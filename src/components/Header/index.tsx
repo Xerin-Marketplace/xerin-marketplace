@@ -67,11 +67,12 @@ const Header = () => {
           <div className="xl:w-auto flex-col sm:flex-row w-full flex sm:justify-between sm:items-center gap-5 sm:gap-10">
             <Link className="flex-shrink-0 flex items-center gap-2" href="/">
               <Image
-                src="/images/logo/logo.png"
+                src="/images/logo/xerin-logo-mark.png"
                 alt="Xerin Market logo"
                 width={44}
                 height={44}
-                className="rounded-full object-contain"
+                className="object-contain"
+                priority
               />
               <span className="text-lg font-semibold text-dark dark:text-white whitespace-nowrap">
                 Xerin Market
