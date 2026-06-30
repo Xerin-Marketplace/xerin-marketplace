@@ -9,6 +9,7 @@ import SizeDropdown from "./SizeDropdown";
 import ColorsDropdwon from "./ColorsDropdwon";
 import PriceDropdown from "./PriceDropdown";
 import shopData from "../Shop/shopData";
+import { useCategories, useProducts } from "@/lib/products";
 import SingleGridItem from "../Shop/SingleGridItem";
 import SingleListItem from "../Shop/SingleListItem";
 
@@ -31,7 +32,7 @@ const ShopWithSidebar = () => {
     { label: "Old Products", value: "2" },
   ];
 
-  const categories = [
+  const fallbackCategories = [
     {
       name: "Electronics",
       products: 10,
@@ -78,6 +79,25 @@ const ShopWithSidebar = () => {
       products: 8,
     },
   ];
+
+  const {
+    products: apiProducts,
+    isLoading: productsLoading,
+    error: productsError,
+  } = useProducts();
+
+  const {
+    categories: apiCategories,
+    isLoading: categoriesLoading,
+    error: categoriesError,
+  } = useCategories();
+
+  const products = apiProducts.length > 0 ? apiProducts : shopData;
+  const categories =
+    apiCategories.length > 0 ? apiCategories : fallbackCategories;
+  const usingFallbackProducts = apiProducts.length === 0;
+  const showingCount = products.length;
+  const totalCount = apiProducts.length > 0 ? apiProducts.length : shopData.length;
 
   useEffect(() => {
     window.addEventListener("scroll", handleStickyMenu);
@@ -185,9 +205,24 @@ const ShopWithSidebar = () => {
                     <CustomSelect options={options} />
 
                     <p>
-                      Showing <span className="text-dark">9 of 50</span>{" "}
+                      Showing{" "}
+                      <span className="text-dark">
+                        {showingCount} of {totalCount}
+                      </span>{" "}
                       Products
                     </p>
+
+                    {(productsLoading || categoriesLoading) && (
+                      <p className="text-custom-sm text-dark-4">
+                        Loading marketplace data...
+                      </p>
+                    )}
+
+                    {(productsError || categoriesError) && usingFallbackProducts && (
+                      <p className="text-custom-sm text-dark-4">
+                        Showing demo data while backend data is unavailable.
+                      </p>
+                    )}
                   </div>
 
                   {/* <!-- top bar right --> */}
@@ -279,11 +314,11 @@ const ShopWithSidebar = () => {
                     : "flex flex-col gap-7.5"
                 }`}
               >
-                {shopData.map((item, key) =>
+                {products.map((item) =>
                   productStyle === "grid" ? (
-                    <SingleGridItem item={item} key={key} />
+                    <SingleGridItem item={item} key={item.id} />
                   ) : (
-                    <SingleListItem item={item} key={key} />
+                    <SingleListItem item={item} key={item.id} />
                   )
                 )}
               </div>
