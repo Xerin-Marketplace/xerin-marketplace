@@ -1,8 +1,97 @@
+"use client";
+
 import Breadcrumb from "@/components/Common/Breadcrumb";
 import Link from "next/link";
-import React from "react";
+import React, { FormEvent, useMemo, useState } from "react";
+import { useRouter } from "next/navigation";
+import toast from "react-hot-toast";
+import { authApi } from "@/lib/api/auth";
+import { ApiError } from "@/lib/api/client";
+import { authStorage } from "@/lib/auth/storage";
+import type { AuthTokenResponse } from "@/types/api/auth";
+
+const splitFullName = (fullName: string) => {
+  const parts = fullName.trim().split(/\s+/).filter(Boolean);
+  const firstName = parts[0] || "";
+  const lastName = parts.slice(1).join(" ") || "";
+
+  return {
+    first_name: firstName,
+    last_name: lastName || firstName,
+  };
+};
+
+const hasAuthToken = (response: unknown): response is AuthTokenResponse => {
+  return (
+    typeof response === "object" &&
+    response !== null &&
+    "access_token" in response &&
+    typeof (response as { access_token?: unknown }).access_token === "string"
+  );
+};
 
 const Signup = () => {
+  const router = useRouter();
+
+  const [fullName, setFullName] = useState("");
+  const [email, setEmail] = useState("");
+  const [password, setPassword] = useState("");
+  const [confirmPassword, setConfirmPassword] = useState("");
+  const [isSubmitting, setIsSubmitting] = useState(false);
+
+  const isPasswordMismatch = useMemo(() => {
+    return Boolean(confirmPassword) && password !== confirmPassword;
+  }, [password, confirmPassword]);
+
+  const handleSubmit = async (event: FormEvent<HTMLFormElement>) => {
+    event.preventDefault();
+
+    if (!fullName.trim() || !email.trim() || !password || !confirmPassword) {
+      toast.error("Please fill in all required fields.");
+      return;
+    }
+
+    if (password.length < 8) {
+      toast.error("Password must be at least 8 characters.");
+      return;
+    }
+
+    if (password !== confirmPassword) {
+      toast.error("Passwords do not match.");
+      return;
+    }
+
+    setIsSubmitting(true);
+
+    try {
+      const nameParts = splitFullName(fullName);
+
+      const response = await authApi.registerBuyer({
+        ...nameParts,
+        email: email.trim(),
+        password,
+      });
+
+      if (hasAuthToken(response)) {
+        authStorage.setSession(response);
+        toast.success("Account created successfully.");
+        router.push("/my-account");
+        return;
+      }
+
+      toast.success("Account created successfully. Please sign in.");
+      router.push("/signin");
+    } catch (error) {
+      if (error instanceof ApiError) {
+        toast.error(error.message);
+      } else {
+        toast.error("Unable to create account. Please try again.");
+      }
+    } finally {
+      setIsSubmitting(false);
+    }
+  };
+
   return (
     <>
       <Breadcrumb title={"Signup"} pages={["Signup"]} />
@@ -17,7 +106,12 @@ const Signup = () => {
             </div>
 
             <div className="flex flex-col gap-4.5">
-              <button className="flex justify-center items-center gap-3.5 rounded-lg border border-gray-3 bg-gray-1 p-3 ease-out duration-200 hover:bg-gray-2">
+              <button
+                type="button"
+                disabled={isSubmitting}
+                onClick={() => toast("Google sign-up is not enabled yet.")}
+                className="flex justify-center items-center gap-3.5 rounded-lg border border-gray-3 bg-gray-1 p-3 ease-out duration-200 hover:bg-gray-2 disabled:cursor-not-allowed disabled:opacity-70"
+              >
                 <svg
                   width="20"
                   height="20"
@@ -25,9 +119,9 @@ const Signup = () => {
                   fill="none"
                   xmlns="http://www.w3.org/2000/svg"
                 >
-                  <g clipPath="url(#clip0_98_7461)">
+                  <g clipPath="url(#clip0_98_7461_signup)">
                     <mask
-                      id="mask0_98_7461"
+                      id="mask0_98_7461_signup"
                       maskUnits="userSpaceOnUse"
                       x="0"
                       y="0"
@@ -36,7 +130,7 @@ const Signup = () => {
                     >
                       <path d="M20 0H0V20H20V0Z" fill="white" />
                     </mask>
-                    <g mask="url(#mask0_98_7461)">
+                    <g mask="url(#mask0_98_7461_signup)">
                       <path
                         d="M19.999 10.2218C20.0111 9.53429 19.9387 8.84791 19.7834 8.17737H10.2031V11.8884H15.8267C15.7201 12.5391 15.4804 13.162 15.1219 13.7195C14.7634 14.2771 14.2935 14.7578 13.7405 15.1328L13.7209 15.2571L16.7502 17.5568L16.96 17.5774C18.8873 15.8329 19.999 13.2661 19.999 10.2218Z"
                         fill="#4285F4"
@@ -56,14 +150,14 @@ const Signup = () => {
                     </g>
                   </g>
                   <defs>
-                    <clipPath id="clip0_98_7461">
+                    <clipPath id="clip0_98_7461_signup">
                       <rect width="20" height="20" fill="white" />
                     </clipPath>
                   </defs>
                 </svg>
                 Sign Up with Google
               </button>
-</div>
+            </div>
 
             <span className="relative z-1 block font-medium text-center mt-4.5">
               <span className="block absolute -z-1 left-0 top-1/2 h-px w-full bg-gray-3"></span>
@@ -71,7 +165,7 @@ const Signup = () => {
             </span>
 
             <div className="mt-5.5">
-              <form>
+              <form onSubmit={handleSubmit}>
                 <div className="mb-5">
                   <label htmlFor="name" className="block mb-2.5">
                     Full Name <span className="text-red">*</span>
@@ -82,7 +176,11 @@ const Signup = () => {
                     name="name"
                     id="name"
                     placeholder="Enter your full name"
-                    className="rounded-lg border border-gray-3 bg-gray-1 placeholder:text-dark-5 w-full py-3 px-5 outline-none duration-200 focus:border-transparent focus:shadow-input focus:ring-2 focus:ring-blue/20"
+                    value={fullName}
+                    onChange={(event) => setFullName(event.target.value)}
+                    autoComplete="name"
+                    disabled={isSubmitting}
+                    className="rounded-lg border border-gray-3 bg-gray-1 placeholder:text-dark-5 w-full py-3 px-5 outline-none duration-200 focus:border-transparent focus:shadow-input focus:ring-2 focus:ring-blue/20 disabled:cursor-not-allowed disabled:opacity-70"
                   />
                 </div>
 
@@ -96,7 +194,11 @@ const Signup = () => {
                     name="email"
                     id="email"
                     placeholder="Enter your email address"
-                    className="rounded-lg border border-gray-3 bg-gray-1 placeholder:text-dark-5 w-full py-3 px-5 outline-none duration-200 focus:border-transparent focus:shadow-input focus:ring-2 focus:ring-blue/20"
+                    value={email}
+                    onChange={(event) => setEmail(event.target.value)}
+                    autoComplete="email"
+                    disabled={isSubmitting}
+                    className="rounded-lg border border-gray-3 bg-gray-1 placeholder:text-dark-5 w-full py-3 px-5 outline-none duration-200 focus:border-transparent focus:shadow-input focus:ring-2 focus:ring-blue/20 disabled:cursor-not-allowed disabled:opacity-70"
                   />
                 </div>
 
@@ -110,8 +212,11 @@ const Signup = () => {
                     name="password"
                     id="password"
                     placeholder="Enter your password"
-                    autoComplete="on"
-                    className="rounded-lg border border-gray-3 bg-gray-1 placeholder:text-dark-5 w-full py-3 px-5 outline-none duration-200 focus:border-transparent focus:shadow-input focus:ring-2 focus:ring-blue/20"
+                    value={password}
+                    onChange={(event) => setPassword(event.target.value)}
+                    autoComplete="new-password"
+                    disabled={isSubmitting}
+                    className="rounded-lg border border-gray-3 bg-gray-1 placeholder:text-dark-5 w-full py-3 px-5 outline-none duration-200 focus:border-transparent focus:shadow-input focus:ring-2 focus:ring-blue/20 disabled:cursor-not-allowed disabled:opacity-70"
                   />
                 </div>
 
@@ -125,16 +230,26 @@ const Signup = () => {
                     name="re-type-password"
                     id="re-type-password"
                     placeholder="Re-type your password"
-                    autoComplete="on"
-                    className="rounded-lg border border-gray-3 bg-gray-1 placeholder:text-dark-5 w-full py-3 px-5 outline-none duration-200 focus:border-transparent focus:shadow-input focus:ring-2 focus:ring-blue/20"
+                    value={confirmPassword}
+                    onChange={(event) => setConfirmPassword(event.target.value)}
+                    autoComplete="new-password"
+                    disabled={isSubmitting}
+                    aria-invalid={isPasswordMismatch}
+                    className="rounded-lg border border-gray-3 bg-gray-1 placeholder:text-dark-5 w-full py-3 px-5 outline-none duration-200 focus:border-transparent focus:shadow-input focus:ring-2 focus:ring-blue/20 disabled:cursor-not-allowed disabled:opacity-70"
                   />
+                  {isPasswordMismatch && (
+                    <p className="mt-2 text-sm text-red">
+                      Passwords do not match.
+                    </p>
+                  )}
                 </div>
 
                 <button
                   type="submit"
-                  className="w-full flex justify-center font-medium text-white bg-dark py-3 px-6 rounded-lg ease-out duration-200 hover:bg-blue mt-7.5"
+                  disabled={isSubmitting}
+                  className="w-full flex justify-center font-medium text-white bg-dark py-3 px-6 rounded-lg ease-out duration-200 hover:bg-blue mt-7.5 disabled:cursor-not-allowed disabled:opacity-70"
                 >
-                  Create Account
+                  {isSubmitting ? "Creating account..." : "Create Account"}
                 </button>
 
                 <p className="text-center mt-6">
