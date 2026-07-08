@@ -38,6 +38,26 @@
     -ms-overflow-style: none; /* IE and Edge */
     scrollbar-width: none; /* Firefox */
   }
+  .section-padding {
+    @apply py-15 lg:py-17.5;
+  }
+
+  .section-title {
+    @apply font-semibold text-xl xl:text-heading-5 text-dark dark:text-white;
+  }
+
+  .section-subtitle {
+    @apply flex items-center gap-2.5 font-medium text-dark dark:text-darkTheme-body-color mb-1.5;
+  }
+
+  .btn-primary {
+    @apply inline-flex font-medium text-custom-sm py-2.5 px-7 rounded-md bg-blue text-white ease-out duration-200 hover:bg-blue-dark;
+  }
+
+  .btn-outline {
+    @apply inline-flex font-medium text-custom-sm py-2.5 px-7 rounded-md border-gray-3 dark:border-darkTheme-border-color border bg-gray-1 dark:bg-darkTheme-secondary-bg text-dark dark:text-darkTheme-body-color ease-out duration-200 hover:bg-dark hover:text-white hover:border-transparent dark:hover:bg-darkTheme-tertiary-bg;
+  }
+
 }
 
 /* third-party libraries CSS */

@@ -3,11 +3,13 @@ import { Swiper, SwiperSlide } from "swiper/react";
 import { useCallback, useRef, useEffect } from "react";
 import data from "./categoryData";
 import Image from "next/image";
+import Link from "next/link";
 
 // Import Swiper styles
 import "swiper/css/navigation";
 import "swiper/css";
 import SingleItem from "./SingleItem";
+import { ROUTES } from "@/constants/links";
 
 const Categories = () => {
   const sliderRef = useRef(null);
@@ -35,7 +37,7 @@ const Categories = () => {
           {/* <!-- section title --> */}
           <div className="mb-10 flex items-center justify-between">
             <div>
-              <span className="flex items-center gap-2.5 font-medium text-dark mb-1.5">
+              <span className="flex items-center gap-2.5 font-medium text-dark dark:text-darkTheme-body-color mb-1.5">
                 <svg
                   width="20"
                   height="20"
@@ -72,13 +74,13 @@ const Categories = () => {
                 </svg>
                 Shop Categories
               </span>
-              <h2 className="font-semibold text-xl xl:text-heading-5 text-dark">
+              <h2 className="font-semibold text-xl xl:text-heading-5 text-dark dark:text-white">
                 Explore Popular Categories
               </h2>
             </div>
 
             <div className="flex items-center gap-3">
-              <button onClick={handlePrev} className="swiper-button-prev">
+              <button onClick={handlePrev} className="swiper-button-prev" aria-label="Previous category">
                 <svg
                   className="fill-current"
                   width="24"
@@ -96,7 +98,7 @@ const Categories = () => {
                 </svg>
               </button>
 
-              <button onClick={handleNext} className="swiper-button-next">
+              <button onClick={handleNext} className="swiper-button-next" aria-label="Next category">
                 <svg
                   className="fill-current"
                   width="24"
@@ -120,17 +122,21 @@ const Categories = () => {
             ref={sliderRef}
             slidesPerView={6}
             breakpoints={{
-              // when window width is >= 640px
               0: {
                 slidesPerView: 2,
+                spaceBetween: 16,
+              },
+              640: {
+                slidesPerView: 3,
+                spaceBetween: 20,
               },
               1000: {
                 slidesPerView: 4,
-                // spaceBetween: 4,
+                spaceBetween: 24,
               },
-              // when window width is >= 768px
               1200: {
                 slidesPerView: 6,
+                spaceBetween: 24,
               },
             }}
           >
@@ -140,6 +146,15 @@ const Categories = () => {
               </SwiperSlide>
             ))}
           </Swiper>
+
+          <div className="mt-10 text-center">
+            <Link
+              href={ROUTES.shop}
+              className="inline-flex font-medium text-custom-sm py-2.5 px-7 rounded-md border-gray-3 dark:border-darkTheme-border-color border bg-gray-1 dark:bg-darkTheme-secondary-bg text-dark dark:text-darkTheme-body-color ease-out duration-200 hover:bg-dark hover:text-white hover:border-transparent dark:hover:bg-darkTheme-tertiary-bg"
+            >
+              View All Categories
+            </Link>
+          </div>
         </div>
       </div>
     </section>

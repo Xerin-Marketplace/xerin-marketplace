@@ -59,12 +59,12 @@ const Header = () => {
       <div className="max-w-[1170px] mx-auto px-4 sm:px-7.5 xl:px-0">
         {/* <!-- header top start --> */}
         <div
-          className={`flex flex-col lg:flex-row gap-5 items-end lg:items-center xl:justify-between ease-out duration-200 ${
+          className={`flex flex-col lg:flex-row gap-4 lg:gap-5 items-stretch lg:items-center xl:justify-between ease-out duration-200 ${
             stickyMenu ? "py-3" : "py-4"
           }`}
         >
           {/* <!-- header top left --> */}
-          <div className="xl:w-auto flex-col sm:flex-row w-full flex sm:justify-between sm:items-center gap-5 sm:gap-10">
+          <div className="xl:w-auto flex-col sm:flex-row w-full flex sm:justify-between sm:items-center gap-4 sm:gap-10">
             <Link className="flex-shrink-0 flex items-center gap-2" href="/">
               <Image
                 src="/images/logo/xerin-logo-mark.png"
@@ -79,12 +79,12 @@ const Header = () => {
               </span>
             </Link>
 
-            <div className="max-w-[475px] w-full">
+            <div className="max-w-[475px] lg:max-w-[420px] xl:max-w-[475px] w-full">
               <form>
                 <div className="flex items-center">
                   <CustomSelect options={options} />
 
-                  <div className="relative max-w-[333px] sm:min-w-[333px] w-full">
+                  <div className="relative max-w-[333px] sm:min-w-[333px] lg:min-w-[220px] xl:min-w-[333px] w-full">
                     {/* <!-- divider --> */}
                     <span className="absolute left-0 top-1/2 -translate-y-1/2 inline-block w-px h-5.5 bg-gray-4"></span>
                     <input
@@ -95,7 +95,7 @@ const Header = () => {
                       id="search"
                       placeholder="Search products, brands, or sellers..."
                       autoComplete="off"
-                      className="custom-search w-full rounded-r-[5px] bg-gray-1 !border-l-0 border border-gray-3 py-2.5 pl-4 pr-10 outline-none ease-in duration-200"
+                      className="custom-search w-full rounded-r-[5px] bg-gray-1 dark:bg-darkTheme-secondary-bg dark:text-darkTheme-body-color !border-l-0 border border-gray-3 dark:border-darkTheme-border-color py-2.5 pl-4 pr-10 outline-none ease-in duration-200 focus:border-primary focus:ring-2 focus:ring-primary/20"
                     />
 
                     <button
@@ -155,7 +155,7 @@ const Header = () => {
                 <span className="block text-2xs text-dark-4 uppercase">
                   SUPPORT CENTER
                 </span>
-                <p className="font-medium text-custom-sm text-dark">
+                <p className="font-medium text-custom-sm text-dark dark:text-darkTheme-body-color">
                   Help & Order Support
                 </p>
               </div>
@@ -231,7 +231,7 @@ const Header = () => {
                     <span className="block text-2xs text-dark-4 uppercase">
                       account
                     </span>
-                    <p className="font-medium text-custom-sm text-dark">
+                    <p className="font-medium text-custom-sm text-dark dark:text-darkTheme-body-color">
                       Sign In
                     </p>
                   </div>
@@ -282,7 +282,7 @@ const Header = () => {
                     <span className="block text-2xs text-dark-4 uppercase">
                       cart
                     </span>
-                    <p className="font-medium text-custom-sm text-dark">
+                    <p className="font-medium text-custom-sm text-dark dark:text-darkTheme-body-color">
                       ${totalPrice}
                     </p>
                   </div>
@@ -343,7 +343,7 @@ const Header = () => {
             <div
               className={`w-[288px] absolute right-4 top-full xl:static xl:w-auto h-0 xl:h-auto invisible xl:visible xl:flex items-center justify-between ${
                 navigationOpen &&
-                `!visible bg-white dark:bg-darkTheme-card shadow-lg border border-gray-3 dark:border-darkTheme-border !h-auto max-h-[400px] overflow-y-scroll rounded-md p-5`
+                `!visible bg-white dark:bg-darkTheme-card shadow-lg border border-gray-3 dark:border-darkTheme-border-color !h-auto max-h-[400px] overflow-y-scroll rounded-md p-5`
               }`}
             >
               {/* <!-- Main Nav Start --> */}
@@ -363,7 +363,7 @@ const Header = () => {
                       >
                         <Link
                           href={menuItem.path}
-                          className={`hover:text-blue text-custom-sm font-medium text-dark flex ${
+                          className={`hover:text-blue text-custom-sm font-medium text-dark dark:text-darkTheme-body-color flex ${
                             stickyMenu ? "xl:py-4" : "xl:py-6"
                           }`}
                         >

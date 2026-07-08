@@ -13,11 +13,11 @@ const Footer = () => {
   const year = new Date().getFullYear();
 
   return (
-    <footer className="overflow-hidden">
+    <footer className="overflow-hidden bg-white dark:bg-darkTheme-bg">
       <div className="max-w-[1170px] mx-auto px-4 sm:px-8 xl:px-0">
         {/* <!-- footer menu start --> */}
-        <div className="flex flex-wrap xl:flex-nowrap gap-10 xl:gap-19 xl:justify-between pt-17.5 xl:pt-22.5 pb-10 xl:pb-15">
-          <div className="max-w-[330px] w-full">
+        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 xl:grid-cols-5 gap-10 xl:gap-8 pt-17.5 xl:pt-22.5 pb-10 xl:pb-15">
+          <div className="sm:col-span-2 xl:col-span-1 max-w-[330px] w-full">
             <Link href="/" className="flex items-center gap-3 mb-7.5">
               <Image
                 src="/images/logo/logo.png"
@@ -28,7 +28,7 @@ const Footer = () => {
               />
              
             </Link>
-            <h2 className="mb-7.5 text-custom-1 font-medium text-dark">
+            <h2 className="mb-7.5 text-custom-1 font-medium text-dark dark:text-white">
               Help & Support
             </h2>
 
@@ -109,7 +109,7 @@ const Footer = () => {
               <a
                 href={SOCIAL_LINKS.facebook}
                 aria-label="Facebook Social Link"
-                className="flex ease-out duration-200 hover:text-blue"
+                className="flex items-center justify-center w-10 h-10 rounded-full bg-gray-1 dark:bg-darkTheme-secondary-bg text-dark dark:text-darkTheme-body-color ease-out duration-200 hover:bg-blue hover:text-white"
               >
                 <svg
                   className="fill-current"
@@ -134,7 +134,7 @@ const Footer = () => {
               <a
                 href={SOCIAL_LINKS.twitter}
                 aria-label="Twitter Social Link"
-                className="flex ease-out duration-200 hover:text-blue"
+                className="flex items-center justify-center w-10 h-10 rounded-full bg-gray-1 dark:bg-darkTheme-secondary-bg text-dark dark:text-darkTheme-body-color ease-out duration-200 hover:bg-blue hover:text-white"
               >
                 <svg
                   className="fill-current"
@@ -154,7 +154,7 @@ const Footer = () => {
               <a
                 href={SOCIAL_LINKS.instagram}
                 aria-label="Instagram Social Link"
-                className="flex ease-out duration-200 hover:text-blue"
+                className="flex items-center justify-center w-10 h-10 rounded-full bg-gray-1 dark:bg-darkTheme-secondary-bg text-dark dark:text-darkTheme-body-color ease-out duration-200 hover:bg-blue hover:text-white"
               >
                 <svg
                   className="fill-current"
@@ -189,7 +189,7 @@ const Footer = () => {
               <a
                 href={SOCIAL_LINKS.linkedin}
                 aria-label="Linkedin Social Link"
-                className="flex ease-out duration-200 hover:text-blue"
+                className="flex items-center justify-center w-10 h-10 rounded-full bg-gray-1 dark:bg-darkTheme-secondary-bg text-dark dark:text-darkTheme-body-color ease-out duration-200 hover:bg-blue hover:text-white"
               >
                 <svg
                   className="fill-current"
@@ -214,76 +214,76 @@ const Footer = () => {
             {/* <!-- Social Links end --> */}
           </div>
 
-          <div className="w-full sm:w-auto">
-            <h2 className="mb-7.5 text-custom-1 font-medium text-dark">
+          <div className="w-full sm:w-auto lg:col-span-2 xl:col-span-1">
+            <h2 className="mb-7.5 text-custom-1 font-medium text-dark dark:text-white">
               Account
             </h2>
 
             <ul className="flex flex-col gap-3.5">
               <li>
-                <a className="ease-out duration-200 hover:text-blue" href={ROUTES.account}>
+                <a className="ease-out duration-200 text-dark-4 dark:text-darkTheme-body-color hover:text-blue dark:hover:text-blue transition-colors" href={ROUTES.account}>
                   My Account
                 </a>
               </li>
               <li>
-                <a className="ease-out duration-200 hover:text-blue" href={ROUTES.signin}>
+                <a className="ease-out duration-200 text-dark-4 dark:text-darkTheme-body-color hover:text-blue dark:hover:text-blue transition-colors" href={ROUTES.signin}>
                   Sign In / Register
                 </a>
               </li>
               <li>
-                <a className="ease-out duration-200 hover:text-blue" href={ROUTES.cart}>
+                <a className="ease-out duration-200 text-dark-4 dark:text-darkTheme-body-color hover:text-blue dark:hover:text-blue transition-colors" href={ROUTES.cart}>
                   Cart
                 </a>
               </li>
               <li>
-                <a className="ease-out duration-200 hover:text-blue" href={ROUTES.wishlist}>
+                <a className="ease-out duration-200 text-dark-4 dark:text-darkTheme-body-color hover:text-blue dark:hover:text-blue transition-colors" href={ROUTES.wishlist}>
                   Wishlist
                 </a>
               </li>
               <li>
-                <a className="ease-out duration-200 hover:text-blue" href={ROUTES.shop}>
+                <a className="ease-out duration-200 text-dark-4 dark:text-darkTheme-body-color hover:text-blue dark:hover:text-blue transition-colors" href={ROUTES.shop}>
                   Shop
                 </a>
               </li>
             </ul>
           </div>
 
-          <div className="w-full sm:w-auto">
-            <h2 className="mb-7.5 text-custom-1 font-medium text-dark">
+          <div className="w-full sm:w-auto lg:col-span-2 xl:col-span-1">
+            <h2 className="mb-7.5 text-custom-1 font-medium text-dark dark:text-white">
               Marketplace
             </h2>
 
             <ul className="flex flex-col gap-3">
               <li>
-                <a className="ease-out duration-200 hover:text-blue" href={ROUTES.shop}>
+                <a className="ease-out duration-200 text-dark-4 dark:text-darkTheme-body-color hover:text-blue dark:hover:text-blue transition-colors" href={ROUTES.shop}>
                   Shop Products
                 </a>
               </li>
               <li>
-                <a className="ease-out duration-200 hover:text-blue" href={ROUTES.sellerRegister}>
+                <a className="ease-out duration-200 text-dark-4 dark:text-darkTheme-body-color hover:text-blue dark:hover:text-blue transition-colors" href={ROUTES.sellerRegister}>
                   Sell on Xerin
                 </a>
               </li>
               <li>
-                <a className="ease-out duration-200 hover:text-blue" href={ROUTES.account}>
+                <a className="ease-out duration-200 text-dark-4 dark:text-darkTheme-body-color hover:text-blue dark:hover:text-blue transition-colors" href={ROUTES.account}>
                   Track Order
                 </a>
               </li>
               <li>
-                <a className="ease-out duration-200 hover:text-blue" href={ROUTES.contact}>
+                <a className="ease-out duration-200 text-dark-4 dark:text-darkTheme-body-color hover:text-blue dark:hover:text-blue transition-colors" href={ROUTES.contact}>
                   Returns & Refunds
                 </a>
               </li>
               <li>
-                <a className="ease-out duration-200 hover:text-blue" href={ROUTES.contact}>
+                <a className="ease-out duration-200 text-dark-4 dark:text-darkTheme-body-color hover:text-blue dark:hover:text-blue transition-colors" href={ROUTES.contact}>
                   Help Center
                 </a>
               </li>
             </ul>
           </div>
 
-          <div className="w-full sm:w-auto">
-            <h2 className="mb-7.5 text-custom-1 font-medium text-dark lg:text-right">
+          <div className="w-full sm:w-auto lg:col-span-2 xl:col-span-1">
+            <h2 className="mb-7.5 text-custom-1 font-medium text-dark dark:text-white lg:text-right">
               Mobile Experience
             </h2>
 
@@ -294,7 +294,7 @@ const Footer = () => {
             <ul className="flex flex-col lg:items-end gap-3">
               <li>
                 <a
-                  className="inline-flex items-center gap-3 py-[9px] pl-4 pr-7.5 text-white rounded-md bg-dark ease-out duration-200 hover:bg-opacity-95"
+                  className="inline-flex items-center gap-3 py-[9px] pl-4 pr-7.5 text-white rounded-md bg-dark dark:bg-darkTheme-tertiary-bg ease-out duration-200 hover:bg-opacity-95"
                   href={APP_LINKS.appStore}
                 >
                   <svg
@@ -352,10 +352,10 @@ const Footer = () => {
       </div>
 
       {/* <!-- footer bottom start --> */}
-      <div className="py-5 xl:py-7.5 bg-gray-1">
+      <div className="py-5 xl:py-7.5 bg-gray-1 dark:bg-darkTheme-secondary-bg">
         <div className="max-w-[1170px] mx-auto px-4 sm:px-8 xl:px-0">
           <div className="flex gap-5 flex-wrap items-center justify-between">
-            <p className="text-dark font-medium">
+            <p className="text-dark dark:text-darkTheme-body-color font-medium">
               &copy; {year}. All rights reserved by Xerin Group.
             </p>
 
