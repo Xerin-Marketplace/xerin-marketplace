@@ -13,6 +13,10 @@ import { addItemToWishlist } from "@/redux/features/wishlist-slice";
 const SingleItem = ({ item }: { item: Product }) => {
   const { openModal } = useModalContext();
   const dispatch = useDispatch<AppDispatch>();
+  const hasDiscount = item.price > item.discountedPrice;
+  const savingsPercent = hasDiscount
+    ? Math.round(((item.price - item.discountedPrice) / item.price) * 100)
+    : 0;
 
   // update the QuickView state
   const handleQuickViewUpdate = () => {
@@ -40,58 +44,73 @@ const SingleItem = ({ item }: { item: Product }) => {
   };
 
   return (
-    <div className="group">
-      <div className="relative overflow-hidden rounded-lg bg-[#F6F7FB] dark:bg-darkTheme-secondary-bg min-h-[403px]">
-        <div className="text-center px-4 py-7.5">
-          <div className="flex items-center justify-center gap-2.5 mb-2">
-            <div className="flex items-center gap-1">
-              <Image
-                src="/images/icons/icon-star.svg"
-                alt="star icon"
-                width={14}
-                height={14}
-              />
-              <Image
-                src="/images/icons/icon-star.svg"
-                alt="star icon"
-                width={14}
-                height={14}
-              />
-              <Image
-                src="/images/icons/icon-star.svg"
-                alt="star icon"
-                width={14}
-                height={14}
-              />
-              <Image
-                src="/images/icons/icon-star.svg"
-                alt="star icon"
-                width={14}
-                height={14}
-              />
-              <Image
-                src="/images/icons/icon-star.svg"
-                alt="star icon"
-                width={14}
-                height={14}
-              />
-            </div>
-
-            <p className="text-custom-sm text-dark-4 dark:text-darkTheme-secondary-muted">({item.reviews})</p>
-          </div>
-
-          <h3 className="font-medium text-dark dark:text-white ease-out duration-200 hover:text-blue mb-1.5">
-            <Link href="/shop-details"> {item.title} </Link>
-          </h3>
-
-          <span className="flex items-center justify-center gap-2 font-medium text-lg">
-            <span className="text-dark dark:text-white">${item.discountedPrice}</span>
-            <span className="text-dark-4 dark:text-darkTheme-secondary-muted line-through">${item.price}</span>
+    <div className="group h-full overflow-hidden rounded-2xl border border-gray-3 dark:border-darkTheme-border-color bg-white dark:bg-darkTheme-card shadow-sm transition-all duration-300 hover:-translate-y-1 hover:shadow-lg">
+      <div className="relative flex min-h-[390px] flex-col justify-between overflow-hidden bg-[#F6F7FB] dark:bg-darkTheme-secondary-bg">
+        <div className="absolute left-4 top-4 z-10 flex flex-wrap gap-2">
+          <span className="rounded-full bg-orange px-3 py-1 text-xs font-semibold text-white shadow-sm">
+            Trending now
+          </span>
+          <span className="rounded-full bg-dark/90 px-3 py-1 text-xs font-semibold text-white shadow-sm dark:bg-white/90 dark:text-dark">
+            Best seller
           </span>
         </div>
 
-        <div className="flex justify-center items-center">
-          <Image src={item.imgs.previews[0]} alt={item.title} width={280} height={280} className="object-contain" />
+        <div className="px-5 pt-16 text-center">
+          <div className="mb-2 flex items-center justify-center gap-2.5">
+            <div className="flex items-center gap-1">
+              {Array.from({ length: 5 }).map((_, index) => (
+                <Image
+                  key={index}
+                  src="/images/icons/icon-star.svg"
+                  alt="star icon"
+                  width={14}
+                  height={14}
+                />
+              ))}
+            </div>
+
+            <p className="text-custom-sm text-dark-4 dark:text-darkTheme-secondary-muted">
+              ({item.reviews} reviews)
+            </p>
+          </div>
+
+          <h3 className="mb-1.5 text-lg font-semibold text-dark transition-colors duration-200 hover:text-blue dark:text-white">
+            <Link href="/shop-details">{item.title}</Link>
+          </h3>
+
+          <p className="mx-auto max-w-[240px] text-sm leading-6 text-dark-4 dark:text-darkTheme-secondary-muted">
+            Popular pick with clean pricing, buyer confidence, and quick access to checkout.
+          </p>
+
+          <div className="mt-4 flex items-center justify-center gap-2">
+            {hasDiscount && (
+              <span className="rounded-full bg-green/10 px-3 py-1 text-xs font-semibold text-green">
+                Save {savingsPercent}%
+              </span>
+            )}
+            <span className="rounded-full bg-blue/10 px-3 py-1 text-xs font-semibold text-blue">
+              Secure payment
+            </span>
+          </div>
+
+          <div className="mt-4 flex items-center justify-center gap-2 font-semibold text-lg">
+            <span className="text-dark dark:text-white">
+              ${item.discountedPrice}
+            </span>
+            <span className="text-dark-4 dark:text-darkTheme-secondary-muted line-through">
+              ${item.price}
+            </span>
+          </div>
+        </div>
+
+        <div className="flex justify-center px-6 py-6">
+          <Image
+            src={item.imgs.previews[0]}
+            alt={item.title}
+            width={280}
+            height={280}
+            className="object-contain transition-transform duration-300 group-hover:scale-[1.03]"
+          />
         </div>
 
         <div className="absolute right-0 bottom-0 translate-x-full flex flex-col gap-2 p-5.5 ease-linear duration-300 group-hover:translate-x-0">
@@ -186,6 +205,23 @@ const SingleItem = ({ item }: { item: Product }) => {
               />
             </svg>
           </button>
+        </div>
+
+        <div className="border-t border-gray-3 dark:border-darkTheme-border-color bg-white/70 dark:bg-darkTheme-card/70 px-5 py-4 backdrop-blur-sm">
+          <div className="flex items-center justify-between gap-3 text-sm">
+            <span className="font-medium text-dark dark:text-white">
+              Fast delivery ready
+            </span>
+            <button
+              onClick={() => {
+                handleQuickViewUpdate();
+                openModal();
+              }}
+              className="inline-flex items-center justify-center rounded-md bg-dark px-4 py-2 text-xs font-semibold text-white transition-colors duration-200 hover:bg-opacity-90 dark:bg-darkTheme-tertiary-bg"
+            >
+              Quick view
+            </button>
+          </div>
         </div>
       </div>
     </div>
