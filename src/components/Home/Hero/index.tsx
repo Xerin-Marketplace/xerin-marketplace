@@ -2,8 +2,6 @@ import React from "react";
 import HeroCarousel from "./HeroCarousel";
 import HeroFeature from "./HeroFeature";
 import Image from "next/image";
-import { ROUTES } from "@/constants/links";
-import Link from "next/link";
 
 const Hero = () => {
   return (
@@ -12,45 +10,6 @@ const Hero = () => {
         <div className="flex flex-wrap gap-4 md:gap-5">
           <div className="xl:max-w-[757px] w-full">
             <div className="relative z-1 rounded-[10px] bg-white dark:bg-darkTheme-card overflow-hidden shadow-sm">
-              <div className="border-b border-gray-3 dark:border-darkTheme-border-color px-5 sm:px-7.5 py-5 sm:py-6">
-                <span className="inline-flex items-center rounded-full bg-blue/10 px-3 py-1 text-xs font-semibold uppercase tracking-[0.24em] text-blue mb-4">
-                  Africa-first marketplace
-                </span>
-                <h1 className="max-w-[620px] text-2xl sm:text-3xl lg:text-4xl xl:text-heading-2 font-semibold text-dark dark:text-white leading-tight mb-3">
-                  Shop trusted products, pay safely, and follow every order in one place.
-                </h1>
-                <p className="max-w-[620px] text-dark-4 dark:text-darkTheme-secondary-muted mb-5">
-                  Xerin connects buyers, verified sellers, and logistics so the customer journey feels clear from discovery to delivery.
-                </p>
-
-                <div className="flex flex-wrap gap-3">
-                  <Link
-                    href={ROUTES.shop}
-                    className="inline-flex items-center justify-center rounded-md bg-blue px-5 py-3 text-sm font-medium text-white transition-colors duration-200 hover:bg-blue-dark"
-                  >
-                    Browse products
-                  </Link>
-                  <Link
-                    href={ROUTES.trackOrder}
-                    className="inline-flex items-center justify-center rounded-md border border-gray-3 dark:border-darkTheme-border-color bg-gray-1 dark:bg-darkTheme-secondary-bg px-5 py-3 text-sm font-medium text-dark dark:text-darkTheme-body-color transition-colors duration-200 hover:bg-dark hover:text-white dark:hover:bg-darkTheme-tertiary-bg"
-                  >
-                    Track an order
-                  </Link>
-                </div>
-
-                <div className="mt-5 flex flex-wrap gap-3 text-sm text-dark-4 dark:text-darkTheme-secondary-muted">
-                  <span className="rounded-full bg-gray-1 dark:bg-darkTheme-secondary-bg px-3 py-1.5">
-                    Verified sellers
-                  </span>
-                  <span className="rounded-full bg-gray-1 dark:bg-darkTheme-secondary-bg px-3 py-1.5">
-                    Secure checkout
-                  </span>
-                  <span className="rounded-full bg-gray-1 dark:bg-darkTheme-secondary-bg px-3 py-1.5">
-                    Live logistics updates
-                  </span>
-                </div>
-              </div>
-
               {/* <!-- bg shapes --> */}
               <Image
                 src="/images/hero/hero-bg.png"
