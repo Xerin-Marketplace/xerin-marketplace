@@ -316,7 +316,7 @@ const ShopDetails = () => {
                   </div>
 
                   <h3 className="font-medium text-custom-1 mb-4.5">
-                    <span className="text-sm sm:text-base text-dark dark:text-darkTheme-body-color">
+                    <span className="text-sm sm:text-base text-dark dark:text-darkTheme-body-color dark:text-darkTheme-body-color">
                       Price: ${product.price}
                     </span>
                     <span className="line-through">
@@ -772,116 +772,116 @@ const ShopDetails = () => {
                     }`}
                 >
                   {/* <!-- info item --> */}
-                  <div className="rounded-md even:bg-gray-1 flex py-4 px-4 sm:px-5">
+                  <div className="rounded-md even:bg-gray-1 dark:even:bg-darkTheme-secondary-bg flex py-4 px-4 sm:px-5">
                     <div className="max-w-[450px] min-w-[140px] w-full">
-                      <p className="text-sm sm:text-base text-dark">Brand</p>
+                      <p className="text-sm sm:text-base text-dark dark:text-darkTheme-body-color">Brand</p>
                     </div>
                     <div className="w-full">
-                      <p className="text-sm sm:text-base text-dark">Xerin Verified Seller</p>
+                      <p className="text-sm sm:text-base text-dark dark:text-darkTheme-body-color">Xerin Verified Seller</p>
                     </div>
                   </div>
 
                   {/* <!-- info item --> */}
-                  <div className="rounded-md even:bg-gray-1 flex py-4 px-4 sm:px-5">
+                  <div className="rounded-md even:bg-gray-1 dark:even:bg-darkTheme-secondary-bg flex py-4 px-4 sm:px-5">
                     <div className="max-w-[450px] min-w-[140px] w-full">
-                      <p className="text-sm sm:text-base text-dark">Model</p>
+                      <p className="text-sm sm:text-base text-dark dark:text-darkTheme-body-color">Model</p>
                     </div>
                     <div className="w-full">
-                      <p className="text-sm sm:text-base text-dark">
+                      <p className="text-sm sm:text-base text-dark dark:text-darkTheme-body-color">
                         Smartphone 6GB/128GB
                       </p>
                     </div>
                   </div>
 
                   {/* <!-- info item --> */}
-                  <div className="rounded-md even:bg-gray-1 flex py-4 px-4 sm:px-5">
+                  <div className="rounded-md even:bg-gray-1 dark:even:bg-darkTheme-secondary-bg flex py-4 px-4 sm:px-5">
                     <div className="max-w-[450px] min-w-[140px] w-full">
-                      <p className="text-sm sm:text-base text-dark">
+                      <p className="text-sm sm:text-base text-dark dark:text-darkTheme-body-color">
                         Display Size
                       </p>
                     </div>
                     <div className="w-full">
-                      <p className="text-sm sm:text-base text-dark">
+                      <p className="text-sm sm:text-base text-dark dark:text-darkTheme-body-color">
                         6.7 inches
                       </p>
                     </div>
                   </div>
 
                   {/* <!-- info item --> */}
-                  <div className="rounded-md even:bg-gray-1 flex py-4 px-4 sm:px-5">
+                  <div className="rounded-md even:bg-gray-1 dark:even:bg-darkTheme-secondary-bg flex py-4 px-4 sm:px-5">
                     <div className="max-w-[450px] min-w-[140px] w-full">
-                      <p className="text-sm sm:text-base text-dark">
+                      <p className="text-sm sm:text-base text-dark dark:text-darkTheme-body-color">
                         Display Type
                       </p>
                     </div>
                     <div className="w-full">
-                      <p className="text-sm sm:text-base text-dark">
+                      <p className="text-sm sm:text-base text-dark dark:text-darkTheme-body-color">
                         High-resolution display with clear indoor and outdoor viewing
                       </p>
                     </div>
                   </div>
 
                   {/* <!-- info item --> */}
-                  <div className="rounded-md even:bg-gray-1 flex py-4 px-4 sm:px-5">
+                  <div className="rounded-md even:bg-gray-1 dark:even:bg-darkTheme-secondary-bg flex py-4 px-4 sm:px-5">
                     <div className="max-w-[450px] min-w-[140px] w-full">
-                      <p className="text-sm sm:text-base text-dark">
+                      <p className="text-sm sm:text-base text-dark dark:text-darkTheme-body-color">
                         Display Resolution
                       </p>
                     </div>
                     <div className="w-full">
-                      <p className="text-sm sm:text-base text-dark">
+                      <p className="text-sm sm:text-base text-dark dark:text-darkTheme-body-color">
                         Full HD+ display resolution
                       </p>
                     </div>
                   </div>
 
                   {/* <!-- info item --> */}
-                  <div className="rounded-md even:bg-gray-1 flex py-4 px-4 sm:px-5">
+                  <div className="rounded-md even:bg-gray-1 dark:even:bg-darkTheme-secondary-bg flex py-4 px-4 sm:px-5">
                     <div className="max-w-[450px] min-w-[140px] w-full">
-                      <p className="text-sm sm:text-base text-dark">Chipset</p>
+                      <p className="text-sm sm:text-base text-dark dark:text-darkTheme-body-color">Chipset</p>
                     </div>
                     <div className="w-full">
-                      <p className="text-sm sm:text-base text-dark">
+                      <p className="text-sm sm:text-base text-dark dark:text-darkTheme-body-color">
                         Octa-core mobile processor
                       </p>
                     </div>
                   </div>
 
                   {/* <!-- info item --> */}
-                  <div className="rounded-md even:bg-gray-1 flex py-4 px-4 sm:px-5">
+                  <div className="rounded-md even:bg-gray-1 dark:even:bg-darkTheme-secondary-bg flex py-4 px-4 sm:px-5">
                     <div className="max-w-[450px] min-w-[140px] w-full">
-                      <p className="text-sm sm:text-base text-dark">Memory</p>
+                      <p className="text-sm sm:text-base text-dark dark:text-darkTheme-body-color">Memory</p>
                     </div>
                     <div className="w-full">
-                      <p className="text-sm sm:text-base text-dark">
+                      <p className="text-sm sm:text-base text-dark dark:text-darkTheme-body-color">
                         128GB storage with 6GB RAM
                       </p>
                     </div>
                   </div>
 
                   {/* <!-- info item --> */}
-                  <div className="rounded-md even:bg-gray-1 flex py-4 px-4 sm:px-5">
+                  <div className="rounded-md even:bg-gray-1 dark:even:bg-darkTheme-secondary-bg flex py-4 px-4 sm:px-5">
                     <div className="max-w-[450px] min-w-[140px] w-full">
-                      <p className="text-sm sm:text-base text-dark">
+                      <p className="text-sm sm:text-base text-dark dark:text-darkTheme-body-color">
                         Main Camera
                       </p>
                     </div>
                     <div className="w-full">
-                      <p className="text-sm sm:text-base text-dark">
+                      <p className="text-sm sm:text-base text-dark dark:text-darkTheme-body-color">
                         12MP + 12MP | 4K@24/25/30/60fps, stereo sound rec.
                       </p>
                     </div>
                   </div>
 
                   {/* <!-- info item --> */}
-                  <div className="rounded-md even:bg-gray-1 flex py-4 px-4 sm:px-5">
+                  <div className="rounded-md even:bg-gray-1 dark:even:bg-darkTheme-secondary-bg flex py-4 px-4 sm:px-5">
                     <div className="max-w-[450px] min-w-[140px] w-full">
-                      <p className="text-sm sm:text-base text-dark">
+                      <p className="text-sm sm:text-base text-dark dark:text-darkTheme-body-color">
                         Selfie Camera
                       </p>
                     </div>
                     <div className="w-full">
-                      <p className="text-sm sm:text-base text-dark">
+                      <p className="text-sm sm:text-base text-dark dark:text-darkTheme-body-color">
                         12 MP | 4K@24/25/30/60fps, 1080p@25/30/60/120fps,
                         gyro-EIS
                       </p>
@@ -889,14 +889,14 @@ const ShopDetails = () => {
                   </div>
 
                   {/* <!-- info item --> */}
-                  <div className="rounded-md even:bg-gray-1 flex py-4 px-4 sm:px-5">
+                  <div className="rounded-md even:bg-gray-1 dark:even:bg-darkTheme-secondary-bg flex py-4 px-4 sm:px-5">
                     <div className="max-w-[450px] min-w-[140px] w-full">
-                      <p className="text-sm sm:text-base text-dark">
+                      <p className="text-sm sm:text-base text-dark dark:text-darkTheme-body-color">
                         Battery Info
                       </p>
                     </div>
                     <div className="w-full">
-                      <p className="text-sm sm:text-base text-dark">
+                      <p className="text-sm sm:text-base text-dark dark:text-darkTheme-body-color">
                         Li-Ion 4323 mAh, non-removable | 15W wireless (MagSafe),
                         7.5W wireless (Qi)
                       </p>
@@ -913,7 +913,7 @@ const ShopDetails = () => {
                     }`}
                 >
                   <div className="max-w-[570px] w-full">
-                    <h2 className="font-medium text-2xl text-dark mb-9">
+                    <h2 className="font-medium text-2xl text-dark dark:text-white mb-9">
                       03 Review for this product
                     </h2>
 
