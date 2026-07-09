@@ -768,7 +768,7 @@ const ShopDetails = () => {
               {/* <!-- tab content two start --> */}
               <div>
                 <div
-                  className={`rounded-xl bg-white shadow-1 p-4 sm:p-6 mt-10 ${activeTab === "tabTwo" ? "block" : "hidden"
+                  className={`rounded-xl bg-white dark:bg-darkTheme-card shadow-1 p-4 sm:p-6 mt-10 ${activeTab === "tabTwo" ? "block" : "hidden"
                     }`}
                 >
                   {/* <!-- info item --> */}
@@ -919,7 +919,7 @@ const ShopDetails = () => {
 
                     <div className="flex flex-col gap-6">
                       {/* <!-- review item --> */}
-                      <div className="rounded-xl bg-white shadow-1 p-4 sm:p-6">
+                      <div className="rounded-xl bg-white dark:bg-darkTheme-card shadow-1 p-4 sm:p-6">
                         <div className="flex items-center justify-between">
                           <a href={ROUTES.contact} className="flex items-center gap-4">
                             <div className="w-12.5 h-12.5 rounded-full overflow-hidden">
@@ -1031,7 +1031,7 @@ const ShopDetails = () => {
                       </div>
 
                       {/* <!-- review item --> */}
-                      <div className="rounded-xl bg-white shadow-1 p-4 sm:p-6">
+                      <div className="rounded-xl bg-white dark:bg-darkTheme-card shadow-1 p-4 sm:p-6">
                         <div className="flex items-center justify-between">
                           <a href={ROUTES.contact} className="flex items-center gap-4">
                             <div className="w-12.5 h-12.5 rounded-full overflow-hidden">
@@ -1143,7 +1143,7 @@ const ShopDetails = () => {
                       </div>
 
                       {/* <!-- review item --> */}
-                      <div className="rounded-xl bg-white shadow-1 p-4 sm:p-6">
+                      <div className="rounded-xl bg-white dark:bg-darkTheme-card shadow-1 p-4 sm:p-6">
                         <div className="flex items-center justify-between">
                           <a href={ROUTES.contact} className="flex items-center gap-4">
                             <div className="w-12.5 h-12.5 rounded-full overflow-hidden">
@@ -1353,7 +1353,7 @@ const ShopDetails = () => {
                         </div>
                       </div>
 
-                      <div className="rounded-xl bg-white shadow-1 p-4 sm:p-6">
+                      <div className="rounded-xl bg-white dark:bg-darkTheme-card shadow-1 p-4 sm:p-6">
                         <div className="mb-5">
                           <label htmlFor="comments" className="block mb-2.5 dark:text-darkTheme-body-color">
                             Comments
