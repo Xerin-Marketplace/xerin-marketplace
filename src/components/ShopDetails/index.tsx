@@ -376,7 +376,7 @@ const ShopDetails = () => {
                       {/* <!-- details item --> */}
                       <div className="flex items-center gap-4">
                         <div className="min-w-[65px]">
-                          <h4 className="font-medium text-dark">Color:</h4>
+                          <h4 className="font-medium text-dark dark:text-darkTheme-body-color">Color:</h4>
                         </div>
 
                         <div className="flex items-center gap-2.5">
@@ -413,7 +413,7 @@ const ShopDetails = () => {
                       {/* <!-- details item --> */}
                       <div className="flex items-center gap-4">
                         <div className="min-w-[65px]">
-                          <h4 className="font-medium text-dark">Storage:</h4>
+                          <h4 className="font-medium text-dark dark:text-darkTheme-body-color">Storage:</h4>
                         </div>
 
                         <div className="flex items-center gap-4">
@@ -480,7 +480,7 @@ const ShopDetails = () => {
                       {/* // <!-- details item --> */}
                       <div className="flex items-center gap-4">
                         <div className="min-w-[65px]">
-                          <h4 className="font-medium text-dark">Type:</h4>
+                          <h4 className="font-medium text-dark dark:text-darkTheme-body-color">Type:</h4>
                         </div>
 
                         <div className="flex items-center gap-4">
@@ -547,7 +547,7 @@ const ShopDetails = () => {
                       {/* // <!-- details item --> */}
                       <div className="flex items-center gap-4">
                         <div className="min-w-[65px]">
-                          <h4 className="font-medium text-dark">Sim:</h4>
+                          <h4 className="font-medium text-dark dark:text-darkTheme-body-color">Sim:</h4>
                         </div>
 
                         <div className="flex items-center gap-4">
@@ -933,7 +933,7 @@ const ShopDetails = () => {
                             </div>
 
                             <div>
-                              <h3 className="font-medium text-dark">
+                              <h3 className="font-medium text-dark dark:text-darkTheme-body-color">
                                 Amina M.
                               </h3>
                               <p className="text-custom-sm">
@@ -1025,7 +1025,7 @@ const ShopDetails = () => {
                           </div>
                         </div>
 
-                        <p className="text-dark mt-6">
+                        <p className="text-dark dark:text-darkTheme-body-color mt-6">
                           “The product details were clear, and I could compare the price and delivery option before adding it to cart.”
                         </p>
                       </div>
@@ -1045,7 +1045,7 @@ const ShopDetails = () => {
                             </div>
 
                             <div>
-                              <h3 className="font-medium text-dark">
+                              <h3 className="font-medium text-dark dark:text-darkTheme-body-color">
                                 Kelvin S.
                               </h3>
                               <p className="text-custom-sm">
@@ -1137,7 +1137,7 @@ const ShopDetails = () => {
                           </div>
                         </div>
 
-                        <p className="text-dark mt-6">
+                        <p className="text-dark dark:text-darkTheme-body-color mt-6">
                           “The seller information and checkout flow make the buying process feel more trustworthy.”
                         </p>
                       </div>
@@ -1157,7 +1157,7 @@ const ShopDetails = () => {
                             </div>
 
                             <div>
-                              <h3 className="font-medium text-dark">
+                              <h3 className="font-medium text-dark dark:text-darkTheme-body-color">
                                 Neema K.
                               </h3>
                               <p className="text-custom-sm">
@@ -1249,7 +1249,7 @@ const ShopDetails = () => {
                           </div>
                         </div>
 
-                        <p className="text-dark mt-6">
+                        <p className="text-dark dark:text-darkTheme-body-color mt-6">
                           “Tracking through Xerin Logistics helps me understand where my order is after purchase.”
                         </p>
                       </div>
