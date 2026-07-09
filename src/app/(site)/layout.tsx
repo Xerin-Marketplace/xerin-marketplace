@@ -31,35 +31,36 @@ export default function RootLayout({
 
   return (
     <html lang="en" suppressHydrationWarning={true}>
-      <body className="bg-white dark:bg-darkTheme-bg text-dark dark:text-darkTheme-text">
-        {loading ? (
-          <PreLoader />
-        ) : (
-          <ThemeProvider>
-            <ReduxProvider>
-              <CartModalProvider>
-                <ModalProvider>
-                  <PreviewSliderProvider>
-                    <Header />
-                    {children}
-
-                    <QuickViewModal />
-                    <CartSidebarModal />
-                    <PreviewSliderModal />
-                  </PreviewSliderProvider>
-                </ModalProvider>
-              </CartModalProvider>
-            </ReduxProvider>
-            <Toaster
-              position="top-right"
-              toastOptions={{
-                duration: 4000,
-              }}
-            />
-            <ScrollToTop />
-            <Footer />
-          </ThemeProvider>
-        )}
+      <body className="bg-body-bg dark:bg-darkTheme-bg text-dark dark:text-darkTheme-text">
+        <ThemeProvider>
+          <ReduxProvider>
+            <CartModalProvider>
+              <ModalProvider>
+                <PreviewSliderProvider>
+                  {loading ? (
+                    <PreLoader />
+                  ) : (
+                    <>
+                      <Header />
+                      {children}
+                      <Footer />
+                      <QuickViewModal />
+                      <CartSidebarModal />
+                      <PreviewSliderModal />
+                    </>
+                  )}
+                </PreviewSliderProvider>
+              </ModalProvider>
+            </CartModalProvider>
+          </ReduxProvider>
+          <Toaster
+            position="top-right"
+            toastOptions={{
+              duration: 4000,
+            }}
+          />
+          <ScrollToTop />
+        </ThemeProvider>
       </body>
     </html>
   );

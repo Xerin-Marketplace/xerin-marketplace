@@ -8,7 +8,7 @@ const BlogGrid = () => {
   return (
     <>
       <Breadcrumb title={"Blog Grid"} pages={["blog grid"]} />{" "}
-      <section className="overflow-hidden py-20 bg-gray-2">
+      <section className="overflow-hidden py-20 bg-gray-2 dark:bg-darkTheme-bg">
         <div className="max-w-[1170px] w-full mx-auto px-4 sm:px-8 xl:px-0">
           <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-y-10 gap-x-7.5">
             {/* <!-- blog item --> */}
@@ -19,7 +19,7 @@ const BlogGrid = () => {
 
           {/* <!-- Blog Pagination Start --> */}
           <div className="flex justify-center mt-15">
-            <div className="bg-white shadow-1 rounded-md p-2">
+            <div className="bg-white dark:bg-darkTheme-card shadow-1 rounded-md p-2">
               <ul className="flex items-center">
                 <li>
                   <button
@@ -57,7 +57,7 @@ const BlogGrid = () => {
                 <li>
                   <a
                     href={ROUTES.blogGrid}
-                    className="flex py-1.5 px-3.5 duration-200 rounded-[3px] hover:text-white hover:bg-blue"
+                    className="flex py-1.5 px-3.5 duration-200 rounded-[3px] dark:text-darkTheme-body-color hover:text-white hover:bg-blue"
                   >
                     2
                   </a>
@@ -66,7 +66,7 @@ const BlogGrid = () => {
                 <li>
                   <a
                     href={ROUTES.blogGrid}
-                    className="flex py-1.5 px-3.5 duration-200 rounded-[3px] hover:text-white hover:bg-blue"
+                    className="flex py-1.5 px-3.5 duration-200 rounded-[3px] dark:text-darkTheme-body-color hover:text-white hover:bg-blue"
                   >
                     3
                   </a>
@@ -75,7 +75,7 @@ const BlogGrid = () => {
                 <li>
                   <a
                     href={ROUTES.blogGrid}
-                    className="flex py-1.5 px-3.5 duration-200 rounded-[3px] hover:text-white hover:bg-blue"
+                    className="flex py-1.5 px-3.5 duration-200 rounded-[3px] dark:text-darkTheme-body-color hover:text-white hover:bg-blue"
                   >
                     4
                   </a>
@@ -84,7 +84,7 @@ const BlogGrid = () => {
                 <li>
                   <a
                     href={ROUTES.blogGrid}
-                    className="flex py-1.5 px-3.5 duration-200 rounded-[3px] hover:text-white hover:bg-blue"
+                    className="flex py-1.5 px-3.5 duration-200 rounded-[3px] dark:text-darkTheme-body-color hover:text-white hover:bg-blue"
                   >
                     5
                   </a>
@@ -93,7 +93,7 @@ const BlogGrid = () => {
                 <li>
                   <a
                     href={ROUTES.blogGrid}
-                    className="flex py-1.5 px-3.5 duration-200 rounded-[3px] hover:text-white hover:bg-blue"
+                    className="flex py-1.5 px-3.5 duration-200 rounded-[3px] dark:text-darkTheme-body-color hover:text-white hover:bg-blue"
                   >
                     ...
                   </a>
@@ -102,7 +102,7 @@ const BlogGrid = () => {
                 <li>
                   <a
                     href={ROUTES.blogGrid}
-                    className="flex py-1.5 px-3.5 duration-200 rounded-[3px] hover:text-white hover:bg-blue"
+                    className="flex py-1.5 px-3.5 duration-200 rounded-[3px] dark:text-darkTheme-body-color hover:text-white hover:bg-blue"
                   >
                     10
                   </a>

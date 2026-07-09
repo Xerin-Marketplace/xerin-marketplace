@@ -6,19 +6,19 @@ const Contact = () => {
     <>
       <Breadcrumb title={"Contact"} pages={["contact"]} />
 
-      <section className="overflow-hidden py-20 bg-gray-2">
+      <section className="overflow-hidden py-20 bg-gray-2 dark:bg-darkTheme-bg">
         <div className="max-w-[1170px] w-full mx-auto px-4 sm:px-8 xl:px-0">
           <div className="flex flex-col xl:flex-row gap-7.5">
-            <div className="xl:max-w-[370px] w-full bg-white rounded-xl shadow-1">
-              <div className="py-5 px-4 sm:px-7.5 border-b border-gray-3">
-                <p className="font-medium text-xl text-dark">
+            <div className="xl:max-w-[370px] w-full bg-white dark:bg-darkTheme-card rounded-xl shadow-1">
+              <div className="py-5 px-4 sm:px-7.5 border-b border-gray-3 dark:border-darkTheme-border-color">
+                <p className="font-medium text-xl text-dark dark:text-white">
                   Contact Information
                 </p>
               </div>
 
               <div className="p-4 sm:p-7.5">
                 <div className="flex flex-col gap-4">
-                  <p className="flex items-center gap-4">
+                  <p className="flex items-center gap-4 dark:text-darkTheme-body-color">
                     <svg
                       width="22"
                       height="22"
@@ -36,7 +36,7 @@ const Contact = () => {
                     Name: James Septimus
                   </p>
 
-                  <p className="flex items-center gap-4">
+                  <p className="flex items-center gap-4 dark:text-darkTheme-body-color">
                     <svg
                       width="22"
                       height="22"
@@ -64,7 +64,7 @@ const Contact = () => {
                     Phone: 1234 567890
                   </p>
 
-                  <p className="flex gap-4">
+                  <p className="flex gap-4 dark:text-darkTheme-body-color">
                     <svg
                       className="mt-0.5 shrink-0"
                       width="22"
@@ -86,11 +86,11 @@ const Contact = () => {
               </div>
             </div>
 
-            <div className="xl:max-w-[770px] w-full bg-white rounded-xl shadow-1 p-4 sm:p-7.5 xl:p-10">
+            <div className="xl:max-w-[770px] w-full bg-white dark:bg-darkTheme-card rounded-xl shadow-1 p-4 sm:p-7.5 xl:p-10">
               <form>
                 <div className="flex flex-col lg:flex-row gap-5 sm:gap-8 mb-5">
                   <div className="w-full">
-                    <label htmlFor="firstName" className="block mb-2.5">
+                    <label htmlFor="firstName" className="block mb-2.5 dark:text-darkTheme-body-color">
                       First Name <span className="text-red">*</span>
                     </label>
 
@@ -99,12 +99,12 @@ const Contact = () => {
                       name="firstName"
                       id="firstName"
                       placeholder="Jhon"
-                      className="rounded-md border border-gray-3 bg-gray-1 placeholder:text-dark-5 w-full py-2.5 px-5 outline-none duration-200 focus:border-transparent focus:shadow-input focus:ring-2 focus:ring-blue/20"
+                      className="rounded-md border border-gray-3 dark:border-darkTheme-border-color bg-gray-1 dark:bg-darkTheme-secondary-bg dark:text-darkTheme-body-color placeholder:text-dark-4 dark:placeholder:text-darkTheme-secondary-muted w-full py-2.5 px-5 outline-none duration-200 focus:border-transparent focus:shadow-input focus:ring-2 focus:ring-blue/20"
                     />
                   </div>
 
                   <div className="w-full">
-                    <label htmlFor="lastName" className="block mb-2.5">
+                    <label htmlFor="lastName" className="block mb-2.5 dark:text-darkTheme-body-color">
                       Last Name <span className="text-red">*</span>
                     </label>
 
@@ -113,14 +113,14 @@ const Contact = () => {
                       name="lastName"
                       id="lastName"
                       placeholder="Deo"
-                      className="rounded-md border border-gray-3 bg-gray-1 placeholder:text-dark-5 w-full py-2.5 px-5 outline-none duration-200 focus:border-transparent focus:shadow-input focus:ring-2 focus:ring-blue/20"
+                      className="rounded-md border border-gray-3 dark:border-darkTheme-border-color bg-gray-1 dark:bg-darkTheme-secondary-bg dark:text-darkTheme-body-color placeholder:text-dark-4 dark:placeholder:text-darkTheme-secondary-muted w-full py-2.5 px-5 outline-none duration-200 focus:border-transparent focus:shadow-input focus:ring-2 focus:ring-blue/20"
                     />
                   </div>
                 </div>
 
                 <div className="flex flex-col lg:flex-row gap-5 sm:gap-8 mb-5">
                   <div className="w-full">
-                    <label htmlFor="subject" className="block mb-2.5">
+                    <label htmlFor="subject" className="block mb-2.5 dark:text-darkTheme-body-color">
                       Subject
                     </label>
 
@@ -129,12 +129,12 @@ const Contact = () => {
                       name="subject"
                       id="subject"
                       placeholder="Type your subject"
-                      className="rounded-md border border-gray-3 bg-gray-1 placeholder:text-dark-5 w-full py-2.5 px-5 outline-none duration-200 focus:border-transparent focus:shadow-input focus:ring-2 focus:ring-blue/20"
+                      className="rounded-md border border-gray-3 dark:border-darkTheme-border-color bg-gray-1 dark:bg-darkTheme-secondary-bg dark:text-darkTheme-body-color placeholder:text-dark-4 dark:placeholder:text-darkTheme-secondary-muted w-full py-2.5 px-5 outline-none duration-200 focus:border-transparent focus:shadow-input focus:ring-2 focus:ring-blue/20"
                     />
                   </div>
 
                   <div className="w-full">
-                    <label htmlFor="phone" className="block mb-2.5">
+                    <label htmlFor="phone" className="block mb-2.5 dark:text-darkTheme-body-color">
                       Phone
                     </label>
 
@@ -143,13 +143,13 @@ const Contact = () => {
                       name="phone"
                       id="phone"
                       placeholder="Enter your phone"
-                      className="rounded-md border border-gray-3 bg-gray-1 placeholder:text-dark-5 w-full py-2.5 px-5 outline-none duration-200 focus:border-transparent focus:shadow-input focus:ring-2 focus:ring-blue/20"
+                      className="rounded-md border border-gray-3 dark:border-darkTheme-border-color bg-gray-1 dark:bg-darkTheme-secondary-bg dark:text-darkTheme-body-color placeholder:text-dark-4 dark:placeholder:text-darkTheme-secondary-muted w-full py-2.5 px-5 outline-none duration-200 focus:border-transparent focus:shadow-input focus:ring-2 focus:ring-blue/20"
                     />
                   </div>
                 </div>
 
                 <div className="mb-7.5">
-                  <label htmlFor="message" className="block mb-2.5">
+                  <label htmlFor="message" className="block mb-2.5 dark:text-darkTheme-body-color">
                     Message
                   </label>
 
@@ -158,7 +158,7 @@ const Contact = () => {
                     id="message"
                     rows={5}
                     placeholder="Type your message"
-                    className="rounded-md border border-gray-3 bg-gray-1 placeholder:text-dark-5 w-full p-5 outline-none duration-200 focus:border-transparent focus:shadow-input focus:ring-2 focus:ring-blue/20"
+                    className="rounded-md border border-gray-3 dark:border-darkTheme-border-color bg-gray-1 dark:bg-darkTheme-secondary-bg dark:text-darkTheme-body-color placeholder:text-dark-4 dark:placeholder:text-darkTheme-secondary-muted w-full p-5 outline-none duration-200 focus:border-transparent focus:shadow-input focus:ring-2 focus:ring-blue/20"
                   ></textarea>
                 </div>
 

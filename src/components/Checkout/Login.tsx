@@ -4,15 +4,15 @@ const Login = () => {
   const [dropdown, setDropdown] = useState(false);
 
   return (
-    <div className="bg-white shadow-1 rounded-[10px]">
+    <div className="bg-white dark:bg-darkTheme-card shadow-1 rounded-[10px]">
       <div
         onClick={() => setDropdown(!dropdown)}
-        className={`cursor-pointer flex items-center gap-0.5 py-5 px-5.5 ${
-          dropdown && "border-b border-gray-3"
+        className={`cursor-pointer flex items-center gap-0.5 py-5 px-5.5 dark:text-darkTheme-body-color ${
+          dropdown && "border-b border-gray-3 dark:border-darkTheme-border-color"
         }`}
       >
         Returning customer?
-        <span className="flex items-center gap-2.5 pl-1 font-medium text-dark">
+        <span className="flex items-center gap-2.5 pl-1 font-medium text-dark dark:text-white">
           Click here to login
           <svg
             className={`${
@@ -45,7 +45,7 @@ const Login = () => {
         </p>
 
         <div className="mb-5">
-          <label htmlFor="name" className="block mb-2.5">
+          <label htmlFor="name" className="block mb-2.5 dark:text-darkTheme-body-color">
             Username or Email
           </label>
 
@@ -53,12 +53,12 @@ const Login = () => {
             type="text"
             name="name"
             id="name"
-            className="rounded-md border border-gray-3 bg-gray-1 placeholder:text-dark-5 w-full py-2.5 px-5 outline-none duration-200 focus:border-transparent focus:shadow-input focus:ring-2 focus:ring-blue/20"
+            className="rounded-md border border-gray-3 dark:border-darkTheme-border-color bg-gray-1 dark:bg-darkTheme-secondary-bg dark:text-darkTheme-body-color placeholder:text-dark-4 dark:placeholder:text-darkTheme-secondary-muted w-full py-2.5 px-5 outline-none duration-200 focus:border-transparent focus:shadow-input focus:ring-2 focus:ring-blue/20"
           />
         </div>
 
         <div className="mb-5">
-          <label htmlFor="password" className="block mb-2.5">
+          <label htmlFor="password" className="block mb-2.5 dark:text-darkTheme-body-color">
             Password
           </label>
 
@@ -67,7 +67,7 @@ const Login = () => {
             name="password"
             id="password"
             autoComplete="on"
-            className="rounded-md border border-gray-3 bg-gray-1 placeholder:text-dark-5 w-full py-2.5 px-5 outline-none duration-200 focus:border-transparent focus:shadow-input focus:ring-2 focus:ring-blue/20"
+            className="rounded-md border border-gray-3 dark:border-darkTheme-border-color bg-gray-1 dark:bg-darkTheme-secondary-bg dark:text-darkTheme-body-color placeholder:text-dark-4 dark:placeholder:text-darkTheme-secondary-muted w-full py-2.5 px-5 outline-none duration-200 focus:border-transparent focus:shadow-input focus:ring-2 focus:ring-blue/20"
           />
         </div>
 

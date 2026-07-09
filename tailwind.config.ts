@@ -43,9 +43,15 @@ const config: Config = {
       info: "#4ecac2",
       light: "#eef2f7",
       dark: "#434951",
+      "dark-3": "#6b7280",
+      "dark-4": "#9ca3af",
       "body-bg": "#f9f7f7",
       "border-color": "#eaedf1",
       gray: {
+        1: "#f8f9fa",
+        2: "#eef2f7",
+        3: "#d8dfe7",
+        4: "#b0b0bb",
         100: "#f8f9fa",
         200: "#eef2f7",
         300: "#d8dfe7",
@@ -112,9 +118,12 @@ const config: Config = {
     extend: {
       colors: {
         darkTheme: {
+          "bg": "#22282e",
           "body-bg": "#22282e",
+          "card": "#282f36",
           "secondary-bg": "#282f36",
           "tertiary-bg": "#2f3943",
+          "text": "#dee2e6",
           "body-color": "#aab8c5",
           "secondary-muted": "#8391a2",
           "emphasis-text": "#dee2e6",

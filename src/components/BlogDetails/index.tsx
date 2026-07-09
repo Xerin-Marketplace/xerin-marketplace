@@ -8,7 +8,7 @@ const BlogDetails = () => {
   return (
     <>
       <Breadcrumb title={"Blog Details"} pages={["blog details"]} />
-      <section className="overflow-hidden py-20 bg-gray-2">
+      <section className="overflow-hidden py-20 bg-gray-2 dark:bg-darkTheme-bg">
         <div className="max-w-[750px] w-full mx-auto px-4 sm:px-8 xl:px-0">
           <div className="rounded-[10px] overflow-hidden mb-7.5">
             <Image
@@ -34,7 +34,7 @@ const BlogDetails = () => {
               </a>
             </span>
 
-            <h2 className="font-medium text-dark text-xl lg:text-2xl xl:text-custom-4xl mb-4">
+            <h2 className="font-medium text-dark dark:text-white text-xl lg:text-2xl xl:text-custom-4xl mb-4">
               What information is needed for Xerin Market delivery?
             </h2>
 
@@ -46,7 +46,7 @@ const BlogDetails = () => {
             </p>
 
             <div className="mt-7.5">
-              <h3 className="font-medium text-dark text-lg xl:text-[26px] xl:leading-[34px] mb-6">
+              <h3 className="font-medium text-dark dark:text-white text-lg xl:text-[26px] xl:leading-[34px] mb-6">
                 What sellers and buyers should prepare before delivery.
               </h3>
 
@@ -60,8 +60,8 @@ const BlogDetails = () => {
               </ul>
             </div>
 
-            <div className="rounded-xl bg-white pt-7.5 pb-6 px-4 sm:px-7.5 my-7.5">
-              <p className="italic text-dark text-center">
+            <div className="rounded-xl bg-white dark:bg-darkTheme-card pt-7.5 pb-6 px-4 sm:px-7.5 my-7.5">
+              <p className="italic text-dark dark:text-darkTheme-body-color text-center">
                 “Clear order information builds trust between buyers, sellers,
                 and delivery partners across the Xerin Market ecosystem.”
               </p>
@@ -80,8 +80,8 @@ const BlogDetails = () => {
                 </div>
 
                 <div>
-                  <h4 className="text-dark text-custom-sm">Xerin Market Team</h4>
-                  <p className="text-custom-xs">Marketplace Insights</p>
+                  <h4 className="text-dark dark:text-white text-custom-sm">Xerin Market Team</h4>
+                  <p className="text-custom-xs dark:text-darkTheme-secondary-muted">Marketplace Insights</p>
                 </div>
               </a>
             </div>
@@ -105,7 +105,7 @@ const BlogDetails = () => {
                 <ul className="flex flex-wrap items-center gap-3.5">
                   <li>
                     <a
-                      className="inline-flex hover:text-white border border-gray-3 bg-white py-2 px-4 rounded-md ease-out duration-200 hover:bg-blue hover:border-blue"
+                      className="inline-flex hover:text-white border border-gray-3 dark:border-darkTheme-border-color bg-white dark:bg-darkTheme-card dark:text-darkTheme-body-color py-2 px-4 rounded-md ease-out duration-200 hover:bg-blue hover:border-blue"
                       href={ROUTES.blogDetails}
                     >
                       Desktop
@@ -114,7 +114,7 @@ const BlogDetails = () => {
 
                   <li>
                     <a
-                      className="inline-flex hover:text-white border border-gray-3 bg-white py-2 px-4 rounded-md ease-out duration-200 hover:bg-blue hover:border-blue"
+                      className="inline-flex hover:text-white border border-gray-3 dark:border-darkTheme-border-color bg-white dark:bg-darkTheme-card dark:text-darkTheme-body-color py-2 px-4 rounded-md ease-out duration-200 hover:bg-blue hover:border-blue"
                       href={ROUTES.blogDetails}
                     >
                       Macbook
@@ -123,7 +123,7 @@ const BlogDetails = () => {
 
                   <li>
                     <a
-                      className="inline-flex hover:text-white border border-gray-3 bg-white py-2 px-4 rounded-md ease-out duration-200 hover:bg-blue hover:border-blue"
+                      className="inline-flex hover:text-white border border-gray-3 dark:border-darkTheme-border-color bg-white dark:bg-darkTheme-card dark:text-darkTheme-body-color py-2 px-4 rounded-md ease-out duration-200 hover:bg-blue hover:border-blue"
                       href={ROUTES.blogDetails}
                     >
                       PC

@@ -95,14 +95,14 @@ const Signup = () => {
   return (
     <>
       <Breadcrumb title={"Signup"} pages={["Signup"]} />
-      <section className="overflow-hidden py-20 bg-gray-2">
+      <section className="overflow-hidden py-20 bg-gray-2 dark:bg-darkTheme-bg">
         <div className="max-w-[1170px] w-full mx-auto px-4 sm:px-8 xl:px-0">
-          <div className="max-w-[570px] w-full mx-auto rounded-xl bg-white shadow-1 p-4 sm:p-7.5 xl:p-11">
+          <div className="max-w-[570px] w-full mx-auto rounded-xl bg-white dark:bg-darkTheme-card shadow-1 p-4 sm:p-7.5 xl:p-11">
             <div className="text-center mb-11">
-              <h2 className="font-semibold text-xl sm:text-2xl xl:text-heading-5 text-dark mb-1.5">
+              <h2 className="font-semibold text-xl sm:text-2xl xl:text-heading-5 text-dark dark:text-white mb-1.5">
                 Create an Account
               </h2>
-              <p>Enter your detail below</p>
+              <p className="dark:text-darkTheme-body-color">Enter your detail below</p>
             </div>
 
             <div className="flex flex-col gap-4.5">
@@ -110,7 +110,7 @@ const Signup = () => {
                 type="button"
                 disabled={isSubmitting}
                 onClick={() => toast("Google sign-up is not enabled yet.")}
-                className="flex justify-center items-center gap-3.5 rounded-lg border border-gray-3 bg-gray-1 p-3 ease-out duration-200 hover:bg-gray-2 disabled:cursor-not-allowed disabled:opacity-70"
+                className="flex justify-center items-center gap-3.5 rounded-lg border border-gray-3 dark:border-darkTheme-border-color bg-gray-1 dark:bg-darkTheme-secondary-bg dark:text-darkTheme-body-color p-3 ease-out duration-200 hover:bg-gray-2 dark:hover:bg-darkTheme-tertiary-bg disabled:cursor-not-allowed disabled:opacity-70"
               >
                 <svg
                   width="20"
@@ -160,14 +160,14 @@ const Signup = () => {
             </div>
 
             <span className="relative z-1 block font-medium text-center mt-4.5">
-              <span className="block absolute -z-1 left-0 top-1/2 h-px w-full bg-gray-3"></span>
-              <span className="inline-block px-3 bg-white">Or</span>
+              <span className="block absolute -z-1 left-0 top-1/2 h-px w-full bg-gray-3 dark:bg-darkTheme-border-color"></span>
+              <span className="inline-block px-3 bg-white dark:bg-darkTheme-card dark:text-darkTheme-body-color">Or</span>
             </span>
 
             <div className="mt-5.5">
               <form onSubmit={handleSubmit}>
                 <div className="mb-5">
-                  <label htmlFor="name" className="block mb-2.5">
+                  <label htmlFor="name" className="block mb-2.5 dark:text-darkTheme-body-color">
                     Full Name <span className="text-red">*</span>
                   </label>
 
@@ -180,12 +180,12 @@ const Signup = () => {
                     onChange={(event) => setFullName(event.target.value)}
                     autoComplete="name"
                     disabled={isSubmitting}
-                    className="rounded-lg border border-gray-3 bg-gray-1 placeholder:text-dark-5 w-full py-3 px-5 outline-none duration-200 focus:border-transparent focus:shadow-input focus:ring-2 focus:ring-blue/20 disabled:cursor-not-allowed disabled:opacity-70"
+                    className="rounded-lg border border-gray-3 dark:border-darkTheme-border-color bg-gray-1 dark:bg-darkTheme-secondary-bg dark:text-darkTheme-body-color placeholder:text-dark-4 dark:placeholder:text-darkTheme-secondary-muted w-full py-3 px-5 outline-none duration-200 focus:border-transparent focus:shadow-input focus:ring-2 focus:ring-blue/20 disabled:cursor-not-allowed disabled:opacity-70"
                   />
                 </div>
 
                 <div className="mb-5">
-                  <label htmlFor="email" className="block mb-2.5">
+                  <label htmlFor="email" className="block mb-2.5 dark:text-darkTheme-body-color">
                     Email Address <span className="text-red">*</span>
                   </label>
 
@@ -198,12 +198,12 @@ const Signup = () => {
                     onChange={(event) => setEmail(event.target.value)}
                     autoComplete="email"
                     disabled={isSubmitting}
-                    className="rounded-lg border border-gray-3 bg-gray-1 placeholder:text-dark-5 w-full py-3 px-5 outline-none duration-200 focus:border-transparent focus:shadow-input focus:ring-2 focus:ring-blue/20 disabled:cursor-not-allowed disabled:opacity-70"
+                    className="rounded-lg border border-gray-3 dark:border-darkTheme-border-color bg-gray-1 dark:bg-darkTheme-secondary-bg dark:text-darkTheme-body-color placeholder:text-dark-4 dark:placeholder:text-darkTheme-secondary-muted w-full py-3 px-5 outline-none duration-200 focus:border-transparent focus:shadow-input focus:ring-2 focus:ring-blue/20 disabled:cursor-not-allowed disabled:opacity-70"
                   />
                 </div>
 
                 <div className="mb-5">
-                  <label htmlFor="password" className="block mb-2.5">
+                  <label htmlFor="password" className="block mb-2.5 dark:text-darkTheme-body-color">
                     Password <span className="text-red">*</span>
                   </label>
 
@@ -216,12 +216,12 @@ const Signup = () => {
                     onChange={(event) => setPassword(event.target.value)}
                     autoComplete="new-password"
                     disabled={isSubmitting}
-                    className="rounded-lg border border-gray-3 bg-gray-1 placeholder:text-dark-5 w-full py-3 px-5 outline-none duration-200 focus:border-transparent focus:shadow-input focus:ring-2 focus:ring-blue/20 disabled:cursor-not-allowed disabled:opacity-70"
+                    className="rounded-lg border border-gray-3 dark:border-darkTheme-border-color bg-gray-1 dark:bg-darkTheme-secondary-bg dark:text-darkTheme-body-color placeholder:text-dark-4 dark:placeholder:text-darkTheme-secondary-muted w-full py-3 px-5 outline-none duration-200 focus:border-transparent focus:shadow-input focus:ring-2 focus:ring-blue/20 disabled:cursor-not-allowed disabled:opacity-70"
                   />
                 </div>
 
                 <div className="mb-5.5">
-                  <label htmlFor="re-type-password" className="block mb-2.5">
+                  <label htmlFor="re-type-password" className="block mb-2.5 dark:text-darkTheme-body-color">
                     Re-type Password <span className="text-red">*</span>
                   </label>
 
@@ -235,7 +235,7 @@ const Signup = () => {
                     autoComplete="new-password"
                     disabled={isSubmitting}
                     aria-invalid={isPasswordMismatch}
-                    className="rounded-lg border border-gray-3 bg-gray-1 placeholder:text-dark-5 w-full py-3 px-5 outline-none duration-200 focus:border-transparent focus:shadow-input focus:ring-2 focus:ring-blue/20 disabled:cursor-not-allowed disabled:opacity-70"
+                    className="rounded-lg border border-gray-3 dark:border-darkTheme-border-color bg-gray-1 dark:bg-darkTheme-secondary-bg dark:text-darkTheme-body-color placeholder:text-dark-4 dark:placeholder:text-darkTheme-secondary-muted w-full py-3 px-5 outline-none duration-200 focus:border-transparent focus:shadow-input focus:ring-2 focus:ring-blue/20 disabled:cursor-not-allowed disabled:opacity-70"
                   />
                   {isPasswordMismatch && (
                     <p className="mt-2 text-sm text-red">
@@ -253,10 +253,10 @@ const Signup = () => {
                 </button>
 
                 <p className="text-center mt-6">
-                  Already have an account?
+                  <span className="dark:text-darkTheme-body-color">Already have an account?</span>
                   <Link
                     href="/signin"
-                    className="text-dark ease-out duration-200 hover:text-blue pl-2"
+                    className="text-dark dark:text-darkTheme-body-color ease-out duration-200 hover:text-blue pl-2"
                   >
                     Sign in Now
                   </Link>

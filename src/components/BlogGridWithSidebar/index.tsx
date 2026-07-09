@@ -41,7 +41,7 @@ const BlogGridWithSidebar = () => {
     <>
       <Breadcrumb title={"Blog Grid Sidebar"} pages={["blog grid sidebar"]} />
 
-      <section className="overflow-hidden py-20 bg-gray-2">
+      <section className="overflow-hidden py-20 bg-gray-2 dark:bg-darkTheme-bg">
         <div className="max-w-[1170px] w-full mx-auto px-4 sm:px-8 xl:px-0">
           <div className="flex flex-col lg:flex-row gap-7.5">
             {/* <!-- blog grid --> */}
@@ -54,7 +54,7 @@ const BlogGridWithSidebar = () => {
 
               {/* <!-- Blog Pagination Start --> */}
               <div className="flex justify-center mt-15">
-                <div className="bg-white shadow-1 rounded-md p-2">
+                <div className="bg-white dark:bg-darkTheme-card shadow-1 rounded-md p-2">
                   <ul className="flex items-center">
                     <li>
                       <button
@@ -92,7 +92,7 @@ const BlogGridWithSidebar = () => {
                     <li>
                       <a
                         href={ROUTES.blogGridWithSidebar}
-                        className="flex py-1.5 px-3.5 duration-200 rounded-[3px] hover:text-white hover:bg-blue"
+                        className="flex py-1.5 px-3.5 duration-200 rounded-[3px] dark:text-darkTheme-body-color hover:text-white hover:bg-blue"
                       >
                         2
                       </a>
@@ -101,7 +101,7 @@ const BlogGridWithSidebar = () => {
                     <li>
                       <a
                         href={ROUTES.blogGridWithSidebar}
-                        className="flex py-1.5 px-3.5 duration-200 rounded-[3px] hover:text-white hover:bg-blue"
+                        className="flex py-1.5 px-3.5 duration-200 rounded-[3px] dark:text-darkTheme-body-color hover:text-white hover:bg-blue"
                       >
                         3
                       </a>
@@ -110,7 +110,7 @@ const BlogGridWithSidebar = () => {
                     <li>
                       <a
                         href={ROUTES.blogGridWithSidebar}
-                        className="flex py-1.5 px-3.5 duration-200 rounded-[3px] hover:text-white hover:bg-blue"
+                        className="flex py-1.5 px-3.5 duration-200 rounded-[3px] dark:text-darkTheme-body-color hover:text-white hover:bg-blue"
                       >
                         4
                       </a>
@@ -119,7 +119,7 @@ const BlogGridWithSidebar = () => {
                     <li>
                       <a
                         href={ROUTES.blogGridWithSidebar}
-                        className="flex py-1.5 px-3.5 duration-200 rounded-[3px] hover:text-white hover:bg-blue"
+                        className="flex py-1.5 px-3.5 duration-200 rounded-[3px] dark:text-darkTheme-body-color hover:text-white hover:bg-blue"
                       >
                         5
                       </a>
@@ -128,7 +128,7 @@ const BlogGridWithSidebar = () => {
                     <li>
                       <a
                         href={ROUTES.blogGridWithSidebar}
-                        className="flex py-1.5 px-3.5 duration-200 rounded-[3px] hover:text-white hover:bg-blue"
+                        className="flex py-1.5 px-3.5 duration-200 rounded-[3px] dark:text-darkTheme-body-color hover:text-white hover:bg-blue"
                       >
                         ...
                       </a>
@@ -137,7 +137,7 @@ const BlogGridWithSidebar = () => {
                     <li>
                       <a
                         href={ROUTES.blogGridWithSidebar}
-                        className="flex py-1.5 px-3.5 duration-200 rounded-[3px] hover:text-white hover:bg-blue"
+                        className="flex py-1.5 px-3.5 duration-200 rounded-[3px] dark:text-darkTheme-body-color hover:text-white hover:bg-blue"
                       >
                         10
                       </a>
@@ -186,64 +186,64 @@ const BlogGridWithSidebar = () => {
               <Categories categories={categories} />
 
               {/* <!-- Tags box --> */}
-              <div className="shadow-1 bg-white rounded-xl mt-7.5">
-                <div className="px-4 sm:px-6 py-4.5 border-b border-gray-3">
-                  <h2 className="font-medium text-lg text-dark">Tags</h2>
+              <div className="shadow-1 bg-white dark:bg-darkTheme-card rounded-xl mt-7.5">
+                <div className="px-4 sm:px-6 py-4.5 border-b border-gray-3 dark:border-darkTheme-border-color">
+                  <h2 className="font-medium text-lg text-dark dark:text-white">Tags</h2>
                 </div>
 
                 <div className="p-4 sm:p-6">
                   <div className="flex flex-wrap gap-3.5">
                     <a
-                      className="inline-flex hover:text-white border border-gray-3 py-2 px-4 rounded-md ease-out duration-200 hover:bg-blue hover:border-blue"
+                      className="inline-flex hover:text-white border border-gray-3 dark:border-darkTheme-border-color dark:text-darkTheme-body-color py-2 px-4 rounded-md ease-out duration-200 hover:bg-blue hover:border-blue"
                       href={ROUTES.blogGridWithSidebar}
                     >
                       Desktop
                     </a>
 
                     <a
-                      className="inline-flex hover:text-white border border-gray-3 py-2 px-4 rounded-md ease-out duration-200 hover:bg-blue hover:border-blue"
+                      className="inline-flex hover:text-white border border-gray-3 dark:border-darkTheme-border-color dark:text-darkTheme-body-color py-2 px-4 rounded-md ease-out duration-200 hover:bg-blue hover:border-blue"
                       href={ROUTES.blogGridWithSidebar}
                     >
                       Macbook
                     </a>
 
                     <a
-                      className="inline-flex hover:text-white border border-gray-3 py-2 px-4 rounded-md ease-out duration-200 hover:bg-blue hover:border-blue"
+                      className="inline-flex hover:text-white border border-gray-3 dark:border-darkTheme-border-color dark:text-darkTheme-body-color py-2 px-4 rounded-md ease-out duration-200 hover:bg-blue hover:border-blue"
                       href={ROUTES.blogGridWithSidebar}
                     >
                       PC
                     </a>
 
                     <a
-                      className="inline-flex hover:text-white border border-gray-3 py-2 px-4 rounded-md ease-out duration-200 hover:bg-blue hover:border-blue"
+                      className="inline-flex hover:text-white border border-gray-3 dark:border-darkTheme-border-color dark:text-darkTheme-body-color py-2 px-4 rounded-md ease-out duration-200 hover:bg-blue hover:border-blue"
                       href={ROUTES.blogGridWithSidebar}
                     >
                       Watch
                     </a>
 
                     <a
-                      className="inline-flex hover:text-white border border-gray-3 py-2 px-4 rounded-md ease-out duration-200 hover:bg-blue hover:border-blue"
+                      className="inline-flex hover:text-white border border-gray-3 dark:border-darkTheme-border-color dark:text-darkTheme-body-color py-2 px-4 rounded-md ease-out duration-200 hover:bg-blue hover:border-blue"
                       href={ROUTES.blogGridWithSidebar}
                     >
                       USB Cable
                     </a>
 
                     <a
-                      className="inline-flex hover:text-white border border-gray-3 py-2 px-4 rounded-md ease-out duration-200 hover:bg-blue hover:border-blue"
+                      className="inline-flex hover:text-white border border-gray-3 dark:border-darkTheme-border-color dark:text-darkTheme-body-color py-2 px-4 rounded-md ease-out duration-200 hover:bg-blue hover:border-blue"
                       href={ROUTES.blogGridWithSidebar}
                     >
                       Mouse
                     </a>
 
                     <a
-                      className="inline-flex hover:text-white border border-gray-3 py-2 px-4 rounded-md ease-out duration-200 hover:bg-blue hover:border-blue"
+                      className="inline-flex hover:text-white border border-gray-3 dark:border-darkTheme-border-color dark:text-darkTheme-body-color py-2 px-4 rounded-md ease-out duration-200 hover:bg-blue hover:border-blue"
                       href={ROUTES.blogGridWithSidebar}
                     >
                       Windows PC
                     </a>
 
                     <a
-                      className="inline-flex hover:text-white border border-gray-3 py-2 px-4 rounded-md ease-out duration-200 hover:bg-blue hover:border-blue"
+                      className="inline-flex hover:text-white border border-gray-3 dark:border-darkTheme-border-color dark:text-darkTheme-body-color py-2 px-4 rounded-md ease-out duration-200 hover:bg-blue hover:border-blue"
                       href={ROUTES.blogGridWithSidebar}
                     >
                       Monitor

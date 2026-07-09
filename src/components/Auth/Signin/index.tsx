@@ -50,20 +50,20 @@ const Signin = () => {
   return (
     <>
       <Breadcrumb title={"Signin"} pages={["Signin"]} />
-      <section className="overflow-hidden py-20 bg-gray-2">
+      <section className="overflow-hidden py-20 bg-gray-2 dark:bg-darkTheme-bg">
         <div className="max-w-[1170px] w-full mx-auto px-4 sm:px-8 xl:px-0">
-          <div className="max-w-[570px] w-full mx-auto rounded-xl bg-white shadow-1 p-4 sm:p-7.5 xl:p-11">
+          <div className="max-w-[570px] w-full mx-auto rounded-xl bg-white dark:bg-darkTheme-card shadow-1 p-4 sm:p-7.5 xl:p-11">
             <div className="text-center mb-11">
-              <h2 className="font-semibold text-xl sm:text-2xl xl:text-heading-5 text-dark mb-1.5">
+              <h2 className="font-semibold text-xl sm:text-2xl xl:text-heading-5 text-dark dark:text-white mb-1.5">
                 Sign In to Your Account
               </h2>
-              <p>Enter your detail below</p>
+              <p className="dark:text-darkTheme-body-color">Enter your detail below</p>
             </div>
 
             <div>
               <form onSubmit={handleSubmit}>
                 <div className="mb-5">
-                  <label htmlFor="email" className="block mb-2.5">
+                  <label htmlFor="email" className="block mb-2.5 dark:text-darkTheme-body-color">
                     Email
                   </label>
 
@@ -76,12 +76,12 @@ const Signin = () => {
                     onChange={(event) => setEmail(event.target.value)}
                     autoComplete="email"
                     disabled={isSubmitting}
-                    className="rounded-lg border border-gray-3 bg-gray-1 placeholder:text-dark-5 w-full py-3 px-5 outline-none duration-200 focus:border-transparent focus:shadow-input focus:ring-2 focus:ring-blue/20 disabled:cursor-not-allowed disabled:opacity-70"
+                    className="rounded-lg border border-gray-3 dark:border-darkTheme-border-color bg-gray-1 dark:bg-darkTheme-secondary-bg dark:text-darkTheme-body-color placeholder:text-dark-4 dark:placeholder:text-darkTheme-secondary-muted w-full py-3 px-5 outline-none duration-200 focus:border-transparent focus:shadow-input focus:ring-2 focus:ring-blue/20 disabled:cursor-not-allowed disabled:opacity-70"
                   />
                 </div>
 
                 <div className="mb-5">
-                  <label htmlFor="password" className="block mb-2.5">
+                  <label htmlFor="password" className="block mb-2.5 dark:text-darkTheme-body-color">
                     Password
                   </label>
 
@@ -94,7 +94,7 @@ const Signin = () => {
                     onChange={(event) => setPassword(event.target.value)}
                     autoComplete="current-password"
                     disabled={isSubmitting}
-                    className="rounded-lg border border-gray-3 bg-gray-1 placeholder:text-dark-5 w-full py-3 px-5 outline-none duration-200 focus:border-transparent focus:shadow-input focus:ring-2 focus:ring-blue/20 disabled:cursor-not-allowed disabled:opacity-70"
+                    className="rounded-lg border border-gray-3 dark:border-darkTheme-border-color bg-gray-1 dark:bg-darkTheme-secondary-bg dark:text-darkTheme-body-color placeholder:text-dark-4 dark:placeholder:text-darkTheme-secondary-muted w-full py-3 px-5 outline-none duration-200 focus:border-transparent focus:shadow-input focus:ring-2 focus:ring-blue/20 disabled:cursor-not-allowed disabled:opacity-70"
                   />
                 </div>
 
@@ -108,21 +108,21 @@ const Signin = () => {
 
                 <a
                   href={ROUTES.contact}
-                  className="block text-center text-dark-4 mt-4.5 ease-out duration-200 hover:text-dark"
+                  className="block text-center text-dark-4 dark:text-darkTheme-secondary-muted mt-4.5 ease-out duration-200 hover:text-dark dark:hover:text-white"
                 >
                   Forget your password?
                 </a>
 
                 <span className="relative z-1 block font-medium text-center mt-4.5">
-                  <span className="block absolute -z-1 left-0 top-1/2 h-px w-full bg-gray-3"></span>
-                  <span className="inline-block px-3 bg-white">Or</span>
+                  <span className="block absolute -z-1 left-0 top-1/2 h-px w-full bg-gray-3 dark:bg-darkTheme-border-color"></span>
+                  <span className="inline-block px-3 bg-white dark:bg-darkTheme-card dark:text-darkTheme-body-color">Or</span>
                 </span>
 
                 <div className="flex flex-col gap-4.5 mt-4.5">
                   <button
                     type="button"
                     disabled={isSubmitting}
-                    className="flex justify-center items-center gap-3.5 rounded-lg border border-gray-3 bg-gray-1 p-3 ease-out duration-200 hover:bg-gray-2 disabled:cursor-not-allowed disabled:opacity-70"
+                    className="flex justify-center items-center gap-3.5 rounded-lg border border-gray-3 dark:border-darkTheme-border-color bg-gray-1 dark:bg-darkTheme-secondary-bg dark:text-darkTheme-body-color p-3 ease-out duration-200 hover:bg-gray-2 dark:hover:bg-darkTheme-tertiary-bg disabled:cursor-not-allowed disabled:opacity-70"
                     onClick={() => toast("Google sign-in is not enabled yet.")}
                   >
                     <svg
@@ -173,10 +173,10 @@ const Signin = () => {
 </div>
 
                 <p className="text-center mt-6">
-                  Don&apos;t have an account?
+                  <span className="dark:text-darkTheme-body-color">Don&apos;t have an account?</span>
                   <Link
                     href="/signup"
-                    className="text-dark ease-out duration-200 hover:text-blue pl-2"
+                    className="text-dark dark:text-darkTheme-body-color ease-out duration-200 hover:text-blue pl-2"
                   >
                     Sign Up Now!
                   </Link>

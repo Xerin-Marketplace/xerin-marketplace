@@ -22,13 +22,13 @@ const MyAccount = () => {
     <>
       <Breadcrumb title={"My Account"} pages={["my account"]} />
 
-      <section className="overflow-hidden py-20 bg-gray-2">
+      <section className="overflow-hidden py-20 bg-gray-2 dark:bg-darkTheme-bg">
         <div className="max-w-[1170px] w-full mx-auto px-4 sm:px-8 xl:px-0">
           <div className="flex flex-col xl:flex-row gap-7.5">
             {/* <!--== user dashboard menu start ==--> */}
-            <div className="xl:max-w-[370px] w-full bg-white rounded-xl shadow-1">
+            <div className="xl:max-w-[370px] w-full bg-white dark:bg-darkTheme-card rounded-xl shadow-1">
               <div className="flex xl:flex-col">
-                <div className="hidden lg:flex flex-wrap items-center gap-5 py-6 px-4 sm:px-7.5 xl:px-9 border-r xl:border-r-0 xl:border-b border-gray-3">
+                <div className="hidden lg:flex flex-wrap items-center gap-5 py-6 px-4 sm:px-7.5 xl:px-9 border-r xl:border-r-0 xl:border-b border-gray-3 dark:border-darkTheme-border-color">
                   <div className="max-w-[64px] w-full h-16 rounded-full overflow-hidden">
                     <Image
                       src="/images/users/user-04.jpg"
@@ -39,10 +39,10 @@ const MyAccount = () => {
                   </div>
 
                   <div>
-                    <p className="font-medium text-dark mb-0.5">
+                    <p className="font-medium text-dark dark:text-white mb-0.5">
                       James Septimus
                     </p>
-                    <p className="text-custom-xs">Member Since Sep 2020</p>
+                    <p className="text-custom-xs dark:text-darkTheme-secondary-muted">Member Since Sep 2020</p>
                   </div>
                 </div>
 
@@ -53,7 +53,7 @@ const MyAccount = () => {
                       className={`flex items-center rounded-md gap-2.5 py-3 px-4.5 ease-out duration-200 hover:bg-blue hover:text-white ${
                         activeTab === "dashboard"
                           ? "text-white bg-blue"
-                          : "text-dark-2 bg-gray-1"
+                          : "text-dark-2 dark:text-darkTheme-body-color bg-gray-1 dark:bg-darkTheme-secondary-bg"
                       }`}
                     >
                       <svg
@@ -96,7 +96,7 @@ const MyAccount = () => {
                       className={`flex items-center rounded-md gap-2.5 py-3 px-4.5 ease-out duration-200 hover:bg-blue hover:text-white ${
                         activeTab === "orders"
                           ? "text-white bg-blue"
-                          : "text-dark-2 bg-gray-1"
+                          : "text-dark-2 dark:text-darkTheme-body-color bg-gray-1 dark:bg-darkTheme-secondary-bg"
                       }`}
                     >
                       <svg
@@ -134,7 +134,7 @@ const MyAccount = () => {
                       className={`flex items-center rounded-md gap-2.5 py-3 px-4.5 ease-out duration-200 hover:bg-blue hover:text-white ${
                         activeTab === "downloads"
                           ? "text-white bg-blue"
-                          : "text-dark-2 bg-gray-1"
+                          : "text-dark-2 dark:text-darkTheme-body-color bg-gray-1 dark:bg-darkTheme-secondary-bg"
                       }`}
                     >
                       <svg
@@ -162,7 +162,7 @@ const MyAccount = () => {
                       className={`flex items-center rounded-md gap-2.5 py-3 px-4.5 ease-out duration-200 hover:bg-blue hover:text-white ${
                         activeTab === "addresses"
                           ? "text-white bg-blue"
-                          : "text-dark-2 bg-gray-1"
+                          : "text-dark-2 dark:text-darkTheme-body-color bg-gray-1 dark:bg-darkTheme-secondary-bg"
                       }`}
                     >
                       <svg
@@ -192,7 +192,7 @@ const MyAccount = () => {
                       className={`flex items-center rounded-md gap-2.5 py-3 px-4.5 ease-out duration-200 hover:bg-blue hover:text-white ${
                         activeTab === "account-details"
                           ? "text-white bg-blue"
-                          : "text-dark-2 bg-gray-1"
+                          : "text-dark-2 dark:text-darkTheme-body-color bg-gray-1 dark:bg-darkTheme-secondary-bg"
                       }`}
                     >
                       <svg
@@ -224,7 +224,7 @@ const MyAccount = () => {
                       className={`flex items-center rounded-md gap-2.5 py-3 px-4.5 ease-out duration-200 hover:bg-blue hover:text-white ${
                         activeTab === "logout"
                           ? "text-white bg-blue"
-                          : "text-dark-2 bg-gray-1"
+                          : "text-dark-2 dark:text-darkTheme-body-color bg-gray-1 dark:bg-darkTheme-secondary-bg"
                       }`}
                     >
                       <svg
@@ -257,11 +257,11 @@ const MyAccount = () => {
             {/* <!-- dashboard tab content start --> */}
 
             <div
-              className={`xl:max-w-[770px] w-full bg-white rounded-xl shadow-1 py-9.5 px-4 sm:px-7.5 xl:px-10 ${
+              className={`xl:max-w-[770px] w-full bg-white dark:bg-darkTheme-card rounded-xl shadow-1 py-9.5 px-4 sm:px-7.5 xl:px-10 ${
                 activeTab === "dashboard" ? "block" : "hidden"
               }`}
             >
-              <p className="text-dark">
+              <p className="text-dark dark:text-darkTheme-body-color">
                 Welcome to your Xerin Market account. Not your account?
                 <a
                   href={ROUTES.signin}
@@ -271,7 +271,7 @@ const MyAccount = () => {
                 </a>
               </p>
 
-              <p className="text-custom-sm mt-4">
+              <p className="text-custom-sm dark:text-darkTheme-secondary-muted mt-4">
                 Use your account dashboard to review recent orders, track Xerin
                 Logistics deliveries, manage addresses, and update your
                 password or account details.
@@ -281,7 +281,7 @@ const MyAccount = () => {
 
           <!-- orders tab content start --> */}
             <div
-              className={`xl:max-w-[770px] w-full bg-white rounded-xl shadow-1 ${
+              className={`xl:max-w-[770px] w-full bg-white dark:bg-darkTheme-card rounded-xl shadow-1 ${
                 activeTab === "orders" ? "block" : "hidden"
               }`}
             >
@@ -291,11 +291,11 @@ const MyAccount = () => {
 
           <!-- downloads tab content start --> */}
             <div
-              className={`xl:max-w-[770px] w-full bg-white rounded-xl shadow-1 py-9.5 px-4 sm:px-7.5 xl:px-10 ${
+              className={`xl:max-w-[770px] w-full bg-white dark:bg-darkTheme-card rounded-xl shadow-1 py-9.5 px-4 sm:px-7.5 xl:px-10 ${
                 activeTab === "downloads" ? "block" : "hidden"
               }`}
             >
-              <p>No digital receipts or downloadable files are available yet.</p>
+              <p className="dark:text-darkTheme-body-color">No digital receipts or downloadable files are available yet.</p>
             </div>
             {/* <!-- downloads tab content end -->
 
@@ -305,14 +305,14 @@ const MyAccount = () => {
                 activeTab === "addresses" ? "flex" : "hidden"
               }`}
             >
-              <div className="xl:max-w-[370px] w-full bg-white shadow-1 rounded-xl">
-                <div className="flex items-center justify-between py-5 px-4 sm:pl-7.5 sm:pr-6 border-b border-gray-3">
-                  <p className="font-medium text-xl text-dark">
+              <div className="xl:max-w-[370px] w-full bg-white dark:bg-darkTheme-card shadow-1 rounded-xl">
+                <div className="flex items-center justify-between py-5 px-4 sm:pl-7.5 sm:pr-6 border-b border-gray-3 dark:border-darkTheme-border-color">
+                  <p className="font-medium text-xl text-dark dark:text-white">
                     Shipping Address
                   </p>
 
                   <button
-                    className="text-dark ease-out duration-200 hover:text-blue"
+                    className="text-dark dark:text-darkTheme-body-color ease-out duration-200 hover:text-blue"
                     onClick={openAddressModal}
                   >
                     <svg
@@ -437,14 +437,14 @@ const MyAccount = () => {
                 </div>
               </div>
 
-              <div className="xl:max-w-[370px] w-full bg-white shadow-1 rounded-xl">
-                <div className="flex items-center justify-between py-5 px-4 sm:pl-7.5 sm:pr-6 border-b border-gray-3">
-                  <p className="font-medium text-xl text-dark">
+              <div className="xl:max-w-[370px] w-full bg-white dark:bg-darkTheme-card shadow-1 rounded-xl">
+                <div className="flex items-center justify-between py-5 px-4 sm:pl-7.5 sm:pr-6 border-b border-gray-3 dark:border-darkTheme-border-color">
+                  <p className="font-medium text-xl text-dark dark:text-white">
                     Billing Address
                   </p>
 
                   <button
-                    className="text-dark ease-out duration-200 hover:text-blue"
+                    className="text-dark dark:text-darkTheme-body-color ease-out duration-200 hover:text-blue"
                     onClick={openAddressModal}
                   >
                     <svg
@@ -578,10 +578,10 @@ const MyAccount = () => {
               }`}
             >
               <form>
-                <div className="bg-white shadow-1 rounded-xl p-4 sm:p-8.5">
+                <div className="bg-white dark:bg-darkTheme-card shadow-1 rounded-xl p-4 sm:p-8.5">
                   <div className="flex flex-col lg:flex-row gap-5 sm:gap-8 mb-5">
                     <div className="w-full">
-                      <label htmlFor="firstName" className="block mb-2.5">
+                      <label htmlFor="firstName" className="block mb-2.5 dark:text-darkTheme-body-color">
                         First Name <span className="text-red">*</span>
                       </label>
 
@@ -591,12 +591,12 @@ const MyAccount = () => {
                         id="firstName"
                         placeholder="Jhon"
                         value="Jhon"
-                        className="rounded-md border border-gray-3 bg-gray-1 placeholder:text-dark-5 w-full py-2.5 px-5 outline-none duration-200 focus:border-transparent focus:shadow-input focus:ring-2 focus:ring-blue/20"
+                        className="rounded-md border border-gray-3 dark:border-darkTheme-border-color bg-gray-1 dark:bg-darkTheme-secondary-bg dark:text-darkTheme-body-color placeholder:text-dark-4 dark:placeholder:text-darkTheme-secondary-muted w-full py-2.5 px-5 outline-none duration-200 focus:border-transparent focus:shadow-input focus:ring-2 focus:ring-blue/20"
                       />
                     </div>
 
                     <div className="w-full">
-                      <label htmlFor="lastName" className="block mb-2.5">
+                      <label htmlFor="lastName" className="block mb-2.5 dark:text-darkTheme-body-color">
                         Last Name <span className="text-red">*</span>
                       </label>
 
@@ -606,18 +606,18 @@ const MyAccount = () => {
                         id="lastName"
                         placeholder="Deo"
                         value="Deo"
-                        className="rounded-md border border-gray-3 bg-gray-1 placeholder:text-dark-5 w-full py-2.5 px-5 outline-none duration-200 focus:border-transparent focus:shadow-input focus:ring-2 focus:ring-blue/20"
+                        className="rounded-md border border-gray-3 dark:border-darkTheme-border-color bg-gray-1 dark:bg-darkTheme-secondary-bg dark:text-darkTheme-body-color placeholder:text-dark-4 dark:placeholder:text-darkTheme-secondary-muted w-full py-2.5 px-5 outline-none duration-200 focus:border-transparent focus:shadow-input focus:ring-2 focus:ring-blue/20"
                       />
                     </div>
                   </div>
 
                   <div className="mb-5">
-                    <label htmlFor="countryName" className="block mb-2.5">
+                    <label htmlFor="countryName" className="block mb-2.5 dark:text-darkTheme-body-color">
                       Country/ Region <span className="text-red">*</span>
                     </label>
 
                     <div className="relative">
-                      <select className="w-full bg-gray-1 rounded-md border border-gray-3 text-dark-4 py-3 pl-5 pr-9 duration-200 appearance-none outline-none focus:border-transparent focus:shadow-input focus:ring-2 focus:ring-blue/20">
+                      <select className="w-full bg-gray-1 dark:bg-darkTheme-secondary-bg rounded-md border border-gray-3 dark:border-darkTheme-border-color text-dark-4 dark:text-darkTheme-body-color py-3 pl-5 pr-9 duration-200 appearance-none outline-none focus:border-transparent focus:shadow-input focus:ring-2 focus:ring-blue/20">
                         <option value="0">Australia</option>
                         <option value="1">America</option>
                         <option value="2">England</option>
@@ -651,18 +651,18 @@ const MyAccount = () => {
                   </button>
                 </div>
 
-                <p className="text-custom-sm mt-5 mb-9">
+                <p className="text-custom-sm dark:text-darkTheme-secondary-muted mt-5 mb-9">
                   This will be how your name will be displayed in the account
                   section and in reviews
                 </p>
 
-                <p className="font-medium text-xl sm:text-2xl text-dark mb-7">
+                <p className="font-medium text-xl sm:text-2xl text-dark dark:text-white mb-7">
                   Password Change
                 </p>
 
-                <div className="bg-white shadow-1 rounded-xl p-4 sm:p-8.5">
+                <div className="bg-white dark:bg-darkTheme-card shadow-1 rounded-xl p-4 sm:p-8.5">
                   <div className="mb-5">
-                    <label htmlFor="oldPassword" className="block mb-2.5">
+                    <label htmlFor="oldPassword" className="block mb-2.5 dark:text-darkTheme-body-color">
                       Old Password
                     </label>
 
@@ -671,12 +671,12 @@ const MyAccount = () => {
                       name="oldPassword"
                       id="oldPassword"
                       autoComplete="on"
-                      className="rounded-md border border-gray-3 bg-gray-1 placeholder:text-dark-5 w-full py-2.5 px-5 outline-none duration-200 focus:border-transparent focus:shadow-input focus:ring-2 focus:ring-blue/20"
+                      className="rounded-md border border-gray-3 dark:border-darkTheme-border-color bg-gray-1 dark:bg-darkTheme-secondary-bg dark:text-darkTheme-body-color placeholder:text-dark-4 dark:placeholder:text-darkTheme-secondary-muted w-full py-2.5 px-5 outline-none duration-200 focus:border-transparent focus:shadow-input focus:ring-2 focus:ring-blue/20"
                     />
                   </div>
 
                   <div className="mb-5">
-                    <label htmlFor="newPassword" className="block mb-2.5">
+                    <label htmlFor="newPassword" className="block mb-2.5 dark:text-darkTheme-body-color">
                       New Password
                     </label>
 
@@ -685,14 +685,14 @@ const MyAccount = () => {
                       name="newPassword"
                       id="newPassword"
                       autoComplete="on"
-                      className="rounded-md border border-gray-3 bg-gray-1 placeholder:text-dark-5 w-full py-2.5 px-5 outline-none duration-200 focus:border-transparent focus:shadow-input focus:ring-2 focus:ring-blue/20"
+                      className="rounded-md border border-gray-3 dark:border-darkTheme-border-color bg-gray-1 dark:bg-darkTheme-secondary-bg dark:text-darkTheme-body-color placeholder:text-dark-4 dark:placeholder:text-darkTheme-secondary-muted w-full py-2.5 px-5 outline-none duration-200 focus:border-transparent focus:shadow-input focus:ring-2 focus:ring-blue/20"
                     />
                   </div>
 
                   <div className="mb-5">
                     <label
                       htmlFor="confirmNewPassword"
-                      className="block mb-2.5"
+                      className="block mb-2.5 dark:text-darkTheme-body-color"
                     >
                       Confirm New Password
                     </label>
@@ -702,7 +702,7 @@ const MyAccount = () => {
                       name="confirmNewPassword"
                       id="confirmNewPassword"
                       autoComplete="on"
-                      className="rounded-md border border-gray-3 bg-gray-1 placeholder:text-dark-5 w-full py-2.5 px-5 outline-none duration-200 focus:border-transparent focus:shadow-input focus:ring-2 focus:ring-blue/20"
+                      className="rounded-md border border-gray-3 dark:border-darkTheme-border-color bg-gray-1 dark:bg-darkTheme-secondary-bg dark:text-darkTheme-body-color placeholder:text-dark-4 dark:placeholder:text-darkTheme-secondary-muted w-full py-2.5 px-5 outline-none duration-200 focus:border-transparent focus:shadow-input focus:ring-2 focus:ring-blue/20"
                     />
                   </div>
 

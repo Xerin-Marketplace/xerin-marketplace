@@ -5,9 +5,9 @@ import Image from "next/image";
 
 const LatestPosts = ({ blogs }) => {
   return (
-    <div className="shadow-1 bg-white rounded-xl mt-7.5">
-      <div className="px-4 sm:px-6 py-4.5 border-b border-gray-3">
-        <h2 className="font-medium text-lg text-dark">Recent Posts</h2>
+    <div className="shadow-1 bg-white dark:bg-darkTheme-card rounded-xl mt-7.5">
+      <div className="px-4 sm:px-6 py-4.5 border-b border-gray-3 dark:border-darkTheme-border-color">
+        <h2 className="font-medium text-lg text-dark dark:text-white">Recent Posts</h2>
       </div>
 
       <div className="p-4 sm:p-6">
@@ -30,7 +30,7 @@ const LatestPosts = ({ blogs }) => {
               </Link>
 
               <div>
-                <h3 className="text-dark leading-[22px] ease-out duration-200 mb-1.5 hover:text-blue">
+                <h3 className="text-dark dark:text-darkTheme-body-color leading-[22px] ease-out duration-200 mb-1.5 hover:text-blue">
                   <Link href="/blogs/blog-details-with-sidebar">{blog.title}</Link>
                 </h3>
 
