@@ -104,7 +104,7 @@ const ShopDetails = () => {
             <div className="max-w-[1170px] w-full mx-auto px-4 sm:px-8 xl:px-0">
               <div className="flex flex-col lg:flex-row gap-7.5 xl:gap-17.5">
                 <div className="lg:max-w-[570px] w-full">
-                  <div className="lg:min-h-[512px] rounded-lg shadow-1 bg-gray-2 p-4 sm:p-7.5 relative flex items-center justify-center">
+                  <div className="lg:min-h-[512px] rounded-lg shadow-1 bg-gray-2 dark:bg-darkTheme-secondary-bg p-4 sm:p-7.5 relative flex items-center justify-center">
                     <div>
                       <button
                         onClick={handlePreviewSlider}
@@ -145,7 +145,7 @@ const ShopDetails = () => {
                       <button
                         onClick={() => setPreviewImg(key)}
                         key={key}
-                        className={`flex items-center justify-center w-15 sm:w-25 h-15 sm:h-25 overflow-hidden rounded-lg bg-gray-2 shadow-1 ease-out duration-200 border-2 hover:border-blue ${key === previewImg
+                        className={`flex items-center justify-center w-15 sm:w-25 h-15 sm:h-25 overflow-hidden rounded-lg bg-gray-2 dark:bg-darkTheme-secondary-bg shadow-1 ease-out duration-200 border-2 hover:border-blue ${key === previewImg
                           ? "border-blue"
                           : "border-transparent"
                           }`}
@@ -164,7 +164,7 @@ const ShopDetails = () => {
                 {/* <!-- product content --> */}
                 <div className="max-w-[539px] w-full">
                   <div className="flex items-center justify-between mb-3">
-                    <h2 className="font-semibold text-xl sm:text-2xl xl:text-custom-3 text-dark">
+                    <h2 className="font-semibold text-xl sm:text-2xl xl:text-custom-3 text-dark dark:text-white">
                       {product.title}
                     </h2>
 
@@ -316,7 +316,7 @@ const ShopDetails = () => {
                   </div>
 
                   <h3 className="font-medium text-custom-1 mb-4.5">
-                    <span className="text-sm sm:text-base text-dark">
+                    <span className="text-sm sm:text-base text-dark dark:text-darkTheme-body-color">
                       Price: ${product.price}
                     </span>
                     <span className="line-through">
@@ -372,7 +372,7 @@ const ShopDetails = () => {
                   </ul>
 
                   <form onSubmit={(e) => e.preventDefault()}>
-                    <div className="flex flex-col gap-4.5 border-y border-gray-3 mt-7.5 mb-9 py-9">
+                    <div className="flex flex-col gap-4.5 border-y border-gray-3 dark:border-darkTheme-border-color mt-7.5 mb-9 py-9">
                       {/* <!-- details item --> */}
                       <div className="flex items-center gap-4">
                         <div className="min-w-[65px]">
