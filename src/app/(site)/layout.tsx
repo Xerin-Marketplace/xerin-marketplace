@@ -31,7 +31,7 @@ export default function RootLayout({
 
   return (
     <html lang="en" suppressHydrationWarning={true}>
-      <body className="bg-body-bg dark:bg-darkTheme-bg text-dark dark:text-darkTheme-text">
+      <body className="bg-body-bg dark:bg-darkTheme-bg">
         <ThemeProvider>
           <ReduxProvider>
             <CartModalProvider>

@@ -11,8 +11,8 @@ const config: Config = {
   darkMode: "class",
   theme: {
     fontFamily: {
-      sans: ['"Play"', "sans-serif"],
-      heading: ['"Hanken Grotesk"', "sans-serif"],
+      sans: ['"Euclid Circular A"', "sans-serif"],
+      heading: ['"Euclid Circular A"', "sans-serif"],
       mono: [
         "SFMono-Regular",
         "Menlo",
@@ -270,7 +270,7 @@ const config: Config = {
       },
       boxShadow: {
         DEFAULT: "0px 3px 4px 0px rgba(0, 0, 0, 0.03)",
-        1: "0px 1px 2px 0px rgba(166, 175, 195, 0.25)",
+        1: "0px 2px 8px 0px rgba(0, 0, 0, 0.08), 0px 1px 2px 0px rgba(166, 175, 195, 0.30)",
         2: "0px 6px 24px 0px rgba(235, 238, 251, 0.40), 0px 2px 4px 0px rgba(148, 163, 184, 0.05)",
         3: "0px 2px 16px 0px rgba(13, 10, 44, 0.12)",
         testimonial:
