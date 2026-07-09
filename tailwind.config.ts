@@ -43,8 +43,10 @@ const config: Config = {
       info: "#4ecac2",
       light: "#eef2f7",
       dark: "#434951",
+      "dark-2": "#6b7280",
       "dark-3": "#6b7280",
       "dark-4": "#9ca3af",
+      "dark-5": "#c5cdd4",
       "body-bg": "#f9f7f7",
       "border-color": "#eaedf1",
       gray: {
