@@ -24,26 +24,26 @@ const Orders = () => {
           {ordersData.length > 0 && (
             <div className="items-center justify-between py-4.5 px-7.5 hidden md:flex ">
               <div className="min-w-[111px]">
-                <p className="text-custom-sm text-dark">Order</p>
+                <p className="text-custom-sm text-dark dark:text-darkTheme-body-color">Order</p>
               </div>
               <div className="min-w-[175px]">
-                <p className="text-custom-sm text-dark">Date</p>
+                <p className="text-custom-sm text-dark dark:text-darkTheme-body-color">Date</p>
               </div>
 
               <div className="min-w-[128px]">
-                <p className="text-custom-sm text-dark">Status</p>
+                <p className="text-custom-sm text-dark dark:text-darkTheme-body-color">Status</p>
               </div>
 
               <div className="min-w-[213px]">
-                <p className="text-custom-sm text-dark">Title</p>
+                <p className="text-custom-sm text-dark dark:text-darkTheme-body-color">Title</p>
               </div>
 
               <div className="min-w-[113px]">
-                <p className="text-custom-sm text-dark">Total</p>
+                <p className="text-custom-sm text-dark dark:text-darkTheme-body-color">Total</p>
               </div>
 
               <div className="min-w-[113px]">
-                <p className="text-custom-sm text-dark">Action</p>
+                <p className="text-custom-sm text-dark dark:text-darkTheme-body-color">Action</p>
               </div>
             </div>
           )}

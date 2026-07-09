@@ -5,26 +5,26 @@ const OrderDetails = ({ orderItem }: any) => {
     <>
       <div className="items-center justify-between py-4.5 px-7.5 hidden md:flex ">
         <div className="min-w-[113px]">
-          <p className="text-custom-sm text-dark">Order</p>
+          <p className="text-custom-sm text-dark dark:text-darkTheme-body-color">Order</p>
         </div>
         <div className="min-w-[113px]">
-          <p className="text-custom-sm text-dark">Date</p>
+          <p className="text-custom-sm text-dark dark:text-darkTheme-body-color">Date</p>
         </div>
 
         <div className="min-w-[113px]">
-          <p className="text-custom-sm text-dark">Status</p>
+          <p className="text-custom-sm text-dark dark:text-darkTheme-body-color">Status</p>
         </div>
 
         {/* <div className="min-w-[113px]">
-          <p className="text-custom-sm text-dark">Title</p>
+          <p className="text-custom-sm text-dark dark:text-darkTheme-body-color">Title</p>
         </div> */}
 
         <div className="min-w-[113px]">
-          <p className="text-custom-sm text-dark">Total</p>
+          <p className="text-custom-sm text-dark dark:text-darkTheme-body-color">Total</p>
         </div>
 
         {/* <div className="min-w-[113px]">
-          <p className="text-custom-sm text-dark">Action</p>
+          <p className="text-custom-sm text-dark dark:text-darkTheme-body-color">Action</p>
         </div> */}
       </div>
 
@@ -35,7 +35,7 @@ const OrderDetails = ({ orderItem }: any) => {
           </p>
         </div>
         <div className="min-w-[175px]">
-          <p className="text-custom-sm text-dark">
+          <p className="text-custom-sm text-dark dark:text-darkTheme-body-color">
             {orderItem.createdAt}
           </p>
         </div>
@@ -57,11 +57,11 @@ const OrderDetails = ({ orderItem }: any) => {
         </div>
 
         {/* <div className="min-w-[213px]">
-          <p className="text-custom-sm text-dark">{orderItem.orderTitle}</p>
+          <p className="text-custom-sm text-dark dark:text-darkTheme-body-color">{orderItem.orderTitle}</p>
         </div> */}
 
         <div className="min-w-[113px]">
-          <p className="text-custom-sm text-dark">
+          <p className="text-custom-sm text-dark dark:text-darkTheme-body-color">
             {orderItem.total}
           </p>
         </div>
