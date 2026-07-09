@@ -79,9 +79,15 @@ export const apiClient = async <T>(
     const message =
       typeof data === "object" &&
       data !== null &&
-      "detail" in data &&
-      typeof (data as { detail?: unknown }).detail === "string"
-        ? (data as { detail: string }).detail
+      "detail" in data
+        ? typeof (data as { detail?: unknown }).detail === "string"
+          ? (data as { detail: string }).detail
+          : Array.isArray((data as { detail?: unknown }).detail)
+            ? (data as { detail: Array<{ msg?: string }> }).detail
+                .map((item) => item?.msg)
+                .filter(Boolean)
+                .join(", ") || `API request failed with status ${response.status}`
+            : `API request failed with status ${response.status}`
         : `API request failed with status ${response.status}`;
 
     throw new ApiError(message, response.status, data);

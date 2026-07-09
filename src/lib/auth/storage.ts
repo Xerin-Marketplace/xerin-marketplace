@@ -31,6 +31,17 @@ export const authStorage = {
     return localStorage.getItem(REFRESH_TOKEN_KEY);
   },
 
+  getUser: <T = unknown>(): T | null => {
+    if (!isBrowser) return null;
+
+    try {
+      const rawUser = localStorage.getItem(USER_KEY);
+      return rawUser ? (JSON.parse(rawUser) as T) : null;
+    } catch {
+      return null;
+    }
+  },
+
   clearSession: () => {
     if (!isBrowser) return;
 
