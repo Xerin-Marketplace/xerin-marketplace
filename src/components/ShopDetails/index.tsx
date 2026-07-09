@@ -316,7 +316,7 @@ const ShopDetails = () => {
                   </div>
 
                   <h3 className="font-medium text-custom-1 mb-4.5">
-                    <span className="text-sm sm:text-base text-dark dark:text-darkTheme-body-color dark:text-darkTheme-body-color">
+                    <span className="text-sm sm:text-base text-dark dark:text-darkTheme-body-color">
                       Price: ${product.price}
                     </span>
                     <span className="line-through">
