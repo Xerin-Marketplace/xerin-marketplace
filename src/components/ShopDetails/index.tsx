@@ -1355,7 +1355,7 @@ const ShopDetails = () => {
 
                       <div className="rounded-xl bg-white shadow-1 p-4 sm:p-6">
                         <div className="mb-5">
-                          <label htmlFor="comments" className="block mb-2.5">
+                          <label htmlFor="comments" className="block mb-2.5 dark:text-darkTheme-body-color">
                             Comments
                           </label>
 
@@ -1364,7 +1364,7 @@ const ShopDetails = () => {
                             id="comments"
                             rows={5}
                             placeholder="Your comments"
-                            className="rounded-md border border-gray-3 bg-gray-1 placeholder:text-dark-5 w-full p-5 outline-none duration-200 focus:border-transparent focus:shadow-input focus:ring-2 focus:ring-blue/20"
+                            className="rounded-md border border-gray-3 dark:border-darkTheme-border-color bg-gray-1 dark:bg-darkTheme-secondary-bg dark:text-darkTheme-body-color placeholder:text-dark-4 dark:placeholder:text-darkTheme-secondary-muted w-full p-5 outline-none duration-200 focus:border-transparent focus:shadow-input focus:ring-2 focus:ring-blue/20"
                           ></textarea>
 
                           <span className="flex items-center justify-between mt-2.5">
@@ -1379,7 +1379,7 @@ const ShopDetails = () => {
 
                         <div className="flex flex-col lg:flex-row gap-5 sm:gap-7.5 mb-5.5">
                           <div>
-                            <label htmlFor="name" className="block mb-2.5">
+                            <label htmlFor="name" className="block mb-2.5 dark:text-darkTheme-body-color">
                               Name
                             </label>
 
@@ -1388,12 +1388,12 @@ const ShopDetails = () => {
                               name="name"
                               id="name"
                               placeholder="Your name"
-                              className="rounded-md border border-gray-3 bg-gray-1 placeholder:text-dark-5 w-full py-2.5 px-5 outline-none duration-200 focus:border-transparent focus:shadow-input focus:ring-2 focus:ring-blue/20"
+                              className="rounded-md border border-gray-3 dark:border-darkTheme-border-color bg-gray-1 dark:bg-darkTheme-secondary-bg dark:text-darkTheme-body-color placeholder:text-dark-4 dark:placeholder:text-darkTheme-secondary-muted w-full py-2.5 px-5 outline-none duration-200 focus:border-transparent focus:shadow-input focus:ring-2 focus:ring-blue/20"
                             />
                           </div>
 
                           <div>
-                            <label htmlFor="email" className="block mb-2.5">
+                            <label htmlFor="email" className="block mb-2.5 dark:text-darkTheme-body-color">
                               Email
                             </label>
 
@@ -1402,7 +1402,7 @@ const ShopDetails = () => {
                               name="email"
                               id="email"
                               placeholder="Your email"
-                              className="rounded-md border border-gray-3 bg-gray-1 placeholder:text-dark-5 w-full py-2.5 px-5 outline-none duration-200 focus:border-transparent focus:shadow-input focus:ring-2 focus:ring-blue/20"
+                              className="rounded-md border border-gray-3 dark:border-darkTheme-border-color bg-gray-1 dark:bg-darkTheme-secondary-bg dark:text-darkTheme-body-color placeholder:text-dark-4 dark:placeholder:text-darkTheme-secondary-muted w-full py-2.5 px-5 outline-none duration-200 focus:border-transparent focus:shadow-input focus:ring-2 focus:ring-blue/20"
                             />
                           </div>
                         </div>
