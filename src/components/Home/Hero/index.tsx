@@ -2,6 +2,8 @@ import React from "react";
 import HeroCarousel from "./HeroCarousel";
 import HeroFeature from "./HeroFeature";
 import Image from "next/image";
+import { ROUTES } from "@/constants/links";
+import Link from "next/link";
 
 const Hero = () => {
   return (
