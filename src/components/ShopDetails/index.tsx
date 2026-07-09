@@ -613,7 +613,7 @@ const ShopDetails = () => {
                     </div>
 
                     <div className="flex flex-wrap items-center gap-4.5">
-                      <div className="flex items-center rounded-md border border-gray-3">
+                      <div className="flex items-center rounded-md border border-gray-3 dark:border-darkTheme-border-color">
                         <button
                           aria-label="button for remove product"
                           className="flex items-center justify-center w-12 h-12 ease-out duration-200 hover:text-blue"
@@ -636,7 +636,7 @@ const ShopDetails = () => {
                           </svg>
                         </button>
 
-                        <span className="flex items-center justify-center w-16 h-12 border-x border-gray-4">
+                        <span className="flex items-center justify-center w-16 h-12 border-x border-gray-4 dark:border-darkTheme-border-color dark:text-darkTheme-body-color">
                           {quantity}
                         </span>
 
@@ -674,7 +674,7 @@ const ShopDetails = () => {
 
                       <a
                         href={ROUTES.wishlist}
-                        className="flex items-center justify-center w-12 h-12 rounded-md border border-gray-3 ease-out duration-200 hover:text-white hover:bg-dark hover:border-transparent"
+                        className="flex items-center justify-center w-12 h-12 rounded-md border border-gray-3 dark:border-darkTheme-border-color dark:text-darkTheme-body-color ease-out duration-200 hover:text-white hover:bg-dark hover:border-transparent"
                       >
                         <svg
                           className="fill-current"
@@ -1258,7 +1258,7 @@ const ShopDetails = () => {
 
                   <div className="max-w-[550px] w-full">
                     <form>
-                      <h2 className="font-medium text-2xl text-dark mb-3.5">
+                      <h2 className="font-medium text-2xl text-dark dark:text-white mb-3.5">
                         Add a Review
                       </h2>
 
