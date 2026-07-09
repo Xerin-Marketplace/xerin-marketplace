@@ -1,5 +1,5 @@
 export const API_BASE_URL =
-  process.env.NEXT_PUBLIC_API_BASE_URL || "http://187.124.32.94:8080";
+  process.env.NEXT_PUBLIC_API_BASE_URL || "http://localhost:8000";
 
 export const API_DOCS_URL =
   process.env.NEXT_PUBLIC_API_DOCS_URL || `${API_BASE_URL}/docs`;
