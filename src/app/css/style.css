@@ -8,11 +8,11 @@
   }
 
   body {
-    @apply font-sans font-normal text-base text-dark relative z-1 bg-body-bg dark:bg-darkTheme-body-bg dark:text-darkTheme-body-color;
+    @apply font-sans font-normal text-base text-dark relative z-1 bg-body-bg dark:bg-darkTheme-body-bg dark:text-darkTheme-text;
   }
 
   h1, h2, h3, h4, h5, h6 {
-    @apply font-heading;
+    @apply font-heading dark:text-white;
   }
 
   * {
