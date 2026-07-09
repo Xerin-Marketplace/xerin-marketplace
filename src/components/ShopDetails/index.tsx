@@ -699,17 +699,17 @@ const ShopDetails = () => {
             </div>
           </section>
 
-          <section className="overflow-hidden bg-gray-2 py-20">
+          <section className="overflow-hidden bg-gray-2 dark:bg-darkTheme-bg py-20">
             <div className="max-w-[1170px] w-full mx-auto px-4 sm:px-8 xl:px-0">
               {/* <!--== tab header start ==--> */}
-              <div className="flex flex-wrap items-center bg-white rounded-[10px] shadow-1 gap-5 xl:gap-12.5 py-4.5 px-4 sm:px-6">
+              <div className="flex flex-wrap items-center bg-white dark:bg-darkTheme-card rounded-[10px] shadow-1 gap-5 xl:gap-12.5 py-4.5 px-4 sm:px-6">
                 {tabs.map((item, key) => (
                   <button
                     key={key}
                     onClick={() => setActiveTab(item.id)}
                     className={`font-medium lg:text-lg ease-out duration-200 hover:text-blue relative before:h-0.5 before:bg-blue before:absolute before:left-0 before:bottom-0 before:ease-out before:duration-200 hover:before:w-full ${activeTab === item.id
                       ? "text-blue before:w-full"
-                      : "text-dark before:w-0"
+                      : "text-dark dark:text-darkTheme-body-color before:w-0"
                       }`}
                   >
                     {item.title}
@@ -726,7 +726,7 @@ const ShopDetails = () => {
                     }`}
                 >
                   <div className="max-w-[670px] w-full">
-                    <h2 className="font-medium text-2xl text-dark mb-7">
+                    <h2 className="font-medium text-2xl text-dark dark:text-white mb-7">
                       Specifications:
                     </h2>
 
@@ -747,7 +747,7 @@ const ShopDetails = () => {
                   </div>
 
                   <div className="max-w-[447px] w-full">
-                    <h2 className="font-medium text-2xl text-dark mb-7">
+                    <h2 className="font-medium text-2xl text-dark dark:text-white mb-7">
                       Care & Maintenance:
                     </h2>
 
