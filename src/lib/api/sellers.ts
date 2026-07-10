@@ -5,12 +5,18 @@ import type {
   PayoutAccount,
   PayoutAccountRequest,
   Seller,
+  SellerBusinessCategory,
   SellerKycDocument,
   UpdateSellerRequest,
   UploadSellerKycDocumentRequest,
 } from "@/types/api/seller";
 
 export const sellersApi = {
+  getBusinessCategories: () =>
+    apiClient<SellerBusinessCategory[]>(API_ENDPOINTS.sellers.businessCategories, {
+      method: "GET",
+    }),
+
   register: (payload: Omit<Seller, "id" | "status">) =>
     apiClient<Seller>(API_ENDPOINTS.sellers.register, {
       method: "POST",

@@ -15,7 +15,16 @@ export type RegisterBuyerRequest = {
 
 export type RegisterSellerRequest = RegisterBuyerRequest & {
   business_name: string;
-  business_category?: string;
+  business_category_ids: string[];
+  business_description?: string;
+  business_location?: string;
+  business_country?: string;
+  business_region?: string;
+  business_city?: string;
+  business_address?: string;
+  product_description?: string;
+  years_in_business?: string;
+  website_url?: string;
   contact_email?: string;
   contact_phone?: string;
   agreement_accepted: boolean;

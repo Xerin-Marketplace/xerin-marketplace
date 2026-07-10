@@ -6,6 +6,7 @@ export const ROUTES = {
   wishlist: "/wishlist",
   checkout: "/checkout",
   signin: "/signin",
+  adminLogin: "/admin/login",
   signup: "/signup",
   account: "/my-account",
   contact: "/contact",
@@ -19,7 +20,7 @@ export const ROUTES = {
   trackOrder: "/my-account",
   returnsRefunds: "/contact",
   helpCenter: "/contact",
-  sellerRegister: "/signup",
+  sellerRegister: "/seller/register",
 
   // Future routes
   sellerDashboard: "/seller/dashboard",

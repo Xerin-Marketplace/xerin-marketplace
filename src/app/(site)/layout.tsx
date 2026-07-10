@@ -1,5 +1,6 @@
 "use client";
 import { useState, useEffect } from "react";
+import { usePathname } from "next/navigation";
 import "../css/euclid-circular-a-font.css";
 import "../css/style.css";
 import Header from "../../components/Header";
@@ -8,15 +9,17 @@ import Footer from "../../components/Footer";
 import { ModalProvider } from "../context/QuickViewModalContext";
 import { CartModalProvider } from "../context/CartSidebarModalContext";
 import { ReduxProvider } from "@/redux/provider";
+import AuthProvider from "@/app/providers/AuthProvider";
+import QueryProvider from "@/app/providers/QueryProvider";
 import QuickViewModal from "@/components/Common/QuickViewModal";
 import CartSidebarModal from "@/components/Common/CartSidebarModal";
 import { PreviewSliderProvider } from "../context/PreviewSliderContext";
 import PreviewSliderModal from "@/components/Common/PreviewSlider";
-import { ThemeProvider } from "../context/ThemeContext";
+import { ThemeProvider } from "@/app/providers/ThemeProvider";
+import NotificationProvider from "@/app/providers/NotificationProvider";
 
 import ScrollToTop from "@/components/Common/ScrollToTop";
 import PreLoader from "@/components/Common/PreLoader";
-import { Toaster } from "react-hot-toast";
 
 export default function RootLayout({
   children,
@@ -24,6 +27,15 @@ export default function RootLayout({
   children: React.ReactNode;
 }) {
   const [loading, setLoading] = useState<boolean>(true);
+  const pathname = usePathname();
+
+  const hideStorefrontChrome =
+    pathname === "/signin" ||
+    pathname === "/signup" ||
+    pathname === "/seller/register" ||
+    pathname === "/admin/login" ||
+    pathname === "/admin" ||
+    pathname.startsWith("/admin/");
 
   useEffect(() => {
     setTimeout(() => setLoading(false), 1000);
@@ -33,32 +45,32 @@ export default function RootLayout({
     <html lang="en" suppressHydrationWarning={true}>
       <body className="bg-body-bg dark:bg-darkTheme-bg">
         <ThemeProvider>
-          <ReduxProvider>
-            <CartModalProvider>
-              <ModalProvider>
-                <PreviewSliderProvider>
-                  {loading ? (
-                    <PreLoader />
-                  ) : (
-                    <>
-                      <Header />
-                      {children}
-                      <Footer />
-                      <QuickViewModal />
-                      <CartSidebarModal />
-                      <PreviewSliderModal />
-                    </>
-                  )}
-                </PreviewSliderProvider>
-              </ModalProvider>
-            </CartModalProvider>
-          </ReduxProvider>
-          <Toaster
-            position="top-right"
-            toastOptions={{
-              duration: 4000,
-            }}
-          />
+          <NotificationProvider>
+            <QueryProvider>
+              <ReduxProvider>
+                <AuthProvider>
+                  <CartModalProvider>
+                    <ModalProvider>
+                      <PreviewSliderProvider>
+                        {loading ? (
+                          <PreLoader />
+                        ) : (
+                          <>
+                            {!hideStorefrontChrome ? <Header /> : null}
+                            {children}
+                            {!hideStorefrontChrome ? <Footer /> : null}
+                            <QuickViewModal />
+                            <CartSidebarModal />
+                            <PreviewSliderModal />
+                          </>
+                        )}
+                      </PreviewSliderProvider>
+                    </ModalProvider>
+                  </CartModalProvider>
+                </AuthProvider>
+              </ReduxProvider>
+            </QueryProvider>
+          </NotificationProvider>
           <ScrollToTop />
         </ThemeProvider>
       </body>

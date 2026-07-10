@@ -2,6 +2,14 @@ import type { ID, TimestampFields } from "./common";
 
 export type SellerStatus = "pending" | "under_review" | "approved";
 
+export type SellerBusinessCategory = {
+  id: ID;
+  name: string;
+  slug?: string;
+  description?: string | null;
+  active?: boolean;
+};
+
 export type SellerDocumentType =
   | "tin"
   | "business_registration"
