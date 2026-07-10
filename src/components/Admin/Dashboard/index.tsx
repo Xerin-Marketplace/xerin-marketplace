@@ -1,7 +1,7 @@
 "use client";
 
 import { ReactNode, useEffect, useState } from "react";
-import { useRouter } from "next/navigation";
+import { usePathname, useRouter, useSearchParams } from "next/navigation";
 import toast from "react-hot-toast";
 import { authStorage } from "@/lib/auth/storage";
 import { ApiError } from "@/lib/api/client";
@@ -280,6 +280,8 @@ const getErrorMessage = (error: unknown) => {
 
 export default function AdminDashboard() {
   const router = useRouter();
+  const pathname = usePathname();
+  const searchParams = useSearchParams();
   const formatWalletAmount = (value: number) =>
     new Intl.NumberFormat("en-US", {
       style: "currency",
@@ -312,7 +314,64 @@ export default function AdminDashboard() {
   const [openSidebarGroup, setOpenSidebarGroup] = useState<string | null>(null);
   const [activeSidebarItem, setActiveSidebarItem] = useState<string>("Dashboard");
 
+  const hiddenOverviewMenuGroups = ["Communications", "System Management", "Account"];
+  const isOverviewHiddenByMenuSelection = hiddenOverviewMenuGroups.some(
+    (group) => activeSidebarItem === group || activeSidebarItem.startsWith(`${group}:`)
+  );
+
+  const activeMenuLabel =
+    activeSidebarItem === "Dashboard"
+      ? "Overview"
+      : activeSidebarItem.includes(":")
+        ? activeSidebarItem.split(":")[1]
+        : activeSidebarItem;
+
+  const activeMenuContextLabel =
+    activeSidebarItem === "Dashboard"
+      ? "Dashboard"
+      : activeSidebarItem.includes(":")
+        ? activeSidebarItem.replace(":", " - ")
+        : activeSidebarItem;
+
+  const dynamicSearchPlaceholder = `Search in ${activeMenuContextLabel.toLowerCase()}...`;
+
   const [busyAction, setBusyAction] = useState<string | null>(null);
+
+  const syncSidebarUrl = (tab: AdminTab, sidebarItem: string) => {
+    const params = new URLSearchParams(searchParams.toString());
+
+    params.set("tab", tab);
+
+    if (sidebarItem === "Dashboard") {
+      params.set("menu", "dashboard");
+      params.delete("item");
+    } else if (sidebarItem.includes(":")) {
+      const [group, item] = sidebarItem.split(":");
+      params.set("menu", normalizeSlug(group));
+      params.set("item", normalizeSlug(item));
+    } else {
+      params.set("menu", normalizeSlug(sidebarItem));
+      params.delete("item");
+    }
+
+    const query = params.toString();
+    router.replace(query ? `${pathname}?${query}` : pathname, { scroll: false });
+  };
+
+  const applySidebarSelection = (
+    tab: AdminTab,
+    sidebarItem: string,
+    openGroup: string | null,
+    writeUrl = true
+  ) => {
+    setActiveTab(tab);
+    setActiveSidebarItem(sidebarItem);
+    setOpenSidebarGroup(openGroup);
+
+    if (writeUrl) {
+      syncSidebarUrl(tab, sidebarItem);
+    }
+  };
 
   const loadOverviewData = async () => {
     setIsLoading(true);
@@ -406,6 +465,40 @@ export default function AdminDashboard() {
     setIsCheckingAccess(false);
     void loadOverviewData();
   }, [router]);
+
+  useEffect(() => {
+    if (isCheckingAccess || !isAuthorized) return;
+
+    const menuParam = searchParams.get("menu");
+    const itemParam = searchParams.get("item");
+
+    if (!menuParam) return;
+
+    if (menuParam === "dashboard") {
+      applySidebarSelection("overview", "Dashboard", null, false);
+      return;
+    }
+
+    const matchedGroup = sidebarGroups.find((group) => normalizeSlug(group.title) === menuParam);
+
+    if (!matchedGroup) return;
+
+    if (itemParam) {
+      const matchedItem = matchedGroup.items.find((item) => normalizeSlug(item) === itemParam);
+
+      if (matchedItem) {
+        applySidebarSelection(
+          matchedGroup.key,
+          `${matchedGroup.title}:${matchedItem}`,
+          matchedGroup.title,
+          false
+        );
+        return;
+      }
+    }
+
+    applySidebarSelection(matchedGroup.key, matchedGroup.title, matchedGroup.title, false);
+  }, [isAuthorized, isCheckingAccess, searchParams]);
 
   const adminWalletCards = [
     { title: "Commission Earned", value: 12927.52, icon: "📈" },
@@ -625,8 +718,7 @@ export default function AdminDashboard() {
               <button
                 type="button"
                 onClick={() => {
-                  setActiveTab("overview");
-                  setActiveSidebarItem("Dashboard");
+                  applySidebarSelection("overview", "Dashboard", null);
                 }}
                 className={`w-full rounded-xl px-3 py-2.5 text-left transition-colors ${
                   activeSidebarItem === "Dashboard"
@@ -652,9 +744,8 @@ export default function AdminDashboard() {
                   <button
                     type="button"
                     onClick={() => {
-                      setActiveTab(group.key);
-                      setActiveSidebarItem(group.title);
-                      setOpenSidebarGroup((current) => (current === group.title ? null : group.title));
+                      const nextOpenGroup = openSidebarGroup === group.title ? null : group.title;
+                      applySidebarSelection(group.key, group.title, nextOpenGroup);
                     }}
                     className={`w-full text-left rounded-lg px-2.5 py-2 text-[13px] font-semibold tracking-[0.08em] uppercase transition-colors ${
                       activeSidebarItem === group.title ? "text-white" : "text-white/85"
@@ -689,8 +780,7 @@ export default function AdminDashboard() {
                           key={item}
                           type="button"
                           onClick={() => {
-                            setActiveTab(group.key);
-                            setActiveSidebarItem(subItemKey);
+                            applySidebarSelection(group.key, subItemKey, group.title);
                           }}
                           className={`block w-full rounded-lg px-2.5 py-1.5 text-left text-sm transition-colors ${
                             isSelected
@@ -726,14 +816,14 @@ export default function AdminDashboard() {
               <div className="flex flex-col gap-3 lg:flex-row lg:items-center lg:justify-between">
                 <div>
                   <h1 className="text-xl sm:text-2xl font-semibold text-[#111827]">Dashboard Overview</h1>
-                  <p className="text-sm text-gray-500 mt-1">Tab: {tabs.find((t) => t.key === activeTab)?.short}</p>
+                  <p className="text-sm text-gray-500 mt-1">Tab: {activeMenuLabel}</p>
                 </div>
 
                 <div className="flex flex-col sm:flex-row gap-2 sm:items-center">
                   <input
                     value={surfaceSearch}
                     onChange={(event) => setSurfaceSearch(event.target.value)}
-                    placeholder="Search users, products, sellers..."
+                    placeholder={dynamicSearchPlaceholder}
                     className="rounded-xl border border-gray-200 bg-[#f8fafc] px-4 py-2.5 text-sm text-gray-700 w-full sm:w-[240px]"
                   />
                   <button
@@ -753,7 +843,7 @@ export default function AdminDashboard() {
             </div>
           ) : null}
 
-          {activeTab === "overview" && !isLoading ? (
+          {activeTab === "overview" && !isLoading && !isOverviewHiddenByMenuSelection ? (
             <>
               <div className="rounded-2xl border border-gray-200 bg-[#eef3f9] p-4 shadow-sm">
                 <h3 className="flex items-center gap-2 text-base sm:text-lg font-semibold text-[#222]">
@@ -820,106 +910,6 @@ export default function AdminDashboard() {
             </>
           ) : null}
 
-          {activeTab === "users" && !isLoading ? (
-            <div className="rounded-2xl border border-gray-200 bg-white p-5 shadow-sm">
-              <div className="flex flex-wrap gap-3 items-center mb-5">
-                <input
-                  value={userSearch}
-                  onChange={(event) => setUserSearch(event.target.value)}
-                  placeholder="Search user by email, phone, first name..."
-                  className="w-full md:max-w-lg rounded-lg border border-gray-200 bg-[#f8fafc] py-3 px-4 outline-none focus:border-[#4b5563] focus:ring-2 focus:ring-[#4b5563]/20"
-                />
-                <button
-                  type="button"
-                  onClick={() => void refreshUsers(userSearch.trim())}
-                  disabled={isRefreshingUsers}
-                  className="rounded-lg bg-[#4b5563] px-4 py-2.5 text-white hover:bg-[#1f2937] disabled:opacity-70"
-                >
-                  {isRefreshingUsers ? "Searching..." : "Search"}
-                </button>
-              </div>
-
-              <p className="mb-3 text-sm text-gray-500">Total users: {totalUsers}</p>
-
-              <div className="overflow-x-auto">
-                <table className="w-full min-w-[760px] text-sm">
-                  <thead>
-                    <tr className="border-b border-gray-200 text-left text-gray-500">
-                      <th className="py-3">Name</th>
-                      <th className="py-3">Email</th>
-                      <th className="py-3">Phone</th>
-                      <th className="py-3">Status</th>
-                      <th className="py-3">Verified</th>
-                    </tr>
-                  </thead>
-                  <tbody>
-                    {users.length === 0 ? (
-                      <tr>
-                        <td className="py-4 text-gray-500" colSpan={5}>
-                          No users found.
-                        </td>
-                      </tr>
-                    ) : (
-                      users.map((user) => (
-                        <tr key={user.id} className="border-b border-gray-100">
-                          <td className="py-3">{`${user.first_name ?? ""} ${user.last_name ?? ""}`.trim() || "-"}</td>
-                          <td className="py-3">{user.email}</td>
-                          <td className="py-3">{user.phone ?? "-"}</td>
-                          <td className="py-3 capitalize">{user.status}</td>
-                          <td className="py-3">{user.is_verified ? "Yes" : "No"}</td>
-                        </tr>
-                      ))
-                    )}
-                  </tbody>
-                </table>
-              </div>
-            </div>
-          ) : null}
-
-          {activeTab === "sellers" && !isLoading ? (
-            <div className="rounded-2xl border border-gray-200 bg-white p-5 shadow-sm">
-              <h3 className="text-xl font-semibold text-[#111827] mb-4">Pending Seller Approvals</h3>
-
-              <div className="space-y-3">
-                {pendingSellers.length === 0 ? (
-                  <p className="text-gray-500">No pending sellers right now.</p>
-                ) : (
-                  pendingSellers.map((seller) => (
-                    <div
-                      key={seller.id}
-                      className="rounded-xl border border-gray-200 p-4 flex flex-col md:flex-row md:items-center md:justify-between gap-4"
-                    >
-                      <div>
-                        <h4 className="font-medium text-[#111827]">{seller.business_name}</h4>
-                        <p className="text-sm text-gray-500">{seller.contact_email || "No contact email"}</p>
-                        <p className="text-sm text-gray-500">{seller.contact_phone || "No contact phone"}</p>
-                      </div>
-
-                      <div className="flex gap-2">
-                        <button
-                          type="button"
-                          onClick={() => void handleApproveSeller(seller.id)}
-                          disabled={busyAction === `approve-seller-${seller.id}`}
-                          className="rounded-lg bg-[#d9f4e1] px-3 py-2 text-[#165c30] hover:opacity-90 disabled:opacity-60"
-                        >
-                          Approve
-                        </button>
-                        <button
-                          type="button"
-                          onClick={() => void handleRejectSeller(seller.id)}
-                          disabled={busyAction === `reject-seller-${seller.id}`}
-                          className="rounded-lg bg-[#fde2e2] px-3 py-2 text-[#8f2727] hover:opacity-90 disabled:opacity-60"
-                        >
-                          Reject
-                        </button>
-                      </div>
-                    </div>
-                  ))
-                )}
-              </div>
-            </div>
-          ) : null}
-
           {activeTab === "products" && !isLoading ? (
             <div className="rounded-2xl border border-gray-200 bg-white p-5 shadow-sm">
               <h3 className="text-xl font-semibold text-[#111827] mb-4">Pending Product Moderation</h3>
@@ -966,273 +956,6 @@ export default function AdminDashboard() {
             </div>
           ) : null}
 
-          {activeTab === "catalog" && !isLoading ? (
-            <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
-              <div className="rounded-2xl border border-gray-200 bg-white p-5 shadow-sm">
-                <h3 className="text-xl font-semibold text-[#111827] mb-4">Business Categories</h3>
-
-                <form className="space-y-3 mb-5" onSubmit={handleCreateCategory}>
-                  <input
-                    value={newCategoryName}
-                    onChange={(event) => {
-                      setNewCategoryName(event.target.value);
-                      if (!newCategorySlug) {
-                        setNewCategorySlug(normalizeSlug(event.target.value));
-                      }
-                    }}
-                    placeholder="Category name"
-                    className="w-full rounded-lg border border-gray-200 bg-[#f8fafc] py-2.5 px-4 outline-none focus:border-[#4b5563] focus:ring-2 focus:ring-[#4b5563]/20"
-                  />
-                  <input
-                    value={newCategorySlug}
-                    onChange={(event) => setNewCategorySlug(normalizeSlug(event.target.value))}
-                    placeholder="category-slug"
-                    className="w-full rounded-lg border border-gray-200 bg-[#f8fafc] py-2.5 px-4 outline-none focus:border-[#4b5563] focus:ring-2 focus:ring-[#4b5563]/20"
-                  />
-                  <textarea
-                    value={newCategoryDescription}
-                    onChange={(event) => setNewCategoryDescription(event.target.value)}
-                    placeholder="Description (optional)"
-                    className="w-full rounded-lg border border-gray-200 bg-[#f8fafc] py-2.5 px-4 outline-none focus:border-[#4b5563] focus:ring-2 focus:ring-[#4b5563]/20"
-                  />
-                  <button
-                    type="submit"
-                    disabled={busyAction === "create-category"}
-                    className="rounded-lg bg-[#4b5563] px-4 py-2.5 text-white hover:bg-[#1f2937] disabled:opacity-70"
-                  >
-                    {busyAction === "create-category" ? "Creating..." : "Create Category"}
-                  </button>
-                </form>
-
-                <div className="space-y-2">
-                  {businessCategories.map((category) => (
-                    <div
-                      key={category.id}
-                      className="rounded-lg border border-gray-200 px-3 py-2 flex items-center justify-between"
-                    >
-                      <div>
-                        <p className="font-medium text-[#111827]">{category.name}</p>
-                        <p className="text-xs text-gray-500">{category.slug}</p>
-                      </div>
-
-                      <button
-                        type="button"
-                        onClick={() => void handleDeleteCategory(category.id)}
-                        disabled={busyAction === `delete-category-${category.id}`}
-                        className="rounded-md bg-[#fde2e2] px-2.5 py-1.5 text-xs text-[#8f2727] disabled:opacity-70"
-                      >
-                        Delete
-                      </button>
-                    </div>
-                  ))}
-                </div>
-              </div>
-
-              <div className="rounded-2xl border border-gray-200 bg-white p-5 shadow-sm">
-                <h3 className="text-xl font-semibold text-[#111827] mb-4">Brands</h3>
-
-                <form className="space-y-3 mb-5" onSubmit={handleCreateBrand}>
-                  <input
-                    value={newBrandName}
-                    onChange={(event) => {
-                      setNewBrandName(event.target.value);
-                      if (!newBrandSlug) {
-                        setNewBrandSlug(normalizeSlug(event.target.value));
-                      }
-                    }}
-                    placeholder="Brand name"
-                    className="w-full rounded-lg border border-gray-200 bg-[#f8fafc] py-2.5 px-4 outline-none focus:border-[#4b5563] focus:ring-2 focus:ring-[#4b5563]/20"
-                  />
-                  <input
-                    value={newBrandSlug}
-                    onChange={(event) => setNewBrandSlug(normalizeSlug(event.target.value))}
-                    placeholder="brand-slug"
-                    className="w-full rounded-lg border border-gray-200 bg-[#f8fafc] py-2.5 px-4 outline-none focus:border-[#4b5563] focus:ring-2 focus:ring-[#4b5563]/20"
-                  />
-
-                  <button
-                    type="submit"
-                    disabled={busyAction === "create-brand"}
-                    className="rounded-lg bg-[#4b5563] px-4 py-2.5 text-white hover:bg-[#1f2937] disabled:opacity-70"
-                  >
-                    {busyAction === "create-brand" ? "Creating..." : "Create Brand"}
-                  </button>
-                </form>
-
-                <div className="space-y-2">
-                  {brands.map((brand) => (
-                    <div
-                      key={brand.id}
-                      className="rounded-lg border border-gray-200 px-3 py-2 flex items-center justify-between"
-                    >
-                      <div>
-                        <p className="font-medium text-[#111827]">{brand.name}</p>
-                        <p className="text-xs text-gray-500">{brand.slug}</p>
-                      </div>
-
-                      <button
-                        type="button"
-                        onClick={() => void handleDeleteBrand(brand.id)}
-                        disabled={busyAction === `delete-brand-${brand.id}`}
-                        className="rounded-md bg-[#fde2e2] px-2.5 py-1.5 text-xs text-[#8f2727] disabled:opacity-70"
-                      >
-                        Delete
-                      </button>
-                    </div>
-                  ))}
-                </div>
-              </div>
-            </div>
-          ) : null}
-
-          {activeTab === "orders" && !isLoading ? (
-            <div className="grid grid-cols-1 xl:grid-cols-[1.15fr_0.85fr] gap-6">
-              <div className="rounded-2xl border border-gray-200 bg-white p-5 shadow-sm">
-                <h3 className="text-xl font-semibold text-[#111827]">Order & Dispute Management</h3>
-                <p className="mt-1 text-sm text-gray-500">
-                  Built from the SRS order lifecycle and dispute handling requirements.
-                </p>
-
-                <div className="mt-5 grid gap-3">
-                  {[
-                    "View all platform orders with full audit trail",
-                    "Intervene in buyer-seller disputes",
-                    "Trigger refunds or cancel orders manually",
-                    "Export order data for reconciliation",
-                  ].map((item) => (
-                    <div key={item} className="flex items-start gap-3 rounded-xl border border-gray-100 bg-[#fafafa] px-4 py-3">
-                      <span className="mt-1 h-2.5 w-2.5 rounded-full bg-[#4b5563]" />
-                      <p className="text-sm text-[#111827]">{item}</p>
-                    </div>
-                  ))}
-                </div>
-
-                <div className="mt-5 rounded-xl bg-[#f3f7fb] p-4">
-                  <p className="text-sm font-semibold text-[#111827]">Recommended UI pieces</p>
-                  <p className="mt-1 text-sm text-gray-600">
-                    Audit table, dispute drawer, refund confirmation modal, export action bar, and order timeline.
-                  </p>
-                </div>
-              </div>
-
-              <div className="rounded-2xl border border-gray-200 bg-white p-5 shadow-sm">
-                <h3 className="text-xl font-semibold text-[#111827]">SRS Feature Coverage</h3>
-                <div className="mt-4 space-y-3">
-                  {srsModules.filter((module) => module.key === "orders").map((module) => (
-                    <div key={module.key} className="rounded-xl border border-gray-100 p-4">
-                      <p className="text-sm font-semibold text-[#111827]">{module.title}</p>
-                      <p className="mt-1 text-xs uppercase tracking-[0.16em] text-[#4b5563]">{module.architecture}</p>
-                      <ul className="mt-3 space-y-2 text-sm text-gray-600">
-                        {module.features.map((feature) => (
-                          <li key={feature} className="flex items-start gap-2">
-                            <span className="mt-1 h-2 w-2 rounded-full bg-[#111827]" />
-                            <span>{feature}</span>
-                          </li>
-                        ))}
-                      </ul>
-                    </div>
-                  ))}
-                </div>
-              </div>
-            </div>
-          ) : null}
-
-          {activeTab === "finance" && !isLoading ? (
-            <div className="grid grid-cols-1 xl:grid-cols-[1fr_1fr] gap-6">
-              <div className="rounded-2xl border border-gray-200 bg-white p-5 shadow-sm">
-                <h3 className="text-xl font-semibold text-[#111827]">Financial Management</h3>
-                <p className="mt-1 text-sm text-gray-500">
-                  Revenue, commissions, payouts, and reporting aligned to the SRS.
-                </p>
-
-                <div className="mt-5 grid grid-cols-1 sm:grid-cols-2 gap-3">
-                  {[
-                    "Platform revenue and commissions",
-                    "Approve or hold seller payout batches",
-                    "Configure commission rates by category or seller tier",
-                    "Generate daily, monthly, and annual financial reports",
-                  ].map((item) => (
-                    <div key={item} className="rounded-xl border border-gray-100 bg-[#fafafa] p-4 text-sm text-[#111827]">
-                      {item}
-                    </div>
-                  ))}
-                </div>
-
-                <div className="mt-5 rounded-xl border border-[#4b5563]/15 bg-[#4b5563]/5 p-4 text-sm text-gray-700">
-                  Suggested widgets: payout queue, commission matrix, revenue trend, downloadable report cards.
-                </div>
-              </div>
-
-              <div className="rounded-2xl border border-gray-200 bg-white p-5 shadow-sm">
-                <h3 className="text-xl font-semibold text-[#111827]">Component Features</h3>
-                <div className="mt-4 space-y-3">
-                  {srsModules.filter((module) => module.key === "finance").map((module) => (
-                    <div key={module.key} className="rounded-xl border border-gray-100 p-4">
-                      <p className="text-sm font-semibold text-[#111827]">{module.title}</p>
-                      <p className="mt-1 text-xs uppercase tracking-[0.16em] text-[#4b5563]">{module.architecture}</p>
-                      <ul className="mt-3 space-y-2 text-sm text-gray-600">
-                        {module.features.map((feature) => (
-                          <li key={feature} className="flex items-start gap-2">
-                            <span className="mt-1 h-2 w-2 rounded-full bg-[#4b5563]" />
-                            <span>{feature}</span>
-                          </li>
-                        ))}
-                      </ul>
-                    </div>
-                  ))}
-                </div>
-              </div>
-            </div>
-          ) : null}
-
-          {activeTab === "analytics" && !isLoading ? (
-            <div className="grid grid-cols-1 xl:grid-cols-[1fr_1fr] gap-6">
-              <div className="rounded-2xl border border-gray-200 bg-white p-5 shadow-sm">
-                <h3 className="text-xl font-semibold text-[#111827]">Analytics Dashboard</h3>
-                <p className="mt-1 text-sm text-gray-500">
-                  Monitor GMV, growth, funnels, and regional performance from the SRS.
-                </p>
-
-                <div className="mt-5 grid grid-cols-1 sm:grid-cols-2 gap-3">
-                  {[
-                    "Platform GMV over time",
-                    "Active users, registrations, and churn metrics",
-                    "Top-selling products and categories",
-                    "Country and region performance heatmaps",
-                    "Funnel analytics from visits to purchase",
-                  ].map((item) => (
-                    <div key={item} className="rounded-xl border border-gray-100 bg-[#fafafa] p-4 text-sm text-[#111827]">
-                      {item}
-                    </div>
-                  ))}
-                </div>
-
-                <div className="mt-5 rounded-xl bg-[#f3f7fb] p-4 text-sm text-gray-700">
-                  Recommended UI pieces: KPI strips, time-series charts, heatmap cards, and funnel cards.
-                </div>
-              </div>
-
-              <div className="rounded-2xl border border-gray-200 bg-white p-5 shadow-sm">
-                <h3 className="text-xl font-semibold text-[#111827]">Architecture Driven Layout</h3>
-                <div className="mt-4 space-y-3">
-                  {srsModules.filter((module) => module.key === "analytics").map((module) => (
-                    <div key={module.key} className="rounded-xl border border-gray-100 p-4">
-                      <p className="text-sm font-semibold text-[#111827]">{module.title}</p>
-                      <p className="mt-1 text-xs uppercase tracking-[0.16em] text-[#4b5563]">{module.architecture}</p>
-                      <ul className="mt-3 space-y-2 text-sm text-gray-600">
-                        {module.features.map((feature) => (
-                          <li key={feature} className="flex items-start gap-2">
-                            <span className="mt-1 h-2 w-2 rounded-full bg-[#111827]" />
-                            <span>{feature}</span>
-                          </li>
-                        ))}
-                      </ul>
-                    </div>
-                  ))}
-                </div>
-              </div>
-            </div>
-          ) : null}
           </main>
         </div>
       </div>
