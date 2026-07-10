@@ -37,16 +37,6 @@ export const navigation = [
     ],
   },
   {
-    name: "Orders",
-    path: "/orders",
-    permission: "view_orders",
-  },
-  {
-    name: "Sell on Xerin",
-    path: "/signup",
-    permission: null,
-  },
-  {
     name: "Help",
     path: "/contact",
     permission: null,

@@ -53,18 +53,6 @@ export const menuData: Menu[] = [
   },
   {
     id: 4,
-    title: "Sell on Xerin",
-    newTab: false,
-    path: "/signup",
-  },
-  {
-    id: 5,
-    title: "Track Order",
-    newTab: false,
-    path: "/my-account",
-  },
-  {
-    id: 6,
     title: "Help",
     newTab: false,
     path: "/contact",

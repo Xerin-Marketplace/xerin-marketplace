@@ -221,11 +221,6 @@ const Footer = () => {
 
             <ul className="flex flex-col gap-3.5">
               <li>
-                <a className="ease-out duration-200 text-dark-4 dark:text-darkTheme-body-color hover:text-blue dark:hover:text-blue transition-colors" href={ROUTES.account}>
-                  My Account
-                </a>
-              </li>
-              <li>
                 <a className="ease-out duration-200 text-dark-4 dark:text-darkTheme-body-color hover:text-blue dark:hover:text-blue transition-colors" href={ROUTES.signin}>
                   Sign In / Register
                 </a>
@@ -257,16 +252,6 @@ const Footer = () => {
               <li>
                 <a className="ease-out duration-200 text-dark-4 dark:text-darkTheme-body-color hover:text-blue dark:hover:text-blue transition-colors" href={ROUTES.shop}>
                   Shop Products
-                </a>
-              </li>
-              <li>
-                <a className="ease-out duration-200 text-dark-4 dark:text-darkTheme-body-color hover:text-blue dark:hover:text-blue transition-colors" href={ROUTES.sellerRegister}>
-                  Sell on Xerin
-                </a>
-              </li>
-              <li>
-                <a className="ease-out duration-200 text-dark-4 dark:text-darkTheme-body-color hover:text-blue dark:hover:text-blue transition-colors" href={ROUTES.account}>
-                  Track Order
                 </a>
               </li>
               <li>

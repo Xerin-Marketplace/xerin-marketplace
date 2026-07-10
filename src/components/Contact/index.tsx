@@ -33,7 +33,7 @@ const Contact = () => {
                         fill="#ff6c2f"
                       />
                     </svg>
-                    Name: James Septimus
+                    Name: Xerin Support Team
                   </p>
 
                   <p className="flex items-center gap-4 dark:text-darkTheme-body-color">
@@ -61,7 +61,7 @@ const Contact = () => {
                         fill="#ff6c2f"
                       />
                     </svg>
-                    Phone: 1234 567890
+                    Phone: +255 700 000 000
                   </p>
 
                   <p className="flex gap-4 dark:text-darkTheme-body-color">
@@ -80,7 +80,7 @@ const Contact = () => {
                         fill="#ff6c2f"
                       />
                     </svg>
-                    Address: 7398 Smoke Ranch RoadLas Vegas, Nevada 89128
+                    Address: Xerin Marketplace, Customer Support Desk
                   </p>
                 </div>
               </div>
