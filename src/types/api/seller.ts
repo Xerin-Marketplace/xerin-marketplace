@@ -52,12 +52,11 @@ export type UploadSellerKycDocumentRequest = {
 export type PayoutAccount = TimestampFields & {
   id: ID;
   seller_id?: ID;
-  account_type?: "bank" | "mobile_money" | string;
-  bank_name?: string | null;
-  account_name?: string | null;
-  account_number?: string | null;
-  mobile_money_provider?: string | null;
-  mobile_money_number?: string | null;
+  account_type: "bank" | "mobile_money" | string;
+  provider: string;
+  account_name: string;
+  account_number: string;
+  currency: string;
   is_default?: boolean;
 };
 
@@ -65,3 +64,11 @@ export type PayoutAccountRequest = Omit<
   PayoutAccount,
   "id" | "seller_id" | "created_at" | "updated_at"
 >;
+
+export type SellerKycStatus = {
+  seller_status: string | null;
+  required_documents: string[];
+  uploaded_documents: string[];
+  missing_documents: string[];
+  can_submit_for_review: boolean;
+};

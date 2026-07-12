@@ -1,7 +1,17 @@
-import { redirect } from "next/navigation";
+import type { Metadata } from "next";
+import SellerKyc from "@/components/Seller/Kyc";
+
+export const metadata: Metadata = {
+  title: "Seller KYC | Xerin Market",
+  description: "Upload KYC documents and manage payout accounts for your seller account.",
+};
 
 const SellerKycPage = () => {
-  redirect("/seller/dashboard");
+  return (
+    <main>
+      <SellerKyc />
+    </main>
+  );
 };
 
 export default SellerKycPage;

@@ -1,6 +1,6 @@
 import type { ID, TimestampFields } from "./common";
 
-export type ProductStatus = "draft" | "pending" | "approved" | "rejected" | "active" | "inactive" | string;
+export type ProductStatus = "draft" | "pending_review" | "approved" | "rejected" | "inactive" | string;
 
 export type Category = TimestampFields & {
   id: ID;
@@ -90,12 +90,12 @@ export type ProductListQuery = {
 export type ProductRequest = {
   category_id: ID;
   brand_id?: ID | null;
+  sku: string;
   name: string;
+  slug: string;
   description?: string;
   price: number | string;
   sale_price?: number | string | null;
   currency?: string;
-  stock_quantity?: number;
-  low_stock_threshold?: number;
   weight?: number | string | null;
 };

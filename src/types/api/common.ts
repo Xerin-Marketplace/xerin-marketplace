@@ -16,6 +16,13 @@ export type PaginatedResponse<T> = {
   limit?: number;
 };
 
+export type PaginatedResults<T> = {
+  total: number;
+  page: number;
+  page_size: number;
+  results: T[];
+};
+
 export type TimestampFields = {
   created_at?: string;
   updated_at?: string;

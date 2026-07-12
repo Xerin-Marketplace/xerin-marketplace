@@ -28,6 +28,7 @@ export const API_ENDPOINTS = {
     businessCategories: "/sellers/business-categories",
     me: "/sellers/me",
     kycDocuments: "/sellers/kyc-documents",
+    kycStatus: "/sellers/kyc-status",
     payoutAccounts: "/sellers/payout-accounts",
     payoutAccountById: (id: string | number) => `/sellers/payout-accounts/${id}`,
   },
