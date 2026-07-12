@@ -956,6 +956,222 @@ export default function AdminDashboard() {
             </div>
           ) : null}
 
+          {activeTab === "sellers" && !isLoading ? (
+            <div className="rounded-2xl border border-gray-200 bg-white p-5 shadow-sm">
+              <h3 className="text-xl font-semibold text-[#111827] mb-4">Pending Seller Applications</h3>
+
+              <div className="space-y-3">
+                {pendingSellers.length === 0 ? (
+                  <p className="text-gray-500">No pending seller applications right now.</p>
+                ) : (
+                  pendingSellers.map((seller) => (
+                    <div
+                      key={seller.id}
+                      className="rounded-xl border border-gray-200 p-4 flex flex-col md:flex-row md:items-center md:justify-between gap-4"
+                    >
+                      <div>
+                        <h4 className="font-medium text-[#111827]">{seller.business_name}</h4>
+                        <p className="text-sm text-gray-500">Email: {seller.contact_email ?? "-"}</p>
+                        <p className="text-sm text-gray-500">Phone: {seller.contact_phone ?? "-"}</p>
+                        <p className="text-sm text-gray-500 capitalize">Status: {seller.status}</p>
+                      </div>
+
+                      <div className="flex gap-2">
+                        <button
+                          type="button"
+                          onClick={() => void handleApproveSeller(seller.id)}
+                          disabled={busyAction === `approve-seller-${seller.id}`}
+                          className="rounded-lg bg-[#d9f4e1] px-3 py-2 text-[#165c30] hover:opacity-90 disabled:opacity-60"
+                        >
+                          Approve
+                        </button>
+                        <button
+                          type="button"
+                          onClick={() => void handleRejectSeller(seller.id)}
+                          disabled={busyAction === `reject-seller-${seller.id}`}
+                          className="rounded-lg bg-[#fde2e2] px-3 py-2 text-[#8f2727] hover:opacity-90 disabled:opacity-60"
+                        >
+                          Reject
+                        </button>
+                      </div>
+                    </div>
+                  ))
+                )}
+              </div>
+            </div>
+          ) : null}
+
+          {activeTab === "users" && !isLoading ? (
+            <div className="rounded-2xl border border-gray-200 bg-white p-5 shadow-sm">
+              <h3 className="text-xl font-semibold text-[#111827] mb-4">User Management</h3>
+
+              <div className="mb-4">
+                <input
+                  type="text"
+                  value={userSearch}
+                  onChange={(event) => {
+                    setUserSearch(event.target.value);
+                    void refreshUsers(event.target.value);
+                  }}
+                  placeholder="Search users by name or email"
+                  className="rounded-xl border border-gray-200 bg-[#f8fafc] px-4 py-2.5 text-sm text-gray-700 w-full sm:w-[360px]"
+                />
+              </div>
+
+              <div className="overflow-x-auto">
+                <table className="w-full text-left">
+                  <thead className="bg-[#f8fafc]">
+                    <tr>
+                      <th className="px-4 py-3 text-sm font-medium text-gray-700">Name</th>
+                      <th className="px-4 py-3 text-sm font-medium text-gray-700">Email</th>
+                      <th className="px-4 py-3 text-sm font-medium text-gray-700">Phone</th>
+                      <th className="px-4 py-3 text-sm font-medium text-gray-700">Status</th>
+                      <th className="px-4 py-3 text-sm font-medium text-gray-700">Verified</th>
+                    </tr>
+                  </thead>
+                  <tbody className="divide-y divide-gray-100">
+                    {users.map((user) => (
+                      <tr key={user.id}>
+                        <td className="px-4 py-3 text-sm text-[#111827]">
+                          {user.first_name} {user.last_name}
+                        </td>
+                        <td className="px-4 py-3 text-sm text-gray-600">{user.email}</td>
+                        <td className="px-4 py-3 text-sm text-gray-600">{user.phone ?? "-"}</td>
+                        <td className="px-4 py-3 text-sm capitalize text-gray-600">{user.status}</td>
+                        <td className="px-4 py-3 text-sm text-gray-600">
+                          {user.is_verified ? "Yes" : "No"}
+                        </td>
+                      </tr>
+                    ))}
+                  </tbody>
+                </table>
+              </div>
+
+              {users.length === 0 && !isRefreshingUsers && (
+                <p className="text-gray-500 mt-4">No users found.</p>
+              )}
+            </div>
+          ) : null}
+
+          {activeTab === "catalog" && !isLoading ? (
+            <div className="space-y-5">
+              <div className="rounded-2xl border border-gray-200 bg-white p-5 shadow-sm">
+                <h3 className="text-xl font-semibold text-[#111827] mb-4">Business Categories</h3>
+
+                <form onSubmit={handleCreateCategory} className="flex flex-col sm:flex-row gap-3 mb-5">
+                  <input
+                    type="text"
+                    value={newCategoryName}
+                    onChange={(event) => setNewCategoryName(event.target.value)}
+                    placeholder="Category name"
+                    className="rounded-xl border border-gray-200 bg-[#f8fafc] px-4 py-2.5 text-sm text-gray-700 flex-1"
+                  />
+                  <input
+                    type="text"
+                    value={newCategorySlug}
+                    onChange={(event) => setNewCategorySlug(event.target.value)}
+                    placeholder="Slug (optional)"
+                    className="rounded-xl border border-gray-200 bg-[#f8fafc] px-4 py-2.5 text-sm text-gray-700 flex-1"
+                  />
+                  <input
+                    type="text"
+                    value={newCategoryDescription}
+                    onChange={(event) => setNewCategoryDescription(event.target.value)}
+                    placeholder="Description"
+                    className="rounded-xl border border-gray-200 bg-[#f8fafc] px-4 py-2.5 text-sm text-gray-700 flex-1"
+                  />
+                  <button
+                    type="submit"
+                    disabled={busyAction === "create-category"}
+                    className="rounded-xl bg-[#4b5563] px-5 py-2.5 text-sm font-medium text-white hover:bg-[#1f2937] disabled:opacity-60"
+                  >
+                    {busyAction === "create-category" ? "Creating..." : "Create"}
+                  </button>
+                </form>
+
+                <div className="space-y-2">
+                  {businessCategories.length === 0 ? (
+                    <p className="text-gray-500">No business categories.</p>
+                  ) : (
+                    businessCategories.map((category) => (
+                      <div
+                        key={category.id}
+                        className="flex items-center justify-between rounded-xl border border-gray-200 p-3"
+                      >
+                        <div>
+                          <p className="font-medium text-[#111827]">{category.name}</p>
+                          <p className="text-sm text-gray-500">Slug: {category.slug}</p>
+                        </div>
+                        <button
+                          type="button"
+                          onClick={() => void handleDeleteCategory(category.id)}
+                          disabled={busyAction === `delete-category-${category.id}`}
+                          className="rounded-lg bg-[#fde2e2] px-3 py-2 text-[#8f2727] hover:opacity-90 disabled:opacity-60"
+                        >
+                          Delete
+                        </button>
+                      </div>
+                    ))
+                  )}
+                </div>
+              </div>
+
+              <div className="rounded-2xl border border-gray-200 bg-white p-5 shadow-sm">
+                <h3 className="text-xl font-semibold text-[#111827] mb-4">Brands</h3>
+
+                <form onSubmit={handleCreateBrand} className="flex flex-col sm:flex-row gap-3 mb-5">
+                  <input
+                    type="text"
+                    value={newBrandName}
+                    onChange={(event) => setNewBrandName(event.target.value)}
+                    placeholder="Brand name"
+                    className="rounded-xl border border-gray-200 bg-[#f8fafc] px-4 py-2.5 text-sm text-gray-700 flex-1"
+                  />
+                  <input
+                    type="text"
+                    value={newBrandSlug}
+                    onChange={(event) => setNewBrandSlug(event.target.value)}
+                    placeholder="Slug (optional)"
+                    className="rounded-xl border border-gray-200 bg-[#f8fafc] px-4 py-2.5 text-sm text-gray-700 flex-1"
+                  />
+                  <button
+                    type="submit"
+                    disabled={busyAction === "create-brand"}
+                    className="rounded-xl bg-[#4b5563] px-5 py-2.5 text-sm font-medium text-white hover:bg-[#1f2937] disabled:opacity-60"
+                  >
+                    {busyAction === "create-brand" ? "Creating..." : "Create"}
+                  </button>
+                </form>
+
+                <div className="space-y-2">
+                  {brands.length === 0 ? (
+                    <p className="text-gray-500">No brands.</p>
+                  ) : (
+                    brands.map((brand) => (
+                      <div
+                        key={brand.id}
+                        className="flex items-center justify-between rounded-xl border border-gray-200 p-3"
+                      >
+                        <div>
+                          <p className="font-medium text-[#111827]">{brand.name}</p>
+                          <p className="text-sm text-gray-500">Slug: {brand.slug}</p>
+                        </div>
+                        <button
+                          type="button"
+                          onClick={() => void handleDeleteBrand(brand.id)}
+                          disabled={busyAction === `delete-brand-${brand.id}`}
+                          className="rounded-lg bg-[#fde2e2] px-3 py-2 text-[#8f2727] hover:opacity-90 disabled:opacity-60"
+                        >
+                          Delete
+                        </button>
+                      </div>
+                    ))
+                  )}
+                </div>
+              </div>
+            </div>
+          ) : null}
+
           </main>
         </div>
       </div>
