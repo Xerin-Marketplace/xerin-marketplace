@@ -10,9 +10,12 @@ import {
   AdminProduct,
   AdminSeller,
   AdminUser,
-  Brand,
-  BusinessCategory,
 } from "@/services/admin.service";
+import AdminProducts from "@/components/Admin/Products";
+import AdminCategories from "@/components/Admin/Catalog/Categories";
+import AdminBrands from "@/components/Admin/Catalog/Brands";
+import AdminReviews from "@/components/Admin/Catalog/Reviews";
+import AdminOrdersDashboard from "@/components/Admin/Orders/Dashboard";
 
 type StoredUser = {
   account_type?: string;
@@ -25,7 +28,9 @@ type AdminTab =
   | "users"
   | "sellers"
   | "products"
-  | "catalog"
+  | "categories"
+  | "brands"
+  | "reviews"
   | "orders"
   | "finance"
   | "analytics";
@@ -34,88 +39,18 @@ const tabs: Array<{ key: AdminTab; label: string; short: string }> = [
   { key: "overview", label: "Dashboard", short: "Overview" },
   { key: "users", label: "User Management", short: "Users" },
   { key: "sellers", label: "Seller Review", short: "Sellers" },
-  { key: "products", label: "Product Review", short: "Products" },
-  { key: "catalog", label: "Product & Catalogue", short: "Catalog" },
+  { key: "products", label: "Products", short: "Products" },
+  { key: "categories", label: "Categories", short: "Categories" },
+  { key: "brands", label: "Brands", short: "Brands" },
+  { key: "reviews", label: "Reviews", short: "Reviews" },
   { key: "orders", label: "Order & Dispute", short: "Orders" },
   { key: "finance", label: "Financial Management", short: "Finance" },
   { key: "analytics", label: "Analytics Dashboard", short: "Analytics" },
 ];
 
-type SrsModule = {
-  key: AdminTab;
-  title: string;
-  subtitle: string;
-  features: string[];
-  architecture: string;
-};
-
-const srsModules: SrsModule[] = [
-  {
-    key: "users",
-    title: "User Management",
-    subtitle: "Buyers, sellers, KYC, roles, permissions",
-    features: [
-      "View, search, and filter all buyers and sellers",
-      "Suspend, ban, or reinstate user accounts",
-      "Review KYC documents and approve/reject seller applications",
-      "Assign and manage admin roles and permissions",
-    ],
-    architecture: "Presentation + Auth + Admin API",
-  },
-  {
-    key: "catalog",
-    title: "Product & Catalogue",
-    subtitle: "Listings, categories, brands, featured slots",
-    features: [
-      "Review and approve/reject new product listings",
-      "Edit or remove non-compliant listings",
-      "Manage category tree, brands, and attributes",
-      "Configure flash sales and featured product slots",
-    ],
-    architecture: "Product Service + Catalogue Data + Media Storage",
-  },
-  {
-    key: "orders",
-    title: "Order & Dispute",
-    subtitle: "Audit trail, refunds, cancellations, dispute handling",
-    features: [
-      "View all platform orders with full audit trail",
-      "Intervene in buyer-seller disputes",
-      "Manually trigger refunds or order cancellations",
-      "Export order data for reconciliation",
-    ],
-    architecture: "Order Service + Payments + Logistics events",
-  },
-  {
-    key: "finance",
-    title: "Financial Management",
-    subtitle: "Revenue, commissions, payouts, rate control",
-    features: [
-      "View platform revenue, commissions, and payouts",
-      "Approve or hold seller payout batches",
-      "Configure commission rates per category or seller tier",
-      "Generate financial reports daily, monthly, and annual",
-    ],
-    architecture: "Payments + Ledger + Reporting pipeline",
-  },
-  {
-    key: "analytics",
-    title: "Analytics Dashboard",
-    subtitle: "GMV, users, growth, funnels, market heatmaps",
-    features: [
-      "Platform GMV over time",
-      "Active users, registrations, and churn metrics",
-      "Top-selling products and categories",
-      "Country and region performance heatmaps",
-      "Funnel analytics from visits to purchase",
-    ],
-    architecture: "Analytics service + warehouse + charts layer",
-  },
-];
-
 type SidebarGroup = {
   title: string;
-  key: AdminTab;
+  key: AdminTab | string;
   items: string[];
   icon: string;
 };
@@ -123,7 +58,7 @@ type SidebarGroup = {
 const sidebarGroups: SidebarGroup[] = [
   {
     title: "Catalog",
-    key: "catalog",
+    key: "products",
     items: ["Products", "Categories", "Brands", "Product Reviews"],
     icon: "📦",
   },
@@ -135,7 +70,7 @@ const sidebarGroups: SidebarGroup[] = [
   },
   {
     title: "Inventory",
-    key: "catalog",
+    key: "products",
     items: ["Stock Overview", "Warehouses", "Stock Adjustments", "Low Stock Products"],
     icon: "📚",
   },
@@ -159,7 +94,7 @@ const sidebarGroups: SidebarGroup[] = [
   },
   {
     title: "Promotions",
-    key: "catalog",
+    key: "products",
     items: ["Coupons", "Discounts", "Campaigns"],
     icon: "🏷️",
   },
@@ -221,10 +156,22 @@ const tabIcon = (tab: AdminTab): ReactNode => {
           <path d="M10 1 2 5l8 4 8-4-8-4Zm-8 7 8 4 8-4v7l-8 4-8-4V8Z" />
         </svg>
       );
-    case "catalog":
+    case "categories":
       return (
         <svg className="h-4 w-4" viewBox="0 0 20 20" fill="currentColor" aria-hidden="true">
           <path d="M4 3h12a1 1 0 0 1 1 1v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V4a1 1 0 0 1 1-1Zm2 3v2h8V6H6Zm0 4v2h8v-2H6Z" />
+        </svg>
+      );
+    case "brands":
+      return (
+        <svg className="h-4 w-4" viewBox="0 0 20 20" fill="currentColor" aria-hidden="true">
+          <path d="M4 4h12v2H4V4Zm0 5h12v2H4V9Zm0 5h12v2H4v-2Z" />
+        </svg>
+      );
+    case "reviews":
+      return (
+        <svg className="h-4 w-4" viewBox="0 0 20 20" fill="currentColor" aria-hidden="true">
+          <path d="M10 2l2.5 5.5h5.5l-4.5 4 1.5 6-5-3.5L4.5 18l1.5-6-4.5-4h5.5L10 2Z" />
         </svg>
       );
     case "orders":
@@ -298,18 +245,10 @@ export default function AdminDashboard() {
   const [totalUsers, setTotalUsers] = useState(0);
   const [pendingSellers, setPendingSellers] = useState<AdminSeller[]>([]);
   const [pendingProducts, setPendingProducts] = useState<AdminProduct[]>([]);
-  const [businessCategories, setBusinessCategories] = useState<BusinessCategory[]>([]);
-  const [brands, setBrands] = useState<Brand[]>([]);
 
   const [userSearch, setUserSearch] = useState("");
   const [isRefreshingUsers, setIsRefreshingUsers] = useState(false);
 
-  const [newCategoryName, setNewCategoryName] = useState("");
-  const [newCategorySlug, setNewCategorySlug] = useState("");
-  const [newCategoryDescription, setNewCategoryDescription] = useState("");
-
-  const [newBrandName, setNewBrandName] = useState("");
-  const [newBrandSlug, setNewBrandSlug] = useState("");
   const [surfaceSearch, setSurfaceSearch] = useState("");
   const [openSidebarGroup, setOpenSidebarGroup] = useState<string | null>(null);
   const [activeSidebarItem, setActiveSidebarItem] = useState<string>("Dashboard");
@@ -333,7 +272,7 @@ export default function AdminDashboard() {
         ? activeSidebarItem.replace(":", " - ")
         : activeSidebarItem;
 
-  const dynamicSearchPlaceholder = `Search in ${activeMenuContextLabel.toLowerCase()}...`;
+  const dynamicSearchPlaceholder = activeTab === "orders" ? "Global search" : `Search in ${activeMenuContextLabel.toLowerCase()}...`;
 
   const [busyAction, setBusyAction] = useState<string | null>(null);
 
@@ -358,18 +297,35 @@ export default function AdminDashboard() {
     router.replace(query ? `${pathname}?${query}` : pathname, { scroll: false });
   };
 
+  const resolveTab = (tabOrGroup: AdminTab | string): AdminTab => {
+    const catalogMap: Record<string, AdminTab> = {
+      "Catalog:Products": "products",
+      "Catalog:Categories": "categories",
+      "Catalog:Brands": "brands",
+      "Catalog:Product Reviews": "reviews",
+      "Orders:All Orders": "orders",
+      "Orders:Pending Orders": "orders",
+      "Orders:Processing Orders": "orders",
+      "Orders:Completed Orders": "orders",
+      "Orders:Cancelled Orders": "orders",
+      "Orders:Order Tracking": "orders",
+    };
+    return catalogMap[tabOrGroup] ?? (tabOrGroup as AdminTab);
+  };
+
   const applySidebarSelection = (
-    tab: AdminTab,
+    tab: AdminTab | string,
     sidebarItem: string,
     openGroup: string | null,
     writeUrl = true
   ) => {
-    setActiveTab(tab);
+    const resolvedTab = resolveTab(tab);
+    setActiveTab(resolvedTab);
     setActiveSidebarItem(sidebarItem);
     setOpenSidebarGroup(openGroup);
 
     if (writeUrl) {
-      syncSidebarUrl(tab, sidebarItem);
+      syncSidebarUrl(resolvedTab, sidebarItem);
     }
   };
 
@@ -377,21 +333,16 @@ export default function AdminDashboard() {
     setIsLoading(true);
 
     try {
-      const [usersResponse, sellersResponse, productsResponse, categoriesResponse, brandsResponse] =
-        await Promise.all([
-          adminService.listUsers({ page: 1, page_size: 8 }),
-          adminService.listPendingSellers(),
-          adminService.listPendingProducts(),
-          adminService.listBusinessCategories(),
-          adminService.listBrands(),
-        ]);
+      const [usersResponse, sellersResponse, productsResponse] = await Promise.all([
+        adminService.listUsers({ page: 1, page_size: 8 }),
+        adminService.listPendingSellers(),
+        adminService.listPendingProducts(),
+      ]);
 
       setUsers(usersResponse.results);
       setTotalUsers(usersResponse.total);
       setPendingSellers(sellersResponse);
       setPendingProducts(productsResponse);
-      setBusinessCategories(categoriesResponse);
-      setBrands(brandsResponse);
     } catch (error) {
       toast.error(getErrorMessage(error));
     } finally {
@@ -427,20 +378,6 @@ export default function AdminDashboard() {
 
       setPendingSellers(sellersResponse);
       setPendingProducts(productsResponse);
-    } catch (error) {
-      toast.error(getErrorMessage(error));
-    }
-  };
-
-  const refreshCatalog = async () => {
-    try {
-      const [categoriesResponse, brandsResponse] = await Promise.all([
-        adminService.listBusinessCategories(),
-        adminService.listBrands(),
-      ]);
-
-      setBusinessCategories(categoriesResponse);
-      setBrands(brandsResponse);
     } catch (error) {
       toast.error(getErrorMessage(error));
     }
@@ -487,9 +424,10 @@ export default function AdminDashboard() {
       const matchedItem = matchedGroup.items.find((item) => normalizeSlug(item) === itemParam);
 
       if (matchedItem) {
+        const subItemKey = `${matchedGroup.title}:${matchedItem}`;
         applySidebarSelection(
-          matchedGroup.key,
-          `${matchedGroup.title}:${matchedItem}`,
+          subItemKey,
+          subItemKey,
           matchedGroup.title,
           false
         );
@@ -571,109 +509,6 @@ export default function AdminDashboard() {
       await adminService.rejectProduct(productId, reason.trim());
       toast.success("Product rejected.");
       await refreshModerationQueues();
-    } catch (error) {
-      toast.error(getErrorMessage(error));
-    } finally {
-      setBusyAction(null);
-    }
-  };
-
-  const handleCreateCategory = async (event: React.FormEvent<HTMLFormElement>) => {
-    event.preventDefault();
-
-    if (!newCategoryName.trim()) {
-      toast.error("Category name is required.");
-      return;
-    }
-
-    const slug = normalizeSlug(newCategorySlug || newCategoryName);
-
-    if (!slug) {
-      toast.error("Category slug is required.");
-      return;
-    }
-
-    setBusyAction("create-category");
-
-    try {
-      await adminService.createBusinessCategory({
-        name: newCategoryName.trim(),
-        slug,
-        description: newCategoryDescription.trim() || undefined,
-        active: true,
-      });
-
-      toast.success("Business category created.");
-      setNewCategoryName("");
-      setNewCategorySlug("");
-      setNewCategoryDescription("");
-      await refreshCatalog();
-    } catch (error) {
-      toast.error(getErrorMessage(error));
-    } finally {
-      setBusyAction(null);
-    }
-  };
-
-  const handleDeleteCategory = async (categoryId: string) => {
-    if (!window.confirm("Delete this business category?")) return;
-
-    setBusyAction(`delete-category-${categoryId}`);
-
-    try {
-      await adminService.deleteBusinessCategory(categoryId);
-      toast.success("Business category deleted.");
-      await refreshCatalog();
-    } catch (error) {
-      toast.error(getErrorMessage(error));
-    } finally {
-      setBusyAction(null);
-    }
-  };
-
-  const handleCreateBrand = async (event: React.FormEvent<HTMLFormElement>) => {
-    event.preventDefault();
-
-    if (!newBrandName.trim()) {
-      toast.error("Brand name is required.");
-      return;
-    }
-
-    const slug = normalizeSlug(newBrandSlug || newBrandName);
-
-    if (!slug) {
-      toast.error("Brand slug is required.");
-      return;
-    }
-
-    setBusyAction("create-brand");
-
-    try {
-      await adminService.createBrand({
-        name: newBrandName.trim(),
-        slug,
-      });
-
-      toast.success("Brand created.");
-      setNewBrandName("");
-      setNewBrandSlug("");
-      await refreshCatalog();
-    } catch (error) {
-      toast.error(getErrorMessage(error));
-    } finally {
-      setBusyAction(null);
-    }
-  };
-
-  const handleDeleteBrand = async (brandId: string) => {
-    if (!window.confirm("Delete this brand?")) return;
-
-    setBusyAction(`delete-brand-${brandId}`);
-
-    try {
-      await adminService.deleteBrand(brandId);
-      toast.success("Brand deleted.");
-      await refreshCatalog();
     } catch (error) {
       toast.error(getErrorMessage(error));
     } finally {
@@ -780,6 +615,24 @@ export default function AdminDashboard() {
                           key={item}
                           type="button"
                           onClick={() => {
+                            if (group.title === "Catalog") {
+                              applySidebarSelection(subItemKey, subItemKey, group.title);
+                              return;
+                            }
+                            if (group.title === "Orders") {
+                              const orderTabMap: Record<string, string> = {
+                                "All Orders": "all",
+                                "Pending Orders": "pending",
+                                "Processing Orders": "processing",
+                                "Completed Orders": "completed",
+                                "Cancelled Orders": "cancelled",
+                                "Order Tracking": "tracking",
+                              };
+                              const ordersTab = orderTabMap[item] ?? "all";
+                              const itemSlug = normalizeSlug(item);
+                              router.push(`/admin/dashboard?tab=orders&menu=orders&item=${itemSlug}&orders_tab=${ordersTab}`);
+                              return;
+                            }
                             applySidebarSelection(group.key, subItemKey, group.title);
                           }}
                           className={`block w-full rounded-lg px-2.5 py-1.5 text-left text-sm transition-colors ${
@@ -815,8 +668,12 @@ export default function AdminDashboard() {
             <div className="rounded-2xl border border-gray-200 bg-white p-4 sm:p-5 shadow-sm">
               <div className="flex flex-col gap-3 lg:flex-row lg:items-center lg:justify-between">
                 <div>
-                  <h1 className="text-xl sm:text-2xl font-semibold text-[#111827]">Dashboard Overview</h1>
-                  <p className="text-sm text-gray-500 mt-1">Tab: {activeMenuLabel}</p>
+                  <h1 className="text-xl sm:text-2xl font-semibold text-[#111827]">
+                    {activeTab === "orders" ? "Order Management" : "Dashboard Overview"}
+                  </h1>
+                  <p className="text-sm text-gray-500 mt-1">
+                    {activeTab === "orders" ? `Admin / Orders / ${activeMenuLabel}` : `Tab: ${activeMenuLabel}`}
+                  </p>
                 </div>
 
                 <div className="flex flex-col sm:flex-row gap-2 sm:items-center">
@@ -837,7 +694,7 @@ export default function AdminDashboard() {
               </div>
             </div>
 
-          {(activeTab === "overview" || activeTab === "users" || activeTab === "sellers" || activeTab === "products" || activeTab === "catalog" || activeTab === "orders" || activeTab === "finance" || activeTab === "analytics") && isLoading ? (
+          {(activeTab === "overview" || activeTab === "users" || activeTab === "sellers" || activeTab === "products" || activeTab === "categories" || activeTab === "brands" || activeTab === "reviews" || activeTab === "orders" || activeTab === "finance" || activeTab === "analytics") && isLoading ? (
             <div className="rounded-2xl border border-gray-200 bg-white p-8 text-center text-gray-600 shadow-sm">
               Loading dashboard data...
             </div>
@@ -910,50 +767,12 @@ export default function AdminDashboard() {
             </>
           ) : null}
 
-          {activeTab === "products" && !isLoading ? (
-            <div className="rounded-2xl border border-gray-200 bg-white p-5 shadow-sm">
-              <h3 className="text-xl font-semibold text-[#111827] mb-4">Pending Product Moderation</h3>
-
-              <div className="space-y-3">
-                {pendingProducts.length === 0 ? (
-                  <p className="text-gray-500">No pending products right now.</p>
-                ) : (
-                  pendingProducts.map((product) => (
-                    <div
-                      key={product.id}
-                      className="rounded-xl border border-gray-200 p-4 flex flex-col md:flex-row md:items-center md:justify-between gap-4"
-                    >
-                      <div>
-                        <h4 className="font-medium text-[#111827]">{product.name}</h4>
-                        <p className="text-sm text-gray-500">SKU: {product.sku}</p>
-                        <p className="text-sm text-gray-500">
-                          Price: {product.price} {product.currency}
-                        </p>
-                      </div>
-
-                      <div className="flex gap-2">
-                        <button
-                          type="button"
-                          onClick={() => void handleApproveProduct(product.id)}
-                          disabled={busyAction === `approve-product-${product.id}`}
-                          className="rounded-lg bg-[#d9f4e1] px-3 py-2 text-[#165c30] hover:opacity-90 disabled:opacity-60"
-                        >
-                          Approve
-                        </button>
-                        <button
-                          type="button"
-                          onClick={() => void handleRejectProduct(product.id)}
-                          disabled={busyAction === `reject-product-${product.id}`}
-                          className="rounded-lg bg-[#fde2e2] px-3 py-2 text-[#8f2727] hover:opacity-90 disabled:opacity-60"
-                        >
-                          Reject
-                        </button>
-                      </div>
-                    </div>
-                  ))
-                )}
-              </div>
-            </div>
+          {activeTab === "products" && !isLoading ? <AdminProducts /> : null}
+          {activeTab === "categories" && !isLoading ? <AdminCategories /> : null}
+          {activeTab === "brands" && !isLoading ? <AdminBrands /> : null}
+          {activeTab === "reviews" && !isLoading ? <AdminReviews /> : null}
+          {activeTab === "orders" && !isLoading ? (
+            <AdminOrdersDashboard initialTab={searchParams.get("orders_tab") ?? "all"} />
           ) : null}
 
           {activeTab === "sellers" && !isLoading ? (
@@ -1050,125 +869,6 @@ export default function AdminDashboard() {
               {users.length === 0 && !isRefreshingUsers && (
                 <p className="text-gray-500 mt-4">No users found.</p>
               )}
-            </div>
-          ) : null}
-
-          {activeTab === "catalog" && !isLoading ? (
-            <div className="space-y-5">
-              <div className="rounded-2xl border border-gray-200 bg-white p-5 shadow-sm">
-                <h3 className="text-xl font-semibold text-[#111827] mb-4">Business Categories</h3>
-
-                <form onSubmit={handleCreateCategory} className="flex flex-col sm:flex-row gap-3 mb-5">
-                  <input
-                    type="text"
-                    value={newCategoryName}
-                    onChange={(event) => setNewCategoryName(event.target.value)}
-                    placeholder="Category name"
-                    className="rounded-xl border border-gray-200 bg-[#f8fafc] px-4 py-2.5 text-sm text-gray-700 flex-1"
-                  />
-                  <input
-                    type="text"
-                    value={newCategorySlug}
-                    onChange={(event) => setNewCategorySlug(event.target.value)}
-                    placeholder="Slug (optional)"
-                    className="rounded-xl border border-gray-200 bg-[#f8fafc] px-4 py-2.5 text-sm text-gray-700 flex-1"
-                  />
-                  <input
-                    type="text"
-                    value={newCategoryDescription}
-                    onChange={(event) => setNewCategoryDescription(event.target.value)}
-                    placeholder="Description"
-                    className="rounded-xl border border-gray-200 bg-[#f8fafc] px-4 py-2.5 text-sm text-gray-700 flex-1"
-                  />
-                  <button
-                    type="submit"
-                    disabled={busyAction === "create-category"}
-                    className="rounded-xl bg-[#4b5563] px-5 py-2.5 text-sm font-medium text-white hover:bg-[#1f2937] disabled:opacity-60"
-                  >
-                    {busyAction === "create-category" ? "Creating..." : "Create"}
-                  </button>
-                </form>
-
-                <div className="space-y-2">
-                  {businessCategories.length === 0 ? (
-                    <p className="text-gray-500">No business categories.</p>
-                  ) : (
-                    businessCategories.map((category) => (
-                      <div
-                        key={category.id}
-                        className="flex items-center justify-between rounded-xl border border-gray-200 p-3"
-                      >
-                        <div>
-                          <p className="font-medium text-[#111827]">{category.name}</p>
-                          <p className="text-sm text-gray-500">Slug: {category.slug}</p>
-                        </div>
-                        <button
-                          type="button"
-                          onClick={() => void handleDeleteCategory(category.id)}
-                          disabled={busyAction === `delete-category-${category.id}`}
-                          className="rounded-lg bg-[#fde2e2] px-3 py-2 text-[#8f2727] hover:opacity-90 disabled:opacity-60"
-                        >
-                          Delete
-                        </button>
-                      </div>
-                    ))
-                  )}
-                </div>
-              </div>
-
-              <div className="rounded-2xl border border-gray-200 bg-white p-5 shadow-sm">
-                <h3 className="text-xl font-semibold text-[#111827] mb-4">Brands</h3>
-
-                <form onSubmit={handleCreateBrand} className="flex flex-col sm:flex-row gap-3 mb-5">
-                  <input
-                    type="text"
-                    value={newBrandName}
-                    onChange={(event) => setNewBrandName(event.target.value)}
-                    placeholder="Brand name"
-                    className="rounded-xl border border-gray-200 bg-[#f8fafc] px-4 py-2.5 text-sm text-gray-700 flex-1"
-                  />
-                  <input
-                    type="text"
-                    value={newBrandSlug}
-                    onChange={(event) => setNewBrandSlug(event.target.value)}
-                    placeholder="Slug (optional)"
-                    className="rounded-xl border border-gray-200 bg-[#f8fafc] px-4 py-2.5 text-sm text-gray-700 flex-1"
-                  />
-                  <button
-                    type="submit"
-                    disabled={busyAction === "create-brand"}
-                    className="rounded-xl bg-[#4b5563] px-5 py-2.5 text-sm font-medium text-white hover:bg-[#1f2937] disabled:opacity-60"
-                  >
-                    {busyAction === "create-brand" ? "Creating..." : "Create"}
-                  </button>
-                </form>
-
-                <div className="space-y-2">
-                  {brands.length === 0 ? (
-                    <p className="text-gray-500">No brands.</p>
-                  ) : (
-                    brands.map((brand) => (
-                      <div
-                        key={brand.id}
-                        className="flex items-center justify-between rounded-xl border border-gray-200 p-3"
-                      >
-                        <div>
-                          <p className="font-medium text-[#111827]">{brand.name}</p>
-                          <p className="text-sm text-gray-500">Slug: {brand.slug}</p>
-                        </div>
-                        <button
-                          type="button"
-                          onClick={() => void handleDeleteBrand(brand.id)}
-                          disabled={busyAction === `delete-brand-${brand.id}`}
-                          className="rounded-lg bg-[#fde2e2] px-3 py-2 text-[#8f2727] hover:opacity-90 disabled:opacity-60"
-                        >
-                          Delete
-                        </button>
-                      </div>
-                    ))
-                  )}
-                </div>
-              </div>
             </div>
           ) : null}
 
