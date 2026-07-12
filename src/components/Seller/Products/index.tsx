@@ -312,7 +312,7 @@ const SellerProducts = () => {
                           <td className="px-6 py-4">
                             <span
                               className={`inline-flex rounded-full px-3 py-1 text-xs font-medium capitalize ${
-                                product.status === "approved" || product.status === "active"
+                                product.status === "approved"
                                   ? "bg-success/10 text-success"
                                   : product.status === "rejected"
                                   ? "bg-red/10 text-red"
