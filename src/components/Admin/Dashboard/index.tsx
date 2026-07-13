@@ -22,6 +22,11 @@ import AdminInventoryAdjustments from "@/components/Admin/Inventory/Adjustments"
 import AdminInventoryLowStock from "@/components/Admin/Inventory/LowStock";
 import AdminProductInventoryDetails from "@/components/Admin/Inventory/ProductDetails";
 import AdminWarehouseDetails from "@/components/Admin/Inventory/WarehouseDetails";
+import AdminCustomers from "@/components/Admin/Customers/Customers";
+import AdminCustomerDetails from "@/components/Admin/Customers/CustomerDetails";
+import AdminCustomerAddresses from "@/components/Admin/Customers/Addresses";
+import AdminCustomerReviews from "@/components/Admin/Customers/Reviews";
+import AdminCustomerSupport from "@/components/Admin/Customers/Support";
 
 type StoredUser = {
   account_type?: string;
@@ -85,7 +90,7 @@ const sidebarGroups: SidebarGroup[] = [
   {
     title: "Customers",
     key: "users",
-    items: ["All Customers", "Customer Details", "Addresses", "Customer Reviews"],
+    items: ["All Customers", "Customer Addresses", "Customer Reviews", "Customer Support"],
     icon: "👥",
   },
   {
@@ -280,7 +285,7 @@ export default function AdminDashboard() {
         ? activeSidebarItem.replace(":", " - ")
         : activeSidebarItem;
 
-  const dynamicSearchPlaceholder = activeTab === "orders" || activeTab === "inventory" ? "Global search" : `Search in ${activeMenuContextLabel.toLowerCase()}...`;
+  const dynamicSearchPlaceholder = activeTab === "orders" || activeTab === "inventory" || activeTab === "users" ? "Global search" : `Search in ${activeMenuContextLabel.toLowerCase()}...`;
 
   const [busyAction, setBusyAction] = useState<string | null>(null);
 
@@ -324,6 +329,10 @@ export default function AdminDashboard() {
       "Inventory:Warehouses": "inventory",
       "Inventory:Stock Adjustments": "inventory",
       "Inventory:Low Stock Products": "inventory",
+      "Customers:All Customers": "users",
+      "Customers:Customer Addresses": "users",
+      "Customers:Customer Reviews": "users",
+      "Customers:Customer Support": "users",
     };
     return catalogMap[tabOrGroup] ?? (tabOrGroup as AdminTab);
   };
@@ -427,6 +436,8 @@ export default function AdminDashboard() {
     if (!menuParam) {
       if (pathname.startsWith("/admin/inventory")) {
         applySidebarSelection("inventory", "Inventory", "Inventory", false);
+      } else if (pathname.startsWith("/admin/customers")) {
+        applySidebarSelection("users", "Customers", "Customers", false);
       }
       return;
     }
@@ -693,14 +704,18 @@ export default function AdminDashboard() {
                       ? "Order Management"
                       : activeTab === "inventory"
                         ? "Inventory Overview"
-                        : "Dashboard Overview"}
+                        : activeTab === "users" && activeSidebarItem !== "Dashboard"
+                          ? "Customer Management"
+                          : "Dashboard Overview"}
                   </h1>
                   <p className="text-sm text-gray-500 mt-1">
                     {activeTab === "orders"
                       ? `Admin / Orders / ${activeMenuLabel}`
                       : activeTab === "inventory"
                         ? `Admin / Inventory / ${activeMenuLabel}`
-                        : `Tab: ${activeMenuLabel}`}
+                        : activeTab === "users" && activeSidebarItem !== "Dashboard"
+                          ? `Manage customer accounts, addresses, orders and engagement`
+                          : `Tab: ${activeMenuLabel}`}
                   </p>
                 </div>
 
@@ -816,6 +831,22 @@ export default function AdminDashboard() {
                   {searchParams.get("inventory_tab") === "stock-adjustments" && <AdminInventoryAdjustments />}
                   {searchParams.get("inventory_tab") === "low-stock-products" && <AdminInventoryLowStock />}
                 </>
+              )}
+            </>
+          ) : null}
+
+          {activeTab === "users" && !isLoading ? (
+            <>
+              {pathname.includes("/admin/customers/") && pathname.split("/admin/customers/")[1]?.length && !pathname.includes("/addresses") && !pathname.includes("/reviews") && !pathname.includes("/support") ? (
+                <AdminCustomerDetails customerId={pathname.split("/admin/customers/")[1]?.split("/")[0] ?? ""} />
+              ) : pathname.includes("/admin/customers/addresses") ? (
+                <AdminCustomerAddresses />
+              ) : pathname.includes("/admin/customers/reviews") ? (
+                <AdminCustomerReviews />
+              ) : pathname.includes("/admin/customers/support") ? (
+                <AdminCustomerSupport />
+              ) : (
+                <AdminCustomers />
               )}
             </>
           ) : null}
