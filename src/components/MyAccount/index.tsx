@@ -1,5 +1,6 @@
 "use client";
 import React, { useState } from "react";
+import { useRouter } from "next/navigation";
 import { ROUTES } from "@/constants/links";
 import Breadcrumb from "../Common/Breadcrumb";
 import Image from "next/image";
@@ -53,9 +54,10 @@ const getMemberSinceLabel = (user?: AccountUser | null) => {
 };
 
 const MyAccount = () => {
+  const router = useRouter();
   const [activeTab, setActiveTab] = useState("dashboard");
   const [addressModal, setAddressModal] = useState(false);
-  const { user } = useAuth();
+  const { user, logout } = useAuth();
   const accountUser = user as AccountUser | null;
   const displayName = getDisplayName(accountUser);
   const memberSinceLabel = getMemberSinceLabel(accountUser);
@@ -66,6 +68,11 @@ const MyAccount = () => {
 
   const closeAddressModal = () => {
     setAddressModal(false);
+  };
+
+  const handleLogout = () => {
+    logout();
+    router.push("/signin");
   };
 
   return (
@@ -272,7 +279,7 @@ const MyAccount = () => {
                     </button>
 
                     <button
-                      onClick={() => setActiveTab("logout")}
+                      onClick={handleLogout}
                       className={`flex items-center rounded-md gap-2.5 py-3 px-4.5 ease-out duration-200 hover:bg-blue hover:text-white ${
                         activeTab === "logout"
                           ? "text-white bg-blue"
