@@ -10,6 +10,8 @@ import { useSelector } from "react-redux";
 import { selectTotalPrice } from "@/redux/features/cart-slice";
 import { useCartModalContext } from "@/app/context/CartSidebarModalContext";
 import { useTheme } from "@/app/context/ThemeContext";
+import { useAuth } from "@/hooks/useAuth";
+import { getAccountHref, getAccountLabel } from "@/guards/auth-routing";
 import Image from "next/image";
 
 const Header = () => {
@@ -18,9 +20,13 @@ const Header = () => {
   const [stickyMenu, setStickyMenu] = useState(false);
   const { openCartModal } = useCartModalContext();
   const { theme, toggleTheme } = useTheme();
+  const { user, isAuthenticated } = useAuth();
 
   const product = useAppSelector((state) => state.cartReducer.items);
   const totalPrice = useSelector(selectTotalPrice);
+
+  const accountHref = getAccountHref(isAuthenticated, user);
+  const accountLabel = getAccountLabel(isAuthenticated, user);
 
   const handleOpenCartModal = () => {
     openCartModal();
@@ -205,7 +211,7 @@ const Header = () => {
                     </svg>
                   )}
                 </button>
-                <Link href="/signin" className="flex items-center gap-2.5">
+                <Link href={accountHref} className="flex items-center gap-2.5">
                   <svg
                     width="24"
                     height="24"
@@ -232,7 +238,7 @@ const Header = () => {
                       account
                     </span>
                     <p className="font-medium text-custom-sm text-dark dark:text-darkTheme-body-color">
-                      Sign In
+                      {accountLabel}
                     </p>
                   </div>
                 </Link>
