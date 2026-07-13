@@ -11,7 +11,7 @@ const BlogItem = ({ blog }: { blog: BlogItem }) => {
         <Image
           src={blog.img}
           alt="blog"
-          className="rounded-md w-full"
+          className="rounded-md w-full h-auto"
           width={330}
           height={210}
         />

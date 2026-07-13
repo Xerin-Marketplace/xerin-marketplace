@@ -19,6 +19,7 @@ const Hero = () => {
                 className="absolute right-0 bottom-0 -z-1"
                 width={534}
                 height={520}
+                priority
               />
 
               <HeroCarousel />
@@ -63,6 +64,7 @@ const Hero = () => {
                       width={123}
                       height={161}
                       className="object-contain"
+                      style={{ width: "auto", height: "161px" }}
                     />
                   </div>
                 </div>
@@ -103,6 +105,7 @@ const Hero = () => {
                       width={123}
                       height={161}
                       className="object-contain"
+                      style={{ width: "auto", height: "161px" }}
                     />
                   </div>
                 </div>

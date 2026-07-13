@@ -23,7 +23,7 @@ const LatestPosts = ({ blogs }) => {
                 <Image
                   src={blog.img}
                   alt="blog"
-                  className="rounded-[10px] w-full"
+                  className="rounded-[10px] w-full h-auto"
                   width={110}
                   height={80}
                 />

@@ -31,7 +31,7 @@ const HeroFeature = () => {
         {featureData.map((item, key) => (
           <div className="flex items-center gap-4 p-4 rounded-lg bg-white/60 dark:bg-darkTheme-card/60 backdrop-blur-sm" key={key}>
             <div className="flex-shrink-0 w-11 h-11 rounded-full bg-blue/10 flex items-center justify-center">
-              <Image src={item.img} alt="icons" width={24} height={24} className="object-contain" />
+              <Image src={item.img} alt="icons" width={24} height={24} className="object-contain" style={{ width: "auto", height: "24px" }} />
             </div>
 
             <div>

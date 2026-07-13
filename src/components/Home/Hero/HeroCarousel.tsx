@@ -61,6 +61,7 @@ const HeroCarousal = () => {
               alt="Xerin Market shopping experience"
               width={351}
               height={358}
+              style={{ width: "auto", height: "358px" }}
             />
           </div>
         </div>
@@ -103,6 +104,7 @@ const HeroCarousal = () => {
               alt="Sell on Xerin Market"
               width={351}
               height={358}
+              style={{ width: "auto", height: "358px" }}
             />
           </div>
         </div>
