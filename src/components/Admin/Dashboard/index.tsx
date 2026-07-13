@@ -16,6 +16,12 @@ import AdminCategories from "@/components/Admin/Catalog/Categories";
 import AdminBrands from "@/components/Admin/Catalog/Brands";
 import AdminReviews from "@/components/Admin/Catalog/Reviews";
 import AdminOrdersDashboard from "@/components/Admin/Orders/Dashboard";
+import AdminInventoryDashboard from "@/components/Admin/Inventory/Dashboard";
+import AdminInventoryWarehouses from "@/components/Admin/Inventory/Warehouses";
+import AdminInventoryAdjustments from "@/components/Admin/Inventory/Adjustments";
+import AdminInventoryLowStock from "@/components/Admin/Inventory/LowStock";
+import AdminProductInventoryDetails from "@/components/Admin/Inventory/ProductDetails";
+import AdminWarehouseDetails from "@/components/Admin/Inventory/WarehouseDetails";
 
 type StoredUser = {
   account_type?: string;
@@ -32,6 +38,7 @@ type AdminTab =
   | "brands"
   | "reviews"
   | "orders"
+  | "inventory"
   | "finance"
   | "analytics";
 
@@ -44,6 +51,7 @@ const tabs: Array<{ key: AdminTab; label: string; short: string }> = [
   { key: "brands", label: "Brands", short: "Brands" },
   { key: "reviews", label: "Reviews", short: "Reviews" },
   { key: "orders", label: "Order & Dispute", short: "Orders" },
+  { key: "inventory", label: "Inventory", short: "Inventory" },
   { key: "finance", label: "Financial Management", short: "Finance" },
   { key: "analytics", label: "Analytics Dashboard", short: "Analytics" },
 ];
@@ -70,7 +78,7 @@ const sidebarGroups: SidebarGroup[] = [
   },
   {
     title: "Inventory",
-    key: "products",
+    key: "inventory",
     items: ["Stock Overview", "Warehouses", "Stock Adjustments", "Low Stock Products"],
     icon: "📚",
   },
@@ -272,7 +280,7 @@ export default function AdminDashboard() {
         ? activeSidebarItem.replace(":", " - ")
         : activeSidebarItem;
 
-  const dynamicSearchPlaceholder = activeTab === "orders" ? "Global search" : `Search in ${activeMenuContextLabel.toLowerCase()}...`;
+  const dynamicSearchPlaceholder = activeTab === "orders" || activeTab === "inventory" ? "Global search" : `Search in ${activeMenuContextLabel.toLowerCase()}...`;
 
   const [busyAction, setBusyAction] = useState<string | null>(null);
 
@@ -288,6 +296,9 @@ export default function AdminDashboard() {
       const [group, item] = sidebarItem.split(":");
       params.set("menu", normalizeSlug(group));
       params.set("item", normalizeSlug(item));
+      if (tab === "inventory") {
+        params.set("inventory_tab", normalizeSlug(item));
+      }
     } else {
       params.set("menu", normalizeSlug(sidebarItem));
       params.delete("item");
@@ -309,6 +320,10 @@ export default function AdminDashboard() {
       "Orders:Completed Orders": "orders",
       "Orders:Cancelled Orders": "orders",
       "Orders:Order Tracking": "orders",
+      "Inventory:Stock Overview": "inventory",
+      "Inventory:Warehouses": "inventory",
+      "Inventory:Stock Adjustments": "inventory",
+      "Inventory:Low Stock Products": "inventory",
     };
     return catalogMap[tabOrGroup] ?? (tabOrGroup as AdminTab);
   };
@@ -409,7 +424,12 @@ export default function AdminDashboard() {
     const menuParam = searchParams.get("menu");
     const itemParam = searchParams.get("item");
 
-    if (!menuParam) return;
+    if (!menuParam) {
+      if (pathname.startsWith("/admin/inventory")) {
+        applySidebarSelection("inventory", "Inventory", "Inventory", false);
+      }
+      return;
+    }
 
     if (menuParam === "dashboard") {
       applySidebarSelection("overview", "Dashboard", null, false);
@@ -669,10 +689,18 @@ export default function AdminDashboard() {
               <div className="flex flex-col gap-3 lg:flex-row lg:items-center lg:justify-between">
                 <div>
                   <h1 className="text-xl sm:text-2xl font-semibold text-[#111827]">
-                    {activeTab === "orders" ? "Order Management" : "Dashboard Overview"}
+                    {activeTab === "orders"
+                      ? "Order Management"
+                      : activeTab === "inventory"
+                        ? "Inventory Overview"
+                        : "Dashboard Overview"}
                   </h1>
                   <p className="text-sm text-gray-500 mt-1">
-                    {activeTab === "orders" ? `Admin / Orders / ${activeMenuLabel}` : `Tab: ${activeMenuLabel}`}
+                    {activeTab === "orders"
+                      ? `Admin / Orders / ${activeMenuLabel}`
+                      : activeTab === "inventory"
+                        ? `Admin / Inventory / ${activeMenuLabel}`
+                        : `Tab: ${activeMenuLabel}`}
                   </p>
                 </div>
 
@@ -694,7 +722,7 @@ export default function AdminDashboard() {
               </div>
             </div>
 
-          {(activeTab === "overview" || activeTab === "users" || activeTab === "sellers" || activeTab === "products" || activeTab === "categories" || activeTab === "brands" || activeTab === "reviews" || activeTab === "orders" || activeTab === "finance" || activeTab === "analytics") && isLoading ? (
+          {(activeTab === "overview" || activeTab === "users" || activeTab === "sellers" || activeTab === "products" || activeTab === "categories" || activeTab === "brands" || activeTab === "reviews" || activeTab === "orders" || activeTab === "inventory" || activeTab === "finance" || activeTab === "analytics") && isLoading ? (
             <div className="rounded-2xl border border-gray-200 bg-white p-8 text-center text-gray-600 shadow-sm">
               Loading dashboard data...
             </div>
@@ -773,6 +801,23 @@ export default function AdminDashboard() {
           {activeTab === "reviews" && !isLoading ? <AdminReviews /> : null}
           {activeTab === "orders" && !isLoading ? (
             <AdminOrdersDashboard initialTab={searchParams.get("orders_tab") ?? "all"} />
+          ) : null}
+
+          {activeTab === "inventory" && !isLoading ? (
+            <>
+              {pathname.includes("/admin/inventory/products/") ? (
+                <AdminProductInventoryDetails productId={pathname.split("/admin/inventory/products/")[1]?.split("/")[0] ?? ""} />
+              ) : pathname.includes("/admin/inventory/warehouses/") ? (
+                <AdminWarehouseDetails warehouseId={pathname.split("/admin/inventory/warehouses/")[1]?.split("/")[0] ?? ""} />
+              ) : (
+                <>
+                  {(searchParams.get("inventory_tab") ?? "stock-overview") === "stock-overview" && <AdminInventoryDashboard />}
+                  {searchParams.get("inventory_tab") === "warehouses" && <AdminInventoryWarehouses />}
+                  {searchParams.get("inventory_tab") === "stock-adjustments" && <AdminInventoryAdjustments />}
+                  {searchParams.get("inventory_tab") === "low-stock-products" && <AdminInventoryLowStock />}
+                </>
+              )}
+            </>
           ) : null}
 
           {activeTab === "sellers" && !isLoading ? (
