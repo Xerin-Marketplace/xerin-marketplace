@@ -5,10 +5,60 @@ import Breadcrumb from "../Common/Breadcrumb";
 import Image from "next/image";
 import AddressModal from "./AddressModal";
 import Orders from "../Orders";
+import { useAuth } from "@/hooks/useAuth";
+
+
+type AccountUser = {
+  first_name?: unknown;
+  last_name?: unknown;
+  full_name?: unknown;
+  name?: unknown;
+  email?: unknown;
+  created_at?: unknown;
+  date_joined?: unknown;
+  [key: string]: unknown;
+};
+
+const getStringValue = (value: unknown) => {
+  return typeof value === "string" ? value.trim() : "";
+};
+
+const getDisplayName = (user?: AccountUser | null) => {
+  const fullName = getStringValue(user?.full_name) || getStringValue(user?.name);
+  const firstName = getStringValue(user?.first_name);
+  const lastName = getStringValue(user?.last_name);
+  const nameFromParts = [firstName, lastName].filter(Boolean).join(" ");
+  const email = getStringValue(user?.email);
+
+  return fullName || nameFromParts || email || "Xerin Customer";
+};
+
+const getMemberSinceLabel = (user?: AccountUser | null) => {
+  const rawDate = getStringValue(user?.created_at) || getStringValue(user?.date_joined);
+
+  if (!rawDate) {
+    return "Xerin Member";
+  }
+
+  const date = new Date(rawDate);
+
+  if (Number.isNaN(date.getTime())) {
+    return "Xerin Member";
+  }
+
+  return `Member Since ${new Intl.DateTimeFormat("en", {
+    month: "short",
+    year: "numeric",
+  }).format(date)}`;
+};
 
 const MyAccount = () => {
   const [activeTab, setActiveTab] = useState("dashboard");
   const [addressModal, setAddressModal] = useState(false);
+  const { user } = useAuth();
+  const accountUser = user as AccountUser | null;
+  const displayName = getDisplayName(accountUser);
+  const memberSinceLabel = getMemberSinceLabel(accountUser);
 
   const openAddressModal = () => {
     setAddressModal(true);
@@ -40,9 +90,11 @@ const MyAccount = () => {
 
                   <div>
                     <p className="font-medium text-dark dark:text-white mb-0.5">
-                      James Septimus
+                      {displayName}
                     </p>
-                    <p className="text-custom-xs dark:text-darkTheme-secondary-muted">Member Since Sep 2020</p>
+                    <p className="text-custom-xs dark:text-darkTheme-secondary-muted">
+                      {memberSinceLabel}
+                    </p>
                   </div>
                 </div>
 
@@ -357,7 +409,7 @@ const MyAccount = () => {
                           fill=""
                         />
                       </svg>
-                      Name: James Septimus
+                      Name: {displayName}
                     </p>
 
                     <p className="flex items-center gap-2.5 text-custom-sm">
@@ -489,7 +541,7 @@ const MyAccount = () => {
                           fill=""
                         />
                       </svg>
-                      Name: James Septimus
+                      Name: {displayName}
                     </p>
 
                     <p className="flex items-center gap-2.5 text-custom-sm">
