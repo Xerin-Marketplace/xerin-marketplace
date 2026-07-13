@@ -16,6 +16,7 @@ const SingleItem = ({ item }: { item: Category }) => {
           width={82}
           height={62}
           className="object-contain transition-transform duration-300 group-hover:scale-110"
+          style={{ width: "auto", height: "62px" }}
         />
       </div>
 

@@ -14,7 +14,7 @@ const Error = () => {
               <Image
                 src="/images/404.svg"
                 alt="404"
-                className="mx-auto mb-8 w-1/2 sm:w-auto"
+                className="mx-auto mb-8 w-1/2 sm:w-auto h-auto"
                 width={288}
                 height={190}
               />

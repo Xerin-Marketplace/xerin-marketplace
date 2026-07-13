@@ -78,6 +78,7 @@ const Header = () => {
                 width={44}
                 height={44}
                 className="object-contain"
+                style={{ width: "auto", height: "44px" }}
                 priority
               />
               <span className="text-lg font-semibold text-dark dark:text-white whitespace-nowrap">
