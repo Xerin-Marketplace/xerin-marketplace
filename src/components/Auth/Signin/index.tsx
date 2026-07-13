@@ -7,34 +7,14 @@ import { useRouter, useSearchParams } from "next/navigation";
 import toast from "react-hot-toast";
 import { authApi } from "@/lib/api/auth";
 import { ApiError } from "@/lib/api/client";
-import { authStorage } from "@/lib/auth/storage";
+import { useAuth } from "@/hooks/useAuth";
+import { getPostLoginPath } from "@/guards/auth-routing";
 
-type AuthUser = {
-  account_type?: string;
-  roles?: string[];
-};
-
-const resolvePostLoginPath = (requestedPath: string | null, user?: AuthUser): string => {
-  if (requestedPath && requestedPath.startsWith("/")) {
-    return requestedPath;
-  }
-
-  const roles = user?.roles ?? [];
-
-  if (user?.account_type === "super_admin" || user?.account_type === "admin" || roles.includes("super_admin") || roles.includes("admin")) {
-    return "/admin/dashboard";
-  }
-
-  if (user?.account_type === "seller" || roles.includes("seller")) {
-    return "/seller/dashboard";
-  }
-
-  return "/my-account";
-};
 
 const Signin = () => {
   const router = useRouter();
   const searchParams = useSearchParams();
+  const { setSession } = useAuth();
 
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
@@ -56,10 +36,10 @@ const Signin = () => {
         password,
       });
 
-      authStorage.setSession(session);
+      setSession(session);
       toast.success("Signed in successfully.");
       const requestedRedirect = searchParams.get("redirect");
-      const redirectPath = resolvePostLoginPath(requestedRedirect, session.user as AuthUser | undefined);
+      const redirectPath = getPostLoginPath(requestedRedirect, session.user);
       router.push(redirectPath);
     } catch (error) {
       if (error instanceof ApiError) {

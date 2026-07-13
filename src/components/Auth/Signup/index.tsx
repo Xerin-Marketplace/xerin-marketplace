@@ -6,7 +6,7 @@ import { useRouter } from "next/navigation";
 import toast from "react-hot-toast";
 import { authApi } from "@/lib/api/auth";
 import { ApiError } from "@/lib/api/client";
-import { authStorage } from "@/lib/auth/storage";
+import { useAuth } from "@/hooks/useAuth";
 import type { AuthTokenResponse } from "@/types/api/auth";
 
 const splitFullName = (fullName: string) => {
@@ -31,6 +31,7 @@ const hasAuthToken = (response: unknown): response is AuthTokenResponse => {
 
 const Signup = () => {
   const router = useRouter();
+  const { setSession } = useAuth();
 
   const [fullName, setFullName] = useState("");
   const [email, setEmail] = useState("");
@@ -72,7 +73,7 @@ const Signup = () => {
       });
 
       if (hasAuthToken(response)) {
-        authStorage.setSession(response);
+        setSession(response);
         toast.success("Account created successfully.");
         router.push("/my-account");
         return;
