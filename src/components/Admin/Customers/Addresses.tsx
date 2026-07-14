@@ -2,7 +2,7 @@
 
 import { useEffect, useState } from "react";
 import toast from "react-hot-toast";
-import { customersService, type CustomerAddress } from "@/services/customers.service";
+import { customersService, type CustomerAddress } from "@/lib/api/endpoints/customers";
 import { ApiError } from "@/lib/api/client";
 
 const getErrorMessage = (error: unknown) => {

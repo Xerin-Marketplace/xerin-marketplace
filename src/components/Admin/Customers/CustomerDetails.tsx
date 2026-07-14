@@ -3,7 +3,7 @@
 import { useEffect, useState } from "react";
 import Link from "next/link";
 import toast from "react-hot-toast";
-import { customersService, type CustomerDetails } from "@/services/customers.service";
+import { customersService, type CustomerDetails } from "@/lib/api/endpoints/customers";
 import { ApiError } from "@/lib/api/client";
 
 const getErrorMessage = (error: unknown) => {

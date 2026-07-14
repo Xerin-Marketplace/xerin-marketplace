@@ -2,8 +2,8 @@
 
 import { useEffect, useState } from "react";
 import toast from "react-hot-toast";
-import { inventoryService, type StockAdjustment, type Warehouse } from "@/services/inventory.service";
-import { adminService, type AdminProduct } from "@/services/admin.service";
+import { inventoryService, type StockAdjustment, type Warehouse } from "@/lib/api/endpoints/inventory";
+import { adminService, type AdminProduct } from "@/lib/api/endpoints/admin";
 import { ApiError } from "@/lib/api/client";
 
 const getErrorMessage = (error: unknown) => {

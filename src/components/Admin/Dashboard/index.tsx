@@ -10,7 +10,7 @@ import {
   AdminProduct,
   AdminSeller,
   AdminUser,
-} from "@/services/admin.service";
+} from "@/lib/api/endpoints/admin";
 import AdminProducts from "@/components/Admin/Products";
 import AdminCategories from "@/components/Admin/Catalog/Categories";
 import AdminBrands from "@/components/Admin/Catalog/Brands";

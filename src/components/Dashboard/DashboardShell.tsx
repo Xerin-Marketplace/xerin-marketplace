@@ -1,7 +1,7 @@
 "use client";
 
 import Link from "next/link";
-import { useSelector } from "react-redux";
+import { useAuthStore } from "@/store/useAuthStore";
 import { dashboardModules, type DashboardModule } from "@/constants/dashboard";
 import {
   hasAllPermissions,
@@ -50,7 +50,7 @@ const canAccessModule = (
 };
 
 export default function DashboardShell() {
-  const auth = useSelector((state: any) => state.auth);
+  const auth = useAuthStore();
   const user = (auth?.user ?? null) as GuardUser | null;
 
   const visibleModules = dashboardModules.filter((module) =>

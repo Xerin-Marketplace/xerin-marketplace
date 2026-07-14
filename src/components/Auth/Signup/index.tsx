@@ -4,7 +4,7 @@ import Link from "next/link";
 import React, { FormEvent, useMemo, useState } from "react";
 import { useRouter } from "next/navigation";
 import toast from "react-hot-toast";
-import { authApi } from "@/lib/api/auth";
+import { authApi } from "@/lib/api/endpoints/auth";
 import { ApiError } from "@/lib/api/client";
 import { useAuth } from "@/hooks/useAuth";
 import type { AuthTokenResponse } from "@/types/api/auth";

@@ -1,6 +1,6 @@
 "use client";
 
-import { adminService, type ProductReview } from "@/services/admin.service";
+import { adminService, type ProductReview } from "@/lib/api/endpoints/admin";
 import { ApiError } from "@/lib/api/client";
 import { useEffect, useState } from "react";
 import toast from "react-hot-toast";

@@ -2,17 +2,19 @@
 import React from "react";
 import { Product } from "@/types/product";
 import { useModalContext } from "@/app/context/QuickViewModalContext";
-import { useDispatch } from "react-redux";
-import { AppDispatch } from "@/redux/store";
-import { updateQuickView } from "@/redux/features/quickView-slice";
-import { addItemToCart } from "@/redux/features/cart-slice";
+import { useQuickViewStore } from "@/store/useQuickViewStore";
+import { useCartStore } from "@/store/useCartStore";
 import Image from "next/image";
 import Link from "next/link";
-import { addItemToWishlist } from "@/redux/features/wishlist-slice";
+import { useWishlistStore } from "@/store/useWishlistStore";
 
 const SingleItem = ({ item }: { item: Product }) => {
   const { openModal } = useModalContext();
-  const dispatch = useDispatch<AppDispatch>();
+
+  const updateQuickView = useQuickViewStore((state) => state.updateQuickView);
+  const addItemToCart = useCartStore((state) => state.addItemToCart);
+  const addItemToWishlist = useWishlistStore((state) => state.addItemToWishlist);
+
   const hasDiscount = item.price > item.discountedPrice;
   const savingsPercent = hasDiscount
     ? Math.round(((item.price - item.discountedPrice) / item.price) * 100)
@@ -20,27 +22,23 @@ const SingleItem = ({ item }: { item: Product }) => {
 
   // update the QuickView state
   const handleQuickViewUpdate = () => {
-    dispatch(updateQuickView({ ...item }));
+    updateQuickView({ ...item });
   };
 
   // add to cart
   const handleAddToCart = () => {
-    dispatch(
-      addItemToCart({
-        ...item,
-        quantity: 1,
-      })
-    );
+    addItemToCart({
+      ...item,
+      quantity: 1,
+    });
   };
 
   const handleItemToWishList = () => {
-    dispatch(
-      addItemToWishlist({
-        ...item,
-        status: "available",
-        quantity: 1,
-      })
-    );
+    addItemToWishlist({
+      ...item,
+      status: "available",
+      quantity: 1,
+    });
   };
 
   return (

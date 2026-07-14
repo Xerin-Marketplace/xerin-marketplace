@@ -3,7 +3,7 @@
 import { useEffect, useState } from "react";
 import Link from "next/link";
 import toast from "react-hot-toast";
-import { inventoryService, type Warehouse, type InventoryItem, type StockMovement } from "@/services/inventory.service";
+import { inventoryService, type Warehouse, type InventoryItem, type StockMovement } from "@/lib/api/endpoints/inventory";
 import { ApiError } from "@/lib/api/client";
 
 const getErrorMessage = (error: unknown) => {

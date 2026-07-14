@@ -1,27 +1,22 @@
 import React from "react";
-import { AppDispatch } from "@/redux/store";
-import { useDispatch } from "react-redux";
-
-import { removeItemFromWishlist } from "@/redux/features/wishlist-slice";
-import { addItemToCart } from "@/redux/features/cart-slice";
-
+import { useWishlistStore } from "@/store/useWishlistStore";
+import { useCartStore } from "@/store/useCartStore";
 import Image from "next/image";
 import { ROUTES } from "@/constants/links";
 
 const SingleItem = ({ item }) => {
-  const dispatch = useDispatch<AppDispatch>();
+  const removeItemFromWishlist = useWishlistStore((state) => state.removeItemFromWishlist);
+  const addItemToCart = useCartStore((state) => state.addItemToCart);
 
   const handleRemoveFromWishlist = () => {
-    dispatch(removeItemFromWishlist(item.id));
+    removeItemFromWishlist(item.id);
   };
 
   const handleAddToCart = () => {
-    dispatch(
-      addItemToCart({
-        ...item,
-        quantity: 1,
-      })
-    );
+    addItemToCart({
+      ...item,
+      quantity: 1,
+    });
   };
 
   return (

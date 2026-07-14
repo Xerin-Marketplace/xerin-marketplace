@@ -5,7 +5,7 @@ import {
   type ProductCategory,
   type CreateProductCategoryPayload,
   type UpdateProductCategoryPayload,
-} from "@/services/admin.service";
+} from "@/lib/api/endpoints/admin";
 import { ApiError } from "@/lib/api/client";
 import { FormEvent, useEffect, useState } from "react";
 import toast from "react-hot-toast";

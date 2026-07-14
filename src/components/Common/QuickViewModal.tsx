@@ -2,41 +2,36 @@
 import React, { useEffect, useState } from "react";
 
 import { useModalContext } from "@/app/context/QuickViewModalContext";
-import { AppDispatch, useAppSelector } from "@/redux/store";
-import { addItemToCart } from "@/redux/features/cart-slice";
-import { useDispatch } from "react-redux";
+import { useCartStore } from "@/store/useCartStore";
+import { useQuickViewStore } from "@/store/useQuickViewStore";
+import { useProductDetailsStore } from "@/store/useProductDetailsStore";
 import Image from "next/image";
 import { usePreviewSlider } from "@/app/context/PreviewSliderContext";
-import { resetQuickView } from "@/redux/features/quickView-slice";
-import { updateproductDetails } from "@/redux/features/product-details";
 
 const QuickViewModal = () => {
   const { isModalOpen, closeModal } = useModalContext();
   const { openPreviewModal } = usePreviewSlider();
   const [quantity, setQuantity] = useState(1);
 
-  const dispatch = useDispatch<AppDispatch>();
-
-  // get the product data
-  const product = useAppSelector((state) => state.quickViewReducer.value);
+  const addItemToCart = useCartStore((state) => state.addItemToCart);
+  const updateproductDetails = useProductDetailsStore((state) => state.updateproductDetails);
+  const product = useQuickViewStore((state) => state.value);
 
   const [activePreview, setActivePreview] = useState(0);
 
   // preview modal
   const handlePreviewSlider = () => {
-    dispatch(updateproductDetails(product));
+    updateproductDetails(product);
 
     openPreviewModal();
   };
 
   // add to cart
   const handleAddToCart = () => {
-    dispatch(
-      addItemToCart({
-        ...product,
-        quantity,
-      })
-    );
+    addItemToCart({
+      ...product,
+      quantity,
+    });
 
     closeModal();
   };

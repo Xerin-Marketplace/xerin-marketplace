@@ -1,11 +1,12 @@
 "use client";
 import React from "react";
 import Breadcrumb from "../Common/Breadcrumb";
-import { useAppSelector } from "@/redux/store";
+import { useWishlistStore } from "@/store/useWishlistStore";
 import SingleItem from "./SingleItem";
 
 export const Wishlist = () => {
-  const wishlistItems = useAppSelector((state) => state.wishlistReducer.items);
+  const wishlistItems = useWishlistStore((state) => state.items);
+  const removeAllItemsFromWishlist = useWishlistStore((state) => state.removeAllItemsFromWishlist);
 
   return (
     <>
@@ -14,7 +15,7 @@ export const Wishlist = () => {
         <div className="max-w-[1170px] w-full mx-auto px-4 sm:px-8 xl:px-0">
           <div className="flex flex-wrap items-center justify-between gap-5 mb-7.5">
             <h2 className="font-medium text-dark dark:text-white text-2xl">Your Wishlist</h2>
-            <button className="text-blue">Clear Wishlist Cart</button>
+            <button onClick={() => removeAllItemsFromWishlist()} className="text-blue">Clear Wishlist Cart</button>
           </div>
 
           <div className="bg-white dark:bg-darkTheme-card rounded-[10px] shadow-1">

@@ -1,0 +1,67 @@
+import { create } from "zustand";
+import { persist } from "zustand/middleware";
+
+export type CartItem = {
+  id: number;
+  title: string;
+  price: number;
+  discountedPrice: number;
+  quantity: number;
+  imgs?: {
+    thumbnails: string[];
+    previews: string[];
+  };
+};
+
+interface CartState {
+  items: CartItem[];
+  addItemToCart: (item: CartItem) => void;
+  removeItemFromCart: (id: number) => void;
+  updateCartItemQuantity: (id: number, quantity: number) => void;
+  removeAllItemsFromCart: () => void;
+}
+
+export const useCartStore = create<CartState>()(
+  persist(
+    (set) => ({
+      items: [],
+
+      addItemToCart: (newItem) =>
+        set((state) => {
+          const existingItem = state.items.find((item) => item.id === newItem.id);
+          if (existingItem) {
+            return {
+              items: state.items.map((item) =>
+                item.id === newItem.id
+                  ? { ...item, quantity: item.quantity + newItem.quantity }
+                  : item
+              ),
+            };
+          }
+          return { items: [...state.items, newItem] };
+        }),
+
+      removeItemFromCart: (id) =>
+        set((state) => ({
+          items: state.items.filter((item) => item.id !== id),
+        })),
+
+      updateCartItemQuantity: (id, quantity) =>
+        set((state) => ({
+          items: state.items.map((item) =>
+            item.id === id ? { ...item, quantity } : item
+          ),
+        })),
+
+      removeAllItemsFromCart: () => set({ items: [] }),
+    }),
+    {
+      name: "xerin_cart_store",
+    }
+  )
+);
+
+// Helper selectors
+export const selectCartItems = (state: CartState) => state.items;
+export const selectTotalPrice = (state: CartState) =>
+  state.items.reduce((total, item) => total + item.discountedPrice * item.quantity, 0);

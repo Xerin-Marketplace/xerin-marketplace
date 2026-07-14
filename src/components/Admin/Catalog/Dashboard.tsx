@@ -1,7 +1,7 @@
 "use client";
 
 import { useEffect, useState } from "react";
-import { adminService } from "@/services/admin.service";
+import { adminService } from "@/lib/api/endpoints/admin";
 import { ApiError } from "@/lib/api/client";
 import toast from "react-hot-toast";
 

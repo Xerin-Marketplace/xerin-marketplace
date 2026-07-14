@@ -2,7 +2,7 @@
 
 import { useState } from "react";
 import toast from "react-hot-toast";
-import { adminService, type Order } from "@/services/admin.service";
+import { adminService, type Order } from "@/lib/api/endpoints/admin";
 import { ApiError } from "@/lib/api/client";
 
 const CANCELLATION_REASONS = [

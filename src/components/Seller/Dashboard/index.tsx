@@ -1,8 +1,8 @@
 "use client";
 
 import Breadcrumb from "@/components/Common/Breadcrumb";
-import { productsApi } from "@/lib/api/products";
-import { sellersApi } from "@/lib/api/sellers";
+import { productsApi } from "@/lib/api/endpoints/products";
+import { sellersApi } from "@/lib/api/endpoints/sellers";
 import { ApiError } from "@/lib/api/client";
 import { authStorage } from "@/lib/auth/storage";
 import type { Product } from "@/types/api/product";

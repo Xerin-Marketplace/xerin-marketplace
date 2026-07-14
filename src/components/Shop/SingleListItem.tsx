@@ -3,41 +3,38 @@ import React from "react";
 
 import { Product } from "@/types/product";
 import { useModalContext } from "@/app/context/QuickViewModalContext";
-import { updateQuickView } from "@/redux/features/quickView-slice";
-import { addItemToCart } from "@/redux/features/cart-slice";
-import { addItemToWishlist } from "@/redux/features/wishlist-slice";
-import { useDispatch } from "react-redux";
-import { AppDispatch } from "@/redux/store";
+import { useQuickViewStore } from "@/store/useQuickViewStore";
+import { useCartStore } from "@/store/useCartStore";
+import { useWishlistStore } from "@/store/useWishlistStore";
 import Link from "next/link";
 import Image from "next/image";
 
 const SingleListItem = ({ item }: { item: Product }) => {
   const { openModal } = useModalContext();
-  const dispatch = useDispatch<AppDispatch>();
+
+  const updateQuickView = useQuickViewStore((state) => state.updateQuickView);
+  const addItemToCart = useCartStore((state) => state.addItemToCart);
+  const addItemToWishlist = useWishlistStore((state) => state.addItemToWishlist);
 
   // update the QuickView state
   const handleQuickViewUpdate = () => {
-    dispatch(updateQuickView({ ...item }));
+    updateQuickView({ ...item });
   };
 
   // add to cart
   const handleAddToCart = () => {
-    dispatch(
-      addItemToCart({
-        ...item,
-        quantity: 1,
-      })
-    );
+    addItemToCart({
+      ...item,
+      quantity: 1,
+    });
   };
 
   const handleItemToWishList = () => {
-    dispatch(
-      addItemToWishlist({
-        ...item,
-        status: "available",
-        quantity: 1,
-      })
-    );
+    addItemToWishlist({
+      ...item,
+      status: "available",
+      quantity: 1,
+    });
   };
 
   return (

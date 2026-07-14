@@ -1,7 +1,7 @@
 "use client";
 
 import Breadcrumb from "@/components/Common/Breadcrumb";
-import { sellersApi } from "@/lib/api/sellers";
+import { sellersApi } from "@/lib/api/endpoints/sellers";
 import { ApiError } from "@/lib/api/client";
 import { authStorage } from "@/lib/auth/storage";
 import type { SellerKycDocument, PayoutAccount, SellerKycStatus } from "@/types/api/seller";
