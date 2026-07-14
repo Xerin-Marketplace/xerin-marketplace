@@ -9,13 +9,8 @@ import {
   useMemo,
   useState,
 } from "react";
-import { useDispatch } from "react-redux";
 import { authStorage } from "@/lib/auth/storage";
-import {
-  clearSession as clearReduxSession,
-  setSession as setReduxSession,
-  setTokens as setReduxTokens,
-} from "@/redux/features/auth-slice";
+import { useAuthStore } from "@/store/useAuthStore";
 import type { AuthTokenResponse } from "@/types/api/auth";
 
 type AuthUser = {
@@ -38,7 +33,10 @@ type AuthContextValue = {
 const AuthContext = createContext<AuthContextValue | null>(null);
 
 export default function AuthProvider({ children }: { children: ReactNode }) {
-  const dispatch = useDispatch();
+  const storeSetSession = useAuthStore((state) => state.setSession);
+  const storeSetTokens = useAuthStore((state) => state.setTokens);
+  const storeClearSession = useAuthStore((state) => state.clearSession);
+
   const [user, setUser] = useState<AuthUser | null>(null);
   const [accessToken, setAccessToken] = useState<string | null>(null);
 
@@ -50,30 +48,26 @@ export default function AuthProvider({ children }: { children: ReactNode }) {
       setUser(sessionUser ?? null);
 
       if (sessionUser?.id) {
-        dispatch(
-          setReduxSession({
-            access_token: session.access_token,
-            refresh_token: session.refresh_token,
-            token_type: session.token_type,
-            user: {
-              ...sessionUser,
-              id: String(sessionUser.id),
-            },
-          })
-        );
+        storeSetSession({
+          access_token: session.access_token,
+          refresh_token: session.refresh_token,
+          token_type: session.token_type,
+          user: {
+            ...sessionUser,
+            id: String(sessionUser.id),
+          },
+        });
 
         return;
       }
 
-      dispatch(
-        setReduxTokens({
-          access_token: session.access_token,
-          refresh_token: session.refresh_token,
-          token_type: session.token_type,
-        })
-      );
+      storeSetTokens({
+        access_token: session.access_token,
+        refresh_token: session.refresh_token,
+        token_type: session.token_type,
+      });
     },
-    [dispatch]
+    [storeSetSession, storeSetTokens]
   );
 
   const refreshSession = useCallback(() => {
@@ -82,12 +76,12 @@ export default function AuthProvider({ children }: { children: ReactNode }) {
     if (!session?.access_token) {
       setAccessToken(null);
       setUser(null);
-      dispatch(clearReduxSession());
+      storeClearSession();
       return;
     }
 
     applySession(session);
-  }, [applySession, dispatch]);
+  }, [applySession, storeClearSession]);
 
   const setSession = useCallback(
     (session: AuthTokenResponse) => {
@@ -101,8 +95,8 @@ export default function AuthProvider({ children }: { children: ReactNode }) {
     authStorage.clearSession();
     setAccessToken(null);
     setUser(null);
-    dispatch(clearReduxSession());
-  }, [dispatch]);
+    storeClearSession();
+  }, [storeClearSession]);
 
   useEffect(() => {
     refreshSession();

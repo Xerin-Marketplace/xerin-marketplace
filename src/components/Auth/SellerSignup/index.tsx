@@ -1,7 +1,7 @@
 "use client";
 
-import { authApi } from "@/lib/api/auth";
-import { sellersApi } from "@/lib/api/sellers";
+import { authApi } from "@/lib/api/endpoints/auth";
+import { sellersApi } from "@/lib/api/endpoints/sellers";
 import { ApiError } from "@/lib/api/client";
 import type { SellerBusinessCategory } from "@/types/api/seller";
 import Link from "next/link";

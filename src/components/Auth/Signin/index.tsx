@@ -5,7 +5,7 @@ import { ROUTES } from "@/constants/links";
 import React, { FormEvent, useState } from "react";
 import { useRouter, useSearchParams } from "next/navigation";
 import toast from "react-hot-toast";
-import { authApi } from "@/lib/api/auth";
+import { authApi } from "@/lib/api/endpoints/auth";
 import { ApiError } from "@/lib/api/client";
 import { useAuth } from "@/hooks/useAuth";
 import { getPostLoginPath } from "@/guards/auth-routing";

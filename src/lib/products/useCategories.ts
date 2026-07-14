@@ -1,7 +1,7 @@
 "use client";
 
 import { useEffect, useState } from "react";
-import { productsApi } from "@/lib/api/products";
+import { productsApi } from "@/lib/api/endpoints/products";
 import { mapApiCategoriesToFilters, type UiCategoryFilter } from "./adapters";
 
 export type UseCategoriesResult = {

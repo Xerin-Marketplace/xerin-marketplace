@@ -3,7 +3,7 @@
 import { useEffect, useState } from "react";
 import OrderList from "./OrderList";
 import OrderTracking from "./OrderTracking";
-import { adminService } from "@/services/admin.service";
+import { adminService } from "@/lib/api/endpoints/admin";
 import { ApiError } from "@/lib/api/client";
 
 const VIEW_CONFIG: Record<string, { title: string; subtitle?: string; status?: string }> = {

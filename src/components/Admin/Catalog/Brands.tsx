@@ -1,6 +1,6 @@
 "use client";
 
-import { adminService, type Brand, type CreateBrandPayload, type UpdateBrandPayload } from "@/services/admin.service";
+import { adminService, type Brand, type CreateBrandPayload, type UpdateBrandPayload } from "@/lib/api/endpoints/admin";
 import { ApiError } from "@/lib/api/client";
 import { FormEvent, useEffect, useState } from "react";
 import toast from "react-hot-toast";

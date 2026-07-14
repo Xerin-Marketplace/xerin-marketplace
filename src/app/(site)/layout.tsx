@@ -8,7 +8,6 @@ import Footer from "../../components/Footer";
 
 import { ModalProvider } from "../context/QuickViewModalContext";
 import { CartModalProvider } from "../context/CartSidebarModalContext";
-import { ReduxProvider } from "@/redux/provider";
 import AuthProvider from "@/app/providers/AuthProvider";
 import QueryProvider from "@/app/providers/QueryProvider";
 import QuickViewModal from "@/components/Common/QuickViewModal";
@@ -47,28 +46,26 @@ export default function RootLayout({
         <ThemeProvider>
           <NotificationProvider>
             <QueryProvider>
-              <ReduxProvider>
-                <AuthProvider>
-                  <CartModalProvider>
-                    <ModalProvider>
-                      <PreviewSliderProvider>
-                        {loading ? (
-                          <PreLoader />
-                        ) : (
-                          <>
-                            {!hideStorefrontChrome ? <Header /> : null}
-                            {children}
-                            {!hideStorefrontChrome ? <Footer /> : null}
-                            <QuickViewModal />
-                            <CartSidebarModal />
-                            <PreviewSliderModal />
-                          </>
-                        )}
-                      </PreviewSliderProvider>
-                    </ModalProvider>
-                  </CartModalProvider>
-                </AuthProvider>
-              </ReduxProvider>
+              <AuthProvider>
+                <CartModalProvider>
+                  <ModalProvider>
+                    <PreviewSliderProvider>
+                      {loading ? (
+                        <PreLoader />
+                      ) : (
+                        <>
+                          {!hideStorefrontChrome ? <Header /> : null}
+                          {children}
+                          {!hideStorefrontChrome ? <Footer /> : null}
+                          <QuickViewModal />
+                          <CartSidebarModal />
+                          <PreviewSliderModal />
+                        </>
+                      )}
+                    </PreviewSliderProvider>
+                  </ModalProvider>
+                </CartModalProvider>
+              </AuthProvider>
             </QueryProvider>
           </NotificationProvider>
           <ScrollToTop />

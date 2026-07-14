@@ -4,7 +4,7 @@ import { useEffect, useState } from "react";
 import { useRouter } from "next/navigation";
 import Link from "next/link";
 import toast from "react-hot-toast";
-import { adminService, type Order } from "@/services/admin.service";
+import { adminService, type Order } from "@/lib/api/endpoints/admin";
 import { ApiError } from "@/lib/api/client";
 import OrderStatusModal from "./OrderStatusModal";
 import OrderCancelModal from "./OrderCancelModal";

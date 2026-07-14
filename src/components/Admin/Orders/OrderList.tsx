@@ -3,7 +3,7 @@
 import { useEffect, useMemo, useState } from "react";
 import Link from "next/link";
 import toast from "react-hot-toast";
-import { adminService, type Order, type PaginatedOrders } from "@/services/admin.service";
+import { adminService, type Order, type PaginatedOrders } from "@/lib/api/endpoints/admin";
 import { ApiError } from "@/lib/api/client";
 import OrderStatusModal from "./OrderStatusModal";
 import OrderCancelModal from "./OrderCancelModal";

@@ -3,7 +3,7 @@
 import { useEffect, useState } from "react";
 import Link from "next/link";
 import toast from "react-hot-toast";
-import { adminService, type Order } from "@/services/admin.service";
+import { adminService, type Order } from "@/lib/api/endpoints/admin";
 import { ApiError } from "@/lib/api/client";
 
 const STATUS_BADGE: Record<string, string> = {

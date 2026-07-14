@@ -5,9 +5,7 @@ import { ROUTES } from "@/constants/links";
 import CustomSelect from "./CustomSelect";
 import { menuData } from "./menuData";
 import Dropdown from "./Dropdown";
-import { useAppSelector } from "@/redux/store";
-import { useSelector } from "react-redux";
-import { selectTotalPrice } from "@/redux/features/cart-slice";
+import { useCartStore, selectTotalPrice } from "@/store/useCartStore";
 import { useCartModalContext } from "@/app/context/CartSidebarModalContext";
 import { useTheme } from "@/app/context/ThemeContext";
 import { useAuth } from "@/hooks/useAuth";
@@ -22,8 +20,8 @@ const Header = () => {
   const { theme, toggleTheme } = useTheme();
   const { user, isAuthenticated } = useAuth();
 
-  const product = useAppSelector((state) => state.cartReducer.items);
-  const totalPrice = useSelector(selectTotalPrice);
+  const product = useCartStore((state) => state.items);
+  const totalPrice = useCartStore(selectTotalPrice);
 
   const accountHref = getAccountHref(isAuthenticated, user);
   const accountLabel = getAccountLabel(isAuthenticated, user);

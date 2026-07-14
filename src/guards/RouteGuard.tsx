@@ -2,7 +2,7 @@
 
 import { ReactNode, useEffect } from "react";
 import { usePathname, useRouter } from "next/navigation";
-import { useSelector } from "react-redux";
+import { useAuthStore } from "@/store/useAuthStore";
 import {
   hasAllPermissions,
   hasAnyAccountType,
@@ -37,7 +37,7 @@ export default function RouteGuard({
   const router = useRouter();
   const pathname = usePathname();
 
-  const auth = useSelector((state: any) => state.auth);
+  const auth = useAuthStore();
   const user = auth?.user ?? null;
 
   const isAuthenticated = Boolean(auth?.isAuthenticated || auth?.accessToken || user);

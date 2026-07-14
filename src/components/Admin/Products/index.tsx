@@ -1,6 +1,6 @@
 "use client";
 
-import { adminService, type AdminProduct, type AdminSeller, type Brand, type ProductCategory } from "@/services/admin.service";
+import { adminService, type AdminProduct, type AdminSeller, type Brand, type ProductCategory } from "@/lib/api/endpoints/admin";
 import { ApiError } from "@/lib/api/client";
 import { FormEvent, useEffect, useMemo, useState } from "react";
 import toast from "react-hot-toast";
