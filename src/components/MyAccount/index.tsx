@@ -1,5 +1,6 @@
 "use client";
 import React, { useState } from "react";
+import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { ROUTES } from "@/constants/links";
 import Breadcrumb from "../Common/Breadcrumb";
@@ -7,6 +8,8 @@ import Image from "next/image";
 import AddressModal from "./AddressModal";
 import Orders from "../Orders";
 import { useAuth } from "@/hooks/useAuth";
+import { selectTotalPrice, useCartStore } from "@/store/useCartStore";
+import { useWishlistStore } from "@/store/useWishlistStore";
 
 
 type AccountUser = {
@@ -15,6 +18,10 @@ type AccountUser = {
   full_name?: unknown;
   name?: unknown;
   email?: unknown;
+  phone?: unknown;
+  status?: unknown;
+  is_verified?: unknown;
+  account_type?: unknown;
   created_at?: unknown;
   date_joined?: unknown;
   [key: string]: unknown;
@@ -53,6 +60,27 @@ const getMemberSinceLabel = (user?: AccountUser | null) => {
   }).format(date)}`;
 };
 
+const getAccountStatusLabel = (user?: AccountUser | null) => {
+  const status = getStringValue(user?.status);
+
+  if (!status) {
+    return "Active account";
+  }
+
+  return status
+    .split("_")
+    .filter(Boolean)
+    .map((word) => word.charAt(0).toUpperCase() + word.slice(1))
+    .join(" ");
+};
+
+const formatMoney = (amount: number) =>
+  new Intl.NumberFormat("en-TZ", {
+    style: "currency",
+    currency: "TZS",
+    maximumFractionDigits: 0,
+  }).format(amount);
+
 const MyAccount = () => {
   const router = useRouter();
   const [activeTab, setActiveTab] = useState("dashboard");
@@ -61,6 +89,15 @@ const MyAccount = () => {
   const accountUser = user as AccountUser | null;
   const displayName = getDisplayName(accountUser);
   const memberSinceLabel = getMemberSinceLabel(accountUser);
+  const emailLabel = getStringValue(accountUser?.email) || "No email available";
+  const phoneLabel = getStringValue(accountUser?.phone) || "No phone available";
+  const accountStatusLabel = getAccountStatusLabel(accountUser);
+  const isVerified = Boolean(accountUser?.is_verified);
+  const cartItems = useCartStore((state) => state.items);
+  const cartTotal = useCartStore(selectTotalPrice);
+  const wishlistItems = useWishlistStore((state) => state.items);
+  const cartItemCount = cartItems.reduce((total, item) => total + item.quantity, 0);
+  const wishlistItemCount = wishlistItems.length;
 
   const openAddressModal = () => {
     setAddressModal(true);
@@ -189,9 +226,9 @@ const MyAccount = () => {
                     </button>
 
                     <button
-                      onClick={() => setActiveTab("downloads")}
+                      onClick={() => setActiveTab("payments")}
                       className={`flex items-center rounded-md gap-2.5 py-3 px-4.5 ease-out duration-200 hover:bg-blue hover:text-white ${
-                        activeTab === "downloads"
+                        activeTab === "payments"
                           ? "text-white bg-blue"
                           : "text-dark-2 dark:text-darkTheme-body-color bg-gray-1 dark:bg-darkTheme-secondary-bg"
                       }`}
@@ -213,7 +250,7 @@ const MyAccount = () => {
                           fill=""
                         />
                       </svg>
-                      Downloads
+                      Payments
                     </button>
 
                     <button
@@ -244,6 +281,76 @@ const MyAccount = () => {
                         />
                       </svg>
                       Addresses
+                    </button>
+
+                    <button
+                      onClick={() => setActiveTab("cart")}
+                      className={`flex items-center rounded-md gap-2.5 py-3 px-4.5 ease-out duration-200 hover:bg-blue hover:text-white ${
+                        activeTab === "cart"
+                          ? "text-white bg-blue"
+                          : "text-dark-2 dark:text-darkTheme-body-color bg-gray-1 dark:bg-darkTheme-secondary-bg"
+                      }`}
+                    >
+                      <span className="flex h-5 w-5 items-center justify-center rounded-full border border-current text-[11px] font-semibold">
+                        C
+                      </span>
+                      Cart Summary
+                    </button>
+
+                    <button
+                      onClick={() => setActiveTab("wishlist")}
+                      className={`flex items-center rounded-md gap-2.5 py-3 px-4.5 ease-out duration-200 hover:bg-blue hover:text-white ${
+                        activeTab === "wishlist"
+                          ? "text-white bg-blue"
+                          : "text-dark-2 dark:text-darkTheme-body-color bg-gray-1 dark:bg-darkTheme-secondary-bg"
+                      }`}
+                    >
+                      <span className="flex h-5 w-5 items-center justify-center rounded-full border border-current text-[11px] font-semibold">
+                        W
+                      </span>
+                      Saved Items
+                    </button>
+
+                    <button
+                      onClick={() => setActiveTab("reviews")}
+                      className={`flex items-center rounded-md gap-2.5 py-3 px-4.5 ease-out duration-200 hover:bg-blue hover:text-white ${
+                        activeTab === "reviews"
+                          ? "text-white bg-blue"
+                          : "text-dark-2 dark:text-darkTheme-body-color bg-gray-1 dark:bg-darkTheme-secondary-bg"
+                      }`}
+                    >
+                      <span className="flex h-5 w-5 items-center justify-center rounded-full border border-current text-[11px] font-semibold">
+                        R
+                      </span>
+                      Reviews
+                    </button>
+
+                    <button
+                      onClick={() => setActiveTab("notifications")}
+                      className={`flex items-center rounded-md gap-2.5 py-3 px-4.5 ease-out duration-200 hover:bg-blue hover:text-white ${
+                        activeTab === "notifications"
+                          ? "text-white bg-blue"
+                          : "text-dark-2 dark:text-darkTheme-body-color bg-gray-1 dark:bg-darkTheme-secondary-bg"
+                      }`}
+                    >
+                      <span className="flex h-5 w-5 items-center justify-center rounded-full border border-current text-[11px] font-semibold">
+                        N
+                      </span>
+                      Notifications
+                    </button>
+
+                    <button
+                      onClick={() => setActiveTab("security")}
+                      className={`flex items-center rounded-md gap-2.5 py-3 px-4.5 ease-out duration-200 hover:bg-blue hover:text-white ${
+                        activeTab === "security"
+                          ? "text-white bg-blue"
+                          : "text-dark-2 dark:text-darkTheme-body-color bg-gray-1 dark:bg-darkTheme-secondary-bg"
+                      }`}
+                    >
+                      <span className="flex h-5 w-5 items-center justify-center rounded-full border border-current text-[11px] font-semibold">
+                        S
+                      </span>
+                      Security
                     </button>
 
                     <button
@@ -316,25 +423,152 @@ const MyAccount = () => {
             {/* <!-- dashboard tab content start --> */}
 
             <div
-              className={`xl:max-w-[770px] w-full bg-white dark:bg-darkTheme-card rounded-xl shadow-1 py-9.5 px-4 sm:px-7.5 xl:px-10 ${
+              className={`xl:max-w-[770px] w-full space-y-6 ${
                 activeTab === "dashboard" ? "block" : "hidden"
               }`}
             >
-              <p className="text-dark dark:text-darkTheme-body-color">
-                Welcome to your Xerin Market account. Not your account?
-                <a
-                  href={ROUTES.signin}
-                  className="text-red ease-out duration-200 hover:underline"
-                >
-                  Log Out
-                </a>
-              </p>
+              <div className="rounded-xl bg-white dark:bg-darkTheme-card shadow-1 py-8 px-4 sm:px-7.5 xl:px-10">
+                <div className="flex flex-col lg:flex-row lg:items-center lg:justify-between gap-6">
+                  <div>
+                    <span className="inline-flex rounded-full bg-blue/10 px-4 py-2 text-custom-sm font-medium text-blue">
+                      Buyer Dashboard
+                    </span>
 
-              <p className="text-custom-sm dark:text-darkTheme-secondary-muted mt-4">
-                Use your account dashboard to review recent orders, track Xerin
-                Logistics deliveries, manage addresses, and update your
-                password or account details.
-              </p>
+                    <h2 className="mt-4 text-2xl font-semibold text-dark dark:text-white">
+                      Welcome back, {displayName}
+                    </h2>
+
+                    <p className="mt-3 text-custom-sm leading-6 text-dark-4 dark:text-darkTheme-secondary-muted">
+                      Review orders, manage addresses, track cart items, and keep
+                      your Xerin Market account ready for checkout.
+                    </p>
+                  </div>
+
+                  <div className="rounded-lg border border-gray-3 dark:border-darkTheme-border-color px-5 py-4">
+                    <p className="text-custom-xs uppercase tracking-wide text-dark-4 dark:text-darkTheme-secondary-muted">
+                      Account Status
+                    </p>
+                    <p className="mt-1 font-medium text-dark dark:text-white">
+                      {accountStatusLabel}
+                    </p>
+                    <p className="mt-1 text-custom-xs text-dark-4 dark:text-darkTheme-secondary-muted">
+                      {isVerified ? "Verified customer" : "Verification pending"}
+                    </p>
+                  </div>
+                </div>
+              </div>
+
+              <div className="grid grid-cols-1 sm:grid-cols-2 xl:grid-cols-4 gap-4">
+                <div className="rounded-xl bg-white dark:bg-darkTheme-card shadow-1 p-5">
+                  <p className="text-custom-sm text-dark-4 dark:text-darkTheme-secondary-muted">
+                    Cart Items
+                  </p>
+                  <h3 className="mt-2 text-2xl font-semibold text-dark dark:text-white">
+                    {cartItemCount}
+                  </h3>
+                  <p className="mt-1 text-custom-xs text-dark-4 dark:text-darkTheme-secondary-muted">
+                    {formatMoney(cartTotal)}
+                  </p>
+                </div>
+
+                <div className="rounded-xl bg-white dark:bg-darkTheme-card shadow-1 p-5">
+                  <p className="text-custom-sm text-dark-4 dark:text-darkTheme-secondary-muted">
+                    Wishlist
+                  </p>
+                  <h3 className="mt-2 text-2xl font-semibold text-dark dark:text-white">
+                    {wishlistItemCount}
+                  </h3>
+                  <p className="mt-1 text-custom-xs text-dark-4 dark:text-darkTheme-secondary-muted">
+                    Saved products
+                  </p>
+                </div>
+
+                <div className="rounded-xl bg-white dark:bg-darkTheme-card shadow-1 p-5">
+                  <p className="text-custom-sm text-dark-4 dark:text-darkTheme-secondary-muted">
+                    Orders
+                  </p>
+                  <h3 className="mt-2 text-2xl font-semibold text-dark dark:text-white">
+                    0
+                  </h3>
+                  <p className="mt-1 text-custom-xs text-dark-4 dark:text-darkTheme-secondary-muted">
+                    Waiting for API data
+                  </p>
+                </div>
+
+                <div className="rounded-xl bg-white dark:bg-darkTheme-card shadow-1 p-5">
+                  <p className="text-custom-sm text-dark-4 dark:text-darkTheme-secondary-muted">
+                    Addresses
+                  </p>
+                  <h3 className="mt-2 text-2xl font-semibold text-dark dark:text-white">
+                    0
+                  </h3>
+                  <p className="mt-1 text-custom-xs text-dark-4 dark:text-darkTheme-secondary-muted">
+                    Add delivery details
+                  </p>
+                </div>
+              </div>
+
+              <div className="rounded-xl bg-white dark:bg-darkTheme-card shadow-1 py-7 px-4 sm:px-7.5 xl:px-10">
+                <div className="flex flex-col lg:flex-row lg:items-center lg:justify-between gap-5">
+                  <div>
+                    <h3 className="text-lg font-semibold text-dark dark:text-white">
+                      Quick Actions
+                    </h3>
+                    <p className="mt-2 text-custom-sm text-dark-4 dark:text-darkTheme-secondary-muted">
+                      Continue shopping, review cart, or update your account details.
+                    </p>
+                  </div>
+
+                  <div className="flex flex-wrap gap-3">
+                    <Link
+                      href="/shop-with-sidebar"
+                      className="inline-flex rounded-md bg-blue px-5 py-3 text-custom-sm font-medium text-white hover:bg-blue-dark"
+                    >
+                      Continue Shopping
+                    </Link>
+
+                    <Link
+                      href="/cart"
+                      className="inline-flex rounded-md bg-gray-1 dark:bg-darkTheme-secondary-bg px-5 py-3 text-custom-sm font-medium text-dark dark:text-white hover:text-blue"
+                    >
+                      View Cart
+                    </Link>
+
+                    <button
+                      onClick={() => setActiveTab("addresses")}
+                      className="inline-flex rounded-md bg-gray-1 dark:bg-darkTheme-secondary-bg px-5 py-3 text-custom-sm font-medium text-dark dark:text-white hover:text-blue"
+                    >
+                      Manage Addresses
+                    </button>
+                  </div>
+                </div>
+              </div>
+
+              <div className="rounded-xl bg-white dark:bg-darkTheme-card shadow-1 py-7 px-4 sm:px-7.5 xl:px-10">
+                <h3 className="text-lg font-semibold text-dark dark:text-white">
+                  Account Summary
+                </h3>
+
+                <div className="mt-5 grid grid-cols-1 sm:grid-cols-2 gap-4">
+                  <div className="rounded-lg border border-gray-3 dark:border-darkTheme-border-color p-4">
+                    <p className="text-custom-xs text-dark-4 dark:text-darkTheme-secondary-muted">
+                      Email
+                    </p>
+                    <p className="mt-1 text-custom-sm font-medium text-dark dark:text-white">
+                      {emailLabel}
+                    </p>
+                  </div>
+
+                  <div className="rounded-lg border border-gray-3 dark:border-darkTheme-border-color p-4">
+                    <p className="text-custom-xs text-dark-4 dark:text-darkTheme-secondary-muted">
+                      Phone
+                    </p>
+                    <p className="mt-1 text-custom-sm font-medium text-dark dark:text-white">
+                      {phoneLabel}
+                    </p>
+                  </div>
+                </div>
+              </div>
             </div>
             {/* <!-- dashboard tab content end -->
 
@@ -344,21 +578,132 @@ const MyAccount = () => {
                 activeTab === "orders" ? "block" : "hidden"
               }`}
             >
+              <div className="py-7 px-4 sm:px-7.5 xl:px-10 border-b border-gray-3 dark:border-darkTheme-border-color">
+                <div className="flex flex-col lg:flex-row lg:items-center lg:justify-between gap-4">
+                  <div>
+                    <h3 className="text-xl font-semibold text-dark dark:text-white">
+                      Orders & Tracking
+                    </h3>
+                    <p className="mt-2 text-custom-sm text-dark-4 dark:text-darkTheme-secondary-muted">
+                      View order history, track delivery status, request cancellation,
+                      start returns, and download invoices.
+                    </p>
+                  </div>
+
+                  <Link
+                    href="/orders"
+                    className="inline-flex w-fit rounded-md bg-blue px-5 py-3 text-custom-sm font-medium text-white hover:bg-blue-dark"
+                  >
+                    Open Orders Page
+                  </Link>
+                </div>
+
+                <div className="mt-6 grid grid-cols-1 sm:grid-cols-3 gap-4">
+                  <div className="rounded-lg bg-gray-1 dark:bg-darkTheme-secondary-bg p-4">
+                    <p className="text-custom-xs text-dark-4 dark:text-darkTheme-secondary-muted">
+                      Payment
+                    </p>
+                    <p className="mt-1 font-medium text-dark dark:text-white">
+                      Pending / Confirmed
+                    </p>
+                  </div>
+
+                  <div className="rounded-lg bg-gray-1 dark:bg-darkTheme-secondary-bg p-4">
+                    <p className="text-custom-xs text-dark-4 dark:text-darkTheme-secondary-muted">
+                      Delivery
+                    </p>
+                    <p className="mt-1 font-medium text-dark dark:text-white">
+                      Processing to Delivered
+                    </p>
+                  </div>
+
+                  <div className="rounded-lg bg-gray-1 dark:bg-darkTheme-secondary-bg p-4">
+                    <p className="text-custom-xs text-dark-4 dark:text-darkTheme-secondary-muted">
+                      After Sale
+                    </p>
+                    <p className="mt-1 font-medium text-dark dark:text-white">
+                      Cancel / Return / Refund
+                    </p>
+                  </div>
+                </div>
+              </div>
+
               <Orders />
+
+              <div className="py-7 px-4 sm:px-7.5 xl:px-10 border-t border-gray-3 dark:border-darkTheme-border-color">
+                <h4 className="font-semibold text-dark dark:text-white">
+                  Sample Order Timeline
+                </h4>
+
+                <div className="mt-5 grid grid-cols-1 md:grid-cols-5 gap-3">
+                  {["Pending Payment", "Payment Confirmed", "Processing", "In Transit", "Delivered"].map((status) => (
+                    <div
+                      key={status}
+                      className="rounded-lg border border-gray-3 dark:border-darkTheme-border-color p-4"
+                    >
+                      <span className="block h-2 w-2 rounded-full bg-blue" />
+                      <p className="mt-3 text-custom-sm font-medium text-dark dark:text-white">
+                        {status}
+                      </p>
+                    </div>
+                  ))}
+                </div>
+              </div>
             </div>
             {/* <!-- orders tab content end -->
 
           <!-- downloads tab content start --> */}
             <div
               className={`xl:max-w-[770px] w-full bg-white dark:bg-darkTheme-card rounded-xl shadow-1 py-9.5 px-4 sm:px-7.5 xl:px-10 ${
-                activeTab === "downloads" ? "block" : "hidden"
+                activeTab === "payments" ? "block" : "hidden"
               }`}
             >
-              <p className="dark:text-darkTheme-body-color">No digital receipts or downloadable files are available yet.</p>
-            </div>
-            {/* <!-- downloads tab content end -->
+              <div className="flex flex-col lg:flex-row lg:items-center lg:justify-between gap-4">
+                <div>
+                  <h3 className="text-xl font-semibold text-dark dark:text-white">
+                    Payments & Invoices
+                  </h3>
+                  <p className="mt-2 text-custom-sm text-dark-4 dark:text-darkTheme-secondary-muted">
+                    Manage payment methods, view payment status, and download
+                    invoices or receipts after successful orders.
+                  </p>
+                </div>
 
-          <!-- addresses tab content start --> */}
+                <span className="inline-flex w-fit rounded-full bg-green-light-6 px-4 py-2 text-custom-sm font-medium text-green">
+                  UI ready for payment API
+                </span>
+              </div>
+
+              <div className="mt-7 grid grid-cols-1 sm:grid-cols-2 gap-4">
+                <div className="rounded-lg border border-gray-3 dark:border-darkTheme-border-color p-5">
+                  <p className="font-medium text-dark dark:text-white">
+                    Mobile Money
+                  </p>
+                  <p className="mt-2 text-custom-sm text-dark-4 dark:text-darkTheme-secondary-muted">
+                    M-Pesa, Airtel Money, Tigo Pesa, and MTN MoMo support.
+                  </p>
+                </div>
+
+                <div className="rounded-lg border border-gray-3 dark:border-darkTheme-border-color p-5">
+                  <p className="font-medium text-dark dark:text-white">
+                    Card / Bank Transfer
+                  </p>
+                  <p className="mt-2 text-custom-sm text-dark-4 dark:text-darkTheme-secondary-muted">
+                    Visa, Mastercard, Verve, and direct bank transfer flows.
+                  </p>
+                </div>
+              </div>
+
+              <div className="mt-6 rounded-lg bg-gray-1 dark:bg-darkTheme-secondary-bg p-5">
+                <h4 className="font-medium text-dark dark:text-white">
+                  Invoice & Receipt Center
+                </h4>
+                <p className="mt-2 text-custom-sm text-dark-4 dark:text-darkTheme-secondary-muted">
+                  Receipts and invoices will appear here after successful orders.
+                  Buyer will be able to download PDF receipts from each order.
+                </p>
+              </div>
+            </div>
             <div
               className={`flex-col sm:flex-row gap-7.5 ${
                 activeTab === "addresses" ? "flex" : "hidden"
@@ -435,7 +780,7 @@ const MyAccount = () => {
                           fill=""
                         />
                       </svg>
-                      Email: jamse@example.com
+                      Email: {emailLabel}
                     </p>
 
                     <p className="flex items-center gap-2.5 text-custom-sm">
@@ -464,7 +809,7 @@ const MyAccount = () => {
                           fill=""
                         />
                       </svg>
-                      Phone: 1234 567890
+                      Phone: {phoneLabel}
                     </p>
 
                     <p className="flex gap-2.5 text-custom-sm">
@@ -490,7 +835,7 @@ const MyAccount = () => {
                           </clipPath>
                         </defs>
                       </svg>
-                      Address: 7398 Smoke Ranch RoadLas Vegas, Nevada 89128
+                      Address: Add your delivery address
                     </p>
                   </div>
                 </div>
@@ -567,7 +912,7 @@ const MyAccount = () => {
                           fill=""
                         />
                       </svg>
-                      Email: jamse@example.com
+                      Email: {emailLabel}
                     </p>
 
                     <p className="flex items-center gap-2.5 text-custom-sm">
@@ -596,7 +941,7 @@ const MyAccount = () => {
                           fill=""
                         />
                       </svg>
-                      Phone: 1234 567890
+                      Phone: {phoneLabel}
                     </p>
 
                     <p className="flex gap-2.5 text-custom-sm">
@@ -622,7 +967,7 @@ const MyAccount = () => {
                           </clipPath>
                         </defs>
                       </svg>
-                      Address: 7398 Smoke Ranch RoadLas Vegas, Nevada 89128
+                      Address: Add your delivery address
                     </p>
                   </div>
                 </div>
@@ -631,6 +976,211 @@ const MyAccount = () => {
             {/* <!-- addresses tab content end -->
 
           <!-- details tab content start --> */}
+            {/* <!-- cart tab content start --> */}
+            <div
+              className={`xl:max-w-[770px] w-full bg-white dark:bg-darkTheme-card rounded-xl shadow-1 py-9.5 px-4 sm:px-7.5 xl:px-10 ${
+                activeTab === "cart" ? "block" : "hidden"
+              }`}
+            >
+              <h3 className="text-xl font-semibold text-dark dark:text-white">
+                Cart Summary
+              </h3>
+              <p className="mt-2 text-custom-sm text-dark-4 dark:text-darkTheme-secondary-muted">
+                Review cart totals, estimated delivery charges, taxes, and coupon readiness.
+              </p>
+
+              <div className="mt-7 grid grid-cols-1 sm:grid-cols-3 gap-4">
+                <div className="rounded-lg border border-gray-3 dark:border-darkTheme-border-color p-5">
+                  <p className="text-custom-sm text-dark-4 dark:text-darkTheme-secondary-muted">
+                    Items
+                  </p>
+                  <p className="mt-2 text-2xl font-semibold text-dark dark:text-white">
+                    {cartItemCount}
+                  </p>
+                </div>
+
+                <div className="rounded-lg border border-gray-3 dark:border-darkTheme-border-color p-5">
+                  <p className="text-custom-sm text-dark-4 dark:text-darkTheme-secondary-muted">
+                    Subtotal
+                  </p>
+                  <p className="mt-2 text-2xl font-semibold text-dark dark:text-white">
+                    {formatMoney(cartTotal)}
+                  </p>
+                </div>
+
+                <div className="rounded-lg border border-gray-3 dark:border-darkTheme-border-color p-5">
+                  <p className="text-custom-sm text-dark-4 dark:text-darkTheme-secondary-muted">
+                    Coupon
+                  </p>
+                  <p className="mt-2 text-lg font-semibold text-dark dark:text-white">
+                    Ready
+                  </p>
+                </div>
+              </div>
+
+              <div className="mt-6 flex flex-wrap gap-3">
+                <Link
+                  href="/cart"
+                  className="inline-flex rounded-md bg-blue px-5 py-3 text-custom-sm font-medium text-white hover:bg-blue-dark"
+                >
+                  Open Cart
+                </Link>
+
+                <Link
+                  href="/checkout"
+                  className="inline-flex rounded-md bg-gray-1 dark:bg-darkTheme-secondary-bg px-5 py-3 text-custom-sm font-medium text-dark dark:text-white hover:text-blue"
+                >
+                  Proceed to Checkout
+                </Link>
+              </div>
+            </div>
+            {/* <!-- cart tab content end --> */}
+
+            {/* <!-- wishlist tab content start --> */}
+            <div
+              className={`xl:max-w-[770px] w-full bg-white dark:bg-darkTheme-card rounded-xl shadow-1 py-9.5 px-4 sm:px-7.5 xl:px-10 ${
+                activeTab === "wishlist" ? "block" : "hidden"
+              }`}
+            >
+              <h3 className="text-xl font-semibold text-dark dark:text-white">
+                Saved Items / Wishlist
+              </h3>
+              <p className="mt-2 text-custom-sm text-dark-4 dark:text-darkTheme-secondary-muted">
+                Save products for later and move them to cart when ready.
+              </p>
+
+              <div className="mt-7 rounded-lg bg-gray-1 dark:bg-darkTheme-secondary-bg p-5">
+                <p className="text-custom-sm text-dark-4 dark:text-darkTheme-secondary-muted">
+                  Saved products
+                </p>
+                <p className="mt-2 text-3xl font-semibold text-dark dark:text-white">
+                  {wishlistItemCount}
+                </p>
+              </div>
+
+              <Link
+                href="/wishlist"
+                className="mt-6 inline-flex rounded-md bg-blue px-5 py-3 text-custom-sm font-medium text-white hover:bg-blue-dark"
+              >
+                Open Wishlist
+              </Link>
+            </div>
+            {/* <!-- wishlist tab content end --> */}
+
+            {/* <!-- reviews tab content start --> */}
+            <div
+              className={`xl:max-w-[770px] w-full bg-white dark:bg-darkTheme-card rounded-xl shadow-1 py-9.5 px-4 sm:px-7.5 xl:px-10 ${
+                activeTab === "reviews" ? "block" : "hidden"
+              }`}
+            >
+              <h3 className="text-xl font-semibold text-dark dark:text-white">
+                Reviews & Ratings
+              </h3>
+              <p className="mt-2 text-custom-sm text-dark-4 dark:text-darkTheme-secondary-muted">
+                Review delivered products, rate sellers, and manage review history.
+              </p>
+
+              <div className="mt-7 grid grid-cols-1 sm:grid-cols-2 gap-4">
+                <div className="rounded-lg border border-gray-3 dark:border-darkTheme-border-color p-5">
+                  <p className="font-medium text-dark dark:text-white">
+                    Product Reviews
+                  </p>
+                  <p className="mt-2 text-custom-sm text-dark-4 dark:text-darkTheme-secondary-muted">
+                    Rate purchased products from 1 to 5 stars and write feedback.
+                  </p>
+                </div>
+
+                <div className="rounded-lg border border-gray-3 dark:border-darkTheme-border-color p-5">
+                  <p className="font-medium text-dark dark:text-white">
+                    Seller Ratings
+                  </p>
+                  <p className="mt-2 text-custom-sm text-dark-4 dark:text-darkTheme-secondary-muted">
+                    Rate seller communication, packaging, and delivery speed.
+                  </p>
+                </div>
+              </div>
+            </div>
+            {/* <!-- reviews tab content end --> */}
+
+            {/* <!-- notifications tab content start --> */}
+            <div
+              className={`xl:max-w-[770px] w-full bg-white dark:bg-darkTheme-card rounded-xl shadow-1 py-9.5 px-4 sm:px-7.5 xl:px-10 ${
+                activeTab === "notifications" ? "block" : "hidden"
+              }`}
+            >
+              <h3 className="text-xl font-semibold text-dark dark:text-white">
+                Notification Preferences
+              </h3>
+              <p className="mt-2 text-custom-sm text-dark-4 dark:text-darkTheme-secondary-muted">
+                Control alerts for orders, payments, delivery updates, returns,
+                refunds, promotions, and account security.
+              </p>
+
+              <div className="mt-7 grid grid-cols-1 sm:grid-cols-2 gap-4">
+                {["Email alerts", "SMS alerts", "Push notifications", "Promotional offers"].map((item) => (
+                  <label
+                    key={item}
+                    className="flex items-center justify-between gap-4 rounded-lg border border-gray-3 dark:border-darkTheme-border-color p-5"
+                  >
+                    <span className="font-medium text-dark dark:text-white">
+                      {item}
+                    </span>
+                    <input
+                      type="checkbox"
+                      defaultChecked
+                      className="h-4 w-4 accent-blue"
+                    />
+                  </label>
+                ))}
+              </div>
+            </div>
+            {/* <!-- notifications tab content end --> */}
+
+            {/* <!-- security tab content start --> */}
+            <div
+              className={`xl:max-w-[770px] w-full bg-white dark:bg-darkTheme-card rounded-xl shadow-1 py-9.5 px-4 sm:px-7.5 xl:px-10 ${
+                activeTab === "security" ? "block" : "hidden"
+              }`}
+            >
+              <h3 className="text-xl font-semibold text-dark dark:text-white">
+                Account Security
+              </h3>
+              <p className="mt-2 text-custom-sm text-dark-4 dark:text-darkTheme-secondary-muted">
+                Manage password, two-factor authentication, account sessions,
+                and account deletion requests.
+              </p>
+
+              <div className="mt-7 space-y-4">
+                <div className="rounded-lg border border-gray-3 dark:border-darkTheme-border-color p-5">
+                  <p className="font-medium text-dark dark:text-white">
+                    Password Management
+                  </p>
+                  <p className="mt-2 text-custom-sm text-dark-4 dark:text-darkTheme-secondary-muted">
+                    Password reset and change password flow will connect to auth API.
+                  </p>
+                </div>
+
+                <div className="rounded-lg border border-gray-3 dark:border-darkTheme-border-color p-5">
+                  <p className="font-medium text-dark dark:text-white">
+                    Two-Factor Authentication
+                  </p>
+                  <p className="mt-2 text-custom-sm text-dark-4 dark:text-darkTheme-secondary-muted">
+                    Supports SMS OTP or authenticator app once backend endpoints are ready.
+                  </p>
+                </div>
+
+                <div className="rounded-lg border border-red-light-4 bg-red-light-6 p-5">
+                  <p className="font-medium text-red">
+                    Deactivate or Delete Account
+                  </p>
+                  <p className="mt-2 text-custom-sm text-red">
+                    Customer data deletion request will require confirmation and API approval.
+                  </p>
+                </div>
+              </div>
+            </div>
+            {/* <!-- security tab content end --> */}
+
             <div
               className={`xl:max-w-[770px] w-full ${
                 activeTab === "account-details" ? "block" : "hidden"
