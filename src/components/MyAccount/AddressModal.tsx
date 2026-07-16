@@ -1,10 +1,54 @@
-import React, { useEffect } from "react";
+"use client";
 
-const AddressModal = ({ isOpen, closeModal }) => {
+import React, { FormEvent, useEffect, useState } from "react";
+import type { Address, AddressRequest } from "@/types/api/user";
+
+type AddressModalProps = {
+  isOpen: boolean;
+  closeModal: () => void;
+  initialAddress?: Address | null;
+  isSubmitting?: boolean;
+  onSubmit: (payload: AddressRequest) => Promise<void> | void;
+};
+
+const emptyForm: AddressRequest = {
+  country: "",
+  region: "",
+  city: "",
+  street: "",
+  postal_code: "",
+  is_default: false,
+};
+
+const AddressModal = ({
+  isOpen,
+  closeModal,
+  initialAddress,
+  isSubmitting = false,
+  onSubmit,
+}: AddressModalProps) => {
+  const [form, setForm] = useState<AddressRequest>(emptyForm);
+
   useEffect(() => {
-    // closing modal while clicking outside
-    function handleClickOutside(event) {
-      if (!event.target.closest(".modal-content")) {
+    if (!isOpen) {
+      return;
+    }
+
+    setForm({
+      country: initialAddress?.country ?? "",
+      region: initialAddress?.region ?? "",
+      city: initialAddress?.city ?? "",
+      street: initialAddress?.street ?? "",
+      postal_code: initialAddress?.postal_code ?? "",
+      is_default: Boolean(initialAddress?.is_default),
+    });
+  }, [initialAddress, isOpen]);
+
+  useEffect(() => {
+    function handleClickOutside(event: MouseEvent) {
+      const target = event.target as HTMLElement | null;
+
+      if (target && !target.closest(".modal-content")) {
         closeModal();
       }
     }
@@ -18,20 +62,39 @@ const AddressModal = ({ isOpen, closeModal }) => {
     };
   }, [isOpen, closeModal]);
 
+  const handleChange = (field: keyof AddressRequest, value: string | boolean) => {
+    setForm((current) => ({
+      ...current,
+      [field]: value,
+    }));
+  };
+
+  const handleSubmit = async (event: FormEvent<HTMLFormElement>) => {
+    event.preventDefault();
+
+    await onSubmit({
+      country: form.country.trim(),
+      region: form.region.trim(),
+      city: form.city.trim(),
+      street: form.street.trim(),
+      postal_code: form.postal_code?.trim() || null,
+      is_default: Boolean(form.is_default),
+    });
+  };
+
   return (
     <div
-      className={`fixed top-0 left-0 overflow-y-auto no-scrollbar w-full h-screen sm:py-20 xl:py-25 2xl:py-[230px] bg-dark/70 sm:px-8 px-4 py-5 ${isOpen ? "block z-99999" : "hidden"
-        }`}
+      className={`fixed top-0 left-0 overflow-y-auto no-scrollbar w-full h-screen sm:py-20 xl:py-25 2xl:py-[230px] bg-dark/70 sm:px-8 px-4 py-5 ${
+        isOpen ? "block z-99999" : "hidden"
+      }`}
     >
-      <div className="flex items-center justify-center ">
-        <div
-          x-show="addressModal"
-          className="w-full max-w-[1100px] rounded-xl shadow-3 bg-white dark:bg-darkTheme-card p-7.5 relative modal-content"
-        >
+      <div className="flex items-center justify-center">
+        <div className="w-full max-w-[760px] rounded-xl shadow-3 bg-white dark:bg-darkTheme-card p-7.5 relative modal-content">
           <button
             onClick={closeModal}
             aria-label="button for close modal"
             className="absolute top-0 right-0 sm:top-3 sm:right-3 flex items-center justify-center w-10 h-10 rounded-full ease-in duration-150 bg-meta text-body hover:text-dark"
+            type="button"
           >
             <svg
               className="fill-current"
@@ -51,69 +114,133 @@ const AddressModal = ({ isOpen, closeModal }) => {
           </button>
 
           <div>
-            <form>
-              <div className="flex flex-col lg:flex-row gap-5 sm:gap-8 mb-5">
-                <div className="w-full">
-                  <label htmlFor="name" className="block mb-2.5 dark:text-darkTheme-body-color">
-                    Name
+            <div className="mb-7">
+              <h3 className="text-xl font-semibold text-dark dark:text-white">
+                {initialAddress ? "Edit Address" : "Add Address"}
+              </h3>
+              <p className="mt-2 text-custom-sm text-dark-4 dark:text-darkTheme-secondary-muted">
+                Add delivery details exactly as required by the backend address schema.
+              </p>
+            </div>
+
+            <form onSubmit={handleSubmit}>
+              <div className="grid grid-cols-1 sm:grid-cols-2 gap-5 mb-5">
+                <div>
+                  <label htmlFor="country" className="block mb-2.5 dark:text-darkTheme-body-color">
+                    Country <span className="text-red">*</span>
                   </label>
 
                   <input
+                    id="country"
                     type="text"
-                    name="name"
-                    value="James Septimus"
-                    className="rounded-md border border-gray-3 dark:border-darkTheme-border-color bg-gray-1 dark:bg-darkTheme-secondary-bg dark:text-darkTheme-body-color placeholder:text-dark-4 dark:placeholder:text-darkTheme-secondary-muted w-full py-2.5 px-5 outline-none duration-200 focus:border-transparent focus:shadow-input focus:ring-2 focus:ring-blue/20"
+                    value={form.country}
+                    onChange={(event) => handleChange("country", event.target.value)}
+                    placeholder="Tanzania"
+                    required
+                    disabled={isSubmitting}
+                    className="rounded-md border border-gray-3 dark:border-darkTheme-border-color bg-gray-1 dark:bg-darkTheme-secondary-bg dark:text-darkTheme-body-color placeholder:text-dark-4 dark:placeholder:text-darkTheme-secondary-muted w-full py-2.5 px-5 outline-none duration-200 focus:border-transparent focus:shadow-input focus:ring-2 focus:ring-blue/20 disabled:opacity-70"
                   />
                 </div>
 
-                <div className="w-full">
-                  <label htmlFor="email" className="block mb-2.5 dark:text-darkTheme-body-color">
-                    Email
+                <div>
+                  <label htmlFor="region" className="block mb-2.5 dark:text-darkTheme-body-color">
+                    Region <span className="text-red">*</span>
                   </label>
 
                   <input
-                    type="email"
-                    name="email"
-                    value="jamse@example.com"
-                    className="rounded-md border border-gray-3 dark:border-darkTheme-border-color bg-gray-1 dark:bg-darkTheme-secondary-bg dark:text-darkTheme-body-color placeholder:text-dark-4 dark:placeholder:text-darkTheme-secondary-muted w-full py-2.5 px-5 outline-none duration-200 focus:border-transparent focus:shadow-input focus:ring-2 focus:ring-blue/20"
+                    id="region"
+                    type="text"
+                    value={form.region}
+                    onChange={(event) => handleChange("region", event.target.value)}
+                    placeholder="Dar es Salaam"
+                    required
+                    disabled={isSubmitting}
+                    className="rounded-md border border-gray-3 dark:border-darkTheme-border-color bg-gray-1 dark:bg-darkTheme-secondary-bg dark:text-darkTheme-body-color placeholder:text-dark-4 dark:placeholder:text-darkTheme-secondary-muted w-full py-2.5 px-5 outline-none duration-200 focus:border-transparent focus:shadow-input focus:ring-2 focus:ring-blue/20 disabled:opacity-70"
                   />
                 </div>
               </div>
 
-              <div className="flex flex-col lg:flex-row gap-5 sm:gap-8 mb-5">
-                <div className="w-full">
-                  <label htmlFor="phone" className="block mb-2.5 dark:text-darkTheme-body-color">
-                    Phone
+              <div className="grid grid-cols-1 sm:grid-cols-2 gap-5 mb-5">
+                <div>
+                  <label htmlFor="city" className="block mb-2.5 dark:text-darkTheme-body-color">
+                    City <span className="text-red">*</span>
                   </label>
 
                   <input
+                    id="city"
                     type="text"
-                    name="phone"
-                    value="1234 567890"
-                    className="rounded-md border border-gray-3 dark:border-darkTheme-border-color bg-gray-1 dark:bg-darkTheme-secondary-bg dark:text-darkTheme-body-color placeholder:text-dark-4 dark:placeholder:text-darkTheme-secondary-muted w-full py-2.5 px-5 outline-none duration-200 focus:border-transparent focus:shadow-input focus:ring-2 focus:ring-blue/20"
+                    value={form.city}
+                    onChange={(event) => handleChange("city", event.target.value)}
+                    placeholder="Ilala"
+                    required
+                    disabled={isSubmitting}
+                    className="rounded-md border border-gray-3 dark:border-darkTheme-border-color bg-gray-1 dark:bg-darkTheme-secondary-bg dark:text-darkTheme-body-color placeholder:text-dark-4 dark:placeholder:text-darkTheme-secondary-muted w-full py-2.5 px-5 outline-none duration-200 focus:border-transparent focus:shadow-input focus:ring-2 focus:ring-blue/20 disabled:opacity-70"
                   />
                 </div>
 
-                <div className="w-full">
-                  <label htmlFor="address" className="block mb-2.5 dark:text-darkTheme-body-color">
-                    Address
+                <div>
+                  <label htmlFor="postalCode" className="block mb-2.5 dark:text-darkTheme-body-color">
+                    Postal Code
                   </label>
 
                   <input
+                    id="postalCode"
                     type="text"
-                    name="address"
-                    value="7398 Smoke Ranch RoadLas Vegas, Nevada 89128"
-                    className="rounded-md border border-gray-3 dark:border-darkTheme-border-color bg-gray-1 dark:bg-darkTheme-secondary-bg dark:text-darkTheme-body-color placeholder:text-dark-4 dark:placeholder:text-darkTheme-secondary-muted w-full py-2.5 px-5 outline-none duration-200 focus:border-transparent focus:shadow-input focus:ring-2 focus:ring-blue/20"
+                    value={form.postal_code ?? ""}
+                    onChange={(event) => handleChange("postal_code", event.target.value)}
+                    placeholder="Optional"
+                    disabled={isSubmitting}
+                    className="rounded-md border border-gray-3 dark:border-darkTheme-border-color bg-gray-1 dark:bg-darkTheme-secondary-bg dark:text-darkTheme-body-color placeholder:text-dark-4 dark:placeholder:text-darkTheme-secondary-muted w-full py-2.5 px-5 outline-none duration-200 focus:border-transparent focus:shadow-input focus:ring-2 focus:ring-blue/20 disabled:opacity-70"
                   />
                 </div>
               </div>
 
-              <button
-                type="submit"
-                className="inline-flex font-medium text-white bg-blue py-3 px-7 rounded-md ease-out duration-200 hover:bg-blue-dark"
-              >
-                Save Changes
-              </button>
+              <div className="mb-5">
+                <label htmlFor="street" className="block mb-2.5 dark:text-darkTheme-body-color">
+                  Street / Delivery Area <span className="text-red">*</span>
+                </label>
+
+                <input
+                  id="street"
+                  type="text"
+                  value={form.street}
+                  onChange={(event) => handleChange("street", event.target.value)}
+                  placeholder="Street, house number, landmark"
+                  required
+                  disabled={isSubmitting}
+                  className="rounded-md border border-gray-3 dark:border-darkTheme-border-color bg-gray-1 dark:bg-darkTheme-secondary-bg dark:text-darkTheme-body-color placeholder:text-dark-4 dark:placeholder:text-darkTheme-secondary-muted w-full py-2.5 px-5 outline-none duration-200 focus:border-transparent focus:shadow-input focus:ring-2 focus:ring-blue/20 disabled:opacity-70"
+                />
+              </div>
+
+              <label className="mb-6 flex items-center gap-3 text-custom-sm text-dark dark:text-white">
+                <input
+                  type="checkbox"
+                  checked={Boolean(form.is_default)}
+                  onChange={(event) => handleChange("is_default", event.target.checked)}
+                  disabled={isSubmitting}
+                  className="h-4 w-4"
+                />
+                Set as default address
+              </label>
+
+              <div className="flex flex-col sm:flex-row gap-3">
+                <button
+                  type="submit"
+                  disabled={isSubmitting}
+                  className="inline-flex justify-center font-medium text-white bg-blue py-3 px-7 rounded-md ease-out duration-200 hover:bg-blue-dark disabled:opacity-70 disabled:cursor-not-allowed"
+                >
+                  {isSubmitting ? "Saving..." : "Save Address"}
+                </button>
+
+                <button
+                  type="button"
+                  onClick={closeModal}
+                  disabled={isSubmitting}
+                  className="inline-flex justify-center font-medium text-dark dark:text-white bg-gray-1 dark:bg-darkTheme-secondary-bg py-3 px-7 rounded-md ease-out duration-200 hover:text-blue disabled:opacity-70 disabled:cursor-not-allowed"
+                >
+                  Cancel
+                </button>
+              </div>
             </form>
           </div>
         </div>
