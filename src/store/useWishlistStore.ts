@@ -2,7 +2,7 @@ import { create } from "zustand";
 import { persist } from "zustand/middleware";
 
 export type WishListItem = {
-  id: number;
+  id: number | string;
   title: string;
   price: number;
   discountedPrice: number;
@@ -17,7 +17,7 @@ export type WishListItem = {
 interface WishlistState {
   items: WishListItem[];
   addItemToWishlist: (item: WishListItem) => void;
-  removeItemFromWishlist: (id: number) => void;
+  removeItemFromWishlist: (id: number | string) => void;
   removeAllItemsFromWishlist: () => void;
 }
 
