@@ -10,7 +10,9 @@ import {
   useState,
 } from "react";
 import { authStorage } from "@/lib/auth/storage";
+import { authCookies } from "@/lib/auth/cookies";
 import { useAuthStore } from "@/store/useAuthStore";
+import { isAdminUser, isSellerUser } from "@/guards/permissions";
 import type { AuthTokenResponse } from "@/types/api/auth";
 
 type AuthUser = {
@@ -40,12 +42,34 @@ export default function AuthProvider({ children }: { children: ReactNode }) {
   const [user, setUser] = useState<AuthUser | null>(null);
   const [accessToken, setAccessToken] = useState<string | null>(null);
 
+  const syncCookies = useCallback((user: AuthUser | null, accessToken: string | null) => {
+    if (!accessToken) {
+      authCookies.clearAll();
+      return;
+    }
+
+    authCookies.setAuth();
+
+    if (isAdminUser(user as any)) {
+      authCookies.setAdmin();
+    } else {
+      authCookies.clearAdmin();
+    }
+
+    if (isSellerUser(user as any)) {
+      authCookies.setSeller();
+    } else {
+      authCookies.clearSeller();
+    }
+  }, []);
+
   const applySession = useCallback(
     (session: AuthTokenResponse) => {
       const sessionUser = session.user as AuthUser | undefined;
 
       setAccessToken(session.access_token);
       setUser(sessionUser ?? null);
+      syncCookies(sessionUser ?? null, session.access_token);
 
       if (sessionUser?.id) {
         storeSetSession({
@@ -67,7 +91,7 @@ export default function AuthProvider({ children }: { children: ReactNode }) {
         token_type: session.token_type,
       });
     },
-    [storeSetSession, storeSetTokens]
+    [storeSetSession, storeSetTokens, syncCookies]
   );
 
   const refreshSession = useCallback(() => {
@@ -76,6 +100,7 @@ export default function AuthProvider({ children }: { children: ReactNode }) {
     if (!session?.access_token) {
       setAccessToken(null);
       setUser(null);
+      syncCookies(null, null);
       storeClearSession();
       return;
     }
@@ -93,6 +118,7 @@ export default function AuthProvider({ children }: { children: ReactNode }) {
 
   const logout = useCallback(() => {
     authStorage.clearSession();
+    authCookies.clearAll();
     setAccessToken(null);
     setUser(null);
     storeClearSession();

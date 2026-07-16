@@ -2,6 +2,7 @@
 
 import { ReactNode, useEffect, useState } from "react";
 import { usePathname, useRouter, useSearchParams } from "next/navigation";
+import Link from "next/link";
 import toast from "react-hot-toast";
 import { authStorage } from "@/lib/auth/storage";
 import { ApiError } from "@/lib/api/client";
@@ -64,7 +65,7 @@ const tabs: Array<{ key: AdminTab; label: string; short: string }> = [
 type SidebarGroup = {
   title: string;
   key: AdminTab | string;
-  items: string[];
+  items: { label: string; href: string }[];
   icon: string;
 };
 
@@ -72,74 +73,146 @@ const sidebarGroups: SidebarGroup[] = [
   {
     title: "Catalog",
     key: "products",
-    items: ["Products", "Categories", "Brands", "Product Reviews"],
     icon: "📦",
+    items: [
+      { label: "Products", href: "?tab=products&menu=catalog&item=products" },
+      { label: "Categories", href: "?tab=categories&menu=catalog&item=categories" },
+      { label: "Brands", href: "?tab=brands&menu=catalog&item=brands" },
+      { label: "Product Reviews", href: "?tab=reviews&menu=catalog&item=product-reviews" },
+    ],
   },
   {
     title: "Orders",
     key: "orders",
-    items: ["All Orders", "Pending Orders", "Processing Orders", "Completed Orders", "Cancelled Orders", "Order Tracking"],
     icon: "🧾",
+    items: [
+      { label: "All Orders", href: "?tab=orders&menu=orders&item=all-orders&orders_tab=all" },
+      { label: "Pending Orders", href: "?tab=orders&menu=orders&item=pending-orders&orders_tab=pending" },
+      { label: "Processing Orders", href: "?tab=orders&menu=orders&item=processing-orders&orders_tab=processing" },
+      { label: "Completed Orders", href: "?tab=orders&menu=orders&item=completed-orders&orders_tab=completed" },
+      { label: "Cancelled Orders", href: "?tab=orders&menu=orders&item=cancelled-orders&orders_tab=cancelled" },
+      { label: "Order Tracking", href: "?tab=orders&menu=orders&item=order-tracking&orders_tab=tracking" },
+    ],
   },
   {
     title: "Inventory",
     key: "inventory",
-    items: ["Stock Overview", "Warehouses", "Stock Adjustments", "Low Stock Products"],
     icon: "📚",
+    items: [
+      { label: "Stock Overview", href: "?tab=inventory&menu=inventory&item=stock-overview&inventory_tab=stock-overview" },
+      { label: "Warehouses", href: "?tab=inventory&menu=inventory&item=warehouses&inventory_tab=warehouses" },
+      { label: "Stock Adjustments", href: "?tab=inventory&menu=inventory&item=stock-adjustments&inventory_tab=stock-adjustments" },
+      { label: "Low Stock Products", href: "?tab=inventory&menu=inventory&item=low-stock-products&inventory_tab=low-stock-products" },
+    ],
   },
   {
     title: "Customers",
     key: "users",
-    items: ["All Customers", "Customer Addresses", "Customer Reviews", "Customer Support"],
     icon: "👥",
+    items: [
+      { label: "All Customers", href: "/admin/customers" },
+      { label: "Customer Addresses", href: "/admin/customers/addresses" },
+      { label: "Customer Reviews", href: "/admin/customers/reviews" },
+      { label: "Customer Support", href: "/admin/customers/support" },
+    ],
   },
   {
     title: "Sellers",
     key: "sellers",
-    items: ["All Sellers", "Seller Applications", "Seller Products", "Seller Orders", "Seller Performance"],
     icon: "🏪",
+    items: [
+      { label: "All Sellers", href: "?tab=sellers&menu=sellers&item=all-sellers" },
+      { label: "Seller Applications", href: "?tab=sellers&menu=sellers&item=seller-applications" },
+      { label: "Seller Products", href: "?tab=products&menu=sellers&item=seller-products" },
+      { label: "Seller Orders", href: "?tab=orders&menu=sellers&item=seller-orders&orders_tab=all" },
+      { label: "Seller Performance", href: "?tab=sellers&menu=sellers&item=seller-performance" },
+    ],
   },
   {
     title: "Payments",
     key: "finance",
-    items: ["Transactions", "Payment Methods", "Refunds", "Failed Payments"],
     icon: "💳",
+    items: [
+      { label: "Transactions", href: "/admin/finance" },
+      { label: "Payment Methods", href: "/admin/finance?tab=methods" },
+      { label: "Refunds", href: "/admin/finance?tab=refunds" },
+      { label: "Failed Payments", href: "/admin/finance?tab=failed" },
+    ],
   },
   {
     title: "Promotions",
     key: "products",
-    items: ["Coupons", "Discounts", "Campaigns"],
     icon: "🏷️",
+    items: [
+      { label: "Coupons", href: "?tab=products&menu=promotions&item=coupons" },
+      { label: "Discounts", href: "?tab=products&menu=promotions&item=discounts" },
+      { label: "Campaigns", href: "?tab=products&menu=promotions&item=campaigns" },
+    ],
+  },
+  {
+    title: "Disputes",
+    key: "orders",
+    icon: "⚖️",
+    items: [
+      { label: "All Disputes", href: "/admin/disputes" },
+      { label: "Open Disputes", href: "/admin/disputes?status=open" },
+      { label: "Resolved Disputes", href: "/admin/disputes?status=resolved" },
+    ],
   },
   {
     title: "Communications",
     key: "overview",
-    items: ["Notifications", "Email Messages", "SMS Messages"],
     icon: "📣",
+    items: [
+      { label: "Notifications", href: "?tab=overview&menu=communications&item=notifications" },
+      { label: "Email Messages", href: "?tab=overview&menu=communications&item=email-messages" },
+      { label: "SMS Messages", href: "?tab=overview&menu=communications&item=sms-messages" },
+    ],
   },
   {
     title: "User Management",
     key: "users",
-    items: ["Users", "Roles", "Permissions", "Active Sessions"],
     icon: "🛡️",
+    items: [
+      { label: "Users", href: "?tab=users&menu=user-management&item=users" },
+      { label: "Roles", href: "?tab=users&menu=user-management&item=roles" },
+      { label: "Permissions", href: "?tab=users&menu=user-management&item=permissions" },
+      { label: "Active Sessions", href: "?tab=users&menu=user-management&item=active-sessions" },
+    ],
   },
   {
     title: "Reports & Analytics",
     key: "analytics",
-    items: ["Sales Reports", "Order Reports", "Product Reports", "Inventory Reports", "Customer Reports", "Payment Reports"],
     icon: "📊",
+    items: [
+      { label: "Sales Reports", href: "/admin/analytics?report=sales" },
+      { label: "Order Reports", href: "/admin/analytics?report=orders" },
+      { label: "Product Reports", href: "/admin/analytics?report=products" },
+      { label: "Inventory Reports", href: "/admin/analytics?report=inventory" },
+      { label: "Customer Reports", href: "/admin/analytics?report=customers" },
+      { label: "Payment Reports", href: "/admin/analytics?report=payments" },
+    ],
   },
   {
     title: "System Management",
     key: "overview",
-    items: ["Audit Logs", "System Events", "Background Jobs", "Application Settings"],
     icon: "⚙️",
+    items: [
+      { label: "Audit Logs", href: "?tab=overview&menu=system-management&item=audit-logs" },
+      { label: "System Events", href: "?tab=overview&menu=system-management&item=system-events" },
+      { label: "Background Jobs", href: "?tab=overview&menu=system-management&item=background-jobs" },
+      { label: "Application Settings", href: "?tab=overview&menu=system-management&item=application-settings" },
+    ],
   },
   {
     title: "Account",
     key: "overview",
-    items: ["Profile", "Security", "Logout"],
     icon: "👤",
+    items: [
+      { label: "Profile", href: "/my-account" },
+      { label: "Security", href: "/my-account?tab=security" },
+      { label: "Logout", href: "/signin" },
+    ],
   },
 ];
 
@@ -333,26 +406,10 @@ export default function AdminDashboard() {
       "Customers:Customer Addresses": "users",
       "Customers:Customer Reviews": "users",
       "Customers:Customer Support": "users",
-    };
-    return catalogMap[tabOrGroup] ?? (tabOrGroup as AdminTab);
-  };
-
-  const applySidebarSelection = (
-    tab: AdminTab | string,
-    sidebarItem: string,
-    openGroup: string | null,
-    writeUrl = true
-  ) => {
-    const resolvedTab = resolveTab(tab);
-    setActiveTab(resolvedTab);
-    setActiveSidebarItem(sidebarItem);
-    setOpenSidebarGroup(openGroup);
-
-    if (writeUrl) {
-      syncSidebarUrl(resolvedTab, sidebarItem);
-    }
-  };
-
+    "User Management:Users": "users",
+    "User Management:Roles": "users",
+    "User Management:Permissions": "users",
+    "User Management:Active Sessions": "users",
   const loadOverviewData = async () => {
     setIsLoading(true);
 
@@ -603,7 +660,18 @@ export default function AdminDashboard() {
 
             <nav className="mt-4 space-y-1.5">
               {sidebarGroups.map((group) => {
-                const isOpen = openSidebarGroup === group.title;
+                const isOpen = openSidebarGroup === group.title || group.items.some((item) => {
+                  if (item.href.startsWith("/admin/")) {
+                    return pathname.startsWith(item.href.split("?")[0]);
+                  }
+                  const params = new URLSearchParams(item.href.replace("?", ""));
+                  const menu = params.get("menu");
+                  const itemParam = params.get("item");
+                  if (!menu) return false;
+                  const currentMenu = searchParams.get("menu");
+                  const currentItem = searchParams.get("item");
+                  return currentMenu === menu && (!itemParam || currentItem === itemParam);
+                });
 
                 return (
                 <div key={group.title} className="px-1">
@@ -611,7 +679,7 @@ export default function AdminDashboard() {
                     type="button"
                     onClick={() => {
                       const nextOpenGroup = openSidebarGroup === group.title ? null : group.title;
-                      applySidebarSelection(group.key, group.title, nextOpenGroup);
+                      setOpenSidebarGroup(nextOpenGroup);
                     }}
                     className={`w-full text-left rounded-lg px-2.5 py-2 text-[13px] font-semibold tracking-[0.08em] uppercase transition-colors ${
                       activeSidebarItem === group.title ? "text-white" : "text-white/85"
@@ -638,12 +706,28 @@ export default function AdminDashboard() {
                   {isOpen ? (
                   <div className="mt-1 border-l border-white/15 pl-3 space-y-1">
                     {group.items.map((item) => {
-                      const subItemKey = `${group.title}:${item}`;
+                      const subItemKey = `${group.title}:${item.label}`;
                       const isSelected = activeSidebarItem === subItemKey;
+                      const isExternal = item.href.startsWith("/admin/");
 
-                      return (
+                      return isExternal ? (
+                        <Link
+                          key={item.label}
+                          href={item.href}
+                          className={`block w-full rounded-lg px-2.5 py-1.5 text-left text-sm transition-colors ${
+                            pathname.startsWith(item.href.split("?")[0])
+                              ? "text-white font-semibold"
+                              : "text-white/80 hover:text-white"
+                          }`}
+                        >
+                          <span className="inline-flex items-center gap-2">
+                            <span className={`h-1.5 w-1.5 rounded-full ${pathname.startsWith(item.href.split("?")[0]) ? "bg-white" : "bg-white/60"}`} />
+                            <span>{item.label}</span>
+                          </span>
+                        </Link>
+                      ) : (
                         <button
-                          key={item}
+                          key={item.label}
                           type="button"
                           onClick={() => {
                             if (group.title === "Catalog") {
@@ -659,8 +743,8 @@ export default function AdminDashboard() {
                                 "Cancelled Orders": "cancelled",
                                 "Order Tracking": "tracking",
                               };
-                              const ordersTab = orderTabMap[item] ?? "all";
-                              const itemSlug = normalizeSlug(item);
+                              const ordersTab = orderTabMap[item.label] ?? "all";
+                              const itemSlug = normalizeSlug(item.label);
                               router.push(`/admin/dashboard?tab=orders&menu=orders&item=${itemSlug}&orders_tab=${ordersTab}`);
                               return;
                             }
@@ -674,7 +758,7 @@ export default function AdminDashboard() {
                         >
                           <span className="inline-flex items-center gap-2">
                             <span className={`h-1.5 w-1.5 rounded-full ${isSelected ? "bg-white" : "bg-white/60"}`} />
-                            <span>{item}</span>
+                            <span>{item.label}</span>
                           </span>
                         </button>
                       );

@@ -558,6 +558,61 @@ export const refundOrder = async (orderId: string, payload: RefundOrderPayload):
   return res.data;
 };
 
+export type FinanceSummary = {
+  totalRevenue: number;
+  totalCommissions: number;
+  totalPayouts: number;
+  pendingPayouts: number;
+  failedPayments: number;
+};
+
+export type AdminTransaction = {
+  id: string;
+  reference: string;
+  method: string;
+  amount: number;
+  currency: string;
+  status: string;
+  created_at: string;
+};
+
+export type Dispute = {
+  id: string;
+  order_number: string;
+  reason: string;
+  status: "open" | "under_review" | "resolved" | "closed";
+  created_at: string;
+};
+
+export type AnalyticsOverview = {
+  totalSales: number;
+  totalOrders: number;
+  averageOrderValue: number;
+  topProducts: { id: string; name: string; sales: number }[];
+  newCustomers: number;
+  returningCustomers: number;
+};
+
+export const getFinanceSummary = async (): Promise<FinanceSummary> => {
+  const res = await axiosInstance.get<FinanceSummary>("/admin/finance/summary");
+  return res.data;
+};
+
+export const listTransactions = async (params: { status?: string } = {}): Promise<AdminTransaction[]> => {
+  const res = await axiosInstance.get<AdminTransaction[]>("/admin/finance/transactions", { params });
+  return res.data;
+};
+
+export const listDisputes = async (params: { status?: string } = {}): Promise<Dispute[]> => {
+  const res = await axiosInstance.get<Dispute[]>("/admin/disputes", { params });
+  return res.data;
+};
+
+export const getAnalyticsOverview = async (): Promise<AnalyticsOverview> => {
+  const res = await axiosInstance.get<AnalyticsOverview>("/admin/analytics/overview");
+  return res.data;
+};
+
 export const adminService = {
   listUsers,
   listAllSellers,
@@ -592,5 +647,9 @@ export const adminService = {
   updateOrderTracking,
   cancelOrder,
   refundOrder,
+  getFinanceSummary,
+  listTransactions,
+  listDisputes,
+  getAnalyticsOverview,
 };
 
