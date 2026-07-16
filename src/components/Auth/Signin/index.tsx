@@ -1,7 +1,6 @@
 "use client";
 
 import Link from "next/link";
-import { ROUTES } from "@/constants/links";
 import React, { FormEvent, useState } from "react";
 import { useRouter, useSearchParams } from "next/navigation";
 import toast from "react-hot-toast";
@@ -109,12 +108,12 @@ const Signin = () => {
                   {isSubmitting ? "Signing in..." : "Sign in to account"}
                 </button>
 
-                <a
-                  href={ROUTES.contact}
+                <Link
+                  href="/forgot-password"
                   className="block text-center text-dark-4 dark:text-darkTheme-secondary-muted mt-4.5 ease-out duration-200 hover:text-dark dark:hover:text-white"
                 >
                   Forgot your password?
-                </a>
+                </Link>
 
                 <p className="text-center mt-6">
                   <span className="dark:text-darkTheme-body-color">Don&apos;t have an account?</span>

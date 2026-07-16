@@ -35,6 +35,7 @@ const Signup = () => {
 
   const [fullName, setFullName] = useState("");
   const [email, setEmail] = useState("");
+  const [phone, setPhone] = useState("");
   const [password, setPassword] = useState("");
   const [confirmPassword, setConfirmPassword] = useState("");
   const [isSubmitting, setIsSubmitting] = useState(false);
@@ -69,6 +70,7 @@ const Signup = () => {
       const response = await authApi.registerBuyer({
         ...nameParts,
         email: email.trim(),
+        phone: phone.trim() || undefined,
         password,
       });
 
@@ -141,6 +143,24 @@ const Signup = () => {
                 </div>
 
                 <div className="mb-5">
+                  <label htmlFor="phone" className="block mb-2.5 dark:text-darkTheme-body-color">
+                    Phone Number <span className="text-dark-4 dark:text-darkTheme-secondary-muted">(optional)</span>
+                  </label>
+
+                  <input
+                    type="tel"
+                    name="phone"
+                    id="phone"
+                    placeholder="Enter your phone number"
+                    value={phone}
+                    onChange={(event) => setPhone(event.target.value)}
+                    autoComplete="tel"
+                    disabled={isSubmitting}
+                    className="rounded-lg border border-gray-3 dark:border-darkTheme-border-color bg-gray-1 dark:bg-darkTheme-secondary-bg dark:text-darkTheme-body-color placeholder:text-dark-4 dark:placeholder:text-darkTheme-secondary-muted w-full py-3 px-5 outline-none duration-200 focus:border-transparent focus:shadow-input focus:ring-2 focus:ring-blue/20 disabled:cursor-not-allowed disabled:opacity-70"
+                  />
+                </div>
+
+                <div className="mb-5">
                   <label htmlFor="password" className="block mb-2.5 dark:text-darkTheme-body-color">
                     Password <span className="text-red">*</span>
                   </label>
@@ -207,6 +227,16 @@ const Signup = () => {
                     className="text-dark dark:text-darkTheme-body-color ease-out duration-200 hover:text-blue pl-2"
                   >
                     Register as Seller
+                  </Link>
+                </p>
+
+                <p className="text-center mt-3 text-sm">
+                  <span className="dark:text-darkTheme-body-color">Already have an OTP?</span>
+                  <Link
+                    href="/verify-otp"
+                    className="text-dark dark:text-darkTheme-body-color ease-out duration-200 hover:text-blue pl-2"
+                  >
+                    Verify Account
                   </Link>
                 </p>
               </form>

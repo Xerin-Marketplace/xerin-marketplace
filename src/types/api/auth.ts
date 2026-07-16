@@ -38,28 +38,25 @@ export type AuthTokenResponse = {
   user?: User;
 };
 
+export type RefreshTokenRequest = {
+  refresh_token: string;
+};
+
 export type SendOtpRequest = {
-  email?: string;
-  phone?: string;
-  purpose?: "registration" | "login" | "password_reset" | string;
+  phone: string;
 };
 
 export type VerifyOtpRequest = {
-  email?: string;
-  phone?: string;
-  otp: string;
-  purpose?: "registration" | "login" | "password_reset" | string;
+  phone: string;
+  otp_code: string;
 };
 
 export type ForgotPasswordRequest = {
-  email?: string;
-  phone?: string;
+  email: string;
 };
 
 export type ResetPasswordRequest = {
-  token?: string;
-  otp?: string;
-  email?: string;
-  phone?: string;
+  email: string;
+  otp_code: string;
   new_password: string;
 };
