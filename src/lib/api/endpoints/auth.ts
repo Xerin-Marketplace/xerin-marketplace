@@ -9,6 +9,7 @@ import type {
   ResetPasswordRequest,
   SendOtpRequest,
   VerifyOtpRequest,
+  RefreshTokenRequest,
 } from "@/types/api/auth";
 import type { ApiMessageResponse } from "@/types/api/common";
 
@@ -27,8 +28,8 @@ export const registerSeller = async (payload: RegisterSellerRequest): Promise<Au
   return res.data;
 };
 
-export const logout = async (): Promise<ApiMessageResponse> => {
-  const res = await axiosInstance.post<ApiMessageResponse>(API_ENDPOINTS.auth.logout);
+export const logout = async (payload: RefreshTokenRequest): Promise<ApiMessageResponse> => {
+  const res = await axiosInstance.post<ApiMessageResponse>(API_ENDPOINTS.auth.logout, payload);
   return res.data;
 };
 

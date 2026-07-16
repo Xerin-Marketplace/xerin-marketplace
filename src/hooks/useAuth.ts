@@ -18,6 +18,7 @@ export const useAuth = () => {
   
   const user = useAuthStore((state) => state.user);
   const accessToken = useAuthStore((state) => state.accessToken);
+  const refreshToken = useAuthStore((state) => state.refreshToken);
   const isAuthenticated = useAuthStore((state) => state.isAuthenticated);
   
   const setSession = useAuthStore((state) => state.setSession);
@@ -57,7 +58,9 @@ export const useAuth = () => {
   const logoutMutation = useMutation({
     mutationFn: async () => {
       try {
-        await apiLogout();
+        if (refreshToken) {
+          await apiLogout({ refresh_token: refreshToken });
+        }
       } finally {
         clearSession();
         queryClient.clear();
