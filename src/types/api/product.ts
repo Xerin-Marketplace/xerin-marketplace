@@ -1,74 +1,70 @@
 import type { ID, TimestampFields } from "./common";
 
-export type ProductStatus = "draft" | "pending_review" | "approved" | "rejected" | "inactive" | string;
+export type ProductStatus =
+  | "draft"
+  | "pending_review"
+  | "approved"
+  | "rejected"
+  | "inactive"
+  | string;
 
-export type Category = TimestampFields & {
+export type Category = {
+  id: ID;
+  parent_id: ID | null;
+  name: string;
+  slug: string;
+  created_at: string;
+};
+
+export type Brand = {
   id: ID;
   name: string;
-  slug?: string;
-  parent_id?: ID | null;
-  description?: string | null;
-  is_active?: boolean;
+  slug: string;
+  created_at: string;
 };
 
-export type Brand = TimestampFields & {
+export type ProductImage = {
   id: ID;
-  name: string;
-  slug?: string;
-  description?: string | null;
-  is_active?: boolean;
+  product_id: ID;
+  image_url: string;
+  is_primary: boolean;
+  created_at: string;
 };
 
-export type ProductImage = TimestampFields & {
+export type ProductVariant = {
   id: ID;
-  product_id?: ID;
-  image_url?: string;
-  url?: string;
-  alt_text?: string | null;
-  is_primary?: boolean;
-  sort_order?: number;
+  product_id: ID;
+  variant_name: string;
+  sku: string;
+  price: string | null;
+  attributes: Record<string, unknown> | null;
+  created_at: string;
 };
 
-export type ProductVariant = TimestampFields & {
+export type ProductTag = {
   id: ID;
-  product_id?: ID;
-  name?: string;
-  sku?: string;
-  size?: string | null;
-  color?: string | null;
-  material?: string | null;
-  weight?: number | string | null;
-  price?: number | string | null;
-  stock_quantity?: number;
-};
-
-export type ProductTag = TimestampFields & {
-  id: ID;
-  product_id?: ID;
-  name: string;
-  slug?: string;
+  product_id: ID;
+  tag: string;
 };
 
 export type Product = TimestampFields & {
   id: ID;
-  seller_id?: ID;
-  category_id?: ID;
-  brand_id?: ID | null;
-  sku?: string;
+  seller_id: ID;
+  category_id: ID;
+  brand_id: ID | null;
+  sku: string;
   name: string;
-  slug?: string;
-  title?: string;
-  description?: string | null;
-  price: number | string;
-  sale_price?: number | string | null;
-  discounted_price?: number | string | null;
-  currency?: string;
-  stock_quantity?: number;
-  low_stock_threshold?: number;
-  weight?: number | string | null;
-  status?: ProductStatus;
-  rejection_reason?: string | null;
-  is_active?: boolean;
+  slug: string;
+  description: string | null;
+  price: string;
+  sale_price: string | null;
+  currency: string;
+  weight: string | null;
+  status: ProductStatus;
+  rejection_reason: string | null;
+  is_active: boolean;
+
+  // Optional frontend-enriched fields when fetched separately.
   images?: ProductImage[];
   variants?: ProductVariant[];
   tags?: ProductTag[];
@@ -83,8 +79,6 @@ export type ProductListQuery = {
   seller_id?: ID;
   skip?: number;
   limit?: number;
-  sort_by?: string;
-  is_active?: boolean;
 };
 
 export type ProductRequest = {
@@ -93,9 +87,31 @@ export type ProductRequest = {
   sku: string;
   name: string;
   slug: string;
-  description?: string;
+  description?: string | null;
   price: number | string;
   sale_price?: number | string | null;
   currency?: string;
   weight?: number | string | null;
+};
+
+export type ProductUpdateRequest = Partial<
+  ProductRequest & {
+    is_active: boolean | null;
+  }
+>;
+
+export type ProductImageRequest = {
+  image_url: string;
+  is_primary?: boolean;
+};
+
+export type ProductVariantRequest = {
+  variant_name: string;
+  sku: string;
+  price?: number | string | null;
+  attributes?: Record<string, unknown> | null;
+};
+
+export type ProductTagRequest = {
+  tag: string;
 };

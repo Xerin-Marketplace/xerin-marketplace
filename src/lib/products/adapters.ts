@@ -16,27 +16,22 @@ const getProductImageUrl = (product: ApiProduct) => {
   const primaryImage = product.images?.find((image) => image.is_primary);
   const firstImage = primaryImage || product.images?.[0];
 
-  return (
-    firstImage?.image_url ||
-    firstImage?.url ||
-    FALLBACK_PRODUCT_IMAGE
-  );
+  return firstImage?.image_url || FALLBACK_PRODUCT_IMAGE;
 };
 
 export const mapApiProductToUiProduct = (product: ApiProduct): UiProduct => {
   const price = toNumber(product.price);
-  const discountedPrice = toNumber(
-    product.sale_price ?? product.discounted_price,
-    price
-  );
+  const discountedPrice = toNumber(product.sale_price, price);
   const imageUrl = getProductImageUrl(product);
+  const displayPrice = price;
+  const displayDiscountedPrice = discountedPrice || price;
 
   return {
-    id: toNumber(product.id),
-    title: product.name || product.title || "Untitled product",
+    id: product.id as UiProduct["id"],
+    title: product.name || product.slug || "Untitled product",
     reviews: 0,
-    price,
-    discountedPrice,
+    price: displayPrice,
+    discountedPrice: displayDiscountedPrice,
     imgs: {
       thumbnails: [imageUrl],
       previews: [imageUrl],

@@ -9,8 +9,10 @@ import {
   updateProduct as apiUpdateProduct,
   deleteProduct as apiDeleteProduct,
   uploadProductImage as apiUploadProductImage,
+  addProductVariant as apiAddProductVariant,
+  addProductTag as apiAddProductTag,
 } from "@/lib/api/endpoints/products";
-import type { ProductListQuery, ProductRequest } from "@/types/api/product";
+import type { ProductImageRequest, ProductListQuery, ProductRequest, ProductTagRequest, ProductUpdateRequest, ProductVariantRequest } from "@/types/api/product";
 import type { ID } from "@/types/api/common";
 
 export const useProducts = (query?: ProductListQuery) => {
@@ -63,7 +65,7 @@ export const useCreateProduct = () => {
 export const useUpdateProduct = () => {
   const queryClient = useQueryClient();
   return useMutation({
-    mutationFn: ({ id, payload }: { id: ID; payload: Partial<ProductRequest> }) =>
+    mutationFn: ({ id, payload }: { id: ID; payload: ProductUpdateRequest }) =>
       apiUpdateProduct(id, payload),
     onSuccess: (_, variables) => {
       queryClient.invalidateQueries({ queryKey: ["product", variables.id] });
@@ -89,13 +91,46 @@ export const useUploadProductImage = () => {
   return useMutation({
     mutationFn: ({
       productId,
-      file,
-      options,
+      payload,
     }: {
       productId: ID;
-      file: File;
-      options?: { altText?: string; isPrimary?: boolean; sortOrder?: number };
-    }) => apiUploadProductImage(productId, file, options),
+      payload: ProductImageRequest;
+    }) => apiUploadProductImage(productId, payload),
+    onSuccess: (_, variables) => {
+      queryClient.invalidateQueries({ queryKey: ["product", variables.productId] });
+    },
+  });
+};
+
+
+export const useAddProductVariant = () => {
+  const queryClient = useQueryClient();
+
+  return useMutation({
+    mutationFn: ({
+      productId,
+      payload,
+    }: {
+      productId: ID;
+      payload: ProductVariantRequest;
+    }) => apiAddProductVariant(productId, payload),
+    onSuccess: (_, variables) => {
+      queryClient.invalidateQueries({ queryKey: ["product", variables.productId] });
+    },
+  });
+};
+
+export const useAddProductTag = () => {
+  const queryClient = useQueryClient();
+
+  return useMutation({
+    mutationFn: ({
+      productId,
+      payload,
+    }: {
+      productId: ID;
+      payload: ProductTagRequest;
+    }) => apiAddProductTag(productId, payload),
     onSuccess: (_, variables) => {
       queryClient.invalidateQueries({ queryKey: ["product", variables.productId] });
     },
