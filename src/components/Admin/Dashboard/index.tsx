@@ -406,10 +406,32 @@ export default function AdminDashboard() {
       "Customers:Customer Addresses": "users",
       "Customers:Customer Reviews": "users",
       "Customers:Customer Support": "users",
-    "User Management:Users": "users",
-    "User Management:Roles": "users",
-    "User Management:Permissions": "users",
-    "User Management:Active Sessions": "users",
+      "User Management:Users": "users",
+      "User Management:Roles": "users",
+      "User Management:Permissions": "users",
+      "User Management:Active Sessions": "users",
+    };
+
+    return catalogMap[tabOrGroup] ?? (tabOrGroup as AdminTab);
+  };
+
+  const applySidebarSelection = (
+    tabOrGroup: AdminTab | string,
+    sidebarItem: string,
+    sidebarGroup: string | null = null,
+    shouldSyncUrl = true
+  ) => {
+    const nextTab = resolveTab(tabOrGroup);
+
+    setActiveTab(nextTab);
+    setActiveSidebarItem(sidebarItem);
+    setOpenSidebarGroup(sidebarGroup);
+
+    if (shouldSyncUrl) {
+      syncSidebarUrl(nextTab, sidebarItem);
+    }
+  };
+
   const loadOverviewData = async () => {
     setIsLoading(true);
 
@@ -509,10 +531,10 @@ export default function AdminDashboard() {
     if (!matchedGroup) return;
 
     if (itemParam) {
-      const matchedItem = matchedGroup.items.find((item) => normalizeSlug(item) === itemParam);
+      const matchedItem = matchedGroup.items.find((item) => normalizeSlug(item.label) === itemParam);
 
       if (matchedItem) {
-        const subItemKey = `${matchedGroup.title}:${matchedItem}`;
+        const subItemKey = `${matchedGroup.title}:${matchedItem.label}`;
         applySidebarSelection(
           subItemKey,
           subItemKey,
