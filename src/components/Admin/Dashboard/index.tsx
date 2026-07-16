@@ -370,11 +370,11 @@ export default function AdminDashboard() {
       ) ?? null;
   const legacyTheme: Record<string, { icon: string; eyebrow: string; gradient: string }> = {
     Dashboard: { icon: "◆", eyebrow: "Platform command center", gradient: "from-[#111827] via-[#263244] to-[#f47524]" },
-    Catalog: { icon: "📦", eyebrow: "Catalog operations", gradient: "from-[#172554] via-[#1d4ed8] to-[#38bdf8]" },
-    Orders: { icon: "🧾", eyebrow: "Order fulfillment", gradient: "from-[#3b0764] via-[#7e22ce] to-[#f97316]" },
-    Inventory: { icon: "📚", eyebrow: "Stock control", gradient: "from-[#052e16] via-[#15803d] to-[#84cc16]" },
-    Customers: { icon: "👥", eyebrow: "Customer operations", gradient: "from-[#083344] via-[#0e7490] to-[#22d3ee]" },
-    Sellers: { icon: "🏪", eyebrow: "Marketplace partners", gradient: "from-[#431407] via-[#c2410c] to-[#fbbf24]" },
+    Catalog: { icon: "📦", eyebrow: "Catalog operations", gradient: "from-[#111827] via-[#263244] to-[#f47524]" },
+    Orders: { icon: "🧾", eyebrow: "Order fulfillment", gradient: "from-[#111827] via-[#263244] to-[#f47524]" },
+    Inventory: { icon: "📚", eyebrow: "Stock control", gradient: "from-[#111827] via-[#263244] to-[#f47524]" },
+    Customers: { icon: "👥", eyebrow: "Customer operations", gradient: "from-[#111827] via-[#263244] to-[#f47524]" },
+    Sellers: { icon: "🏪", eyebrow: "Marketplace partners", gradient: "from-[#111827] via-[#263244] to-[#f47524]" },
   };
 
   const dynamicSearchPlaceholder = activeTab === "orders" || activeTab === "inventory" || activeTab === "users" ? "Global search" : `Search in ${activeMenuContextLabel.toLowerCase()}...`;

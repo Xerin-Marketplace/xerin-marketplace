@@ -95,7 +95,7 @@ export default function SellerSubWorkspace({ view }: { view: View }) {
 
   return (
     <div className="space-y-5">
-      <section className="rounded-2xl bg-gradient-to-r from-[#111827] via-[#293548] to-[#f47524] p-6 text-white shadow-lg sm:p-8">
+      <section className="rounded-2xl bg-gradient-to-br from-[#111827] via-[#263244] to-[#f47524] p-6 text-white shadow-lg sm:p-8">
         <p className="text-xs font-semibold uppercase tracking-[.18em] text-orange-100">Seller operations</p>
         <h2 className="mt-2 text-3xl font-semibold">{copy.title}</h2>
         <p className="mt-2 max-w-2xl text-sm text-white/75">{copy.description}</p>
