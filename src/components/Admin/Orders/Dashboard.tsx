@@ -83,8 +83,9 @@ const AdminOrdersDashboard = ({ initialTab = "all" }: { initialTab?: string }) =
       </div>
 
       <div className="grid grid-cols-2 gap-3 sm:grid-cols-3 lg:grid-cols-5">
-        {COUNT_CARDS.map((card) => (
-          <div key={card.key} className="rounded-2xl border border-gray-200 bg-white p-4 shadow-sm">
+        {COUNT_CARDS.map((card, index) => (
+          <div key={card.key} className={`relative overflow-hidden rounded-2xl border border-gray-200 bg-gradient-to-br p-4 shadow-sm ${["from-slate-50 to-slate-100", "from-amber-50 to-orange-100", "from-blue-50 to-cyan-100", "from-emerald-50 to-green-100", "from-red-50 to-rose-100"][index]}`}>
+            <span className={`absolute inset-y-0 left-0 w-1 ${["bg-slate-500", "bg-amber-500", "bg-blue-500", "bg-emerald-500", "bg-red-500"][index]}`} />
             <p className="text-xs font-medium uppercase tracking-wider text-gray-500">{card.label}</p>
             <p className={`mt-2 inline-flex rounded-lg px-2.5 py-1 text-2xl font-semibold ${card.color}`}>
               {countsLoading ? "-" : counts[card.key] ?? 0}

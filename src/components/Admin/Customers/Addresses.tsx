@@ -4,6 +4,7 @@ import { useEffect, useState } from "react";
 import toast from "react-hot-toast";
 import { customersService, type CustomerAddress } from "@/lib/api/endpoints/customers";
 import { ApiError } from "@/lib/api/client";
+import Link from "next/link";
 
 const getErrorMessage = (error: unknown) => {
   if (error instanceof ApiError) return error.message;
@@ -84,7 +85,9 @@ const AdminCustomerAddresses = () => {
               <tbody className="divide-y divide-gray-100">
                 {filtered.map((a) => (
                   <tr key={a.id} className="hover:bg-gray-50">
-                    <td className="px-4 py-3 text-sm font-medium text-[#111827]">-</td>
+                    <td className="px-4 py-3 text-sm font-medium text-[#111827]">
+                      {a.user_id ? <Link href={`/admin/customers/${a.user_id}`} className="hover:text-[#f47524] hover:underline">{a.customer_name ?? "View customer"}</Link> : a.customer_name ?? "-"}
+                    </td>
                     <td className="px-4 py-3 text-sm text-gray-600">{a.label ?? "-"}</td>
                     <td className="px-4 py-3 text-sm text-gray-600">{a.country}</td>
                     <td className="px-4 py-3 text-sm text-gray-600">{a.region}</td>
@@ -94,8 +97,7 @@ const AdminCustomerAddresses = () => {
                     </td>
                     <td className="px-4 py-3 text-sm">
                       <div className="flex gap-1">
-                        <button type="button" className="rounded-lg bg-[#f8fafc] px-2.5 py-1.5 text-xs font-medium text-gray-700 hover:bg-gray-100">View</button>
-                        <button type="button" className="rounded-lg bg-[#f8fafc] px-2.5 py-1.5 text-xs font-medium text-gray-700 hover:bg-gray-100">Edit</button>
+                        {a.user_id ? <Link href={`/admin/customers/${a.user_id}`} className="rounded-lg bg-orange-50 px-2.5 py-1.5 text-xs font-medium text-[#f47524] hover:bg-orange-100">View customer</Link> : null}
                       </div>
                     </td>
                   </tr>

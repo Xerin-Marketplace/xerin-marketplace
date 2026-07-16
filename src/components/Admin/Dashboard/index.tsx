@@ -10,7 +10,6 @@ import {
   adminService,
   AdminProduct,
   AdminSeller,
-  AdminUser,
 } from "@/lib/api/endpoints/admin";
 import AdminProducts from "@/components/Admin/Products";
 import AdminCategories from "@/components/Admin/Catalog/Categories";
@@ -28,6 +27,16 @@ import AdminCustomerDetails from "@/components/Admin/Customers/CustomerDetails";
 import AdminCustomerAddresses from "@/components/Admin/Customers/Addresses";
 import AdminCustomerReviews from "@/components/Admin/Customers/Reviews";
 import AdminCustomerSupport from "@/components/Admin/Customers/Support";
+import AdminOperationsWorkspace from "@/components/Admin/Operations";
+import AdminSellers from "@/components/Admin/Sellers";
+import SellerSubWorkspace from "@/components/Admin/Sellers/SubWorkspace";
+import AdminPayments, { PaymentView } from "@/components/Admin/Payments";
+import AdminPromotions, { PromotionView } from "@/components/Admin/Promotions";
+import AdminCommunications, { CommunicationView } from "@/components/Admin/Communications";
+import AdminUserManagement, { UserManagementView } from "@/components/Admin/UserManagement";
+import AdminReports, { ReportView } from "@/components/Admin/Reports";
+import AdminSystemManagement, { SystemView } from "@/components/Admin/SystemManagement";
+import AdminAccount, { AccountView } from "@/components/Admin/Account";
 
 type StoredUser = {
   account_type?: string;
@@ -327,13 +336,9 @@ export default function AdminDashboard() {
   const [isAuthorized, setIsAuthorized] = useState(false);
 
   const [isLoading, setIsLoading] = useState(false);
-  const [users, setUsers] = useState<AdminUser[]>([]);
   const [totalUsers, setTotalUsers] = useState(0);
   const [pendingSellers, setPendingSellers] = useState<AdminSeller[]>([]);
   const [pendingProducts, setPendingProducts] = useState<AdminProduct[]>([]);
-
-  const [userSearch, setUserSearch] = useState("");
-  const [isRefreshingUsers, setIsRefreshingUsers] = useState(false);
 
   const [surfaceSearch, setSurfaceSearch] = useState("");
   const [openSidebarGroup, setOpenSidebarGroup] = useState<string | null>(null);
@@ -358,7 +363,46 @@ export default function AdminDashboard() {
         ? activeSidebarItem.replace(":", " - ")
         : activeSidebarItem;
 
+  const legacyVisualGroup = activeSidebarItem === "Dashboard"
+    ? "Dashboard"
+    : ["Catalog", "Orders", "Inventory", "Customers", "Sellers"].find(
+        (group) => activeSidebarItem === group || activeSidebarItem.startsWith(`${group}:`)
+      ) ?? null;
+  const legacyTheme: Record<string, { icon: string; eyebrow: string; gradient: string }> = {
+    Dashboard: { icon: "◆", eyebrow: "Platform command center", gradient: "from-[#111827] via-[#263244] to-[#f47524]" },
+    Catalog: { icon: "📦", eyebrow: "Catalog operations", gradient: "from-[#172554] via-[#1d4ed8] to-[#38bdf8]" },
+    Orders: { icon: "🧾", eyebrow: "Order fulfillment", gradient: "from-[#3b0764] via-[#7e22ce] to-[#f97316]" },
+    Inventory: { icon: "📚", eyebrow: "Stock control", gradient: "from-[#052e16] via-[#15803d] to-[#84cc16]" },
+    Customers: { icon: "👥", eyebrow: "Customer operations", gradient: "from-[#083344] via-[#0e7490] to-[#22d3ee]" },
+    Sellers: { icon: "🏪", eyebrow: "Marketplace partners", gradient: "from-[#431407] via-[#c2410c] to-[#fbbf24]" },
+  };
+
   const dynamicSearchPlaceholder = activeTab === "orders" || activeTab === "inventory" || activeTab === "users" ? "Global search" : `Search in ${activeMenuContextLabel.toLowerCase()}...`;
+
+  const isPaymentsWorkspace = activeSidebarItem === "Payments" || activeSidebarItem.startsWith("Payments:");
+  const paymentView: PaymentView = activeSidebarItem === "Payments:Payment Methods" ? "methods" : activeSidebarItem === "Payments:Refunds" ? "refunds" : activeSidebarItem === "Payments:Failed Payments" ? "failed" : "transactions";
+  const isPromotionsWorkspace = activeSidebarItem === "Promotions" || activeSidebarItem.startsWith("Promotions:");
+  const promotionView: PromotionView = activeSidebarItem === "Promotions:Discounts" ? "discounts" : activeSidebarItem === "Promotions:Campaigns" ? "campaigns" : "coupons";
+  const isCommunicationsWorkspace = activeSidebarItem === "Communications" || activeSidebarItem.startsWith("Communications:");
+  const communicationView: CommunicationView = activeSidebarItem === "Communications:Email Messages" ? "email" : activeSidebarItem === "Communications:SMS Messages" ? "sms" : "notification";
+  const isUserManagementWorkspace = activeSidebarItem === "User Management" || activeSidebarItem.startsWith("User Management:");
+  const userManagementView: UserManagementView = activeSidebarItem === "User Management:Roles" ? "roles" : activeSidebarItem === "User Management:Permissions" ? "permissions" : activeSidebarItem === "User Management:Active Sessions" ? "sessions" : "users";
+  const isReportsWorkspace = activeSidebarItem === "Reports & Analytics" || activeSidebarItem.startsWith("Reports & Analytics:");
+  const reportView: ReportView = activeSidebarItem === "Reports & Analytics:Order Reports" ? "orders" : activeSidebarItem === "Reports & Analytics:Product Reports" ? "products" : activeSidebarItem === "Reports & Analytics:Inventory Reports" ? "inventory" : activeSidebarItem === "Reports & Analytics:Customer Reports" ? "customers" : activeSidebarItem === "Reports & Analytics:Payment Reports" ? "payments" : "sales";
+  const isSystemWorkspace = activeSidebarItem === "System Management" || activeSidebarItem.startsWith("System Management:");
+  const systemView: SystemView = activeSidebarItem === "System Management:System Events" ? "events" : activeSidebarItem === "System Management:Background Jobs" ? "jobs" : activeSidebarItem === "System Management:Application Settings" ? "settings" : "audit";
+  const isAccountWorkspace = activeSidebarItem === "Account" || activeSidebarItem.startsWith("Account:");
+  const accountView: AccountView = activeSidebarItem === "Account:Security" ? "security" : activeSidebarItem === "Account:Logout" ? "logout" : "profile";
+  const operationsWorkspace = null;
+  const sellerView = activeSidebarItem === "Sellers:Seller Applications"
+    ? "applications"
+    : activeSidebarItem === "Sellers:Seller Products"
+      ? "products"
+      : activeSidebarItem === "Sellers:Seller Orders"
+        ? "orders"
+        : activeSidebarItem === "Sellers:Seller Performance"
+          ? "performance"
+          : "all";
 
   const [busyAction, setBusyAction] = useState<string | null>(null);
 
@@ -442,7 +486,6 @@ export default function AdminDashboard() {
         adminService.listPendingProducts(),
       ]);
 
-      setUsers(usersResponse.results);
       setTotalUsers(usersResponse.total);
       setPendingSellers(sellersResponse);
       setPendingProducts(productsResponse);
@@ -450,25 +493,6 @@ export default function AdminDashboard() {
       toast.error(getErrorMessage(error));
     } finally {
       setIsLoading(false);
-    }
-  };
-
-  const refreshUsers = async (search: string) => {
-    setIsRefreshingUsers(true);
-
-    try {
-      const response = await adminService.listUsers({
-        page: 1,
-        page_size: 15,
-        search: search || undefined,
-      });
-
-      setUsers(response.results);
-      setTotalUsers(response.total);
-    } catch (error) {
-      toast.error(getErrorMessage(error));
-    } finally {
-      setIsRefreshingUsers(false);
     }
   };
 
@@ -516,7 +540,14 @@ export default function AdminDashboard() {
       if (pathname.startsWith("/admin/inventory")) {
         applySidebarSelection("inventory", "Inventory", "Inventory", false);
       } else if (pathname.startsWith("/admin/customers")) {
-        applySidebarSelection("users", "Customers", "Customers", false);
+        const customerItem = pathname.includes("/addresses")
+          ? "Customer Addresses"
+          : pathname.includes("/reviews")
+            ? "Customer Reviews"
+            : pathname.includes("/support")
+              ? "Customer Support"
+              : "All Customers";
+        applySidebarSelection("users", `Customers:${customerItem}`, "Customers", false);
       }
       return;
     }
@@ -770,6 +801,16 @@ export default function AdminDashboard() {
                               router.push(`/admin/dashboard?tab=orders&menu=orders&item=${itemSlug}&orders_tab=${ordersTab}`);
                               return;
                             }
+                            if (group.title === "Customers") {
+                              const customerRoutes: Record<string, string> = {
+                                "All Customers": "/admin/customers",
+                                "Customer Addresses": "/admin/customers/addresses",
+                                "Customer Reviews": "/admin/customers/reviews",
+                                "Customer Support": "/admin/customers/support",
+                              };
+                              router.push(customerRoutes[item.label] ?? "/admin/customers");
+                              return;
+                            }
                             applySidebarSelection(group.key, subItemKey, group.title);
                           }}
                           className={`block w-full rounded-lg px-2.5 py-1.5 text-left text-sm transition-colors ${
@@ -802,10 +843,13 @@ export default function AdminDashboard() {
           </aside>
 
           <main className="space-y-5">
-            <div className="rounded-2xl border border-gray-200 bg-white p-4 sm:p-5 shadow-sm">
+            <div className={`rounded-2xl p-4 sm:p-5 shadow-sm ${legacyVisualGroup ? `border border-white/10 bg-gradient-to-br ${legacyTheme[legacyVisualGroup].gradient} text-white shadow-lg` : "border border-gray-200 bg-white"}`}>
               <div className="flex flex-col gap-3 lg:flex-row lg:items-center lg:justify-between">
-                <div>
-                  <h1 className="text-xl sm:text-2xl font-semibold text-[#111827]">
+                <div className="flex items-center gap-4">
+                  {legacyVisualGroup ? <span className="flex h-12 w-12 shrink-0 items-center justify-center rounded-2xl border border-white/20 bg-white/15 text-2xl shadow-inner" aria-hidden="true">{legacyTheme[legacyVisualGroup].icon}</span> : null}
+                  <div>
+                  {legacyVisualGroup ? <p className="text-[11px] font-semibold uppercase tracking-[.2em] text-white/60">{legacyTheme[legacyVisualGroup].eyebrow}</p> : null}
+                  <h1 className={`text-xl sm:text-2xl font-semibold ${legacyVisualGroup ? "mt-1 text-white" : "text-[#111827]"}`}>
                     {activeTab === "orders"
                       ? "Order Management"
                       : activeTab === "inventory"
@@ -814,7 +858,7 @@ export default function AdminDashboard() {
                           ? "Customer Management"
                           : "Dashboard Overview"}
                   </h1>
-                  <p className="text-sm text-gray-500 mt-1">
+                  <p className={`text-sm mt-1 ${legacyVisualGroup ? "text-white/70" : "text-gray-500"}`}>
                     {activeTab === "orders"
                       ? `Admin / Orders / ${activeMenuLabel}`
                       : activeTab === "inventory"
@@ -823,6 +867,7 @@ export default function AdminDashboard() {
                           ? `Manage customer accounts, addresses, orders and engagement`
                           : `Tab: ${activeMenuLabel}`}
                   </p>
+                  </div>
                 </div>
 
                 <div className="flex flex-col sm:flex-row gap-2 sm:items-center">
@@ -830,12 +875,12 @@ export default function AdminDashboard() {
                     value={surfaceSearch}
                     onChange={(event) => setSurfaceSearch(event.target.value)}
                     placeholder={dynamicSearchPlaceholder}
-                    className="rounded-xl border border-gray-200 bg-[#f8fafc] px-4 py-2.5 text-sm text-gray-700 w-full sm:w-[240px]"
+                    className={`rounded-xl px-4 py-2.5 text-sm w-full sm:w-[240px] ${legacyVisualGroup ? "border border-white/20 bg-white/15 text-white placeholder:text-white/55" : "border border-gray-200 bg-[#f8fafc] text-gray-700"}`}
                   />
                   <button
                     type="button"
                     onClick={loadOverviewData}
-                    className="rounded-xl bg-[#4b5563] px-4 py-2.5 text-sm font-medium text-white hover:bg-[#1f2937]"
+                    className={`rounded-xl px-4 py-2.5 text-sm font-medium transition ${legacyVisualGroup ? "bg-white text-[#111827] hover:bg-white/90" : "bg-[#4b5563] text-white hover:bg-[#1f2937]"}`}
                   >
                     Refresh Data
                   </button>
@@ -851,6 +896,26 @@ export default function AdminDashboard() {
 
           {activeTab === "overview" && !isLoading && !isOverviewHiddenByMenuSelection ? (
             <>
+              <div className="grid grid-cols-1 sm:grid-cols-2 xl:grid-cols-4 gap-4">
+                {[
+                  { label: "Platform users", value: totalUsers, hint: "Registered accounts" },
+                  { label: "Seller applications", value: pendingSellers.length, hint: "Awaiting review" },
+                  { label: "Product approvals", value: pendingProducts.length, hint: "Awaiting moderation" },
+                  { label: "Operational status", value: "Live", hint: "Core API connected" },
+                ].map((metric, index) => {
+                  const accents = ["from-blue-500 to-cyan-400", "from-orange-500 to-amber-400", "from-violet-500 to-fuchsia-400", "from-emerald-500 to-lime-400"];
+                  return (
+                  <div key={metric.label} className="relative overflow-hidden rounded-2xl border border-gray-200 bg-white p-5 shadow-sm">
+                    <span className={`absolute inset-x-0 top-0 h-1 bg-gradient-to-r ${accents[index]}`} />
+                    <div className={`mb-4 flex h-9 w-9 items-center justify-center rounded-xl bg-gradient-to-br ${accents[index]} text-sm font-bold text-white`}>{index + 1}</div>
+                    <p className="text-sm font-medium text-gray-500">{metric.label}</p>
+                    <p className="mt-2 text-3xl font-semibold text-[#111827]">{metric.value}</p>
+                    <p className="mt-1 text-xs text-gray-400">{metric.hint}</p>
+                  </div>
+                  );
+                })}
+              </div>
+
               <div className="rounded-2xl border border-gray-200 bg-[#eef3f9] p-4 shadow-sm">
                 <h3 className="flex items-center gap-2 text-base sm:text-lg font-semibold text-[#222]">
                   <span className="text-base">💰</span>
@@ -916,7 +981,19 @@ export default function AdminDashboard() {
             </>
           ) : null}
 
-          {activeTab === "products" && !isLoading ? <AdminProducts /> : null}
+          {operationsWorkspace && !isLoading ? (
+            <AdminOperationsWorkspace workspace={operationsWorkspace} />
+          ) : null}
+
+          {isPaymentsWorkspace && !isLoading ? <AdminPayments view={paymentView} /> : null}
+          {isPromotionsWorkspace && !isLoading ? <AdminPromotions view={promotionView} /> : null}
+          {isCommunicationsWorkspace && !isLoading ? <AdminCommunications view={communicationView} /> : null}
+          {isUserManagementWorkspace && !isLoading ? <AdminUserManagement view={userManagementView} /> : null}
+          {isReportsWorkspace && !isLoading ? <AdminReports view={reportView} /> : null}
+          {isSystemWorkspace && !isLoading ? <AdminSystemManagement view={systemView} /> : null}
+          {isAccountWorkspace && !isLoading ? <AdminAccount view={accountView} /> : null}
+
+          {activeTab === "products" && !isLoading && !operationsWorkspace && !isPromotionsWorkspace ? <AdminProducts /> : null}
           {activeTab === "categories" && !isLoading ? <AdminCategories /> : null}
           {activeTab === "brands" && !isLoading ? <AdminBrands /> : null}
           {activeTab === "reviews" && !isLoading ? <AdminReviews /> : null}
@@ -941,7 +1018,7 @@ export default function AdminDashboard() {
             </>
           ) : null}
 
-          {activeTab === "users" && !isLoading ? (
+          {activeTab === "users" && !isLoading && !operationsWorkspace && !isUserManagementWorkspace ? (
             <>
               {pathname.includes("/admin/customers/") && pathname.split("/admin/customers/")[1]?.length && !pathname.includes("/addresses") && !pathname.includes("/reviews") && !pathname.includes("/support") ? (
                 <AdminCustomerDetails customerId={pathname.split("/admin/customers/")[1]?.split("/")[0] ?? ""} />
@@ -957,7 +1034,13 @@ export default function AdminDashboard() {
             </>
           ) : null}
 
-          {activeTab === "sellers" && !isLoading ? (
+          {activeTab === "sellers" && !isLoading && !operationsWorkspace ? (
+            sellerView === "all" || sellerView === "applications"
+              ? <AdminSellers mode={sellerView} />
+              : <SellerSubWorkspace view={sellerView} />
+          ) : null}
+
+          {false && activeTab === "sellers" && !isLoading && !operationsWorkspace ? (
             <div className="rounded-2xl border border-gray-200 bg-white p-5 shadow-sm">
               <h3 className="text-xl font-semibold text-[#111827] mb-4">Pending Seller Applications</h3>
 
@@ -999,58 +1082,6 @@ export default function AdminDashboard() {
                   ))
                 )}
               </div>
-            </div>
-          ) : null}
-
-          {activeTab === "users" && !isLoading ? (
-            <div className="rounded-2xl border border-gray-200 bg-white p-5 shadow-sm">
-              <h3 className="text-xl font-semibold text-[#111827] mb-4">User Management</h3>
-
-              <div className="mb-4">
-                <input
-                  type="text"
-                  value={userSearch}
-                  onChange={(event) => {
-                    setUserSearch(event.target.value);
-                    void refreshUsers(event.target.value);
-                  }}
-                  placeholder="Search users by name or email"
-                  className="rounded-xl border border-gray-200 bg-[#f8fafc] px-4 py-2.5 text-sm text-gray-700 w-full sm:w-[360px]"
-                />
-              </div>
-
-              <div className="overflow-x-auto">
-                <table className="w-full text-left">
-                  <thead className="bg-[#f8fafc]">
-                    <tr>
-                      <th className="px-4 py-3 text-sm font-medium text-gray-700">Name</th>
-                      <th className="px-4 py-3 text-sm font-medium text-gray-700">Email</th>
-                      <th className="px-4 py-3 text-sm font-medium text-gray-700">Phone</th>
-                      <th className="px-4 py-3 text-sm font-medium text-gray-700">Status</th>
-                      <th className="px-4 py-3 text-sm font-medium text-gray-700">Verified</th>
-                    </tr>
-                  </thead>
-                  <tbody className="divide-y divide-gray-100">
-                    {users.map((user) => (
-                      <tr key={user.id}>
-                        <td className="px-4 py-3 text-sm text-[#111827]">
-                          {user.first_name} {user.last_name}
-                        </td>
-                        <td className="px-4 py-3 text-sm text-gray-600">{user.email}</td>
-                        <td className="px-4 py-3 text-sm text-gray-600">{user.phone ?? "-"}</td>
-                        <td className="px-4 py-3 text-sm capitalize text-gray-600">{user.status}</td>
-                        <td className="px-4 py-3 text-sm text-gray-600">
-                          {user.is_verified ? "Yes" : "No"}
-                        </td>
-                      </tr>
-                    ))}
-                  </tbody>
-                </table>
-              </div>
-
-              {users.length === 0 && !isRefreshingUsers && (
-                <p className="text-gray-500 mt-4">No users found.</p>
-              )}
             </div>
           ) : null}
 

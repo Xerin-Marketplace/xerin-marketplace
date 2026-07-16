@@ -26,7 +26,47 @@ export type AdminSeller = {
   contact_phone: string | null;
   status: string;
   created_at: string;
+  business_description?: string | null;
+  business_country?: string | null;
+  business_region?: string | null;
+  business_city?: string | null;
+  business_address?: string | null;
+  product_description?: string | null;
+  years_in_business?: string | null;
+  website_url?: string | null;
+  agreement_accepted?: boolean;
 };
+
+export type AdminSellerDocument = {
+  id: string;
+  seller_id: string;
+  document_type: string;
+  document_url: string;
+  status: string;
+  rejection_reason?: string | null;
+  uploaded_at: string;
+};
+
+export type AdminSellerProduct = { id: string; seller_id: string; seller_name: string; name: string; sku: string; price: number; currency: string; status: string; is_active: boolean; created_at: string };
+export type AdminSellerOrder = { id: string; order_id: string; order_number: string; seller_id: string; seller_name: string; product_name: string; quantity: number; amount: number; currency: string; status: string; created_at: string };
+export type AdminSellerPerformance = { seller_id: string; seller_name: string; status: string; products: number; approved_products: number; orders: number; delivered_orders: number; cancelled_orders: number; revenue: number; currency: string; fulfillment_rate: number };
+export type AdminPayment = { id: string; order_id: string; order_number: string; user_id: string; customer_name: string; customer_email: string; amount: number; currency: string; method: string; provider: string | null; status: string; reference: string | null; failure_reason: string | null; paid_at: string | null; created_at: string; updated_at: string | null; transaction_count: number; refund_reason: string | null; refunded_at: string | null };
+export type AdminPaymentMethod = { method: string; provider: string; transactions: number; completed: number; failed: number; volume: number; currency: string };
+export type Coupon = { id: string; code: string; description: string | null; discount_type: string; discount_value: number; minimum_order_amount: number | null; maximum_discount_amount: number | null; usage_limit: number | null; usage_count: number; is_active: boolean; valid_from: string | null; valid_until: string | null; created_at: string };
+export type DiscountRule = { id: string; name: string; description: string | null; discount_type: string; discount_value: number; applies_to: string; minimum_order_amount: number | null; priority: number; is_active: boolean; valid_from: string | null; valid_until: string | null; created_at: string };
+export type PromotionCampaign = { id: string; name: string; objective: string; description: string | null; audience: string; channel: string; budget: number | null; currency: string; status: string; starts_at: string | null; ends_at: string | null; impressions: number; conversions: number; revenue: number; created_at: string };
+export type CommunicationMessage = { id: string; channel: "notification" | "email" | "sms"; title: string | null; body: string; audience: string; recipient: string | null; status: string; scheduled_at: string | null; sent_at: string | null; delivered_at: string | null; failure_reason: string | null; created_at: string };
+export type AccessUser = AdminUser & { roles: string[]; direct_permissions: string[]; active_sessions: number; last_login_at: string | null };
+export type AccessRole = { id: string; name: string; description: string | null; users_count: number; permissions: string[]; created_at: string };
+export type AccessPermission = { id: string; code: string; name: string; description: string | null; created_at: string };
+export type AccessSession = { id: string; user_id: string; user_name: string; email: string; created_at: string; expires_at: string; is_current_user: boolean };
+export type AdminReport = { type: string; date_from: string; date_to: string; currency: string; metrics: Array<{label:string;value:number;format:"currency"|"number"|"percent"}>; breakdown: Array<{label:string;value:number}>; rows: Array<Record<string,string|number|null>> };
+export type AuditLog={id:string;actor_id:string|null;actor_name:string;action:string;resource_type:string;resource_id:string|null;details:Record<string,unknown>;created_at:string};
+export type SystemEvent={id:string;source:string;event_type:string;severity:string;message:string;metadata_json:Record<string,unknown>|null;status:string;acknowledged_at:string|null;created_at:string};
+export type BackgroundJob={id:string;job_type:string;queue:string;status:string;attempts:number;max_attempts:number;failure_reason:string|null;scheduled_at:string|null;started_at:string|null;completed_at:string|null;created_at:string};
+export type ApplicationSetting={id:string|null;key:string;value:unknown;category:string;description:string|null;is_public:boolean;updated_at:string|null};
+export type AccountProfile={id:string;first_name:string;last_name:string;email:string;phone:string|null;is_verified:boolean;status:string;account_type:string;roles?:string[]};
+export type AccountSession={id:string;created_at:string;expires_at:string};
 
 export type AdminProduct = {
   id: string;
@@ -399,6 +439,54 @@ export const listPendingSellers = async (): Promise<AdminSeller[]> => {
   return res.data;
 };
 
+export const getSellerDocuments = async (sellerId: string): Promise<AdminSellerDocument[]> => {
+  const res = await axiosInstance.get<AdminSellerDocument[]>(`/admin/sellers/${sellerId}/documents`);
+  return res.data;
+};
+export const listSellerProducts = async () => (await axiosInstance.get<AdminSellerProduct[]>("/admin/seller-products")).data;
+export const listSellerOrders = async () => (await axiosInstance.get<AdminSellerOrder[]>("/admin/seller-orders")).data;
+export const listSellerPerformance = async () => (await axiosInstance.get<AdminSellerPerformance[]>("/admin/seller-performance")).data;
+export const listAdminPayments = async (params: { status_filter?: string; method?: string; search?: string } = {}) => (await axiosInstance.get<AdminPayment[]>("/admin/payments", { params })).data;
+export const listAdminPaymentMethods = async () => (await axiosInstance.get<AdminPaymentMethod[]>("/admin/payment-methods")).data;
+export const listAdminRefunds = async () => (await axiosInstance.get<AdminPayment[]>("/admin/refunds")).data;
+export const listAdminFailedPayments = async () => (await axiosInstance.get<AdminPayment[]>("/admin/failed-payments")).data;
+export const refundAdminPayment = async (paymentId: string, reason: string) => (await axiosInstance.post<AdminPayment>(`/admin/payments/${paymentId}/refund`, { reason })).data;
+export const listCoupons = async () => (await axiosInstance.get<Coupon[]>("/coupons")).data;
+export const createCoupon = async (payload: Partial<Coupon>) => (await axiosInstance.post<Coupon>("/coupons", payload)).data;
+export const updateCoupon = async (id: string, payload: Partial<Coupon>) => (await axiosInstance.put<Coupon>(`/coupons/${id}`, payload)).data;
+export const listDiscounts = async () => (await axiosInstance.get<DiscountRule[]>("/promotions/discounts")).data;
+export const createDiscount = async (payload: Partial<DiscountRule>) => (await axiosInstance.post<DiscountRule>("/promotions/discounts", payload)).data;
+export const updateDiscount = async (id: string, payload: Partial<DiscountRule>) => (await axiosInstance.put<DiscountRule>(`/promotions/discounts/${id}`, payload)).data;
+export const listPromotionCampaigns = async () => (await axiosInstance.get<PromotionCampaign[]>("/promotions/campaigns")).data;
+export const createPromotionCampaign = async (payload: Partial<PromotionCampaign>) => (await axiosInstance.post<PromotionCampaign>("/promotions/campaigns", payload)).data;
+export const updatePromotionCampaign = async (id: string, payload: Partial<PromotionCampaign>) => (await axiosInstance.put<PromotionCampaign>(`/promotions/campaigns/${id}`, payload)).data;
+export const listCommunicationMessages = async (channel: CommunicationMessage["channel"]) => (await axiosInstance.get<CommunicationMessage[]>("/communications", { params: { channel } })).data;
+export const createCommunicationMessage = async (payload: Partial<CommunicationMessage>) => (await axiosInstance.post<CommunicationMessage>("/communications", payload)).data;
+export const sendCommunicationMessage = async (id: string) => (await axiosInstance.post<CommunicationMessage>(`/communications/${id}/send`)).data;
+export const cancelCommunicationMessage = async (id: string) => (await axiosInstance.post<CommunicationMessage>(`/communications/${id}/cancel`)).data;
+export const listAccessUsers = async () => (await axiosInstance.get<AccessUser[]>("/admin/access-users")).data;
+export const updateAccessUser = async (id: string, payload: Partial<AdminUser>) => (await axiosInstance.patch<AdminUser>(`/admin/users/${id}`, payload)).data;
+export const updateUserRoles = async (id: string, roles: string[]) => (await axiosInstance.put<{ user_id: string; roles: string[] }>(`/admin/users/${id}/roles`, { roles })).data;
+export const listAccessRoles = async () => (await axiosInstance.get<AccessRole[]>("/admin/access-roles")).data;
+export const listAccessPermissions = async () => (await axiosInstance.get<AccessPermission[]>("/admin/permissions")).data;
+export const updateAccessRolePermissions = async (id: string, permission_codes: string[]) => (await axiosInstance.put(`/admin/roles/${id}/permissions`, { permission_codes })).data;
+export const listAccessSessions = async () => (await axiosInstance.get<AccessSession[]>("/admin/active-sessions")).data;
+export const revokeAccessSession = async (id: string) => (await axiosInstance.delete(`/admin/active-sessions/${id}`)).data;
+export const getAdminReport = async (type: string, params: {date_from?:string;date_to?:string}={}) => (await axiosInstance.get<AdminReport>(`/admin/reports/${type}`,{params})).data;
+export const listAuditLogs=async()=>(await axiosInstance.get<AuditLog[]>("/system/audit-logs")).data;
+export const listSystemEvents=async()=>(await axiosInstance.get<SystemEvent[]>("/system/events")).data;
+export const acknowledgeSystemEvent=async(id:string)=>(await axiosInstance.post<SystemEvent>(`/system/events/${id}/acknowledge`)).data;
+export const listBackgroundJobs=async()=>(await axiosInstance.get<BackgroundJob[]>("/system/jobs")).data;
+export const retryBackgroundJob=async(id:string)=>(await axiosInstance.post<BackgroundJob>(`/system/jobs/${id}/retry`)).data;
+export const cancelBackgroundJob=async(id:string)=>(await axiosInstance.post<BackgroundJob>(`/system/jobs/${id}/cancel`)).data;
+export const listApplicationSettings=async()=>(await axiosInstance.get<ApplicationSetting[]>("/system/settings")).data;
+export const updateApplicationSetting=async(key:string,payload:Partial<ApplicationSetting>)=>(await axiosInstance.put<ApplicationSetting>(`/system/settings/${key}`,payload)).data;
+export const getAccountProfile=async()=>(await axiosInstance.get<AccountProfile>("/users/me")).data;
+export const updateAccountProfile=async(payload:Pick<AccountProfile,"first_name"|"last_name"|"phone">)=>(await axiosInstance.patch<AccountProfile>("/users/me",payload)).data;
+export const changeAccountPassword=async(current_password:string,new_password:string)=>(await axiosInstance.post<{message:string}>("/auth/change-password",{current_password,new_password})).data;
+export const listAccountSessions=async()=>(await axiosInstance.get<AccountSession[]>("/users/me/sessions")).data;
+export const revokeAccountSession=async(id:string)=>(await axiosInstance.delete(`/users/me/sessions/${id}`)).data;
+
 export const approveSeller = async (sellerId: string): Promise<AdminSeller> => {
   const res = await axiosInstance.post<AdminSeller>(`/admin/sellers/${sellerId}/approve`);
   return res.data;
@@ -617,6 +705,39 @@ export const adminService = {
   listUsers,
   listAllSellers,
   listPendingSellers,
+  getSellerDocuments,
+  listSellerProducts,
+  listSellerOrders,
+  listSellerPerformance,
+  listAdminPayments,
+  listAdminPaymentMethods,
+  listAdminRefunds,
+  listAdminFailedPayments,
+  refundAdminPayment,
+  listCoupons,
+  createCoupon,
+  updateCoupon,
+  listDiscounts,
+  createDiscount,
+  updateDiscount,
+  listPromotionCampaigns,
+  createPromotionCampaign,
+  updatePromotionCampaign,
+  listCommunicationMessages,
+  createCommunicationMessage,
+  sendCommunicationMessage,
+  cancelCommunicationMessage,
+  listAccessUsers,
+  updateAccessUser,
+  updateUserRoles,
+  listAccessRoles,
+  listAccessPermissions,
+  updateAccessRolePermissions,
+  listAccessSessions,
+  revokeAccessSession,
+  getAdminReport,
+  listAuditLogs,listSystemEvents,acknowledgeSystemEvent,listBackgroundJobs,retryBackgroundJob,cancelBackgroundJob,listApplicationSettings,updateApplicationSetting,
+  getAccountProfile,updateAccountProfile,changeAccountPassword,listAccountSessions,revokeAccountSession,
   approveSeller,
   rejectSeller,
   listAllProducts,
@@ -652,4 +773,3 @@ export const adminService = {
   listDisputes,
   getAnalyticsOverview,
 };
-

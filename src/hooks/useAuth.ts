@@ -10,6 +10,7 @@ import {
   resetPassword as apiResetPassword,
 } from "@/lib/api/endpoints/auth";
 import { useAuthStore } from "@/store/useAuthStore";
+import { authStorage } from "@/lib/auth/storage";
 import { useRouter } from "next/navigation";
 
 export const useAuth = () => {
@@ -21,15 +22,32 @@ export const useAuth = () => {
   const refreshToken = useAuthStore((state) => state.refreshToken);
   const isAuthenticated = useAuthStore((state) => state.isAuthenticated);
   
-  const setSession = useAuthStore((state) => state.setSession);
-  const clearSession = useAuthStore((state) => state.clearSession);
+  const storeSetSession = useAuthStore((state) => state.setSession);
+  const storeClearSession = useAuthStore((state) => state.clearSession);
+
+  const setSession = (session: Parameters<typeof storeSetSession>[0]) => {
+    authStorage.setSession(session);
+    storeSetSession(session);
+  };
+
+  const clearSession = () => {
+    authStorage.clearSession();
+    storeClearSession();
+  };
 
   const loginMutation = useMutation({
     mutationFn: apiLogin,
     onSuccess: (data) => {
       setSession(data);
       const user = data.user as any;
-      if (user?.roles?.includes("admin") || user?.role === "admin") {
+      if (
+        user?.roles?.includes("admin") ||
+        user?.roles?.includes("super_admin") ||
+        user?.role === "admin" ||
+        user?.role === "super_admin" ||
+        user?.account_type === "admin" ||
+        user?.account_type === "super_admin"
+      ) {
         router.push("/admin/dashboard");
       } else if (user?.is_seller || user?.role === "seller") {
         router.push("/seller/dashboard");

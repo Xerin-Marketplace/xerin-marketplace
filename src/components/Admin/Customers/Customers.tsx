@@ -38,6 +38,7 @@ const AdminCustomers = () => {
   const [hasOrders, setHasOrders] = useState("");
   const [customerType, setCustomerType] = useState("");
   const [debouncedSearch, setDebouncedSearch] = useState("");
+  const [busyCustomerId, setBusyCustomerId] = useState<string | null>(null);
 
   useEffect(() => {
     const timer = setTimeout(() => setDebouncedSearch(search), 400);
@@ -91,6 +92,24 @@ const AdminCustomers = () => {
     `${c.first_name?.[0] ?? ""}${c.last_name?.[0] ?? ""}`.toUpperCase() || "??";
 
   const totalPages = Math.ceil(total / pageSize) || 1;
+
+  const toggleCustomerStatus = async (customer: Customer) => {
+    const nextStatus = customer.status === "suspended" ? "active" : "suspended";
+    const action = nextStatus === "suspended" ? "suspend" : "reactivate";
+    if (!window.confirm(`Are you sure you want to ${action} this customer?`)) return;
+    setBusyCustomerId(customer.id);
+    try {
+      const updated = await customersService.updateCustomerStatus(customer.id, nextStatus);
+      setCustomers((items) => items.map((item) => item.id === updated.id ? { ...item, ...updated } : item));
+      toast.success(`Customer ${action}d successfully.`);
+      const summaryData = await customersService.getSummary();
+      setSummary(summaryData);
+    } catch (error) {
+      toast.error(getErrorMessage(error));
+    } finally {
+      setBusyCustomerId(null);
+    }
+  };
 
   return (
     <div className="space-y-4">
@@ -238,8 +257,13 @@ const AdminCustomers = () => {
                           >
                             View Profile
                           </Link>
-                          <button type="button" className="rounded-lg bg-[#f8fafc] px-2.5 py-1.5 text-xs font-medium text-gray-700 hover:bg-gray-100">
-                            Disable
+                          <button
+                            type="button"
+                            disabled={busyCustomerId === c.id}
+                            onClick={() => void toggleCustomerStatus(c)}
+                            className="rounded-lg bg-[#f8fafc] px-2.5 py-1.5 text-xs font-medium text-gray-700 hover:bg-gray-100 disabled:opacity-50"
+                          >
+                            {busyCustomerId === c.id ? "Updating..." : c.status === "suspended" ? "Reactivate" : "Suspend"}
                           </button>
                         </div>
                       </td>
@@ -280,7 +304,8 @@ const AdminCustomers = () => {
 };
 
 const SummaryCard = ({ label, value }: { label: string; value: string | number }) => (
-  <div className="rounded-2xl border border-gray-200 bg-white p-4 shadow-sm">
+  <div className="relative overflow-hidden rounded-2xl border border-cyan-100 bg-gradient-to-br from-white to-cyan-50 p-4 shadow-sm">
+    <span className="absolute inset-x-0 top-0 h-1 bg-gradient-to-r from-cyan-500 to-blue-500" />
     <p className="text-xs font-medium uppercase tracking-wider text-gray-500">{label}</p>
     <p className="mt-2 text-xl font-semibold text-[#111827]">{value}</p>
   </div>

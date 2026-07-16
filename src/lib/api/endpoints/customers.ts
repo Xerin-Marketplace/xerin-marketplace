@@ -31,6 +31,8 @@ export type CustomerStats = {
 
 export type CustomerAddress = {
   id: string;
+  user_id?: string;
+  customer_name?: string | null;
   label: string | null;
   address_type: string;
   country: string;
@@ -158,6 +160,11 @@ export const getCustomerDetails = async (customerId: string): Promise<CustomerDe
   return res.data;
 };
 
+export const updateCustomerStatus = async (customerId: string, status: string): Promise<Customer> => {
+  const res = await axiosInstance.patch<Customer>(`/admin/users/${customerId}`, { status });
+  return res.data;
+};
+
 export const listCustomerAddresses = async (customerId: string): Promise<CustomerAddress[]> => {
   const res = await axiosInstance.get<CustomerAddress[]>(`/admin/customers/${customerId}/addresses`);
   return res.data;
@@ -233,6 +240,7 @@ export const customersService = {
   getSummary,
   listCustomers,
   getCustomerDetails,
+  updateCustomerStatus,
   getCustomer,
   listCustomerAddresses,
   listAllAddresses,
@@ -249,4 +257,3 @@ export const customersService = {
   listSupportTickets,
   updateSupportTicket,
 };
-

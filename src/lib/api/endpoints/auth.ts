@@ -63,4 +63,3 @@ export const authApi = {
   forgotPassword,
   resetPassword,
 };
-

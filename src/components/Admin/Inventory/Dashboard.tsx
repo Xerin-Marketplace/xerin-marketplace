@@ -235,7 +235,8 @@ const AdminInventoryDashboard = ({ initialTab = "overview" }: { initialTab?: str
 };
 
 const SummaryCard = ({ label, value, color }: { label: string; value: string | number; color: string }) => (
-  <div className="rounded-2xl border border-gray-200 bg-white p-4 shadow-sm">
+  <div className="relative overflow-hidden rounded-2xl border border-emerald-100 bg-gradient-to-br from-white to-emerald-50 p-4 shadow-sm">
+    <span className="absolute inset-x-0 top-0 h-1 bg-gradient-to-r from-emerald-500 to-lime-400" />
     <p className="text-xs font-medium uppercase tracking-wider text-gray-500">{label}</p>
     <p className={`mt-2 inline-flex rounded-lg px-2.5 py-1 text-xl font-semibold ${color}`}>{value}</p>
   </div>
