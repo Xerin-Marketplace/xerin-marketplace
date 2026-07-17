@@ -19,6 +19,7 @@ import NotificationProvider from "@/app/providers/NotificationProvider";
 
 import ScrollToTop from "@/components/Common/ScrollToTop";
 import PreLoader from "@/components/Common/PreLoader";
+import BuyerAccountFooter from "@/components/BuyerAccount/BuyerAccountFooter";
 
 export default function RootLayout({
   children,
@@ -32,9 +33,11 @@ export default function RootLayout({
     pathname === "/signin" ||
     pathname === "/signup" ||
     pathname === "/seller/register" ||
+    pathname.startsWith("/seller/") ||
     pathname === "/admin/login" ||
     pathname === "/admin" ||
     pathname.startsWith("/admin/");
+  const isBuyerAccount = pathname === "/account" || pathname.startsWith("/account/") || pathname === "/my-account";
 
   useEffect(() => {
     setTimeout(() => setLoading(false), 1000);
@@ -56,10 +59,11 @@ export default function RootLayout({
                         <>
                           {!hideStorefrontChrome ? <Header /> : null}
                           {children}
-                          {!hideStorefrontChrome ? <Footer /> : null}
-                          <QuickViewModal />
-                          <CartSidebarModal />
-                          <PreviewSliderModal />
+                          {!hideStorefrontChrome && !isBuyerAccount ? <Footer /> : null}
+                          {!hideStorefrontChrome && isBuyerAccount ? <BuyerAccountFooter /> : null}
+                          {!hideStorefrontChrome ? <QuickViewModal /> : null}
+                          {!hideStorefrontChrome ? <CartSidebarModal /> : null}
+                          {!hideStorefrontChrome ? <PreviewSliderModal /> : null}
                         </>
                       )}
                     </PreviewSliderProvider>

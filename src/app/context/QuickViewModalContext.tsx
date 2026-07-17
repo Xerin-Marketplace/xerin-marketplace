@@ -1,5 +1,6 @@
 "use client"
-import React, { createContext, useContext, useState } from "react";
+import React, { createContext, useContext, useEffect, useState } from "react";
+import { usePathname } from "next/navigation";
 
 interface ModalContextType {
   isModalOpen: boolean;
@@ -19,6 +20,8 @@ export const useModalContext = () => {
 
 export const ModalProvider = ({ children }) => {
   const [isModalOpen, setIsModalOpen] = useState(false);
+  const pathname = usePathname();
+  useEffect(() => setIsModalOpen(false), [pathname]);
 
   const openModal = () => {
     setIsModalOpen(true);
@@ -33,4 +36,4 @@ export const ModalProvider = ({ children }) => {
       {children}
     </ModalContext.Provider>
   );
-}; 
+};

@@ -27,6 +27,7 @@ export const API_ENDPOINTS = {
     register: "/sellers/register",
     businessCategories: "/sellers/business-categories",
     me: "/sellers/me",
+    profile: "/sellers/profile",
     kycDocuments: "/sellers/kyc-documents",
     kycStatus: "/sellers/kyc-status",
     payoutAccounts: "/sellers/payout-accounts",

@@ -1,269 +1,58 @@
 "use client";
 
-import Breadcrumb from "@/components/Common/Breadcrumb";
+import { ApiError } from "@/lib/api/client";
 import { productsApi } from "@/lib/api/endpoints/products";
 import { sellersApi } from "@/lib/api/endpoints/sellers";
-import { ApiError } from "@/lib/api/client";
 import { authStorage } from "@/lib/auth/storage";
 import type { Product } from "@/types/api/product";
-import type { SellerKycDocument, SellerKycStatus } from "@/types/api/seller";
+import type { PayoutAccount, Seller, SellerBusinessProfile, SellerKycDocument, SellerKycStatus } from "@/types/api/seller";
+import { AlertCircle, ArrowRight, BadgeDollarSign, Box, Check, CheckCircle2, CircleDashed, Clock3, ExternalLink, FileWarning, ImageIcon, PackageCheck, Plus, RefreshCw, ShieldCheck, ShoppingBag, Store, WalletCards } from "lucide-react";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { useEffect, useMemo, useState } from "react";
-import toast from "react-hot-toast";
 
-type CurrentUser = {
-  account_type?: string;
-  roles?: string[];
-  seller_status?: string | null;
-  first_name?: string | null;
-};
-
+type CurrentUser = { account_type?: string; roles?: string[]; seller_status?: string | null; first_name?: string | null };
+type LoadState = "loading" | "ready" | "error";
 const REQUIRED_DOCUMENTS = ["tin", "business_profile", "business_registration"];
+const documentNames: Record<string,string> = { tin: "TIN Certificate", business_profile: "Business Profile", business_registration: "Business Registration" };
+const pretty=(value:string)=>value.replaceAll("_"," ").replace(/\b\w/g,letter=>letter.toUpperCase());
 
-const SellerDashboard = () => {
-  const router = useRouter();
-  const user = authStorage.getUser<CurrentUser>();
-  const token = authStorage.getAccessToken();
+export default function SellerDashboard(){
+  const router=useRouter(); const user=authStorage.getUser<CurrentUser>(); const token=authStorage.getAccessToken();
+  const isSeller=useMemo(()=>Boolean(user&&(user.account_type==="seller"||(user.roles??[]).includes("seller"))),[user]);
+  const[products,setProducts]=useState<Product[]>([]);const[kyc,setKyc]=useState<SellerKycStatus|null>(null);const[documents,setDocuments]=useState<SellerKycDocument[]>([]);const[payouts,setPayouts]=useState<PayoutAccount[]>([]);const[seller,setSeller]=useState<Seller|null>(null);const[profile,setProfile]=useState<SellerBusinessProfile|null>(null);const[state,setState]=useState<LoadState>("loading");const[refreshing,setRefreshing]=useState(false);const[error,setError]=useState("");
+useEffect(()=>{if(!token){router.replace("/signin?redirect=/seller/dashboard");return}if(!isSeller){router.replace("/my-account");return}void load(false)},[isSeller,router,token]);
+  async function load(background:boolean){if(!token)return;background?setRefreshing(true):setState("loading");setError("");try{const[data,status,docs,payoutList,sellerData,profileData]=await Promise.all([productsApi.getMyProducts(token),sellersApi.getKycStatus(token),sellersApi.getKycDocuments(token),sellersApi.getPayoutAccounts(token),sellersApi.getMe(token),sellersApi.getProfile()]);setProducts(data);setKyc(status);setDocuments(docs);setPayouts(payoutList);setSeller(sellerData);setProfile(profileData);setState("ready")}catch(cause){setError(cause instanceof ApiError?cause.message:"Unable to load seller dashboard. Check your connection and retry.");setState("error")}finally{setRefreshing(false)}}
+  const productStats=useMemo(()=>({total:products.length,active:products.filter(p=>p.status==="approved"&&p.is_active).length,pending:products.filter(p=>p.status==="pending_review").length,rejected:products.filter(p=>p.status==="rejected").length}),[products]);
+  const uploaded=new Set(documents.map(document=>document.document_type));const missing=REQUIRED_DOCUMENTS.filter(type=>!uploaded.has(type));const rejectedDocs=documents.filter(document=>document.status==="rejected");
+  const kycLabel=rejectedDocs.length?"Changes Requested":missing.length?documents.length?"Incomplete":"Not Started":kyc?.can_submit_for_review?"Ready to Submit":documents.some(d=>d.status==="pending"||d.status==="under_review")?"Under Review":"Approved";
+  const setupChecks=[Boolean(seller?.business_name),Boolean(profile?.business_description),Boolean(seller?.contact_email||seller?.contact_phone),Boolean(profile?.business_address),payouts.length>0,missing.length===0,productStats.active>0];const setupPercent=Math.round(setupChecks.filter(Boolean).length/setupChecks.length*100);
+  const nextActions=[...missing.map(type=>({priority:"High",title:`Upload ${documentNames[type]}`,description:"Required for KYC verification.",href:"/seller/kyc"})),...(payouts.length?[]:[{priority:"High",title:"Add a payout account",description:"Required before earnings can be settled.",href:"/seller/kyc?tab=payouts"}]),...(profile?.business_description?[]:[{priority:"Medium",title:"Complete your business profile",description:"Add store description and business location.",href:"/seller/kyc"}]),...(products.length?[]:[{priority:"Medium",title:"Add your first product",description:"Start building your approved storefront catalog.",href:"/seller/products?create=true"}]),...products.filter(p=>p.status==="rejected").slice(0,2).map(p=>({priority:"High",title:`Resolve ${p.name}`,description:p.rejection_reason||"This product requires changes.",href:`/seller/products?product=${p.id}`}))];
+  if(!token||!isSeller)return null;
+  if(state==="loading")return <DashboardSkeleton/>;
+  if(state==="error")return <ErrorState message={error} retry={()=>void load(false)}/>;
+  const accountStatus=seller?.status||user?.seller_status||"pending";
+  return <div className="mx-auto max-w-[1280px] space-y-6">
+    {accountStatus!=="approved"&&<div className={`flex gap-3 rounded-2xl border p-4 ${accountStatus==="suspended"||accountStatus==="rejected"?"border-red-200 bg-red-50 text-red-800 dark:border-red-500/30 dark:bg-red-500/10 dark:text-red-200":"border-amber-200 bg-amber-50 text-amber-800 dark:border-amber-500/30 dark:bg-amber-500/10 dark:text-amber-200"}`}><AlertCircle className="shrink-0" size={20}/><div><p className="font-semibold">Seller account: {pretty(accountStatus)}</p><p className="mt-1 text-sm">{accountStatus==="suspended"?"Selling operations are restricted. Contact support for account review.":"Product publishing remains limited until account approval is complete."}</p></div></div>}
+    <section className="flex flex-col gap-4 rounded-2xl border border-[#e2e8f0] bg-white p-5 shadow-sm dark:border-white/10 dark:bg-[#1f2937] sm:flex-row sm:items-center sm:justify-between"><div><h2 className="text-2xl font-semibold">Seller Dashboard</h2><p className="mt-1 text-sm text-[#64748b]">Manage your products, orders, verification and earnings.</p></div><div className="flex flex-wrap gap-2"><button onClick={()=>void load(true)} disabled={refreshing} className="inline-flex items-center gap-2 rounded-xl border border-[#e2e8f0] px-4 py-2.5 text-sm font-semibold dark:border-white/10"><RefreshCw size={17} className={refreshing?"animate-spin":""}/>{refreshing?"Refreshing":"Refresh"}</button><Link href="/seller/products?create=true" className="inline-flex items-center gap-2 rounded-xl bg-[#f7941d] px-4 py-2.5 text-sm font-semibold text-white"><Plus size={17}/>Add Product</Link><Link href="/shop-with-sidebar" className="inline-flex items-center gap-2 rounded-xl bg-[#2d3134] px-4 py-2.5 text-sm font-semibold text-white"><ExternalLink size={17}/>View Store</Link></div></section>
+    <section className="rounded-2xl bg-gradient-to-r from-[#2d3134] to-[#4a4f54] p-5 text-white shadow-sm"><div className="flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between"><div><h3 className="text-xl font-semibold">Welcome back, {user?.first_name||"Seller"}</h3><p className="mt-1 text-sm text-white/65">Complete your store setup, add products and monitor marketplace activity.</p></div><div className="flex gap-2"><Link href="/seller/products?create=true" className="rounded-xl bg-[#f7941d] px-4 py-2.5 text-sm font-semibold">Add Product</Link>{missing.length>0&&<Link href="/seller/kyc" className="rounded-xl border border-white/20 px-4 py-2.5 text-sm font-semibold">Complete Verification</Link>}</div></div></section>
+    <section className="grid gap-3 sm:grid-cols-2 xl:grid-cols-5"><Metric href="/seller/products" label="Total Products" value={productStats.total} help={productStats.total?"All catalog records":"No products submitted yet"} icon={ShoppingBag}/><Metric href="/seller/products?status=approved" label="Active Products" value={productStats.active} help={productStats.active?"Live storefront listings":"No active products yet"} icon={PackageCheck}/><Metric href="/seller/products?status=pending_review" label="Pending Approval" value={productStats.pending} help={productStats.pending?"Awaiting marketplace review":"Nothing awaiting review"} icon={Clock3}/><Metric href="/seller/products?status=rejected" label="Rejected Products" value={productStats.rejected} help={productStats.rejected?"Action required":"No rejected products"} icon={FileWarning}/><UnavailableMetric label="Total Orders" help="Order API not connected" icon={Box}/></section>
+    <section className="grid gap-5 xl:grid-cols-2"><Verification documents={documents} missing={missing} accountStatus={accountStatus} kycLabel={kycLabel}/><StoreSetup percent={setupPercent} checks={setupChecks}/></section>
+    <section className="grid gap-5 xl:grid-cols-[1.1fr_.9fr]"><NextActions actions={nextActions}/><BusinessFlow missing={missing.length} profileReady={Boolean(profile?.business_description)} productCount={products.length} activeProducts={productStats.active} payoutReady={payouts.length>0}/></section>
+    <RecentProducts products={products}/>
+    <section className="grid gap-5 xl:grid-cols-2"><UnavailablePanel title="Recent Orders" description="Orders will appear here after customers purchase your approved products." icon={Box} action="Orders module is not connected yet"/><UnavailablePanel title="Sales & Earnings" description="Gross sales, commission, refunds, net earnings and payout balances will appear after the seller finance API is available." icon={BadgeDollarSign} action="Finance data unavailable"/></section>
+  </div>;
+}
 
-  const isSeller = useMemo(() => {
-    if (!user) return false;
-    const roles = user.roles ?? [];
-    return user.account_type === "seller" || roles.includes("seller");
-  }, [user]);
-
-  const [products, setProducts] = useState<Product[]>([]);
-  const [kycStatus, setKycStatus] = useState<SellerKycStatus | null>(null);
-  const [documents, setDocuments] = useState<SellerKycDocument[]>([]);
-  const [loading, setLoading] = useState(false);
-
-  useEffect(() => {
-    if (!token) {
-      router.replace("/signin?redirect=/seller/dashboard");
-      return;
-    }
-
-    if (!isSeller) {
-      router.replace("/my-account");
-      return;
-    }
-
-    void loadData();
-  }, [isSeller, router, token]);
-
-  async function loadData() {
-    if (!token) return;
-    setLoading(true);
-    try {
-      const [productList, status, docs] = await Promise.all([
-        productsApi.getMyProducts(token),
-        sellersApi.getKycStatus(token),
-        sellersApi.getKycDocuments(token),
-      ]);
-      setProducts(productList);
-      setKycStatus(status);
-      setDocuments(docs);
-    } catch (error) {
-      if (error instanceof ApiError) {
-        toast.error(error.message);
-      } else {
-        toast.error("Failed to load dashboard data.");
-      }
-    } finally {
-      setLoading(false);
-    }
-  }
-
-  const stats = useMemo(() => {
-    const total = products.length;
-    const approved = products.filter((p) => p.status === "approved").length;
-    const pending = products.filter((p) => p.status === "pending_review").length;
-    const rejected = products.filter((p) => p.status === "rejected").length;
-    return { total, approved, pending, rejected };
-  }, [products]);
-
-  const uploadedTypes = useMemo(
-    () => new Set(documents.map((doc) => doc.document_type)),
-    [documents]
-  );
-
-  const missingDocuments = REQUIRED_DOCUMENTS.filter((type) => !uploadedTypes.has(type));
-
-  if (!token || !isSeller) return null;
-
-  return (
-    <>
-      <Breadcrumb title="Seller Dashboard" pages={["Seller Dashboard"]} />
-      <section className="py-14 bg-gray-2 dark:bg-darkTheme-bg min-h-screen">
-        <div className="max-w-[1170px] mx-auto px-4 sm:px-8 xl:px-0 space-y-8">
-          <div className="rounded-xl bg-white dark:bg-darkTheme-card shadow-1 p-6 sm:p-8">
-            <h2 className="text-2xl font-semibold text-dark dark:text-white mb-2">
-              Karibu {user?.first_name || "Seller"}
-            </h2>
-            <p className="text-dark-4 dark:text-darkTheme-body-color">
-              Manage your seller account, track KYC progress, and oversee your product catalog.
-            </p>
-          </div>
-
-          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6">
-            <div className="rounded-xl bg-white dark:bg-darkTheme-card shadow-1 p-6">
-              <p className="text-dark-4 dark:text-darkTheme-body-color text-sm mb-1">Total products</p>
-              <p className="text-3xl font-semibold text-dark dark:text-white">{stats.total}</p>
-            </div>
-            <div className="rounded-xl bg-white dark:bg-darkTheme-card shadow-1 p-6">
-              <p className="text-dark-4 dark:text-darkTheme-body-color text-sm mb-1">Approved</p>
-              <p className="text-3xl font-semibold text-success">{stats.approved}</p>
-            </div>
-            <div className="rounded-xl bg-white dark:bg-darkTheme-card shadow-1 p-6">
-              <p className="text-dark-4 dark:text-darkTheme-body-color text-sm mb-1">Pending review</p>
-              <p className="text-3xl font-semibold text-warning">{stats.pending}</p>
-            </div>
-            <div className="rounded-xl bg-white dark:bg-darkTheme-card shadow-1 p-6">
-              <p className="text-dark-4 dark:text-darkTheme-body-color text-sm mb-1">Rejected</p>
-              <p className="text-3xl font-semibold text-red">{stats.rejected}</p>
-            </div>
-          </div>
-
-          <div className="grid grid-cols-1 lg:grid-cols-2 gap-8">
-            <div className="rounded-xl bg-white dark:bg-darkTheme-card shadow-1 p-6 sm:p-8">
-              <div className="flex items-center justify-between mb-6">
-                <h3 className="text-xl font-semibold text-dark dark:text-white">KYC Status</h3>
-                <span
-                  className={`inline-flex rounded-full px-3 py-1 text-xs font-medium capitalize ${
-                    kycStatus?.can_submit_for_review
-                      ? "bg-success/10 text-success"
-                      : "bg-warning/10 text-warning"
-                  }`}
-                >
-                  {kycStatus?.seller_status ?? user?.seller_status ?? "pending"}
-                </span>
-              </div>
-
-              <div className="space-y-3 mb-6">
-                {REQUIRED_DOCUMENTS.map((type) => {
-                  const uploaded = uploadedTypes.has(type);
-                  return (
-                    <div key={type} className="flex items-center justify-between">
-                      <span className="capitalize text-dark dark:text-white">
-                        {type.replace(/_/g, " ")}
-                      </span>
-                      <span
-                        className={`inline-flex rounded-full px-2.5 py-0.5 text-xs font-medium ${
-                          uploaded ? "bg-success/10 text-success" : "bg-gray-2 text-dark-2"
-                        }`}
-                      >
-                        {uploaded ? "Uploaded" : "Missing"}
-                      </span>
-                    </div>
-                  );
-                })}
-              </div>
-
-              {missingDocuments.length > 0 && (
-                <div className="rounded-lg bg-warning/10 text-warning px-4 py-3 text-sm mb-6">
-                  Missing: {missingDocuments.map((type) => type.replace(/_/g, " ")).join(", ")}
-                </div>
-              )}
-
-              <Link
-                href="/seller/kyc"
-                className="inline-flex rounded-lg bg-blue text-white py-2.5 px-5 font-medium hover:bg-blue-dark transition"
-              >
-                Manage KYC
-              </Link>
-            </div>
-
-            <div className="rounded-xl bg-white dark:bg-darkTheme-card shadow-1 p-6 sm:p-8">
-              <h3 className="text-xl font-semibold text-dark dark:text-white mb-6">Quick Actions</h3>
-              <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
-                <Link
-                  href="/seller/products"
-                  className="rounded-lg border border-gray-3 dark:border-darkTheme-border-color p-4 hover:border-blue transition"
-                >
-                  <p className="font-medium text-dark dark:text-white">Manage Products</p>
-                  <p className="text-sm text-dark-4 dark:text-darkTheme-body-color">
-                    View and edit your listings
-                  </p>
-                </Link>
-                <Link
-                  href="/seller/kyc"
-                  className="rounded-lg border border-gray-3 dark:border-darkTheme-border-color p-4 hover:border-blue transition"
-                >
-                  <p className="font-medium text-dark dark:text-white">Upload Documents</p>
-                  <p className="text-sm text-dark-4 dark:text-darkTheme-body-color">
-                    Complete seller verification
-                  </p>
-                </Link>
-              </div>
-            </div>
-          </div>
-
-          <div className="rounded-xl bg-white dark:bg-darkTheme-card shadow-1 overflow-hidden">
-            <div className="p-6 sm:p-8 border-b border-gray-3 dark:border-darkTheme-border-color">
-              <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
-                <h3 className="text-xl font-semibold text-dark dark:text-white">Recent Products</h3>
-                <Link
-                  href="/seller/products"
-                  className="text-blue hover:text-blue-dark text-sm font-medium"
-                >
-                  View all products
-                </Link>
-              </div>
-            </div>
-
-            {loading ? (
-              <div className="p-8 text-center text-dark-4 dark:text-darkTheme-body-color">
-                Loading products...
-              </div>
-            ) : products.length === 0 ? (
-              <div className="p-8 text-center text-dark-4 dark:text-darkTheme-body-color">
-                No products yet.{" "}
-                <Link href="/seller/products" className="text-blue hover:text-blue-dark">
-                  Add your first product
-                </Link>
-                .
-              </div>
-            ) : (
-              <div className="overflow-x-auto">
-                <table className="w-full text-left">
-                  <thead className="bg-gray-1 dark:bg-darkTheme-secondary-bg">
-                    <tr>
-                      <th className="px-6 py-4 text-sm font-medium text-dark dark:text-white">Product</th>
-                      <th className="px-6 py-4 text-sm font-medium text-dark dark:text-white">Price</th>
-                      <th className="px-6 py-4 text-sm font-medium text-dark dark:text-white">Status</th>
-                    </tr>
-                  </thead>
-                  <tbody className="divide-y divide-gray-3 dark:divide-darkTheme-border-color">
-                    {products.slice(0, 5).map((product) => (
-                      <tr key={product.id}>
-                        <td className="px-6 py-4 font-medium text-dark dark:text-white">{product.name}</td>
-                        <td className="px-6 py-4 text-dark dark:text-white">
-                          {product.currency} {product.price}
-                        </td>
-                        <td className="px-6 py-4">
-                          <span
-                            className={`inline-flex rounded-full px-3 py-1 text-xs font-medium capitalize ${
-                              product.status === "approved"
-                                ? "bg-success/10 text-success"
-                                : product.status === "rejected"
-                                ? "bg-red/10 text-red"
-                                : "bg-warning/10 text-warning"
-                            }`}
-                          >
-                            {product.status ?? "pending"}
-                          </span>
-                        </td>
-                      </tr>
-                    ))}
-                  </tbody>
-                </table>
-              </div>
-            )}
-          </div>
-        </div>
-      </section>
-    </>
-  );
-};
-
-export default SellerDashboard;
+function Metric({href,label,value,help,icon:Icon}:{href:string;label:string;value:number;help:string;icon:typeof Box}){return <Link href={href} className="rounded-2xl border border-[#e2e8f0] bg-white p-4 shadow-sm transition hover:-translate-y-0.5 hover:border-[#f7941d] dark:border-white/10 dark:bg-[#1f2937]"><div className="flex items-center justify-between"><span className="flex h-9 w-9 items-center justify-center rounded-xl bg-orange-50 text-[#f7941d] dark:bg-orange-500/10"><Icon size={19}/></span><ArrowRight size={16} className="text-[#94a3b8]"/></div><p className="mt-4 text-sm text-[#64748b]">{label}</p><p className="mt-1 text-2xl font-semibold">{value}</p><p className="mt-1 text-xs text-[#94a3b8]">{help}</p></Link>}
+function UnavailableMetric({label,help,icon:Icon}:{label:string;help:string;icon:typeof Box}){return <div className="rounded-2xl border border-dashed border-[#cbd5e1] bg-slate-50 p-4 dark:border-white/15 dark:bg-white/5"><Icon size={19} className="text-[#94a3b8]"/><p className="mt-4 text-sm text-[#64748b]">{label}</p><p className="mt-1 text-2xl font-semibold text-[#94a3b8]">—</p><p className="mt-1 text-xs text-[#94a3b8]">{help}</p></div>}
+function Verification({documents,missing,accountStatus,kycLabel}:{documents:SellerKycDocument[];missing:string[];accountStatus:string;kycLabel:string}){const progress=Math.round((REQUIRED_DOCUMENTS.length-missing.length)/REQUIRED_DOCUMENTS.length*100);return <Card><div className="flex items-start justify-between"><div><p className="text-xs font-semibold uppercase tracking-wider text-[#f7941d]">Compliance</p><h3 className="mt-1 text-lg font-semibold">KYC Verification</h3></div><Status label={kycLabel}/></div><div className="mt-5 flex justify-between text-sm"><span>{REQUIRED_DOCUMENTS.length-missing.length} of {REQUIRED_DOCUMENTS.length} required documents uploaded</span><b>{progress}%</b></div><div className="mt-2 h-2 rounded-full bg-slate-100 dark:bg-white/10"><div className="h-2 rounded-full bg-[#f7941d]" style={{width:`${progress}%`}}/></div><div className="mt-5 grid gap-2">{REQUIRED_DOCUMENTS.map(type=>{const document=documents.find(item=>item.document_type===type);return <div key={type} className="flex items-center gap-3 rounded-xl border border-[#e2e8f0] p-3 dark:border-white/10"><span className={`flex h-8 w-8 items-center justify-center rounded-lg ${document?"bg-green-50 text-green-600":"bg-slate-100 text-[#94a3b8]"}`}>{document?<Check size={17}/>:<CircleDashed size={17}/>}</span><div className="min-w-0 flex-1"><p className="text-sm font-semibold">{documentNames[type]}</p><p className="text-xs text-[#64748b]">Required · {document?pretty(document.status||"uploaded"):"Missing"}{document?.created_at?` · ${new Date(document.created_at).toLocaleDateString()}`:""}</p>{document?.rejection_reason&&<p className="mt-1 text-xs text-red-600">{document.rejection_reason}</p>}</div>{document?.document_url&&<a href={document.document_url} target="_blank" rel="noreferrer" className="text-xs font-semibold text-[#f7941d]">View</a>}</div>})}</div><div className="mt-4 flex flex-wrap items-center justify-between gap-3 rounded-xl bg-slate-50 p-3 text-sm dark:bg-white/5"><span><b>Account Status:</b> {pretty(accountStatus)} · <b>KYC Status:</b> {kycLabel}</span><Link href="/seller/kyc" className="font-semibold text-[#f7941d]">{missing.length?"Complete Verification":"Review documents"}</Link></div></Card>}
+function StoreSetup({percent,checks}:{percent:number;checks:boolean[]}){const labels=["Store name","Store description","Contact information","Business address","Payout account","KYC documents","First active product"];return <Card><div className="flex items-center justify-between"><div><p className="text-xs font-semibold uppercase tracking-wider text-[#f7941d]">Store readiness</p><h3 className="mt-1 text-lg font-semibold">Store Setup</h3></div><span className="text-2xl font-semibold">{percent}%</span></div><div className="mt-4 h-2 rounded-full bg-slate-100 dark:bg-white/10"><div className="h-2 rounded-full bg-[#f7941d]" style={{width:`${percent}%`}}/></div><div className="mt-5 grid grid-cols-2 gap-2">{labels.map((label,index)=><div key={label} className="flex items-center gap-2 text-sm"><span className={`flex h-5 w-5 items-center justify-center rounded-full ${checks[index]?"bg-green-100 text-green-700":"bg-slate-100 text-[#94a3b8]"}`}>{checks[index]?<Check size={12}/>:<CircleDashed size={12}/>}</span>{label}</div>)}</div><Link href="/seller/kyc" className="mt-5 inline-flex items-center gap-2 rounded-xl bg-[#2d3134] px-4 py-2.5 text-sm font-semibold text-white">Continue Setup<ArrowRight size={16}/></Link></Card>}
+function NextActions({actions}:{actions:Array<{priority:string;title:string;description:string;href:string}>}){return <Card><p className="text-xs font-semibold uppercase tracking-wider text-[#f7941d]">Priorities</p><h3 className="mt-1 text-lg font-semibold">Next Actions</h3><div className="mt-4 space-y-2">{actions.length?actions.slice(0,5).map(action=><Link key={`${action.title}-${action.href}`} href={action.href} className="flex items-center gap-3 rounded-xl border border-[#e2e8f0] p-3 hover:border-[#f7941d] dark:border-white/10"><span className={`rounded-full px-2 py-1 text-[10px] font-semibold uppercase ${action.priority==="High"?"bg-red-50 text-red-700":"bg-amber-50 text-amber-700"}`}>{action.priority}</span><span className="min-w-0 flex-1"><b className="block truncate text-sm">{action.title}</b><small className="block truncate text-[#64748b]">{action.description}</small></span><ArrowRight size={16}/></Link>):<div className="rounded-xl bg-green-50 p-5 text-center text-green-700 dark:bg-green-500/10 dark:text-green-300"><CheckCircle2 className="mx-auto"/><p className="mt-2 font-semibold">You are all caught up.</p></div>}</div></Card>}
+function BusinessFlow({missing,profileReady,productCount,activeProducts,payoutReady}:{missing:number;profileReady:boolean;productCount:number;activeProducts:number;payoutReady:boolean}){const steps=[{title:"Complete Verification",done:missing===0,blocked:missing>0,detail:missing?`${missing} required document${missing>1?"s":""} missing`:"Verification documents complete",href:"/seller/kyc"},{title:"Set Up Your Store",done:profileReady,blocked:false,detail:profileReady?"Business profile completed":"Add description, contacts and policies",href:"/seller/kyc"},{title:"Add Products",done:productCount>0,blocked:missing>0,detail:productCount?`${productCount} product records created`:"Create products with pricing and stock",href:"/seller/products?create=true"},{title:"Submit for Approval",done:activeProducts>0,blocked:productCount===0,detail:activeProducts?`${activeProducts} active products`:"Complete product details and submit",href:"/seller/products"},{title:"Receive Orders",done:false,blocked:activeProducts===0,detail:activeProducts?"Ready to receive customer orders":"Requires an active product",href:"/seller/dashboard"},{title:"Receive Payouts",done:false,blocked:!payoutReady,detail:payoutReady?"Payout destination configured":"Add a payout account",href:"/seller/kyc?tab=payouts"}];return <Card><p className="text-xs font-semibold uppercase tracking-wider text-[#f7941d]">Onboarding</p><h3 className="mt-1 text-lg font-semibold">Business Flow</h3><div className="mt-4 space-y-3">{steps.map((step,index)=><Link key={step.title} href={step.href} className="flex gap-3"><span className={`flex h-7 w-7 shrink-0 items-center justify-center rounded-full text-xs font-bold ${step.done?"bg-green-100 text-green-700":step.blocked?"bg-red-50 text-red-600":"bg-orange-50 text-[#f7941d]"}`}>{step.done?<Check size={14}/>:index+1}</span><span><b className="text-sm">{step.title}</b><small className="block text-[#64748b]">{step.done?"Completed":step.blocked?"Blocked":"In Progress"} — {step.detail}</small></span></Link>)}</div></Card>}
+function RecentProducts({products}:{products:Product[]}){return <Card flush><div className="flex items-center justify-between border-b border-[#e2e8f0] p-5 dark:border-white/10"><div><h3 className="text-lg font-semibold">Recent Products</h3><p className="text-sm text-[#64748b]">Latest catalog records and approval state</p></div><Link href="/seller/products" className="text-sm font-semibold text-[#f7941d]">View all</Link></div>{products.length?<div className="overflow-x-auto"><table className="w-full min-w-[820px] text-left text-sm"><thead className="bg-slate-50 text-xs uppercase text-[#64748b] dark:bg-white/5"><tr>{["Product","SKU","Price","Stock","Approval","Created","Actions"].map(h=><th key={h} className="px-5 py-3">{h}</th>)}</tr></thead><tbody className="divide-y divide-[#e2e8f0] dark:divide-white/10">{products.slice(0,5).map(product=><tr key={product.id}><td className="px-5 py-4"><div className="flex items-center gap-3"><span className="flex h-10 w-10 items-center justify-center rounded-lg bg-slate-100 text-[#94a3b8] dark:bg-white/10"><ImageIcon size={18}/></span><b>{product.name}</b></div></td><td className="px-5 py-4">{product.sku}</td><td className="px-5 py-4">{product.currency} {product.price}</td><td className="px-5 py-4 text-[#64748b]">Not connected</td><td className="px-5 py-4"><Status label={pretty(product.status||"draft")}/>{product.rejection_reason&&<p className="mt-1 max-w-40 truncate text-xs text-red-600">{product.rejection_reason}</p>}</td><td className="px-5 py-4">{new Date(product.created_at).toLocaleDateString()}</td><td className="px-5 py-4"><Link href={`/seller/products?product=${product.id}`} className="font-semibold text-[#f7941d]">View / Edit</Link></td></tr>)}</tbody></table></div>:<div className="p-10 text-center"><ShoppingBag className="mx-auto text-[#94a3b8]" size={34}/><h4 className="mt-3 font-semibold">No products yet</h4><p className="mt-1 text-sm text-[#64748b]">Add your first product to start building your storefront.</p><Link href="/seller/products?create=true" className="mt-4 inline-flex items-center gap-2 rounded-xl bg-[#f7941d] px-4 py-2.5 text-sm font-semibold text-white"><Plus size={16}/>Add Product</Link></div>}</Card>}
+function UnavailablePanel({title,description,icon:Icon,action}:{title:string;description:string;icon:typeof Box;action:string}){return <Card><Icon className="text-[#94a3b8]"/><h3 className="mt-3 text-lg font-semibold">{title}</h3><p className="mt-1 text-sm leading-6 text-[#64748b]">{description}</p><p className="mt-4 rounded-xl border border-dashed border-[#cbd5e1] p-3 text-xs text-[#64748b] dark:border-white/15">{action}</p></Card>}
+function Card({children,flush=false}:{children:React.ReactNode;flush?:boolean}){return <section className={`overflow-hidden rounded-2xl border border-[#e2e8f0] bg-white shadow-sm dark:border-white/10 dark:bg-[#1f2937] ${flush?"":"p-5"}`}>{children}</section>}
+function Status({label}:{label:string}){const value=label.toLowerCase();const tone=value.includes("approved")||value.includes("complete")?"bg-green-50 text-green-700 dark:bg-green-500/10 dark:text-green-300":value.includes("reject")||value.includes("changes")?"bg-red-50 text-red-700 dark:bg-red-500/10 dark:text-red-300":"bg-amber-50 text-amber-700 dark:bg-amber-500/10 dark:text-amber-300";return <span className={`inline-flex rounded-full px-2.5 py-1 text-xs font-semibold ${tone}`}>{label}</span>}
+function DashboardSkeleton(){return <div className="mx-auto max-w-[1280px] animate-pulse space-y-5"><div className="h-24 rounded-2xl bg-slate-200 dark:bg-white/10"/><div className="grid grid-cols-2 gap-3 xl:grid-cols-5">{Array.from({length:5}).map((_,i)=><div key={i} className="h-36 rounded-2xl bg-slate-200 dark:bg-white/10"/>)}</div><div className="grid gap-5 xl:grid-cols-2"><div className="h-80 rounded-2xl bg-slate-200 dark:bg-white/10"/><div className="h-80 rounded-2xl bg-slate-200 dark:bg-white/10"/></div></div>}
+function ErrorState({message,retry}:{message:string;retry:()=>void}){return <div className="mx-auto max-w-xl rounded-2xl border border-red-200 bg-white p-8 text-center shadow-sm dark:border-red-500/30 dark:bg-[#1f2937]"><AlertCircle className="mx-auto text-red-600" size={34}/><h2 className="mt-3 text-xl font-semibold">Unable to load seller dashboard</h2><p className="mt-2 text-sm text-[#64748b]">{message}</p><button onClick={retry} className="mt-5 inline-flex items-center gap-2 rounded-xl bg-[#2d3134] px-4 py-2.5 text-sm font-semibold text-white"><RefreshCw size={16}/>Try again</button></div>}

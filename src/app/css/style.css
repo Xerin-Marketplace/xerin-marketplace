@@ -227,3 +227,25 @@ input[type='search']::-webkit-search-results-decoration {
 .range-slider__range {
   @apply !bg-primary;
 }
+/* Unified dark surface treatment for the operational Admin Center. */
+.dark .admin-dashboard-shell .bg-white {
+  background-color: #2d3134 !important;
+}
+.dark .admin-dashboard-shell .bg-\[\#f8fafc\],
+.dark .admin-dashboard-shell .bg-\[\#eef3f9\] {
+  background-color: #1f2937 !important;
+}
+.dark .admin-dashboard-shell .border-gray-200,
+.dark .admin-dashboard-shell .border-gray-100 {
+  border-color: rgba(255, 255, 255, 0.1) !important;
+}
+.dark .admin-dashboard-shell .text-\[\#111827\],
+.dark .admin-dashboard-shell .text-\[\#222\],
+.dark .admin-dashboard-shell .text-gray-700 {
+  color: #f8fafc !important;
+}
+.dark .admin-dashboard-shell .text-gray-500,
+.dark .admin-dashboard-shell .text-gray-600,
+.dark .admin-dashboard-shell .text-gray-400 {
+  color: #94a3b8 !important;
+}

@@ -1,5 +1,5 @@
 import { Metadata } from "next";
-import MyAccountClient from "./MyAccountClient";
+import { redirect } from "next/navigation";
 
 export const metadata: Metadata = {
   title: "My Account | Xerin Market",
@@ -7,11 +7,7 @@ export const metadata: Metadata = {
 };
 
 const MyAccountPage = () => {
-  return (
-    <main>
-      <MyAccountClient />
-    </main>
-  );
+  redirect("/account");
 };
 
 export default MyAccountPage;

@@ -1,11 +1,10 @@
 "use client";
 
-import Breadcrumb from "@/components/Common/Breadcrumb";
 import { productsApi } from "@/lib/api/endpoints/products";
 import { ApiError } from "@/lib/api/client";
 import { authStorage } from "@/lib/auth/storage";
 import type { Brand, Category, Product, ProductRequest } from "@/types/api/product";
-import { useRouter } from "next/navigation";
+import { useRouter, useSearchParams } from "next/navigation";
 import { FormEvent, useEffect, useMemo, useState } from "react";
 import toast from "react-hot-toast";
 
@@ -33,6 +32,7 @@ const INITIAL_FORM: ProductRequest & { id?: string } = {
 
 const SellerProducts = () => {
   const router = useRouter();
+  const searchParams = useSearchParams();
   const user = authStorage.getUser<StoredUser>();
   const token = authStorage.getAccessToken();
 
@@ -56,6 +56,16 @@ const SellerProducts = () => {
 
   const [deleteTarget, setDeleteTarget] = useState<Product | null>(null);
   const [isDeleting, setIsDeleting] = useState(false);
+
+  useEffect(() => {
+    const requestedStatus = searchParams.get("status");
+    if (requestedStatus && STATUS_OPTIONS.includes(requestedStatus)) {
+      setStatusFilter(requestedStatus);
+    }
+    if (searchParams.get("create") === "true") {
+      openCreate();
+    }
+  }, [searchParams]);
 
   useEffect(() => {
     if (!token) {
@@ -198,23 +208,10 @@ const SellerProducts = () => {
 
   return (
     <>
-      <Breadcrumb title="Seller Products" pages={["Seller", "Products"]} />
-      <section className="py-14 bg-gray-2 dark:bg-darkTheme-bg min-h-screen">
-        <div className="max-w-[1170px] mx-auto px-4 sm:px-8 xl:px-0">
-          <div className="mb-8 flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4 rounded-xl bg-white dark:bg-darkTheme-card shadow-1 p-6 sm:p-8">
-            <div>
-              <h1 className="text-2xl font-semibold text-dark dark:text-white mb-2">My Products</h1>
-              <p className="text-dark-4 dark:text-darkTheme-body-color">
-                Manage your product catalog and track review status.
-              </p>
-            </div>
-            <button
-              type="button"
-              onClick={openCreate}
-              className="rounded-lg bg-blue text-white py-3 px-6 font-medium hover:bg-blue-dark transition"
-            >
-              Add Product
-            </button>
+      <section>
+        <div className="mx-auto max-w-[1280px]">
+          <div className="mb-6 flex justify-end">
+            <button type="button" onClick={openCreate} className="rounded-xl bg-[#f7941d] px-5 py-3 font-semibold text-white transition hover:brightness-95">Add Product</button>
           </div>
 
           <div className="mb-8 rounded-xl bg-white dark:bg-darkTheme-card shadow-1 p-6 sm:p-8">

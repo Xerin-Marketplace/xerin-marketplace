@@ -11,6 +11,8 @@ import { useTheme } from "@/app/context/ThemeContext";
 import { useAuth } from "@/hooks/useAuth";
 import { getAccountHref, getAccountLabel } from "@/guards/auth-routing";
 import Image from "next/image";
+import { formatCurrency } from "@/lib/formatCurrency";
+import { useAuthStore } from "@/store/useAuthStore";
 
 const Header = () => {
   const [searchQuery, setSearchQuery] = useState("");
@@ -18,13 +20,15 @@ const Header = () => {
   const [stickyMenu, setStickyMenu] = useState(false);
   const { openCartModal } = useCartModalContext();
   const { theme, toggleTheme } = useTheme();
-  const { user, isAuthenticated } = useAuth();
+  const { user, isAuthenticated, logout } = useAuth();
+  const hasHydrated = useAuthStore((state) => state.hasHydrated);
 
   const product = useCartStore((state) => state.items);
   const totalPrice = useCartStore(selectTotalPrice);
 
   const accountHref = getAccountHref(isAuthenticated, user);
   const accountLabel = getAccountLabel(isAuthenticated, user);
+  const buyerName = [user?.first_name, user?.last_name].filter(Boolean).join(" ");
 
   const handleOpenCartModal = () => {
     openCartModal();
@@ -210,6 +214,7 @@ const Header = () => {
                     </svg>
                   )}
                 </button>
+                <div className="group relative">
                 <Link href={accountHref} className="flex items-center gap-2.5">
                   <svg
                     width="24"
@@ -237,10 +242,12 @@ const Header = () => {
                       account
                     </span>
                     <p className="font-medium text-custom-sm text-dark dark:text-darkTheme-body-color">
-                      {accountLabel}
+                      {!hasHydrated ? "Loading..." : buyerName || accountLabel}
                     </p>
                   </div>
                 </Link>
+                {hasHydrated && isAuthenticated && user?.account_type === "customer" && <div className="invisible absolute right-0 top-full z-50 mt-2 w-52 rounded-xl border border-gray-3 bg-white p-2 opacity-0 shadow-lg transition group-hover:visible group-hover:opacity-100 dark:border-darkTheme-border-color dark:bg-darkTheme-card">{[["My Account","/account"],["Orders","/account/orders"],["Addresses","/account/addresses"],["Payments","/account/payments"],["Wishlist","/wishlist"],["Security","/account/security"]].map(([label,href])=><Link key={href} href={href} className="block rounded-lg px-3 py-2 text-sm hover:bg-gray-1 dark:hover:bg-white/5">{label}</Link>)}<button onClick={()=>void logout()} className="block w-full rounded-lg px-3 py-2 text-left text-sm text-red-600 hover:bg-red-50">Logout</button></div>}
+                </div>
 
                 <button
                   onClick={handleOpenCartModal}
@@ -288,7 +295,7 @@ const Header = () => {
                       cart
                     </span>
                     <p className="font-medium text-custom-sm text-dark dark:text-darkTheme-body-color">
-                      ${totalPrice}
+                      {formatCurrency(totalPrice)}
                     </p>
                   </div>
                 </button>

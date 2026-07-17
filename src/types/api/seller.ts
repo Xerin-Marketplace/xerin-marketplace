@@ -27,6 +27,20 @@ export type Seller = TimestampFields & {
   rejection_reason?: string | null;
 };
 
+export type SellerBusinessProfile = {
+  id: ID;
+  seller_id: ID;
+  business_description: string | null;
+  business_country: string | null;
+  business_region: string | null;
+  business_city: string | null;
+  business_address: string | null;
+  product_description: string | null;
+  years_in_business: string | null;
+  website_url: string | null;
+  created_at: string;
+};
+
 export type UpdateSellerRequest = {
   business_name?: string;
   business_category?: string;

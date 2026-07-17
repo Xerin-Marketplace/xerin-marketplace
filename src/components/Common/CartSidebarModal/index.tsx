@@ -6,6 +6,7 @@ import { useCartStore, selectTotalPrice } from "@/store/useCartStore";
 import SingleItem from "./SingleItem";
 import Link from "next/link";
 import EmptyCart from "./EmptyCart";
+import { formatCurrency } from "@/lib/formatCurrency";
 
 const CartSidebarModal = () => {
   const { isCartModalOpen, closeCartModal } = useCartModalContext();
@@ -32,8 +33,9 @@ const CartSidebarModal = () => {
 
   return (
     <div
+      aria-hidden={!isCartModalOpen}
       className={`fixed top-0 left-0 z-99999 overflow-y-auto no-scrollbar w-full h-screen bg-dark/70 ease-linear duration-300 ${
-        isCartModalOpen ? "translate-x-0" : "translate-x-full"
+        isCartModalOpen ? "visible translate-x-0 opacity-100" : "invisible pointer-events-none translate-x-full opacity-0"
       }`}
     >
       <div className="flex items-center justify-end">
@@ -85,11 +87,11 @@ const CartSidebarModal = () => {
             </div>
           </div>
 
-          <div className="border-t border-gray-3 dark:border-darkTheme-border-color bg-white dark:bg-darkTheme-card pt-5 pb-4 sm:pb-7.5 lg:pb-11 mt-7.5 sticky bottom-0">
+          {cartItems.length > 0 && <div className="border-t border-gray-3 dark:border-darkTheme-border-color bg-white dark:bg-darkTheme-card pt-5 pb-4 sm:pb-7.5 lg:pb-11 mt-7.5 sticky bottom-0">
             <div className="flex items-center justify-between gap-5 mb-6">
               <p className="font-medium text-xl text-dark dark:text-white">Subtotal:</p>
 
-              <p className="font-medium text-xl text-dark dark:text-white">${totalPrice}</p>
+              <p className="font-medium text-xl text-dark dark:text-white">{formatCurrency(totalPrice)}</p>
             </div>
 
             <div className="flex items-center gap-4">
@@ -108,7 +110,7 @@ const CartSidebarModal = () => {
                 Checkout
               </Link>
             </div>
-          </div>
+          </div>}
         </div>
       </div>
     </div>

@@ -8,12 +8,14 @@ import { authApi } from "@/lib/api/endpoints/auth";
 import { ApiError } from "@/lib/api/client";
 import { useAuth } from "@/hooks/useAuth";
 import { getPostLoginPath } from "@/guards/auth-routing";
+import { useCartModalContext } from "@/app/context/CartSidebarModalContext";
 
 
 const Signin = () => {
   const router = useRouter();
   const searchParams = useSearchParams();
   const { setSession } = useAuth();
+  const { closeCartModal } = useCartModalContext();
 
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
@@ -36,6 +38,7 @@ const Signin = () => {
       });
 
       setSession(session);
+      closeCartModal();
       toast.success("Signed in successfully.");
       const requestedRedirect = searchParams.get("redirect");
       const redirectPath = getPostLoginPath(requestedRedirect, session.user);

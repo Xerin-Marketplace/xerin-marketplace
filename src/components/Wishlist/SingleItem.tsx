@@ -3,6 +3,7 @@ import { useWishlistStore } from "@/store/useWishlistStore";
 import { useCartStore } from "@/store/useCartStore";
 import Image from "next/image";
 import { ROUTES } from "@/constants/links";
+import { formatCurrency } from "@/lib/formatCurrency";
 
 const SingleItem = ({ item }) => {
   const removeItemFromWishlist = useWishlistStore((state) => state.removeItemFromWishlist);
@@ -66,7 +67,7 @@ const SingleItem = ({ item }) => {
       </div>
 
       <div className="min-w-[205px]">
-        <p className="text-dark dark:text-darkTheme-body-color">${item.discountedPrice}</p>
+        <p className="text-dark dark:text-darkTheme-body-color">{formatCurrency(item.discountedPrice)}</p>
       </div>
 
       <div className="min-w-[265px]">

@@ -1,11 +1,10 @@
 "use client";
 
-import Breadcrumb from "@/components/Common/Breadcrumb";
 import { sellersApi } from "@/lib/api/endpoints/sellers";
 import { ApiError } from "@/lib/api/client";
 import { authStorage } from "@/lib/auth/storage";
 import type { SellerKycDocument, PayoutAccount, SellerKycStatus } from "@/types/api/seller";
-import { useRouter } from "next/navigation";
+import { useRouter, useSearchParams } from "next/navigation";
 import { FormEvent, useEffect, useMemo, useState } from "react";
 import toast from "react-hot-toast";
 
@@ -28,6 +27,8 @@ type StoredUser = {
 
 const SellerKyc = () => {
   const router = useRouter();
+  const searchParams = useSearchParams();
+  const activeTab = searchParams.get("tab") === "payouts" ? "payouts" : "verification";
   const user = authStorage.getUser<StoredUser>();
   const token = authStorage.getAccessToken();
 
@@ -193,26 +194,24 @@ const SellerKyc = () => {
 
   return (
     <>
-      <Breadcrumb title="Seller KYC" pages={["Seller", "KYC"]} />
-      <section className="py-14 bg-gray-2 dark:bg-darkTheme-bg min-h-screen">
-        <div className="max-w-[1170px] mx-auto px-4 sm:px-8 xl:px-0">
-          <div className="mb-8 rounded-xl bg-white dark:bg-darkTheme-card shadow-1 p-6 sm:p-8">
-            <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
-              <div>
-                <h1 className="text-2xl font-semibold text-dark dark:text-white mb-2">
-                  KYC &amp; Payout Setup
-                </h1>
-                <p className="text-dark-4 dark:text-darkTheme-body-color">
-                  Upload required documents and add payout accounts to complete seller onboarding.
-                </p>
-              </div>
-              <div className="flex items-center gap-3">
-                <span className="text-sm text-dark-4 dark:text-darkTheme-body-color">Seller status:</span>
-                <span className="inline-flex items-center rounded-full bg-blue/10 text-blue px-3 py-1 text-sm font-medium capitalize">
-                  {status?.seller_status ?? user?.seller_status ?? "pending"}
-                </span>
-              </div>
-            </div>
+      <section>
+        <div className="mx-auto max-w-[1280px]">
+
+          <div className="mb-6 flex w-fit gap-1 rounded-xl border border-gray-3 bg-white p-1 dark:border-darkTheme-border-color dark:bg-darkTheme-card">
+            <button
+              type="button"
+              onClick={() => router.push("/seller/kyc")}
+              className={`rounded-lg px-4 py-2 text-sm font-semibold transition ${activeTab === "verification" ? "bg-[#f7941d] text-white" : "text-dark-4 hover:bg-gray-1 dark:text-darkTheme-body-color dark:hover:bg-darkTheme-secondary-bg"}`}
+            >
+              KYC Verification
+            </button>
+            <button
+              type="button"
+              onClick={() => router.push("/seller/kyc?tab=payouts")}
+              className={`rounded-lg px-4 py-2 text-sm font-semibold transition ${activeTab === "payouts" ? "bg-[#f7941d] text-white" : "text-dark-4 hover:bg-gray-1 dark:text-darkTheme-body-color dark:hover:bg-darkTheme-secondary-bg"}`}
+            >
+              Payout Account
+            </button>
           </div>
 
           {status?.can_submit_for_review && (
@@ -221,8 +220,8 @@ const SellerKyc = () => {
             </div>
           )}
 
-          <div className="grid grid-cols-1 lg:grid-cols-2 gap-8">
-            <div className="rounded-xl bg-white dark:bg-darkTheme-card shadow-1 p-6 sm:p-8">
+          <div className="grid grid-cols-1 gap-8">
+            <div className={`${activeTab === "verification" ? "block" : "hidden"} rounded-xl bg-white dark:bg-darkTheme-card shadow-1 p-6 sm:p-8`}>
               <h2 className="text-xl font-semibold text-dark dark:text-white mb-6">Required Documents</h2>
 
               <div className="space-y-4 mb-8">
@@ -300,7 +299,7 @@ const SellerKyc = () => {
               </form>
             </div>
 
-            <div className="rounded-xl bg-white dark:bg-darkTheme-card shadow-1 p-6 sm:p-8">
+            <div className={`${activeTab === "payouts" ? "block" : "hidden"} rounded-xl bg-white dark:bg-darkTheme-card shadow-1 p-6 sm:p-8`}>
               <h2 className="text-xl font-semibold text-dark dark:text-white mb-6">Payout Accounts</h2>
 
               {payoutAccounts.length === 0 ? (

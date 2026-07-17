@@ -1,6 +1,7 @@
 import React from "react";
 import { useCartStore } from "@/store/useCartStore";
 import Image from "next/image";
+import { formatCurrency } from "@/lib/formatCurrency";
 import { ROUTES } from "@/constants/links";
 
 const SingleItem = ({ item }) => {
@@ -21,7 +22,7 @@ const SingleItem = ({ item }) => {
           <h3 className="font-medium text-dark dark:text-darkTheme-body-color mb-1 ease-out duration-200 hover:text-blue">
             <a href={ROUTES.productDetails}> {item.title} </a>
           </h3>
-          <p className="text-custom-sm dark:text-darkTheme-secondary-muted">Price: ${item.discountedPrice}</p>
+          <p className="text-custom-sm dark:text-darkTheme-secondary-muted">Price: {formatCurrency(item.discountedPrice)}</p>
         </div>
       </div>
 

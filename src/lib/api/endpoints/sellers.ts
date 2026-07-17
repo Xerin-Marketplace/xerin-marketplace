@@ -6,6 +6,7 @@ import type {
   PayoutAccountRequest,
   Seller,
   SellerBusinessCategory,
+  SellerBusinessProfile,
   SellerKycDocument,
   SellerKycStatus,
   UpdateSellerRequest,
@@ -24,6 +25,18 @@ export const registerSeller = async (payload: Omit<Seller, "id" | "status">): Pr
 
 export const getSellerMe = async (token?: string | null): Promise<Seller> => {
   const res = await axiosInstance.get<Seller>(API_ENDPOINTS.sellers.me);
+  return res.data;
+};
+
+export const getSellerBusinessProfile = async (): Promise<SellerBusinessProfile> => {
+  const res = await axiosInstance.get<SellerBusinessProfile>(API_ENDPOINTS.sellers.profile);
+  return res.data;
+};
+
+export const updateSellerBusinessProfile = async (
+  payload: Partial<Omit<SellerBusinessProfile, "id" | "seller_id" | "created_at">>
+): Promise<SellerBusinessProfile> => {
+  const res = await axiosInstance.patch<SellerBusinessProfile>(API_ENDPOINTS.sellers.profile, payload);
   return res.data;
 };
 
@@ -87,6 +100,8 @@ export const sellersApi = {
   getBusinessCategories,
   register: registerSeller,
   getMe: getSellerMe,
+  getProfile: getSellerBusinessProfile,
+  updateProfile: updateSellerBusinessProfile,
   updateMe: updateSellerMe,
   getKycDocuments,
   getKycStatus,

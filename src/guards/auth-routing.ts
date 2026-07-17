@@ -18,11 +18,21 @@ export const getPostLoginPath = (
   requestedPath?: string | null,
   user?: AuthRoutingUser
 ) => {
-  if (isSafeInternalPath(requestedPath)) {
-    return requestedPath as string;
-  }
-
   const guardUser = toGuardUser(user);
+
+  if (isSafeInternalPath(requestedPath)) {
+    const path = requestedPath as string;
+    if (isSellerUser(guardUser)) {
+      return path.startsWith("/seller/") ? path : "/seller/dashboard";
+    }
+    if (isAdminUser(guardUser)) {
+      return path.startsWith("/admin/") ? path : "/admin/dashboard";
+    }
+    if (path.startsWith("/seller/") || path.startsWith("/admin/")) {
+      return "/account";
+    }
+    return path;
+  }
 
   if (isAdminUser(guardUser)) {
     return "/admin/dashboard";
@@ -32,7 +42,7 @@ export const getPostLoginPath = (
     return "/seller/dashboard";
   }
 
-  return "/my-account";
+  return "/account";
 };
 
 export const getAccountHref = (

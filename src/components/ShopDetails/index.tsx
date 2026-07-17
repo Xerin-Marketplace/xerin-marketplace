@@ -7,6 +7,7 @@ import Newsletter from "../Common/Newsletter";
 import RecentlyViewdItems from "./RecentlyViewd";
 import { usePreviewSlider } from "@/app/context/PreviewSliderContext";
 import { useProductDetailsStore } from "@/store/useProductDetailsStore";
+import { formatCurrency } from "@/lib/formatCurrency";
 
 const ShopDetails = () => {
   const [activeColor, setActiveColor] = useState("blue");
@@ -315,11 +316,11 @@ const ShopDetails = () => {
 
                   <h3 className="font-medium text-custom-1 mb-4.5">
                     <span className="text-sm sm:text-base text-dark dark:text-darkTheme-body-color">
-                      Price: ${product.price}
+                      Price: {formatCurrency(product.price)}
                     </span>
                     <span className="line-through">
                       {" "}
-                      ${product.discountedPrice}{" "}
+                      {formatCurrency(product.discountedPrice)}{" "}
                     </span>
                   </h3>
 

@@ -1,5 +1,6 @@
 "use client";
-import React, { createContext, useContext, useState } from "react";
+import React, { createContext, useContext, useEffect, useState } from "react";
+import { usePathname } from "next/navigation";
 
 interface CartModalContextType {
   isCartModalOpen: boolean;
@@ -21,6 +22,13 @@ export const useCartModalContext = () => {
 
 export const CartModalProvider = ({ children }) => {
   const [isCartModalOpen, setIsCartModalOpen] = useState(false);
+  const pathname = usePathname();
+
+  // Overlay state is deliberately ephemeral. Navigation, login redirects and
+  // hydration must never restore or carry an open drawer into the next page.
+  useEffect(() => {
+    setIsCartModalOpen(false);
+  }, [pathname]);
 
   const openCartModal = () => {
     setIsCartModalOpen(true);

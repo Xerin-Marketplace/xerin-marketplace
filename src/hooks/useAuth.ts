@@ -11,6 +11,7 @@ import {
 } from "@/lib/api/endpoints/auth";
 import { useAuthStore } from "@/store/useAuthStore";
 import { authStorage } from "@/lib/auth/storage";
+import { authCookies } from "@/lib/auth/cookies";
 import { useRouter } from "next/navigation";
 
 export const useAuth = () => {
@@ -32,6 +33,7 @@ export const useAuth = () => {
 
   const clearSession = () => {
     authStorage.clearSession();
+    authCookies.clearAll();
     storeClearSession();
   };
 
@@ -49,10 +51,10 @@ export const useAuth = () => {
         user?.account_type === "super_admin"
       ) {
         router.push("/admin/dashboard");
-      } else if (user?.is_seller || user?.role === "seller") {
+      } else if (user?.is_seller || user?.role === "seller" || user?.account_type === "seller" || user?.roles?.includes("seller")) {
         router.push("/seller/dashboard");
       } else {
-        router.push("/dashboard");
+        router.push("/account");
       }
     },
   });
@@ -61,7 +63,7 @@ export const useAuth = () => {
     mutationFn: apiRegisterBuyer,
     onSuccess: (data) => {
       setSession(data);
-      router.push("/dashboard");
+      router.push("/account");
     },
   });
 

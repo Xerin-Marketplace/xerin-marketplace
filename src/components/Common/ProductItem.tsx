@@ -8,6 +8,7 @@ import { useCartStore } from "@/store/useCartStore";
 import { useWishlistStore } from "@/store/useWishlistStore";
 import { useProductDetailsStore } from "@/store/useProductDetailsStore";
 import Link from "next/link";
+import { formatCurrency } from "@/lib/formatCurrency";
 
 const ProductItem = ({ item }: { item: Product }) => {
   const { openModal } = useModalContext();
@@ -167,10 +168,10 @@ const ProductItem = ({ item }: { item: Product }) => {
             </span>
             <span className="flex flex-wrap items-center gap-2 font-semibold text-lg">
               <span className="text-dark dark:text-white">
-                ${item.discountedPrice}
+                {formatCurrency(item.discountedPrice)}
               </span>
               <span className="text-dark-4 dark:text-darkTheme-secondary-muted line-through">
-                ${item.price}
+                {formatCurrency(item.price)}
               </span>
             </span>
           </div>

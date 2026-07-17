@@ -57,6 +57,7 @@ export const useCartStore = create<CartState>()(
     }),
     {
       name: "xerin_cart_store",
+      partialize: (state) => ({ items: state.items }),
     }
   )
 );

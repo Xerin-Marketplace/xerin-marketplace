@@ -1,3 +1,4 @@
+"use client";
 import React from "react";
 import Image from "next/image";
 import Link from "next/link";
@@ -8,9 +9,11 @@ import {
   ROUTES,
   SOCIAL_LINKS,
 } from "@/constants/links";
+import { useAuth } from "@/hooks/useAuth";
 
 const Footer = () => {
   const year = new Date().getFullYear();
+  const { isAuthenticated, logout } = useAuth();
 
   return (
     <footer className="overflow-hidden bg-white dark:bg-darkTheme-bg">
@@ -220,11 +223,7 @@ const Footer = () => {
             </h2>
 
             <ul className="flex flex-col gap-3.5">
-              <li>
-                <a className="ease-out duration-200 text-dark-4 dark:text-darkTheme-body-color hover:text-blue dark:hover:text-blue transition-colors" href={ROUTES.signin}>
-                  Sign In / Register
-                </a>
-              </li>
+              {isAuthenticated ? <><li><Link className="ease-out duration-200 text-dark-4 dark:text-darkTheme-body-color hover:text-blue" href="/account">My Account</Link></li><li><Link className="ease-out duration-200 text-dark-4 dark:text-darkTheme-body-color hover:text-blue" href="/account/orders">Orders</Link></li><li><button onClick={()=>void logout()} className="ease-out duration-200 text-dark-4 dark:text-darkTheme-body-color hover:text-blue">Logout</button></li></> : <li><Link className="ease-out duration-200 text-dark-4 dark:text-darkTheme-body-color hover:text-blue" href={ROUTES.signin}>Sign In / Register</Link></li>}
               <li>
                 <a className="ease-out duration-200 text-dark-4 dark:text-darkTheme-body-color hover:text-blue dark:hover:text-blue transition-colors" href={ROUTES.cart}>
                   Cart

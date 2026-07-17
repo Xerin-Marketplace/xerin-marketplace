@@ -1,5 +1,6 @@
 "use client";
-import React, { createContext, useContext, useState } from "react";
+import React, { createContext, useContext, useEffect, useState } from "react";
+import { usePathname } from "next/navigation";
 
 interface PreviewSliderType {
   isModalPreviewOpen: boolean;
@@ -19,6 +20,8 @@ export const usePreviewSlider = () => {
 
 export const PreviewSliderProvider = ({ children }) => {
   const [isModalPreviewOpen, setIsModalOpen] = useState(false);
+  const pathname = usePathname();
+  useEffect(() => setIsModalOpen(false), [pathname]);
 
   const openPreviewModal = () => {
     setIsModalOpen(true);

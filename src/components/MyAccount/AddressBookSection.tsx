@@ -98,6 +98,11 @@ const AddressBookSection = ({
   };
 
   const handleDeleteAddress = async (address: Address) => {
+    if (address.is_default && addresses.length > 1) {
+      toast.error("Select another default address before deleting this one.");
+      return;
+    }
+
     const confirmed = window.confirm("Delete this address?");
 
     if (!confirmed) {
