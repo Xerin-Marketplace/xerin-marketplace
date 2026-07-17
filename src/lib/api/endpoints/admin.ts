@@ -617,17 +617,20 @@ export const deleteProductReview = async (reviewId: string): Promise<{ message: 
 };
 
 export const listOrders = async (params: ListOrdersParams = {}): Promise<PaginatedOrders> => {
-  const res = await axiosInstance.get<PaginatedOrders>("/admin/orders", { params });
+  const { page, page_size, status } = params;
+  const res = await axiosInstance.get<PaginatedOrders>("/orders/admin/all", {
+    params: { page, page_size, status },
+  });
   return res.data;
 };
 
 export const getOrder = async (orderId: string): Promise<Order> => {
-  const res = await axiosInstance.get<Order>(`/admin/orders/${orderId}`);
+  const res = await axiosInstance.get<Order>(`/orders/${orderId}`);
   return res.data;
 };
 
 export const updateOrderStatus = async (orderId: string, payload: UpdateOrderStatusPayload): Promise<Order> => {
-  const res = await axiosInstance.patch<Order>(`/admin/orders/${orderId}/status`, payload);
+  const res = await axiosInstance.patch<Order>(`/orders/${orderId}/status`, payload);
   return res.data;
 };
 

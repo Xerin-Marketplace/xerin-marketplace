@@ -1,13 +1,15 @@
-import axios from "axios";
-import { ApiError } from "./client";
+import axios, { AxiosError, AxiosInstance, InternalAxiosRequestConfig } from "axios";
+import { toApiError } from "./errors";
 import { useAuthStore } from "@/store/useAuthStore";
 import { API_BASE_URL } from "./endpoints";
 
 let isRefreshing = false;
-let failedQueue: any[] = [];
-let axiosInstance: any;
+type RefreshQueueItem = { resolve: (token: string | null) => void; reject: (error: unknown) => void };
+type RetryConfig = InternalAxiosRequestConfig & { _retry?: boolean };
+let failedQueue: RefreshQueueItem[] = [];
+let axiosInstance: AxiosInstance;
 
-const processQueue = (error: any, token: string | null = null) => {
+const processQueue = (error: unknown, token: string | null = null) => {
   failedQueue.forEach((prom) => {
     if (error) {
       prom.reject(error);
@@ -18,44 +20,30 @@ const processQueue = (error: any, token: string | null = null) => {
   failedQueue = [];
 };
 
-export const setupInterceptors = (instance: any) => {
+export const setupInterceptors = (instance: AxiosInstance) => {
   axiosInstance = instance;
 
   // Request interceptor
   axiosInstance.interceptors.request.use(
-    (config: any) => {
+    (config) => {
       const token = useAuthStore.getState().accessToken;
       if (token && config.headers) {
         config.headers.Authorization = `Bearer ${token}`;
       }
       return config;
     },
-    (error: any) => Promise.reject(error)
+    (error) => Promise.reject(toApiError(error)),
   );
 
   // Response interceptor
   axiosInstance.interceptors.response.use(
-    (response: any) => response,
-    async (error: any) => {
-      const originalRequest = error.config;
+    (response) => response,
+    async (error: AxiosError) => {
+      const originalRequest = error.config as RetryConfig | undefined;
+      const apiError = toApiError(error);
+      const status = apiError.status;
 
-      // Extract error details
-      const status = error.response?.status || 500;
-      const data = error.response?.data;
-      let message = error.message;
-
-      if (data && typeof data === "object" && "detail" in data) {
-        if (typeof data.detail === "string") {
-          message = data.detail;
-        } else if (Array.isArray(data.detail)) {
-          message = data.detail
-            .map((item: any) => item?.msg)
-            .filter(Boolean)
-            .join(", ") || message;
-        }
-      }
-
-      const apiError = new ApiError(message, status, data);
+      if (!originalRequest) return Promise.reject(apiError);
 
       if (status === 401 && !originalRequest._retry) {
         if (originalRequest.url === "/auth/refresh-token" || originalRequest.url?.includes("/auth/login")) {

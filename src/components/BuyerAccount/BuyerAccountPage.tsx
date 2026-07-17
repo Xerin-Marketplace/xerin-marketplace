@@ -1,10 +1,11 @@
 "use client";
-import axiosInstance from "@/lib/api/client";
 import { formatCurrency } from "@/lib/formatCurrency";
+import { ordersApi } from "@/lib/api/endpoints/commerce";
 import { usersApi } from "@/lib/api/endpoints/users";
 import { useCartStore } from "@/store/useCartStore";
 import { useWishlistStore } from "@/store/useWishlistStore";
 import type { Address, User } from "@/types/api/user";
+import type { Order } from "@/types/api/commerce";
 import {
   AlertCircle,
   Bell,
@@ -21,16 +22,6 @@ import {
 import Link from "next/link";
 import { useEffect, useState } from "react";
 
-type Order = {
-  id: string;
-  order_number?: string;
-  created_at?: string;
-  total_amount?: number | string;
-  total?: number | string;
-  status?: string;
-  payment_status?: string;
-  items?: unknown[];
-};
 type Load<T> = { state: "loading" | "ready" | "error"; data: T };
 export default function BuyerDashboard() {
   const cart = useCartStore((s) => s.items),
@@ -60,9 +51,9 @@ export default function BuyerDashboard() {
         .getAddresses()
         .then((data) => setAddresses({ state: "ready", data }))
         .catch(() => setAddresses({ state: "error", data: [] })),
-      axiosInstance
-        .get<{ results: Order[] }>("/orders/my-orders")
-        .then((r) => setOrders({ state: "ready", data: r.data.results || [] }))
+      ordersApi
+        .mine()
+        .then((r) => setOrders({ state: "ready", data: r.results }))
         .catch(() => setOrders({ state: "error", data: [] })),
     ]);
   }

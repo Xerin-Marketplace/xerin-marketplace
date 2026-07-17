@@ -1,7 +1,7 @@
 import type { Product as ApiProduct, Category as ApiCategory } from "@/types/api/product";
 import type { Product as UiProduct } from "@/types/product";
 
-const FALLBACK_PRODUCT_IMAGE = "/images/products/product-1-bg-1.png";
+const PRODUCT_PLACEHOLDER_IMAGE = "/images/products/placeholder.svg";
 
 const toNumber = (value: number | string | null | undefined, fallback = 0) => {
   if (typeof value === "number") return value;
@@ -16,7 +16,7 @@ const getProductImageUrl = (product: ApiProduct) => {
   const primaryImage = product.images?.find((image) => image.is_primary);
   const firstImage = primaryImage || product.images?.[0];
 
-  return firstImage?.image_url || FALLBACK_PRODUCT_IMAGE;
+  return firstImage?.image_url || PRODUCT_PLACEHOLDER_IMAGE;
 };
 
 export const mapApiProductToUiProduct = (product: ApiProduct): UiProduct => {

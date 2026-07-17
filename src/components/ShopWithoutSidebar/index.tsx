@@ -7,10 +7,11 @@ import SingleGridItem from "../Shop/SingleGridItem";
 import SingleListItem from "../Shop/SingleListItem";
 import CustomSelect from "../ShopWithSidebar/CustomSelect";
 
-import shopData from "../Shop/shopData";
+import { useProducts } from "@/lib/products";
 
 const ShopWithoutSidebar = () => {
   const [productStyle, setProductStyle] = useState("grid");
+  const { products, isLoading, error } = useProducts({ limit: 20 });
 
   const options = [
     { label: "Latest Products", value: "0" },
@@ -36,7 +37,7 @@ const ShopWithoutSidebar = () => {
                     <CustomSelect options={options} />
 
                     <p>
-                      Showing <span className="text-dark">9 of 50</span>{" "}
+                      Showing <span className="text-dark">{products.length}</span>{" "}
                       Products
                     </p>
                   </div>
@@ -130,11 +131,16 @@ const ShopWithoutSidebar = () => {
                     : "flex flex-col gap-7.5"
                 }`}
               >
-                {shopData.map((item, key) =>
+                {isLoading && <CatalogState text="Loading products..." />}
+                {error && <CatalogState error text="Products could not be loaded. Please try again." />}
+                {!isLoading && !error && products.length === 0 && (
+                  <CatalogState text="No products are available yet." />
+                )}
+                {products.map((item) =>
                   productStyle === "grid" ? (
-                    <SingleGridItem item={item} key={key} />
+                    <SingleGridItem item={item} key={item.id} />
                   ) : (
-                    <SingleListItem item={item} key={key} />
+                    <SingleListItem item={item} key={item.id} />
                   )
                 )}
               </div>
@@ -265,5 +271,11 @@ const ShopWithoutSidebar = () => {
     </>
   );
 };
+
+const CatalogState = ({ text, error = false }: { text: string; error?: boolean }) => (
+  <div className={`w-full rounded-xl border bg-white px-6 py-12 text-center text-sm ${error ? "border-red-200 text-red-600" : "border-gray-3 text-dark-4"}`}>
+    {text}
+  </div>
+);
 
 export default ShopWithoutSidebar;

@@ -1,12 +1,13 @@
 "use client";
-import axiosInstance from "@/lib/api/client";
 import { formatCurrency } from "@/lib/formatCurrency";
+import { ordersApi, paymentsApi } from "@/lib/api/endpoints/commerce";
 import {
   sellerAccountApi,
   type SellerSession,
 } from "@/lib/api/endpoints/seller-account";
 import { usersApi } from "@/lib/api/endpoints/users";
 import type { Address, User } from "@/types/api/user";
+import type { Order, Payment } from "@/types/api/commerce";
 import {
   AlertCircle,
   Bell,
@@ -32,26 +33,6 @@ type View =
   | "notifications"
   | "security"
   | "details";
-type Order = {
-  id: string;
-  order_number?: string;
-  created_at?: string;
-  total_amount?: string | number;
-  status?: string;
-  payment_status?: string;
-  items?: unknown[];
-};
-type Payment = {
-  id: string;
-  order_id: string;
-  amount: number | string;
-  currency?: string;
-  method?: string;
-  provider?: string;
-  status?: string;
-  created_at?: string;
-  provider_transaction_id?: string | null;
-};
 const copy = {
   orders: ["My Orders", "Track purchases and delivery progress.", Package],
   payments: [
@@ -101,14 +82,9 @@ export default function BuyerModulePage({ view }: { view: View }) {
     setError(false);
     try {
       if (view === "orders")
-        setOrders(
-          (await axiosInstance.get<{ results: Order[] }>("/orders/my-orders"))
-            .data.results || [],
-        );
+        setOrders((await ordersApi.mine()).results);
       else if (view === "payments")
-        setPayments(
-          (await axiosInstance.get<Payment[]>("/payments/my-payments")).data,
-        );
+        setPayments(await paymentsApi.mine());
       else if (view === "addresses")
         setAddresses(await usersApi.getAddresses());
       else if (view === "details") {
@@ -264,7 +240,7 @@ function Payments({ items }: { items: Payment[] }) {
               </td>
               <td className="p-3">{p.order_id.slice(0, 8)}</td>
               <td className="p-3">
-                {formatCurrency(p.amount, p.currency || "TZS")}
+                {formatCurrency(p.amount, p.currency)}
               </td>
               <td className="p-3 capitalize">
                 {(p.provider || p.method || "—").replaceAll("_", " ")}
@@ -322,17 +298,17 @@ function Orders({ items }: { items: Order[] }) {
               className="border-t border-[#e2e8f0] dark:border-white/10"
             >
               <td className="p-3 font-semibold">
-                {o.order_number || o.id.slice(0, 8)}
+                {o.id.slice(0, 8)}
               </td>
               <td className="p-3">
                 {o.created_at
                   ? new Date(o.created_at).toLocaleDateString()
                   : "—"}
               </td>
-              <td className="p-3">{formatCurrency(o.total_amount)}</td>
-              <td className="p-3">{o.payment_status || "Pending Payment"}</td>
-              <td className="p-3">{o.status || "Processing"}</td>
-              <td className="p-3">{o.items?.length || 0}</td>
+              <td className="p-3">{formatCurrency(o.total, o.currency)}</td>
+              <td className="p-3 text-[#64748b]">See payment history</td>
+              <td className="p-3 capitalize">{o.status.replaceAll("_", " ")}</td>
+              <td className="p-3">{o.items.length}</td>
               <td className="p-3">
                 <Link
                   href={`/account/orders/${o.id}`}

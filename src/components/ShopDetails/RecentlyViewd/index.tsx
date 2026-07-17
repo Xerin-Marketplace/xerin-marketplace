@@ -1,6 +1,5 @@
 "use client";
 import React from "react";
-import shopData from "@/components/Shop/shopData";
 import ProductItem from "@/components/Common/ProductItem";
 import Image from "next/image";
 import Link from "next/link";
@@ -9,8 +8,10 @@ import { Swiper, SwiperSlide } from "swiper/react";
 import { useCallback, useRef } from "react";
 import "swiper/css/navigation";
 import "swiper/css";
+import { useProducts } from "@/lib/products";
 
 const RecentlyViewdItems = () => {
+  const { products, isLoading, error } = useProducts({ limit: 8 });
   const sliderRef = useRef(null);
 
   const handlePrev = useCallback(() => {
@@ -89,12 +90,15 @@ const RecentlyViewdItems = () => {
             spaceBetween={20}
             className="justify-between"
           >
-            {shopData.map((item, key) => (
-              <SwiperSlide key={key}>
+            {products.map((item) => (
+              <SwiperSlide key={item.id}>
                 <ProductItem item={item} />
               </SwiperSlide>
             ))}
           </Swiper>
+          {isLoading && <p className="py-8 text-center text-sm text-dark-4">Loading related products...</p>}
+          {error && <p className="py-8 text-center text-sm text-red-600">Related products could not be loaded.</p>}
+          {!isLoading && !error && products.length === 0 && <p className="py-8 text-center text-sm text-dark-4">No related products are available.</p>}
         </div>
       </div>
     </section>

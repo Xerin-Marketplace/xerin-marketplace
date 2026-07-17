@@ -1,0 +1,8 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="640" height="640" viewBox="0 0 640 640" role="img" aria-labelledby="title description">
+  <title id="title">Product image unavailable</title>
+  <desc id="description">A neutral placeholder used when the backend has no product image.</desc>
+  <rect width="640" height="640" rx="48" fill="#F1F5F9"/>
+  <path d="M205 237a32 32 0 0 1 32-32h166a32 32 0 0 1 32 32v166a32 32 0 0 1-32 32H237a32 32 0 0 1-32-32V237Z" fill="none" stroke="#94A3B8" stroke-width="18"/>
+  <circle cx="270" cy="271" r="25" fill="#CBD5E1"/>
+  <path d="m227 391 82-82 49 49 29-29 48 48" fill="none" stroke="#94A3B8" stroke-width="18" stroke-linecap="round" stroke-linejoin="round"/>
+</svg>

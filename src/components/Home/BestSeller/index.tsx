@@ -1,11 +1,14 @@
+"use client";
+
 import React from "react";
 import SingleItem from "./SingleItem";
 import Image from "next/image";
 import Link from "next/link";
-import shopData from "@/components/Shop/shopData";
 import { ROUTES } from "@/constants/links";
+import { useProducts } from "@/lib/products";
 
 const BestSeller = () => {
+  const { products, isLoading, error } = useProducts({ limit: 6 });
   return (
     <section className="overflow-hidden pt-15 lg:pt-17.5">
       <div className="max-w-[1170px] w-full mx-auto px-4 sm:px-8 xl:px-0">
@@ -48,8 +51,13 @@ const BestSeller = () => {
         </div>
 
         <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6 lg:gap-7.5">
-          {shopData.slice(1, 7).map((item, key) => (
-            <SingleItem item={item} key={key} />
+          {isLoading && <CatalogState text="Loading marketplace products..." />}
+          {error && <CatalogState error text="Marketplace products could not be loaded." />}
+          {!isLoading && !error && products.length === 0 && (
+            <CatalogState text="No products are available yet." />
+          )}
+          {products.map((item) => (
+            <SingleItem item={item} key={item.id} />
           ))}
         </div>
 
@@ -65,5 +73,11 @@ const BestSeller = () => {
     </section>
   );
 };
+
+const CatalogState = ({ text, error = false }: { text: string; error?: boolean }) => (
+  <div className={`col-span-full rounded-xl border bg-white px-6 py-10 text-center text-sm ${error ? "border-red-200 text-red-600" : "border-gray-3 text-dark-4"}`}>
+    {text}
+  </div>
+);
 
 export default BestSeller;

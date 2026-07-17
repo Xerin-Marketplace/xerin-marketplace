@@ -1,11 +1,13 @@
+"use client";
+
 import React from "react";
-import Image from "next/image";
 import Link from "next/link";
 import ProductItem from "@/components/Common/ProductItem";
-import shopData from "@/components/Shop/shopData";
 import { ROUTES } from "@/constants/links";
+import { useProducts } from "@/lib/products";
 
 const NewArrival = () => {
+  const { products, isLoading, error } = useProducts({ limit: 8 });
   return (
     <section className="overflow-hidden pt-15 lg:pt-17.5">
       <div className="max-w-[1170px] w-full mx-auto px-4 sm:px-8 xl:px-0">
@@ -49,13 +51,24 @@ const NewArrival = () => {
 
         <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6 lg:gap-7.5">
           {/* <!-- New on Xerin item --> */}
-          {shopData.map((item, key) => (
-            <ProductItem item={item} key={key} />
+          {isLoading && <CatalogState text="Loading new products..." />}
+          {error && <CatalogState error text="New products could not be loaded." />}
+          {!isLoading && !error && products.length === 0 && (
+            <CatalogState text="No new products are available yet." />
+          )}
+          {products.map((item) => (
+            <ProductItem item={item} key={item.id} />
           ))}
         </div>
       </div>
     </section>
   );
 };
+
+const CatalogState = ({ text, error = false }: { text: string; error?: boolean }) => (
+  <div className={`col-span-full rounded-xl border bg-white px-6 py-10 text-center text-sm ${error ? "border-red-200 text-red-600" : "border-gray-3 text-dark-4"}`}>
+    {text}
+  </div>
+);
 
 export default NewArrival;

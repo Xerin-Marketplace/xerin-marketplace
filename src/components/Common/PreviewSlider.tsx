@@ -12,6 +12,10 @@ const PreviewSliderModal = () => {
   const { closePreviewModal, isModalPreviewOpen } = usePreviewSlider();
 
   const data = useProductDetailsStore((state) => state.value);
+  const images: string[] = [
+    ...(Array.isArray(data?.imgs?.previews) ? data.imgs.previews : []),
+    ...(Array.isArray(data?.images) ? data.images : []),
+  ].filter((image, index, list) => typeof image === "string" && image.length > 0 && list.indexOf(image) === index);
 
   const sliderRef = useRef(null);
 
@@ -94,28 +98,21 @@ const PreviewSliderModal = () => {
         </button>
       </div>
 
-      <Swiper ref={sliderRef} slidesPerView={1} spaceBetween={20}>
-        <SwiperSlide>
-          <div className="flex justify-center items-center">
-            <Image
-              src={"/images/products/product-2-bg-1.png"}
-              alt={"product image"}
-              width={450}
-              height={450}
-            />
-          </div>
-        </SwiperSlide>
-        <SwiperSlide>
-          <div className="flex justify-center items-center">
-            <Image
-              src={"/images/products/product-2-bg-1.png"}
-              alt={"product image"}
-              width={450}
-              height={450}
-            />
-          </div>
-        </SwiperSlide>
-      </Swiper>
+      {images.length ? (
+        <Swiper ref={sliderRef} slidesPerView={1} spaceBetween={20}>
+          {images.map((image) => (
+            <SwiperSlide key={image}>
+              <div className="flex items-center justify-center">
+                <Image src={image} alt={data?.title || "Product image"} width={450} height={450} />
+              </div>
+            </SwiperSlide>
+          ))}
+        </Swiper>
+      ) : (
+        <div className="flex h-[450px] w-[min(90vw,450px)] items-center justify-center rounded-2xl border border-white/20 text-sm text-white/70">
+          No product image available
+        </div>
+      )}
     </div>
   );
 };

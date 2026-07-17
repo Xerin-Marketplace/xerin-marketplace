@@ -8,7 +8,6 @@ import GenderDropdown from "./GenderDropdown";
 import SizeDropdown from "./SizeDropdown";
 import ColorsDropdwon from "./ColorsDropdwon";
 import PriceDropdown from "./PriceDropdown";
-import shopData from "../Shop/shopData";
 import { useCategories, useProducts } from "@/lib/products";
 import SingleGridItem from "../Shop/SingleGridItem";
 import SingleListItem from "../Shop/SingleListItem";
@@ -30,39 +29,6 @@ const ShopWithSidebar = () => {
     { label: "Latest Products", value: "0" },
     { label: "Best Selling", value: "1" },
     { label: "Old Products", value: "2" },
-  ];
-
-  const fallbackCategories = [
-    {
-      name: "Electronics",
-      products: 10,
-      isRefined: true,
-    },
-    {
-      name: "Fashion",
-      products: 12,
-      isRefined: false,
-    },
-    {
-      name: "Home & Living",
-      products: 30,
-      isRefined: false,
-    },
-    {
-      name: "Beauty & Health",
-      products: 23,
-      isRefined: false,
-    },
-    {
-      name: "Groceries",
-      products: 10,
-      isRefined: false,
-    },
-    {
-      name: "Phones & Tablets",
-      products: 13,
-      isRefined: false,
-    },
   ];
 
   const genders = [
@@ -92,12 +58,10 @@ const ShopWithSidebar = () => {
     error: categoriesError,
   } = useCategories();
 
-  const products = apiProducts.length > 0 ? apiProducts : shopData;
-  const categories =
-    apiCategories.length > 0 ? apiCategories : fallbackCategories;
-  const usingFallbackProducts = apiProducts.length === 0;
+  const products = apiProducts;
+  const categories = apiCategories;
   const showingCount = products.length;
-  const totalCount = apiProducts.length > 0 ? apiProducts.length : shopData.length;
+  const totalCount = apiProducts.length;
 
   useEffect(() => {
     window.addEventListener("scroll", handleStickyMenu);
@@ -218,9 +182,9 @@ const ShopWithSidebar = () => {
                       </p>
                     )}
 
-                    {(productsError || categoriesError) && usingFallbackProducts && (
-                      <p className="text-custom-sm text-dark-4">
-                        Showing demo data while backend data is unavailable.
+                    {(productsError || categoriesError) && (
+                      <p className="text-custom-sm font-medium text-red-600">
+                        Marketplace data could not be loaded. Please try again.
                       </p>
                     )}
                   </div>
@@ -314,6 +278,12 @@ const ShopWithSidebar = () => {
                     : "flex flex-col gap-7.5"
                 }`}
               >
+                {!productsLoading && !productsError && products.length === 0 && (
+                  <div className="col-span-full rounded-lg border border-gray-3 bg-white px-6 py-12 text-center">
+                    <h2 className="text-lg font-semibold text-dark">No products found</h2>
+                    <p className="mt-2 text-sm text-dark-4">There are no marketplace products matching this view.</p>
+                  </div>
+                )}
                 {products.map((item) =>
                   productStyle === "grid" ? (
                     <SingleGridItem item={item} key={item.id} />

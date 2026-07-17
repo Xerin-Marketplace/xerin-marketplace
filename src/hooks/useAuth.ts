@@ -12,6 +12,8 @@ import {
 import { useAuthStore } from "@/store/useAuthStore";
 import { authStorage } from "@/lib/auth/storage";
 import { authCookies } from "@/lib/auth/cookies";
+import { isAdminUser, isSellerUser } from "@/guards/permissions";
+import type { AuthTokenResponse } from "@/types/api/auth";
 import { useRouter } from "next/navigation";
 
 export const useAuth = () => {
@@ -26,8 +28,27 @@ export const useAuth = () => {
   const storeSetSession = useAuthStore((state) => state.setSession);
   const storeClearSession = useAuthStore((state) => state.clearSession);
 
-  const setSession = (session: Parameters<typeof storeSetSession>[0]) => {
+  const syncRoleCookies = (session: AuthTokenResponse) => {
+    const sessionUser = session.user ?? null;
+
+    authCookies.setAuth();
+
+    if (isAdminUser(sessionUser)) {
+      authCookies.setAdmin();
+    } else {
+      authCookies.clearAdmin();
+    }
+
+    if (isSellerUser(sessionUser)) {
+      authCookies.setSeller();
+    } else {
+      authCookies.clearSeller();
+    }
+  };
+
+  const setSession = (session: AuthTokenResponse) => {
     authStorage.setSession(session);
+    syncRoleCookies(session);
     storeSetSession(session);
   };
 
@@ -41,17 +62,10 @@ export const useAuth = () => {
     mutationFn: apiLogin,
     onSuccess: (data) => {
       setSession(data);
-      const user = data.user as any;
-      if (
-        user?.roles?.includes("admin") ||
-        user?.roles?.includes("super_admin") ||
-        user?.role === "admin" ||
-        user?.role === "super_admin" ||
-        user?.account_type === "admin" ||
-        user?.account_type === "super_admin"
-      ) {
+      const user = data.user;
+      if (isAdminUser(user)) {
         router.push("/admin/dashboard");
-      } else if (user?.is_seller || user?.role === "seller" || user?.account_type === "seller" || user?.roles?.includes("seller")) {
+      } else if (isSellerUser(user)) {
         router.push("/seller/dashboard");
       } else {
         router.push("/account");
