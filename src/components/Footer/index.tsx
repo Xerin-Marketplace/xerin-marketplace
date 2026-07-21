@@ -24,7 +24,7 @@ const Footer = () => {
             <Link href="/" className="flex items-center gap-3 mb-7.5">
               <Image
                 src="/images/logo/logo.png"
-                alt="Xerin Market logo"
+                alt="Xerin Marketplace logo"
                 width={150}
                 height={45}
                 className="object-contain"

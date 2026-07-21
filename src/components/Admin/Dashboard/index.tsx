@@ -1,4 +1,5 @@
 "use client";
+import Image from "next/image";
 
 import { ReactNode, useEffect, useState } from "react";
 import { usePathname, useRouter, useSearchParams } from "next/navigation";
@@ -1027,15 +1028,17 @@ export default function AdminDashboard() {
             className={`${isMobileSidebarOpen ? "translate-x-0" : "-translate-x-full"} fixed inset-y-0 left-0 z-50 w-[286px] overflow-y-auto bg-gradient-to-b from-[#2d3134] to-[#1f2937] p-4 text-white shadow-2xl transition-all xl:sticky xl:top-6 xl:h-[calc(100vh-3rem)] xl:w-auto xl:translate-x-0 xl:rounded-2xl ${isSidebarCollapsed ? "xl:px-3" : ""}`}
           >
             <div className="px-3 py-2 border-b border-white/15">
-              <div className="flex items-center gap-3">
-                <span className="flex h-10 w-10 shrink-0 items-center justify-center rounded-xl bg-[#f7941d] text-sm font-bold">
-                  XM
-                </span>
+              <div className="flex items-center">
                 {!isSidebarCollapsed && (
                   <div>
-                    <p className="text-xs uppercase tracking-[0.15em] text-white/60">
-                      Xerin Market
-                    </p>
+                    <Image
+                      src="/images/logo/logo.png"
+                      alt="Xerin Marketplace logo"
+                      width={150}
+                      height={46}
+                      className="h-10 w-auto object-contain"
+                      priority
+                    />
                     <h2 className="mt-1 text-lg font-semibold">Admin Center</h2>
                   </div>
                 )}
