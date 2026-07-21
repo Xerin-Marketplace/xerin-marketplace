@@ -1,4 +1,5 @@
 "use client";
+import Image from "next/image";
 
 import { ReactNode } from "react";
 import Link from "next/link";
@@ -206,7 +207,14 @@ export default function AdminSidebar({
         <div className="grid grid-cols-1 xl:grid-cols-[260px_1fr] gap-6">
           <aside className="xl:sticky xl:top-6 h-fit rounded-2xl bg-gradient-to-b from-[#4b5563] to-[#1f2937] p-4 text-white shadow-xl">
             <div className="px-3 py-2 border-b border-white/15">
-              <p className="text-xs uppercase tracking-[0.15em] text-white/60">Xerin Market</p>
+              <Image
+                src="/images/logo/logo.png"
+                alt="Xerin Marketplace logo"
+                width={150}
+                height={46}
+                className="h-10 w-auto object-contain"
+                priority
+              />
               <h2 className="text-xl font-semibold mt-1">Admin Panel</h2>
             </div>
 
