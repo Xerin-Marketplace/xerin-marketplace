@@ -77,20 +77,17 @@ const Header = () => {
         >
           {/* <!-- header top left --> */}
           <div className="xl:w-auto flex-col sm:flex-row w-full flex sm:justify-between sm:items-center gap-4 sm:gap-10">
-            <Link className="flex-shrink-0 flex items-center gap-2" href="/">
-              <Image
-                src="/images/logo/xerin-logo-mark.png"
-                alt="Xerin Market logo"
-                width={44}
-                height={44}
-                className="object-contain"
-                style={{ width: "auto", height: "44px" }}
-                priority
-              />
-              <span className="text-lg font-semibold text-dark dark:text-white whitespace-nowrap">
-                Xerin Market
-              </span>
-            </Link>
+            <Link className="flex-shrink-0 flex items-center" href="/">
+            <Image
+              src="/images/logo/logo.png"
+              alt="Xerin Marketplace logo"
+              width={150}
+              height={46}
+              className="object-contain"
+              style={{ width: "150px", height: "auto" }}
+              priority
+            />
+          </Link>
 
             <div className="max-w-[475px] lg:max-w-[420px] xl:max-w-[475px] w-full">
               <form>

@@ -1,4 +1,5 @@
 "use client";
+import Image from "next/image";
 
 import { useTheme } from "@/app/context/ThemeContext";
 import { authCookies } from "@/lib/auth/cookies";
@@ -202,14 +203,20 @@ export default function SellerLayout({
       <aside
         className={`${mobileOpen ? "translate-x-0" : "-translate-x-full"} ${collapsed ? "lg:w-[88px]" : "lg:w-[270px]"} fixed inset-y-0 left-0 z-50 flex w-[280px] flex-col border-r border-white/10 bg-[#2d3134] text-white shadow-xl transition-all lg:translate-x-0`}
       >
-        <div className="flex h-20 items-center gap-3 border-b border-white/10 px-5">
-          <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-xl bg-[#f7941d] font-bold">
-            XM
-          </div>
+        <div className="flex h-20 items-center border-b border-white/10 px-5">
           {!collapsed && (
             <div>
-              <p className="font-semibold">Xerin Market</p>
-              <p className="text-xs text-white/50">Seller Center</p>
+              <div className="flex flex-col">
+                <Image
+                  src="/images/logo/logo.png"
+                  alt="Xerin Marketplace logo"
+                  width={150}
+                  height={46}
+                  className="h-10 w-auto object-contain"
+                  priority
+                />
+                <p className="mt-1 text-xs text-white/50">Seller Center</p>
+              </div>
             </div>
           )}
           <button
