@@ -1,23 +1,30 @@
 import React from "react";
 import { useWishlistStore } from "@/store/useWishlistStore";
-import { useCartStore } from "@/store/useCartStore";
+import { useRemoveFromWishlist } from "@/hooks/useWishlist";
+import { useAddCartItem, addProductToCartPayload } from "@/hooks/useCartActions";
 import Image from "next/image";
-import { ROUTES } from "@/constants/links";
 import { formatCurrency } from "@/lib/formatCurrency";
+import type { WishListItem } from "@/store/useWishlistStore";
 
-const SingleItem = ({ item }) => {
+const SingleItem = ({ item }: { item: WishListItem }) => {
   const removeItemFromWishlist = useWishlistStore((state) => state.removeItemFromWishlist);
-  const addItemToCart = useCartStore((state) => state.addItemToCart);
+  const removeFromBackend = useRemoveFromWishlist();
+  const addCartItem = useAddCartItem();
 
   const handleRemoveFromWishlist = () => {
     removeItemFromWishlist(item.id);
+    removeFromBackend.mutate(String(item.id));
   };
 
   const handleAddToCart = () => {
-    addItemToCart({
-      ...item,
-      quantity: 1,
-    });
+    addCartItem.mutate(addProductToCartPayload({
+      id: item.id,
+      title: item.title,
+      price: item.price,
+      discountedPrice: item.discountedPrice,
+      imgs: item.imgs,
+      reviews: 0,
+    }));
   };
 
   return (
@@ -25,8 +32,9 @@ const SingleItem = ({ item }) => {
       <div className="min-w-[83px]">
         <button
           onClick={() => handleRemoveFromWishlist()}
+          disabled={removeFromBackend.isPending}
           aria-label="button for remove product from wishlist"
-          className="flex items-center justify-center rounded-lg max-w-[38px] w-full h-9.5 bg-gray-2 dark:bg-darkTheme-secondary-bg border border-gray-3 dark:border-darkTheme-border-color dark:text-darkTheme-body-color ease-out duration-200 hover:bg-red-light-6 hover:border-red-light-4 hover:text-red"
+          className="flex items-center justify-center rounded-lg max-w-[38px] w-full h-9.5 bg-gray-2 dark:bg-darkTheme-secondary-bg border border-gray-3 dark:border-darkTheme-border-color dark:text-darkTheme-body-color ease-out duration-200 hover:bg-red-light-6 hover:border-red-light-4 hover:text-red disabled:opacity-50"
         >
           <svg
             className="fill-current"
@@ -54,12 +62,12 @@ const SingleItem = ({ item }) => {
         <div className="flex items-center justify-between gap-5">
           <div className="w-full flex items-center gap-5.5">
             <div className="flex items-center justify-center rounded-[5px] bg-gray-2 dark:bg-darkTheme-secondary-bg max-w-[80px] w-full h-17.5">
-              <Image src={item.imgs?.thumbnails[0]} alt="product" width={200} height={200} />
+              <Image src={item.imgs?.thumbnails?.[0] || "/images/products/placeholder.svg"} alt="product" width={200} height={200} />
             </div>
 
             <div>
               <h3 className="text-dark dark:text-darkTheme-body-color ease-out duration-200 hover:text-blue">
-                <a href={ROUTES.productDetails}> {item.title} </a>
+                <a href={`/products/${item.id}`}> {item.title} </a>
               </h3>
             </div>
           </div>
@@ -102,9 +110,10 @@ const SingleItem = ({ item }) => {
       <div className="min-w-[150px] flex justify-end">
         <button
           onClick={() => handleAddToCart()}
-          className="inline-flex text-dark dark:text-darkTheme-body-color hover:text-white bg-gray-1 dark:bg-darkTheme-secondary-bg border border-gray-3 dark:border-darkTheme-border-color py-2.5 px-6 rounded-md ease-out duration-200 hover:bg-blue hover:border-blue"
+          disabled={addCartItem.isPending}
+          className="inline-flex text-dark dark:text-darkTheme-body-color hover:text-white bg-gray-1 dark:bg-darkTheme-secondary-bg border border-gray-3 dark:border-darkTheme-border-color py-2.5 px-6 rounded-md ease-out duration-200 hover:bg-blue hover:border-blue disabled:opacity-50"
         >
-          Add to Cart
+          {addCartItem.isPending ? "Adding..." : "Add to Cart"}
         </button>
       </div>
     </div>

@@ -1,12 +1,32 @@
 "use client";
-import React from "react";
+import React, { useEffect } from "react";
 import Breadcrumb from "../Common/Breadcrumb";
 import { useWishlistStore } from "@/store/useWishlistStore";
+import { useWishlist, mapWishlistToUi } from "@/hooks/useWishlist";
 import SingleItem from "./SingleItem";
 
 export const Wishlist = () => {
+  const { data: backendWishlist, isLoading } = useWishlist();
   const wishlistItems = useWishlistStore((state) => state.items);
+  const setItems = useWishlistStore((state) => state.setItems);
   const removeAllItemsFromWishlist = useWishlistStore((state) => state.removeAllItemsFromWishlist);
+
+  useEffect(() => {
+    if (backendWishlist) {
+      setItems(mapWishlistToUi(backendWishlist));
+    }
+  }, [backendWishlist, setItems]);
+
+  if (isLoading) {
+    return (
+      <>
+        <Breadcrumb title="Wishlist" pages={["Wishlist"]} />
+        <section className="py-20 text-center bg-gray-2 dark:bg-darkTheme-bg">
+          <p className="text-dark dark:text-white">Loading wishlist...</p>
+        </section>
+      </>
+    );
+  }
 
   return (
     <>

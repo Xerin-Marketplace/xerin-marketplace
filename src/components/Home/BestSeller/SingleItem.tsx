@@ -3,7 +3,9 @@ import React from "react";
 import { Product } from "@/types/product";
 import { useModalContext } from "@/app/context/QuickViewModalContext";
 import { useQuickViewStore } from "@/store/useQuickViewStore";
-import { useCartStore } from "@/store/useCartStore";
+import { useAddCartItem, addProductToCartPayload } from "@/hooks/useCartActions";
+import { useAddToWishlist } from "@/hooks/useWishlist";
+import StarRating from "@/components/Common/StarRating";
 import Image from "next/image";
 import Link from "next/link";
 import { useWishlistStore } from "@/store/useWishlistStore";
@@ -13,8 +15,9 @@ const SingleItem = ({ item }: { item: Product }) => {
   const { openModal } = useModalContext();
 
   const updateQuickView = useQuickViewStore((state) => state.updateQuickView);
-  const addItemToCart = useCartStore((state) => state.addItemToCart);
-  const addItemToWishlist = useWishlistStore((state) => state.addItemToWishlist);
+  const addCartItem = useAddCartItem();
+  const addToWishlist = useAddToWishlist();
+  const addItemToWishlistLocal = useWishlistStore((state) => state.addItemToWishlist);
 
   const hasDiscount = item.price > item.discountedPrice;
   const savingsPercent = hasDiscount
@@ -28,18 +31,16 @@ const SingleItem = ({ item }: { item: Product }) => {
 
   // add to cart
   const handleAddToCart = () => {
-    addItemToCart({
-      ...item,
-      quantity: 1,
-    });
+    addCartItem.mutate(addProductToCartPayload(item));
   };
 
   const handleItemToWishList = () => {
-    addItemToWishlist({
+    addItemToWishlistLocal({
       ...item,
       status: "available",
       quantity: 1,
     });
+    addToWishlist.mutate(String(item.id));
   };
 
   return (
@@ -56,25 +57,14 @@ const SingleItem = ({ item }: { item: Product }) => {
 
         <div className="px-5 pt-16 text-center">
           <div className="mb-2 flex items-center justify-center gap-2.5">
-            <div className="flex items-center gap-1">
-              {Array.from({ length: 5 }).map((_, index) => (
-                <Image
-                  key={index}
-                  src="/images/icons/icon-star.svg"
-                  alt="star icon"
-                  width={14}
-                  height={14}
-                />
-              ))}
-            </div>
-
-            <p className="text-custom-sm text-dark-4 dark:text-darkTheme-secondary-muted">
-              ({item.reviews} reviews)
-            </p>
+            <StarRating rating={item.rating} reviewCount={item.reviewCount ?? item.reviews} size={14} />
+            <span className="text-custom-sm text-dark-4 dark:text-darkTheme-secondary-muted">
+              {typeof item.reviewCount === "number" && item.reviewCount > 0 ? `${item.reviewCount} reviews` : ""}
+            </span>
           </div>
 
           <h3 className="mb-1.5 text-lg font-semibold text-dark transition-colors duration-200 hover:text-blue dark:text-white">
-            <Link href="/shop-details">{item.title}</Link>
+            <Link href={`/products/${item.id}`}>{item.title}</Link>
           </h3>
 
           <p className="mx-auto max-w-[240px] text-sm leading-6 text-dark-4 dark:text-darkTheme-secondary-muted">
@@ -184,9 +174,10 @@ const SingleItem = ({ item }: { item: Product }) => {
             onClick={() => {
               handleItemToWishList();
             }}
+            disabled={addToWishlist.isPending}
             aria-label="button for add to fav"
             id="addFavOne"
-            className="flex items-center justify-center w-9 h-9 rounded-[5px] shadow-1 ease-out duration-200 text-dark dark:text-darkTheme-body-color bg-white dark:bg-darkTheme-tertiary-bg hover:text-white hover:bg-blue"
+            className="flex items-center justify-center w-9 h-9 rounded-[5px] shadow-1 ease-out duration-200 text-dark dark:text-darkTheme-body-color bg-white dark:bg-darkTheme-tertiary-bg hover:text-white hover:bg-blue disabled:opacity-50"
           >
             <svg
               className="fill-current"

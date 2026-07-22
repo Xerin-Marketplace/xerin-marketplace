@@ -2,13 +2,21 @@
 import React from "react";
 import Discount from "./Discount";
 import OrderSummary from "./OrderSummary";
-import { useCartStore } from "@/store/useCartStore";
+import { useBackendCart, useClearCart, mapBackendCartToUi } from "@/hooks/useCartActions";
 import SingleItem from "./SingleItem";
 import Breadcrumb from "../Common/Breadcrumb";
 import Link from "next/link";
 
 const Cart = () => {
-  const cartItems = useCartStore((state) => state.items);
+  const { data: cart, isLoading } = useBackendCart();
+  const clearCart = useClearCart();
+  const cartItems = cart ? mapBackendCartToUi(cart) : [];
+
+  const handleClearCart = () => {
+    if (confirm("Are you sure you want to clear your cart?")) {
+      clearCart.mutate();
+    }
+  };
 
   return (
     <>
@@ -17,12 +25,22 @@ const Cart = () => {
         <Breadcrumb title={"Cart"} pages={["Cart"]} />
       </section>
       {/* <!-- ===== Breadcrumb Section End ===== --> */}
-      {cartItems.length > 0 ? (
+      {isLoading ? (
+        <section className="py-20 text-center">
+          <p className="text-dark dark:text-white">Loading cart...</p>
+        </section>
+      ) : cartItems.length > 0 ? (
         <section className="overflow-hidden py-20 bg-gray-2 dark:bg-darkTheme-bg">
           <div className="max-w-[1170px] w-full mx-auto px-4 sm:px-8 xl:px-0">
             <div className="flex flex-wrap items-center justify-between gap-5 mb-7.5">
               <h2 className="font-medium text-dark dark:text-white text-2xl">Your Cart</h2>
-              <button className="text-blue">Clear Shopping Cart</button>
+              <button
+                onClick={handleClearCart}
+                className="text-blue"
+                disabled={clearCart.isPending}
+              >
+                Clear Shopping Cart
+              </button>
             </div>
 
             <div className="bg-white dark:bg-darkTheme-card rounded-[10px] shadow-1">
@@ -52,10 +70,9 @@ const Cart = () => {
                   </div>
 
                   {/* <!-- cart item --> */}
-                  {cartItems.length > 0 &&
-                    cartItems.map((item, key) => (
-                      <SingleItem item={item} key={key} />
-                    ))}
+                  {cartItems.map((item, key) => (
+                    <SingleItem item={item} key={key} />
+                  ))}
                 </div>
               </div>
             </div>

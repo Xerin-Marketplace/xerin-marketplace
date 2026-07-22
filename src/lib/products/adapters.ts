@@ -25,11 +25,14 @@ export const mapApiProductToUiProduct = (product: ApiProduct): UiProduct => {
   const imageUrl = getProductImageUrl(product);
   const displayPrice = price;
   const displayDiscountedPrice = discountedPrice || price;
+  const reviewCount = typeof product.review_count === "number" ? product.review_count : 0;
 
   return {
     id: product.id as UiProduct["id"],
     title: product.name || product.slug || "Untitled product",
-    reviews: 0,
+    reviews: reviewCount,
+    reviewCount,
+    rating: toNumber(product.rating, 0),
     price: displayPrice,
     discountedPrice: displayDiscountedPrice,
     imgs: {

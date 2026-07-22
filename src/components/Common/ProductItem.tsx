@@ -4,9 +4,11 @@ import Image from "next/image";
 import { Product } from "@/types/product";
 import { useModalContext } from "@/app/context/QuickViewModalContext";
 import { useQuickViewStore } from "@/store/useQuickViewStore";
-import { useCartStore } from "@/store/useCartStore";
 import { useWishlistStore } from "@/store/useWishlistStore";
 import { useProductDetailsStore } from "@/store/useProductDetailsStore";
+import { useAddCartItem, addProductToCartPayload } from "@/hooks/useCartActions";
+import { useAddToWishlist } from "@/hooks/useWishlist";
+import StarRating from "@/components/Common/StarRating";
 import Link from "next/link";
 import { formatCurrency } from "@/lib/formatCurrency";
 
@@ -14,8 +16,9 @@ const ProductItem = ({ item }: { item: Product }) => {
   const { openModal } = useModalContext();
 
   const updateQuickView = useQuickViewStore((state) => state.updateQuickView);
-  const addItemToCart = useCartStore((state) => state.addItemToCart);
-  const addItemToWishlist = useWishlistStore((state) => state.addItemToWishlist);
+  const addCartItem = useAddCartItem();
+  const addToWishlist = useAddToWishlist();
+  const addItemToWishlistLocal = useWishlistStore((state) => state.addItemToWishlist);
   const updateproductDetails = useProductDetailsStore((state) => state.updateproductDetails);
 
   const hasDiscount = item.price > item.discountedPrice;
@@ -30,18 +33,16 @@ const ProductItem = ({ item }: { item: Product }) => {
 
   // add to cart
   const handleAddToCart = () => {
-    addItemToCart({
-      ...item,
-      quantity: 1,
-    });
+    addCartItem.mutate(addProductToCartPayload(item));
   };
 
   const handleItemToWishList = () => {
-    addItemToWishlist({
+    addItemToWishlistLocal({
       ...item,
       status: "available",
       quantity: 1,
     });
+    addToWishlist.mutate(String(item.id));
   };
 
   const handleProductDetails = () => {
@@ -59,8 +60,9 @@ const ProductItem = ({ item }: { item: Product }) => {
 
         <button
           onClick={() => handleItemToWishList()}
+          disabled={addToWishlist.isPending}
           aria-label="Add to wishlist"
-          className="absolute right-4 top-4 z-10 flex h-9 w-9 items-center justify-center rounded-full bg-white/95 text-dark shadow-sm transition-colors duration-200 hover:bg-blue hover:text-white dark:bg-darkTheme-tertiary-bg dark:text-darkTheme-body-color"
+          className="absolute right-4 top-4 z-10 flex h-9 w-9 items-center justify-center rounded-full bg-white/95 text-dark shadow-sm transition-colors duration-200 hover:bg-blue hover:text-white dark:bg-darkTheme-tertiary-bg dark:text-darkTheme-body-color disabled:opacity-50"
         >
           <svg
             className="fill-current"
@@ -121,29 +123,17 @@ const ProductItem = ({ item }: { item: Product }) => {
 
           <button
             onClick={() => handleAddToCart()}
-            className="inline-flex flex-1 items-center justify-center rounded-md bg-blue px-4 py-[10px] text-sm font-medium text-white transition-colors duration-200 hover:bg-blue-dark"
+            disabled={addCartItem.isPending}
+            className="inline-flex flex-1 items-center justify-center rounded-md bg-blue px-4 py-[10px] text-sm font-medium text-white transition-colors duration-200 hover:bg-blue-dark disabled:opacity-50"
           >
-            Add to cart
+            {addCartItem.isPending ? "Adding..." : "Add to cart"}
           </button>
         </div>
       </div>
 
       <div className="px-4 sm:px-5 py-5">
         <div className="flex items-center justify-between gap-3 mb-3">
-          <div className="flex items-center gap-2 text-sm text-dark-4 dark:text-darkTheme-secondary-muted">
-            <div className="flex items-center gap-1">
-              {Array.from({ length: 5 }).map((_, index) => (
-                <Image
-                  key={index}
-                  src="/images/icons/icon-star.svg"
-                  alt="star icon"
-                  width={14}
-                  height={14}
-                />
-              ))}
-            </div>
-            <span>({item.reviews})</span>
-          </div>
+          <StarRating rating={item.rating} reviewCount={item.reviewCount ?? item.reviews} size={14} />
 
           <span className="rounded-full bg-green/10 px-3 py-1 text-xs font-semibold text-green">
             Fast delivery
@@ -154,7 +144,7 @@ const ProductItem = ({ item }: { item: Product }) => {
           className="mb-2 font-semibold text-dark dark:text-white transition-colors duration-200 hover:text-blue"
           onClick={() => handleProductDetails()}
         >
-          <Link href="/shop-details">{item.title}</Link>
+          <Link href={`/products/${item.id}`}>{item.title}</Link>
         </h3>
 
         <p className="mb-4 text-sm leading-6 text-dark-4 dark:text-darkTheme-secondary-muted">

@@ -19,25 +19,19 @@ interface WishlistState {
   addItemToWishlist: (item: WishListItem) => void;
   removeItemFromWishlist: (id: number | string) => void;
   removeAllItemsFromWishlist: () => void;
+  setItems: (items: WishListItem[]) => void;
+  isInWishlist: (id: number | string) => boolean;
 }
 
 export const useWishlistStore = create<WishlistState>()(
   persist(
-    (set) => ({
+    (set, get) => ({
       items: [],
 
       addItemToWishlist: (newItem) =>
         set((state) => {
           const existingItem = state.items.find((item) => item.id === newItem.id);
-          if (existingItem) {
-            return {
-              items: state.items.map((item) =>
-                item.id === newItem.id
-                  ? { ...item, quantity: item.quantity + newItem.quantity }
-                  : item
-              ),
-            };
-          }
+          if (existingItem) return state;
           return { items: [...state.items, newItem] };
         }),
 
@@ -47,6 +41,10 @@ export const useWishlistStore = create<WishlistState>()(
         })),
 
       removeAllItemsFromWishlist: () => set({ items: [] }),
+
+      setItems: (items) => set({ items }),
+
+      isInWishlist: (id) => get().items.some((item) => item.id === id),
     }),
     {
       name: "xerin_wishlist_store",

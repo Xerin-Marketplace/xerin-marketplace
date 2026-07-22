@@ -3,8 +3,11 @@ import React from "react";
 import { Product } from "@/types/product";
 import { useModalContext } from "@/app/context/QuickViewModalContext";
 import { useQuickViewStore } from "@/store/useQuickViewStore";
-import { useCartStore } from "@/store/useCartStore";
 import { useWishlistStore } from "@/store/useWishlistStore";
+import { useAddCartItem, addProductToCartPayload } from "@/hooks/useCartActions";
+import { useAddToWishlist } from "@/hooks/useWishlist";
+import StarRating from "@/components/Common/StarRating";
+import { formatCurrency } from "@/lib/formatCurrency";
 import Link from "next/link";
 import Image from "next/image";
 
@@ -12,8 +15,9 @@ const SingleGridItem = ({ item }: { item: Product }) => {
   const { openModal } = useModalContext();
 
   const updateQuickView = useQuickViewStore((state) => state.updateQuickView);
-  const addItemToCart = useCartStore((state) => state.addItemToCart);
-  const addItemToWishlist = useWishlistStore((state) => state.addItemToWishlist);
+  const addCartItem = useAddCartItem();
+  const addToWishlist = useAddToWishlist();
+  const addItemToWishlistLocal = useWishlistStore((state) => state.addItemToWishlist);
 
   // update the QuickView state
   const handleQuickViewUpdate = () => {
@@ -22,18 +26,16 @@ const SingleGridItem = ({ item }: { item: Product }) => {
 
   // add to cart
   const handleAddToCart = () => {
-    addItemToCart({
-      ...item,
-      quantity: 1,
-    });
+    addCartItem.mutate(addProductToCartPayload(item));
   };
 
   const handleItemToWishList = () => {
-    addItemToWishlist({
+    addItemToWishlistLocal({
       ...item,
       status: "available",
       quantity: 1,
     });
+    addToWishlist.mutate(String(item.id));
   };
 
   return (
@@ -76,16 +78,18 @@ const SingleGridItem = ({ item }: { item: Product }) => {
 
           <button
             onClick={() => handleAddToCart()}
-            className="inline-flex font-medium text-custom-sm py-[7px] px-5 rounded-[5px] bg-blue text-white ease-out duration-200 hover:bg-blue-dark"
+            disabled={addCartItem.isPending}
+            className="inline-flex font-medium text-custom-sm py-[7px] px-5 rounded-[5px] bg-blue text-white ease-out duration-200 hover:bg-blue-dark disabled:opacity-50"
           >
-            Add to cart
+            {addCartItem.isPending ? "Adding..." : "Add to cart"}
           </button>
 
           <button
             onClick={() => handleItemToWishList()}
+            disabled={addToWishlist.isPending}
             aria-label="button for favorite select"
             id="favOne"
-            className="flex items-center justify-center w-9 h-9 rounded-[5px] shadow-1 ease-out duration-200 text-dark bg-white hover:text-blue"
+            className="flex items-center justify-center w-9 h-9 rounded-[5px] shadow-1 ease-out duration-200 text-dark bg-white hover:text-blue disabled:opacity-50"
           >
             <svg
               className="fill-current"
@@ -107,49 +111,16 @@ const SingleGridItem = ({ item }: { item: Product }) => {
       </div>
 
       <div className="flex items-center gap-2.5 mb-2">
-        <div className="flex items-center gap-1">
-          <Image
-            src="/images/icons/icon-star.svg"
-            alt="star icon"
-            width={15}
-            height={15}
-          />
-          <Image
-            src="/images/icons/icon-star.svg"
-            alt="star icon"
-            width={15}
-            height={15}
-          />
-          <Image
-            src="/images/icons/icon-star.svg"
-            alt="star icon"
-            width={15}
-            height={15}
-          />
-          <Image
-            src="/images/icons/icon-star.svg"
-            alt="star icon"
-            width={15}
-            height={15}
-          />
-          <Image
-            src="/images/icons/icon-star.svg"
-            alt="star icon"
-            width={15}
-            height={15}
-          />
-        </div>
-
-        <p className="text-custom-sm">({item.reviews})</p>
+        <StarRating rating={item.rating} reviewCount={item.reviewCount ?? item.reviews} size={15} />
       </div>
 
       <h3 className="font-medium text-dark ease-out duration-200 hover:text-blue mb-1.5">
-        <Link href="/shop-details"> {item.title} </Link>
+        <Link href={`/products/${item.id}`}> {item.title} </Link>
       </h3>
 
       <span className="flex items-center gap-2 font-medium text-lg">
-        <span className="text-dark">${item.discountedPrice}</span>
-        <span className="text-dark-4 line-through">${item.price}</span>
+        <span className="text-dark">{formatCurrency(item.discountedPrice)}</span>
+        <span className="text-dark-4 line-through">{formatCurrency(item.price)}</span>
       </span>
     </div>
   );

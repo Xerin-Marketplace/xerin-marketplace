@@ -70,6 +70,12 @@ export type Product = TimestampFields & {
   tags?: ProductTag[];
   category?: Category;
   brand?: Brand;
+
+  // Optional storefront fields returned by some endpoints.
+  rating?: number | string | null;
+  review_count?: number | null;
+  is_featured?: boolean;
+  is_best_seller?: boolean;
 };
 
 export type ProductListQuery = {

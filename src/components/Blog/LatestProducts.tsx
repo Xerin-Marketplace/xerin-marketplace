@@ -32,7 +32,7 @@ const LatestProducts = () => {
 
               <div>
                 <h3 className="font-medium text-dark dark:text-darkTheme-body-color mb-1 ease-out duration-200 hover:text-blue">
-                  <Link href="/shop-details"> {product.title} </Link>
+                  <Link href={`/products/${product.id}`}> {product.title} </Link>
                 </h3>
                 <p className="text-custom-sm dark:text-darkTheme-secondary-muted">Price: {formatCurrency(product.discountedPrice)}</p>
               </div>

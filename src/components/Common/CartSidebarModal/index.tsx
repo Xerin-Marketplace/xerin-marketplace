@@ -2,7 +2,7 @@
 import React, { useEffect, useState } from "react";
 
 import { useCartModalContext } from "@/app/context/CartSidebarModalContext";
-import { useCartStore, selectTotalPrice } from "@/store/useCartStore";
+import { useBackendCart, mapBackendCartToUi } from "@/hooks/useCartActions";
 import SingleItem from "./SingleItem";
 import Link from "next/link";
 import EmptyCart from "./EmptyCart";
@@ -10,9 +10,13 @@ import { formatCurrency } from "@/lib/formatCurrency";
 
 const CartSidebarModal = () => {
   const { isCartModalOpen, closeCartModal } = useCartModalContext();
-  const cartItems = useCartStore((state) => state.items);
+  const { data: cart } = useBackendCart();
+  const cartItems = cart ? mapBackendCartToUi(cart) : [];
 
-  const totalPrice = useCartStore(selectTotalPrice);
+  const totalPrice = cartItems.reduce(
+    (total, item) => total + item.discountedPrice * item.quantity,
+    0
+  );
 
   useEffect(() => {
     // closing modal while clicking outside

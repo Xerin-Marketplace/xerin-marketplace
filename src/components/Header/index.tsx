@@ -5,7 +5,7 @@ import { ROUTES } from "@/constants/links";
 import CustomSelect from "./CustomSelect";
 import { menuData } from "./menuData";
 import Dropdown from "./Dropdown";
-import { useCartStore, selectTotalPrice } from "@/store/useCartStore";
+import { useBackendCart, mapBackendCartToUi } from "@/hooks/useCartActions";
 import { useCartModalContext } from "@/app/context/CartSidebarModalContext";
 import { useTheme } from "@/app/context/ThemeContext";
 import { useAuth } from "@/hooks/useAuth";
@@ -23,8 +23,12 @@ const Header = () => {
   const { user, isAuthenticated, logout } = useAuth();
   const hasHydrated = useAuthStore((state) => state.hasHydrated);
 
-  const product = useCartStore((state) => state.items);
-  const totalPrice = useCartStore(selectTotalPrice);
+  const { data: cart } = useBackendCart();
+  const cartItems = cart ? mapBackendCartToUi(cart) : [];
+  const totalPrice = cartItems.reduce(
+    (total, item) => total + item.discountedPrice * item.quantity,
+    0
+  );
 
   const accountHref = getAccountHref(isAuthenticated, user);
   const accountLabel = getAccountLabel(isAuthenticated, user);
@@ -286,7 +290,7 @@ const Header = () => {
                     </svg>
 
                     <span className="flex items-center justify-center font-medium text-2xs absolute -right-2 -top-2.5 bg-blue w-4.5 h-4.5 rounded-full text-white">
-                      {product.length}
+                      {cartItems.length}
                     </span>
                   </span>
 

@@ -1,7 +1,7 @@
 export const ROUTES = {
   home: "/",
   shop: "/shop-with-sidebar",
-  productDetails: "/shop-details",
+  productDetails: (id: string | number) => `/products/${id}`,
   cart: "/cart",
   wishlist: "/wishlist",
   checkout: "/checkout",

@@ -1,10 +1,15 @@
-import { useCartStore, selectTotalPrice } from "@/store/useCartStore";
+import { useBackendCart, mapBackendCartToUi } from "@/hooks/useCartActions";
 import React from "react";
 import { formatCurrency } from "@/lib/formatCurrency";
+import Link from "next/link";
 
 const OrderSummary = () => {
-  const cartItems = useCartStore((state) => state.items);
-  const totalPrice = useCartStore(selectTotalPrice);
+  const { data: cart } = useBackendCart();
+  const cartItems = cart ? mapBackendCartToUi(cart) : [];
+  const totalPrice = cartItems.reduce(
+    (total, item) => total + item.discountedPrice * item.quantity,
+    0
+  );
 
   return (
     <div className="lg:max-w-[455px] w-full">
@@ -52,12 +57,12 @@ const OrderSummary = () => {
           </div>
 
           {/* <!-- checkout button --> */}
-          <button
-            type="submit"
+          <Link
+            href="/checkout"
             className="w-full flex justify-center font-medium text-white bg-blue py-3 px-6 rounded-md ease-out duration-200 hover:bg-blue-dark mt-7.5"
           >
             Process to Checkout
-          </button>
+          </Link>
         </div>
       </div>
     </div>

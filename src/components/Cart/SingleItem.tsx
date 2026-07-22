@@ -1,30 +1,29 @@
 import React, { useState } from "react";
-import { useCartStore } from "@/store/useCartStore";
+import { useUpdateCartItem, useRemoveCartItem, type CartItemUi } from "@/hooks/useCartActions";
 import Image from "next/image";
-import { ROUTES } from "@/constants/links";
+import Link from "next/link";
 import { formatCurrency } from "@/lib/formatCurrency";
 
-const SingleItem = ({ item }) => {
+const SingleItem = ({ item }: { item: CartItemUi }) => {
   const [quantity, setQuantity] = useState(item.quantity);
-
-  const removeItemFromCart = useCartStore((state) => state.removeItemFromCart);
-  const updateCartItemQuantity = useCartStore((state) => state.updateCartItemQuantity);
+  const updateItem = useUpdateCartItem();
+  const removeItem = useRemoveCartItem();
 
   const handleRemoveFromCart = () => {
-    removeItemFromCart(item.id);
+    removeItem.mutate(item.cartItemId);
   };
 
   const handleIncreaseQuantity = () => {
-    setQuantity(quantity + 1);
-    updateCartItemQuantity(item.id, quantity + 1);
+    const next = quantity + 1;
+    setQuantity(next);
+    updateItem.mutate({ itemId: item.cartItemId, quantity: next });
   };
 
   const handleDecreaseQuantity = () => {
     if (quantity > 1) {
-      setQuantity(quantity - 1);
-      updateCartItemQuantity(item.id, quantity - 1);
-    } else {
-      return;
+      const next = quantity - 1;
+      setQuantity(next);
+      updateItem.mutate({ itemId: item.cartItemId, quantity: next });
     }
   };
 
@@ -34,12 +33,12 @@ const SingleItem = ({ item }) => {
         <div className="flex items-center justify-between gap-5">
           <div className="w-full flex items-center gap-5.5">
             <div className="flex items-center justify-center rounded-[5px] bg-gray-2 dark:bg-darkTheme-secondary-bg max-w-[80px] w-full h-17.5">
-              <Image width={200} height={200} src={item.imgs?.thumbnails[0]} alt="product" />
+              <Image width={200} height={200} src={item.imgs?.thumbnails?.[0] || "/images/products/placeholder.svg"} alt="product" />
             </div>
 
             <div>
               <h3 className="text-dark dark:text-darkTheme-body-color ease-out duration-200 hover:text-blue">
-                <a href={ROUTES.productDetails}> {item.title} </a>
+                <Link href={`/products/${item.productId}`}> {item.title} </Link>
               </h3>
             </div>
           </div>
@@ -55,7 +54,8 @@ const SingleItem = ({ item }) => {
           <button
             onClick={() => handleDecreaseQuantity()}
             aria-label="button for remove product"
-            className="flex items-center justify-center w-11.5 h-11.5 ease-out duration-200 hover:text-blue"
+            disabled={updateItem.isPending}
+            className="flex items-center justify-center w-11.5 h-11.5 ease-out duration-200 hover:text-blue disabled:opacity-50"
           >
             <svg
               className="fill-current"
@@ -79,7 +79,8 @@ const SingleItem = ({ item }) => {
           <button
             onClick={() => handleIncreaseQuantity()}
             aria-label="button for add product"
-            className="flex items-center justify-center w-11.5 h-11.5 ease-out duration-200 hover:text-blue"
+            disabled={updateItem.isPending}
+            className="flex items-center justify-center w-11.5 h-11.5 ease-out duration-200 hover:text-blue disabled:opacity-50"
           >
             <svg
               className="fill-current"
@@ -110,7 +111,8 @@ const SingleItem = ({ item }) => {
         <button
           onClick={() => handleRemoveFromCart()}
           aria-label="button for remove product from cart"
-          className="flex items-center justify-center rounded-lg max-w-[38px] w-full h-9.5 bg-gray-2 dark:bg-darkTheme-secondary-bg border border-gray-3 dark:border-darkTheme-border-color text-dark dark:text-darkTheme-body-color ease-out duration-200 hover:bg-red-light-6 hover:border-red-light-4 hover:text-red"
+          disabled={removeItem.isPending}
+          className="flex items-center justify-center rounded-lg max-w-[38px] w-full h-9.5 bg-gray-2 dark:bg-darkTheme-secondary-bg border border-gray-3 dark:border-darkTheme-border-color text-dark dark:text-darkTheme-body-color ease-out duration-200 hover:bg-red-light-6 hover:border-red-light-4 hover:text-red disabled:opacity-50"
         >
           <svg
             className="fill-current"

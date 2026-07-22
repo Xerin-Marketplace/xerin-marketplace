@@ -7,12 +7,17 @@ import Newsletter from "../Common/Newsletter";
 import RecentlyViewdItems from "./RecentlyViewd";
 import { usePreviewSlider } from "@/app/context/PreviewSliderContext";
 import { useProductDetailsStore } from "@/store/useProductDetailsStore";
+import { useAddCartItem, addProductToCartPayload } from "@/hooks/useCartActions";
+import StarRating from "@/components/Common/StarRating";
+import { useRouter } from "next/navigation";
 import { formatCurrency } from "@/lib/formatCurrency";
 
 const ShopDetails = () => {
   const [activeColor, setActiveColor] = useState("blue");
   const { openPreviewModal } = usePreviewSlider();
   const [previewImg, setPreviewImg] = useState(0);
+  const router = useRouter();
+  const addCartItem = useAddCartItem();
 
   const [storage, setStorage] = useState("gb128");
   const [type, setType] = useState("active");
@@ -167,13 +172,17 @@ const ShopDetails = () => {
                       {product.title}
                     </h2>
 
-                    <div className="inline-flex font-medium text-custom-sm text-white bg-blue rounded py-0.5 px-2.5">
-                      30% OFF
-                    </div>
+                    {product.price > product.discountedPrice && (
+                      <div className="inline-flex font-medium text-custom-sm text-white bg-blue rounded py-0.5 px-2.5">
+                        {Math.round(((product.price - product.discountedPrice) / product.price) * 100)}% OFF
+                      </div>
+                    )}
                   </div>
 
                   <div className="flex flex-wrap items-center gap-5.5 mb-4.5">
-                    <div className="flex items-center gap-2.5">
+                    <StarRating rating={product.rating} reviewCount={product.reviewCount ?? product.reviews} size={18} />
+
+                    <div className="hidden flex items-center gap-2.5">
                       {/* <!-- stars --> */}
                       <div className="flex items-center gap-1">
                         <svg
@@ -282,7 +291,9 @@ const ShopDetails = () => {
                         </svg>
                       </div>
 
-                      <span> (5 customer reviews) </span>
+                      <span className="text-sm text-dark-4 dark:text-darkTheme-secondary-muted">
+                        ({product.reviewCount ?? product.reviews ?? 0} customer reviews)
+                      </span>
                     </div>
 
                     <div className="flex items-center gap-1.5">
@@ -664,12 +675,25 @@ const ShopDetails = () => {
                         </button>
                       </div>
 
-                      <a
-                        href={ROUTES.checkout}
-                        className="inline-flex font-medium text-white bg-blue py-3 px-7 rounded-md ease-out duration-200 hover:bg-blue-dark"
+                      <button
+                        onClick={() => addCartItem.mutate(addProductToCartPayload(product, quantity))}
+                        disabled={addCartItem.isPending}
+                        className="inline-flex font-medium text-white bg-blue py-3 px-7 rounded-md ease-out duration-200 hover:bg-blue-dark disabled:opacity-50"
                       >
-                        Purchase Now
-                      </a>
+                        {addCartItem.isPending ? "Adding..." : "Add to Cart"}
+                      </button>
+
+                      <button
+                        onClick={() =>
+                          addCartItem.mutate(addProductToCartPayload(product, quantity), {
+                            onSuccess: () => router.push("/checkout"),
+                          })
+                        }
+                        disabled={addCartItem.isPending}
+                        className="inline-flex font-medium text-white bg-dark py-3 px-7 rounded-md ease-out duration-200 hover:bg-opacity-90 disabled:opacity-50"
+                      >
+                        Buy Now
+                      </button>
 
                       <a
                         href={ROUTES.wishlist}

@@ -1,8 +1,12 @@
-import React, { useState } from "react";
+import React from "react";
 import Image from "next/image";
 
-const ShippingMethod = () => {
-  const [shippingMethod, setShippingMethod] = useState("free");
+interface ShippingMethodProps {
+  selected: string;
+  onChange: (value: string) => void;
+}
+
+const ShippingMethod = ({ selected, onChange }: ShippingMethodProps) => {
   return (
     <div className="bg-white dark:bg-darkTheme-card shadow-1 rounded-[10px] mt-7.5">
       <div className="border-b border-gray-3 dark:border-darkTheme-border-color py-5 px-4 sm:px-8.5">
@@ -17,20 +21,20 @@ const ShippingMethod = () => {
           >
             <div className="relative">
               <input
-                type="checkbox"
-                name="free"
+                type="radio"
+                name="shipping"
                 id="free"
                 className="sr-only"
-                onChange={() => setShippingMethod("free")}
+                checked={selected === "free"}
+                onChange={() => onChange("free")}
               />
-              {/* selectShipping === 'free' ? 'border-4 border-blue' : 'border border-gray-4' */}
               <div
                 className={`flex h-4 w-4 items-center justify-center rounded-full ${
-                  shippingMethod === "free"
+                  selected === "free"
                     ? "border-4 border-blue"
                     : "border border-gray-4 dark:border-darkTheme-border-color"
                 }`}
-              ></div>
+              />
             </div>
             Free Shipping
           </label>
@@ -41,32 +45,27 @@ const ShippingMethod = () => {
           >
             <div className="relative">
               <input
-                type="checkbox"
-                name="fedex"
+                type="radio"
+                name="shipping"
                 id="fedex"
                 className="sr-only"
-                onChange={() => setShippingMethod("fedex")}
+                checked={selected === "fedex"}
+                onChange={() => onChange("fedex")}
               />
               <div
                 className={`flex h-4 w-4 items-center justify-center rounded-full ${
-                  shippingMethod === "fedex"
+                  selected === "fedex"
                     ? "border-4 border-blue"
                     : "border border-gray-4"
                 }`}
-              ></div>
+              />
             </div>
 
             <div className="rounded-md border-[0.5px] border-gray-4 dark:border-darkTheme-border-color py-3.5 px-5 ease-out duration-200 hover:bg-gray-2 dark:hover:bg-darkTheme-secondary-bg hover:border-transparent hover:shadow-none">
               <div className="flex items-center">
                 <div className="pr-4">
-                  <Image
-                    src="/images/checkout/fedex.svg"
-                    alt="fedex"
-                    width={64}
-                    height={18}
-                  />
+                  <Image src="/images/checkout/fedex.svg" alt="fedex" width={64} height={18} />
                 </div>
-
                 <div className="border-l border-gray-4 dark:border-darkTheme-border-color pl-4">
                   <p className="font-semibold text-dark dark:text-white">$10.99</p>
                   <p className="text-custom-xs dark:text-darkTheme-secondary-muted">Standard Shipping</p>
@@ -81,32 +80,27 @@ const ShippingMethod = () => {
           >
             <div className="relative">
               <input
-                type="checkbox"
-                name="dhl"
+                type="radio"
+                name="shipping"
                 id="dhl"
                 className="sr-only"
-                onChange={() => setShippingMethod("dhl")}
+                checked={selected === "dhl"}
+                onChange={() => onChange("dhl")}
               />
               <div
                 className={`flex h-4 w-4 items-center justify-center rounded-full ${
-                  shippingMethod === "dhl"
+                  selected === "dhl"
                     ? "border-4 border-blue"
                     : "border border-gray-4"
                 }`}
-              ></div>
+              />
             </div>
 
             <div className="rounded-md border-[0.5px] border-gray-4 dark:border-darkTheme-border-color py-3.5 px-5 ease-out duration-200 hover:bg-gray-2 dark:hover:bg-darkTheme-secondary-bg hover:border-transparent hover:shadow-none">
               <div className="flex items-center">
                 <div className="pr-4">
-                  <Image
-                    src="/images/checkout/dhl.svg"
-                    alt="dhl"
-                    width={64}
-                    height={20}
-                  />
+                  <Image src="/images/checkout/dhl.svg" alt="dhl" width={64} height={20} />
                 </div>
-
                 <div className="border-l border-gray-4 dark:border-darkTheme-border-color pl-4">
                   <p className="font-semibold text-dark dark:text-white">$12.50</p>
                   <p className="text-custom-xs dark:text-darkTheme-secondary-muted">Standard Shipping</p>

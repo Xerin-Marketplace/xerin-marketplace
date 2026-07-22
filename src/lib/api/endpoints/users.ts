@@ -8,6 +8,7 @@ import type {
   UpdateUserRequest,
   User,
 } from "@/types/api/user";
+import type { Product } from "@/types/product";
 
 export const getMe = async (): Promise<User> => {
   const res = await axiosInstance.get<User>(API_ENDPOINTS.users.me);
@@ -56,6 +57,23 @@ export const deleteAddress = async (id: ID): Promise<ApiMessageResponse> => {
   return res.data;
 };
 
+export const getWishlist = async (): Promise<Product[]> => {
+  const res = await axiosInstance.get<Product[]>("/users/me/wishlist");
+  return res.data;
+};
+
+export const addToWishlist = async (productId: string): Promise<ApiMessageResponse> => {
+  const res = await axiosInstance.post<ApiMessageResponse>("/users/me/wishlist", {
+    product_id: productId,
+  });
+  return res.data;
+};
+
+export const removeFromWishlist = async (productId: string): Promise<ApiMessageResponse> => {
+  const res = await axiosInstance.delete<ApiMessageResponse>(`/users/me/wishlist/${productId}`);
+  return res.data;
+};
+
 export const usersApi = {
   getMe,
   updateMe,
@@ -63,4 +81,7 @@ export const usersApi = {
   createAddress,
   updateAddress,
   deleteAddress,
+  getWishlist,
+  addToWishlist,
+  removeFromWishlist,
 };
