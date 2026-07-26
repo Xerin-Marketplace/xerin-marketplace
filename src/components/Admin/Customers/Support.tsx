@@ -31,6 +31,8 @@ const AdminCustomerSupport = () => {
   const [loading, setLoading] = useState(true);
   const [status, setStatus] = useState("");
   const [priority, setPriority] = useState("");
+  const [viewing, setViewing] = useState<SupportTicket | null>(null);
+  const [busyId, setBusyId] = useState<string | null>(null);
 
   const fetchData = async () => {
     setLoading(true);
@@ -56,6 +58,23 @@ const AdminCustomerSupport = () => {
   const closed = tickets.filter((t) => t.status === "closed").length;
   const pending = tickets.filter((t) => t.status === "pending").length;
   const high = tickets.filter((t) => t.priority === "high" || t.priority === "urgent").length;
+
+  const updateTicket = async (ticket: SupportTicket, updates: { status?: string; priority?: string }) => {
+    setBusyId(ticket.id);
+    try {
+      await customersService.updateSupportTicket(ticket.id, updates);
+      toast.success("Ticket updated.");
+      await fetchData();
+    } catch (error) {
+      toast.error(getErrorMessage(error));
+    } finally {
+      setBusyId(null);
+    }
+  };
+
+  const showUnavailable = (action: string) => {
+    toast(`${action} is not available yet.`, { icon: "ℹ️" });
+  };
 
   return (
     <div className="space-y-4">
@@ -131,9 +150,44 @@ const AdminCustomerSupport = () => {
                     <td className="px-4 py-3 text-sm text-gray-600">{t.assigned_to_name ?? "-"}</td>
                     <td className="px-4 py-3 text-sm text-gray-600">{t.updated_at ? new Date(t.updated_at).toLocaleDateString() : "-"}</td>
                     <td className="px-4 py-3 text-sm">
-                      <div className="flex gap-1">
-                        <button type="button" className="rounded-lg bg-[#dbeafe] px-2.5 py-1.5 text-xs font-medium text-[#1e40af] hover:bg-[#bfdbfe]">View</button>
-                        <button type="button" className="rounded-lg bg-[#f8fafc] px-2.5 py-1.5 text-xs font-medium text-gray-700 hover:bg-gray-100">Assign</button>
+                      <div className="flex flex-wrap gap-2">
+                        <select
+                          value={t.status}
+                          onChange={(e) => updateTicket(t, { status: e.target.value })}
+                          disabled={busyId === t.id}
+                          className="rounded-lg border border-gray-200 bg-[#f8fafc] px-2 py-1.5 text-xs text-gray-700 disabled:opacity-60"
+                        >
+                          <option value="open">Open</option>
+                          <option value="pending">Pending</option>
+                          <option value="in_progress">In Progress</option>
+                          <option value="resolved">Resolved</option>
+                          <option value="closed">Closed</option>
+                        </select>
+                        <select
+                          value={t.priority}
+                          onChange={(e) => updateTicket(t, { priority: e.target.value })}
+                          disabled={busyId === t.id}
+                          className="rounded-lg border border-gray-200 bg-[#f8fafc] px-2 py-1.5 text-xs text-gray-700 disabled:opacity-60"
+                        >
+                          <option value="low">Low</option>
+                          <option value="medium">Medium</option>
+                          <option value="high">High</option>
+                          <option value="urgent">Urgent</option>
+                        </select>
+                        <button
+                          type="button"
+                          onClick={() => setViewing(t)}
+                          className="rounded-lg bg-[#dbeafe] px-2.5 py-1.5 text-xs font-medium text-[#1e40af] hover:bg-[#bfdbfe]"
+                        >
+                          View
+                        </button>
+                        <button
+                          type="button"
+                          onClick={() => showUnavailable("Assign ticket")}
+                          className="rounded-lg bg-[#f8fafc] px-2.5 py-1.5 text-xs font-medium text-gray-700 hover:bg-gray-100"
+                        >
+                          Assign
+                        </button>
                       </div>
                     </td>
                   </tr>
@@ -143,6 +197,72 @@ const AdminCustomerSupport = () => {
           </div>
         )}
       </div>
+
+      {viewing && (
+        <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/50 p-4">
+          <div className="w-full max-w-lg rounded-2xl bg-white p-6 shadow-xl">
+            <div className="mb-4 flex items-center justify-between">
+              <h3 className="text-lg font-semibold text-[#111827]">Ticket {viewing.ticket_number}</h3>
+              <button
+                type="button"
+                onClick={() => setViewing(null)}
+                className="rounded-lg p-1 text-gray-500 hover:bg-gray-100"
+              >
+                ×
+              </button>
+            </div>
+            <div className="space-y-3 text-sm">
+              <div className="flex justify-between">
+                <span className="text-gray-500">Customer</span>
+                <span className="font-medium text-[#111827]">{viewing.customer_name ?? "Unknown"}</span>
+              </div>
+              <div className="flex justify-between">
+                <span className="text-gray-500">Subject</span>
+                <span className="font-medium text-[#111827]">{viewing.subject}</span>
+              </div>
+              <div className="flex justify-between">
+                <span className="text-gray-500">Priority</span>
+                <span className={`inline-flex rounded-full px-2.5 py-1 text-xs font-medium ${PRIORITY_BADGES[viewing.priority] ?? "bg-gray-100 text-gray-600"}`}>
+                  {viewing.priority}
+                </span>
+              </div>
+              <div className="flex justify-between">
+                <span className="text-gray-500">Status</span>
+                <span className={`inline-flex rounded-full px-2.5 py-1 text-xs font-medium ${STATUS_BADGES[viewing.status] ?? "bg-gray-100 text-gray-600"}`}>
+                  {viewing.status.replace("_", " ")}
+                </span>
+              </div>
+              <div className="flex justify-between">
+                <span className="text-gray-500">Assigned To</span>
+                <span className="text-[#111827]">{viewing.assigned_to_name ?? "Unassigned"}</span>
+              </div>
+              <div>
+                <span className="text-gray-500">Description</span>
+                <p className="mt-1 rounded-xl bg-[#f8fafc] p-3 text-[#111827]">{viewing.description ?? "No description provided."}</p>
+              </div>
+              <div className="rounded-xl border border-gray-200 bg-[#f8fafc] p-3">
+                <p className="text-gray-500">Replies are not available yet.</p>
+              </div>
+            </div>
+            <div className="mt-6 flex justify-end gap-2">
+              <button
+                type="button"
+                onClick={() => setViewing(null)}
+                className="rounded-xl border border-gray-200 px-4 py-2 text-sm font-medium text-gray-700 hover:bg-gray-50"
+              >
+                Close
+              </button>
+              <button
+                type="button"
+                onClick={() => showUnavailable("Assign ticket")}
+                className="rounded-xl bg-[#4b5563] px-4 py-2 text-sm font-medium text-white hover:bg-[#1f2937]"
+              >
+                Assign
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
     </div>
   );
 };

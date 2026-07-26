@@ -17,6 +17,9 @@ const formatMoney = (amount: number, currency = "USD") =>
 
 const TABS = [
   { key: "transactions", label: "Transactions" },
+  { key: "commission-ledger", label: "Commission Ledger" },
+  { key: "seller-balances", label: "Seller Balances" },
+  { key: "payouts", label: "Payouts" },
   { key: "methods", label: "Payment Methods" },
   { key: "refunds", label: "Refunds" },
   { key: "failed", label: "Failed Payments" },
@@ -98,6 +101,9 @@ export default function AdminFinance() {
 
         <div className="p-4 sm:p-5">
           {activeTab === "transactions" && <TransactionsTab loading={loading} />}
+          {activeTab === "commission-ledger" && <UnavailableTab title="Commission Ledger" message="Commission ledger details will be available once the finance backend is connected." />}
+          {activeTab === "seller-balances" && <UnavailableTab title="Seller Balances" message="Seller balance management will be available once the finance backend is connected." />}
+          {activeTab === "payouts" && <UnavailableTab title="Payouts" message="Seller payout management will be available once the finance backend is connected." />}
           {activeTab === "methods" && <PaymentMethodsTab />}
           {activeTab === "refunds" && <RefundsTab />}
           {activeTab === "failed" && <FailedPaymentsTab count={summary.failedPayments} />}
@@ -205,6 +211,17 @@ function FailedPaymentsTab({ count }: { count: number }) {
       <p className="text-gray-500">
         Failed payments requiring attention: <span className="font-semibold text-[#111827]">{count}</span>
       </p>
+    </div>
+  );
+}
+
+function UnavailableTab({ title, message }: { title: string; message: string }) {
+  return (
+    <div>
+      <h3 className="text-lg font-semibold text-[#111827] mb-4">{title}</h3>
+      <div className="rounded-xl border border-gray-200 bg-[#f8fafc] p-5">
+        <p className="text-gray-600">{message}</p>
+      </div>
     </div>
   );
 }

@@ -44,6 +44,8 @@ import AdminSystemManagement, {
   SystemView,
 } from "@/components/Admin/SystemManagement";
 import AdminAccount, { AccountView } from "@/components/Admin/Account";
+import AdminFinance from "@/components/Admin/Finance";
+import AdminAnalytics from "@/components/Admin/Analytics";
 import { useTheme } from "@/app/context/ThemeContext";
 import { useAuth } from "@/hooks/useAuth";
 import { formatCurrency } from "@/lib/formatCurrency";
@@ -1848,6 +1850,10 @@ export default function AdminDashboard() {
                 )}
               </>
             ) : null}
+
+            {activeTab === "finance" && !isLoading ? <AdminFinance /> : null}
+
+            {activeTab === "analytics" && !isLoading ? <AdminAnalytics /> : null}
 
             {activeTab === "sellers" && !isLoading && !operationsWorkspace ? (
               sellerView === "all" || sellerView === "applications" ? (
