@@ -72,10 +72,8 @@ const initialForm: CheckoutForm = {
 const Checkout = () => {
   const router = useRouter();
   const [form, setForm] = useState<CheckoutForm>(initialForm);
-  const { isAuthenticated, hasHydrated } = useAuthStore((state) => ({
-    isAuthenticated: state.isAuthenticated,
-    hasHydrated: state.hasHydrated,
-  }));
+  const isAuthenticated = useAuthStore((state) => state.isAuthenticated);
+  const hasHydrated = useAuthStore((state) => state.hasHydrated);
   const { data: cart } = useBackendCart(isAuthenticated);
   const { addresses, createAddress, isCreatingAddress } = useAddresses();
   const createOrder = useCreateOrder();

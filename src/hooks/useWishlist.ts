@@ -25,10 +25,8 @@ export type WishlistItemUi = {
 };
 
 export const useWishlist = () => {
-  const { isAuthenticated, hasHydrated } = useAuthStore((state) => ({
-    isAuthenticated: state.isAuthenticated,
-    hasHydrated: state.hasHydrated,
-  }));
+  const isAuthenticated = useAuthStore((state) => state.isAuthenticated);
+  const hasHydrated = useAuthStore((state) => state.hasHydrated);
   return useQuery({
     queryKey: WISHLIST_QUERY_KEY,
     queryFn: async () => {

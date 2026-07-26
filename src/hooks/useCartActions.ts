@@ -62,10 +62,8 @@ export const useBackendCart = (enabled = true) =>
   });
 
 export const useCart = () => {
-  const { isAuthenticated, hasHydrated } = useAuthStore((state) => ({
-    isAuthenticated: state.isAuthenticated,
-    hasHydrated: state.hasHydrated,
-  }));
+  const isAuthenticated = useAuthStore((state) => state.isAuthenticated);
+  const hasHydrated = useAuthStore((state) => state.hasHydrated);
   const backendEnabled = hasHydrated && isAuthenticated;
   const backend = useBackendCart(backendEnabled);
   const guestItems = useCartStore((state) => state.items);
