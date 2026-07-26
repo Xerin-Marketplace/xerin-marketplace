@@ -3,6 +3,7 @@
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { usersApi } from "@/lib/api/endpoints/users";
 import { mapApiProductToUiProduct } from "@/lib/products/adapters";
+import { useAuthStore } from "@/store/useAuthStore";
 import type { Product as UiProduct } from "@/types/product";
 import type { Product } from "@/types/api/product";
 import toast from "react-hot-toast";
@@ -24,9 +25,23 @@ export type WishlistItemUi = {
 };
 
 export const useWishlist = () => {
+  const { isAuthenticated, hasHydrated } = useAuthStore((state) => ({
+    isAuthenticated: state.isAuthenticated,
+    hasHydrated: state.hasHydrated,
+  }));
   return useQuery({
     queryKey: WISHLIST_QUERY_KEY,
-    queryFn: () => usersApi.getWishlist(),
+    queryFn: async () => {
+      try {
+        return await usersApi.getWishlist();
+      } catch (err: any) {
+        if (err?.response?.status === 404) {
+          return [];
+        }
+        throw err;
+      }
+    },
+    enabled: hasHydrated && isAuthenticated,
   });
 };
 
@@ -48,8 +63,12 @@ export const mapWishlistToUi = (items: Product[]): WishlistItemUi[] => {
 
 export const useAddToWishlist = () => {
   const queryClient = useQueryClient();
+  const isAuthenticated = useAuthStore((state) => state.isAuthenticated);
   return useMutation({
-    mutationFn: (productId: string) => usersApi.addToWishlist(productId),
+    mutationFn: async (productId: string) => {
+      if (isAuthenticated) return usersApi.addToWishlist(productId);
+      return null;
+    },
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: WISHLIST_QUERY_KEY });
       toast.success("Added to wishlist");
@@ -62,8 +81,12 @@ export const useAddToWishlist = () => {
 
 export const useRemoveFromWishlist = () => {
   const queryClient = useQueryClient();
+  const isAuthenticated = useAuthStore((state) => state.isAuthenticated);
   return useMutation({
-    mutationFn: (productId: string) => usersApi.removeFromWishlist(productId),
+    mutationFn: async (productId: string) => {
+      if (isAuthenticated) return usersApi.removeFromWishlist(productId);
+      return null;
+    },
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: WISHLIST_QUERY_KEY });
       toast.success("Removed from wishlist");

@@ -9,12 +9,15 @@ import {
   forgotPassword as apiForgotPassword,
   resetPassword as apiResetPassword,
 } from "@/lib/api/endpoints/auth";
+import { cartApi } from "@/lib/api/endpoints/commerce";
 import { useAuthStore } from "@/store/useAuthStore";
+import { useCartStore } from "@/store/useCartStore";
 import { authStorage } from "@/lib/auth/storage";
 import { authCookies } from "@/lib/auth/cookies";
 import { isAdminUser, isSellerUser } from "@/guards/permissions";
 import type { AuthTokenResponse } from "@/types/api/auth";
 import { useRouter } from "next/navigation";
+import toast from "react-hot-toast";
 
 export const useAuth = () => {
   const queryClient = useQueryClient();
@@ -58,10 +61,29 @@ export const useAuth = () => {
     storeClearSession();
   };
 
+  const mergeGuestCart = async () => {
+    const guestItems = useCartStore.getState().items;
+    if (guestItems.length === 0) return;
+    try {
+      for (const item of guestItems) {
+        await cartApi.addItem({
+          product_id: String(item.id),
+          variant_id: null,
+          quantity: item.quantity,
+        });
+      }
+      useCartStore.getState().removeAllItemsFromCart();
+      toast.success("Guest cart merged into your account");
+    } catch {
+      toast.error("Some guest cart items could not be merged");
+    }
+  };
+
   const loginMutation = useMutation({
     mutationFn: apiLogin,
-    onSuccess: (data) => {
+    onSuccess: async (data) => {
       setSession(data);
+      await mergeGuestCart();
       const user = data.user;
       if (isAdminUser(user)) {
         router.push("/admin/dashboard");
@@ -75,16 +97,18 @@ export const useAuth = () => {
 
   const registerBuyerMutation = useMutation({
     mutationFn: apiRegisterBuyer,
-    onSuccess: (data) => {
+    onSuccess: async (data) => {
       setSession(data);
+      await mergeGuestCart();
       router.push("/account");
     },
   });
 
   const registerSellerMutation = useMutation({
     mutationFn: apiRegisterSeller,
-    onSuccess: (data) => {
+    onSuccess: async (data) => {
       setSession(data);
+      await mergeGuestCart();
       router.push("/seller/dashboard");
     },
   });

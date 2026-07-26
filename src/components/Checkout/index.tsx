@@ -13,6 +13,8 @@ import { useCreateOrder } from "@/hooks/useCommerce";
 import { useAddresses } from "@/hooks/useAddresses";
 import { paymentsApi } from "@/lib/api/endpoints/commerce";
 import { formatCurrency } from "@/lib/formatCurrency";
+import { useAuthStore } from "@/store/useAuthStore";
+import Link from "next/link";
 import toast from "react-hot-toast";
 
 export type CheckoutForm = {
@@ -70,7 +72,11 @@ const initialForm: CheckoutForm = {
 const Checkout = () => {
   const router = useRouter();
   const [form, setForm] = useState<CheckoutForm>(initialForm);
-  const { data: cart } = useBackendCart();
+  const { isAuthenticated, hasHydrated } = useAuthStore((state) => ({
+    isAuthenticated: state.isAuthenticated,
+    hasHydrated: state.hasHydrated,
+  }));
+  const { data: cart } = useBackendCart(isAuthenticated);
   const { addresses, createAddress, isCreatingAddress } = useAddresses();
   const createOrder = useCreateOrder();
 
@@ -135,6 +141,36 @@ const Checkout = () => {
       toast.error(err?.response?.data?.detail || "Checkout failed");
     }
   };
+
+  if (!hasHydrated) {
+    return (
+      <>
+        <Breadcrumb title="Checkout" pages={["checkout"]} />
+        <section className="py-20 text-center bg-gray-2 dark:bg-darkTheme-bg">
+          <p className="text-dark dark:text-white">Loading checkout...</p>
+        </section>
+      </>
+    );
+  }
+
+  if (!isAuthenticated) {
+    return (
+      <>
+        <Breadcrumb title="Checkout" pages={["checkout"]} />
+        <section className="py-20 text-center bg-gray-2 dark:bg-darkTheme-bg">
+          <p className="text-dark dark:text-white mb-4">
+            Please sign in to complete checkout.
+          </p>
+          <Link
+            href="/signin?redirect=/checkout"
+            className="inline-block rounded-md bg-blue px-6 py-3 text-white font-medium hover:bg-blue-dark"
+          >
+            Sign in
+          </Link>
+        </section>
+      </>
+    );
+  }
 
   if (cartItems.length === 0) {
     return (

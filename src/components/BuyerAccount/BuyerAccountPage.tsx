@@ -258,6 +258,45 @@ export default function BuyerDashboard() {
             Edit Account Details
           </Link>
         </Card>
+        <Card title="Recent Activity">
+          {orders.state === "loading" ? (
+            <Loading />
+          ) : orders.state === "error" ? (
+            <ErrorText />
+          ) : orders.data.length === 0 ? (
+            <p className="text-sm text-[#64748b]">No recent orders.</p>
+          ) : (
+            <ul className="space-y-3">
+              {orders.data.slice(0, 5).map((o) => (
+                <li
+                  key={o.id}
+                  className="flex items-center justify-between rounded-xl border border-[#e2e8f0] p-3 text-sm"
+                >
+                  <div>
+                    <p className="font-semibold">Order #{o.id.slice(0, 8)}</p>
+                    <p className="text-xs text-[#64748b]">
+                      {new Date(o.created_at).toLocaleDateString()} ·{" "}
+                      <span className="capitalize">
+                        {o.status.replaceAll("_", " ")}
+                      </span>
+                    </p>
+                  </div>
+                  <div className="text-right">
+                    <p className="font-semibold">
+                      {formatCurrency(o.total, o.currency)}
+                    </p>
+                    <Link
+                      href={`/account/orders/${o.id}`}
+                      className="text-xs font-semibold text-[#f7941d]"
+                    >
+                      View
+                    </Link>
+                  </div>
+                </li>
+              ))}
+            </ul>
+          )}
+        </Card>
       </div>
     </div>
   );

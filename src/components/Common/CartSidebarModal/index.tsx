@@ -2,7 +2,7 @@
 import React, { useEffect, useState } from "react";
 
 import { useCartModalContext } from "@/app/context/CartSidebarModalContext";
-import { useBackendCart, mapBackendCartToUi } from "@/hooks/useCartActions";
+import { useCart } from "@/hooks/useCartActions";
 import SingleItem from "./SingleItem";
 import Link from "next/link";
 import EmptyCart from "./EmptyCart";
@@ -10,13 +10,7 @@ import { formatCurrency } from "@/lib/formatCurrency";
 
 const CartSidebarModal = () => {
   const { isCartModalOpen, closeCartModal } = useCartModalContext();
-  const { data: cart } = useBackendCart();
-  const cartItems = cart ? mapBackendCartToUi(cart) : [];
-
-  const totalPrice = cartItems.reduce(
-    (total, item) => total + item.discountedPrice * item.quantity,
-    0
-  );
+  const { items: cartItems, total: totalPrice, isGuest } = useCart();
 
   useEffect(() => {
     // closing modal while clicking outside
@@ -108,10 +102,10 @@ const CartSidebarModal = () => {
               </Link>
 
               <Link
-                href="/checkout"
+                href={isGuest ? "/signin?redirect=/checkout" : "/checkout"}
                 className="w-full flex justify-center font-medium text-white bg-dark py-[13px] px-6 rounded-md ease-out duration-200 hover:bg-opacity-95"
               >
-                Checkout
+                {isGuest ? "Sign in to Checkout" : "Checkout"}
               </Link>
             </div>
           </div>}

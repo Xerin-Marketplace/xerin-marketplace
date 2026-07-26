@@ -1,12 +1,5 @@
-"use client";
-
-import Orders from "@/components/Orders";
-import RouteGuard from "@/guards/RouteGuard";
+import { redirect } from "next/navigation";
 
 export default function OrdersPage() {
-  return (
-    <RouteGuard permission="view_orders">
-      <Orders />
-    </RouteGuard>
-  );
+  redirect("/account/orders");
 }

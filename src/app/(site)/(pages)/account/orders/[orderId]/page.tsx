@@ -1,2 +1,9 @@
-import { redirect } from "next/navigation";
-export default async function Page({params}:{params:Promise<{orderId:string}>}){await params;redirect("/account/orders")}
+"use client";
+
+import { useParams } from "next/navigation";
+import OrderDetail from "@/components/BuyerAccount/OrderDetail";
+
+export default function Page() {
+  const { orderId } = useParams<{ orderId: string }>();
+  return <OrderDetail key={orderId} />;
+}

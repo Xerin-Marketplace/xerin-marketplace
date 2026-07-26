@@ -5,7 +5,7 @@ import { ROUTES } from "@/constants/links";
 import CustomSelect from "./CustomSelect";
 import { menuData } from "./menuData";
 import Dropdown from "./Dropdown";
-import { useBackendCart, mapBackendCartToUi } from "@/hooks/useCartActions";
+import { useCart } from "@/hooks/useCartActions";
 import { useCartModalContext } from "@/app/context/CartSidebarModalContext";
 import { useTheme } from "@/app/context/ThemeContext";
 import { useAuth } from "@/hooks/useAuth";
@@ -23,12 +23,7 @@ const Header = () => {
   const { user, isAuthenticated, logout } = useAuth();
   const hasHydrated = useAuthStore((state) => state.hasHydrated);
 
-  const { data: cart } = useBackendCart();
-  const cartItems = cart ? mapBackendCartToUi(cart) : [];
-  const totalPrice = cartItems.reduce(
-    (total, item) => total + item.discountedPrice * item.quantity,
-    0
-  );
+  const { items: cartItems, total: totalPrice } = useCart();
 
   const accountHref = getAccountHref(isAuthenticated, user);
   const accountLabel = getAccountLabel(isAuthenticated, user);

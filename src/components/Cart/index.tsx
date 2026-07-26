@@ -2,15 +2,14 @@
 import React from "react";
 import Discount from "./Discount";
 import OrderSummary from "./OrderSummary";
-import { useBackendCart, useClearCart, mapBackendCartToUi } from "@/hooks/useCartActions";
+import { useCart, useClearCart } from "@/hooks/useCartActions";
 import SingleItem from "./SingleItem";
 import Breadcrumb from "../Common/Breadcrumb";
 import Link from "next/link";
 
 const Cart = () => {
-  const { data: cart, isLoading } = useBackendCart();
+  const { items: cartItems, isLoading, isGuest } = useCart();
   const clearCart = useClearCart();
-  const cartItems = cart ? mapBackendCartToUi(cart) : [];
 
   const handleClearCart = () => {
     if (confirm("Are you sure you want to clear your cart?")) {
@@ -31,8 +30,15 @@ const Cart = () => {
         </section>
       ) : cartItems.length > 0 ? (
         <section className="overflow-hidden py-20 bg-gray-2 dark:bg-darkTheme-bg">
-          <div className="max-w-[1170px] w-full mx-auto px-4 sm:px-8 xl:px-0">
-            <div className="flex flex-wrap items-center justify-between gap-5 mb-7.5">
+          <div className="max-w-[1170px] w-full mx-auto px-4 sm:px-8 xl:px-0">            {isGuest && (
+              <div className="mb-6 rounded-lg border border-blue-100 bg-blue-50 p-4 text-sm text-blue-800">
+                You are shopping as a guest.{" "}
+                <Link href="/signin?redirect=/cart" className="font-semibold underline">
+                  Sign in
+                </Link>{" "}
+                to save your cart and proceed to checkout.
+              </div>
+            )}            <div className="flex flex-wrap items-center justify-between gap-5 mb-7.5">
               <h2 className="font-medium text-dark dark:text-white text-2xl">Your Cart</h2>
               <button
                 onClick={handleClearCart}

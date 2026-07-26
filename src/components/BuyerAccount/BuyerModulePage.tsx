@@ -25,6 +25,10 @@ import Link from "next/link";
 import { FormEvent, useEffect, useState } from "react";
 import toast from "react-hot-toast";
 import AddressBookSection from "@/components/MyAccount/AddressBookSection";
+import NotificationPreferences from "./NotificationPreferences";
+import PhoneVerification from "./PhoneVerification";
+import ReviewsPlaceholder from "./ReviewsPlaceholder";
+import { printPaymentReceipt } from "@/lib/invoice";
 type View =
   | "orders"
   | "payments"
@@ -87,16 +91,19 @@ export default function BuyerModulePage({ view }: { view: View }) {
         setPayments(await paymentsApi.mine());
       else if (view === "addresses")
         setAddresses(await usersApi.getAddresses());
-      else if (view === "details") {
+      else if (view === "details" || view === "security") {
         const p = await usersApi.getMe();
         setProfile(p);
-        setForm({
-          first_name: p.first_name || "",
-          last_name: p.last_name || "",
-          phone: p.phone || "",
-        });
-      } else if (view === "security")
-        setSessions(await sellerAccountApi.listSessions());
+        if (view === "details") {
+          setForm({
+            first_name: p.first_name || "",
+            last_name: p.last_name || "",
+            phone: p.phone || "",
+          });
+        }
+        if (view === "security")
+          setSessions(await sellerAccountApi.listSessions());
+      }
     } catch {
       setError(true);
     } finally {
@@ -191,7 +198,12 @@ export default function BuyerModulePage({ view }: { view: View }) {
               setSessions((v) => v.filter((s) => s.id !== id));
               toast.success("Session signed out.");
             }}
+            phone={profile?.phone}
           />
+        ) : view === "notifications" ? (
+          <NotificationPreferences />
+        ) : view === "reviews" ? (
+          <ReviewsPlaceholder />
         ) : (
           <Unavailable view={view} />
         )}
@@ -251,8 +263,17 @@ function Payments({ items }: { items: Payment[] }) {
                   ? new Date(p.created_at).toLocaleDateString()
                   : "—"}
               </td>
-              <td className="p-3 text-[#64748b]">
-                {p.status === "completed" ? "Available" : "Pending"}
+              <td className="p-3">
+                {p.status === "completed" || p.status === "paid" ? (
+                  <button
+                    onClick={() => printPaymentReceipt(p)}
+                    className="font-semibold text-[#f7941d] hover:underline"
+                  >
+                    Receipt
+                  </button>
+                ) : (
+                  <span className="text-[#64748b]">Pending</span>
+                )}
               </td>
             </tr>
           ))}
@@ -434,6 +455,10 @@ function Details({
       <button className="mt-5 rounded-xl bg-[#f7941d] px-5 py-2.5 text-sm font-semibold text-white">
         Save changes
       </button>
+
+      <div className="mt-8">
+        <PhoneVerification phone={profile?.phone} />
+      </div>
     </form>
   );
 }
@@ -443,12 +468,14 @@ function Security({
   setPasswords,
   submit,
   revoke,
+  phone,
 }: {
   sessions: SellerSession[];
   passwords: { current: string; next: string; confirm: string };
   setPasswords: (v: typeof passwords) => void;
   submit: (e: FormEvent) => void;
   revoke: (id: string) => void;
+  phone?: string | null;
 }) {
   return (
     <div className="space-y-7">
@@ -501,10 +528,12 @@ function Security({
           <p className="text-sm text-[#64748b]">No other active sessions.</p>
         )}
       </div>
+      <PhoneVerification phone={phone} />
+
       <div className="rounded-xl bg-[#f8fafc] p-4 text-sm dark:bg-white/5">
         <b>Two-factor authentication</b>
         <p className="text-[#64748b]">
-          Prepared for activation when 2FA becomes available.
+          2FA activation will be available once backend endpoints are ready.
         </p>
       </div>
     </div>
