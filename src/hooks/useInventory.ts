@@ -12,6 +12,9 @@ import {
   listLowStock,
   getProductInventoryDetails,
   getWarehouseInventoryDetails,
+  getMyInventory,
+  getMyLowStock,
+  updateInventoryItem,
 } from "@/lib/api/endpoints/inventory";
 import type {
   ListInventoryParams,
@@ -126,5 +129,30 @@ export const useWarehouseInventoryDetails = (warehouseId: string) => {
     queryKey: ["warehouse-details", warehouseId],
     queryFn: () => getWarehouseInventoryDetails(warehouseId),
     enabled: Boolean(warehouseId),
+  });
+};
+
+export const useMyInventory = (params?: { search?: string; warehouse_id?: string; stock_status?: string; page?: number; page_size?: number }) => {
+  return useQuery({
+    queryKey: ["my-inventory", params],
+    queryFn: () => getMyInventory(params),
+  });
+};
+
+export const useMyLowStock = () => {
+  return useQuery({
+    queryKey: ["my-low-stock"],
+    queryFn: getMyLowStock,
+  });
+};
+
+export const useUpdateInventoryItem = () => {
+  const queryClient = useQueryClient();
+  return useMutation({
+    mutationFn: ({ id, payload }: { id: string; payload: Parameters<typeof updateInventoryItem>[1] }) => updateInventoryItem(id, payload),
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ["my-inventory"] });
+      queryClient.invalidateQueries({ queryKey: ["my-low-stock"] });
+    },
   });
 };

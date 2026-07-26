@@ -210,6 +210,21 @@ export const listLowStock = async (params?: { severity?: string; warehouse_id?: 
   return res.data;
 };
 
+export const getMyInventory = async (params?: { search?: string; warehouse_id?: string; stock_status?: string; page?: number; page_size?: number }): Promise<InventoryItem[]> => {
+  const res = await axiosInstance.get<InventoryItem[]>("/inventory/my-inventory", { params });
+  return res.data;
+};
+
+export const getMyLowStock = async (): Promise<InventoryItem[]> => {
+  const res = await axiosInstance.get<InventoryItem[]>("/inventory/low-stock");
+  return res.data;
+};
+
+export const updateInventoryItem = async (id: string, payload: { on_hand?: number; reserved?: number; incoming?: number; damaged?: number; low_stock_threshold?: number; reorder_quantity?: number | null }): Promise<InventoryItem> => {
+  const res = await axiosInstance.put<InventoryItem>(`/inventory/${id}`, payload);
+  return res.data;
+};
+
 export const getProductInventoryDetails = async (
   productId: string
 ): Promise<{ product: any; totals: any; inventory: InventoryItem[]; movements: StockMovement[] }> => {
@@ -259,5 +274,14 @@ export const inventoryService = {
   getProductInventory,
   getWarehouseInventory,
   getWarehouse,
+  getMyInventory,
+  getMyLowStock,
+  updateInventoryItem,
+};
+
+export const sellerInventoryApi = {
+  getMyInventory,
+  getMyLowStock,
+  updateInventoryItem,
 };
 

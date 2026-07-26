@@ -72,32 +72,32 @@ const groups: Array<{ label: string; items: NavItem[] }> = [
         href: "/seller/products?create=true",
         icon: PackagePlus,
       },
-      { label: "Inventory", icon: Box, soon: true },
+      { label: "Inventory", href: "/seller/inventory", icon: Box },
     ],
   },
   {
     label: "Sales",
     items: [
-      { label: "Orders", icon: ClipboardList, soon: true },
-      { label: "Returns", icon: RotateCcw, soon: true },
-      { label: "Cancellations", icon: X, soon: true },
+      { label: "Orders", href: "/seller/orders", icon: ClipboardList },
+      { label: "Returns", href: "/seller/returns", icon: RotateCcw },
+      { label: "Cancellations", href: "/seller/cancellations", icon: X },
     ],
   },
   {
     label: "Store Operations",
     items: [
       { label: "Store Profile", href: "/seller/store", icon: Store },
-      { label: "Promotions", icon: Tag, soon: true },
-      { label: "Reviews", icon: Star, soon: true },
-      { label: "Messages", icon: MessageSquare, soon: true },
+      { label: "Promotions", href: "/seller/promotions", icon: Tag },
+      { label: "Reviews", href: "/seller/reviews", icon: Star },
+      { label: "Messages", href: "/seller/messages", icon: MessageSquare },
     ],
   },
   {
     label: "Finance",
     items: [
-      { label: "Earnings", icon: BarChart3, soon: true },
+      { label: "Earnings", href: "/seller/earnings", icon: BarChart3 },
       { label: "Payouts", href: "/seller/kyc?tab=payouts", icon: WalletCards },
-      { label: "Transactions", icon: CreditCard, soon: true },
+      { label: "Transactions", href: "/seller/transactions", icon: CreditCard },
     ],
   },
   {
@@ -153,9 +153,29 @@ export default function SellerLayout({
               ? "Help & Support"
               : pathname.includes("/products")
                 ? "Products"
-                : pathname.includes("/kyc")
-                  ? "Verification & Payouts"
-                  : "Seller Dashboard";
+                : pathname.includes("/inventory")
+                  ? "Inventory"
+                  : pathname.includes("/kyc")
+                    ? "Verification & Payouts"
+                    : pathname.includes("/orders/")
+                      ? "Order Details"
+                      : pathname.includes("/orders")
+                        ? "Orders"
+                        : pathname.includes("/returns")
+                          ? "Returns"
+                          : pathname.includes("/cancellations")
+                            ? "Cancellations"
+                            : pathname.includes("/promotions")
+                              ? "Promotions"
+                              : pathname.includes("/reviews")
+                                ? "Reviews"
+                                : pathname.includes("/messages")
+                                  ? "Messages"
+                                  : pathname.includes("/earnings")
+                                    ? "Earnings"
+                                    : pathname.includes("/transactions")
+                                      ? "Transactions"
+                                      : "Seller Dashboard";
   const crumbs = useMemo(
     () =>
       pathname.includes("/account/")

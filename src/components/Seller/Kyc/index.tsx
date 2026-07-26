@@ -323,13 +323,31 @@ const SellerKyc = () => {
                           {account.is_default ? " • Default" : ""}
                         </p>
                       </div>
-                      <button
-                        type="button"
-                        onClick={() => setDeleteTarget(account)}
-                        className="text-sm text-red hover:text-red-dark"
-                      >
-                        Delete
-                      </button>
+                      <div className="flex items-center gap-3">
+                        <button
+                          type="button"
+                          onClick={() => toast("Payout account updates are not available yet.")}
+                          className="text-sm text-blue hover:text-blue-dark"
+                        >
+                          Edit
+                        </button>
+                        {!account.is_default && (
+                          <button
+                            type="button"
+                            onClick={() => toast("Setting a default payout account is not available yet.")}
+                            className="text-sm text-warning hover:text-warning-dark"
+                          >
+                            Set default
+                          </button>
+                        )}
+                        <button
+                          type="button"
+                          onClick={() => setDeleteTarget(account)}
+                          className="text-sm text-red hover:text-red-dark"
+                        >
+                          Delete
+                        </button>
+                      </div>
                     </div>
                   ))}
                 </div>
