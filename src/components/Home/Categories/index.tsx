@@ -31,16 +31,16 @@ const Categories = () => {
   }, []);
 
   return (
-    <section className="overflow-hidden pt-17.5">
-      <div className="max-w-[1170px] w-full mx-auto px-4 sm:px-8 xl:px-0 pb-15 border-b border-gray-3">
+    <section className="overflow-hidden pt-10 sm:pt-17.5">
+      <div className="max-w-[1170px] w-full mx-auto px-4 sm:px-8 xl:px-0 pb-10 sm:pb-15 border-b border-gray-3">
         <div className="swiper categories-carousel common-carousel">
           {/* <!-- section title --> */}
-          <div className="mb-10 flex items-center justify-between">
+          <div className="mb-5 sm:mb-10 flex items-center justify-between">
             <div>
-              <span className="flex items-center gap-2.5 font-medium text-dark dark:text-darkTheme-body-color mb-1.5">
+              <span className="flex items-center gap-2 sm:gap-2.5 font-medium text-dark dark:text-darkTheme-body-color mb-1 sm:mb-1.5 text-sm sm:text-base">
                 <svg
-                  width="20"
-                  height="20"
+                  width="18"
+                  height="18"
                   viewBox="0 0 20 20"
                   fill="none"
                   xmlns="http://www.w3.org/2000/svg"
@@ -74,17 +74,17 @@ const Categories = () => {
                 </svg>
                 Shop Categories
               </span>
-              <h2 className="font-semibold text-xl xl:text-heading-5 text-dark dark:text-white">
+              <h2 className="font-semibold text-base sm:text-xl xl:text-heading-5 text-dark dark:text-white">
                 Explore Popular Categories
               </h2>
             </div>
 
-            <div className="flex items-center gap-3">
+            <div className="flex items-center gap-2 sm:gap-3">
               <button onClick={handlePrev} className="swiper-button-prev" aria-label="Previous category">
                 <svg
                   className="fill-current"
-                  width="24"
-                  height="24"
+                  width="20"
+                  height="20"
                   viewBox="0 0 24 24"
                   fill="none"
                   xmlns="http://www.w3.org/2000/svg"
@@ -101,8 +101,8 @@ const Categories = () => {
               <button onClick={handleNext} className="swiper-button-next" aria-label="Next category">
                 <svg
                   className="fill-current"
-                  width="24"
-                  height="24"
+                  width="20"
+                  height="20"
                   viewBox="0 0 24 24"
                   fill="none"
                   xmlns="http://www.w3.org/2000/svg"
@@ -123,16 +123,20 @@ const Categories = () => {
             slidesPerView={6}
             breakpoints={{
               0: {
-                slidesPerView: 2,
-                spaceBetween: 16,
+                slidesPerView: 3,
+                spaceBetween: 8,
+              },
+              480: {
+                slidesPerView: 4,
+                spaceBetween: 12,
               },
               640: {
-                slidesPerView: 3,
-                spaceBetween: 20,
+                slidesPerView: 5,
+                spaceBetween: 16,
               },
               1000: {
-                slidesPerView: 4,
-                spaceBetween: 24,
+                slidesPerView: 6,
+                spaceBetween: 20,
               },
               1200: {
                 slidesPerView: 6,
@@ -147,10 +151,10 @@ const Categories = () => {
             ))}
           </Swiper>
 
-          <div className="mt-10 text-center">
+          <div className="mt-6 sm:mt-10 text-center">
             <Link
               href={ROUTES.shop}
-              className="inline-flex font-medium text-custom-sm py-2.5 px-7 rounded-md border-gray-3 dark:border-darkTheme-border-color border bg-gray-1 dark:bg-darkTheme-secondary-bg text-dark dark:text-darkTheme-body-color ease-out duration-200 hover:bg-dark hover:text-white hover:border-transparent dark:hover:bg-darkTheme-tertiary-bg"
+              className="inline-flex font-medium text-2xs sm:text-custom-sm py-2 sm:py-2.5 px-5 sm:px-7 rounded-md border-gray-3 dark:border-darkTheme-border-color border bg-gray-1 dark:bg-darkTheme-secondary-bg text-dark dark:text-darkTheme-body-color ease-out duration-200 hover:bg-dark hover:text-white hover:border-transparent dark:hover:bg-darkTheme-tertiary-bg"
             >
               View All Categories
             </Link>
