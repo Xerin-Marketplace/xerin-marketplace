@@ -68,12 +68,12 @@ const Header = () => {
       <div className="max-w-[1170px] mx-auto px-4 sm:px-7.5 xl:px-0">
         {/* <!-- header top start --> */}
         <div
-          className={`flex flex-col lg:flex-row gap-4 lg:gap-5 items-stretch lg:items-center xl:justify-between ease-out duration-200 ${
+          className={`flex flex-col lg:flex-row gap-3 lg:gap-5 items-stretch lg:items-center xl:justify-between ease-out duration-200 ${
             stickyMenu ? "py-3" : "py-4"
           }`}
         >
           {/* <!-- header top left --> */}
-          <div className="xl:w-auto flex-col sm:flex-row w-full flex sm:justify-between sm:items-center gap-4 sm:gap-10">
+          <div className="xl:w-auto flex w-full justify-between items-center gap-4 lg:gap-10">
             <Link className="flex-shrink-0 flex items-center" href="/">
             <Image
               src="/images/logo/logo.png"
@@ -86,7 +86,8 @@ const Header = () => {
             />
           </Link>
 
-            <div className="max-w-[475px] lg:max-w-[420px] xl:max-w-[475px] w-full">
+            {/* <!-- Desktop Search --> */}
+            <div className="hidden lg:block max-w-[475px] xl:max-w-[475px] w-full">
               <form
                 onSubmit={(event) => {
                   event.preventDefault();
@@ -136,6 +137,48 @@ const Header = () => {
             </div>
           </div>
 
+          {/* <!-- Mobile Search Row --> */}
+          <div className="lg:hidden w-full">
+            <form
+              onSubmit={(event) => {
+                event.preventDefault();
+                const query = searchQuery.trim();
+                if (query) router.push(`/search?q=${encodeURIComponent(query)}`);
+              }}
+            >
+              <div className="relative w-full">
+                <input
+                  onChange={(e) => setSearchQuery(e.target.value)}
+                  value={searchQuery}
+                  type="search"
+                  name="mobile-search"
+                  id="mobile-search"
+                  placeholder="Search products, brands, or sellers..."
+                  autoComplete="off"
+                  className="w-full rounded-[5px] bg-gray-1 dark:bg-darkTheme-secondary-bg dark:text-darkTheme-body-color border border-gray-3 dark:border-darkTheme-border-color py-2.5 pl-4 pr-10 outline-none ease-in duration-200 focus:border-primary focus:ring-2 focus:ring-primary/20"
+                />
+                <button
+                  aria-label="Search"
+                  className="flex items-center justify-center absolute right-3 top-1/2 -translate-y-1/2 ease-in duration-200 hover:text-blue"
+                >
+                  <svg
+                    className="fill-current"
+                    width="18"
+                    height="18"
+                    viewBox="0 0 18 18"
+                    fill="none"
+                    xmlns="http://www.w3.org/2000/svg"
+                  >
+                    <path
+                      d="M17.2687 15.6656L12.6281 11.8969C14.5406 9.28123 14.3437 5.5406 11.9531 3.1781C10.6875 1.91248 8.99995 1.20935 7.19995 1.20935C5.39995 1.20935 3.71245 1.91248 2.44683 3.1781C-0.168799 5.79373 -0.168799 10.0687 2.44683 12.6844C3.71245 13.95 5.39995 14.6531 7.19995 14.6531C8.91558 14.6531 10.5187 14.0062 11.7843 12.8531L16.4812 16.65C16.5937 16.7344 16.7343 16.7906 16.875 16.7906C17.0718 16.7906 17.2406 16.7062 17.3531 16.5656C17.5781 16.2844 17.55 15.8906 17.2687 15.6656ZM7.19995 13.3875C5.73745 13.3875 4.38745 12.825 3.34683 11.7844C1.20933 9.64685 1.20933 6.18748 3.34683 4.0781C4.38745 3.03748 5.73745 2.47498 7.19995 2.47498C8.66245 2.47498 10.0125 3.03748 11.0531 4.0781C13.1906 6.2156 13.1906 9.67498 11.0531 11.7844C10.0406 12.825 8.66245 13.3875 7.19995 13.3875Z"
+                      fill=""
+                    />
+                  </svg>
+                </button>
+              </div>
+            </form>
+          </div>
+
           {/* <!-- header top right --> */}
           <div className="flex w-full lg:w-auto items-center gap-7.5">
             <div className="hidden xl:flex items-center gap-3.5">
@@ -177,8 +220,8 @@ const Header = () => {
             {/* <!-- divider --> */}
             <span className="hidden xl:block w-px h-7.5 bg-gray-4"></span>
 
-            <div className="flex w-full lg:w-auto justify-between items-center gap-5">
-              <div className="flex items-center gap-5">
+            <div className="flex w-full lg:w-auto justify-end items-center gap-4 sm:gap-5">
+              <div className="flex items-center gap-4 sm:gap-5">
                 <button
                   onClick={toggleTheme}
                   className="flex items-center justify-center p-2 rounded-full hover:bg-gray-1 transition-colors"
@@ -309,7 +352,7 @@ const Header = () => {
               <button
                 id="Toggle"
                 aria-label="Toggler"
-                className="xl:hidden block"
+                className="xl:hidden flex items-center justify-center p-1.5 rounded-lg hover:bg-gray-1 dark:hover:bg-white/5 transition-colors"
                 onClick={() => setNavigationOpen(!navigationOpen)}
               >
                 <span className="block relative cursor-pointer w-5.5 h-5.5">
@@ -352,15 +395,12 @@ const Header = () => {
         {/* <!-- header top end --> */}
       </div>
 
-      <div className="border-t border-gray-3">
+      <div className="border-t border-gray-3 hidden xl:block">
         <div className="max-w-[1170px] mx-auto px-4 sm:px-7.5 xl:px-0">
           <div className="flex items-center justify-between">
             {/* <!--=== Main Nav Start ===--> */}
             <div
-              className={`w-[288px] absolute right-4 top-full xl:static xl:w-auto h-0 xl:h-auto invisible xl:visible xl:flex items-center justify-between ${
-                navigationOpen &&
-                `!visible bg-white dark:bg-darkTheme-card shadow-lg border border-gray-3 dark:border-darkTheme-border-color !h-auto max-h-[400px] overflow-y-scroll rounded-md p-5`
-              }`}
+              className={`xl:static xl:w-auto xl:h-auto xl:flex items-center justify-between`}
             >
               {/* <!-- Main Nav Start --> */}
               <nav>
@@ -450,6 +490,59 @@ const Header = () => {
           </div>
         </div>
       </div>
+
+      {/* <!-- Mobile Navigation Drawer --> */}
+      {navigationOpen && (
+        <div className="xl:hidden border-t border-gray-3 dark:border-darkTheme-border-color bg-white dark:bg-darkTheme-card shadow-lg">
+          <div className="max-w-[1170px] mx-auto px-4 sm:px-7.5 py-4">
+            <nav>
+              <ul className="flex flex-col gap-1">
+                {menuData.map((menuItem, i) =>
+                  menuItem.submenu ? (
+                    <li key={i} className="flex flex-col">
+                      <span className="px-3 py-2.5 text-custom-sm font-semibold text-dark dark:text-darkTheme-body-color uppercase text-dark-4">
+                        {menuItem.title}
+                      </span>
+                      {menuItem.submenu.map((sub, j) => (
+                        <Link
+                          key={j}
+                          href={sub.path}
+                          onClick={() => setNavigationOpen(false)}
+                          className="block px-6 py-2 text-custom-sm text-dark-4 dark:text-darkTheme-body-color hover:text-blue hover:bg-gray-1 dark:hover:bg-white/5 rounded-lg"
+                        >
+                          {sub.title}
+                        </Link>
+                      ))}
+                    </li>
+                  ) : (
+                    <li key={i}>
+                      <Link
+                        href={menuItem.path}
+                        onClick={() => setNavigationOpen(false)}
+                        className="block px-3 py-2.5 text-custom-sm font-medium text-dark dark:text-darkTheme-body-color hover:text-blue hover:bg-gray-1 dark:hover:bg-white/5 rounded-lg"
+                      >
+                        {menuItem.title}
+                      </Link>
+                    </li>
+                  )
+                )}
+                <li className="border-t border-gray-3 dark:border-darkTheme-border-color mt-2 pt-2">
+                  <Link
+                    href="/wishlist"
+                    onClick={() => setNavigationOpen(false)}
+                    className="flex items-center gap-2 px-3 py-2.5 text-custom-sm font-medium text-dark dark:text-darkTheme-body-color hover:text-blue hover:bg-gray-1 dark:hover:bg-white/5 rounded-lg"
+                  >
+                    <svg className="fill-current" width="16" height="16" viewBox="0 0 16 16" fill="none" xmlns="http://www.w3.org/2000/svg">
+                      <path d="M5.97441 12.6073L6.43872 12.0183L5.97441 12.6073ZM7.99992 3.66709L7.45955 4.18719C7.60094 4.33408 7.79604 4.41709 7.99992 4.41709C8.2038 4.41709 8.3989 4.33408 8.54028 4.18719L7.99992 3.66709ZM10.0254 12.6073L10.4897 13.1962L10.0254 12.6073ZM6.43872 12.0183C5.41345 11.21 4.33627 10.4524 3.47904 9.48717C2.64752 8.55085 2.08325 7.47831 2.08325 6.0914H0.583252C0.583252 7.94644 1.3588 9.35867 2.35747 10.4832C3.33043 11.5788 4.57383 12.4582 5.51009 13.1962L6.43872 12.0183ZM2.08325 6.0914C2.08325 4.75102 2.84027 3.63995 3.85342 3.17683C4.81929 2.73533 6.15155 2.82823 7.45955 4.18719L8.54028 3.14699C6.84839 1.38917 4.84732 1.07324 3.22983 1.8126C1.65962 2.53035 0.583252 4.18982 0.583252 6.0914H2.08325ZM5.51009 13.1962C5.84928 13.4636 6.22932 13.7618 6.61834 13.9891C7.00711 14.2163 7.47619 14.4167 7.99992 14.4167V12.9167C7.85698 12.9167 7.65939 12.8601 7.37512 12.694C7.0911 12.5281 6.79171 12.2965 6.43872 12.0183L5.51009 13.1962ZM10.4897 13.1962C11.426 12.4582 12.6694 11.5788 13.6424 10.4832C14.641 9.35867 15.4166 7.94644 15.4166 6.0914H13.9166C13.9166 7.47831 13.3523 8.55085 12.5208 9.48717C11.6636 10.4524 10.5864 11.21 9.56112 12.0183L10.4897 13.1962ZM15.4166 6.0914C15.4166 4.18982 14.3402 2.53035 12.77 1.8126C11.1525 1.07324 9.15145 1.38917 7.45955 3.14699L8.54028 4.18719C9.84828 2.82823 11.1805 2.73533 12.1464 3.17683C13.1596 3.63995 13.9166 4.75102 13.9166 6.0914H15.4166ZM9.56112 12.0183C9.20813 12.2965 8.90874 12.5281 8.62471 12.694C8.34044 12.8601 8.14285 12.9167 7.99992 12.9167V14.4167C8.52365 14.4167 8.99273 14.2163 9.3815 13.9891C9.77052 13.7618 10.1506 13.4636 10.4897 13.1962L9.56112 12.0183Z" fill="" />
+                    </svg>
+                    Wishlist
+                  </Link>
+                </li>
+              </ul>
+            </nav>
+          </div>
+        </div>
+      )}
     </header>
   );
 };
