@@ -11,6 +11,15 @@ import {
 } from "@/constants/links";
 import { useAuth } from "@/hooks/useAuth";
 
+const marketplacePolicyLabels = [
+  "Product Listing Policy",
+  "Intellectual Property Protection",
+  "Privacy Policy",
+  "Terms of Use",
+  "User Information Legal Enquiry Guide",
+  "Integrity Compliance",
+];
+
 const Footer = () => {
   const year = new Date().getFullYear();
   const { isAuthenticated, logout } = useAuth();
@@ -338,6 +347,29 @@ const Footer = () => {
       {/* <!-- footer bottom start --> */}
       <div className="py-5 xl:py-7.5 bg-gray-1 dark:bg-darkTheme-secondary-bg">
         <div className="max-w-[1170px] mx-auto px-4 sm:px-8 xl:px-0">
+          <div className="mb-5 border-b border-gray-3 pb-5 dark:border-darkTheme-border">
+            <p className="mb-3 text-center text-sm font-medium text-dark dark:text-white">
+              Marketplace Policies &amp; Legal
+            </p>
+
+            <ul
+              aria-label="Marketplace policies and legal guides"
+              className="flex flex-wrap items-center justify-center gap-x-2 gap-y-2 text-center text-sm text-dark-4 dark:text-darkTheme-body-color"
+            >
+              {marketplacePolicyLabels.map((label, index) => (
+                <React.Fragment key={label}>
+                  <li>
+                    <span className="cursor-default">{label}</span>
+                  </li>
+
+                  {index < marketplacePolicyLabels.length - 1 && (
+                    <li aria-hidden="true">-</li>
+                  )}
+                </React.Fragment>
+              ))}
+            </ul>
+          </div>
+
           <div className="flex gap-5 flex-wrap items-center justify-between">
             <p className="text-dark dark:text-darkTheme-body-color font-medium">
               &copy; {year}. All rights reserved by Xerin Group.

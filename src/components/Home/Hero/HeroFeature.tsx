@@ -4,18 +4,18 @@ import Image from "next/image";
 const featureData = [
   {
     img: "/images/icons/icon-01.svg",
-    title: "Trusted Sellers",
-    description: "Verified vendors across Africa",
+    title: "Marketplace Sellers",
+    description: "Browse active marketplace listings",
   },
   {
     img: "/images/icons/icon-02.svg",
-    title: "Xerin Logistics",
-    description: "Real-time delivery tracking",
+    title: "Delivery Options",
+    description: "Availability confirmed at checkout",
   },
   {
     img: "/images/icons/icon-03.svg",
-    title: "Secure Payments",
-    description: "Mobile money, cards, and bank options",
+    title: "Configured Payments",
+    description: "Supported methods shown at checkout",
   },
   {
     img: "/images/icons/icon-04.svg",

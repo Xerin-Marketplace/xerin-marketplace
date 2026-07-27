@@ -1,23 +1,14 @@
 "use client";
 
-import { useEffect } from "react";
 import { useParams } from "next/navigation";
 import ShopDetails from "@/components/ShopDetails";
 import { useProduct } from "@/hooks/useProducts";
-import { useProductDetailsStore } from "@/store/useProductDetailsStore";
 import { mapApiProductToUiProduct } from "@/lib/products/adapters";
 
 export default function ProductDetailsPage() {
   const params = useParams();
   const id = params?.id as string;
   const { data: apiProduct, isLoading, error } = useProduct(id);
-  const updateproductDetails = useProductDetailsStore((state) => state.updateproductDetails);
-
-  useEffect(() => {
-    if (apiProduct) {
-      updateproductDetails(mapApiProductToUiProduct(apiProduct));
-    }
-  }, [apiProduct, updateproductDetails]);
 
   if (isLoading) {
     return (
@@ -35,5 +26,5 @@ export default function ProductDetailsPage() {
     );
   }
 
-  return <ShopDetails />;
+  return <ShopDetails product={mapApiProductToUiProduct(apiProduct)} />;
 }

@@ -1,5 +1,5 @@
 "use client";
-import React, { use, useEffect, useState } from "react";
+import React, { useState } from "react";
 import Breadcrumb from "../Common/Breadcrumb";
 import Image from "next/image";
 import { ROUTES } from "@/constants/links";
@@ -11,13 +11,15 @@ import { useAddCartItem, addProductToCartPayload } from "@/hooks/useCartActions"
 import StarRating from "@/components/Common/StarRating";
 import { useRouter } from "next/navigation";
 import { formatCurrency } from "@/lib/formatCurrency";
+import type { Product } from "@/types/product";
 
-const ShopDetails = () => {
+const ShopDetails = ({ product }: { product: Product }) => {
   const [activeColor, setActiveColor] = useState("blue");
   const { openPreviewModal } = usePreviewSlider();
   const [previewImg, setPreviewImg] = useState(0);
   const router = useRouter();
   const addCartItem = useAddCartItem();
+  const updatePreviewProduct = useProductDetailsStore((state) => state.updateproductDetails);
 
   const [storage, setStorage] = useState("gb128");
   const [type, setType] = useState("active");
@@ -70,29 +72,12 @@ const ShopDetails = () => {
       id: "tabOne",
       title: "Description",
     },
-    {
-      id: "tabTwo",
-      title: "Additional Information",
-    },
-    {
-      id: "tabThree",
-      title: "Reviews",
-    },
   ];
 
   const colors = ["red", "blue", "orange", "pink", "purple"];
 
-  const alreadyExist = typeof window !== "undefined" ? localStorage.getItem("productDetails") : null;
-  const productFromStorage = useProductDetailsStore((state) => state.value);
-
-  const product = alreadyExist ? JSON.parse(alreadyExist) : productFromStorage;
-
-  useEffect(() => {
-    localStorage.setItem("productDetails", JSON.stringify(product));
-  }, [product]);
-
-  // pass the product here when you get the real data.
   const handlePreviewSlider = () => {
+    updatePreviewProduct(product);
     openPreviewModal();
   };
 
@@ -789,6 +774,7 @@ const ShopDetails = () => {
               {/* <!-- tab content one end --> */}
 
               {/* <!-- tab content two start --> */}
+              {false && (
               <div>
                 <div
                   className={`rounded-xl bg-white dark:bg-darkTheme-card shadow-1 p-4 sm:p-6 mt-10 ${activeTab === "tabTwo" ? "block" : "hidden"
@@ -927,9 +913,11 @@ const ShopDetails = () => {
                   </div>
                 </div>
               </div>
+              )}
               {/* <!-- tab content two end --> */}
 
               {/* <!-- tab content three start --> */}
+              {false && (
               <div>
                 <div
                   className={`flex-col sm:flex-row gap-7.5 xl:gap-12.5 mt-12.5 ${activeTab === "tabThree" ? "flex" : "hidden"
@@ -1441,6 +1429,7 @@ const ShopDetails = () => {
                   </div>
                 </div>
               </div>
+              )}
               {/* <!-- tab content three end --> */}
               {/* <!--== tab content end ==--> */}
             </div>

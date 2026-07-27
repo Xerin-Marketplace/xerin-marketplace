@@ -1,9 +1,2 @@
-"use client";
-
-import { useParams } from "next/navigation";
-import OrderDetail from "@/components/BuyerAccount/OrderDetail";
-
-export default function Page() {
-  const { orderId } = useParams<{ orderId: string }>();
-  return <OrderDetail key={orderId} />;
-}
+import BuyerOrderDetails from "@/components/BuyerAccount/BuyerOrderDetails";
+export default async function Page({params}:{params:Promise<{orderId:string}>}){const{orderId}=await params;return <BuyerOrderDetails orderId={orderId}/>}

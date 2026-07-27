@@ -3,6 +3,8 @@ import { persist } from "zustand/middleware";
 
 export type CartItem = {
   id: number | string;
+  productId?: string;
+  variantId?: string | null;
   title: string;
   price: number;
   discountedPrice: number;
@@ -19,6 +21,7 @@ interface CartState {
   removeItemFromCart: (id: number | string) => void;
   updateCartItemQuantity: (id: number | string, quantity: number) => void;
   removeAllItemsFromCart: () => void;
+  setItems: (items: CartItem[]) => void;
 }
 
 export const useCartStore = create<CartState>()(
@@ -43,17 +46,18 @@ export const useCartStore = create<CartState>()(
 
       removeItemFromCart: (id) =>
         set((state) => ({
-          items: state.items.filter((item) => item.id !== id),
+          items: state.items.filter((item) => String(item.id) !== String(id)),
         })),
 
       updateCartItemQuantity: (id, quantity) =>
         set((state) => ({
           items: state.items.map((item) =>
-            item.id === id ? { ...item, quantity } : item
+            String(item.id) === String(id) ? { ...item, quantity } : item
           ),
         })),
 
       removeAllItemsFromCart: () => set({ items: [] }),
+      setItems: (items) => set({ items }),
     }),
     {
       name: "xerin_cart_store",

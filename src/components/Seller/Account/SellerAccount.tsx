@@ -34,18 +34,6 @@ export type SellerAccountView =
   | "notifications"
   | "store"
   | "support";
-type NoticePrefs = Record<string, boolean>;
-const notices = [
-  "New orders",
-  "Product approval updates",
-  "Product rejection",
-  "Low-stock alerts",
-  "Customer messages",
-  "Payout updates",
-  "Security alerts",
-  "Marketplace announcements",
-];
-
 export default function SellerAccount({ view }: { view: SellerAccountView }) {
   const [user, setUser] = useState<SellerUserProfile | null>(null);
   const [seller, setSeller] = useState<Seller | null>(null);
@@ -54,6 +42,7 @@ export default function SellerAccount({ view }: { view: SellerAccountView }) {
   const [payouts, setPayouts] = useState<PayoutAccount[]>([]);
   const [sessions, setSessions] = useState<SellerSession[]>([]);
   const [loading, setLoading] = useState(true);
+  const [loadError, setLoadError] = useState("");
   const [saving, setSaving] = useState(false);
   const [profile, setProfile] = useState({
     first_name: "",
@@ -77,15 +66,13 @@ export default function SellerAccount({ view }: { view: SellerAccountView }) {
     next: "",
     confirm: "",
   });
-  const [prefs, setPrefs] = useState<NoticePrefs>(() =>
-    Object.fromEntries(notices.map((n) => [n, true])),
-  );
 
   useEffect(() => {
     void load();
   }, []);
   async function load() {
     setLoading(true);
+    setLoadError("");
     try {
       const [u, s, b, k, p] = await Promise.all([
         sellerAccountApi.getUser(),
@@ -118,8 +105,10 @@ export default function SellerAccount({ view }: { view: SellerAccountView }) {
       });
       if (view === "security")
         setSessions(await sellerAccountApi.listSessions());
-    } catch {
-      toast.error("Unable to load seller account settings.");
+    } catch (cause) {
+      const message = cause instanceof Error ? cause.message : "Unable to load seller account settings.";
+      setLoadError(message);
+      toast.error(message);
     } finally {
       setLoading(false);
     }
@@ -182,6 +171,8 @@ export default function SellerAccount({ view }: { view: SellerAccountView }) {
         <Loader2 className="animate-spin text-[#f7941d]" />
       </div>
     );
+  if (loadError)
+    return <div className="rounded-2xl border border-red-200 bg-red-50 p-6 text-center text-sm text-red-700"><p>{loadError}</p><button type="button" onClick={() => void load()} className="mt-3 rounded-xl bg-red-700 px-4 py-2 font-semibold text-white">Retry</button></div>;
   if (view === "security")
     return (
       <Security
@@ -198,7 +189,7 @@ export default function SellerAccount({ view }: { view: SellerAccountView }) {
       />
     );
   if (view === "notifications")
-    return <Notifications prefs={prefs} setPrefs={setPrefs} />;
+    return <Notifications />;
   if (view === "store")
     return (
       <StoreSettings
@@ -211,6 +202,14 @@ export default function SellerAccount({ view }: { view: SellerAccountView }) {
       />
     );
   if (view === "support") return <Support />;
+
+  const kycDisplayStatus = kyc?.missing_documents.length
+    ? "Incomplete"
+    : kyc?.seller_status === "under_review"
+      ? "Under Review"
+      : kyc?.seller_status === "approved"
+        ? "Approved"
+        : "Ready to Submit";
 
   return (
     <div className="space-y-6">
@@ -231,13 +230,13 @@ export default function SellerAccount({ view }: { view: SellerAccountView }) {
         />
         <Status
           label="KYC Status"
-          value={kyc?.missing_documents.length ? "Incomplete" : "Submitted"}
-          good={!kyc?.missing_documents.length}
+          value={kycDisplayStatus}
+          good={kycDisplayStatus === "Approved"}
         />
         <Status
           label="Store Status"
-          value={seller?.status === "approved" ? "Active" : "Restricted"}
-          good={seller?.status === "approved"}
+          value="Unavailable"
+          good={false}
         />
         <Status
           label="Payout Status"
@@ -277,13 +276,6 @@ export default function SellerAccount({ view }: { view: SellerAccountView }) {
               value={profile.phone}
               set={(v) => setProfile({ ...profile, phone: v })}
             />
-            <Field
-              label="Preferred language"
-              value="English"
-              disabled
-              hint="Additional languages are coming soon"
-            />
-            <Field label="Time zone" value="Africa/Dar_es_Salaam" disabled />
           </div>
           <Actions saving={saving} />
         </Section>
@@ -588,13 +580,7 @@ function Security({
     </div>
   );
 }
-function Notifications({
-  prefs,
-  setPrefs,
-}: {
-  prefs: NoticePrefs;
-  setPrefs: (v: NoticePrefs) => void;
-}) {
+function Notifications() {
   return (
     <div className="space-y-6">
       <PageIntro
@@ -605,35 +591,9 @@ function Notifications({
       <Section
         icon={Bell}
         title="Seller Notifications"
-        description="Security alerts remain enabled for account safety."
+        description="Notification preferences require a persisted backend contract."
       >
-        <div className="divide-y divide-[#e2e8f0] dark:divide-white/10">
-          {notices.map((n) => (
-            <label key={n} className="flex items-center justify-between py-4">
-              <span>
-                <b className="text-sm">{n}</b>
-                <small className="block text-[#64748b]">
-                  Receive updates about {n.toLowerCase()}.
-                </small>
-              </span>
-              <input
-                type="checkbox"
-                checked={prefs[n]}
-                disabled={n === "Security alerts"}
-                onChange={(e) => setPrefs({ ...prefs, [n]: e.target.checked })}
-                className="h-5 w-5 accent-[#f7941d]"
-              />
-            </label>
-          ))}
-        </div>
-        <button
-          onClick={() =>
-            toast.success("Notification preferences saved locally.")
-          }
-          className="mt-5 rounded-xl bg-[#f7941d] px-5 py-2.5 text-sm font-semibold text-white"
-        >
-          Save preferences
-        </button>
+        <div className="rounded-xl border border-dashed border-[#cbd5e1] bg-[#f8fafc] p-5 text-sm text-[#64748b] dark:border-white/15 dark:bg-white/5">Seller notifications, unread counts and preferences are not available in the current backend. No local preferences or fake unread values are displayed.</div>
       </Section>
     </div>
   );

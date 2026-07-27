@@ -3,11 +3,11 @@
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { cartApi } from "@/lib/api/endpoints/commerce";
 import { mapApiProductToUiProduct } from "@/lib/products/adapters";
-import { useAuthStore } from "@/store/useAuthStore";
-import { useCartStore } from "@/store/useCartStore";
 import type { CartItem as BackendCartItem, Cart } from "@/types/api/commerce";
 import type { Product as UiProduct } from "@/types/product";
 import toast from "react-hot-toast";
+import { useAuthStore } from "@/store/useAuthStore";
+import { useCartStore } from "@/store/useCartStore";
 
 export type CartItemUi = {
   id: string;
@@ -40,20 +40,6 @@ export const mapBackendCartToUi = (cart: Cart): CartItemUi[] => {
   });
 };
 
-type LocalCartItem = ReturnType<typeof useCartStore.getState>["items"][number];
-
-const mapLocalCartToUi = (items: LocalCartItem[]): CartItemUi[] =>
-  items.map((item) => ({
-    id: String(item.id),
-    cartItemId: String(item.id),
-    productId: String(item.id),
-    title: item.title,
-    price: item.price,
-    discountedPrice: item.discountedPrice,
-    quantity: item.quantity,
-    imgs: item.imgs,
-  }));
-
 export const useBackendCart = (enabled = true) =>
   useQuery({
     queryKey: ["cart"],
@@ -61,120 +47,72 @@ export const useBackendCart = (enabled = true) =>
     enabled,
   });
 
-export const useCart = () => {
+export const useCartView = () => {
   const isAuthenticated = useAuthStore((state) => state.isAuthenticated);
-  const hasHydrated = useAuthStore((state) => state.hasHydrated);
-  const backendEnabled = hasHydrated && isAuthenticated;
-  const backend = useBackendCart(backendEnabled);
   const guestItems = useCartStore((state) => state.items);
+  const backend = useBackendCart(isAuthenticated);
+  const items: CartItemUi[] = isAuthenticated
+    ? (backend.data ? mapBackendCartToUi(backend.data) : [])
+    : guestItems.map((item) => ({
+        id: String(item.id),
+        cartItemId: `guest:${item.id}`,
+        productId: item.productId ?? String(item.id).split(":")[0],
+        title: item.title,
+        price: item.price,
+        discountedPrice: item.discountedPrice,
+        quantity: item.quantity,
+        imgs: item.imgs,
+      }));
 
-  if (!hasHydrated) {
-    return {
-      items: [] as CartItemUi[],
-      isLoading: true,
-      total: 0,
-      isGuest: false,
-      cart: null as Cart | null,
-    };
-  }
-
-  if (isAuthenticated) {
-    const items = backend.data ? mapBackendCartToUi(backend.data) : [];
-    const total = items.reduce(
-      (sum, item) => sum + item.discountedPrice * item.quantity,
-      0,
-    );
-    return {
-      items,
-      isLoading: backend.isLoading,
-      total,
-      isGuest: false,
-      cart: backend.data ?? null,
-    };
-  }
-
-  const items = mapLocalCartToUi(guestItems);
-  const total = items.reduce(
-    (sum, item) => sum + item.discountedPrice * item.quantity,
-    0,
-  );
   return {
+    ...backend,
     items,
-    isLoading: false,
-    total,
-    isGuest: true,
-    cart: null as Cart | null,
+    isAuthenticated,
+    isLoading: isAuthenticated ? backend.isLoading : false,
+    total: isAuthenticated
+      ? Number(backend.data?.total ?? 0)
+      : items.reduce((sum, item) => sum + item.discountedPrice * item.quantity, 0),
+    subtotal: isAuthenticated
+      ? Number(backend.data?.subtotal ?? 0)
+      : items.reduce((sum, item) => sum + item.discountedPrice * item.quantity, 0),
+    discountAmount: isAuthenticated ? Number(backend.data?.discount_amount ?? 0) : 0,
+    currency: backend.data?.currency ?? "TZS",
   };
-};
-
-export type AddCartItemInput = {
-  product_id: string;
-  variant_id?: string | null;
-  quantity: number;
-  product?: UiProduct;
-};
-
-export const addProductToCartPayload = (
-  product: UiProduct,
-  quantity = 1,
-): AddCartItemInput => ({
-  product_id: String(product.id),
-  variant_id: null,
-  quantity,
-  product,
-});
-
-const addGuestCartItem = (product: UiProduct, quantity = 1) => {
-  useCartStore.getState().addItemToCart({
-    id: product.id,
-    title: product.title,
-    price: product.price,
-    discountedPrice: product.discountedPrice,
-    quantity,
-    imgs: product.imgs,
-  });
-  toast.success("Added to cart");
 };
 
 export const useAddCartItem = () => {
   const queryClient = useQueryClient();
-  const isAuthenticated = useAuthStore((state) => state.isAuthenticated);
   return useMutation({
-    mutationFn: async (payload: AddCartItemInput) => {
-      if (isAuthenticated) {
-        return cartApi.addItem({
-          product_id: payload.product_id,
-          variant_id: payload.variant_id,
-          quantity: payload.quantity,
-        });
+    mutationFn: async (payload: ReturnType<typeof addProductToCartPayload>) => {
+      if (!useAuthStore.getState().isAuthenticated) {
+        useCartStore.getState().addItemToCart(payload.guest_item);
+        return null;
       }
-      if (!payload.product) throw new Error("Product details required");
-      addGuestCartItem(payload.product, payload.quantity);
-      return null;
+      return cartApi.addItem({
+        product_id: payload.product_id,
+        variant_id: payload.variant_id,
+        quantity: payload.quantity,
+      });
     },
     onSuccess: (cart) => {
       if (cart) queryClient.setQueryData(["cart"], cart);
+      toast.success(cart ? "Added to your cart" : "Saved in your guest cart. Sign in to sync it.");
     },
-    onError: () => {
-      toast.error("Failed to add to cart");
+    onError: (error) => {
+      toast.error(error instanceof Error ? error.message : "Failed to add to cart");
     },
   });
 };
 
 export const useUpdateCartItem = () => {
   const queryClient = useQueryClient();
-  const isAuthenticated = useAuthStore((state) => state.isAuthenticated);
   return useMutation({
-    mutationFn: async ({
-      itemId,
-      quantity,
-    }: {
-      itemId: string;
-      quantity: number;
-    }) => {
-      if (isAuthenticated) return cartApi.updateItem(itemId, quantity);
-      useCartStore.getState().updateCartItemQuantity(itemId, quantity);
-      return null;
+    mutationFn: async ({ itemId, quantity }: { itemId: string; quantity: number }) => {
+      if (itemId.startsWith("guest:")) {
+        useCartStore.getState().updateCartItemQuantity(itemId.slice(6), quantity);
+        return null;
+      }
+      return cartApi.updateItem(itemId, quantity);
     },
     onSuccess: (cart) => {
       if (cart) queryClient.setQueryData(["cart"], cart);
@@ -187,16 +125,17 @@ export const useUpdateCartItem = () => {
 
 export const useRemoveCartItem = () => {
   const queryClient = useQueryClient();
-  const isAuthenticated = useAuthStore((state) => state.isAuthenticated);
   return useMutation({
     mutationFn: async (itemId: string) => {
-      if (isAuthenticated) return cartApi.removeItem(itemId);
-      useCartStore.getState().removeItemFromCart(itemId);
-      return null;
+      if (itemId.startsWith("guest:")) {
+        useCartStore.getState().removeItemFromCart(itemId.slice(6));
+        return null;
+      }
+      return cartApi.removeItem(itemId);
     },
     onSuccess: (cart) => {
       if (cart) queryClient.setQueryData(["cart"], cart);
-      else toast.success("Removed from cart");
+      toast.success("Removed from cart");
     },
     onError: () => {
       toast.error("Failed to remove item");
@@ -206,16 +145,17 @@ export const useRemoveCartItem = () => {
 
 export const useClearCart = () => {
   const queryClient = useQueryClient();
-  const isAuthenticated = useAuthStore((state) => state.isAuthenticated);
   return useMutation({
     mutationFn: async () => {
-      if (isAuthenticated) return cartApi.clear();
-      useCartStore.getState().removeAllItemsFromCart();
-      return null;
+      if (!useAuthStore.getState().isAuthenticated) {
+        useCartStore.getState().removeAllItemsFromCart();
+        return null;
+      }
+      return cartApi.clear();
     },
     onSuccess: (cart) => {
       if (cart) queryClient.setQueryData(["cart"], cart);
-      else toast.success("Cart cleared");
+      toast.success("Cart cleared");
     },
     onError: () => {
       toast.error("Failed to clear cart");
@@ -225,15 +165,8 @@ export const useClearCart = () => {
 
 export const useApplyCoupon = () => {
   const queryClient = useQueryClient();
-  const isAuthenticated = useAuthStore((state) => state.isAuthenticated);
   return useMutation({
-    mutationFn: async (code: string) => {
-      if (!isAuthenticated) {
-        toast.error("Please sign in to apply coupon codes");
-        throw new Error("Sign in required");
-      }
-      return cartApi.applyCoupon(code);
-    },
+    mutationFn: cartApi.applyCoupon,
     onSuccess: (cart) => {
       queryClient.setQueryData(["cart"], cart);
       toast.success("Coupon applied");
@@ -246,21 +179,27 @@ export const useApplyCoupon = () => {
 
 export const useRemoveCoupon = () => {
   const queryClient = useQueryClient();
-  const isAuthenticated = useAuthStore((state) => state.isAuthenticated);
   return useMutation({
-    mutationFn: async () => {
-      if (!isAuthenticated) {
-        toast.error("Please sign in to manage coupons");
-        throw new Error("Sign in required");
-      }
-      return cartApi.removeCoupon();
-    },
+    mutationFn: cartApi.removeCoupon,
     onSuccess: (cart) => {
       queryClient.setQueryData(["cart"], cart);
       toast.success("Coupon removed");
     },
-    onError: () => {
-      toast.error("Failed to remove coupon");
-    },
   });
 };
+
+export const addProductToCartPayload = (product: UiProduct, quantity = 1, variantId?: string | null) => ({
+  product_id: String(product.id),
+  variant_id: variantId ?? null,
+  quantity,
+  guest_item: {
+    id: variantId ? `${product.id}:${variantId}` : product.id,
+    productId: String(product.id),
+    variantId: variantId ?? null,
+    title: product.title,
+    price: product.price,
+    discountedPrice: product.discountedPrice,
+    quantity,
+    imgs: product.imgs,
+  },
+});

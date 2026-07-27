@@ -5,12 +5,13 @@ import type { AddressRequest } from "@/types/api/user";
 
 export const addressesQueryKey = ["addresses"];
 
-export const useAddresses = () => {
+export const useAddresses = (enabled = true) => {
   const queryClient = useQueryClient();
 
   const addressesQuery = useQuery({
     queryKey: addressesQueryKey,
     queryFn: usersApi.getAddresses,
+    enabled,
   });
 
   const createAddressMutation = useMutation({

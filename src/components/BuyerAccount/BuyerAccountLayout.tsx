@@ -26,7 +26,6 @@ const nav = [
   ["Payments", "/account/payments", CreditCard],
   ["Addresses", "/account/addresses", MapPin],
   ["Cart", "/cart", ShoppingCart],
-  ["Wishlist", "/wishlist", Heart],
   ["Reviews", "/account/reviews", Star],
   ["Notifications", "/account/notifications", Bell],
   ["Security", "/account/security", Shield],

@@ -1,11 +1,9 @@
 "use client";
 import { formatCurrency } from "@/lib/formatCurrency";
-import { ordersApi } from "@/lib/api/endpoints/commerce";
+import { cartApi, ordersApi } from "@/lib/api/endpoints/commerce";
 import { usersApi } from "@/lib/api/endpoints/users";
-import { useCartStore } from "@/store/useCartStore";
-import { useWishlistStore } from "@/store/useWishlistStore";
 import type { Address, User } from "@/types/api/user";
-import type { Order } from "@/types/api/commerce";
+import type { Cart, PaginatedOrders } from "@/types/api/commerce";
 import {
   AlertCircle,
   Bell,
@@ -24,8 +22,7 @@ import { useEffect, useState } from "react";
 
 type Load<T> = { state: "loading" | "ready" | "error"; data: T };
 export default function BuyerDashboard() {
-  const cart = useCartStore((s) => s.items),
-    wishlist = useWishlistStore((s) => s.items);
+  const [cart, setCart] = useState<Load<Cart | null>>({ state: "loading", data: null });
   const [profile, setProfile] = useState<Load<User | null>>({
     state: "loading",
     data: null,
@@ -34,14 +31,15 @@ export default function BuyerDashboard() {
     state: "loading",
     data: [],
   });
-  const [orders, setOrders] = useState<Load<Order[]>>({
+  const [orders, setOrders] = useState<Load<PaginatedOrders | null>>({
     state: "loading",
-    data: [],
+    data: null,
   });
   async function load() {
     setProfile((v) => ({ ...v, state: "loading" }));
     setAddresses((v) => ({ ...v, state: "loading" }));
     setOrders((v) => ({ ...v, state: "loading" }));
+    setCart((v) => ({ ...v, state: "loading" }));
     await Promise.allSettled([
       usersApi
         .getMe()
@@ -52,22 +50,25 @@ export default function BuyerDashboard() {
         .then((data) => setAddresses({ state: "ready", data }))
         .catch(() => setAddresses({ state: "error", data: [] })),
       ordersApi
-        .mine()
-        .then((r) => setOrders({ state: "ready", data: r.results }))
-        .catch(() => setOrders({ state: "error", data: [] })),
+        .mine({ page: 1, page_size: 5 })
+        .then((data) => setOrders({ state: "ready", data }))
+        .catch(() => setOrders({ state: "error", data: null })),
+      cartApi.get()
+        .then((data) => setCart({ state: "ready", data }))
+        .catch(() => setCart({ state: "error", data: null })),
     ]);
   }
   useEffect(() => {
     void load();
   }, []);
-  const first = profile.data?.first_name || "there";
-  const cartCount = cart.reduce((n, i) => n + i.quantity, 0);
+  const first = profile.data?.first_name;
+  const cartCount = cart.data?.items.reduce((count, item) => count + item.quantity, 0) ?? 0;
   return (
     <div className="space-y-6">
       <div className="flex flex-col gap-4 rounded-2xl bg-[#2d3134] p-6 text-white sm:flex-row sm:items-center sm:justify-between">
         <div>
           <p className="text-sm text-white/60">Buyer account</p>
-          <h1 className="mt-1 text-2xl font-bold">Welcome back, {first}</h1>
+          <h1 className="mt-1 text-2xl font-bold">{profile.state === "ready" && first ? `Welcome back, ${first}` : profile.state === "error" ? "Buyer Account" : "Loading your account..."}</h1>
           <p className="mt-2 text-sm text-white/70">
             Manage your orders, addresses, payments and saved products.
           </p>
@@ -108,22 +109,18 @@ export default function BuyerDashboard() {
         <Stat
           icon={ShoppingCart}
           label="Cart Items"
-          value={String(cartCount)}
+          value={cart.state === "loading" ? "Loading..." : cart.state === "error" ? "Unable to load" : String(cartCount)}
           href={cartCount ? "/cart" : "/shop-with-sidebar"}
           helper={
-            cartCount
-              ? formatCurrency(
-                  cart.reduce((n, i) => n + i.discountedPrice * i.quantity, 0),
-                )
-              : "Browse products"
+            cart.state === "ready" && cartCount ? formatCurrency(Number(cart.data?.total ?? 0)) : cart.state === "ready" ? "Browse products" : "Cart data unavailable"
           }
         />
         <Stat
           icon={Heart}
           label="Wishlist"
-          value={String(wishlist.length)}
+          value="—"
           href="/wishlist"
-          helper={wishlist.length ? "Saved products" : "No saved products"}
+          helper="Wishlist API unavailable"
         />
         <Stat
           icon={Package}
@@ -133,11 +130,11 @@ export default function BuyerDashboard() {
               ? "Loading..."
               : orders.state === "error"
                 ? "Unable to load"
-                : String(orders.data.length)
+                : String(orders.data?.total ?? 0)
           }
           href="/account/orders"
           helper={
-            orders.state === "ready" && !orders.data.length
+            orders.state === "ready" && !orders.data?.total
               ? "No orders yet"
               : "View order history"
           }
@@ -176,7 +173,7 @@ export default function BuyerDashboard() {
       </div>
       {(profile.state === "error" ||
         addresses.state === "error" ||
-        orders.state === "error") && (
+        orders.state === "error" || cart.state === "error") && (
         <div className="flex items-center justify-between rounded-xl border border-red-200 bg-red-50 p-4 text-sm text-red-700">
           <span className="flex items-center gap-2">
             <AlertCircle size={18} />
@@ -195,9 +192,9 @@ export default function BuyerDashboard() {
         <Card title="Quick Actions">
           <div className="grid gap-3 sm:grid-cols-2">
             <Action
-              href={cartCount ? "/cart" : "/shop-with-sidebar"}
+              href={cart.state === "ready" && cartCount ? "/cart" : "/shop-with-sidebar"}
               icon={ShoppingBag}
-              label={cartCount ? "View Cart" : "Browse Products"}
+              label={cart.state === "ready" && cartCount ? "View Cart" : "Browse Products"}
             />
             <Action href="/account/orders" icon={Package} label="View Orders" />
             <Action
@@ -209,7 +206,6 @@ export default function BuyerDashboard() {
                   : "Add Delivery Address"
               }
             />
-            <Action href="/wishlist" icon={Heart} label="Saved Products" />
           </div>
         </Card>
         <Card title="Account Summary">
@@ -240,15 +236,15 @@ export default function BuyerDashboard() {
               />
               <Row
                 label="Phone verification"
-                value={profile.data?.phone ? "Phone provided" : "Not verified"}
+                value="Unavailable"
               />
               <Row
                 label="Default address"
                 value={
-                  addresses.data.find((a) => a.is_default)?.street ||
-                  "Not configured"
+                  addresses.state === "error" ? "Unable to load" : addresses.data.find((a) => a.is_default)?.street || "Default address not set"
                 }
               />
+              <Row label="Member since" value={profile.data?.created_at ? new Date(profile.data.created_at).toLocaleDateString() : "Unavailable"} />
             </dl>
           )}
           <Link
@@ -263,11 +259,11 @@ export default function BuyerDashboard() {
             <Loading />
           ) : orders.state === "error" ? (
             <ErrorText />
-          ) : orders.data.length === 0 ? (
+          ) : !orders.data?.results.length ? (
             <p className="text-sm text-[#64748b]">No recent orders.</p>
           ) : (
             <ul className="space-y-3">
-              {orders.data.slice(0, 5).map((o) => (
+              {orders.data.results.slice(0, 5).map((o) => (
                 <li
                   key={o.id}
                   className="flex items-center justify-between rounded-xl border border-[#e2e8f0] p-3 text-sm"

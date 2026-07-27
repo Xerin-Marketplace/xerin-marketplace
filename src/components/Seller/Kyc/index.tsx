@@ -3,20 +3,12 @@
 import { sellersApi } from "@/lib/api/endpoints/sellers";
 import { ApiError } from "@/lib/api/client";
 import { authStorage } from "@/lib/auth/storage";
-import type { SellerKycDocument, PayoutAccount, SellerKycStatus } from "@/types/api/seller";
+import type { SellerDocumentType, SellerKycDocument, PayoutAccount, SellerKycStatus } from "@/types/api/seller";
 import { useRouter, useSearchParams } from "next/navigation";
 import { FormEvent, useEffect, useMemo, useState } from "react";
 import toast from "react-hot-toast";
 
-const DOCUMENT_TYPES = ["tin", "business_profile", "business_registration"] as const;
-
-type DocumentType = (typeof DOCUMENT_TYPES)[number];
-
-const DOCUMENT_LABELS: Record<DocumentType, string> = {
-  tin: "TIN Certificate",
-  business_profile: "Business Profile",
-  business_registration: "Business Registration",
-};
+const documentLabel = (value: string) => value.replaceAll("_", " ").replace(/\b\w/g, (letter) => letter.toUpperCase());
 
 type StoredUser = {
   account_type?: string;
@@ -42,8 +34,9 @@ const SellerKyc = () => {
   const [documents, setDocuments] = useState<SellerKycDocument[]>([]);
   const [payoutAccounts, setPayoutAccounts] = useState<PayoutAccount[]>([]);
   const [loading, setLoading] = useState(false);
+  const [error, setError] = useState("");
 
-  const [uploadType, setUploadType] = useState<DocumentType>("tin");
+  const [uploadType, setUploadType] = useState("");
   const [uploadFile, setUploadFile] = useState<File | null>(null);
   const [isUploading, setIsUploading] = useState(false);
 
@@ -76,6 +69,7 @@ const SellerKyc = () => {
     if (!accessToken) return;
 
     setLoading(true);
+    setError("");
     try {
       const [statusData, docsData, accountsData] = await Promise.all([
         sellersApi.getKycStatus(accessToken),
@@ -84,14 +78,13 @@ const SellerKyc = () => {
       ]);
 
       setStatus(statusData);
+      setUploadType((current) => current || statusData.required_documents[0] || "");
       setDocuments(docsData);
       setPayoutAccounts(accountsData);
     } catch (error) {
-      if (error instanceof ApiError) {
-        toast.error(error.message);
-      } else {
-        toast.error("Failed to load KYC data.");
-      }
+      const message = error instanceof ApiError ? error.message : "Failed to load KYC data.";
+      setError(message);
+      toast.error(message);
     } finally {
       setLoading(false);
     }
@@ -107,10 +100,10 @@ const SellerKyc = () => {
     setIsUploading(true);
     try {
       await sellersApi.uploadKycDocument(
-        { document_type: uploadType, file: uploadFile },
+        { document_type: uploadType as SellerDocumentType, file: uploadFile },
         token
       );
-      toast.success(`${DOCUMENT_LABELS[uploadType]} uploaded successfully.`);
+      toast.success(`${documentLabel(uploadType)} uploaded successfully.`);
       setUploadFile(null);
       await loadData();
     } catch (error) {
@@ -184,13 +177,15 @@ const SellerKyc = () => {
     }
   }
 
-  function getDocumentStatus(type: DocumentType): "missing" | "pending" | "uploaded" {
+  function getDocumentStatus(type: string): "missing" | "pending" | "under_review" | "approved" | "rejected" | "uploaded" {
     const doc = documents.find((d) => d.document_type === type);
     if (!doc) return "missing";
-    return doc.status === "pending" ? "pending" : "uploaded";
+    return (doc.status as "pending" | "under_review" | "approved" | "rejected") || "uploaded";
   }
 
   if (!token || !isSeller) return null;
+  if (loading) return <div className="p-12 text-center text-dark-4 dark:text-darkTheme-body-color">Loading verification data...</div>;
+  if (error) return <div className="rounded-xl border border-red-200 bg-red-50 p-6 text-center text-red-700"><p>{error}</p><button type="button" onClick={() => void loadData()} className="mt-3 rounded-lg bg-red-700 px-4 py-2 text-sm font-semibold text-white">Retry</button></div>;
 
   return (
     <>
@@ -225,7 +220,7 @@ const SellerKyc = () => {
               <h2 className="text-xl font-semibold text-dark dark:text-white mb-6">Required Documents</h2>
 
               <div className="space-y-4 mb-8">
-                {DOCUMENT_TYPES.map((type) => {
+                {(status?.required_documents ?? []).map((type) => {
                   const docStatus = getDocumentStatus(type);
                   return (
                     <div
@@ -239,7 +234,7 @@ const SellerKyc = () => {
                       }`}
                     >
                       <div>
-                        <p className="font-medium text-dark dark:text-white">{DOCUMENT_LABELS[type]}</p>
+                        <p className="font-medium text-dark dark:text-white">{documentLabel(type)}</p>
                         <p className="text-sm text-dark-4 dark:text-darkTheme-body-color capitalize">
                           {docStatus === "missing" ? "Not uploaded" : docStatus}
                         </p>
@@ -266,13 +261,13 @@ const SellerKyc = () => {
                   <label className="block mb-2.5 dark:text-darkTheme-body-color">Document type</label>
                   <select
                     value={uploadType}
-                    onChange={(event) => setUploadType(event.target.value as DocumentType)}
+                    onChange={(event) => setUploadType(event.target.value)}
                     disabled={isUploading}
                     className="rounded-lg border border-gray-3 dark:border-darkTheme-border-color bg-gray-1 dark:bg-darkTheme-secondary-bg dark:text-darkTheme-body-color w-full py-3 px-5 outline-none focus:ring-2 focus:ring-blue/20"
                   >
-                    {DOCUMENT_TYPES.map((type) => (
+                    {(status?.required_documents ?? []).map((type) => (
                       <option key={type} value={type}>
-                        {DOCUMENT_LABELS[type]}
+                        {documentLabel(type)}
                       </option>
                     ))}
                   </select>

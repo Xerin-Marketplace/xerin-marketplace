@@ -74,6 +74,11 @@ export const removeFromWishlist = async (productId: string): Promise<ApiMessageR
   return res.data;
 };
 
+export const clearWishlist = async (): Promise<ApiMessageResponse> => {
+  const res = await axiosInstance.delete<ApiMessageResponse>("/users/me/wishlist");
+  return res.data;
+};
+
 export const usersApi = {
   getMe,
   updateMe,
@@ -84,4 +89,5 @@ export const usersApi = {
   getWishlist,
   addToWishlist,
   removeFromWishlist,
+  clearWishlist,
 };

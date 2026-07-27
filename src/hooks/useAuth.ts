@@ -9,14 +9,14 @@ import {
   forgotPassword as apiForgotPassword,
   resetPassword as apiResetPassword,
 } from "@/lib/api/endpoints/auth";
-import { cartApi } from "@/lib/api/endpoints/commerce";
 import { useAuthStore } from "@/store/useAuthStore";
-import { useCartStore } from "@/store/useCartStore";
 import { authStorage } from "@/lib/auth/storage";
 import { authCookies } from "@/lib/auth/cookies";
 import { isAdminUser, isSellerUser } from "@/guards/permissions";
 import type { AuthTokenResponse } from "@/types/api/auth";
 import { useRouter } from "next/navigation";
+import { cartApi } from "@/lib/api/endpoints/commerce";
+import { useCartStore } from "@/store/useCartStore";
 import toast from "react-hot-toast";
 
 export const useAuth = () => {
@@ -63,19 +63,23 @@ export const useAuth = () => {
 
   const mergeGuestCart = async () => {
     const guestItems = useCartStore.getState().items;
-    if (guestItems.length === 0) return;
-    try {
-      for (const item of guestItems) {
-        await cartApi.addItem({
-          product_id: String(item.id),
-          variant_id: null,
-          quantity: item.quantity,
-        });
-      }
-      useCartStore.getState().removeAllItemsFromCart();
-      toast.success("Guest cart merged into your account");
-    } catch {
-      toast.error("Some guest cart items could not be merged");
+    if (!guestItems.length) return;
+
+    const result = await cartApi.merge(
+      guestItems.map((item) => ({
+        product_id: item.productId ?? String(item.id).split(":")[0],
+        variant_id: item.variantId ?? null,
+        quantity: item.quantity,
+      })),
+    );
+    queryClient.setQueryData(["cart"], result.cart);
+
+    const rejectedIds = new Set(result.rejected_items.map((item) => item.product_id));
+    useCartStore.getState().setItems(
+      guestItems.filter((item) => rejectedIds.has(item.productId ?? String(item.id).split(":")[0])),
+    );
+    if (result.rejected_items.length) {
+      toast.error(`${result.rejected_items.length} guest cart item(s) could not be merged.`);
     }
   };
 
@@ -83,7 +87,11 @@ export const useAuth = () => {
     mutationFn: apiLogin,
     onSuccess: async (data) => {
       setSession(data);
-      await mergeGuestCart();
+      if (!isAdminUser(data.user) && !isSellerUser(data.user)) {
+        await mergeGuestCart().catch(() => {
+          toast.error("Your guest cart could not be synced. It is still saved on this device.");
+        });
+      }
       const user = data.user;
       if (isAdminUser(user)) {
         router.push("/admin/dashboard");
@@ -99,16 +107,17 @@ export const useAuth = () => {
     mutationFn: apiRegisterBuyer,
     onSuccess: async (data) => {
       setSession(data);
-      await mergeGuestCart();
+      await mergeGuestCart().catch(() => {
+        toast.error("Your guest cart could not be synced. It is still saved on this device.");
+      });
       router.push("/account");
     },
   });
 
   const registerSellerMutation = useMutation({
     mutationFn: apiRegisterSeller,
-    onSuccess: async (data) => {
+    onSuccess: (data) => {
       setSession(data);
-      await mergeGuestCart();
       router.push("/seller/dashboard");
     },
   });
@@ -175,6 +184,7 @@ export const useAuth = () => {
     resetPassword: resetPasswordMutation.mutateAsync,
     isSubmittingResetPassword: resetPasswordMutation.isPending,
     setSession,
+    mergeGuestCart,
     refreshSession: () => {},
   };
 };

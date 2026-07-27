@@ -5,14 +5,16 @@ import { useAddCartItem, addProductToCartPayload } from "@/hooks/useCartActions"
 import Image from "next/image";
 import { formatCurrency } from "@/lib/formatCurrency";
 import type { WishListItem } from "@/store/useWishlistStore";
+import { useAuthStore } from "@/store/useAuthStore";
 
 const SingleItem = ({ item }: { item: WishListItem }) => {
   const removeItemFromWishlist = useWishlistStore((state) => state.removeItemFromWishlist);
   const removeFromBackend = useRemoveFromWishlist();
   const addCartItem = useAddCartItem();
+  const isAuthenticated = useAuthStore((state) => state.isAuthenticated);
 
   const handleRemoveFromWishlist = () => {
-    removeItemFromWishlist(item.id);
+    if (!isAuthenticated) removeItemFromWishlist(item.id);
     removeFromBackend.mutate(String(item.id));
   };
 
@@ -103,7 +105,7 @@ const SingleItem = ({ item }: { item: WishListItem }) => {
             />
           </svg>
 
-          <span className="text-red"> Out of Stock </span>
+          <span className="text-dark-4"> Availability checked when added to cart </span>
         </div>
       </div>
 

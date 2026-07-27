@@ -534,16 +534,15 @@ export default function AdminDashboard() {
   const adminName =
     [adminUser?.first_name, adminUser?.last_name].filter(Boolean).join(" ") ||
     "Administrator";
-  const formatWalletAmount = (value: number) => formatCurrency(value);
-
   const [activeTab, setActiveTab] = useState<AdminTab>("overview");
   const [isCheckingAccess, setIsCheckingAccess] = useState(true);
   const [isAuthorized, setIsAuthorized] = useState(false);
 
   const [isLoading, setIsLoading] = useState(false);
-  const [totalUsers, setTotalUsers] = useState(0);
+  const [totalUsers, setTotalUsers] = useState<number | null>(null);
   const [pendingSellers, setPendingSellers] = useState<AdminSeller[]>([]);
   const [pendingProducts, setPendingProducts] = useState<AdminProduct[]>([]);
+  const [overviewError, setOverviewError] = useState("");
 
   const [surfaceSearch, setSurfaceSearch] = useState("");
   const [openSidebarGroup, setOpenSidebarGroup] = useState<string | null>(null);
@@ -789,6 +788,7 @@ export default function AdminDashboard() {
 
   const loadOverviewData = async () => {
     setIsLoading(true);
+    setOverviewError("");
 
     try {
       const [usersResponse, sellersResponse, productsResponse] =
@@ -802,7 +802,10 @@ export default function AdminDashboard() {
       setPendingSellers(sellersResponse);
       setPendingProducts(productsResponse);
     } catch (error) {
-      toast.error(getErrorMessage(error));
+      const message = getErrorMessage(error);
+      setTotalUsers(null);
+      setOverviewError(message);
+      toast.error(message);
     } finally {
       setIsLoading(false);
     }
@@ -903,20 +906,6 @@ export default function AdminDashboard() {
       false,
     );
   }, [isAuthorized, isCheckingAccess, searchParams]);
-
-  const adminWalletCards = [
-    { title: "Commission Earned", value: 12927.52, icon: BarChart3 },
-    { title: "Delivery Charge Earned", value: 1660, icon: ShoppingBag },
-    { title: "Total Tax Collected", value: 2666, icon: CreditCard },
-    { title: "Pending Amount", value: 7987.5, icon: RefreshCw },
-  ];
-
-  const auctionWalletCards = [
-    { title: "Entry Fee", value: 1517, icon: CreditCard },
-    { title: "Tax", value: 0, icon: BarChart3 },
-    { title: "Commission Collected", value: 0, icon: Gauge },
-    { title: "Self Auction Shipping Fee", value: 0, icon: ShoppingBag },
-  ];
 
   const handleApproveSeller = async (sellerId: string) => {
     setBusyAction(`approve-seller-${sellerId}`);
@@ -1451,11 +1440,17 @@ export default function AdminDashboard() {
             !isLoading &&
             !isOverviewHiddenByMenuSelection ? (
               <>
+                {overviewError ? (
+                  <div className="flex items-center justify-between rounded-xl border border-red-200 bg-red-50 p-4 text-sm text-red-700">
+                    <span>Unable to load dashboard statistics: {overviewError}</span>
+                    <button onClick={() => void loadOverviewData()} className="font-semibold">Retry</button>
+                  </div>
+                ) : null}
                 <div className="grid grid-cols-1 sm:grid-cols-2 xl:grid-cols-4 gap-4">
                   {[
                     {
                       label: "Platform users",
-                      value: totalUsers,
+                      value: totalUsers ?? "Unavailable",
                       hint: "Registered accounts",
                     },
                     {
@@ -1469,9 +1464,9 @@ export default function AdminDashboard() {
                       hint: "Awaiting moderation",
                     },
                     {
-                      label: "Operational status",
-                      value: "Live",
-                      hint: "Core API connected",
+                      label: "Reports",
+                      value: "Available",
+                      hint: "Backend report service",
                     },
                   ].map((metric, index) => {
                     const accents = [
@@ -1603,33 +1598,15 @@ export default function AdminDashboard() {
                     <div className="flex items-center justify-between">
                       <div>
                         <p className="text-xs font-semibold uppercase tracking-[.18em] text-green-600">
-                          Platform status
+                          System management
                         </p>
                         <h3 className="mt-1 text-lg font-semibold text-[#111827]">
-                          Operations healthy
+                          Operational telemetry
                         </h3>
                       </div>
-                      <span className="relative flex h-3 w-3">
-                        <span className="absolute h-full w-full animate-ping rounded-full bg-green-400 opacity-60" />
-                        <span className="relative h-3 w-3 rounded-full bg-green-500" />
-                      </span>
+                      <Bell className="text-green-600" size={22} />
                     </div>
-                    <div className="mt-5 space-y-3 text-sm">
-                      {[
-                        ["Core API", "Connected"],
-                        ["Moderation queues", "Available"],
-                        ["Admin permissions", "Enforced"],
-                        ["Background processing", "Monitor jobs"],
-                      ].map(([label, value]) => (
-                        <div
-                          key={label}
-                          className="flex items-center justify-between border-b border-gray-100 pb-3"
-                        >
-                          <span className="text-gray-500">{label}</span>
-                          <b>{value}</b>
-                        </div>
-                      ))}
-                    </div>
+                    <p className="mt-4 text-sm text-gray-500">Open the backend-powered audit logs, system events and background jobs views to inspect current platform state.</p>
                     <button
                       onClick={() =>
                         applySidebarSelection(
@@ -1645,100 +1622,10 @@ export default function AdminDashboard() {
                   </section>
                 </div>
 
-                <div className="rounded-2xl border border-gray-200 bg-[#eef3f9] p-4 shadow-sm">
-                  <h3 className="flex items-center gap-2 text-base sm:text-lg font-semibold text-[#222]">
-                    <CreditCard size={18} className="text-[#f7941d]" />
-                    Admin Wallet
-                  </h3>
-
-                  <div className="mt-4 grid grid-cols-1 lg:grid-cols-[1fr_2fr] gap-3">
-                    <div className="rounded-2xl border border-gray-200 bg-white p-5 shadow-sm flex flex-col items-center justify-center text-center min-h-[180px]">
-                      <BarChart3 size={30} className="text-[#f7941d]" />
-                      <p className="mt-2 text-2xl sm:text-3xl font-semibold text-[#222]">
-                        {formatWalletAmount(41992)}
-                      </p>
-                      <p className="mt-1 text-sm sm:text-base font-medium text-[#222]">
-                        In-House Earning
-                      </p>
-                    </div>
-
-                    <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
-                      {adminWalletCards.map((card) => {
-                        const CardIcon = card.icon;
-                        return (
-                          <div
-                            key={card.title}
-                            className="rounded-2xl border border-gray-200 bg-white p-4 shadow-sm min-h-[92px]"
-                          >
-                            <div className="flex items-start justify-between gap-2">
-                              <div>
-                                <p className="text-xl sm:text-2xl font-semibold leading-tight text-[#222]">
-                                  {formatWalletAmount(card.value)}
-                                </p>
-                                <p className="mt-1 text-xs sm:text-sm text-gray-700">
-                                  {card.title}
-                                </p>
-                              </div>
-                              <span
-                                className="rounded-xl bg-orange-50 p-2 text-[#f7941d]"
-                                aria-hidden="true"
-                              >
-                                <CardIcon size={20} />
-                              </span>
-                            </div>
-                          </div>
-                        );
-                      })}
-                    </div>
-                  </div>
-                </div>
-
-                <div className="rounded-2xl border border-gray-200 bg-[#eef3f9] p-4 shadow-sm">
-                  <h3 className="flex items-center gap-2 text-base sm:text-lg font-semibold text-[#222]">
-                    <Gauge size={18} className="text-[#f7941d]" />
-                    Auction Wallet
-                  </h3>
-
-                  <div className="mt-4 grid grid-cols-1 lg:grid-cols-[1fr_2fr] gap-3">
-                    <div className="rounded-2xl border border-gray-200 bg-white p-5 shadow-sm flex flex-col items-center justify-center text-center min-h-[180px]">
-                      <Gauge size={30} className="text-[#f7941d]" />
-                      <p className="mt-2 text-2xl sm:text-3xl font-semibold text-[#222]">
-                        {formatWalletAmount(0)}
-                      </p>
-                      <p className="mt-1 text-sm sm:text-base font-medium text-[#222]">
-                        In-House Total Earning
-                      </p>
-                    </div>
-
-                    <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
-                      {auctionWalletCards.map((card) => {
-                        const CardIcon = card.icon;
-                        return (
-                          <div
-                            key={card.title}
-                            className="rounded-2xl border border-gray-200 bg-white p-4 shadow-sm min-h-[92px]"
-                          >
-                            <div className="flex items-start justify-between gap-2">
-                              <div>
-                                <p className="text-xl sm:text-2xl font-semibold leading-tight text-[#222]">
-                                  {formatWalletAmount(card.value)}
-                                </p>
-                                <p className="mt-1 text-xs sm:text-sm text-gray-700">
-                                  {card.title}
-                                </p>
-                              </div>
-                              <span
-                                className="rounded-xl bg-orange-50 p-2 text-[#f7941d]"
-                                aria-hidden="true"
-                              >
-                                <CardIcon size={20} />
-                              </span>
-                            </div>
-                          </div>
-                        );
-                      })}
-                    </div>
-                  </div>
+                <div className="rounded-2xl border border-amber-200 bg-amber-50 p-6 text-center shadow-sm">
+                  <CreditCard size={28} className="mx-auto text-amber-600" />
+                  <h3 className="mt-3 font-semibold text-gray-900">Finance summary is not available yet</h3>
+                  <p className="mt-1 text-sm text-amber-800">The backend does not currently expose wallet, commission, tax, auction or payout summary data.</p>
                 </div>
               </>
             ) : null}

@@ -39,6 +39,8 @@ const AddressBookSection = ({
 }: AddressBookSectionProps) => {
   const {
     addresses,
+    addressesError,
+    refetchAddresses,
     isLoadingAddresses,
     isFetchingAddresses,
     createAddress,
@@ -205,6 +207,8 @@ const AddressBookSection = ({
               <div className="mt-5 rounded-lg border border-gray-3 dark:border-darkTheme-border-color p-5 text-custom-sm text-dark-4 dark:text-darkTheme-secondary-muted">
                 Loading addresses...
               </div>
+            ) : addressesError ? (
+              <div className="mt-5 rounded-lg border border-red-200 bg-red-50 p-6 text-center text-sm text-red-700"><p>Unable to load your addresses.</p><button type="button" onClick={() => void refetchAddresses()} className="mt-3 font-semibold underline">Retry</button></div>
             ) : addresses.length === 0 ? (
               <div className="mt-5 rounded-lg border border-dashed border-gray-3 dark:border-darkTheme-border-color p-6 text-center">
                 <p className="font-medium text-dark dark:text-white">

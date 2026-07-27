@@ -18,17 +18,17 @@ const BestSeller = () => {
               <span className="inline-flex items-center gap-2 rounded-full bg-orange/10 px-4 py-2 text-sm font-medium text-orange mb-4">
                 <Image
                   src="/images/icons/icon-07.svg"
-                  alt="Trending now"
+                  alt="Latest products"
                   width={16}
                   height={16}
                 />
-                Trending now
+                Latest products
               </span>
               <h2 className="font-semibold text-2xl sm:text-3xl xl:text-heading-4 text-dark dark:text-white mb-3">
-                Best Sellers Across Africa
+                Newly listed marketplace products
               </h2>
               <p className="max-w-[620px] text-dark-4 dark:text-darkTheme-secondary-muted">
-                Popular items shoppers are actively choosing right now, with clear pricing and a faster path to checkout.
+                Recently approved products from the marketplace catalog, ordered by listing date.
               </p>
             </div>
 
@@ -37,7 +37,7 @@ const BestSeller = () => {
                 href={ROUTES.shop}
                 className="inline-flex font-medium text-custom-sm py-2.5 px-6 rounded-md bg-dark dark:bg-darkTheme-tertiary-bg text-white ease-out duration-200 hover:bg-opacity-90"
               >
-                Shop trending items
+                Shop latest products
               </Link>
 
               <Link

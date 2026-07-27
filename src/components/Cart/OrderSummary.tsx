@@ -1,10 +1,15 @@
-import { useCart } from "@/hooks/useCartActions";
+import { useCartView } from "@/hooks/useCartActions";
 import React from "react";
 import { formatCurrency } from "@/lib/formatCurrency";
 import Link from "next/link";
 
 const OrderSummary = () => {
-  const { items: cartItems, total: totalPrice, isGuest } = useCart();
+  const {
+    items: cartItems,
+    total: totalPrice,
+    isAuthenticated,
+  } = useCartView();
+  const isGuest = !isAuthenticated;
 
   return (
     <div className="lg:max-w-[455px] w-full">

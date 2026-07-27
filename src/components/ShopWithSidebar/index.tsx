@@ -31,20 +31,7 @@ const ShopWithSidebar = () => {
     { label: "Old Products", value: "2" },
   ];
 
-  const genders = [
-    {
-      name: "Verified Sellers",
-      products: 10,
-    },
-    {
-      name: "Local Sellers",
-      products: 23,
-    },
-    {
-      name: "Cross-border Sellers",
-      products: 8,
-    },
-  ];
+  const genders: Array<{ name: string; products: number }> = [];
 
   const {
     products: apiProducts,
@@ -145,7 +132,7 @@ const ShopWithSidebar = () => {
                   <CategoryDropdown categories={categories} />
 
                   {/* <!-- gender box --> */}
-                  <GenderDropdown genders={genders} />
+                  {genders.length > 0 && <GenderDropdown genders={genders} />}
 
                   {/* // <!-- size box --> */}
                   <SizeDropdown />

@@ -14,12 +14,12 @@ const PromoBanner = () => {
             </span>
 
             <h2 className="font-bold text-xl lg:text-heading-4 xl:text-heading-3 text-dark mb-5">
-              Trusted Products, Fast Delivery
+              Discover Marketplace Products
             </h2>
 
             <p>
-              Discover products from trusted sellers with secure payments and
-              Xerin Logistics order tracking from checkout to delivery.
+              Explore current marketplace listings. Available delivery and
+              payment options are confirmed during checkout.
             </p>
 
             <a

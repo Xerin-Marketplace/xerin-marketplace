@@ -48,10 +48,10 @@ const SingleItem = ({ item }: { item: Product }) => {
       <div className="relative flex min-h-[390px] flex-col justify-between overflow-hidden bg-[#F6F7FB] dark:bg-darkTheme-secondary-bg">
         <div className="absolute left-4 top-4 z-10 flex flex-wrap gap-2">
           <span className="rounded-full bg-orange px-3 py-1 text-xs font-semibold text-white shadow-sm">
-            Trending now
+            Latest listing
           </span>
           <span className="rounded-full bg-dark/90 px-3 py-1 text-xs font-semibold text-white shadow-sm dark:bg-white/90 dark:text-dark">
-            Best seller
+            Marketplace product
           </span>
         </div>
 
@@ -68,7 +68,7 @@ const SingleItem = ({ item }: { item: Product }) => {
           </h3>
 
           <p className="mx-auto max-w-[240px] text-sm leading-6 text-dark-4 dark:text-darkTheme-secondary-muted">
-            Popular pick with clean pricing, buyer confidence, and quick access to checkout.
+            Review the current price and product details before adding it to your cart.
           </p>
 
           <div className="mt-4 flex items-center justify-center gap-2">
@@ -78,7 +78,7 @@ const SingleItem = ({ item }: { item: Product }) => {
               </span>
             )}
             <span className="rounded-full bg-blue/10 px-3 py-1 text-xs font-semibold text-blue">
-              Secure payment
+              Payment options at checkout
             </span>
           </div>
 

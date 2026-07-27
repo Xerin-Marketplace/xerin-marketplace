@@ -1,21 +1,18 @@
 "use client";
-import React, { useEffect } from "react";
+import React from "react";
 import Breadcrumb from "../Common/Breadcrumb";
 import { useWishlistStore } from "@/store/useWishlistStore";
-import { useWishlist, mapWishlistToUi } from "@/hooks/useWishlist";
+import { useWishlist, mapWishlistToUi, useClearWishlist } from "@/hooks/useWishlist";
 import SingleItem from "./SingleItem";
+import { useAuthStore } from "@/store/useAuthStore";
 
 export const Wishlist = () => {
   const { data: backendWishlist, isLoading } = useWishlist();
-  const wishlistItems = useWishlistStore((state) => state.items);
-  const setItems = useWishlistStore((state) => state.setItems);
+  const guestWishlistItems = useWishlistStore((state) => state.items);
   const removeAllItemsFromWishlist = useWishlistStore((state) => state.removeAllItemsFromWishlist);
-
-  useEffect(() => {
-    if (backendWishlist) {
-      setItems(mapWishlistToUi(backendWishlist));
-    }
-  }, [backendWishlist, setItems]);
+  const isAuthenticated = useAuthStore((state) => state.isAuthenticated);
+  const clearBackendWishlist = useClearWishlist();
+  const wishlistItems = isAuthenticated ? mapWishlistToUi(backendWishlist ?? []) : guestWishlistItems;
 
   if (isLoading) {
     return (
@@ -35,7 +32,16 @@ export const Wishlist = () => {
         <div className="max-w-[1170px] w-full mx-auto px-4 sm:px-8 xl:px-0">
           <div className="flex flex-wrap items-center justify-between gap-5 mb-7.5">
             <h2 className="font-medium text-dark dark:text-white text-2xl">Your Wishlist</h2>
-            <button onClick={() => removeAllItemsFromWishlist()} className="text-blue">Clear Wishlist Cart</button>
+            <button
+              onClick={() => {
+                if (isAuthenticated) clearBackendWishlist.mutate();
+                else removeAllItemsFromWishlist();
+              }}
+              disabled={clearBackendWishlist.isPending}
+              className="text-blue disabled:opacity-50"
+            >
+              Clear Wishlist
+            </button>
           </div>
 
           <div className="bg-white dark:bg-darkTheme-card rounded-[10px] shadow-1">
@@ -65,6 +71,11 @@ export const Wishlist = () => {
                 {wishlistItems.map((item, key) => (
                   <SingleItem item={item} key={key} />
                 ))}
+                {!wishlistItems.length && (
+                  <p className="border-t border-gray-3 px-10 py-12 text-center text-dark-4">
+                    Your wishlist is empty.
+                  </p>
+                )}
               </div>
             </div>
           </div>

@@ -1,5 +1,14 @@
 import axiosInstance from "../client";
-import type { Cart, Order, PaginatedOrders, Payment } from "@/types/api/commerce";
+import type {
+  Cart,
+  CheckoutQuote,
+  GuestCartMergeResult,
+  Order,
+  PaginatedOrders,
+  Payment,
+  PaymentOption,
+  ShippingOption,
+} from "@/types/api/commerce";
 
 export const cartApi = {
   get: async (signal?: AbortSignal) =>
@@ -14,6 +23,24 @@ export const cartApi = {
   applyCoupon: async (code: string) =>
     (await axiosInstance.post<Cart>("/cart/apply-coupon", { code })).data,
   removeCoupon: async () => (await axiosInstance.delete<Cart>("/cart/coupon")).data,
+  validate: async () => (await axiosInstance.post<Cart>("/cart/validate")).data,
+  merge: async (items: Array<{ product_id: string; variant_id?: string | null; quantity: number }>) =>
+    (await axiosInstance.post<GuestCartMergeResult>("/cart/merge", { items })).data,
+};
+
+export const checkoutApi = {
+  shippingOptions: async (addressId: string, signal?: AbortSignal) =>
+    (await axiosInstance.get<ShippingOption[]>("/checkout/shipping-options", {
+      params: { address_id: addressId },
+      signal,
+    })).data,
+  paymentOptions: async (signal?: AbortSignal) =>
+    (await axiosInstance.get<PaymentOption[]>("/checkout/payment-options", { signal })).data,
+  quote: async (payload: {
+    shipping_address_id: string;
+    shipping_method_id: string;
+    coupon_code?: string;
+  }) => (await axiosInstance.post<CheckoutQuote>("/checkout/quote", payload)).data,
 };
 
 export const ordersApi = {
@@ -21,7 +48,14 @@ export const ordersApi = {
     (await axiosInstance.get<PaginatedOrders>("/orders/my-orders", { params, signal })).data,
   get: async (id: string, signal?: AbortSignal) =>
     (await axiosInstance.get<Order>(`/orders/${id}`, { signal })).data,
-  create: async (payload: { shipping_address_id?: string; coupon_code?: string; notes?: string }) =>
+  create: async (payload: {
+    shipping_address_id: string;
+    shipping_method_id: string;
+    payment_method: string;
+    idempotency_key: string;
+    coupon_code?: string;
+    notes?: string;
+  }) =>
     (await axiosInstance.post<Order>("/orders", payload)).data,
   updateStatus: async (id: string, payload: { status: string; notes?: string }) =>
     (await axiosInstance.patch<Order>(`/orders/${id}/status`, payload)).data,

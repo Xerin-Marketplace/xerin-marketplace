@@ -49,7 +49,7 @@ export default function AdminPayments({ view }: { view: PaymentView }) {
       <div className="mt-2 flex flex-col gap-4 lg:flex-row lg:items-end lg:justify-between"><div><h2 className="text-3xl font-semibold">{labels[view]}</h2><p className="mt-2 max-w-2xl text-sm text-white/75">Reconcile collections, trace provider responses and handle payment exceptions with a clear audit trail.</p></div><button onClick={() => void load()} className="rounded-xl bg-white px-4 py-2.5 text-sm font-semibold text-gray-900">Refresh live data</button></div>
     </section>
 
-    {view !== "methods" && <section className="grid gap-4 sm:grid-cols-2 xl:grid-cols-4">{[
+    {view !== "methods" && !loading && !error && <section className="grid gap-4 sm:grid-cols-2 xl:grid-cols-4">{[
       ["Successful volume", money(totals.volume)], ["Completed", String(totals.completed)], ["Pending / processing", String(totals.pending)], ["Exceptions", String(totals.exceptions)]
     ].map(([label, value]) => <article key={label} className="rounded-2xl border border-gray-200 bg-white p-5 shadow-sm"><p className="text-sm text-gray-500">{label}</p><p className="mt-2 text-2xl font-semibold text-gray-900">{value}</p></article>)}</section>}
 

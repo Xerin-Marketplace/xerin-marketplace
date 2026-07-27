@@ -5,7 +5,6 @@ import { Product } from "@/types/product";
 import { useModalContext } from "@/app/context/QuickViewModalContext";
 import { useQuickViewStore } from "@/store/useQuickViewStore";
 import { useWishlistStore } from "@/store/useWishlistStore";
-import { useProductDetailsStore } from "@/store/useProductDetailsStore";
 import { useAddCartItem, addProductToCartPayload } from "@/hooks/useCartActions";
 import { useAddToWishlist } from "@/hooks/useWishlist";
 import StarRating from "@/components/Common/StarRating";
@@ -19,7 +18,6 @@ const ProductItem = ({ item }: { item: Product }) => {
   const addCartItem = useAddCartItem();
   const addToWishlist = useAddToWishlist();
   const addItemToWishlistLocal = useWishlistStore((state) => state.addItemToWishlist);
-  const updateproductDetails = useProductDetailsStore((state) => state.updateproductDetails);
 
   const hasDiscount = item.price > item.discountedPrice;
   const savingsPercent = hasDiscount
@@ -43,10 +41,6 @@ const ProductItem = ({ item }: { item: Product }) => {
       quantity: 1,
     });
     addToWishlist.mutate(String(item.id));
-  };
-
-  const handleProductDetails = () => {
-    updateproductDetails({ ...item });
   };
 
   return (
@@ -136,19 +130,18 @@ const ProductItem = ({ item }: { item: Product }) => {
           <StarRating rating={item.rating} reviewCount={item.reviewCount ?? item.reviews} size={14} />
 
           <span className="rounded-full bg-green/10 px-3 py-1 text-xs font-semibold text-green">
-            Fast delivery
+            Delivery options at checkout
           </span>
         </div>
 
         <h3
           className="mb-2 font-semibold text-dark dark:text-white transition-colors duration-200 hover:text-blue"
-          onClick={() => handleProductDetails()}
         >
           <Link href={`/products/${item.id}`}>{item.title}</Link>
         </h3>
 
         <p className="mb-4 text-sm leading-6 text-dark-4 dark:text-darkTheme-secondary-muted">
-          Trusted pick for everyday shopping with secure checkout and buyer support.
+          View current product details, pricing, and availability before checkout.
         </p>
 
         <div className="flex items-end justify-between gap-4">

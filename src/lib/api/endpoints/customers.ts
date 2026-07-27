@@ -165,53 +165,8 @@ export const updateCustomerStatus = async (customerId: string, status: string): 
   return res.data;
 };
 
-export const listCustomerAddresses = async (customerId: string): Promise<CustomerAddress[]> => {
-  const res = await axiosInstance.get<CustomerAddress[]>(`/admin/customers/${customerId}/addresses`);
-  return res.data;
-};
-
 export const listAllAddresses = async (params: { search?: string } = {}): Promise<CustomerAddress[]> => {
   const res = await axiosInstance.get<CustomerAddress[]>("/admin/customer-addresses", { params });
-  return res.data;
-};
-
-export const listCustomerOrders = async (customerId: string): Promise<Order[]> => {
-  const res = await axiosInstance.get<Order[]>(`/admin/customers/${customerId}/orders`);
-  return res.data;
-};
-
-export const listCustomerReviews = async (customerId: string): Promise<CustomerReview[]> => {
-  const res = await axiosInstance.get<CustomerReview[]>(`/admin/customers/${customerId}/reviews`);
-  return res.data;
-};
-
-export const listCustomerPayments = async (customerId: string): Promise<CustomerPayment[]> => {
-  const res = await axiosInstance.get<CustomerPayment[]>(`/admin/customers/${customerId}/payments`);
-  return res.data;
-};
-
-export const listCustomerWishlist = async (customerId: string): Promise<CustomerWishlist[]> => {
-  const res = await axiosInstance.get<CustomerWishlist[]>(`/admin/customers/${customerId}/wishlist`);
-  return res.data;
-};
-
-export const listCustomerLoginHistory = async (customerId: string): Promise<CustomerLoginHistory[]> => {
-  const res = await axiosInstance.get<CustomerLoginHistory[]>(`/admin/customers/${customerId}/login-history`);
-  return res.data;
-};
-
-export const listCustomerNotes = async (customerId: string): Promise<CustomerNote[]> => {
-  const res = await axiosInstance.get<CustomerNote[]>(`/admin/customers/${customerId}/notes`);
-  return res.data;
-};
-
-export const createCustomerNote = async (customerId: string, note: string): Promise<CustomerNote> => {
-  const res = await axiosInstance.post<CustomerNote>(`/admin/customers/${customerId}/notes`, { note });
-  return res.data;
-};
-
-export const deleteCustomerNote = async (customerId: string, noteId: string): Promise<{ message: string }> => {
-  const res = await axiosInstance.delete<{ message: string }>(`/admin/customers/${customerId}/notes/${noteId}`);
   return res.data;
 };
 
@@ -220,18 +175,7 @@ export const listSupportTickets = async (params: { status?: string; priority?: s
   return res.data;
 };
 
-export const updateSupportTicket = async (
-  ticketId: string,
-  payload: { status?: string; priority?: string; assigned_to_id?: string | null }
-): Promise<SupportTicket> => {
-  const res = await axiosInstance.patch<SupportTicket>(`/admin/support-tickets/${ticketId}`, payload);
-  return res.data;
-};
-
 export const getCustomer = getCustomerDetails;
-
-export const createNote = createCustomerNote;
-export const deleteNote = deleteCustomerNote;
 
 export const getSummary = getCustomerSummary;
 
@@ -242,18 +186,6 @@ export const customersService = {
   getCustomerDetails,
   updateCustomerStatus,
   getCustomer,
-  listCustomerAddresses,
   listAllAddresses,
-  listCustomerOrders,
-  listCustomerReviews,
-  listCustomerPayments,
-  listCustomerWishlist,
-  listCustomerLoginHistory,
-  listCustomerNotes,
-  createCustomerNote,
-  deleteCustomerNote,
-  createNote,
-  deleteNote,
   listSupportTickets,
-  updateSupportTicket,
 };

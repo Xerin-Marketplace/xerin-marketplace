@@ -2,9 +2,9 @@
 
 import { useEffect, useState } from "react";
 import Link from "next/link";
-import toast from "react-hot-toast";
 import { customersService, type CustomerDetails } from "@/lib/api/endpoints/customers";
 import { ApiError } from "@/lib/api/client";
+import UnavailableFeature from "@/components/Admin/Common/UnavailableFeature";
 
 const getErrorMessage = (error: unknown) => {
   if (error instanceof ApiError) return error.message;
@@ -16,27 +16,25 @@ const TABS = [
   { key: "overview", label: "Overview" },
   { key: "orders", label: "Orders" },
   { key: "addresses", label: "Addresses" },
-  { key: "reviews", label: "Reviews" },
   { key: "payments", label: "Payments" },
-  { key: "wishlist", label: "Wishlist" },
   { key: "activity", label: "Activity" },
-  { key: "notes", label: "Notes" },
+  { key: "unsupported", label: "Unavailable Data" },
 ];
 
 const AdminCustomerDetails = ({ customerId }: { customerId: string }) => {
   const [data, setData] = useState<CustomerDetails | null>(null);
   const [loading, setLoading] = useState(true);
+  const [error, setError] = useState<string | null>(null);
   const [activeTab, setActiveTab] = useState("overview");
-  const [note, setNote] = useState("");
 
   const fetchData = async () => {
     setLoading(true);
+    setError(null);
     try {
       const res = await customersService.getCustomer(customerId);
       setData(res);
     } catch (error) {
-      if (error instanceof ApiError && error.status === 401) return;
-      toast.error(getErrorMessage(error));
+      setError(getErrorMessage(error));
     } finally {
       setLoading(false);
     }
@@ -46,30 +44,8 @@ const AdminCustomerDetails = ({ customerId }: { customerId: string }) => {
     void fetchData();
   }, [customerId]);
 
-  const addNote = async () => {
-    if (!note.trim()) return;
-    try {
-      await customersService.createNote(customerId, note.trim());
-      setNote("");
-      await fetchData();
-      toast.success("Note added.");
-    } catch (error) {
-      toast.error(getErrorMessage(error));
-    }
-  };
-
-  const deleteNote = async (noteId: string) => {
-    if (!confirm("Delete this note?")) return;
-    try {
-      await customersService.deleteNote(customerId, noteId);
-      await fetchData();
-      toast.success("Note deleted.");
-    } catch (error) {
-      toast.error(getErrorMessage(error));
-    }
-  };
-
   if (loading) return <div className="py-8 text-center text-gray-600">Loading customer...</div>;
+  if (error) return <div className="rounded-2xl border border-red-200 bg-red-50 p-6 text-sm text-red-800"><p>{error}</p><button type="button" onClick={() => void fetchData()} className="mt-3 rounded-lg bg-red-700 px-3 py-2 font-medium text-white">Retry</button></div>;
   if (!data) return <div className="py-8 text-center text-gray-500">Customer not found.</div>;
 
   const c = data.customer;
@@ -106,14 +82,12 @@ const AdminCustomerDetails = ({ customerId }: { customerId: string }) => {
         </div>
       </div>
 
-      <div className="grid grid-cols-2 gap-3 sm:grid-cols-4 lg:grid-cols-7">
+      <div className="grid grid-cols-2 gap-3 sm:grid-cols-3 lg:grid-cols-5">
         <SummaryCard label="Orders" value={data.stats.orders} />
         <SummaryCard label="Completed" value={data.stats.completed_orders} />
         <SummaryCard label="Cancelled" value={data.stats.cancelled_orders} />
         <SummaryCard label="Total Spent" value={data.stats.total_spent.toLocaleString()} />
         <SummaryCard label="Avg Order" value={data.stats.average_order.toLocaleString()} />
-        <SummaryCard label="Reviews" value={data.stats.reviews} />
-        <SummaryCard label="Wishlist" value={data.stats.wishlist_items} />
       </div>
 
       <div className="rounded-2xl border border-gray-200 bg-white p-5 shadow-sm">
@@ -201,27 +175,11 @@ const AdminCustomerDetails = ({ customerId }: { customerId: string }) => {
           />
         )}
 
-        {activeTab === "reviews" && (
-          <SimpleTable
-            headers={["Product", "Rating", "Comment", "Status", "Date"]}
-            rows={data.reviews.map((r) => [r.product?.name ?? "-", `${r.rating}/5`, r.comment ?? "-", r.status, new Date(r.created_at).toLocaleDateString()])}
-            empty="No reviews found."
-          />
-        )}
-
         {activeTab === "payments" && (
           <SimpleTable
             headers={["Method", "Reference", "Amount", "Status", "Date"]}
             rows={data.payments.map((p) => [p.method, p.transaction_reference ?? "-", `${p.amount.toLocaleString()} ${p.currency}`, p.status, new Date(p.created_at).toLocaleDateString()])}
             empty="No payments found."
-          />
-        )}
-
-        {activeTab === "wishlist" && (
-          <SimpleTable
-            headers={["Product", "Price", "Availability", "Added"]}
-            rows={data.wishlist.map((w) => [w.product_name ?? "-", w.price?.toLocaleString() ?? "-", w.is_available ? "Available" : "Unavailable", new Date(w.created_at).toLocaleDateString()])}
-            empty="Wishlist is empty."
           />
         )}
 
@@ -239,42 +197,7 @@ const AdminCustomerDetails = ({ customerId }: { customerId: string }) => {
           />
         )}
 
-        {activeTab === "notes" && (
-          <div className="space-y-4">
-            <div className="flex gap-2">
-              <textarea
-                value={note}
-                onChange={(e) => setNote(e.target.value)}
-                placeholder="Add internal note..."
-                className="min-h-[80px] flex-1 rounded-xl border border-gray-200 bg-[#f8fafc] px-4 py-2 text-sm text-gray-700"
-              />
-              <button
-                type="button"
-                onClick={addNote}
-                className="self-start rounded-xl bg-[#1e40af] px-4 py-2 text-sm font-medium text-white hover:bg-[#1e3a8a]"
-              >
-                Add Note
-              </button>
-            </div>
-            {data.notes.length === 0 ? (
-              <p className="text-sm text-gray-500">No notes yet.</p>
-            ) : (
-              <div className="space-y-2">
-                {data.notes.map((n) => (
-                  <div key={n.id} className="rounded-xl border border-gray-200 bg-[#f8fafc] p-4">
-                    <p className="text-sm text-[#111827]">{n.note}</p>
-                    <div className="mt-2 flex items-center justify-between text-xs text-gray-500">
-                      <span>{new Date(n.created_at).toLocaleString()}</span>
-                      <button type="button" onClick={() => deleteNote(n.id)} className="text-[#8f2727] hover:underline">
-                        Delete
-                      </button>
-                    </div>
-                  </div>
-                ))}
-              </div>
-            )}
-          </div>
-        )}
+        {activeTab === "unsupported" && <UnavailableFeature title="Customer reviews, wishlist, and internal notes are unavailable" description="The backend customer-detail contract does not currently provide persisted records or mutation endpoints for these sections." />}
       </div>
 
       <div className="mt-4">

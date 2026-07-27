@@ -187,6 +187,11 @@ export default function SellerLayout({
     setMobileOpen(false);
   }, [pathname]);
   useEffect(() => {
+    let active = true;
+    sellersApi.getMe().then((value) => { if (active) setSeller(value); }).catch(() => { if (active) setSeller(null); });
+    return () => { active = false; };
+  }, []);
+  useEffect(() => {
     const close = (event: MouseEvent) => {
       if (
         profileRef.current &&
@@ -209,8 +214,7 @@ export default function SellerLayout({
       window.location.assign("/signin");
     }
   };
-  const storeName =
-    seller?.business_name || `${user?.first_name || "Seller"}'s Store`;
+  const storeName = seller?.business_name || [user?.first_name, user?.last_name].filter(Boolean).join(" ") || user?.email || "Seller account";
   return (
     <div className="min-h-screen bg-[#f8fafc] text-[#0f172a] dark:bg-[#111827] dark:text-white">
       {mobileOpen && (
@@ -252,7 +256,7 @@ export default function SellerLayout({
             <p className="mt-1 truncate text-xs text-white/50">{user?.email}</p>
             <div className="mt-3 flex gap-2">
               <Badge
-                label={`Account: ${seller?.status || user?.seller_status || "pending"}`}
+                label={`Account: ${seller?.status || user?.seller_status || "unavailable"}`}
                 tone={seller?.status === "approved" ? "green" : "amber"}
               />
             </div>
@@ -349,7 +353,6 @@ export default function SellerLayout({
                 className="relative rounded-xl p-2.5 hover:bg-slate-100 dark:hover:bg-white/10"
               >
                 <Bell size={19} />
-                <span className="absolute right-2 top-2 h-2 w-2 rounded-full bg-[#f7941d]" />
               </Link>
               <button
                 aria-label="Toggle theme"
@@ -364,10 +367,10 @@ export default function SellerLayout({
                   className="flex items-center gap-2 rounded-xl border border-[#e2e8f0] px-2 py-1.5 dark:border-white/10"
                 >
                   <span className="flex h-8 w-8 items-center justify-center rounded-lg bg-[#f7941d] text-sm font-bold text-white">
-                    {user?.first_name?.[0] || "S"}
+                    {user?.first_name?.[0] || user?.email?.[0]?.toUpperCase() || "?"}
                   </span>
                   <span className="hidden max-w-28 truncate text-sm font-semibold sm:block">
-                    {user?.first_name || "Seller"}
+                    {user?.first_name || user?.email || "Seller account"}
                   </span>
                   <ChevronDown size={15} />
                 </button>
@@ -379,7 +382,7 @@ export default function SellerLayout({
                         {user?.email}
                       </p>
                       <p className="mt-2 text-xs capitalize text-green-600">
-                        {seller?.status || user?.seller_status || "pending"}
+                        {seller?.status || user?.seller_status || "unavailable"}
                       </p>
                     </div>
                     <Drop href="/seller/account/profile" icon={CircleUserRound} label="Seller Profile" />

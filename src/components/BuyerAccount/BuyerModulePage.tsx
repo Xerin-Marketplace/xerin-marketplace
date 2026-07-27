@@ -25,10 +25,6 @@ import Link from "next/link";
 import { FormEvent, useEffect, useState } from "react";
 import toast from "react-hot-toast";
 import AddressBookSection from "@/components/MyAccount/AddressBookSection";
-import NotificationPreferences from "./NotificationPreferences";
-import PhoneVerification from "./PhoneVerification";
-import ReviewsPlaceholder from "./ReviewsPlaceholder";
-import { printPaymentReceipt } from "@/lib/invoice";
 type View =
   | "orders"
   | "payments"
@@ -67,7 +63,6 @@ export default function BuyerModulePage({ view }: { view: View }) {
     [error, setError] = useState(false),
     [orders, setOrders] = useState<Order[]>([]),
     [payments, setPayments] = useState<Payment[]>([]),
-    [addresses, setAddresses] = useState<Address[]>([]),
     [profile, setProfile] = useState<User | null>(null),
     [sessions, setSessions] = useState<SellerSession[]>([]);
   const [passwords, setPasswords] = useState({
@@ -90,20 +85,17 @@ export default function BuyerModulePage({ view }: { view: View }) {
       else if (view === "payments")
         setPayments(await paymentsApi.mine());
       else if (view === "addresses")
-        setAddresses(await usersApi.getAddresses());
-      else if (view === "details" || view === "security") {
+        setProfile(await usersApi.getMe());
+      else if (view === "details") {
         const p = await usersApi.getMe();
         setProfile(p);
-        if (view === "details") {
-          setForm({
-            first_name: p.first_name || "",
-            last_name: p.last_name || "",
-            phone: p.phone || "",
-          });
-        }
-        if (view === "security")
-          setSessions(await sellerAccountApi.listSessions());
-      }
+        setForm({
+          first_name: p.first_name || "",
+          last_name: p.last_name || "",
+          phone: p.phone || "",
+        });
+      } else if (view === "security")
+        setSessions(await sellerAccountApi.listSessions());
     } catch {
       setError(true);
     } finally {
@@ -176,9 +168,9 @@ export default function BuyerModulePage({ view }: { view: View }) {
         ) : view === "addresses" ? (
           <AddressBookSection
             isActive
-            displayName="Buyer"
-            emailLabel="Authenticated account"
-            phoneLabel="Account contact"
+            displayName={`${profile?.first_name || ""} ${profile?.last_name || ""}`.trim() || "Name not provided"}
+            emailLabel={profile?.email || "Email unavailable"}
+            phoneLabel={profile?.phone || "Phone number not added"}
           />
         ) : view === "details" ? (
           <Details
@@ -198,12 +190,7 @@ export default function BuyerModulePage({ view }: { view: View }) {
               setSessions((v) => v.filter((s) => s.id !== id));
               toast.success("Session signed out.");
             }}
-            phone={profile?.phone}
           />
-        ) : view === "notifications" ? (
-          <NotificationPreferences />
-        ) : view === "reviews" ? (
-          <ReviewsPlaceholder />
         ) : (
           <Unavailable view={view} />
         )}
@@ -257,24 +244,13 @@ function Payments({ items }: { items: Payment[] }) {
               <td className="p-3 capitalize">
                 {(p.provider || p.method || "—").replaceAll("_", " ")}
               </td>
-              <td className="p-3 capitalize">{p.status || "Pending"}</td>
+              <td className="p-3 capitalize">{p.status || "Unavailable"}</td>
               <td className="p-3">
                 {p.created_at
                   ? new Date(p.created_at).toLocaleDateString()
                   : "—"}
               </td>
-              <td className="p-3">
-                {p.status === "completed" || p.status === "paid" ? (
-                  <button
-                    onClick={() => printPaymentReceipt(p)}
-                    className="font-semibold text-[#f7941d] hover:underline"
-                  >
-                    Receipt
-                  </button>
-                ) : (
-                  <span className="text-[#64748b]">Pending</span>
-                )}
-              </td>
+              <td className="p-3 text-[#64748b]">Unavailable</td>
             </tr>
           ))}
         </tbody>
@@ -327,7 +303,7 @@ function Orders({ items }: { items: Order[] }) {
                   : "—"}
               </td>
               <td className="p-3">{formatCurrency(o.total, o.currency)}</td>
-              <td className="p-3 text-[#64748b]">See payment history</td>
+              <td className="p-3 text-[#64748b]">Unavailable</td>
               <td className="p-3 capitalize">{o.status.replaceAll("_", " ")}</td>
               <td className="p-3">{o.items.length}</td>
               <td className="p-3">
@@ -455,10 +431,6 @@ function Details({
       <button className="mt-5 rounded-xl bg-[#f7941d] px-5 py-2.5 text-sm font-semibold text-white">
         Save changes
       </button>
-
-      <div className="mt-8">
-        <PhoneVerification phone={profile?.phone} />
-      </div>
     </form>
   );
 }
@@ -468,14 +440,12 @@ function Security({
   setPasswords,
   submit,
   revoke,
-  phone,
 }: {
   sessions: SellerSession[];
   passwords: { current: string; next: string; confirm: string };
   setPasswords: (v: typeof passwords) => void;
   submit: (e: FormEvent) => void;
   revoke: (id: string) => void;
-  phone?: string | null;
 }) {
   return (
     <div className="space-y-7">
@@ -528,12 +498,10 @@ function Security({
           <p className="text-sm text-[#64748b]">No other active sessions.</p>
         )}
       </div>
-      <PhoneVerification phone={phone} />
-
       <div className="rounded-xl bg-[#f8fafc] p-4 text-sm dark:bg-white/5">
         <b>Two-factor authentication</b>
         <p className="text-[#64748b]">
-          2FA activation will be available once backend endpoints are ready.
+          Two-factor authentication is unavailable because the backend does not expose a 2FA enrollment contract.
         </p>
       </div>
     </div>
@@ -545,14 +513,8 @@ function Unavailable({ view }: { view: View }) {
       "No payments yet",
       "Buyer payment history will appear here when the payment-list API becomes available.",
     ],
-    reviews: [
-      "No reviews yet",
-      "Reviews you submit for purchased products will appear here.",
-    ],
-    notifications: [
-      "You are all caught up",
-      "Account and order notifications will appear here.",
-    ],
+    reviews: ["Reviews unavailable", "The backend does not currently expose buyer review history or review mutations."],
+    notifications: ["Notifications unavailable", "The backend does not currently expose buyer notifications or unread counts."],
   };
   const [a, b] = labels[view];
   return <Empty title={a} text={b} />;

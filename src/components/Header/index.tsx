@@ -5,7 +5,7 @@ import { ROUTES } from "@/constants/links";
 import CustomSelect from "./CustomSelect";
 import { menuData } from "./menuData";
 import Dropdown from "./Dropdown";
-import { useCart } from "@/hooks/useCartActions";
+import { useCartView } from "@/hooks/useCartActions";
 import { useCartModalContext } from "@/app/context/CartSidebarModalContext";
 import { useTheme } from "@/app/context/ThemeContext";
 import { useAuth } from "@/hooks/useAuth";
@@ -13,17 +13,19 @@ import { getAccountHref, getAccountLabel } from "@/guards/auth-routing";
 import Image from "next/image";
 import { formatCurrency } from "@/lib/formatCurrency";
 import { useAuthStore } from "@/store/useAuthStore";
+import { useRouter } from "next/navigation";
 
 const Header = () => {
   const [searchQuery, setSearchQuery] = useState("");
   const [navigationOpen, setNavigationOpen] = useState(false);
   const [stickyMenu, setStickyMenu] = useState(false);
+  const router = useRouter();
   const { openCartModal } = useCartModalContext();
   const { theme, toggleTheme } = useTheme();
   const { user, isAuthenticated, logout } = useAuth();
   const hasHydrated = useAuthStore((state) => state.hasHydrated);
 
-  const { items: cartItems, total: totalPrice } = useCart();
+  const { items: cartItems, total: totalPrice } = useCartView();
 
   const accountHref = getAccountHref(isAuthenticated, user);
   const accountLabel = getAccountLabel(isAuthenticated, user);
@@ -44,8 +46,7 @@ const Header = () => {
 
   useEffect(() => {
     window.addEventListener("scroll", handleStickyMenu);
-    return () => window.removeEventListener("scroll", handleStickyMenu);
-  }, []);
+  });
 
   const options = [
     { label: "All Categories", value: "0" },
@@ -86,7 +87,13 @@ const Header = () => {
           </Link>
 
             <div className="max-w-[475px] lg:max-w-[420px] xl:max-w-[475px] w-full">
-              <form>
+              <form
+                onSubmit={(event) => {
+                  event.preventDefault();
+                  const query = searchQuery.trim();
+                  if (query) router.push(`/search?q=${encodeURIComponent(query)}`);
+                }}
+              >
                 <div className="flex items-center">
                   <CustomSelect options={options} />
 

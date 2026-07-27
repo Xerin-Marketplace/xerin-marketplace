@@ -1,5 +1,5 @@
 import React from "react";
-import ShopDetails from "@/components/ShopDetails";
+import { redirect } from "next/navigation";
 import { Metadata } from "next";
 
 export const metadata: Metadata = {
@@ -9,11 +9,7 @@ export const metadata: Metadata = {
 };
 
 const ShopDetailsPage = () => {
-  return (
-    <main>
-      <ShopDetails />
-    </main>
-  );
+  redirect("/shop-with-sidebar");
 };
 
 export default ShopDetailsPage;

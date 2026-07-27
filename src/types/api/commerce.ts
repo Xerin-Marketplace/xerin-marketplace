@@ -18,6 +18,47 @@ export type Cart = {
   subtotal: number | string;
   discount_amount: number | string;
   total: number | string;
+  currency: string;
+  validation_messages: string[];
+};
+
+export type GuestCartMergeResult = {
+  cart: Cart;
+  rejected_items: Array<{
+    product_id: string;
+    reason: string;
+    available_quantity?: number;
+  }>;
+};
+
+export type ShippingOption = {
+  id: string;
+  service_name: string;
+  carrier: string;
+  amount: number | string;
+  currency: string;
+  estimated_min_days: number;
+  estimated_max_days: number;
+  tracking_supported: boolean;
+};
+
+export type PaymentOption = {
+  id: string;
+  label: string;
+  requires_phone: boolean;
+  providers: string[];
+};
+
+export type CheckoutQuote = {
+  cart_id: string;
+  currency: string;
+  subtotal: number | string;
+  discount_amount: number | string;
+  shipping_amount: number | string;
+  tax_amount: number | string;
+  total: number | string;
+  shipping_option: ShippingOption;
+  validation_messages: string[];
 };
 
 export type OrderItem = {

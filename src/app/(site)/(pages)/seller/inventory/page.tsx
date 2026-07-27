@@ -1,15 +1,6 @@
 import type { Metadata } from "next";
-import SellerInventory from "@/components/Seller/Inventory";
+import SellerInventoryPage from "@/components/Seller/Inventory";
 
-export const metadata: Metadata = {
-  title: "Inventory | Seller Center",
-  description: "Manage seller inventory, stock levels and warehouses.",
-};
+export const metadata: Metadata = { title: "Seller Inventory | Xerin Market" };
 
-export default function SellerInventoryPage() {
-  return (
-    <main>
-      <SellerInventory />
-    </main>
-  );
-}
+export default function Page() { return <SellerInventoryPage />; }

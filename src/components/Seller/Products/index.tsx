@@ -46,10 +46,9 @@ const SellerProducts = () => {
   const [categories, setCategories] = useState<Category[]>([]);
   const [brands, setBrands] = useState<Brand[]>([]);
   const [loading, setLoading] = useState(false);
+  const [error, setError] = useState("");
   const [search, setSearch] = useState("");
   const [statusFilter, setStatusFilter] = useState("all");
-  const [page, setPage] = useState(1);
-  const [pageSize, setPageSize] = useState(10);
 
   const [modalOpen, setModalOpen] = useState(false);
   const [editingProduct, setEditingProduct] = useState<Product | null>(null);
@@ -64,23 +63,10 @@ const SellerProducts = () => {
     if (requestedStatus && STATUS_OPTIONS.includes(requestedStatus)) {
       setStatusFilter(requestedStatus);
     }
-    const requestedSearch = searchParams.get("search");
-    if (requestedSearch !== null) setSearch(requestedSearch);
-    const requestedPage = searchParams.get("page");
-    if (requestedPage) setPage(Math.max(1, Number(requestedPage) || 1));
-    const requestedPageSize = searchParams.get("page_size");
-    if (requestedPageSize) setPageSize(Math.max(1, Number(requestedPageSize) || 10));
     if (searchParams.get("create") === "true") {
       openCreate();
     }
   }, [searchParams]);
-
-  const [debouncedSearch, setDebouncedSearch] = useState(search);
-
-  useEffect(() => {
-    const timer = setTimeout(() => setDebouncedSearch(search), 400);
-    return () => clearTimeout(timer);
-  }, [search]);
 
   useEffect(() => {
     if (!token) {
@@ -94,30 +80,15 @@ const SellerProducts = () => {
     }
 
     void loadData();
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [isSeller, router, token, debouncedSearch, statusFilter]);
-
-  useEffect(() => {
-    setPage(1);
-  }, [search, statusFilter]);
-
-  useEffect(() => {
-    const params = new URLSearchParams();
-    if (search.trim()) params.set("search", search.trim());
-    if (statusFilter !== "all") params.set("status", statusFilter);
-    if (page !== 1) params.set("page", String(page));
-    if (pageSize !== 10) params.set("page_size", String(pageSize));
-    const query = params.toString();
-    const url = `/seller/products${query ? `?${query}` : ""}`;
-    router.replace(url, { scroll: false });
-  }, [search, statusFilter, page, pageSize, router]);
+  }, [isSeller, router, token]);
 
   async function loadData() {
     if (!token) return;
     setLoading(true);
+    setError("");
     try {
       const [items, categoryList, brandList] = await Promise.all([
-        productsApi.getMyProducts({ search: debouncedSearch.trim() || undefined }),
+        productsApi.getMyProducts(token),
         productsApi.getCategories(),
         productsApi.getBrands(),
       ]);
@@ -125,25 +96,24 @@ const SellerProducts = () => {
       setCategories(categoryList);
       setBrands(brandList);
     } catch (error) {
-      if (error instanceof ApiError) {
-        toast.error(error.message);
-      } else {
-        toast.error("Failed to load products.");
-      }
+      const message = error instanceof ApiError ? error.message : "Failed to load products.";
+      setError(message);
+      toast.error(message);
     } finally {
       setLoading(false);
     }
   }
 
-  const statusFilteredProducts = useMemo(() => {
-    return products.filter((product) => statusFilter === "all" || product.status === statusFilter);
-  }, [products, statusFilter]);
-
-  const totalProducts = statusFilteredProducts.length;
-  const totalPages = Math.max(1, Math.ceil(totalProducts / pageSize));
-  const paginatedProducts = useMemo(() => {
-    return statusFilteredProducts.slice((page - 1) * pageSize, page * pageSize);
-  }, [statusFilteredProducts, page, pageSize]);
+  const filteredProducts = useMemo(() => {
+    return products.filter((product) => {
+      const category = categories.find((c) => c.id === product.category_id);
+      const brand = brands.find((b) => b.id === product.brand_id);
+      const haystack = `${product.name} ${product.sku ?? ""} ${product.status ?? ""} ${category?.name ?? ""} ${brand?.name ?? ""}`.toLowerCase();
+      const matchesSearch = !search || haystack.includes(search.toLowerCase());
+      const matchesStatus = statusFilter === "all" || product.status === statusFilter;
+      return matchesSearch && matchesStatus;
+    });
+  }, [products, categories, brands, search, statusFilter]);
 
   function openCreate() {
     setEditingProduct(null);
@@ -273,25 +243,14 @@ const SellerProducts = () => {
             </div>
           </div>
 
-          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6 mb-8">
-            <div className="rounded-xl bg-white dark:bg-darkTheme-card shadow-1 p-6">
-              <p className="text-dark-4 dark:text-darkTheme-body-color text-sm mb-1">Total products</p>
-              <p className="text-2xl font-semibold text-dark dark:text-white">{products.length}</p>
-            </div>
-            <div className="rounded-xl bg-white dark:bg-darkTheme-card shadow-1 p-6">
-              <p className="text-dark-4 dark:text-darkTheme-body-color text-sm mb-1">Filtered products</p>
-              <p className="text-2xl font-semibold text-dark dark:text-white">{statusFilteredProducts.length}</p>
-            </div>
-            <div className="rounded-xl bg-white dark:bg-darkTheme-card shadow-1 p-6">
-              <p className="text-dark-4 dark:text-darkTheme-body-color text-sm mb-1">Categories loaded</p>
-              <p className="text-2xl font-semibold text-dark dark:text-white">{categories.length}</p>
-            </div>
-          </div>
+          <div className="mb-6 rounded-xl border border-dashed border-gray-3 bg-gray-1 p-4 text-sm text-dark-4 dark:border-darkTheme-border-color dark:bg-darkTheme-secondary-bg dark:text-darkTheme-body-color">The backend currently returns a limited product list without total-count metadata or server-side status/search filters. The table shows only records returned by the API and does not present them as complete totals.</div>
 
           <div className="rounded-xl bg-white dark:bg-darkTheme-card shadow-1 overflow-hidden">
             {loading ? (
               <div className="p-12 text-center text-dark-4 dark:text-darkTheme-body-color">Loading products...</div>
-            ) : paginatedProducts.length === 0 ? (
+            ) : error ? (
+              <div className="p-12 text-center text-red"><p>{error}</p><button type="button" onClick={() => void loadData()} className="mt-3 rounded-lg bg-red px-4 py-2 text-sm font-semibold text-white">Retry</button></div>
+            ) : filteredProducts.length === 0 ? (
               <div className="p-12 text-center text-dark-4 dark:text-darkTheme-body-color">
                 No products found. Click &quot;Add Product&quot; to create your first product.
               </div>
@@ -309,7 +268,7 @@ const SellerProducts = () => {
                     </tr>
                   </thead>
                   <tbody className="divide-y divide-gray-3 dark:divide-darkTheme-border-color">
-                    {paginatedProducts.map((product) => {
+                    {filteredProducts.map((product) => {
                       const category = categories.find((c) => c.id === product.category_id);
                       const brand = brands.find((b) => b.id === product.brand_id);
                       return (
@@ -374,43 +333,6 @@ const SellerProducts = () => {
                     })}
                   </tbody>
                 </table>
-              </div>
-            )}
-            {!loading && statusFilteredProducts.length > 0 && (
-              <div className="flex items-center justify-between border-t border-gray-3 px-6 py-4 dark:border-darkTheme-border-color">
-                <div className="flex items-center gap-2 text-sm text-dark-4 dark:text-darkTheme-body-color">
-                  <span>Rows per page:</span>
-                  <select
-                    value={pageSize}
-                    onChange={(e) => setPageSize(Number(e.target.value))}
-                    className="rounded-lg border border-gray-3 bg-gray-1 px-2 py-1 text-sm dark:border-darkTheme-border-color dark:bg-darkTheme-secondary-bg"
-                  >
-                    <option value={10}>10</option>
-                    <option value={25}>25</option>
-                    <option value={50}>50</option>
-                  </select>
-                </div>
-                <div className="flex items-center gap-2">
-                  <button
-                    type="button"
-                    onClick={() => setPage((p) => Math.max(1, p - 1))}
-                    disabled={page <= 1}
-                    className="rounded-lg border border-gray-3 bg-white px-3 py-1.5 text-sm disabled:opacity-50 dark:border-darkTheme-border-color dark:bg-darkTheme-card"
-                  >
-                    Previous
-                  </button>
-                  <span className="text-sm text-dark-4 dark:text-darkTheme-body-color">
-                    Page {page} of {totalPages}
-                  </span>
-                  <button
-                    type="button"
-                    onClick={() => setPage((p) => Math.min(totalPages, p + 1))}
-                    disabled={page >= totalPages}
-                    className="rounded-lg border border-gray-3 bg-white px-3 py-1.5 text-sm disabled:opacity-50 dark:border-darkTheme-border-color dark:bg-darkTheme-card"
-                  >
-                    Next
-                  </button>
-                </div>
               </div>
             )}
           </div>

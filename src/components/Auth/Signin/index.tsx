@@ -14,7 +14,7 @@ import { useCartModalContext } from "@/app/context/CartSidebarModalContext";
 const Signin = () => {
   const router = useRouter();
   const searchParams = useSearchParams();
-  const { setSession } = useAuth();
+  const { setSession, mergeGuestCart } = useAuth();
   const { closeCartModal } = useCartModalContext();
 
   const [email, setEmail] = useState("");
@@ -38,6 +38,11 @@ const Signin = () => {
       });
 
       setSession(session);
+      if (getPostLoginPath("/account", session.user) === "/account") {
+        await mergeGuestCart().catch(() => {
+          toast.error("Signed in, but your guest cart is still waiting to be synced.");
+        });
+      }
       closeCartModal();
       toast.success("Signed in successfully.");
       const requestedRedirect = searchParams.get("redirect");

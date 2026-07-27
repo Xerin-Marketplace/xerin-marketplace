@@ -3,10 +3,10 @@
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { usersApi } from "@/lib/api/endpoints/users";
 import { mapApiProductToUiProduct } from "@/lib/products/adapters";
-import { useAuthStore } from "@/store/useAuthStore";
 import type { Product as UiProduct } from "@/types/product";
 import type { Product } from "@/types/api/product";
 import toast from "react-hot-toast";
+import { useAuthStore } from "@/store/useAuthStore";
 
 const WISHLIST_QUERY_KEY = ["wishlist"];
 
@@ -26,20 +26,10 @@ export type WishlistItemUi = {
 
 export const useWishlist = () => {
   const isAuthenticated = useAuthStore((state) => state.isAuthenticated);
-  const hasHydrated = useAuthStore((state) => state.hasHydrated);
   return useQuery({
     queryKey: WISHLIST_QUERY_KEY,
-    queryFn: async () => {
-      try {
-        return await usersApi.getWishlist();
-      } catch (err: any) {
-        if (err?.response?.status === 404) {
-          return [];
-        }
-        throw err;
-      }
-    },
-    enabled: hasHydrated && isAuthenticated,
+    queryFn: () => usersApi.getWishlist(),
+    enabled: isAuthenticated,
   });
 };
 
@@ -61,15 +51,14 @@ export const mapWishlistToUi = (items: Product[]): WishlistItemUi[] => {
 
 export const useAddToWishlist = () => {
   const queryClient = useQueryClient();
-  const isAuthenticated = useAuthStore((state) => state.isAuthenticated);
   return useMutation({
-    mutationFn: async (productId: string) => {
-      if (isAuthenticated) return usersApi.addToWishlist(productId);
-      return null;
-    },
+    mutationFn: (productId: string) =>
+      useAuthStore.getState().isAuthenticated
+        ? usersApi.addToWishlist(productId)
+        : Promise.resolve({ message: "Saved on this device" }),
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: WISHLIST_QUERY_KEY });
-      toast.success("Added to wishlist");
+      toast.success(useAuthStore.getState().isAuthenticated ? "Added to wishlist" : "Saved to your guest wishlist");
     },
     onError: () => {
       toast.error("Failed to add to wishlist");
@@ -79,18 +68,31 @@ export const useAddToWishlist = () => {
 
 export const useRemoveFromWishlist = () => {
   const queryClient = useQueryClient();
-  const isAuthenticated = useAuthStore((state) => state.isAuthenticated);
   return useMutation({
-    mutationFn: async (productId: string) => {
-      if (isAuthenticated) return usersApi.removeFromWishlist(productId);
-      return null;
-    },
+    mutationFn: (productId: string) =>
+      useAuthStore.getState().isAuthenticated
+        ? usersApi.removeFromWishlist(productId)
+        : Promise.resolve({ message: "Removed from this device" }),
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: WISHLIST_QUERY_KEY });
       toast.success("Removed from wishlist");
     },
     onError: () => {
       toast.error("Failed to remove from wishlist");
+    },
+  });
+};
+
+export const useClearWishlist = () => {
+  const queryClient = useQueryClient();
+  return useMutation({
+    mutationFn: () =>
+      useAuthStore.getState().isAuthenticated
+        ? usersApi.clearWishlist()
+        : Promise.resolve({ message: "Cleared on this device" }),
+    onSuccess: () => {
+      queryClient.setQueryData(WISHLIST_QUERY_KEY, []);
+      toast.success("Wishlist cleared");
     },
   });
 };

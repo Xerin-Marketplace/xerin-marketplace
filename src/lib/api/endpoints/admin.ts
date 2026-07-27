@@ -501,36 +501,10 @@ export const rejectSeller = async (sellerId: string, reason: string): Promise<Ad
   return res.data;
 };
 
-export const listAllProducts = async (params: ListAllProductsParams = {}): Promise<PaginatedAdminProducts> => {
-  const res = await axiosInstance.get<PaginatedAdminProducts>("/admin/products", { params });
-  return res.data;
-};
-
-export const createProduct = async (payload: CreateProductPayload): Promise<AdminProduct> => {
-  const res = await axiosInstance.post<AdminProduct>("/admin/products", payload);
-  return res.data;
-};
-
 export const listPendingProducts = async (): Promise<AdminProduct[]> => {
   const res = await axiosInstance.get<AdminProduct[]>("/admin/products/pending");
   return res.data;
 };
-
-export const getProduct = async (productId: string): Promise<AdminProduct> => {
-  const res = await axiosInstance.get<AdminProduct>(`/admin/products/${productId}`);
-  return res.data;
-};
-
-export const deleteProduct = async (productId: string): Promise<{ message: string }> => {
-  const res = await axiosInstance.delete<{ message: string }>(`/admin/products/${productId}`);
-  return res.data;
-};
-
-export const updateProduct = async (productId: string, payload: UpdateProductPayload): Promise<AdminProduct> => {
-  const res = await axiosInstance.patch<AdminProduct>(`/admin/products/${productId}`, payload);
-  return res.data;
-};
-
 
 export const approveProduct = async (productId: string): Promise<AdminProduct> => {
   const res = await axiosInstance.post<AdminProduct>(`/admin/products/${productId}/approve`);
@@ -576,11 +550,6 @@ export const createBrand = async (payload: CreateBrandPayload): Promise<Brand> =
   return res.data;
 };
 
-export const updateBrand = async (brandId: string, payload: UpdateBrandPayload): Promise<Brand> => {
-  const res = await axiosInstance.patch<Brand>(`/admin/brands/${brandId}`, payload);
-  return res.data;
-};
-
 export const deleteBrand = async (brandId: string): Promise<{ message: string }> => {
   const res = await axiosInstance.delete<{ message: string }>(`/admin/brands/${brandId}`);
   return res.data;
@@ -591,11 +560,6 @@ export const createProductCategory = async (payload: CreateProductCategoryPayloa
   return res.data;
 };
 
-export const updateProductCategory = async (categoryId: string, payload: UpdateProductCategoryPayload): Promise<ProductCategory> => {
-  const res = await axiosInstance.patch<ProductCategory>(`/admin/product-categories/${categoryId}`, payload);
-  return res.data;
-};
-
 export const deleteProductCategory = async (categoryId: string): Promise<{ message: string }> => {
   const res = await axiosInstance.delete<{ message: string }>(`/admin/product-categories/${categoryId}`);
   return res.data;
@@ -603,49 +567,6 @@ export const deleteProductCategory = async (categoryId: string): Promise<{ messa
 
 export const listProductReviews = async (params: { status?: string } = {}): Promise<ProductReview[]> => {
   const res = await axiosInstance.get<ProductReview[]>("/admin/reviews", { params });
-  return res.data;
-};
-
-export const updateProductReview = async (reviewId: string, payload: UpdateProductReviewPayload): Promise<ProductReview> => {
-  const res = await axiosInstance.patch<ProductReview>(`/admin/reviews/${reviewId}`, payload);
-  return res.data;
-};
-
-export const deleteProductReview = async (reviewId: string): Promise<{ message: string }> => {
-  const res = await axiosInstance.delete<{ message: string }>(`/admin/reviews/${reviewId}`);
-  return res.data;
-};
-
-export const listOrders = async (params: ListOrdersParams = {}): Promise<PaginatedOrders> => {
-  const { page, page_size, status } = params;
-  const res = await axiosInstance.get<PaginatedOrders>("/orders/admin/all", {
-    params: { page, page_size, status },
-  });
-  return res.data;
-};
-
-export const getOrder = async (orderId: string): Promise<Order> => {
-  const res = await axiosInstance.get<Order>(`/orders/${orderId}`);
-  return res.data;
-};
-
-export const updateOrderStatus = async (orderId: string, payload: UpdateOrderStatusPayload): Promise<Order> => {
-  const res = await axiosInstance.patch<Order>(`/orders/${orderId}/status`, payload);
-  return res.data;
-};
-
-export const updateOrderTracking = async (orderId: string, payload: UpdateOrderTrackingPayload): Promise<Order> => {
-  const res = await axiosInstance.patch<Order>(`/admin/orders/${orderId}/tracking`, payload);
-  return res.data;
-};
-
-export const cancelOrder = async (orderId: string, payload: CancelOrderPayload): Promise<Order> => {
-  const res = await axiosInstance.post<Order>(`/admin/orders/${orderId}/cancel`, payload);
-  return res.data;
-};
-
-export const refundOrder = async (orderId: string, payload: RefundOrderPayload): Promise<Order> => {
-  const res = await axiosInstance.post<Order>(`/admin/orders/${orderId}/refund`, payload);
   return res.data;
 };
 
@@ -682,26 +603,6 @@ export type AnalyticsOverview = {
   topProducts: { id: string; name: string; sales: number }[];
   newCustomers: number;
   returningCustomers: number;
-};
-
-export const getFinanceSummary = async (): Promise<FinanceSummary> => {
-  const res = await axiosInstance.get<FinanceSummary>("/admin/finance/summary");
-  return res.data;
-};
-
-export const listTransactions = async (params: { status?: string } = {}): Promise<AdminTransaction[]> => {
-  const res = await axiosInstance.get<AdminTransaction[]>("/admin/finance/transactions", { params });
-  return res.data;
-};
-
-export const listDisputes = async (params: { status?: string } = {}): Promise<Dispute[]> => {
-  const res = await axiosInstance.get<Dispute[]>("/admin/disputes", { params });
-  return res.data;
-};
-
-export const getAnalyticsOverview = async (): Promise<AnalyticsOverview> => {
-  const res = await axiosInstance.get<AnalyticsOverview>("/admin/analytics/overview");
-  return res.data;
 };
 
 export const adminService = {
@@ -743,12 +644,7 @@ export const adminService = {
   getAccountProfile,updateAccountProfile,changeAccountPassword,listAccountSessions,revokeAccountSession,
   approveSeller,
   rejectSeller,
-  listAllProducts,
-  createProduct,
   listPendingProducts,
-  getProduct,
-  deleteProduct,
-  updateProduct,
   approveProduct,
   rejectProduct,
   listBusinessCategories,
@@ -757,22 +653,8 @@ export const adminService = {
   deleteBusinessCategory,
   listBrands,
   createBrand,
-  updateBrand,
   deleteBrand,
   createProductCategory,
-  updateProductCategory,
   deleteProductCategory,
   listProductReviews,
-  updateProductReview,
-  deleteProductReview,
-  listOrders,
-  getOrder,
-  updateOrderStatus,
-  updateOrderTracking,
-  cancelOrder,
-  refundOrder,
-  getFinanceSummary,
-  listTransactions,
-  listDisputes,
-  getAnalyticsOverview,
 };
