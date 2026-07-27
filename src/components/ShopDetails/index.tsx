@@ -89,16 +89,16 @@ const ShopDetails = ({ product }: { product: Product }) => {
         "Please add product"
       ) : (
         <>
-          <section className="overflow-hidden relative pb-20 pt-5 lg:pt-20 xl:pt-28">
+          <section className="overflow-hidden relative pb-10 sm:pb-20 pt-4 sm:pt-5 lg:pt-20 xl:pt-28">
             <div className="max-w-[1170px] w-full mx-auto px-4 sm:px-8 xl:px-0">
-              <div className="flex flex-col lg:flex-row gap-7.5 xl:gap-17.5">
+              <div className="flex flex-col lg:flex-row gap-5 sm:gap-7.5 xl:gap-17.5">
                 <div className="lg:max-w-[570px] w-full">
-                  <div className="lg:min-h-[512px] rounded-lg shadow-1 bg-gray-2 dark:bg-darkTheme-secondary-bg p-4 sm:p-7.5 relative flex items-center justify-center">
+                  <div className="min-h-[280px] sm:min-h-[400px] lg:min-h-[512px] rounded-lg shadow-1 bg-gray-2 dark:bg-darkTheme-secondary-bg p-3 sm:p-7.5 relative flex items-center justify-center">
                     <div>
                       <button
                         onClick={handlePreviewSlider}
                         aria-label="button for zoom"
-                        className="gallery__Image w-11 h-11 rounded-[5px] bg-gray-1 shadow-1 flex items-center justify-center ease-out duration-200 text-dark hover:text-blue absolute top-4 lg:top-6 right-4 lg:right-6 z-50"
+                        className="gallery__Image w-9 h-9 sm:w-11 sm:h-11 rounded-[5px] bg-gray-1 shadow-1 flex items-center justify-center ease-out duration-200 text-dark hover:text-blue absolute top-3 sm:top-4 lg:top-6 right-3 sm:right-4 lg:right-6 z-50"
                       >
                         <svg
                           className="fill-current"
@@ -123,18 +123,21 @@ const ShopDetails = ({ product }: { product: Product }) => {
                           alt="products-details"
                           width={400}
                           height={400}
+                          className="object-contain"
+                          style={{ width: "auto", height: "min(280px, 60vw)" }}
+                          sizes="(max-width: 640px) 280px, 400px"
                         />
                       )}
                     </div>
                   </div>
 
                   {/* ?  &apos;border-blue &apos; :  &apos;border-transparent&apos; */}
-                  <div className="flex flex-wrap sm:flex-nowrap gap-4.5 mt-6">
+                  <div className="flex flex-wrap sm:flex-nowrap gap-2.5 sm:gap-4.5 mt-4 sm:mt-6">
                     {product.imgs?.thumbnails.map((item, key) => (
                       <button
                         onClick={() => setPreviewImg(key)}
                         key={key}
-                        className={`flex items-center justify-center w-15 sm:w-25 h-15 sm:h-25 overflow-hidden rounded-lg bg-gray-2 dark:bg-darkTheme-secondary-bg shadow-1 ease-out duration-200 border-2 hover:border-blue ${key === previewImg
+                        className={`flex items-center justify-center w-12 h-12 sm:w-25 sm:h-25 overflow-hidden rounded-lg bg-gray-2 dark:bg-darkTheme-secondary-bg shadow-1 ease-out duration-200 border-2 hover:border-blue ${key === previewImg
                           ? "border-blue"
                           : "border-transparent"
                           }`}
@@ -144,6 +147,8 @@ const ShopDetails = ({ product }: { product: Product }) => {
                           height={50}
                           src={item}
                           alt="thumbnail"
+                          className="object-contain"
+                          style={{ width: "auto", height: "40px" }}
                         />
                       </button>
                     ))}
@@ -151,9 +156,9 @@ const ShopDetails = ({ product }: { product: Product }) => {
                 </div>
 
                 {/* <!-- product content --> */}
-                <div className="max-w-[539px] w-full">
-                  <div className="flex items-center justify-between mb-3">
-                    <h2 className="font-semibold text-xl sm:text-2xl xl:text-custom-3 text-dark dark:text-white">
+                <div className="w-full lg:max-w-[539px]">
+                  <div className="flex items-start sm:items-center justify-between mb-3 gap-3">
+                    <h2 className="font-semibold text-lg sm:text-2xl xl:text-custom-3 text-dark dark:text-white leading-tight">
                       {product.title}
                     </h2>
 
@@ -164,7 +169,7 @@ const ShopDetails = ({ product }: { product: Product }) => {
                     )}
                   </div>
 
-                  <div className="flex flex-wrap items-center gap-5.5 mb-4.5">
+                  <div className="flex flex-wrap items-center gap-3 sm:gap-5.5 mb-3 sm:mb-4.5">
                     <StarRating rating={product.rating} reviewCount={product.reviewCount ?? product.reviews} size={18} />
 
                     <div className="hidden flex items-center gap-2.5">
@@ -310,17 +315,17 @@ const ShopDetails = ({ product }: { product: Product }) => {
                     </div>
                   </div>
 
-                  <h3 className="font-medium text-custom-1 mb-4.5">
+                  <h3 className="font-medium text-base sm:text-custom-1 mb-3 sm:mb-4.5">
                     <span className="text-sm sm:text-base text-dark dark:text-darkTheme-body-color">
                       Price: {formatCurrency(product.price)}
                     </span>
-                    <span className="line-through">
+                    <span className="line-through text-sm sm:text-base">
                       {" "}
                       {formatCurrency(product.discountedPrice)}{" "}
                     </span>
                   </h3>
 
-                  <ul className="flex flex-col gap-2">
+                  <ul className="flex flex-col gap-1.5 sm:gap-2">
                     <li className="flex items-center gap-2.5">
                       <svg
                         width="20"
@@ -367,7 +372,7 @@ const ShopDetails = ({ product }: { product: Product }) => {
                   </ul>
 
                   <form onSubmit={(e) => e.preventDefault()}>
-                    <div className="flex flex-col gap-4.5 border-y border-gray-3 dark:border-darkTheme-border-color mt-7.5 mb-9 py-9">
+                    <div className="flex flex-col gap-3 sm:gap-4.5 border-y border-gray-3 dark:border-darkTheme-border-color mt-5 sm:mt-7.5 mb-6 sm:mb-9 py-5 sm:py-9">
                       {/* <!-- details item --> */}
                       <div className="flex items-center gap-4">
                         <div className="min-w-[65px]">
@@ -607,11 +612,11 @@ const ShopDetails = ({ product }: { product: Product }) => {
                       </div>
                     </div>
 
-                    <div className="flex flex-wrap items-center gap-4.5">
+                    <div className="flex flex-wrap items-center gap-3 sm:gap-4.5">
                       <div className="flex items-center rounded-md border border-gray-3 dark:border-darkTheme-border-color">
                         <button
                           aria-label="button for remove product"
-                          className="flex items-center justify-center w-12 h-12 ease-out duration-200 hover:text-blue"
+                          className="flex items-center justify-center w-10 h-10 sm:w-12 sm:h-12 ease-out duration-200 hover:text-blue"
                           onClick={() =>
                             quantity > 1 && setQuantity(quantity - 1)
                           }
@@ -631,14 +636,14 @@ const ShopDetails = ({ product }: { product: Product }) => {
                           </svg>
                         </button>
 
-                        <span className="flex items-center justify-center w-16 h-12 border-x border-gray-4 dark:border-darkTheme-border-color dark:text-darkTheme-body-color">
+                        <span className="flex items-center justify-center w-12 h-10 sm:w-16 sm:h-12 border-x border-gray-4 dark:border-darkTheme-border-color dark:text-darkTheme-body-color text-sm">
                           {quantity}
                         </span>
 
                         <button
                           onClick={() => setQuantity(quantity + 1)}
                           aria-label="button for add product"
-                          className="flex items-center justify-center w-12 h-12 ease-out duration-200 hover:text-blue"
+                          className="flex items-center justify-center w-10 h-10 sm:w-12 sm:h-12 ease-out duration-200 hover:text-blue"
                         >
                           <svg
                             className="fill-current"
@@ -663,7 +668,7 @@ const ShopDetails = ({ product }: { product: Product }) => {
                       <button
                         onClick={() => addCartItem.mutate(addProductToCartPayload(product, quantity))}
                         disabled={addCartItem.isPending}
-                        className="inline-flex font-medium text-white bg-blue py-3 px-7 rounded-md ease-out duration-200 hover:bg-blue-dark disabled:opacity-50"
+                        className="inline-flex font-medium text-2xs sm:text-custom-sm text-white bg-blue py-2.5 sm:py-3 px-5 sm:px-7 rounded-md ease-out duration-200 hover:bg-blue-dark disabled:opacity-50"
                       >
                         {addCartItem.isPending ? "Adding..." : "Add to Cart"}
                       </button>
@@ -675,14 +680,14 @@ const ShopDetails = ({ product }: { product: Product }) => {
                           })
                         }
                         disabled={addCartItem.isPending}
-                        className="inline-flex font-medium text-white bg-dark py-3 px-7 rounded-md ease-out duration-200 hover:bg-opacity-90 disabled:opacity-50"
+                        className="inline-flex font-medium text-2xs sm:text-custom-sm text-white bg-dark py-2.5 sm:py-3 px-5 sm:px-7 rounded-md ease-out duration-200 hover:bg-opacity-90 disabled:opacity-50"
                       >
                         Buy Now
                       </button>
 
                       <a
                         href={ROUTES.wishlist}
-                        className="flex items-center justify-center w-12 h-12 rounded-md border border-gray-3 dark:border-darkTheme-border-color dark:text-darkTheme-body-color ease-out duration-200 hover:text-white hover:bg-dark hover:border-transparent"
+                        className="flex items-center justify-center w-10 h-10 sm:w-12 sm:h-12 rounded-md border border-gray-3 dark:border-darkTheme-border-color dark:text-darkTheme-body-color ease-out duration-200 hover:text-white hover:bg-dark hover:border-transparent"
                       >
                         <svg
                           className="fill-current"
@@ -707,15 +712,15 @@ const ShopDetails = ({ product }: { product: Product }) => {
             </div>
           </section>
 
-          <section className="overflow-hidden bg-gray-2 dark:bg-darkTheme-bg py-20">
+          <section className="overflow-hidden bg-gray-2 dark:bg-darkTheme-bg py-10 sm:py-20">
             <div className="max-w-[1170px] w-full mx-auto px-4 sm:px-8 xl:px-0">
               {/* <!--== tab header start ==--> */}
-              <div className="flex flex-wrap items-center bg-white dark:bg-darkTheme-card rounded-[10px] shadow-1 gap-5 xl:gap-12.5 py-4.5 px-4 sm:px-6">
+              <div className="flex flex-wrap items-center bg-white dark:bg-darkTheme-card rounded-[10px] shadow-1 gap-3 sm:gap-5 xl:gap-12.5 py-3 sm:py-4.5 px-3 sm:px-6">
                 {tabs.map((item, key) => (
                   <button
                     key={key}
                     onClick={() => setActiveTab(item.id)}
-                    className={`font-medium lg:text-lg ease-out duration-200 hover:text-blue relative before:h-0.5 before:bg-blue before:absolute before:left-0 before:bottom-0 before:ease-out before:duration-200 hover:before:w-full ${activeTab === item.id
+                    className={`font-medium text-sm sm:text-lg ease-out duration-200 hover:text-blue relative before:h-0.5 before:bg-blue before:absolute before:left-0 before:bottom-0 before:ease-out before:duration-200 hover:before:w-full ${activeTab === item.id
                       ? "text-blue before:w-full"
                       : "text-dark dark:text-darkTheme-body-color before:w-0"
                       }`}
@@ -730,24 +735,24 @@ const ShopDetails = ({ product }: { product: Product }) => {
               {/* <!-- tab content one start --> */}
               <div>
                 <div
-                  className={`flex-col sm:flex-row gap-7.5 xl:gap-12.5 mt-12.5 ${activeTab === "tabOne" ? "flex" : "hidden"
+                  className={`flex-col sm:flex-row gap-5 sm:gap-7.5 xl:gap-12.5 mt-6 sm:mt-12.5 ${activeTab === "tabOne" ? "flex" : "hidden"
                     }`}
                 >
                   <div className="max-w-[670px] w-full">
-                    <h2 className="font-medium text-2xl text-dark dark:text-white mb-7">
+                    <h2 className="font-medium text-lg sm:text-2xl text-dark dark:text-white mb-4 sm:mb-7">
                       Specifications:
                     </h2>
 
-                    <p className="mb-6">
+                    <p className="mb-4 sm:mb-6 text-sm sm:text-base">
                       Keep the product in suitable storage conditions and follow seller
                       guidance for handling, cleaning, charging, or usage based
                       on the product category.
                     </p>
-                    <p className="mb-6">
+                    <p className="mb-4 sm:mb-6 text-sm sm:text-base">
                       For warranty, returns, or support questions, contact Xerin Market support
                       or review the seller&apos;s return policy before purchase.
                     </p>
-                    <p>
+                    <p className="text-sm sm:text-base">
                       Buyers can review product details, add items to cart, and complete
                       checkout through supported payment options when backend
                       integrations are connected.
@@ -755,16 +760,16 @@ const ShopDetails = ({ product }: { product: Product }) => {
                   </div>
 
                   <div className="max-w-[447px] w-full">
-                    <h2 className="font-medium text-2xl text-dark dark:text-white mb-7">
+                    <h2 className="font-medium text-lg sm:text-2xl text-dark dark:text-white mb-4 sm:mb-7">
                       Care & Maintenance:
                     </h2>
 
-                    <p className="mb-6">
+                    <p className="mb-4 sm:mb-6 text-sm sm:text-base">
                       Keep the product in suitable storage conditions and follow seller
                       guidance for handling, cleaning, charging, or usage based
                       on the product category.
                     </p>
-                    <p>
+                    <p className="text-sm sm:text-base">
                       For warranty, returns, or support questions, contact Xerin Market support
                       or review the seller&apos;s return policy before purchase.
                     </p>
