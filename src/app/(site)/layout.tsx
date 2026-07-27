@@ -44,37 +44,33 @@ export default function RootLayout({
   }, []);
 
   return (
-    <html lang="en" suppressHydrationWarning={true}>
-      <body className="bg-body-bg dark:bg-darkTheme-bg">
-        <ThemeProvider>
-          <NotificationProvider>
-            <QueryProvider>
-              <AuthProvider>
-                <CartModalProvider>
-                  <ModalProvider>
-                    <PreviewSliderProvider>
-                      {loading ? (
-                        <PreLoader />
-                      ) : (
-                        <>
-                          {!hideStorefrontChrome ? <Header /> : null}
-                          {children}
-                          {!hideStorefrontChrome && !isBuyerAccount ? <Footer /> : null}
-                          {!hideStorefrontChrome && isBuyerAccount ? <BuyerAccountFooter /> : null}
-                          {!hideStorefrontChrome ? <QuickViewModal /> : null}
-                          {!hideStorefrontChrome ? <CartSidebarModal /> : null}
-                          {!hideStorefrontChrome ? <PreviewSliderModal /> : null}
-                        </>
-                      )}
-                    </PreviewSliderProvider>
-                  </ModalProvider>
-                </CartModalProvider>
-              </AuthProvider>
-            </QueryProvider>
-          </NotificationProvider>
-          <ScrollToTop />
-        </ThemeProvider>
-      </body>
-    </html>
+    <ThemeProvider>
+      <NotificationProvider>
+        <QueryProvider>
+          <AuthProvider>
+            <CartModalProvider>
+              <ModalProvider>
+                <PreviewSliderProvider>
+                  {loading ? (
+                    <PreLoader />
+                  ) : (
+                    <>
+                      {!hideStorefrontChrome ? <Header /> : null}
+                      {children}
+                      {!hideStorefrontChrome && !isBuyerAccount ? <Footer /> : null}
+                      {!hideStorefrontChrome && isBuyerAccount ? <BuyerAccountFooter /> : null}
+                      {!hideStorefrontChrome ? <QuickViewModal /> : null}
+                      {!hideStorefrontChrome ? <CartSidebarModal /> : null}
+                      {!hideStorefrontChrome ? <PreviewSliderModal /> : null}
+                    </>
+                  )}
+                </PreviewSliderProvider>
+              </ModalProvider>
+            </CartModalProvider>
+          </AuthProvider>
+        </QueryProvider>
+      </NotificationProvider>
+      <ScrollToTop />
+    </ThemeProvider>
   );
 }
