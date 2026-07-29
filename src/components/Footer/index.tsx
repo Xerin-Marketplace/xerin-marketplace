@@ -11,13 +11,31 @@ import {
 } from "@/constants/links";
 import { useAuth } from "@/hooks/useAuth";
 
-const marketplacePolicyLabels = [
-  "Product Listing Policy",
-  "Intellectual Property Protection",
-  "Privacy Policy",
-  "Terms of Use",
-  "User Information Legal Enquiry Guide",
-  "Integrity Compliance",
+const marketplacePolicyLinks = [
+  {
+    label: "Product Listing Policy",
+    href: "/policies/product-listing",
+  },
+  {
+    label: "Intellectual Property Protection",
+    href: "/policies/intellectual-property",
+  },
+  {
+    label: "Privacy Policy",
+    href: "/policies/privacy",
+  },
+  {
+    label: "Terms of Use",
+    href: "/policies/terms-of-use",
+  },
+  {
+    label: "User Information Legal Enquiry Guide",
+    href: "/policies/legal-enquiry",
+  },
+  {
+    label: "Integrity Compliance",
+    href: "/policies/integrity-compliance",
+  },
 ];
 
 const Footer = () => {
@@ -356,13 +374,18 @@ const Footer = () => {
               aria-label="Marketplace policies and legal guides"
               className="flex flex-wrap items-center justify-center gap-x-2 gap-y-2 text-center text-sm text-dark-4 dark:text-darkTheme-body-color"
             >
-              {marketplacePolicyLabels.map((label, index) => (
-                <React.Fragment key={label}>
+              {marketplacePolicyLinks.map((policy, index) => (
+                <React.Fragment key={policy.href}>
                   <li>
-                    <span className="cursor-default">{label}</span>
+                    <Link
+                      href={policy.href}
+                      className="transition-colors hover:text-blue hover:underline"
+                    >
+                      {policy.label}
+                    </Link>
                   </li>
 
-                  {index < marketplacePolicyLabels.length - 1 && (
+                  {index < marketplacePolicyLinks.length - 1 && (
                     <li aria-hidden="true">-</li>
                   )}
                 </React.Fragment>
