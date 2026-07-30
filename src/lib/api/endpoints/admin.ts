@@ -560,6 +560,20 @@ export const createProductCategory = async (payload: CreateProductCategoryPayloa
   return res.data;
 };
 
+export const uploadProductCategoryImage = async (
+  categoryId: string,
+  image: File,
+): Promise<ProductCategory> => {
+  const formData = new FormData();
+  formData.append("image", image);
+  const res = await axiosInstance.post<ProductCategory>(
+    `/admin/product-categories/${categoryId}/image`,
+    formData,
+    { headers: { "Content-Type": "multipart/form-data" } },
+  );
+  return res.data;
+};
+
 export const deleteProductCategory = async (categoryId: string): Promise<{ message: string }> => {
   const res = await axiosInstance.delete<{ message: string }>(`/admin/product-categories/${categoryId}`);
   return res.data;
@@ -655,6 +669,7 @@ export const adminService = {
   createBrand,
   deleteBrand,
   createProductCategory,
+  uploadProductCategoryImage,
   deleteProductCategory,
   listProductReviews,
 };

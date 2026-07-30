@@ -15,6 +15,24 @@ const nextConfig = {
   reactStrictMode: true,
   productionBrowserSourceMaps: false,
   generateEtags: true,
+  images: {
+    dangerouslyAllowLocalIP: true,
+    qualities: [75, 90],
+    remotePatterns: [
+      {
+        protocol: "http",
+        hostname: "127.0.0.1",
+        port: "8000",
+        pathname: "/uploads/**",
+      },
+      {
+        protocol: "http",
+        hostname: "localhost",
+        port: "8000",
+        pathname: "/uploads/**",
+      },
+    ],
+  },
 
   // Fix Turbopack workspace root warning
   turbopack: {
@@ -34,7 +52,7 @@ const nextConfig = {
       "default-src 'self'",
       "script-src 'self' 'unsafe-eval' 'unsafe-inline'",
       "style-src 'self' 'unsafe-inline'",
-      "img-src 'self' data: https: blob:",
+      `img-src 'self' data: https: blob: ${apiBaseUrl}`,
       "font-src 'self' data:",
       `connect-src 'self' ${apiBaseUrl} https:`,
       "frame-src 'none'",

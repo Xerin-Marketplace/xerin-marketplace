@@ -1,7 +1,21 @@
 import type { Product as ApiProduct, Category as ApiCategory } from "@/types/api/product";
 import type { Product as UiProduct } from "@/types/product";
+import { API_BASE_URL } from "@/lib/api/endpoints";
 
 const PRODUCT_PLACEHOLDER_IMAGE = "/images/products/placeholder.svg";
+
+const resolveProductImageUrl = (imageUrl: string) => {
+  if (
+    imageUrl.startsWith("http://") ||
+    imageUrl.startsWith("https://") ||
+    imageUrl.startsWith("data:") ||
+    imageUrl.startsWith("blob:")
+  ) {
+    return imageUrl;
+  }
+
+  return `${API_BASE_URL.replace(/\/$/, "")}/${imageUrl.replace(/^\//, "")}`;
+};
 
 const toNumber = (value: number | string | null | undefined, fallback = 0) => {
   if (typeof value === "number") return value;
@@ -16,13 +30,20 @@ const getProductImageUrl = (product: ApiProduct) => {
   const primaryImage = product.images?.find((image) => image.is_primary);
   const firstImage = primaryImage || product.images?.[0];
 
-  return firstImage?.image_url || PRODUCT_PLACEHOLDER_IMAGE;
+  return firstImage?.image_url
+    ? resolveProductImageUrl(firstImage.image_url)
+    : PRODUCT_PLACEHOLDER_IMAGE;
 };
 
 export const mapApiProductToUiProduct = (product: ApiProduct): UiProduct => {
   const price = toNumber(product.price);
   const discountedPrice = toNumber(product.sale_price, price);
-  const imageUrl = getProductImageUrl(product);
+  const primaryImageUrl = getProductImageUrl(product);
+  const galleryImages = product.images?.length
+    ? [...product.images]
+        .sort((a, b) => Number(b.is_primary) - Number(a.is_primary))
+        .map((image) => resolveProductImageUrl(image.image_url))
+    : [primaryImageUrl];
   const displayPrice = price;
   const displayDiscountedPrice = discountedPrice || price;
   const reviewCount = typeof product.review_count === "number" ? product.review_count : 0;
@@ -36,8 +57,8 @@ export const mapApiProductToUiProduct = (product: ApiProduct): UiProduct => {
     price: displayPrice,
     discountedPrice: displayDiscountedPrice,
     imgs: {
-      thumbnails: [imageUrl],
-      previews: [imageUrl],
+      thumbnails: galleryImages,
+      previews: galleryImages,
     },
   };
 };

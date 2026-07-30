@@ -1,6 +1,19 @@
 import React, { useState, useEffect } from "react";
 
-const CustomSelect = ({ options }) => {
+type SelectOption = {
+  label: string;
+  value: string;
+};
+
+type CustomSelectProps = {
+  options: SelectOption[];
+  onChange?: (option: SelectOption) => void;
+};
+
+const CustomSelect = ({
+  options,
+  onChange = () => undefined,
+}: CustomSelectProps) => {
   const [isOpen, setIsOpen] = useState(false);
   const [selectedOption, setSelectedOption] = useState(options[0]);
 
@@ -10,14 +23,22 @@ const CustomSelect = ({ options }) => {
 
   const handleOptionClick = (option) => {
     setSelectedOption(option);
+    onChange(option);
     toggleDropdown();
   };
+
+  useEffect(() => {
+    if (!options.some((option) => option.value === selectedOption?.value)) {
+      setSelectedOption(options[0]);
+      onChange(options[0]);
+    }
+  }, [options, selectedOption?.value, onChange]);
 
   useEffect(() => {
     // closing modal while clicking outside
     function handleClickOutside(event) {
       if (!event.target.closest(".dropdown-content")) {
-        toggleDropdown();
+        setIsOpen(false);
       }
     }
 
@@ -28,7 +49,7 @@ const CustomSelect = ({ options }) => {
     return () => {
       document.removeEventListener("mousedown", handleClickOutside);
     };
-  }, []);
+  }, [isOpen]);
 
   return (
     <div className="dropdown-content custom-select relative" style={{ width: "200px" }}>
@@ -41,7 +62,7 @@ const CustomSelect = ({ options }) => {
         {selectedOption.label}
       </div>
       <div className={`select-items ${isOpen ? "" : "select-hide"}`}>
-        {options.slice(1, -1).map((option, index) => (
+        {options.map((option, index) => (
           <div
             key={index}
             onClick={() => handleOptionClick(option)}
