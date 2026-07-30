@@ -11,11 +11,8 @@ import PriceDropdown from "./PriceDropdown";
 import { useCategories, useProducts } from "@/lib/products";
 import SingleGridItem from "../Shop/SingleGridItem";
 import SingleListItem from "../Shop/SingleListItem";
-import { useSearchParams } from "next/navigation";
 
 const ShopWithSidebar = () => {
-  const searchParams = useSearchParams();
-  const categoryId = searchParams.get("category_id") || undefined;
   const [productStyle, setProductStyle] = useState("grid");
   const [productSidebar, setProductSidebar] = useState(false);
   const [stickyMenu, setStickyMenu] = useState(false);
@@ -40,7 +37,7 @@ const ShopWithSidebar = () => {
     products: apiProducts,
     isLoading: productsLoading,
     error: productsError,
-  } = useProducts({ category_id: categoryId });
+  } = useProducts();
 
   const {
     categories: apiCategories,

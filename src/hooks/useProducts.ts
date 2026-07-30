@@ -4,7 +4,6 @@ import {
   getProduct as apiGetProduct,
   getMyProducts as apiGetMyProducts,
   getCategories as apiGetCategories,
-  getPopularCategories as apiGetPopularCategories,
   getBrands as apiGetBrands,
   createProduct as apiCreateProduct,
   updateProduct as apiUpdateProduct,
@@ -42,14 +41,6 @@ export const useCategories = () => {
   return useQuery({
     queryKey: ["categories"],
     queryFn: apiGetCategories,
-  });
-};
-
-export const usePopularCategories = (limit = 12) => {
-  return useQuery({
-    queryKey: ["popular-categories", limit],
-    queryFn: () => apiGetPopularCategories(limit),
-    staleTime: 60_000,
   });
 };
 

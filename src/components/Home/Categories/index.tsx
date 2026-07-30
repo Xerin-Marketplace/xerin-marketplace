@@ -1,6 +1,8 @@
 "use client";
 import { Swiper, SwiperSlide } from "swiper/react";
 import { useCallback, useRef, useEffect } from "react";
+import data from "./categoryData";
+import Image from "next/image";
 import Link from "next/link";
 
 // Import Swiper styles
@@ -8,15 +10,9 @@ import "swiper/css/navigation";
 import "swiper/css";
 import SingleItem from "./SingleItem";
 import { ROUTES } from "@/constants/links";
-import { usePopularCategories } from "@/hooks/useProducts";
 
 const Categories = () => {
   const sliderRef = useRef(null);
-  const {
-    data: categories = [],
-    isLoading,
-    isError,
-  } = usePopularCategories(12);
 
   const handlePrev = useCallback(() => {
     if (!sliderRef.current) return;
@@ -122,37 +118,38 @@ const Categories = () => {
             </div>
           </div>
 
-          {isLoading ? (
-            <div className="rounded-xl border border-gray-3 bg-white px-6 py-12 text-center text-dark-4">
-              Loading popular categories...
-            </div>
-          ) : isError ? (
-            <div className="rounded-xl border border-red-200 bg-red-50 px-6 py-10 text-center text-red-700">
-              Popular categories could not be loaded. Please retry.
-            </div>
-          ) : categories.length === 0 ? (
-            <div className="rounded-xl border border-gray-3 bg-white px-6 py-12 text-center text-dark-4">
-              No product categories are available yet.
-            </div>
-          ) : (
-            <Swiper
-              ref={sliderRef}
-              slidesPerView={6}
-              breakpoints={{
-                0: { slidesPerView: 3, spaceBetween: 8 },
-                480: { slidesPerView: 4, spaceBetween: 12 },
-                640: { slidesPerView: 5, spaceBetween: 16 },
-                1000: { slidesPerView: 6, spaceBetween: 20 },
-                1200: { slidesPerView: 6, spaceBetween: 24 },
-              }}
-            >
-              {categories.map((item) => (
-                <SwiperSlide key={String(item.id)}>
-                  <SingleItem item={item} />
-                </SwiperSlide>
-              ))}
-            </Swiper>
-          )}
+          <Swiper
+            ref={sliderRef}
+            slidesPerView={6}
+            breakpoints={{
+              0: {
+                slidesPerView: 3,
+                spaceBetween: 8,
+              },
+              480: {
+                slidesPerView: 4,
+                spaceBetween: 12,
+              },
+              640: {
+                slidesPerView: 5,
+                spaceBetween: 16,
+              },
+              1000: {
+                slidesPerView: 6,
+                spaceBetween: 20,
+              },
+              1200: {
+                slidesPerView: 6,
+                spaceBetween: 24,
+              },
+            }}
+          >
+            {data.map((item, key) => (
+              <SwiperSlide key={key}>
+                <SingleItem item={item} />
+              </SwiperSlide>
+            ))}
+          </Swiper>
 
           <div className="mt-6 sm:mt-10 text-center">
             <Link

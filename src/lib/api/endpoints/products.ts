@@ -8,7 +8,6 @@ import type {
   ProductImage,
   ProductImageRequest,
   ProductListQuery,
-  PopularCategory,
   ProductRequest,
   ProductTag,
   ProductTagRequest,
@@ -40,25 +39,6 @@ export const getMyProducts = async (query?: ProductListQuery | string | null): P
 export const getCategories = async (): Promise<Category[]> => {
   const res = await axiosInstance.get<Category[]>(API_ENDPOINTS.products.categories);
   return res.data;
-};
-
-export const getPopularCategories = async (
-  limit = 12,
-): Promise<PopularCategory[]> => {
-  const res = await axiosInstance.get<PopularCategory[]>(
-    "/products/categories/popular",
-    { params: { limit } },
-  );
-  return res.data;
-};
-
-export const trackCategoryEngagement = async (
-  categoryId: ID,
-  action: "view" | "search" = "view",
-): Promise<void> => {
-  await axiosInstance.post(`/products/categories/${categoryId}/engagement`, {
-    action,
-  });
 };
 
 export const getBrands = async (): Promise<Brand[]> => {
@@ -99,30 +79,6 @@ export const uploadProductImage = async (
 export const getProductImages = async (productId: ID): Promise<ProductImage[]> => {
   const res = await axiosInstance.get<ProductImage[]>(
     API_ENDPOINTS.products.images(productId)
-  );
-  return res.data;
-};
-
-export const uploadProductImages = async (
-  productId: ID,
-  images: File[],
-): Promise<ProductImage[]> => {
-  const formData = new FormData();
-  images.forEach((image) => formData.append("images", image));
-  const res = await axiosInstance.post<ProductImage[]>(
-    `/products/${productId}/images/upload`,
-    formData,
-    { headers: { "Content-Type": "multipart/form-data" } },
-  );
-  return res.data;
-};
-
-export const deleteProductImage = async (
-  productId: ID,
-  imageId: ID,
-): Promise<ApiMessageResponse> => {
-  const res = await axiosInstance.delete<ApiMessageResponse>(
-    `/products/${productId}/images/${imageId}`,
   );
   return res.data;
 };
@@ -168,16 +124,12 @@ export const productsApi = {
   getById: getProduct,
   getMyProducts,
   getCategories,
-  getPopularCategories,
-  trackCategoryEngagement,
   getBrands,
   create: createProduct,
   update: updateProduct,
   delete: deleteProduct,
   uploadImage: uploadProductImage,
   getImages: getProductImages,
-  uploadImages: uploadProductImages,
-  deleteImage: deleteProductImage,
   addVariant: addProductVariant,
   getVariants: getProductVariants,
   addTag: addProductTag,
