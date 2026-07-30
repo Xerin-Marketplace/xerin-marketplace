@@ -14,9 +14,11 @@ import Image from "next/image";
 import { formatCurrency } from "@/lib/formatCurrency";
 import { useAuthStore } from "@/store/useAuthStore";
 import { useRouter } from "next/navigation";
+import { usePopularCategories } from "@/hooks/useProducts";
 
 const Header = () => {
   const [searchQuery, setSearchQuery] = useState("");
+  const [selectedCategoryId, setSelectedCategoryId] = useState("0");
   const [navigationOpen, setNavigationOpen] = useState(false);
   const [stickyMenu, setStickyMenu] = useState(false);
   const router = useRouter();
@@ -26,6 +28,21 @@ const Header = () => {
   const hasHydrated = useAuthStore((state) => state.hasHydrated);
 
   const { items: cartItems, total: totalPrice } = useCartView();
+  const { data: popularCategories = [] } = usePopularCategories(50);
+  const topCategories = popularCategories.slice(0, 5);
+  const navigationMenuData = menuData.map((menuItem) =>
+    menuItem.title === "Categories"
+      ? {
+          ...menuItem,
+          submenu: topCategories.map((category) => ({
+            id: String(category.id),
+            title: category.name,
+            newTab: false,
+            path: `/shop-with-sidebar?category_id=${encodeURIComponent(String(category.id))}`,
+          })),
+        }
+      : menuItem,
+  );
 
   const accountHref = getAccountHref(isAuthenticated, user);
   const accountLabel = getAccountLabel(isAuthenticated, user);
@@ -50,13 +67,10 @@ const Header = () => {
 
   const options = [
     { label: "All Categories", value: "0" },
-    { label: "Electronics", value: "electronics" },
-    { label: "Fashion", value: "fashion" },
-    { label: "Home & Living", value: "home-living" },
-    { label: "Beauty & Health", value: "beauty-health" },
-    { label: "Groceries", value: "groceries" },
-    { label: "Phones & Tablets", value: "phones-tablets" },
-    { label: "Computers", value: "computers" },
+    ...popularCategories.map((category) => ({
+      label: category.name,
+      value: String(category.id),
+    })),
   ];
 
   return (
@@ -92,11 +106,21 @@ const Header = () => {
                 onSubmit={(event) => {
                   event.preventDefault();
                   const query = searchQuery.trim();
-                  if (query) router.push(`/search?q=${encodeURIComponent(query)}`);
+                  const searchParams = new URLSearchParams();
+                  if (query) searchParams.set("q", query);
+                  if (selectedCategoryId !== "0") {
+                    searchParams.set("category_id", selectedCategoryId);
+                  }
+                  if (searchParams.size) {
+                    router.push(`/search?${searchParams.toString()}`);
+                  }
                 }}
               >
                 <div className="flex items-center">
-                  <CustomSelect options={options} />
+                  <CustomSelect
+                    options={options}
+                    onChange={(option) => setSelectedCategoryId(option.value)}
+                  />
 
                   <div className="relative max-w-[333px] sm:min-w-[333px] lg:min-w-[220px] xl:min-w-[333px] w-full">
                     {/* <!-- divider --> */}
@@ -405,7 +429,7 @@ const Header = () => {
               {/* <!-- Main Nav Start --> */}
               <nav>
                 <ul className="flex xl:items-center flex-col xl:flex-row gap-5 xl:gap-6">
-                  {menuData.map((menuItem, i) =>
+                  {navigationMenuData.map((menuItem, i) =>
                     menuItem.submenu ? (
                       <Dropdown
                         key={i}
@@ -497,7 +521,7 @@ const Header = () => {
           <div className="max-w-[1170px] mx-auto px-4 sm:px-7.5 py-4">
             <nav>
               <ul className="flex flex-col gap-1">
-                {menuData.map((menuItem, i) =>
+                {navigationMenuData.map((menuItem, i) =>
                   menuItem.submenu ? (
                     <li key={i} className="flex flex-col">
                       <span className="px-3 py-2.5 text-custom-sm font-semibold text-dark dark:text-darkTheme-body-color uppercase text-dark-4">

@@ -8,10 +8,12 @@ import { useProducts } from "@/lib/products";
 export default function SearchPage() {
   const params = useSearchParams();
   const query = params.get("q")?.trim() ?? "";
+  const categoryId = params.get("category_id")?.trim() || undefined;
   const page = Math.max(1, Number(params.get("page") ?? 1));
   const pageSize = 20;
   const result = useProducts({
     search: query || undefined,
+    category_id: categoryId,
     skip: (page - 1) * pageSize,
     limit: pageSize,
   });

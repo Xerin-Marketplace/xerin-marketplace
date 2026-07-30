@@ -8,6 +8,7 @@ import type {
   ProductImage,
   ProductImageRequest,
   ProductListQuery,
+  PopularCategory,
   ProductRequest,
   ProductTag,
   ProductTagRequest,
@@ -20,12 +21,20 @@ export const getProducts = async (query?: ProductListQuery): Promise<Product[]> 
   const res = await axiosInstance.get<Product[]>(API_ENDPOINTS.products.list, {
     params: query,
   });
-  return res.data;
+  return Promise.all(
+    res.data.map(async (product) => ({
+      ...product,
+      images: await getProductImages(product.id).catch(() => []),
+    })),
+  );
 };
 
 export const getProduct = async (id: ID): Promise<Product> => {
   const res = await axiosInstance.get<Product>(API_ENDPOINTS.products.byId(id));
-  return res.data;
+  return {
+    ...res.data,
+    images: await getProductImages(id).catch(() => []),
+  };
 };
 
 export const getMyProducts = async (query?: ProductListQuery | string | null): Promise<Product[]> => {
@@ -39,6 +48,28 @@ export const getMyProducts = async (query?: ProductListQuery | string | null): P
 export const getCategories = async (): Promise<Category[]> => {
   const res = await axiosInstance.get<Category[]>(API_ENDPOINTS.products.categories);
   return res.data;
+};
+
+export const getPopularCategories = async (
+  limit = 12,
+): Promise<PopularCategory[]> => {
+  const categories = await getCategories();
+  return categories.slice(0, limit).map((category) => ({
+    ...category,
+    image_url: category.image_url ?? null,
+    product_count: 0,
+    search_count: 0,
+    view_count: 0,
+    popularity_score: 0,
+  }));
+};
+
+export const trackCategoryEngagement = async (
+  categoryId: ID,
+  action: "view" | "search" = "view",
+): Promise<void> => {
+  void categoryId;
+  void action;
 };
 
 export const getBrands = async (): Promise<Brand[]> => {
@@ -79,6 +110,30 @@ export const uploadProductImage = async (
 export const getProductImages = async (productId: ID): Promise<ProductImage[]> => {
   const res = await axiosInstance.get<ProductImage[]>(
     API_ENDPOINTS.products.images(productId)
+  );
+  return res.data;
+};
+
+export const uploadProductImages = async (
+  productId: ID,
+  imageUrls: string[],
+): Promise<ProductImage[]> => {
+  return Promise.all(
+    imageUrls.map((imageUrl, index) =>
+      uploadProductImage(productId, {
+        image_url: imageUrl,
+        is_primary: index === 0,
+      }),
+    ),
+  );
+};
+
+export const deleteProductImage = async (
+  productId: ID,
+  imageId: ID,
+): Promise<ApiMessageResponse> => {
+  const res = await axiosInstance.delete<ApiMessageResponse>(
+    `/products/${productId}/images/${imageId}`,
   );
   return res.data;
 };
@@ -124,12 +179,16 @@ export const productsApi = {
   getById: getProduct,
   getMyProducts,
   getCategories,
+  getPopularCategories,
+  trackCategoryEngagement,
   getBrands,
   create: createProduct,
   update: updateProduct,
   delete: deleteProduct,
   uploadImage: uploadProductImage,
   getImages: getProductImages,
+  uploadImages: uploadProductImages,
+  deleteImage: deleteProductImage,
   addVariant: addProductVariant,
   getVariants: getProductVariants,
   addTag: addProductTag,
