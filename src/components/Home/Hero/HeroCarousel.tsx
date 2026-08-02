@@ -57,7 +57,7 @@ const HeroCarousal = () => {
 
           <div className="flex-shrink-0">
             <Image
-              src="/images/hero/hero-01.png"
+              src="/images/hero/headphon.png"
               alt="Xerin Market shopping experience"
               width={351}
               height={358}
@@ -102,7 +102,7 @@ const HeroCarousal = () => {
 
           <div className="flex-shrink-0">
             <Image
-              src="/images/hero/hero-01.png"
+              src="/images/hero/Tshirtremove.png"
               alt="Sell on Xerin Market"
               width={351}
               height={358}

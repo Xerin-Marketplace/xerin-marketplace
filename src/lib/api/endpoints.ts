@@ -1,5 +1,5 @@
 export const API_BASE_URL =
-  process.env.NEXT_PUBLIC_API_BASE_URL || "http://localhost:8000";
+  process.env.NEXT_PUBLIC_API_BASE_URL || "https://api.xerinmarketplace.com/api/v1";
 
 export const API_DOCS_URL =
   process.env.NEXT_PUBLIC_API_DOCS_URL || `${API_BASE_URL}/docs`;
@@ -25,7 +25,7 @@ export const API_ENDPOINTS = {
 
   sellers: {
     register: "/sellers/register",
-    businessCategories: "/sellers/business-categories",
+    businessCategories: "/admin/business-categories",
     me: "/sellers/me",
     profile: "/sellers/profile",
     kycDocuments: "/sellers/kyc-documents",

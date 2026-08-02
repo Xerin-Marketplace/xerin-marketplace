@@ -59,7 +59,7 @@ const Hero = () => {
 
                   <div className="flex-shrink-0 hidden sm:block">
                     <Image
-                      src="/images/hero/hero-02.png"
+                      src="/images/hero/phoneremove.png"
                       alt="Xerin Market promotion"
                       width={123}
                       height={161}
@@ -99,7 +99,7 @@ const Hero = () => {
 
                   <div className="flex-shrink-0 hidden sm:block">
                     <Image
-                      src="/images/hero/hero-01.png"
+                      src="/images/hero/headremove.png"
                       alt="Xerin Market promotion"
                       width={123}
                       height={161}

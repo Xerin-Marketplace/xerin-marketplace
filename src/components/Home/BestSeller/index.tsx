@@ -1,83 +1,15 @@
 "use client";
 
 import React from "react";
-import SingleItem from "./SingleItem";
-import Image from "next/image";
-import Link from "next/link";
-import { ROUTES } from "@/constants/links";
-import { useProducts } from "@/lib/products";
 
-const BestSeller = () => {
-  const { products, isLoading, error } = useProducts({ limit: 6 });
+const NewArrival = () => {
   return (
-    <section className="overflow-hidden pt-15 lg:pt-17.5">
+    <section className="overflow-hidden pt-10 sm:pt-15 lg:pt-17.5">
       <div className="max-w-[1170px] w-full mx-auto px-4 sm:px-8 xl:px-0">
-        <div className="mb-7 rounded-[28px] border border-gray-3 dark:border-darkTheme-border-color bg-white dark:bg-darkTheme-card px-5 sm:px-8 lg:px-10 py-6 sm:py-8 shadow-sm">
-          <div className="flex flex-col gap-5 lg:flex-row lg:items-end lg:justify-between">
-            <div className="max-w-[720px]">
-              <span className="inline-flex items-center gap-2 rounded-full bg-orange/10 px-4 py-2 text-sm font-medium text-orange mb-4">
-                <Image
-                  src="/images/icons/icon-07.svg"
-                  alt="Latest products"
-                  width={16}
-                  height={16}
-                />
-                Latest products
-              </span>
-              <h2 className="font-semibold text-2xl sm:text-3xl xl:text-heading-4 text-dark dark:text-white mb-3">
-                Newly listed marketplace products
-              </h2>
-              <p className="max-w-[620px] text-dark-4 dark:text-darkTheme-secondary-muted">
-                Recently approved products from the marketplace catalog, ordered by listing date.
-              </p>
-            </div>
-
-            <div className="flex flex-wrap gap-3">
-              <Link
-                href={ROUTES.shop}
-                className="inline-flex font-medium text-custom-sm py-2.5 px-6 rounded-md bg-dark dark:bg-darkTheme-tertiary-bg text-white ease-out duration-200 hover:bg-opacity-90"
-              >
-                Shop latest products
-              </Link>
-
-              <Link
-                href={ROUTES.shop}
-                className="inline-flex font-medium text-custom-sm py-2.5 px-6 rounded-md border-gray-3 dark:border-darkTheme-border-color border bg-gray-1 dark:bg-darkTheme-secondary-bg text-dark dark:text-darkTheme-body-color ease-out duration-200 hover:bg-dark hover:text-white hover:border-transparent dark:hover:bg-darkTheme-tertiary-bg"
-              >
-                View all
-              </Link>
-            </div>
-          </div>
-        </div>
-
-        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6 lg:gap-7.5">
-          {isLoading && <CatalogState text="Loading marketplace products..." />}
-          {error && <CatalogState error text="Marketplace products could not be loaded." />}
-          {!isLoading && !error && products.length === 0 && (
-            <CatalogState text="No products are available yet." />
-          )}
-          {products.map((item) => (
-            <SingleItem item={item} key={item.id} />
-          ))}
-        </div>
-
-        <div className="text-center mt-10 lg:mt-12.5">
-          <Link
-            href={ROUTES.shop}
-            className="inline-flex font-medium text-custom-sm py-3 px-7 sm:px-12.5 rounded-md border-gray-3 dark:border-darkTheme-border-color border bg-gray-1 dark:bg-darkTheme-secondary-bg text-dark dark:text-darkTheme-body-color ease-out duration-200 hover:bg-dark hover:text-white hover:border-transparent dark:hover:bg-darkTheme-tertiary-bg"
-          >
-            View All
-          </Link>
-        </div>
+        {/* Intentionally left empty */}
       </div>
     </section>
   );
 };
 
-const CatalogState = ({ text, error = false }: { text: string; error?: boolean }) => (
-  <div className={`col-span-full rounded-xl border bg-white px-6 py-10 text-center text-sm ${error ? "border-red-200 text-red-600" : "border-gray-3 text-dark-4"}`}>
-    {text}
-  </div>
-);
-
-export default BestSeller;
+export default NewArrival;
