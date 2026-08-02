@@ -429,29 +429,41 @@ const Header = () => {
               {/* <!-- Main Nav Start --> */}
               <nav>
                 <ul className="flex xl:items-center flex-col xl:flex-row gap-5 xl:gap-6">
-                  {navigationMenuData.map((menuItem, i) =>
-                    menuItem.submenu ? (
-                      <Dropdown
-                        key={i}
-                        menuItem={menuItem}
-                        stickyMenu={stickyMenu}
-                      />
-                    ) : (
-                      <li
-                        key={i}
-                        className="group relative before:w-0 before:h-[3px] before:bg-blue before:absolute before:left-0 before:top-0 before:rounded-b-[3px] before:ease-out before:duration-200 hover:before:w-full "
-                      >
-                        <Link
-                          href={menuItem.path}
-                          className={`hover:text-blue text-custom-sm font-medium text-dark dark:text-darkTheme-body-color flex ${
-                            stickyMenu ? "xl:py-4" : "xl:py-6"
-                          }`}
-                        >
-                          {menuItem.title}
-                        </Link>
-                      </li>
-                    )
-                  )}
+                  <>
+  {/* Home + Shop */}
+  {menuData.map((menuItem, i) => (
+    <li
+      key={i}
+      className="group relative before:w-0 before:h-[3px] before:bg-blue before:absolute before:left-0 before:top-0 before:rounded-b-[3px] before:ease-out before:duration-200 hover:before:w-full"
+    >
+      <Link
+        href={menuItem.path}
+        className={`hover:text-blue text-custom-sm font-medium text-dark dark:text-darkTheme-body-color flex ${
+          stickyMenu ? "xl:py-4" : "xl:py-6"
+        }`}
+      >
+        {menuItem.title}
+      </Link>
+    </li>
+  ))}
+
+  {/* Categories as menu items */}
+  {topCategories.map((category) => (
+    <li
+      key={category.id}
+      className="group relative before:w-0 before:h-[3px] before:bg-blue before:absolute before:left-0 before:top-0 before:rounded-b-[3px] before:ease-out before:duration-200 hover:before:w-full"
+    >
+      <Link
+        href={`/shop-with-sidebar?category_id=${category.id}`}
+        className={`hover:text-blue text-custom-sm font-medium text-dark dark:text-darkTheme-body-color flex ${
+          stickyMenu ? "xl:py-4" : "xl:py-6"
+        }`}
+      >
+        {category.name}
+      </Link>
+    </li>
+  ))}
+</>
                 </ul>
               </nav>
               {/* //   <!-- Main Nav End --> */}

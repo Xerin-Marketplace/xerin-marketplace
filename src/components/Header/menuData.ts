@@ -1,16 +1,21 @@
-import { Menu } from "@/types/Menu";
-
 export const menuData: Menu[] = [
   {
     id: 1,
     title: "Home",
-    newTab: false,
     path: "/",
+    newTab: false,
   },
   {
     id: 2,
     title: "Shop",
-    newTab: false,
     path: "/shop-with-sidebar",
+    newTab: false,
+  },
+  {
+    id: 3,
+    title: "Categories",
+    path: "#",
+    newTab: false,
+    submenu: [],
   },
 ];
