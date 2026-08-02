@@ -26,7 +26,7 @@ const HeroCarousal = () => {
     >
       <SwiperSlide>
         <div className="flex items-center flex-col-reverse sm:flex-row">
-          <div className="max-w-[430px] py-5 sm:py-10 lg:py-24.5 px-4 sm:pl-7.5 lg:pl-12.5 text-center sm:text-left">
+          <div className="max-w-[600px] py-5 sm:py-10 lg:py-24.5 px-4 sm:pl-7.5 lg:pl-12.5 text-center sm:text-left">
             <div className="flex items-center justify-center sm:justify-start gap-3 sm:gap-4 mb-4 sm:mb-7.5">
               <span className="block font-semibold text-2xl sm:text-heading-3 lg:text-heading-1 text-blue">
                 Xerin
@@ -71,7 +71,7 @@ const HeroCarousal = () => {
 
       <SwiperSlide>
         <div className="flex items-center flex-col-reverse sm:flex-row">
-          <div className="max-w-[430px] py-5 sm:py-10 lg:py-26 px-4 sm:pl-7.5 lg:pl-12.5 text-center sm:text-left">
+          <div className="max-w-[600px] py-5 sm:py-10 lg:py-26 px-4 sm:pl-7.5 lg:pl-12.5 text-center sm:text-left">
             <div className="flex items-center justify-center sm:justify-start gap-3 sm:gap-4 mb-4 sm:mb-7.5">
               <span className="block font-semibold text-2xl sm:text-heading-3 lg:text-heading-1 text-blue">
                 Sell

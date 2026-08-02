@@ -1,48 +1,15 @@
+"use client";
+
 import React from "react";
-import Image from "next/image";
 
-const featureData = [
-  {
-    img: "/images/icons/icon-01.svg",
-    title: "Marketplace Sellers",
-    description: "Browse active marketplace listings",
-  },
-  {
-    img: "/images/icons/icon-02.svg",
-    title: "Delivery Options",
-    description: "Availability confirmed at checkout",
-  },
-  {
-    img: "/images/icons/icon-03.svg",
-    title: "Configured Payments",
-    description: "Supported methods shown at checkout",
-  },
-  {
-    img: "/images/icons/icon-04.svg",
-    title: "Buyer Support",
-    description: "Help with orders, returns, and refunds",
-  },
-];
-
-const HeroFeature = () => {
+const NewArrival = () => {
   return (
-    <div className="max-w-[1060px] w-full mx-auto px-4 sm:px-8 xl:px-0">
-      <div className="grid grid-cols-2 lg:grid-cols-4 gap-3 sm:gap-6 xl:gap-8 mt-6 sm:mt-10">
-        {featureData.map((item, key) => (
-          <div className="flex items-center gap-2 sm:gap-4 p-2.5 sm:p-4 rounded-lg bg-white/60 dark:bg-darkTheme-card/60 backdrop-blur-sm" key={key}>
-            <div className="flex-shrink-0 w-11 h-11 rounded-full bg-blue/10 flex items-center justify-center">
-              <Image src={item.img} alt="icons" width={24} height={24} className="object-contain" style={{ width: "auto", height: "24px" }} />
-            </div>
-
-            <div className="min-w-0">
-              <h3 className="font-medium text-sm sm:text-base text-dark dark:text-white truncate">{item.title}</h3>
-              <p className="text-2xs sm:text-sm text-dark-4 dark:text-darkTheme-secondary-muted hidden sm:block">{item.description}</p>
-            </div>
-          </div>
-        ))}
+    <section className="overflow-hidden pt-10 sm:pt-15 lg:pt-17.5">
+      <div className="max-w-[1170px] w-full mx-auto px-4 sm:px-8 xl:px-0">
+        {/* Intentionally left empty */}
       </div>
-    </div>
+    </section>
   );
 };
 
-export default HeroFeature;
+export default NewArrival;

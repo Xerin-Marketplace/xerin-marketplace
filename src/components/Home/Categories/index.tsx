@@ -35,7 +35,7 @@ const Categories = () => {
   }, []);
 
   return (
-    <section className="overflow-hidden pt-10 sm:pt-17.5">
+    <section className="overflow-hidden pt-10 sm:pt-8">
       <div className="max-w-[1170px] w-full mx-auto px-4 sm:px-8 xl:px-0 pb-10 sm:pb-15 border-b border-gray-3">
         <div className="swiper categories-carousel common-carousel">
           {/* <!-- section title --> */}
