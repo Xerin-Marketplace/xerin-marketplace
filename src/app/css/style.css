@@ -249,3 +249,10 @@ input[type='search']::-webkit-search-results-decoration {
 .dark .admin-dashboard-shell .text-gray-400 {
   color: #94a3b8 !important;
 }
+
+/* Xerin storefront sizing helpers */
+@layer utilities {
+  .storefront-shell {
+    @apply mx-auto w-full max-w-[1440px] px-4 sm:px-6 lg:px-8 xl:px-10 2xl:px-6;
+  }
+}

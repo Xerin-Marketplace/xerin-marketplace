@@ -77,7 +77,7 @@ const Header = () => {
         stickyMenu && "shadow"
       }`}
     >
-      <div className="max-w-[1170px] mx-auto px-4 sm:px-7.5 xl:px-0">
+      <div className="max-w-[1440px] mx-auto px-4 sm:px-6 lg:px-8 xl:px-10 2xl:px-6">
         {/* <!-- header top start --> */}
         <div
           className={`flex flex-col lg:flex-row gap-3 lg:gap-5 items-stretch lg:items-center xl:justify-between ease-out duration-200 ${
@@ -418,7 +418,7 @@ const Header = () => {
       </div>
 
       <div className="border-t border-gray-3 hidden xl:block">
-        <div className="max-w-[1170px] mx-auto px-4 sm:px-7.5 xl:px-0">
+        <div className="max-w-[1440px] mx-auto px-4 sm:px-6 lg:px-8 xl:px-10 2xl:px-6">
           <div className="flex items-center justify-between">
             {/* <!--=== Main Nav Start ===--> */}
             <div
@@ -528,7 +528,7 @@ const Header = () => {
       {/* <!-- Mobile Navigation Drawer --> */}
       {navigationOpen && (
         <div className="xl:hidden border-t border-gray-3 dark:border-darkTheme-border-color bg-white dark:bg-darkTheme-card shadow-lg">
-          <div className="max-w-[1170px] mx-auto px-4 sm:px-7.5 py-4">
+          <div className="max-w-[1440px] mx-auto px-4 sm:px-7.5 py-4">
             <nav>
               <ul className="flex flex-col gap-1">
                 {primaryMenuItems.map((menuItem) => (

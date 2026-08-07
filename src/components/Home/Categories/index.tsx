@@ -61,8 +61,8 @@ const Categories = () => {
   const showingTo = products.length ? showingFrom + products.length - 1 : 0;
 
   return (
-    <section className="overflow-hidden bg-gray-1 py-10 dark:bg-darkTheme-bg sm:py-1">
-      <div className="mx-auto w-full max-w-[1170px] px-4 sm:px-8 xl:px-0">
+    <section className="overflow-hidden bg-gray-1 pt-1 pb-2 dark:bg-darkTheme-bg sm:pt-12 sm:pb 1">
+      <div className="mx-auto w-full max-w-[1440px] px-4 sm:px-6 lg:px-8 xl:px-10 2xl:px-6">
         {/* Heading */}
         <div className="mb-3 flex flex-col gap-5 lg:flex-row lg:items-end lg:justify-between">
           <div>
@@ -338,7 +338,7 @@ const Categories = () => {
 
         {/* Pagination */}
         {!isLoading && !isError && (page > 1 || hasNextPage) && (
-          <div className="mt-10 flex items-center justify-center gap-3">
+          <div className="mt-6 flex items-center justify-center gap-3">
             <button
               type="button"
               onClick={() => {

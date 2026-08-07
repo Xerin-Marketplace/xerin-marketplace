@@ -25,7 +25,7 @@ const steps = [
 const CommerceFlow = () => {
   return (
     <section className="overflow-hidden pt-15 lg:pt-17.5">
-      <div className="max-w-[1170px] w-full mx-auto px-4 sm:px-8 xl:px-0">
+      <div className="max-w-[1440px] w-full mx-auto px-4 sm:px-6 lg:px-8 xl:px-10 2xl:px-6">
         <div className="relative overflow-hidden rounded-[28px] border border-gray-3 dark:border-darkTheme-border-color bg-white dark:bg-darkTheme-card shadow-sm">
           <div className="absolute inset-x-0 top-0 h-1 bg-gradient-to-r from-orange via-blue to-teal" />
 
