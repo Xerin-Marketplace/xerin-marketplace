@@ -61,12 +61,12 @@ const Categories = () => {
   const showingTo = products.length ? showingFrom + products.length - 1 : 0;
 
   return (
-    <section className="overflow-hidden bg-gray-1 py-10 dark:bg-darkTheme-bg sm:py-14">
+    <section className="overflow-hidden bg-gray-1 py-10 dark:bg-darkTheme-bg sm:py-1">
       <div className="mx-auto w-full max-w-[1170px] px-4 sm:px-8 xl:px-0">
         {/* Heading */}
-        <div className="mb-7 flex flex-col gap-5 lg:flex-row lg:items-end lg:justify-between">
+        <div className="mb-3 flex flex-col gap-5 lg:flex-row lg:items-end lg:justify-between">
           <div>
-            <span className="mb-1.5 flex items-center gap-2 text-sm font-medium text-orange sm:text-base">
+            <span className="mb-1 flex items-center gap-2 text-sm font-medium text-orange sm:text-base">
               <svg
                 width="20"
                 height="20"
@@ -93,7 +93,7 @@ const Categories = () => {
             <h2 className="text-xl font-semibold text-dark dark:text-white sm:text-2xl xl:text-heading-5">
               Explore products from our sellers
             </h2>
-            <p className="mt-2 max-w-2xl text-sm text-dark-4 dark:text-darkTheme-secondary-muted">
+            <p className="mt-1 max-w-2xl text-sm text-dark-4 dark:text-darkTheme-secondary-muted">
               Browse live products published by sellers. Search by product name, description or SKU,
               or filter the catalog by category.
             </p>

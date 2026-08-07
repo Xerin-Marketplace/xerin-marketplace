@@ -23,14 +23,14 @@ const Testimonials = () => {
   }, []);
 
   return (
-    <section className="overflow-hidden pb-16.5">
+    <section className="overflow-hidden pb-5">
       <div className="max-w-[1170px] w-full mx-auto px-4 sm:px-8 xl:px-0">
         <div className="">
           <div className="swiper testimonial-carousel common-carousel p-5">
             {/* <!-- section title --> */}
-            <div className="mb-10 flex items-center justify-between">
+            <div className="mb-1 flex items-center justify-between">
               <div>
-                <span className="flex items-center gap-2.5 font-medium text-dark mb-1.5">
+                <span className="flex items-center gap-2 font-medium text-dark mb-1.5">
                   <Image
                     src="/images/icons/icon-08.svg"
                     alt="icon"
