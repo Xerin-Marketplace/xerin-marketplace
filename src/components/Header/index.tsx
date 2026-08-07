@@ -4,7 +4,6 @@ import Link from "next/link";
 import { ROUTES } from "@/constants/links";
 import CustomSelect from "./CustomSelect";
 import { menuData } from "./menuData";
-import Dropdown from "./Dropdown";
 import { useCartView } from "@/hooks/useCartActions";
 import { useCartModalContext } from "@/app/context/CartSidebarModalContext";
 import { useTheme } from "@/app/context/ThemeContext";
@@ -14,7 +13,7 @@ import Image from "next/image";
 import { formatCurrency } from "@/lib/formatCurrency";
 import { useAuthStore } from "@/store/useAuthStore";
 import { useRouter } from "next/navigation";
-import { usePopularCategories } from "@/hooks/useProducts";
+import { useCategories } from "@/hooks/useProducts";
 
 const Header = () => {
   const [searchQuery, setSearchQuery] = useState("");
@@ -28,20 +27,17 @@ const Header = () => {
   const hasHydrated = useAuthStore((state) => state.hasHydrated);
 
   const { items: cartItems, total: totalPrice } = useCartView();
-  const { data: popularCategories = [] } = usePopularCategories(50);
-  const topCategories = popularCategories.slice(0, 5);
-  const navigationMenuData = menuData.map((menuItem) =>
-    menuItem.title === "Categories"
-      ? {
-          ...menuItem,
-          submenu: topCategories.map((category) => ({
-            id: String(category.id),
-            title: category.name,
-            newTab: false,
-            path: `/shop-with-sidebar?category_id=${encodeURIComponent(String(category.id))}`,
-          })),
-        }
-      : menuItem,
+
+  // Product categories are loaded from the public backend endpoint:
+  // GET /api/v1/products/categories
+  // Admin-created product categories use the same `categories` table, so the
+  // header automatically reflects categories created or removed by an admin.
+  const { data: categories = [] } = useCategories();
+
+  // Keep only the permanent navigation entries (Home + Shop). The old static
+  // "Categories" item is replaced by the live categories returned by the API.
+  const primaryMenuItems = menuData.filter(
+    (menuItem) => menuItem.title !== "Categories",
   );
 
   const accountHref = getAccountHref(isAuthenticated, user);
@@ -63,11 +59,13 @@ const Header = () => {
 
   useEffect(() => {
     window.addEventListener("scroll", handleStickyMenu);
-  });
+    return () => window.removeEventListener("scroll", handleStickyMenu);
+  }, []);
 
+  // Search dropdown: always show every product category registered by admin.
   const options = [
     { label: "All Categories", value: "0" },
-    ...popularCategories.map((category) => ({
+    ...categories.map((category) => ({
       label: category.name,
       value: String(category.id),
     })),
@@ -430,40 +428,40 @@ const Header = () => {
               <nav>
                 <ul className="flex xl:items-center flex-col xl:flex-row gap-5 xl:gap-6">
                   <>
-  {/* Home + Shop */}
-  {menuData.map((menuItem, i) => (
-    <li
-      key={i}
-      className="group relative before:w-0 before:h-[3px] before:bg-blue before:absolute before:left-0 before:top-0 before:rounded-b-[3px] before:ease-out before:duration-200 hover:before:w-full"
-    >
-      <Link
-        href={menuItem.path}
-        className={`hover:text-blue text-custom-sm font-medium text-dark dark:text-darkTheme-body-color flex ${
-          stickyMenu ? "xl:py-4" : "xl:py-6"
-        }`}
-      >
-        {menuItem.title}
-      </Link>
-    </li>
-  ))}
+                    {/* Permanent navigation: Home + Shop */}
+                    {primaryMenuItems.map((menuItem) => (
+                      <li
+                        key={menuItem.id}
+                        className="group relative before:w-0 before:h-[3px] before:bg-blue before:absolute before:left-0 before:top-0 before:rounded-b-[3px] before:ease-out before:duration-200 hover:before:w-full"
+                      >
+                        <Link
+                          href={menuItem.path}
+                          className={`hover:text-blue text-custom-sm font-medium text-dark dark:text-darkTheme-body-color flex ${
+                            stickyMenu ? "xl:py-4" : "xl:py-6"
+                          }`}
+                        >
+                          {menuItem.title}
+                        </Link>
+                      </li>
+                    ))}
 
-  {/* Categories as menu items */}
-  {topCategories.map((category) => (
-    <li
-      key={category.id}
-      className="group relative before:w-0 before:h-[3px] before:bg-blue before:absolute before:left-0 before:top-0 before:rounded-b-[3px] before:ease-out before:duration-200 hover:before:w-full"
-    >
-      <Link
-        href={`/shop-with-sidebar?category_id=${category.id}`}
-        className={`hover:text-blue text-custom-sm font-medium text-dark dark:text-darkTheme-body-color flex ${
-          stickyMenu ? "xl:py-4" : "xl:py-6"
-        }`}
-      >
-        {category.name}
-      </Link>
-    </li>
-  ))}
-</>
+                    {/* Every product category registered by admin */}
+                    {categories.map((category) => (
+                      <li
+                        key={String(category.id)}
+                        className="group relative before:w-0 before:h-[3px] before:bg-blue before:absolute before:left-0 before:top-0 before:rounded-b-[3px] before:ease-out before:duration-200 hover:before:w-full"
+                      >
+                        <Link
+                          href={`/shop-with-sidebar?category_id=${encodeURIComponent(String(category.id))}`}
+                          className={`hover:text-blue text-custom-sm font-medium text-dark dark:text-darkTheme-body-color flex ${
+                            stickyMenu ? "xl:py-4" : "xl:py-6"
+                          }`}
+                        >
+                          {category.name}
+                        </Link>
+                      </li>
+                    ))}
+                  </>
                 </ul>
               </nav>
               {/* //   <!-- Main Nav End --> */}
@@ -533,35 +531,29 @@ const Header = () => {
           <div className="max-w-[1170px] mx-auto px-4 sm:px-7.5 py-4">
             <nav>
               <ul className="flex flex-col gap-1">
-                {navigationMenuData.map((menuItem, i) =>
-                  menuItem.submenu ? (
-                    <li key={i} className="flex flex-col">
-                      <span className="px-3 py-2.5 text-custom-sm font-semibold text-dark dark:text-darkTheme-body-color uppercase text-dark-4">
-                        {menuItem.title}
-                      </span>
-                      {menuItem.submenu.map((sub, j) => (
-                        <Link
-                          key={j}
-                          href={sub.path}
-                          onClick={() => setNavigationOpen(false)}
-                          className="block px-6 py-2 text-custom-sm text-dark-4 dark:text-darkTheme-body-color hover:text-blue hover:bg-gray-1 dark:hover:bg-white/5 rounded-lg"
-                        >
-                          {sub.title}
-                        </Link>
-                      ))}
-                    </li>
-                  ) : (
-                    <li key={i}>
-                      <Link
-                        href={menuItem.path}
-                        onClick={() => setNavigationOpen(false)}
-                        className="block px-3 py-2.5 text-custom-sm font-medium text-dark dark:text-darkTheme-body-color hover:text-blue hover:bg-gray-1 dark:hover:bg-white/5 rounded-lg"
-                      >
-                        {menuItem.title}
-                      </Link>
-                    </li>
-                  )
-                )}
+                {primaryMenuItems.map((menuItem) => (
+                  <li key={menuItem.id}>
+                    <Link
+                      href={menuItem.path}
+                      onClick={() => setNavigationOpen(false)}
+                      className="block px-3 py-2.5 text-custom-sm font-medium text-dark dark:text-darkTheme-body-color hover:text-blue hover:bg-gray-1 dark:hover:bg-white/5 rounded-lg"
+                    >
+                      {menuItem.title}
+                    </Link>
+                  </li>
+                ))}
+
+                {categories.map((category) => (
+                  <li key={String(category.id)}>
+                    <Link
+                      href={`/shop-with-sidebar?category_id=${encodeURIComponent(String(category.id))}`}
+                      onClick={() => setNavigationOpen(false)}
+                      className="block px-3 py-2.5 text-custom-sm font-medium text-dark dark:text-darkTheme-body-color hover:text-blue hover:bg-gray-1 dark:hover:bg-white/5 rounded-lg"
+                    >
+                      {category.name}
+                    </Link>
+                  </li>
+                ))}
                 <li className="border-t border-gray-3 dark:border-darkTheme-border-color mt-2 pt-2">
                   <Link
                     href="/wishlist"

@@ -16,8 +16,8 @@ import { PreviewSliderProvider } from "../context/PreviewSliderContext";
 import PreviewSliderModal from "@/components/Common/PreviewSlider";
 import { ThemeProvider } from "@/app/providers/ThemeProvider";
 import NotificationProvider from "@/app/providers/NotificationProvider";
-
-import ScrollToTop from "@/components/Common/ScrollToTop";
+import ChatBot from "@/components/Common/ChatBot";
+// import ScrollToTop from "@/components/Common/ScrollToTop";
 import PreLoader from "@/components/Common/PreLoader";
 import BuyerAccountFooter from "@/components/BuyerAccount/BuyerAccountFooter";
 
@@ -70,7 +70,8 @@ export default function RootLayout({
           </AuthProvider>
         </QueryProvider>
       </NotificationProvider>
-      <ScrollToTop />
+      {/* <ScrollToTop /> */}
+      <ChatBot />
     </ThemeProvider>
   );
 }
