@@ -1003,7 +1003,7 @@ export default function AdminDashboard() {
     : Gauge;
 
   return (
-    <section className="admin-dashboard-shell min-h-screen overflow-x-hidden bg-[#f5f7fb] text-[#0f172a] dark:bg-[#111827] dark:text-white">
+    <section className="admin-dashboard-shell min-h-screen overflow-x-hidden bg-[#f3f7fb] py-4 text-[#0f172a] dark:bg-[#111827] dark:text-white sm:py-6">
       {isMobileSidebarOpen ? (
         <button
           aria-label="Close admin navigation"
@@ -1011,12 +1011,12 @@ export default function AdminDashboard() {
           className="fixed inset-0 z-40 bg-black/50 xl:hidden"
         />
       ) : null}
-      <div className="w-full">
+      <div className="mx-auto max-w-[1600px] px-4 sm:px-6 xl:px-8">
         <div
-          className={`grid min-h-screen grid-cols-1 gap-0 ${isSidebarCollapsed ? "xl:grid-cols-[82px_minmax(0,1fr)]" : "xl:grid-cols-[250px_minmax(0,1fr)]"}`}
+          className={`grid grid-cols-1 gap-6 ${isSidebarCollapsed ? "xl:grid-cols-[88px_1fr]" : "xl:grid-cols-[280px_1fr]"}`}
         >
           <aside
-            className={`${isMobileSidebarOpen ? "translate-x-0" : "-translate-x-full"} fixed inset-y-0 left-0 z-50 flex w-[270px] flex-col overflow-y-auto border-r border-[#e6eaf0] bg-white p-3 text-[#0f172a] shadow-2xl transition-all xl:sticky xl:top-0 xl:h-screen xl:w-auto xl:translate-x-0 xl:shadow-none dark:border-white/10 dark:bg-[#161d29] ${isSidebarCollapsed ? "xl:px-3" : ""}`}
+            className={`${isMobileSidebarOpen ? "translate-x-0" : "-translate-x-full"} fixed inset-y-0 left-0 z-50 flex w-[270px] flex-col overflow-y-auto border-r border-gray-100 bg-white p-4 text-[#0f172a] shadow-xl transition-all xl:sticky xl:top-6 xl:h-[calc(100vh-3rem)] xl:w-auto xl:translate-x-0 xl:rounded-2xl xl:border xl:shadow-sm ${isSidebarCollapsed ? "xl:px-3" : ""}`}
           >
             <div className="border-b border-gray-100 px-2 pb-3">
               <div className="flex items-center">
@@ -1247,8 +1247,8 @@ export default function AdminDashboard() {
             </button>
           </aside>
 
-          <main className="min-w-0 space-y-4 px-4 pb-8 pt-3 sm:px-5 lg:px-6 xl:px-7">
-            <header className="sticky top-0 z-30 -mx-4 border-b border-[#e5e9f0] bg-white/95 px-4 py-2.5 backdrop-blur dark:border-white/10 dark:bg-[#161d29]/95 sm:-mx-5 sm:px-5 lg:-mx-6 lg:px-6 xl:-mx-7 xl:px-7">
+          <main className="space-y-5">
+            <header className="sticky top-3 z-30 rounded-2xl border border-[#e2e8f0] bg-white/95 px-4 py-3 shadow-sm backdrop-blur dark:border-white/10 dark:bg-[#1f2937]/95 sm:px-5">
               <div className="flex items-center gap-3">
                 <button
                   type="button"
@@ -1357,7 +1357,7 @@ export default function AdminDashboard() {
                 </div>
               </div>
             </header>
-            <div className="border-b border-gray-200 bg-transparent px-0 pb-4 pt-1 dark:border-white/10">
+            <div className="rounded-2xl border border-gray-200 bg-white p-5 shadow-sm sm:p-6">
               <div className="flex flex-col gap-4 lg:flex-row lg:items-center lg:justify-between">
                 <div className="flex min-w-0 items-center gap-4">
                   {legacyVisualGroup ? (
@@ -1448,269 +1448,188 @@ export default function AdminDashboard() {
                     </button>
                   </div>
                 ) : null}
-
-                <div className="grid gap-4 2xl:grid-cols-[minmax(0,1.55fr)_minmax(330px,.75fr)]">
-                  <section className="overflow-hidden rounded-xl border border-[#e2e7ee] bg-white shadow-[0_1px_2px_rgba(15,23,42,.03)] dark:border-white/10 dark:bg-[#1f2937]">
-                    <div className="border-b border-[#edf0f4] px-5 py-5 dark:border-white/10 sm:px-6">
-                      <div className="flex flex-col gap-4 lg:flex-row lg:items-start lg:justify-between">
-                        <div>
-                          <p className="text-[11px] font-bold uppercase tracking-[.16em] text-[#f47524]">
-                            Ecommerce operations
-                          </p>
-                          <h2 className="mt-1 text-2xl font-bold tracking-[-.02em] text-[#101828] dark:text-white sm:text-[28px]">
-                            Ecommerce Dashboard
-                          </h2>
-                          <p className="mt-1 text-sm text-[#667085] dark:text-gray-300">
-                            Here&apos;s what is happening across your marketplace right now.
-                          </p>
-                        </div>
-                        <button
-                          type="button"
-                          onClick={loadOverviewData}
-                          className="inline-flex h-10 items-center justify-center gap-2 self-start rounded-lg border border-[#dfe4eb] bg-white px-3.5 text-sm font-semibold text-[#344054] transition hover:border-[#f47524] hover:text-[#f47524] dark:border-white/10 dark:bg-white/5 dark:text-white"
-                        >
-                          <RefreshCw size={15} />
-                          Refresh
-                        </button>
-                      </div>
-
-                      <div className="mt-6 grid gap-3 sm:grid-cols-3">
-                        {[
-                          {
-                            label: "Registered users",
-                            value: totalUsers ?? "—",
-                            hint: "Platform accounts",
-                            icon: Users,
-                            badge: "bg-[#eef4ff] text-[#2f6bff]",
-                          },
-                          {
-                            label: "Seller reviews",
-                            value: pendingSellers.length,
-                            hint: "Awaiting approval",
-                            icon: Store,
-                            badge: "bg-[#fff4e8] text-[#f47524]",
-                          },
-                          {
-                            label: "Product reviews",
-                            value: pendingProducts.length,
-                            hint: "Awaiting moderation",
-                            icon: Package,
-                            badge: "bg-[#f4efff] text-[#7c3aed]",
-                          },
-                        ].map((metric) => (
-                          <div
-                            key={metric.label}
-                            className="flex min-w-0 items-center gap-3 rounded-xl border border-[#edf0f4] bg-[#fbfcfe] p-4 dark:border-white/10 dark:bg-white/[.03]"
-                          >
-                            <span className={`flex h-11 w-11 shrink-0 items-center justify-center rounded-xl ${metric.badge}`}>
-                              <metric.icon size={20} />
-                            </span>
-                            <div className="min-w-0">
-                              <p className="truncate text-xs font-medium text-[#667085] dark:text-gray-300">
-                                {metric.label}
-                              </p>
-                              <div className="mt-0.5 flex items-baseline gap-2">
-                                <strong className="text-xl font-bold text-[#101828] dark:text-white">
-                                  {metric.value}
-                                </strong>
-                                <span className="truncate text-[11px] text-[#98a2b3]">
-                                  {metric.hint}
-                                </span>
-                              </div>
-                            </div>
-                          </div>
-                        ))}
-                      </div>
-                    </div>
-
-                    <div className="p-5 sm:p-6">
-                      <div className="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
-                        <div>
-                          <h3 className="text-lg font-bold text-[#101828] dark:text-white">
-                            Moderation workload
-                          </h3>
-                          <p className="text-sm text-[#667085] dark:text-gray-300">
-                            Live approval queues returned by your backend.
-                          </p>
-                        </div>
-                        <div className="flex items-center gap-3 text-xs text-[#667085]">
-                          <span className="inline-flex items-center gap-1.5">
-                            <span className="h-2 w-2 rounded-full bg-[#f47524]" /> Sellers
-                          </span>
-                          <span className="inline-flex items-center gap-1.5">
-                            <span className="h-2 w-2 rounded-full bg-[#2f6bff]" /> Products
-                          </span>
-                        </div>
-                      </div>
-
-                      <div className="mt-6 rounded-xl border border-[#edf0f4] bg-[#fcfdff] p-4 dark:border-white/10 dark:bg-white/[.02] sm:p-5">
-                        <div className="grid h-48 grid-cols-7 items-end gap-3 border-b border-l border-[#e7ebf0] px-4 pb-0 pt-4 dark:border-white/10">
-                          {[42, 58, 50, 72, 61, 84, 70].map((height, index) => {
-                            const sellerFactor = Math.max(18, Math.min(92, height + Math.min(pendingSellers.length * 2, 12)));
-                            const productFactor = Math.max(16, Math.min(88, height - 12 + Math.min(pendingProducts.length * 2, 14)));
-                            return (
-                              <div key={index} className="flex h-full items-end justify-center gap-1.5">
-                                <span
-                                  className="w-2.5 rounded-t bg-[#f47524]/85 transition-all"
-                                  style={{ height: `${sellerFactor}%` }}
-                                />
-                                <span
-                                  className="w-2.5 rounded-t bg-[#2f6bff]/85 transition-all"
-                                  style={{ height: `${productFactor}%` }}
-                                />
-                              </div>
-                            );
-                          })}
-                        </div>
-                        <div className="mt-2 grid grid-cols-7 px-3 text-center text-[10px] font-medium text-[#98a2b3]">
-                          {["Mon", "Tue", "Wed", "Thu", "Fri", "Sat", "Sun"].map((day) => (
-                            <span key={day}>{day}</span>
-                          ))}
-                        </div>
-                      </div>
-                    </div>
-                  </section>
-
-                  <div className="grid gap-4 sm:grid-cols-2 2xl:grid-cols-1">
-                    <section className="rounded-xl border border-[#e2e7ee] bg-white p-5 shadow-[0_1px_2px_rgba(15,23,42,.03)] dark:border-white/10 dark:bg-[#1f2937]">
+                <div className="grid grid-cols-1 gap-4 sm:grid-cols-2 xl:grid-cols-4">
+                  {[
+                    {
+                      label: "Platform users",
+                      value: totalUsers ?? "Unavailable",
+                      hint: "Registered accounts",
+                      icon: Users,
+                      accent: "bg-blue-50 text-blue-600",
+                    },
+                    {
+                      label: "Seller applications",
+                      value: pendingSellers.length,
+                      hint: "Awaiting review",
+                      icon: Store,
+                      accent: "bg-orange-50 text-[#f7941d]",
+                    },
+                    {
+                      label: "Product approvals",
+                      value: pendingProducts.length,
+                      hint: "Awaiting moderation",
+                      icon: Package,
+                      accent: "bg-violet-50 text-violet-600",
+                    },
+                    {
+                      label: "Reports",
+                      value: "Available",
+                      hint: "Backend report service",
+                      icon: BarChart3,
+                      accent: "bg-emerald-50 text-emerald-600",
+                    },
+                  ].map((metric) => (
+                    <div
+                      key={metric.label}
+                      className="rounded-2xl border border-gray-200 bg-white p-5 shadow-sm"
+                    >
                       <div className="flex items-center justify-between gap-3">
-                        <div>
-                          <p className="text-sm font-bold text-[#101828] dark:text-white">Approval queues</p>
-                          <p className="mt-0.5 text-xs text-[#667085] dark:text-gray-300">Items requiring administrator action</p>
-                        </div>
-                        <span className="flex h-9 w-9 items-center justify-center rounded-lg bg-[#fff4e8] text-[#f47524]">
-                          <ShieldCheck size={18} />
+                        <p className="text-sm font-medium text-gray-500">
+                          {metric.label}
+                        </p>
+                        <span
+                          className={`flex h-9 w-9 shrink-0 items-center justify-center rounded-xl ${metric.accent}`}
+                        >
+                          <metric.icon size={18} />
                         </span>
                       </div>
-                      <div className="mt-5 space-y-4">
-                        <button
-                          type="button"
-                          onClick={() => applySidebarSelection("sellers", "Sellers:Seller Applications", "Sellers")}
-                          className="group w-full text-left"
-                        >
-                          <div className="mb-1.5 flex items-center justify-between text-sm">
-                            <span className="font-semibold text-[#344054] group-hover:text-[#f47524] dark:text-white">Seller applications</span>
-                            <span className="font-bold text-[#101828] dark:text-white">{pendingSellers.length}</span>
-                          </div>
-                          <div className="h-2 overflow-hidden rounded-full bg-[#f2f4f7] dark:bg-white/10">
-                            <div className="h-full rounded-full bg-[#f47524]" style={{ width: `${Math.min(100, Math.max(8, pendingSellers.length * 12))}%` }} />
-                          </div>
-                        </button>
-                        <button
-                          type="button"
-                          onClick={() => applySidebarSelection("products", "Catalog:Products", "Catalog")}
-                          className="group w-full text-left"
-                        >
-                          <div className="mb-1.5 flex items-center justify-between text-sm">
-                            <span className="font-semibold text-[#344054] group-hover:text-[#2f6bff] dark:text-white">Product approvals</span>
-                            <span className="font-bold text-[#101828] dark:text-white">{pendingProducts.length}</span>
-                          </div>
-                          <div className="h-2 overflow-hidden rounded-full bg-[#f2f4f7] dark:bg-white/10">
-                            <div className="h-full rounded-full bg-[#2f6bff]" style={{ width: `${Math.min(100, Math.max(8, pendingProducts.length * 10))}%` }} />
-                          </div>
-                        </button>
-                      </div>
-                    </section>
-
-                    <section className="rounded-xl border border-[#e2e7ee] bg-white p-5 shadow-[0_1px_2px_rgba(15,23,42,.03)] dark:border-white/10 dark:bg-[#1f2937]">
-                      <div className="flex items-center justify-between gap-3">
-                        <div>
-                          <p className="text-sm font-bold text-[#101828] dark:text-white">Platform shortcuts</p>
-                          <p className="mt-0.5 text-xs text-[#667085] dark:text-gray-300">Jump into key operations</p>
-                        </div>
-                        <Gauge size={20} className="text-[#2f6bff]" />
-                      </div>
-                      <div className="mt-4 grid grid-cols-2 gap-2">
-                        {[
-                          { label: "Orders", icon: ShoppingBag, tab: "orders" as AdminTab, item: "Orders:All Orders", group: "Orders" },
-                          { label: "Inventory", icon: Boxes, tab: "inventory" as AdminTab, item: "Inventory:Stock Overview", group: "Inventory" },
-                          { label: "Customers", icon: Users, tab: "users" as AdminTab, item: "Customers:All Customers", group: "Customers" },
-                          { label: "Analytics", icon: BarChart3, tab: "analytics" as AdminTab, item: "Reports & Analytics:Sales Reports", group: "Reports & Analytics" },
-                        ].map((shortcut) => (
-                          <button
-                            key={shortcut.label}
-                            type="button"
-                            onClick={() => applySidebarSelection(shortcut.tab, shortcut.item, shortcut.group)}
-                            className="flex items-center gap-2 rounded-lg border border-[#edf0f4] px-3 py-3 text-left text-xs font-semibold text-[#475467] transition hover:border-[#f47524] hover:text-[#f47524] dark:border-white/10 dark:text-gray-200"
-                          >
-                            <shortcut.icon size={16} />
-                            {shortcut.label}
-                          </button>
-                        ))}
-                      </div>
-                    </section>
-                  </div>
+                      <p className="mt-4 text-3xl font-semibold text-[#111827]">
+                        {metric.value}
+                      </p>
+                      <p className="mt-1 text-xs text-gray-400">
+                        {metric.hint}
+                      </p>
+                    </div>
+                  ))}
                 </div>
 
-                <section className="overflow-hidden rounded-xl border border-[#e2e7ee] bg-white shadow-[0_1px_2px_rgba(15,23,42,.03)] dark:border-white/10 dark:bg-[#1f2937]">
-                  <div className="flex flex-col gap-3 border-b border-[#edf0f4] px-5 py-4 dark:border-white/10 sm:flex-row sm:items-center sm:justify-between">
-                    <div>
-                      <h3 className="text-lg font-bold text-[#101828] dark:text-white">Latest moderation items</h3>
-                      <p className="text-xs text-[#667085] dark:text-gray-300">Recent seller and product submissions waiting for review.</p>
+                <div className="grid gap-4 lg:grid-cols-[1.2fr_.8fr]">
+                  <section className="rounded-2xl border border-gray-200 bg-white p-5 shadow-sm">
+                    <div className="flex items-center justify-between">
+                      <div>
+                        <p className="text-xs font-semibold uppercase tracking-[.18em] text-[#f7941d]">
+                          Priority queue
+                        </p>
+                        <h3 className="mt-1 text-lg font-semibold text-[#111827]">
+                          Marketplace moderation
+                        </h3>
+                      </div>
+                      <ShieldCheck className="text-[#f7941d]" size={24} />
                     </div>
+                    <div className="mt-5 grid gap-3 sm:grid-cols-2">
+                      <button
+                        onClick={() =>
+                          applySidebarSelection(
+                            "sellers",
+                            "Sellers:Seller Applications",
+                            "Sellers",
+                          )
+                        }
+                        className="flex items-center justify-between rounded-xl border border-gray-200 p-4 text-left hover:border-[#f7941d]"
+                      >
+                        <span>
+                          <b className="block text-sm">Seller applications</b>
+                          <small className="text-gray-500">
+                            Review business and KYC submissions
+                          </small>
+                        </span>
+                        <span className="rounded-full bg-orange-50 px-3 py-1 text-sm font-bold text-[#f7941d]">
+                          {pendingSellers.length}
+                        </span>
+                      </button>
+                      <button
+                        onClick={() =>
+                          applySidebarSelection(
+                            "products",
+                            "Catalog:Products",
+                            "Catalog",
+                          )
+                        }
+                        className="flex items-center justify-between rounded-xl border border-gray-200 p-4 text-left hover:border-[#f7941d]"
+                      >
+                        <span>
+                          <b className="block text-sm">Product approvals</b>
+                          <small className="text-gray-500">
+                            Moderate submitted catalog items
+                          </small>
+                        </span>
+                        <span className="rounded-full bg-orange-50 px-3 py-1 text-sm font-bold text-[#f7941d]">
+                          {pendingProducts.length}
+                        </span>
+                      </button>
+                      <button
+                        onClick={() =>
+                          applySidebarSelection(
+                            "orders",
+                            "Orders:Pending Orders",
+                            "Orders",
+                          )
+                        }
+                        className="flex items-center gap-3 rounded-xl border border-gray-200 p-4 text-left hover:border-[#f7941d]"
+                      >
+                        <ShoppingBag size={20} className="text-[#f7941d]" />
+                        <span>
+                          <b className="block text-sm">Order operations</b>
+                          <small className="text-gray-500">
+                            Inspect pending fulfilment
+                          </small>
+                        </span>
+                      </button>
+                      <button
+                        onClick={() =>
+                          applySidebarSelection(
+                            "overview",
+                            "System Management:System Events",
+                            "System Management",
+                          )
+                        }
+                        className="flex items-center gap-3 rounded-xl border border-gray-200 p-4 text-left hover:border-[#f7941d]"
+                      >
+                        <Bell size={20} className="text-[#f7941d]" />
+                        <span>
+                          <b className="block text-sm">System events</b>
+                          <small className="text-gray-500">
+                            Review platform alerts
+                          </small>
+                        </span>
+                      </button>
+                    </div>
+                  </section>
+                  <section className="rounded-2xl border border-gray-200 bg-white p-5 shadow-sm">
+                    <div className="flex items-center justify-between">
+                      <div>
+                        <p className="text-xs font-semibold uppercase tracking-[.18em] text-green-600">
+                          System management
+                        </p>
+                        <h3 className="mt-1 text-lg font-semibold text-[#111827]">
+                          Operational telemetry
+                        </h3>
+                      </div>
+                      <Bell className="text-green-600" size={22} />
+                    </div>
+                    <p className="mt-4 text-sm text-gray-500">Open the backend-powered audit logs, system events and background jobs views to inspect current platform state.</p>
                     <button
-                      type="button"
-                      onClick={() => applySidebarSelection("sellers", "Sellers:Seller Applications", "Sellers")}
-                      className="text-sm font-semibold text-[#f47524] hover:text-[#d85f13]"
+                      onClick={() =>
+                        applySidebarSelection(
+                          "overview",
+                          "System Management:Background Jobs",
+                          "System Management",
+                        )
+                      }
+                      className="mt-4 text-sm font-semibold text-[#f7941d]"
                     >
-                      View moderation queue
+                      Open system management
                     </button>
-                  </div>
-                  <div className="overflow-x-auto">
-                    <table className="w-full min-w-[760px] text-left">
-                      <thead className="bg-[#fbfcfe] text-[11px] font-bold uppercase tracking-[.08em] text-[#98a2b3] dark:bg-white/[.03]">
-                        <tr>
-                          <th className="px-5 py-3">Type</th>
-                          <th className="px-5 py-3">Name</th>
-                          <th className="px-5 py-3">Reference</th>
-                          <th className="px-5 py-3">Status</th>
-                          <th className="px-5 py-3">Action</th>
-                        </tr>
-                      </thead>
-                      <tbody className="divide-y divide-[#edf0f4] dark:divide-white/10">
-                        {[
-                          ...pendingSellers.slice(0, 3).map((seller) => ({
-                            key: `seller-${seller.id}`,
-                            type: "Seller",
-                            name: seller.business_name,
-                            reference: seller.contact_email || seller.id.slice(0, 8),
-                            status: seller.status,
-                            action: () => applySidebarSelection("sellers", "Sellers:Seller Applications", "Sellers"),
-                          })),
-                          ...pendingProducts.slice(0, 3).map((product) => ({
-                            key: `product-${product.id}`,
-                            type: "Product",
-                            name: product.name,
-                            reference: product.sku,
-                            status: product.status,
-                            action: () => applySidebarSelection("products", "Catalog:Products", "Catalog"),
-                          })),
-                        ].slice(0, 5).map((row) => (
-                          <tr key={row.key} className="hover:bg-[#fbfcfe] dark:hover:bg-white/[.03]">
-                            <td className="px-5 py-3.5">
-                              <span className="inline-flex rounded-md bg-[#f2f4f7] px-2 py-1 text-xs font-semibold text-[#475467] dark:bg-white/10 dark:text-gray-200">{row.type}</span>
-                            </td>
-                            <td className="max-w-[280px] truncate px-5 py-3.5 text-sm font-semibold text-[#344054] dark:text-white">{row.name}</td>
-                            <td className="px-5 py-3.5 text-sm text-[#667085] dark:text-gray-300">{row.reference}</td>
-                            <td className="px-5 py-3.5">
-                              <span className="inline-flex rounded-full bg-[#fff4e8] px-2.5 py-1 text-xs font-semibold capitalize text-[#c85b10]">{row.status.replaceAll("_", " ")}</span>
-                            </td>
-                            <td className="px-5 py-3.5">
-                              <button type="button" onClick={row.action} className="text-sm font-semibold text-[#2f6bff] hover:underline">Review</button>
-                            </td>
-                          </tr>
-                        ))}
-                        {pendingSellers.length === 0 && pendingProducts.length === 0 ? (
-                          <tr>
-                            <td colSpan={5} className="px-5 py-10 text-center text-sm text-[#667085] dark:text-gray-300">
-                              No moderation items are waiting right now.
-                            </td>
-                          </tr>
-                        ) : null}
-                      </tbody>
-                    </table>
-                  </div>
-                </section>
+                  </section>
+                </div>
+
+                <div className="rounded-2xl border border-gray-200 bg-white p-6 text-center shadow-sm">
+                  <span className="mx-auto flex h-11 w-11 items-center justify-center rounded-xl bg-gray-100 text-gray-500">
+                    <CreditCard size={20} />
+                  </span>
+                  <h3 className="mt-3 font-semibold text-gray-900">Finance summary is not available yet</h3>
+                  <p className="mx-auto mt-1 max-w-md text-sm text-gray-500">The backend does not currently expose wallet, commission, tax, auction or payout summary data.</p>
+                </div>
               </>
             ) : null}
 
