@@ -192,9 +192,7 @@ export default function AdminSidebar({
   const pathname = usePathname();
   const searchParams = useSearchParams();
 
-  const fullPath = `${pathname}${searchParams.toString() ? `?${searchParams.toString()}` : ""}`;
-
-  const isDashboard = pathname === "/admin/dashboard";
+    const isDashboard = pathname === "/admin/dashboard";
   const isGroupActive = (group: SidebarGroup) =>
     group.items.some((item) => {
       const itemUrl = new URL(item.href, "http://localhost");
@@ -202,27 +200,26 @@ export default function AdminSidebar({
     });
 
   return (
-    <section className="min-h-screen bg-[#f3f7fb] py-6">
-      <div className="max-w-[1400px] mx-auto px-4 sm:px-6 xl:px-8">
-        <div className="grid grid-cols-1 xl:grid-cols-[260px_1fr] gap-6">
-          <aside className="xl:sticky xl:top-6 h-fit rounded-2xl bg-gradient-to-b from-[#4b5563] to-[#1f2937] p-4 text-white shadow-xl">
-            <div className="px-3 py-2 border-b border-white/15">
+    <section className="min-h-screen bg-[#f5f7fb]">
+      <div className="grid min-h-screen grid-cols-1 xl:grid-cols-[250px_minmax(0,1fr)]">
+          <aside className="border-r border-[#e6eaf0] bg-white p-3 text-[#0f172a] xl:sticky xl:top-0 xl:h-screen xl:overflow-y-auto">
+            <div className="border-b border-[#edf0f4] px-3 pb-4 pt-2">
               <Image
                 src="/images/logo/logo.png"
                 alt="Xerin Marketplace logo"
                 width={150}
                 height={46}
-                className="h-10 w-auto object-contain"
+                className="h-9 w-auto object-contain"
                 priority
               />
-              <h2 className="text-xl font-semibold mt-1">Admin Panel</h2>
+              <h2 className="mt-1 text-xs font-semibold uppercase tracking-[.14em] text-[#98a2b3]">Admin Center</h2>
             </div>
 
             <div className="mt-4">
               <Link
                 href="/admin/dashboard"
                 className={`block w-full rounded-xl px-3 py-2.5 text-left transition-colors ${
-                  isDashboard ? "bg-white/15 text-white" : "text-white/85 hover:bg-white/10"
+                  isDashboard ? "bg-[#fff4e8] text-[#f47524]" : "text-[#667085] hover:bg-[#f8fafc] hover:text-[#344054]"
                 }`}
               >
                 <span className="inline-flex items-center gap-2.5 text-sm font-semibold">
@@ -240,7 +237,7 @@ export default function AdminSidebar({
 
                 return (
                   <div key={group.title} className="px-1">
-                    <div className="w-full text-left rounded-lg px-2.5 py-2 text-[13px] font-semibold tracking-[0.08em] uppercase text-white/85">
+                    <div className="w-full rounded-lg px-2.5 py-2 text-left text-[11px] font-bold uppercase tracking-[0.12em] text-[#98a2b3]">
                       <span className="flex items-center justify-between gap-2">
                         <span className="inline-flex items-center gap-2.5">
                           <span className="inline-flex h-5 w-5 items-center justify-center text-base leading-none shrink-0" aria-hidden="true">
@@ -252,7 +249,7 @@ export default function AdminSidebar({
                       </span>
                     </div>
 
-                    <div className="mt-1 border-l border-white/15 pl-3 space-y-1">
+                    <div className="mt-1 space-y-1 border-l border-[#edf0f4] pl-3">
                       {group.items.map((item) => {
                         const itemUrl = new URL(item.href, "http://localhost");
                         const active = itemUrl.pathname === pathname;
@@ -262,11 +259,11 @@ export default function AdminSidebar({
                             key={item.label}
                             href={item.href}
                             className={`block w-full rounded-lg px-2.5 py-1.5 text-left text-sm transition-colors ${
-                              active ? "text-white font-semibold" : "text-white/80 hover:text-white"
+                              active ? "bg-[#fff4e8] font-semibold text-[#f47524]" : "text-[#667085] hover:bg-[#f8fafc] hover:text-[#344054]"
                             }`}
                           >
                             <span className="inline-flex items-center gap-2">
-                              <span className={`h-1.5 w-1.5 rounded-full ${active ? "bg-white" : "bg-white/60"}`} />
+                              <span className={`h-1.5 w-1.5 rounded-full ${active ? "bg-[#f47524]" : "bg-[#d0d5dd]"}`} />
                               <span>{item.label}</span>
                             </span>
                           </Link>
@@ -279,19 +276,18 @@ export default function AdminSidebar({
             </nav>
           </aside>
 
-          <main className="space-y-5">
-            <div className="rounded-2xl border border-gray-200 bg-white p-4 sm:p-5 shadow-sm">
+          <main className="min-w-0 space-y-4 px-4 pb-8 pt-4 sm:px-5 lg:px-6 xl:px-7">
+            <div className="border-b border-[#e4e7ec] bg-transparent pb-4 pt-1">
               <div className="flex flex-col gap-3 lg:flex-row lg:items-center lg:justify-between">
                 <div>
-                  <h1 className="text-xl sm:text-2xl font-semibold text-[#111827]">{title}</h1>
-                  {breadcrumb ? <p className="text-sm text-gray-500 mt-1">{breadcrumb}</p> : null}
+                  <h1 className="text-2xl font-bold tracking-[-.02em] text-[#101828] sm:text-[28px]">{title}</h1>
+                  {breadcrumb ? <p className="mt-1 text-sm text-[#667085]">{breadcrumb}</p> : null}
                 </div>
               </div>
             </div>
 
             {children}
           </main>
-        </div>
       </div>
     </section>
   );
