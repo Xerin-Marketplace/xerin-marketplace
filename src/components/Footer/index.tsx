@@ -80,7 +80,7 @@ const Footer = () => {
                     />
                   </svg>
                 </span>
-                Dar es Salaam, Tanzania -Serving buyers and sellers across Africa.
+                Dar es Salaam, Tanzania.
               </li>
 
               <li>
