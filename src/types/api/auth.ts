@@ -79,6 +79,16 @@ export type VerifyOtpRequest = {
   purpose: OtpPurpose;
 };
 
+
+export type ResendVerificationRequest = {
+  identifier: string;
+};
+
+export type VerifyAccountOtpRequest = {
+  identifier: string;
+  otp_code: string;
+};
+
 export type ForgotPasswordRequest = {
   email: string;
 };

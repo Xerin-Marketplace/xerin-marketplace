@@ -13,6 +13,8 @@ export const API_ENDPOINTS = {
     refreshToken: "/auth/refresh-token",
     sendOtp: "/auth/send-otp",
     verifyOtp: "/auth/verify-otp",
+    resendVerification: "/auth/resend-verification",
+    verifyAccountOtp: "/auth/verify-account-otp",
     forgotPassword: "/auth/forgot-password",
     resetPassword: "/auth/reset-password",
   },

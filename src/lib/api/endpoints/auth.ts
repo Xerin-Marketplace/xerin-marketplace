@@ -12,6 +12,8 @@ import type {
   SendOtpRequest,
   VerifyOtpRequest,
   RefreshTokenRequest,
+  ResendVerificationRequest,
+  VerifyAccountOtpRequest,
 } from "@/types/api/auth";
 import type { ApiMessageResponse } from "@/types/api/common";
 
@@ -45,6 +47,26 @@ export const verifyOtp = async (payload: VerifyOtpRequest): Promise<ApiMessageRe
   return res.data;
 };
 
+export const resendVerification = async (
+  payload: ResendVerificationRequest,
+): Promise<ApiMessageResponse> => {
+  const res = await axiosInstance.post<ApiMessageResponse>(
+    API_ENDPOINTS.auth.resendVerification,
+    payload,
+  );
+  return res.data;
+};
+
+export const verifyAccountOtp = async (
+  payload: VerifyAccountOtpRequest,
+): Promise<ApiMessageResponse> => {
+  const res = await axiosInstance.post<ApiMessageResponse>(
+    API_ENDPOINTS.auth.verifyAccountOtp,
+    payload,
+  );
+  return res.data;
+};
+
 export const forgotPassword = async (payload: ForgotPasswordRequest): Promise<ApiMessageResponse> => {
   const res = await axiosInstance.post<ApiMessageResponse>(API_ENDPOINTS.auth.forgotPassword, payload);
   return res.data;
@@ -62,6 +84,8 @@ export const authApi = {
   logout,
   sendOtp,
   verifyOtp,
+  resendVerification,
+  verifyAccountOtp,
   forgotPassword,
   resetPassword,
 };

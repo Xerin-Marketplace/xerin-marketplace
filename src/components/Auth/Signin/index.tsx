@@ -368,6 +368,23 @@ const SignInPanel = ({ onSwitchTab }: { onSwitchTab: (tab: AuthTab) => void }) =
       const requestedRedirect = searchParams.get("redirect");
       router.push(getPostLoginPath(requestedRedirect, session.user));
     } catch (error) {
+      if (
+        error instanceof ApiError &&
+        error.status === 403 &&
+        error.message.toLowerCase().includes("not verified")
+      ) {
+        toast("Your account is not verified yet. Enter the OTP or request a new one.");
+
+        const params = new URLSearchParams({
+          identifier: email.trim().toLowerCase(),
+          recover: "1",
+          next: "/signin",
+        });
+
+        router.push(`/verify-otp?${params.toString()}`);
+        return;
+      }
+
       if (error instanceof ApiError) toast.error(error.message);
       else toast.error("Unable to sign in. Please try again.");
     } finally {

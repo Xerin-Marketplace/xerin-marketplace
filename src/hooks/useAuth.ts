@@ -6,6 +6,8 @@ import {
   logout as apiLogout,
   sendOtp as apiSendOtp,
   verifyOtp as apiVerifyOtp,
+  resendVerification as apiResendVerification,
+  verifyAccountOtp as apiVerifyAccountOtp,
   forgotPassword as apiForgotPassword,
   resetPassword as apiResetPassword,
 } from "@/lib/api/endpoints/auth";
@@ -151,6 +153,14 @@ export const useAuth = () => {
     mutationFn: apiVerifyOtp,
   });
 
+  const resendVerificationMutation = useMutation({
+    mutationFn: apiResendVerification,
+  });
+
+  const verifyAccountOtpMutation = useMutation({
+    mutationFn: apiVerifyAccountOtp,
+  });
+
   const forgotPasswordMutation = useMutation({
     mutationFn: apiForgotPassword,
   });
@@ -184,6 +194,12 @@ export const useAuth = () => {
 
     verifyOtp: verifyOtpMutation.mutateAsync,
     isVerifyingOtp: verifyOtpMutation.isPending,
+
+    resendVerification: resendVerificationMutation.mutateAsync,
+    isResendingVerification: resendVerificationMutation.isPending,
+
+    verifyAccountOtp: verifyAccountOtpMutation.mutateAsync,
+    isVerifyingAccountOtp: verifyAccountOtpMutation.isPending,
 
     forgotPassword: forgotPasswordMutation.mutateAsync,
     isSubmittingForgotPassword: forgotPasswordMutation.isPending,
