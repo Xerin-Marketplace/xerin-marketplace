@@ -42,6 +42,7 @@ export type AdminSellerDocument = {
   seller_id: string;
   document_type: string;
   document_url: string;
+  mime_type?: string | null;
   status: string;
   rejection_reason?: string | null;
   uploaded_at: string;

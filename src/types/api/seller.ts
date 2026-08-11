@@ -54,6 +54,7 @@ export type SellerKycDocument = TimestampFields & {
   document_type: SellerDocumentType | string;
   document_url?: string;
   file_url?: string;
+  mime_type?: string | null;
   status?: "pending" | "under_review" | "approved" | "rejected" | string;
   rejection_reason?: string | null;
 };

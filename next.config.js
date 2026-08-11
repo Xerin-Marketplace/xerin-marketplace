@@ -95,7 +95,7 @@ const nextConfig = {
       // Frontend API calls
       `connect-src 'self' ${apiBaseUrl} https:`,
 
-      "frame-src 'none'",
+      "frame-src 'self' blob:",
 
       "object-src 'none'",
 

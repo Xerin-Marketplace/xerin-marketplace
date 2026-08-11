@@ -1,13 +1,15 @@
 "use client";
 
 import { sellersApi } from "@/lib/api/endpoints/sellers";
+import BackendDocumentPreview from "@/components/Common/BackendDocumentPreview";
 import { ApiError } from "@/lib/api/client";
 import { authStorage } from "@/lib/auth/storage";
 import type { SellerDocumentType, SellerKycDocument, PayoutAccount, SellerKycStatus } from "@/types/api/seller";
 import { useRouter, useSearchParams } from "next/navigation";
 import { FormEvent, useEffect, useMemo, useState } from "react";
 import toast from "react-hot-toast";
-
+import { Eye, FileText, ImageIcon, X } from "lucide-react";
+import Link from "next/link";
 const documentLabel = (value: string) => value.replaceAll("_", " ").replace(/\b\w/g, (letter) => letter.toUpperCase());
 
 type StoredUser = {
@@ -38,6 +40,16 @@ const SellerKyc = () => {
 
   const [uploadType, setUploadType] = useState("");
   const [uploadFile, setUploadFile] = useState<File | null>(null);
+  const [localPreviewUrl, setLocalPreviewUrl] = useState("");
+  const [preview, setPreview] = useState<{
+    title: string;
+    url: string;
+    mimeType?: string | null;
+  } | null>(null);
+  const [submittedPreview, setSubmittedPreview] = useState<{
+    title: string;
+    url: string;
+  } | null>(null);
   const [isUploading, setIsUploading] = useState(false);
 
   const [accountType, setAccountType] = useState<"bank" | "mobile_money">("bank");
@@ -63,6 +75,18 @@ const SellerKyc = () => {
 
     void loadData();
   }, [isSeller, router, token]);
+
+  useEffect(() => {
+    if (!uploadFile) {
+      setLocalPreviewUrl("");
+      return;
+    }
+
+    const url = URL.createObjectURL(uploadFile);
+    setLocalPreviewUrl(url);
+
+    return () => URL.revokeObjectURL(url);
+  }, [uploadFile]);
 
   async function loadData() {
     const accessToken = token;
@@ -105,6 +129,7 @@ const SellerKyc = () => {
       );
       toast.success(`${documentLabel(uploadType)} uploaded successfully.`);
       setUploadFile(null);
+      setLocalPreviewUrl("");
       await loadData();
     } catch (error) {
       if (error instanceof ApiError) {
@@ -192,7 +217,7 @@ const SellerKyc = () => {
       <section>
         <div className="mx-auto max-w-[1280px]">
 
-          <div className="mb-6 flex w-fit gap-1 rounded-xl border border-gray-3 bg-white p-1 dark:border-darkTheme-border-color dark:bg-darkTheme-card">
+          <div className="mb-6 flex w-fit flex-wrap gap-1 rounded-xl border border-gray-3 bg-white p-1 dark:border-darkTheme-border-color dark:bg-darkTheme-card">
             <button
               type="button"
               onClick={() => router.push("/seller/kyc")}
@@ -202,11 +227,20 @@ const SellerKyc = () => {
             </button>
             <button
               type="button"
+              onClick={() => router.push("/seller/documents")}
+              className="rounded-lg px-4 py-2 text-sm font-semibold text-dark-4 transition hover:bg-gray-1 dark:text-darkTheme-body-color dark:hover:bg-darkTheme-secondary-bg"
+            >
+              Business Documents
+            </button>
+            {status?.seller_status === "approved" && (
+            <button
+              type="button"
               onClick={() => router.push("/seller/kyc?tab=payouts")}
               className={`rounded-lg px-4 py-2 text-sm font-semibold transition ${activeTab === "payouts" ? "bg-[#f7941d] text-white" : "text-dark-4 hover:bg-gray-1 dark:text-darkTheme-body-color dark:hover:bg-darkTheme-secondary-bg"}`}
             >
               Payout Account
             </button>
+            )}
           </div>
 
           {status?.can_submit_for_review && (
@@ -222,6 +256,7 @@ const SellerKyc = () => {
               <div className="space-y-4 mb-8">
                 {(status?.required_documents ?? []).map((type) => {
                   const docStatus = getDocumentStatus(type);
+                  const document = documents.find((item) => item.document_type === type);
                   return (
                     <div
                       key={type}
@@ -239,23 +274,56 @@ const SellerKyc = () => {
                           {docStatus === "missing" ? "Not uploaded" : docStatus}
                         </p>
                       </div>
-                      <span
-                        className={`inline-flex rounded-full px-3 py-1 text-xs font-medium ${
-                          docStatus === "missing"
-                            ? "bg-gray-2 text-dark-2"
-                            : docStatus === "pending"
-                            ? "bg-warning/10 text-warning"
-                            : "bg-success/10 text-success"
-                        }`}
-                      >
-                        {docStatus}
-                      </span>
+                      <div className="flex flex-wrap items-center justify-end gap-2">
+                        {(document?.document_url || document?.file_url) && (
+                          <button
+                            type="button"
+                            onClick={() =>
+                              setSubmittedPreview({
+                                title: documentLabel(type),
+                                url: document.document_url || document.file_url || "",
+                              })
+                            }
+                            className="inline-flex items-center gap-1.5 rounded-lg border border-[#f7941d]/30 bg-orange-50 px-3 py-1.5 text-xs font-semibold text-[#f7941d] dark:bg-orange-500/10"
+                          >
+                            <Eye size={14} />
+                            View
+                          </button>
+                        )}
+
+                        <span
+                          className={`inline-flex rounded-full px-3 py-1 text-xs font-medium ${
+                            docStatus === "missing"
+                              ? "bg-gray-2 text-dark-2"
+                              : docStatus === "pending"
+                              ? "bg-warning/10 text-warning"
+                              : "bg-success/10 text-success"
+                          }`}
+                        >
+                          {docStatus}
+                        </span>
+                      </div>
                     </div>
                   );
                 })}
               </div>
 
               <h3 className="text-lg font-semibold text-dark dark:text-white mb-4">Upload Document</h3>
+              <div className="mb-5 rounded-xl border border-orange/20 bg-orange/5 p-4">
+                <p className="text-sm font-semibold text-dark dark:text-white">
+                  Need to submit TIN, Business Licence and Business Profile together?
+                </p>
+                <p className="mt-1 text-xs leading-5 text-dark-4 dark:text-darkTheme-body-color">
+                  Use the Business Documents workspace to select, preview and submit all required verification files in one action.
+                </p>
+                <Link
+                  href="/seller/documents"
+                  className="mt-3 inline-flex rounded-lg bg-orange px-4 py-2 text-sm font-semibold text-white hover:bg-orange-dark"
+                >
+                  Upload all business documents
+                </Link>
+              </div>
+
               <form onSubmit={handleUpload} className="space-y-5">
                 <div>
                   <label className="block mb-2.5 dark:text-darkTheme-body-color">Document type</label>
@@ -283,6 +351,45 @@ const SellerKyc = () => {
                     className="rounded-lg border border-gray-3 dark:border-darkTheme-border-color bg-gray-1 dark:bg-darkTheme-secondary-bg dark:text-darkTheme-body-color w-full py-3 px-5 outline-none focus:ring-2 focus:ring-blue/20 file:mr-4 file:py-2 file:px-4 file:rounded file:border-0 file:bg-blue file:text-white file:text-sm"
                   />
                 </div>
+
+                {uploadFile && localPreviewUrl && (
+                  <div className="rounded-xl border border-gray-3 bg-white p-4 dark:border-darkTheme-border-color dark:bg-darkTheme-secondary-bg">
+                    <div className="flex items-start gap-3">
+                      <span className="flex h-10 w-10 shrink-0 items-center justify-center rounded-lg bg-orange-50 text-[#f7941d] dark:bg-orange-500/10">
+                        {uploadFile.type.startsWith("image/") ? (
+                          <ImageIcon size={18} />
+                        ) : (
+                          <FileText size={18} />
+                        )}
+                      </span>
+
+                      <div className="min-w-0 flex-1">
+                        <p className="truncate text-sm font-semibold text-dark dark:text-white">
+                          {uploadFile.name}
+                        </p>
+                        <p className="mt-0.5 text-xs text-dark-4 dark:text-darkTheme-body-color">
+                          {(uploadFile.size / 1024 / 1024).toFixed(2)} MB ·{" "}
+                          {uploadFile.type || "Unknown file type"}
+                        </p>
+                      </div>
+                    </div>
+
+                    <button
+                      type="button"
+                      onClick={() =>
+                        setPreview({
+                          title: `${documentLabel(uploadType)} — before upload`,
+                          url: localPreviewUrl,
+                          mimeType: uploadFile.type,
+                        })
+                      }
+                      className="mt-3 inline-flex items-center gap-2 rounded-lg border border-[#f7941d]/30 bg-orange-50 px-3 py-2 text-xs font-semibold text-[#f7941d] transition hover:bg-orange-100 dark:bg-orange-500/10"
+                    >
+                      <Eye size={14} />
+                      Preview before upload
+                    </button>
+                  </div>
+                )}
 
                 <button
                   type="submit"
@@ -468,8 +575,102 @@ const SellerKyc = () => {
           </div>
         </div>
       )}
+      <BackendDocumentPreview
+        open={Boolean(submittedPreview)}
+        title={submittedPreview?.title || "Submitted document"}
+        documentUrl={submittedPreview?.url || ""}
+        onClose={() => setSubmittedPreview(null)}
+      />
+
+      <DocumentPreviewModal
+        open={Boolean(preview)}
+        title={preview?.title || "Document"}
+        url={preview?.url || ""}
+        mimeType={preview?.mimeType}
+        onClose={() => setPreview(null)}
+      />
     </>
   );
 };
 
 export default SellerKyc;
+
+
+function DocumentPreviewModal({
+  open,
+  title,
+  url,
+  mimeType,
+  onClose,
+}: {
+  open: boolean;
+  title: string;
+  url: string;
+  mimeType?: string | null;
+  onClose: () => void;
+}) {
+  if (!open || !url) return null;
+
+  const isImage =
+    mimeType?.startsWith("image/") ||
+    /\.(png|jpe?g|webp|gif|bmp|svg)(\?.*)?$/i.test(url);
+  const isPdf =
+    mimeType === "application/pdf" || /\.pdf(\?.*)?$/i.test(url);
+
+  return (
+    <div className="fixed inset-0 z-[120] flex items-center justify-center bg-black/65 p-4 backdrop-blur-sm">
+      <div className="flex max-h-[92vh] w-full max-w-5xl flex-col overflow-hidden rounded-2xl bg-white shadow-2xl dark:bg-[#1f2937]">
+        <div className="flex items-center justify-between border-b border-[#e7ebf0] px-5 py-4 dark:border-white/10">
+          <div className="min-w-0">
+            <p className="text-xs font-bold uppercase tracking-[0.14em] text-[#f7941d]">
+              Document Preview
+            </p>
+            <h3 className="truncate text-base font-semibold text-[#111827] dark:text-white">
+              {title}
+            </h3>
+          </div>
+
+          <button
+            type="button"
+            onClick={onClose}
+            className="flex h-9 w-9 items-center justify-center rounded-lg border border-[#e7ebf0] text-[#64748b] transition hover:bg-slate-50 dark:border-white/10 dark:hover:bg-white/5"
+            aria-label="Close document preview"
+          >
+            <X size={18} />
+          </button>
+        </div>
+
+        <div className="min-h-[420px] flex-1 overflow-auto bg-slate-100 p-4 dark:bg-black/20">
+          {isImage ? (
+            <div className="flex min-h-[420px] items-center justify-center">
+              <img
+                src={url}
+                alt={title}
+                className="max-h-[72vh] max-w-full rounded-lg object-contain shadow-sm"
+              />
+            </div>
+          ) : isPdf ? (
+            <iframe
+              src={url}
+              title={title}
+              className="h-[72vh] w-full rounded-lg bg-white"
+            />
+          ) : (
+            <div className="flex min-h-[420px] flex-col items-center justify-center rounded-xl border border-dashed border-[#cbd5e1] bg-white p-8 text-center dark:border-white/10 dark:bg-white/5">
+              <FileText size={36} className="text-[#94a3b8]" />
+              <p className="mt-3 font-semibold">Preview is not available for this file type.</p>
+              <a
+                href={url}
+                target="_blank"
+                rel="noreferrer"
+                className="mt-4 rounded-lg bg-[#f7941d] px-4 py-2 text-sm font-semibold text-white"
+              >
+                Open document
+              </a>
+            </div>
+          )}
+        </div>
+      </div>
+    </div>
+  );
+}

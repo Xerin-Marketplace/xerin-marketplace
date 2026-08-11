@@ -76,6 +76,17 @@ export const uploadKycDocument = async (
   return res.data;
 };
 
+export const uploadKycDocuments = async (
+  payloads: UploadSellerKycDocumentRequest[],
+  token?: string | null
+): Promise<SellerKycDocument[]> => {
+  // The current backend endpoint accepts one KYC document per multipart POST.
+  // Send all selected documents concurrently from one "Submit all" action.
+  return Promise.all(
+    payloads.map((payload) => uploadKycDocument(payload, token))
+  );
+};
+
 export const getPayoutAccounts = async (token?: string | null): Promise<PayoutAccount[]> => {
   const res = await axiosInstance.get<PaginatedResults<PayoutAccount> | PayoutAccount[]>(
     API_ENDPOINTS.sellers.payoutAccounts
@@ -106,6 +117,7 @@ export const sellersApi = {
   getKycDocuments,
   getKycStatus,
   uploadKycDocument,
+  uploadKycDocuments,
   getPayoutAccounts,
   createPayoutAccount,
   deletePayoutAccount,
