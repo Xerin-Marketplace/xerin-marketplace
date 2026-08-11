@@ -105,20 +105,27 @@ export const useAuth = () => {
 
   const registerBuyerMutation = useMutation({
     mutationFn: apiRegisterBuyer,
-    onSuccess: async (data) => {
-      setSession(data);
-      await mergeGuestCart().catch(() => {
-        toast.error("Your guest cart could not be synced. It is still saved on this device.");
+    onSuccess: (data) => {
+      const params = new URLSearchParams({
+        phone: data.phone,
+        email: data.email,
+        purpose: data.verification_purpose || "register",
+        next: "/signin",
       });
-      router.push("/account");
+      router.push(`/verify-otp?${params.toString()}`);
     },
   });
 
   const registerSellerMutation = useMutation({
     mutationFn: apiRegisterSeller,
     onSuccess: (data) => {
-      setSession(data);
-      router.push("/seller/dashboard");
+      const params = new URLSearchParams({
+        phone: data.phone,
+        email: data.email,
+        purpose: data.verification_purpose,
+        next: "/signin",
+      });
+      router.push(`/verify-otp?${params.toString()}`);
     },
   });
 

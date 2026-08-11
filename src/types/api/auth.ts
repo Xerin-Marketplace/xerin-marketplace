@@ -30,6 +30,30 @@ export type RegisterSellerRequest = RegisterBuyerRequest & {
   agreement_accepted: boolean;
 };
 
+export type RegistrationResponse = {
+  message: string;
+  user_id: string;
+  email: string;
+  phone: string;
+  verification_required: true;
+  verification_purpose: "register";
+  otp_expires_in_seconds: number;
+  resumed_registration: boolean;
+};
+
+export type SellerRegistrationResponse = {
+  message: string;
+  user_id: string;
+  seller_id: string;
+  email: string;
+  phone: string;
+  seller_status: string;
+  verification_required: true;
+  verification_purpose: "register_seller";
+  otp_expires_in_seconds: number;
+  resumed_registration: boolean;
+};
+
 export type AuthTokenResponse = {
   access_token: string;
   refresh_token?: string;
@@ -42,13 +66,17 @@ export type RefreshTokenRequest = {
   refresh_token: string;
 };
 
+export type OtpPurpose = "generic" | "register" | "register_seller" | "password_reset";
+
 export type SendOtpRequest = {
   phone: string;
+  purpose: OtpPurpose;
 };
 
 export type VerifyOtpRequest = {
   phone: string;
   otp_code: string;
+  purpose: OtpPurpose;
 };
 
 export type ForgotPasswordRequest = {

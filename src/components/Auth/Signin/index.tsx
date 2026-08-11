@@ -7,9 +7,7 @@ import { useRouter, useSearchParams } from "next/navigation";
 import toast from "react-hot-toast";
 
 import { authApi } from "@/lib/api/endpoints/auth";
-// TODO: point this at wherever your business-category list actually lives.
-// It just needs to expose a function that resolves to { id: string; name: string }[].
-import { API_ENDPOINTS } from "@/lib/api/endpoints";
+import { sellersApi } from "@/lib/api/endpoints/sellers";
 import { ApiError } from "@/lib/api/client";
 import { useAuth } from "@/hooks/useAuth";
 import { getPostLoginPath } from "@/guards/auth-routing";
@@ -337,6 +335,12 @@ const SignInPanel = ({ onSwitchTab }: { onSwitchTab: (tab: AuthTab) => void }) =
   const [showPassword, setShowPassword] = useState(false);
   const [rememberMe, setRememberMe] = useState(true);
   const [isSubmitting, setIsSubmitting] = useState(false);
+  const justVerified = searchParams.get("verified") === "1";
+
+  useEffect(() => {
+    const emailFromQuery = searchParams.get("email");
+    if (emailFromQuery) setEmail(emailFromQuery);
+  }, [searchParams]);
 
   const handleSubmit = async (event: FormEvent<HTMLFormElement>) => {
     event.preventDefault();
@@ -373,6 +377,12 @@ const SignInPanel = ({ onSwitchTab }: { onSwitchTab: (tab: AuthTab) => void }) =
 
   return (
     <form onSubmit={handleSubmit}>
+      {justVerified && (
+        <div className="mb-5 rounded-lg border border-green-200 bg-green-50 px-4 py-3 text-sm text-green-700">
+          Your account has been verified successfully. You can sign in now.
+        </div>
+      )}
+
       <div className="mb-5">
         <FieldLabel htmlFor="signin-email">Email</FieldLabel>
         <div className="relative">
@@ -474,11 +484,11 @@ const SignUpPanel = ({ onSwitchTab }: { onSwitchTab: (tab: AuthTab) => void }) =
   const handleSubmit = async (event: FormEvent<HTMLFormElement>) => {
     event.preventDefault();
 
-    if (!fullName.trim() || !email.trim() || !password || !confirmPassword) {
+    if (!fullName.trim() || !email.trim() || !phone || !password || !confirmPassword) {
       toast.error("Please fill in all required fields.");
       return;
     }
-    if (phone && !isValidLocalPhone(phone)) {
+    if (!isValidLocalPhone(phone)) {
       toast.error("Enter a valid phone number, e.g. 712 345 678.");
       return;
     }
@@ -495,22 +505,26 @@ const SignUpPanel = ({ onSwitchTab }: { onSwitchTab: (tab: AuthTab) => void }) =
 
     try {
       const nameParts = splitFullName(fullName);
+      const submittedPhone = `${COUNTRY_CODE}${phone}`;
+      const submittedEmail = email.trim().toLowerCase();
+
       const response = await authApi.registerBuyer({
         ...nameParts,
-        email: email.trim(),
-        phone: phone ? `${COUNTRY_CODE}${phone}` : undefined,
+        email: submittedEmail,
+        phone: submittedPhone,
         password,
       });
 
-      if (hasAuthToken(response)) {
-        setSession(response);
-        toast.success("Account created successfully.");
-        router.push("/my-account");
-        return;
-      }
+      toast.success(response.message || "Verification code sent.");
 
-      toast.success("Account created successfully. Please sign in.");
-      onSwitchTab("signin");
+      const params = new URLSearchParams({
+        phone: response.phone || submittedPhone,
+        email: response.email || submittedEmail,
+        purpose: response.verification_purpose || "register",
+        next: "/signin",
+      });
+
+      router.push(`/verify-otp?${params.toString()}`);
     } catch (error) {
       if (error instanceof ApiError) toast.error(error.message);
       else toast.error("Unable to create account. Please try again.");
@@ -635,6 +649,7 @@ interface SellerFormState {
   websiteUrl: string;
   contactEmail: string;
   contactPhone: string;
+  agreementAccepted: boolean;
 }
 
 const SELLER_INITIAL_STATE: SellerFormState = {
@@ -656,16 +671,17 @@ const SELLER_INITIAL_STATE: SellerFormState = {
   websiteUrl: "",
   contactEmail: "",
   contactPhone: "",
+  agreementAccepted: false,
 };
 
 const SellerPanel = ({ onSwitchTab }: { onSwitchTab: (tab: AuthTab) => void }) => {
   const router = useRouter();
-  const { setSession } = useAuth();
 
   const [form, setForm] = useState<SellerFormState>(SELLER_INITIAL_STATE);
   const [showPassword, setShowPassword] = useState(false);
   const [showConfirmPassword, setShowConfirmPassword] = useState(false);
   const [isSubmitting, setIsSubmitting] = useState(false);
+  const [useAccountContact, setUseAccountContact] = useState(true);
 
   const [categories, setCategories] = useState<BusinessCategory[]>([]);
   const [selectedCategoryIds, setSelectedCategoryIds] = useState<string[]>([]);
@@ -680,7 +696,7 @@ const SellerPanel = ({ onSwitchTab }: { onSwitchTab: (tab: AuthTab) => void }) =
     setCategoriesLoading(true);
     setCategoriesError(false);
     try {
-      const result = await categoriesApi.getBusinessCategories();
+      const result = await sellersApi.getBusinessCategories();
       setCategories(result);
     } catch {
       setCategoriesError(true);
@@ -725,8 +741,7 @@ const SellerPanel = ({ onSwitchTab }: { onSwitchTab: (tab: AuthTab) => void }) =
       !form.businessDescription.trim() ||
       !form.businessCountry.trim() ||
       !form.businessCity.trim() ||
-      !form.contactEmail.trim() ||
-      !form.contactPhone
+      (!useAccountContact && (!form.contactEmail.trim() || !form.contactPhone))
     ) {
       toast.error("Please fill in all required fields.");
       return;
@@ -737,7 +752,7 @@ const SellerPanel = ({ onSwitchTab }: { onSwitchTab: (tab: AuthTab) => void }) =
       return;
     }
 
-    if (!isValidLocalPhone(form.contactPhone)) {
+    if (!useAccountContact && !isValidLocalPhone(form.contactPhone)) {
       toast.error("Enter a valid contact phone number, e.g. 712 345 678.");
       return;
     }
@@ -762,6 +777,11 @@ const SellerPanel = ({ onSwitchTab }: { onSwitchTab: (tab: AuthTab) => void }) =
       return;
     }
 
+    if (!form.agreementAccepted) {
+      toast.error("You must accept the Seller Agreement and Terms & Conditions.");
+      return;
+    }
+
     setIsSubmitting(true);
 
     try {
@@ -782,22 +802,28 @@ const SellerPanel = ({ onSwitchTab }: { onSwitchTab: (tab: AuthTab) => void }) =
         product_description: form.productDescription.trim() || undefined,
         years_in_business: form.yearsInBusiness.trim() || undefined,
         website_url: form.websiteUrl.trim() || undefined,
-        contact_email: form.contactEmail.trim(),
-        contact_phone: `${COUNTRY_CODE}${form.contactPhone}`,
+        contact_email: useAccountContact ? form.email.trim() : form.contactEmail.trim(),
+        contact_phone: useAccountContact
+          ? `${COUNTRY_CODE}${form.phone}`
+          : `${COUNTRY_CODE}${form.contactPhone}`,
+        agreement_accepted: form.agreementAccepted,
       };
 
-      // TODO: rename to match your actual endpoint if it differs
       const response = await authApi.registerSeller(payload);
 
-      if (hasAuthToken(response)) {
-        setSession(response);
-        toast.success("Seller account created successfully.");
-        router.push("/seller/dashboard");
-        return;
-      }
+      toast.success(response.message || "Verification code sent.");
 
-      toast.success("Seller account created. Please sign in.");
-      onSwitchTab("signin");
+      const submittedPhone = `${COUNTRY_CODE}${form.phone}`;
+      const submittedEmail = form.email.trim().toLowerCase();
+
+      const params = new URLSearchParams({
+        phone: response.phone || submittedPhone,
+        email: response.email || submittedEmail,
+        purpose: response.verification_purpose || "register_seller",
+        next: "/signin",
+      });
+
+      router.push(`/verify-otp?${params.toString()}`);
     } catch (error) {
       if (error instanceof ApiError) toast.error(error.message);
       else toast.error("Unable to create seller account. Please try again.");
@@ -1084,34 +1110,88 @@ const SellerPanel = ({ onSwitchTab }: { onSwitchTab: (tab: AuthTab) => void }) =
         Business contact
       </h3>
 
+      <label
+        htmlFor="seller-use-account-contact"
+        className="mb-5 flex cursor-pointer items-center gap-3 rounded-lg border border-gray-3 bg-gray-1 p-3 dark:border-darkTheme-border-color dark:bg-darkTheme-secondary-bg"
+      >
+        <input
+          id="seller-use-account-contact"
+          type="checkbox"
+          checked={useAccountContact}
+          onChange={(event) => setUseAccountContact(event.target.checked)}
+          disabled={isSubmitting}
+          className="h-4 w-4 accent-orange"
+        />
+        <span className="text-sm text-dark dark:text-darkTheme-body-color">
+          Use my account email and phone as the business contact details
+        </span>
+      </label>
+
       <div className="grid sm:grid-cols-2 gap-5 mb-7">
         <div>
-          <FieldLabel htmlFor="seller-contact-email" required>Contact Email</FieldLabel>
+          <FieldLabel htmlFor="seller-contact-email" required={!useAccountContact} optional={useAccountContact}>Contact Email</FieldLabel>
           <TextInput
             type="email"
             id="seller-contact-email"
             placeholder="business@example.com"
-            value={form.contactEmail}
+            value={useAccountContact ? form.email : form.contactEmail}
             onChange={(event) => updateField("contactEmail", event.target.value)}
-            disabled={isSubmitting}
+            disabled={isSubmitting || useAccountContact}
           />
         </div>
         <div>
-          <FieldLabel htmlFor="seller-contact-phone" required>Contact Phone</FieldLabel>
+          <FieldLabel htmlFor="seller-contact-phone" required={!useAccountContact} optional={useAccountContact}>Contact Phone</FieldLabel>
           <PhoneInput
             id="seller-contact-phone"
-            value={form.contactPhone}
+            value={useAccountContact ? form.phone : form.contactPhone}
             onChange={(value) => updateField("contactPhone", value)}
-            disabled={isSubmitting}
-            invalid={Boolean(form.contactPhone) && !isContactPhoneValid}
+            disabled={isSubmitting || useAccountContact}
+            invalid={!useAccountContact && Boolean(form.contactPhone) && !isContactPhoneValid}
           />
         </div>
       </div>
 
+      {/* Seller Agreement - required before registration */}
+      <div className="mb-6 rounded-xl border-2 border-orange/30 bg-orange/5 p-4 dark:border-orange/40 dark:bg-orange/10">
+        <label
+          htmlFor="seller-agreement-accepted"
+          className="flex cursor-pointer items-start gap-3"
+        >
+          <input
+            id="seller-agreement-accepted"
+            name="agreement_accepted"
+            type="checkbox"
+            checked={form.agreementAccepted}
+            onChange={(event) => updateField("agreementAccepted", event.target.checked)}
+            disabled={isSubmitting}
+            className="mt-1 h-5 w-5 shrink-0 cursor-pointer accent-orange"
+          />
+
+          <span className="text-sm leading-6 text-dark dark:text-darkTheme-body-color">
+            <span className="font-semibold">
+              I agree to the Seller Agreement and Terms &amp; Conditions
+            </span>
+            <span className="text-red"> *</span>
+            <br />
+            <span className="text-dark-4 dark:text-darkTheme-secondary-muted">
+              By creating a seller account, I confirm that the information I have
+              provided is correct and I agree to comply with XerinMarket seller
+              policies and terms.
+            </span>
+          </span>
+        </label>
+
+        {!form.agreementAccepted && (
+          <p className="mt-2 pl-8 text-xs text-dark-4 dark:text-darkTheme-secondary-muted">
+            Please tick the checkbox above to enable seller registration.
+          </p>
+        )}
+      </div>
+
       <button
         type="submit"
-        disabled={isSubmitting}
-        className="w-full flex justify-center font-medium text-white bg-orange py-3 px-6 rounded-lg ease-out duration-200 hover:bg-orange-dark disabled:cursor-not-allowed disabled:opacity-70"
+        disabled={isSubmitting || !form.agreementAccepted}
+        className="w-full flex justify-center font-medium text-white bg-orange py-3 px-6 rounded-lg ease-out duration-200 hover:bg-orange-dark disabled:cursor-not-allowed disabled:opacity-50"
       >
         {isSubmitting ? "Creating seller account..." : "Create Seller Account"}
       </button>
@@ -1253,6 +1333,6 @@ const AuthPage = ({ initialTab = "signup" }: { initialTab?: AuthTab }) => {
   );
 };
 
-const Signup = () => <AuthPage initialTab="signup" />;
+const Signin = () => <AuthPage initialTab="signin" />;
 
-export default Signup;
+export default Signin;

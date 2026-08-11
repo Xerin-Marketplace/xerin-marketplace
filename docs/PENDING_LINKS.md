@@ -71,7 +71,7 @@ Status: Temporary routes used
 
 | Area | Current Route | Final Route Needed | Notes |
 |---|---|---|---|
-| Sell on Xerin | /signup | /seller/register | Needs separate seller registration flow |
+| Sell on Xerin | /signup | /signin | Needs separate seller registration flow |
 | Seller Dashboard | Not created yet | /seller/dashboard | Needed after seller module begins |
 | Seller KYC Upload | Not created yet | /seller/kyc | Needed for seller verification |
 | Seller Product Management | Not created yet | /seller/products | Needed for product listing and inventory |

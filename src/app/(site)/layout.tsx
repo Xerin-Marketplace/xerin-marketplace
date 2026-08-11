@@ -33,6 +33,9 @@ export default function RootLayout({
     pathname === "/signin" ||
     pathname === "/signup" ||
     pathname === "/seller/register" ||
+    pathname === "/forgot-password" ||
+    pathname === "/reset-password" ||
+    pathname === "/verify-otp" ||
     pathname.startsWith("/seller/") ||
     pathname === "/admin/login" ||
     pathname === "/admin" ||
