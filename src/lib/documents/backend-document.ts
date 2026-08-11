@@ -11,11 +11,22 @@ export const resolveBackendDocumentUrl = (value?: string | null) => {
   try {
     const api = new URL(API_BASE_URL);
 
-    if (value.startsWith("/")) {
+    // API endpoint paths such as /sellers/... and /admin/... should remain
+    // relative so axiosInstance keeps the /api/v1 base path.
+    if (value.startsWith("/sellers/") || value.startsWith("/admin/")) {
+      return value;
+    }
+
+    // Legacy/static upload paths live at the API host root.
+    if (value.startsWith("/uploads/")) {
       return `${api.origin}${value}`;
     }
 
-    return `${api.origin}/${value.replace(/^\/+/, "")}`;
+    if (value.startsWith("uploads/")) {
+      return `${api.origin}/${value}`;
+    }
+
+    return value;
   } catch {
     return value;
   }

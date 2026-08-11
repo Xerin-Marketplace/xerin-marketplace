@@ -8,7 +8,7 @@ import type { SellerDocumentType, SellerKycDocument, PayoutAccount, SellerKycSta
 import { useRouter, useSearchParams } from "next/navigation";
 import { FormEvent, useEffect, useMemo, useState } from "react";
 import toast from "react-hot-toast";
-import { Eye, FileText, ImageIcon, X } from "lucide-react";
+import { Eye, FileText, ImageIcon, LockKeyhole, Pencil, X } from "lucide-react";
 import Link from "next/link";
 const documentLabel = (value: string) => value.replaceAll("_", " ").replace(/\b\w/g, (letter) => letter.toUpperCase());
 
@@ -212,6 +212,17 @@ const SellerKyc = () => {
   if (loading) return <div className="p-12 text-center text-dark-4 dark:text-darkTheme-body-color">Loading verification data...</div>;
   if (error) return <div className="rounded-xl border border-red-200 bg-red-50 p-6 text-center text-red-700"><p>{error}</p><button type="button" onClick={() => void loadData()} className="mt-3 rounded-lg bg-red-700 px-4 py-2 text-sm font-semibold text-white">Retry</button></div>;
 
+  const allSubmitted =
+    (status?.required_documents?.length ?? 0) > 0 &&
+    (status?.required_documents ?? []).every((type) =>
+      documents.some((document) => document.document_type === type)
+    );
+  const reviewLocked =
+    status?.seller_status === "approved" ||
+    documents.some((document) => document.status === "under_review");
+  const canEditDocument = (document: SellerKycDocument | undefined) =>
+    Boolean(document && !reviewLocked && status?.seller_status !== "approved" && ["pending", "rejected"].includes(document.status || "pending"));
+
   return (
     <>
       <section>
@@ -273,22 +284,31 @@ const SellerKyc = () => {
                         <p className="text-sm text-dark-4 dark:text-darkTheme-body-color capitalize">
                           {docStatus === "missing" ? "Not uploaded" : docStatus}
                         </p>
+                        {document?.rejection_reason && (
+                          <p className="mt-2 max-w-xl rounded-lg border border-red-200 bg-red-50 px-3 py-2 text-xs leading-5 text-red-700">
+                            <strong>Admin reason:</strong> {document.rejection_reason}
+                          </p>
+                        )}
                       </div>
                       <div className="flex flex-wrap items-center justify-end gap-2">
-                        {(document?.document_url || document?.file_url) && (
+                        {document && (
                           <button
                             type="button"
-                            onClick={() =>
-                              setSubmittedPreview({
-                                title: documentLabel(type),
-                                url: document.document_url || document.file_url || "",
-                              })
-                            }
+                            onClick={() => setSubmittedPreview({ title: documentLabel(type), url: sellersApi.getKycDocumentViewUrl(document.id) })}
                             className="inline-flex items-center gap-1.5 rounded-lg border border-[#f7941d]/30 bg-orange-50 px-3 py-1.5 text-xs font-semibold text-[#f7941d] dark:bg-orange-500/10"
                           >
-                            <Eye size={14} />
-                            View
+                            <Eye size={14} /> View
                           </button>
+                        )}
+                        {canEditDocument(document) && (
+                          <Link href={`/seller/documents?edit=${encodeURIComponent(type)}`} className="inline-flex items-center gap-1.5 rounded-lg bg-[#111827] px-3 py-1.5 text-xs font-semibold text-white">
+                            <Pencil size={13} /> Edit
+                          </Link>
+                        )}
+                        {document && reviewLocked && (
+                          <span className="inline-flex items-center gap-1.5 rounded-lg bg-slate-100 px-3 py-1.5 text-xs font-medium text-[#64748b]">
+                            <LockKeyhole size={13} /> View only
+                          </span>
                         )}
 
                         <span
@@ -308,6 +328,7 @@ const SellerKyc = () => {
                 })}
               </div>
 
+              <div className={`relative ${allSubmitted ? "opacity-40 pointer-events-none select-none" : ""}`}>
               <h3 className="text-lg font-semibold text-dark dark:text-white mb-4">Upload Document</h3>
               <div className="mb-5 rounded-xl border border-orange/20 bg-orange/5 p-4">
                 <p className="text-sm font-semibold text-dark dark:text-white">
@@ -399,6 +420,12 @@ const SellerKyc = () => {
                   {isUploading ? "Uploading..." : "Upload Document"}
                 </button>
               </form>
+              </div>
+              {allSubmitted && (
+                <div className="mt-4 rounded-xl border border-[#e7ebf0] bg-slate-50 p-4 text-sm text-[#64748b]">
+                  Initial upload is complete. Use <strong>View</strong> and <strong>Edit</strong> above. Edit is hidden while Admin is reviewing and returns after rejection.
+                </div>
+              )}
             </div>
 
             <div className={`${activeTab === "payouts" ? "block" : "hidden"} rounded-xl bg-white dark:bg-darkTheme-card shadow-1 p-6 sm:p-8`}>

@@ -444,6 +444,13 @@ export const getSellerDocuments = async (sellerId: string): Promise<AdminSellerD
   const res = await axiosInstance.get<AdminSellerDocument[]>(`/admin/sellers/${sellerId}/documents`);
   return res.data;
 };
+export const startSellerReview = async (sellerId: string): Promise<AdminSeller> => {
+  const res = await axiosInstance.post<AdminSeller>(`/admin/sellers/${sellerId}/start-review`);
+  return res.data;
+};
+
+export const getSellerDocumentViewUrl = (sellerId: string, documentId: string) =>
+  `/admin/sellers/${sellerId}/documents/${documentId}/view`;
 export const listSellerProducts = async () => (await axiosInstance.get<AdminSellerProduct[]>("/admin/seller-products")).data;
 export const listSellerOrders = async () => (await axiosInstance.get<AdminSellerOrder[]>("/admin/seller-orders")).data;
 export const listSellerPerformance = async () => (await axiosInstance.get<AdminSellerPerformance[]>("/admin/seller-performance")).data;
@@ -611,6 +618,8 @@ export const adminService = {
   listAllSellers,
   listPendingSellers,
   getSellerDocuments,
+  startSellerReview,
+  getSellerDocumentViewUrl,
   listSellerProducts,
   listSellerOrders,
   listSellerPerformance,

@@ -84,6 +84,12 @@ export default function AdminSellers({
     setDocumentsLoading(true);
 
     try {
+      let currentSeller = seller;
+      if (seller.status === "under_review") {
+        currentSeller = await adminService.startSellerReview(seller.id);
+        setSelected(currentSeller);
+        setSellers((items) => items.map((item) => item.id === currentSeller.id ? currentSeller : item));
+      }
       setDocuments(await adminService.getSellerDocuments(seller.id));
     } catch (error) {
       setDocuments([]);
@@ -128,7 +134,8 @@ export default function AdminSellers({
         items.map((item) => (item.id === updated.id ? updated : item)),
       );
       setSelected(updated);
-      toast.success("Seller application rejected.");
+      setDocuments(await adminService.getSellerDocuments(selected.id));
+      toast.success("Seller application rejected. The seller can now edit documents and see your reason.");
     } catch (error) {
       toast.error(errorMessage(error));
     } finally {
@@ -267,7 +274,7 @@ export default function AdminSellers({
                         onClick={() => void openSeller(seller)}
                         className="rounded-lg border border-gray-200 px-3 py-2 text-sm font-medium hover:border-[#f47524] hover:text-[#f47524]"
                       >
-                        Review
+                        {seller.status === "rejected" ? "View" : "Review"}
                       </button>
                     </td>
                   </tr>
@@ -329,6 +336,11 @@ export default function AdminSellers({
               ))}
             </div>
 
+            <div className="mt-6 rounded-xl border border-blue-100 bg-blue-50 p-4 text-sm text-blue-800">
+              <p className="font-semibold">Admin review mode</p>
+              <p className="mt-1 text-xs leading-5">Seller documents are view-only during review. Admin does not edit them. Reject with a clear reason when the seller must correct a document.</p>
+            </div>
+
             <div className="mt-6">
               <div className="flex items-center gap-2">
                 <ShieldCheck size={18} className="text-[#f47524]" />
@@ -375,7 +387,7 @@ export default function AdminSellers({
                               title: `${selected.business_name} — ${documentLabel(
                                 document.document_type,
                               )}`,
-                              url: document.document_url,
+                              url: adminService.getSellerDocumentViewUrl(selected.id, document.id),
                             })
                           }
                           className="inline-flex items-center gap-1.5 rounded-lg border border-orange-200 bg-orange-50 px-3 py-2 text-xs font-semibold text-[#f47524] hover:bg-orange-100"
@@ -403,14 +415,15 @@ export default function AdminSellers({
             </div>
 
             <div className="mt-6 border-t border-gray-100 pt-6">
-              <label className="text-sm font-medium text-[#111827]">
-                Rejection reason
+              <label className="text-sm font-semibold text-[#111827]">
+                Rejection reason <span className="text-red-600">*</span>
               </label>
+              <p className="mt-1 text-xs leading-5 text-gray-500">Required when rejecting. Tell the seller exactly which document or information must be corrected.</p>
               <textarea
                 value={rejectReason}
                 onChange={(event) => setRejectReason(event.target.value)}
-                rows={3}
-                placeholder="Explain what the seller must correct..."
+                rows={4}
+                placeholder="Example: The Business Licence is expired. Upload a valid current licence."
                 className="mt-2 w-full rounded-xl border border-gray-200 p-3 text-sm outline-none focus:border-[#f47524]"
               />
 
@@ -423,9 +436,9 @@ export default function AdminSellers({
                   {busy === "approve" ? "Approving..." : "Approve seller"}
                 </button>
                 <button
-                  disabled={Boolean(busy)}
+                  disabled={Boolean(busy) || !rejectReason.trim()}
                   onClick={() => void reject()}
-                  className="flex-1 rounded-xl bg-red-600 px-4 py-3 text-sm font-semibold text-white disabled:opacity-50"
+                  className="flex-1 rounded-xl bg-red-600 px-4 py-3 text-sm font-semibold text-white disabled:cursor-not-allowed disabled:opacity-50"
                 >
                   {busy === "reject" ? "Rejecting..." : "Reject application"}
                 </button>

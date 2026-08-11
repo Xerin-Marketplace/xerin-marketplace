@@ -87,6 +87,41 @@ export const uploadKycDocuments = async (
   );
 };
 
+export const uploadBulkKycDocuments = async (
+  files: { tin: File; business_profile: File; business_registration: File },
+  token?: string | null
+): Promise<SellerKycDocument[]> => {
+  const formData = new FormData();
+  formData.append("tin_file", files.tin);
+  formData.append("business_profile_file", files.business_profile);
+  formData.append("business_registration_file", files.business_registration);
+  const res = await axiosInstance.post<SellerKycDocument[]>(
+    `${API_ENDPOINTS.sellers.kycDocuments}/bulk`,
+    formData,
+    { headers: { "Content-Type": "multipart/form-data" } }
+  );
+  return res.data;
+};
+
+export const updateKycDocument = async (
+  documentId: ID,
+  payload: { file?: File; document_type?: SellerDocumentType },
+  token?: string | null
+): Promise<SellerKycDocument> => {
+  const formData = new FormData();
+  if (payload.document_type) formData.append("document_type", payload.document_type);
+  if (payload.file) formData.append("file", payload.file);
+  const res = await axiosInstance.put<SellerKycDocument>(
+    `${API_ENDPOINTS.sellers.kycDocuments}/${documentId}`,
+    formData,
+    { headers: { "Content-Type": "multipart/form-data" } }
+  );
+  return res.data;
+};
+
+export const getKycDocumentViewUrl = (documentId: ID) =>
+  `${API_ENDPOINTS.sellers.kycDocuments}/${documentId}/view`;
+
 export const getPayoutAccounts = async (token?: string | null): Promise<PayoutAccount[]> => {
   const res = await axiosInstance.get<PaginatedResults<PayoutAccount> | PayoutAccount[]>(
     API_ENDPOINTS.sellers.payoutAccounts
@@ -118,6 +153,9 @@ export const sellersApi = {
   getKycStatus,
   uploadKycDocument,
   uploadKycDocuments,
+  uploadBulkKycDocuments,
+  updateKycDocument,
+  getKycDocumentViewUrl,
   getPayoutAccounts,
   createPayoutAccount,
   deletePayoutAccount,
