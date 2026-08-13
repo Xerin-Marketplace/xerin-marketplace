@@ -40,6 +40,15 @@ export type ProductImage = {
   id: ID;
   product_id: ID;
   image_url: string;
+  thumbnail_url?: string | null;
+  storage_key?: string | null;
+  original_filename?: string | null;
+  mime_type?: string | null;
+  file_size?: number | null;
+  width?: number | null;
+  height?: number | null;
+  alt_text?: string | null;
+  display_order?: number;
   is_primary: boolean;
   created_at: string;
 };

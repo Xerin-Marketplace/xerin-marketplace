@@ -42,7 +42,13 @@ export const getMyProducts = async (query?: ProductListQuery | string | null): P
   const res = await axiosInstance.get<Product[]>(API_ENDPOINTS.products.myProducts, {
     params,
   });
-  return res.data;
+
+  return Promise.all(
+    res.data.map(async (product) => ({
+      ...product,
+      images: await getMyProductImages(product.id).catch(() => []),
+    })),
+  );
 };
 
 export const getCategories = async (): Promise<Category[]> => {
@@ -110,6 +116,50 @@ export const uploadProductImage = async (
 export const getProductImages = async (productId: ID): Promise<ProductImage[]> => {
   const res = await axiosInstance.get<ProductImage[]>(
     API_ENDPOINTS.products.images(productId)
+  );
+  return res.data;
+};
+
+
+export const getMyProductImages = async (
+  productId: ID,
+): Promise<ProductImage[]> => {
+  const res = await axiosInstance.get<ProductImage[]>(
+    `/products/my-products/${productId}/images`,
+  );
+  return res.data;
+};
+
+export const uploadProductImageFiles = async (
+  productId: ID,
+  files: File[],
+  altText?: string,
+): Promise<ProductImage[]> => {
+  const formData = new FormData();
+
+  files.forEach((file) => {
+    formData.append("files", file);
+  });
+
+  if (altText?.trim()) {
+    formData.append("alt_text", altText.trim());
+  }
+
+  formData.append("make_first_primary", "true");
+
+  const res = await axiosInstance.post<ProductImage[]>(
+    `/products/${productId}/images/upload`,
+    formData,
+  );
+
+  return res.data;
+};
+
+export const submitProductForReview = async (
+  productId: ID,
+): Promise<Product> => {
+  const res = await axiosInstance.post<Product>(
+    `/products/${productId}/submit`,
   );
   return res.data;
 };
@@ -187,7 +237,10 @@ export const productsApi = {
   delete: deleteProduct,
   uploadImage: uploadProductImage,
   getImages: getProductImages,
+  getMyImages: getMyProductImages,
+  uploadImageFiles: uploadProductImageFiles,
   uploadImages: uploadProductImages,
+  submitForReview: submitProductForReview,
   deleteImage: deleteProductImage,
   addVariant: addProductVariant,
   getVariants: getProductVariants,

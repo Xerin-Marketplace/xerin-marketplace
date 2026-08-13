@@ -1,8 +1,8 @@
 "use client";
 
-import { productsApi } from "@/lib/api/endpoints/products";
-import { API_BASE_URL } from "@/lib/api/endpoints";
 import { ApiError } from "@/lib/api/client";
+import { API_BASE_URL } from "@/lib/api/endpoints";
+import { productsApi } from "@/lib/api/endpoints/products";
 import { authStorage } from "@/lib/auth/storage";
 import type {
   Brand,
@@ -11,9 +11,40 @@ import type {
   ProductImage,
   ProductRequest,
 } from "@/types/api/product";
+import {
+  AlertCircle,
+  Archive,
+  BadgeCheck,
+  Boxes,
+  Camera,
+  CheckCircle2,
+  Clock3,
+  Eye,
+  FileText,
+  ImagePlus,
+  Package,
+  Pencil,
+  Plus,
+  RefreshCw,
+  Search,
+  Send,
+  ShoppingBag,
+  Tag,
+  Trash2,
+  UploadCloud,
+  X,
+} from "lucide-react";
 import Image from "next/image";
 import { useRouter, useSearchParams } from "next/navigation";
-import { FormEvent, useCallback, useEffect, useMemo, useState } from "react";
+import {
+  ChangeEvent,
+  FormEvent,
+  useCallback,
+  useEffect,
+  useMemo,
+  useRef,
+  useState,
+} from "react";
 import toast from "react-hot-toast";
 
 type StoredUser = {
@@ -23,15 +54,25 @@ type StoredUser = {
   first_name?: string | null;
 };
 
-const STATUS_OPTIONS = ["all", "draft", "pending_review", "approved", "rejected", "inactive"];
-const MAX_PRODUCT_IMAGES = 5;
-
-const resolveImageUrl = (imageUrl: string) => {
-  if (/^(https?:|data:|blob:)/.test(imageUrl)) return imageUrl;
-  return `${API_BASE_URL}${imageUrl.startsWith("/") ? "" : "/"}${imageUrl}`;
+type SelectedImage = {
+  file: File;
+  previewUrl: string;
 };
 
-const INITIAL_FORM: ProductRequest & { id?: string } = {
+const STATUS_OPTIONS = [
+  "all",
+  "draft",
+  "pending_review",
+  "approved",
+  "rejected",
+  "inactive",
+];
+
+const MAX_PRODUCT_IMAGES = 10;
+const MAX_IMAGE_SIZE_BYTES = 5 * 1024 * 1024;
+const ALLOWED_IMAGE_TYPES = ["image/jpeg", "image/png", "image/webp"];
+
+const INITIAL_FORM: ProductRequest = {
   category_id: "",
   brand_id: null,
   sku: "",
@@ -44,17 +85,59 @@ const INITIAL_FORM: ProductRequest & { id?: string } = {
   weight: null,
 };
 
+const resolveImageUrl = (imageUrl: string) => {
+  if (/^(https?:|data:|blob:)/.test(imageUrl)) return imageUrl;
+
+  try {
+    const base = new URL(API_BASE_URL);
+    return `${base.origin}${imageUrl.startsWith("/") ? "" : "/"}${imageUrl}`;
+  } catch {
+    return `${API_BASE_URL}${imageUrl.startsWith("/") ? "" : "/"}${imageUrl}`;
+  }
+};
+
+const slugify = (value: string) =>
+  value
+    .toLowerCase()
+    .trim()
+    .replace(/[^a-z0-9]+/g, "-")
+    .replace(/^-+|-+$/g, "")
+    .slice(0, 240);
+
+const statusLabel = (status?: string | null) =>
+  (status || "draft").replaceAll("_", " ");
+
+const statusClasses = (status?: string | null) => {
+  switch (status) {
+    case "approved":
+      return "border-emerald-200 bg-emerald-50 text-emerald-700";
+    case "pending_review":
+      return "border-blue-200 bg-blue-50 text-blue-700";
+    case "rejected":
+      return "border-red-200 bg-red-50 text-red-700";
+    case "inactive":
+      return "border-slate-200 bg-slate-100 text-slate-600";
+    default:
+      return "border-amber-200 bg-amber-50 text-amber-700";
+  }
+};
+
 const SellerProducts = () => {
   const router = useRouter();
   const searchParams = useSearchParams();
   const user = authStorage.getUser<StoredUser>();
   const token = authStorage.getAccessToken();
+  const objectUrlsRef = useRef<Set<string>>(new Set());
 
   const isSeller = useMemo(() => {
     if (!user) return false;
-    const roles = user.roles ?? [];
-    return user.account_type === "seller" || roles.includes("seller");
+    return (
+      user.account_type === "seller" ||
+      (user.roles ?? []).includes("seller")
+    );
   }, [user]);
+
+  const sellerApproved = user?.seller_status === "approved";
 
   const [products, setProducts] = useState<Product[]>([]);
   const [categories, setCategories] = useState<Category[]>([]);
@@ -64,52 +147,49 @@ const SellerProducts = () => {
   const [search, setSearch] = useState("");
   const [statusFilter, setStatusFilter] = useState("all");
 
-  const [modalOpen, setModalOpen] = useState(false);
+  const [editorOpen, setEditorOpen] = useState(false);
   const [editingProduct, setEditingProduct] = useState<Product | null>(null);
   const [form, setForm] = useState<ProductRequest>(INITIAL_FORM);
-  const [isSubmitting, setIsSubmitting] = useState(false);
-  const [newImages, setNewImages] = useState<string[]>([]);
-  const [newImageUrl, setNewImageUrl] = useState("");
   const [existingImages, setExistingImages] = useState<ProductImage[]>([]);
+  const [selectedImages, setSelectedImages] = useState<SelectedImage[]>([]);
   const [imagesLoading, setImagesLoading] = useState(false);
   const [imageError, setImageError] = useState("");
-  const [deletingImageId, setDeletingImageId] = useState<string | null>(null);
-
+  const [isSubmitting, setIsSubmitting] = useState(false);
+  const [submitIntent, setSubmitIntent] = useState<"draft" | "review">("draft");
   const [deleteTarget, setDeleteTarget] = useState<Product | null>(null);
   const [isDeleting, setIsDeleting] = useState(false);
+  const [submittingProductId, setSubmittingProductId] = useState<string | null>(
+    null,
+  );
 
   const loadData = useCallback(async () => {
     if (!token) return;
+
     setLoading(true);
     setError("");
+
     try {
       const [items, categoryList, brandList] = await Promise.all([
-        productsApi.getMyProducts(token),
+        productsApi.getMyProducts(),
         productsApi.getCategories(),
         productsApi.getBrands(),
       ]);
+
       setProducts(items);
       setCategories(categoryList);
       setBrands(brandList);
-    } catch (error) {
+    } catch (cause) {
       const message =
-        error instanceof ApiError ? error.message : "Failed to load products.";
+        cause instanceof ApiError
+          ? cause.message
+          : "Unable to load your seller products.";
+
       setError(message);
       toast.error(message);
     } finally {
       setLoading(false);
     }
   }, [token]);
-
-  useEffect(() => {
-    const requestedStatus = searchParams.get("status");
-    if (requestedStatus && STATUS_OPTIONS.includes(requestedStatus)) {
-      setStatusFilter(requestedStatus);
-    }
-    if (searchParams.get("create") === "true") {
-      openCreate();
-    }
-  }, [searchParams]);
 
   useEffect(() => {
     if (!token) {
@@ -125,28 +205,103 @@ const SellerProducts = () => {
     void loadData();
   }, [isSeller, loadData, router, token]);
 
+  useEffect(() => {
+    const requestedStatus = searchParams.get("status");
+
+    if (requestedStatus && STATUS_OPTIONS.includes(requestedStatus)) {
+      setStatusFilter(requestedStatus);
+    }
+
+    if (searchParams.get("create") === "true" && sellerApproved) {
+      openCreate();
+    }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [searchParams, sellerApproved]);
+
+  useEffect(() => {
+    return () => {
+      objectUrlsRef.current.forEach((url) => URL.revokeObjectURL(url));
+      objectUrlsRef.current.clear();
+    };
+  }, []);
+
   const filteredProducts = useMemo(() => {
     return products.filter((product) => {
-      const category = categories.find((c) => c.id === product.category_id);
-      const brand = brands.find((b) => b.id === product.brand_id);
-      const haystack = `${product.name} ${product.sku ?? ""} ${product.status ?? ""} ${category?.name ?? ""} ${brand?.name ?? ""}`.toLowerCase();
-      const matchesSearch = !search || haystack.includes(search.toLowerCase());
-      const matchesStatus = statusFilter === "all" || product.status === statusFilter;
+      const category = categories.find((item) => item.id === product.category_id);
+      const brand = brands.find((item) => item.id === product.brand_id);
+      const haystack = [
+        product.name,
+        product.sku,
+        product.status,
+        category?.name,
+        brand?.name,
+      ]
+        .filter(Boolean)
+        .join(" ")
+        .toLowerCase();
+
+      const matchesSearch =
+        !search.trim() || haystack.includes(search.trim().toLowerCase());
+      const matchesStatus =
+        statusFilter === "all" || product.status === statusFilter;
+
       return matchesSearch && matchesStatus;
     });
-  }, [products, categories, brands, search, statusFilter]);
+  }, [brands, categories, products, search, statusFilter]);
 
-  function openCreate() {
+  const counts = useMemo(
+    () => ({
+      total: products.length,
+      draft: products.filter((item) => item.status === "draft").length,
+      review: products.filter((item) => item.status === "pending_review").length,
+      approved: products.filter((item) => item.status === "approved").length,
+      rejected: products.filter((item) => item.status === "rejected").length,
+    }),
+    [products],
+  );
+
+  function clearSelectedImages() {
+    selectedImages.forEach(({ previewUrl }) => {
+      URL.revokeObjectURL(previewUrl);
+      objectUrlsRef.current.delete(previewUrl);
+    });
+    setSelectedImages([]);
+  }
+
+  function closeEditor() {
+    if (isSubmitting) return;
+
+    clearSelectedImages();
+    setEditorOpen(false);
     setEditingProduct(null);
     setForm(INITIAL_FORM);
-    setNewImages([]);
-    setNewImageUrl("");
     setExistingImages([]);
     setImageError("");
-    setModalOpen(true);
+    setSubmitIntent("draft");
+  }
+
+  function openCreate() {
+    if (!sellerApproved) {
+      toast.error("Your seller account must be approved before listing products.");
+      return;
+    }
+
+    clearSelectedImages();
+    setEditingProduct(null);
+    setExistingImages([]);
+    setForm(INITIAL_FORM);
+    setImageError("");
+    setSubmitIntent("draft");
+    setEditorOpen(true);
   }
 
   async function openEdit(product: Product) {
+    if (product.status === "pending_review") {
+      toast.error("This product is under review and cannot be edited.");
+      return;
+    }
+
+    clearSelectedImages();
     setEditingProduct(product);
     setForm({
       category_id: product.category_id ?? "",
@@ -160,636 +315,1116 @@ const SellerProducts = () => {
       currency: product.currency ?? "TZS",
       weight: product.weight ?? null,
     });
-    setNewImages([]);
-    setNewImageUrl("");
-    setExistingImages([]);
     setImageError("");
-    setModalOpen(true);
+    setExistingImages([]);
+    setSubmitIntent("draft");
+    setEditorOpen(true);
     setImagesLoading(true);
+
     try {
-      setExistingImages(await productsApi.getImages(product.id));
-    } catch (error) {
+      setExistingImages(await productsApi.getMyImages(product.id));
+    } catch (cause) {
       toast.error(
-        error instanceof Error ? error.message : "Unable to load product images.",
+        cause instanceof ApiError
+          ? cause.message
+          : "Unable to load the product images.",
       );
     } finally {
       setImagesLoading(false);
     }
   }
 
-  function addImageUrl() {
+  function validateImage(file: File) {
+    if (!ALLOWED_IMAGE_TYPES.includes(file.type)) {
+      return "Only JPEG, PNG and WEBP images are allowed.";
+    }
+
+    if (file.size > MAX_IMAGE_SIZE_BYTES) {
+      return "Each product image must be 5 MB or smaller.";
+    }
+
+    return null;
+  }
+
+  function selectImages(event: ChangeEvent<HTMLInputElement>) {
     setImageError("");
-    const imageUrl = newImageUrl.trim();
-    if (!imageUrl) return;
-    if (!/^(https?:\/\/|\/)/i.test(imageUrl)) {
-      setImageError("Enter a complete http(s) URL or an existing /uploads path.");
-      return;
-    }
-    if (newImages.includes(imageUrl)) {
-      setImageError("This image URL has already been added.");
-      return;
-    }
+
+    const incoming = Array.from(event.target.files ?? []);
+    event.target.value = "";
+
+    if (!incoming.length) return;
+
     const availableSlots =
-      MAX_PRODUCT_IMAGES - existingImages.length - newImages.length;
-    if (availableSlots < 1) {
-      setImageError(
-        `Maximum ${MAX_PRODUCT_IMAGES} images are allowed.`,
-      );
+      MAX_PRODUCT_IMAGES - existingImages.length - selectedImages.length;
+
+    if (availableSlots <= 0) {
+      setImageError(`Maximum ${MAX_PRODUCT_IMAGES} product images are allowed.`);
       return;
     }
-    setNewImages((current) => [...current, imageUrl]);
-    setNewImageUrl("");
+
+    const accepted: SelectedImage[] = [];
+
+    for (const file of incoming.slice(0, availableSlots)) {
+      const validationError = validateImage(file);
+
+      if (validationError) {
+        setImageError(`${file.name}: ${validationError}`);
+        continue;
+      }
+
+      const previewUrl = URL.createObjectURL(file);
+      objectUrlsRef.current.add(previewUrl);
+      accepted.push({ file, previewUrl });
+    }
+
+    setSelectedImages((current) => [...current, ...accepted]);
+
+    if (incoming.length > availableSlots) {
+      setImageError(
+        `Only ${availableSlots} more image${
+          availableSlots === 1 ? "" : "s"
+        } can be added.`,
+      );
+    }
+  }
+
+  function removeSelectedImage(index: number) {
+    setSelectedImages((current) => {
+      const target = current[index];
+
+      if (target) {
+        URL.revokeObjectURL(target.previewUrl);
+        objectUrlsRef.current.delete(target.previewUrl);
+      }
+
+      return current.filter((_, itemIndex) => itemIndex !== index);
+    });
   }
 
   async function removeExistingImage(image: ProductImage) {
-    if (!editingProduct) return;
-    setDeletingImageId(String(image.id));
+    if (!editingProduct || editingProduct.status === "pending_review") return;
+
     try {
       await productsApi.deleteImage(editingProduct.id, image.id);
       setExistingImages((current) =>
         current.filter((item) => item.id !== image.id),
       );
       toast.success("Product image removed.");
-    } catch (error) {
+    } catch (cause) {
       toast.error(
-        error instanceof Error ? error.message : "Unable to remove image.",
+        cause instanceof ApiError ? cause.message : "Unable to remove image.",
       );
-    } finally {
-      setDeletingImageId(null);
     }
+  }
+
+  function updateName(value: string) {
+    setForm((current) => ({
+      ...current,
+      name: value,
+      slug:
+        editingProduct && current.slug
+          ? current.slug
+          : slugify(value),
+    }));
+  }
+
+  function validateForm() {
+    if (!form.category_id) return "Select a product category.";
+    if (!form.name.trim()) return "Enter the product name.";
+    if (!form.sku.trim()) return "Enter the product SKU.";
+    if (!form.slug.trim()) return "Enter the product slug.";
+    if (!form.description?.trim()) return "Add a useful product description.";
+
+    const price = Number(form.price);
+    if (!Number.isFinite(price) || price < 0) {
+      return "Enter a valid product price.";
+    }
+
+    if (form.sale_price !== null && form.sale_price !== "") {
+      const salePrice = Number(form.sale_price);
+
+      if (!Number.isFinite(salePrice) || salePrice < 0) {
+        return "Enter a valid sale price.";
+      }
+
+      if (salePrice > price) {
+        return "Sale price cannot be greater than the regular price.";
+      }
+    }
+
+    const totalImages = existingImages.length + selectedImages.length;
+
+    if (totalImages < 1) {
+      return "Upload at least one product image.";
+    }
+
+    return null;
   }
 
   async function handleSubmit(event: FormEvent<HTMLFormElement>) {
     event.preventDefault();
-    if (!token) return;
 
-    if (!form.category_id || !form.sku || !form.name || !form.slug || !form.price) {
-      toast.error("Please fill in category, SKU, name, slug, and price.");
+    if (!sellerApproved) {
+      toast.error("Your seller account is not approved.");
       return;
     }
 
-    if (!editingProduct && newImages.length === 0) {
-      setImageError("Add at least one product image.");
+    const validationError = validateForm();
+
+    if (validationError) {
+      toast.error(validationError);
       return;
     }
 
     const payload: ProductRequest = {
       ...form,
+      category_id: form.category_id,
       brand_id: form.brand_id || null,
-      sale_price: form.sale_price || null,
-      weight: form.weight || null,
+      sku: form.sku.trim(),
+      name: form.name.trim(),
+      slug: slugify(form.slug),
+      description: form.description?.trim() || null,
+      price: Number(form.price),
+      sale_price:
+        form.sale_price === null || form.sale_price === ""
+          ? null
+          : Number(form.sale_price),
+      currency: form.currency || "TZS",
+      weight:
+        form.weight === null || form.weight === ""
+          ? null
+          : Number(form.weight),
     };
 
     setIsSubmitting(true);
+
     try {
-      if (editingProduct) {
-        const updatedProduct = await productsApi.update(
-          editingProduct.id,
-          payload,
-          token,
+      const product = editingProduct
+        ? await productsApi.update(editingProduct.id, payload)
+        : await productsApi.create(payload);
+
+      if (selectedImages.length) {
+        await productsApi.uploadImageFiles(
+          product.id,
+          selectedImages.map((item) => item.file),
+          payload.name,
         );
-        if (newImages.length) {
-          await productsApi.uploadImages(updatedProduct.id, newImages);
-        }
-        toast.success("Product updated successfully.");
-      } else {
-        const createdProduct = await productsApi.create(payload, token);
-        await productsApi.uploadImages(createdProduct.id, newImages);
-        toast.success("Product created successfully.");
       }
-      setModalOpen(false);
-      setEditingProduct(null);
-      setForm(INITIAL_FORM);
-      setNewImages([]);
-      setNewImageUrl("");
-      setExistingImages([]);
-      setImageError("");
+
+      if (submitIntent === "review") {
+        await productsApi.submitForReview(product.id);
+        toast.success(
+          "Product submitted successfully and is now waiting for Admin review.",
+        );
+      } else {
+        toast.success(
+          editingProduct
+            ? "Product draft updated successfully."
+            : "Product saved as a draft.",
+        );
+      }
+
+      closeEditor();
       await loadData();
-    } catch (error) {
-      if (error instanceof ApiError) {
-        toast.error(error.message);
-      } else {
-        toast.error("Failed to save product.");
-      }
+    } catch (cause) {
+      toast.error(
+        cause instanceof ApiError ? cause.message : "Unable to save the product.",
+      );
     } finally {
       setIsSubmitting(false);
     }
   }
 
-  async function handleDelete() {
-    if (!token || !deleteTarget) return;
-    setIsDeleting(true);
+  async function submitExistingProduct(product: Product) {
+    if (!["draft", "rejected"].includes(product.status)) return;
+
+    setSubmittingProductId(String(product.id));
+
     try {
-      await productsApi.delete(deleteTarget.id, token);
-      toast.success("Product deleted.");
+      await productsApi.submitForReview(product.id);
+      toast.success("Product submitted for Admin review.");
+      await loadData();
+    } catch (cause) {
+      toast.error(
+        cause instanceof ApiError
+          ? cause.message
+          : "Unable to submit the product for review.",
+      );
+    } finally {
+      setSubmittingProductId(null);
+    }
+  }
+
+  async function handleDelete() {
+    if (!deleteTarget) return;
+
+    setIsDeleting(true);
+
+    try {
+      await productsApi.delete(deleteTarget.id);
+      toast.success("Product archived successfully.");
       setDeleteTarget(null);
       await loadData();
-    } catch (error) {
-      if (error instanceof ApiError) {
-        toast.error(error.message);
-      } else {
-        toast.error("Failed to delete product.");
-      }
+    } catch (cause) {
+      toast.error(
+        cause instanceof ApiError ? cause.message : "Unable to archive product.",
+      );
     } finally {
       setIsDeleting(false);
     }
   }
 
   function formatPrice(value: number | string | null | undefined) {
-    if (value === null || value === undefined) return "-";
-    const numeric = typeof value === "string" ? parseFloat(value) : value;
-    if (Number.isNaN(numeric)) return "-";
-    return numeric.toLocaleString();
+    if (value === null || value === undefined) return "—";
+
+    const numeric = Number(value);
+
+    if (!Number.isFinite(numeric)) return "—";
+
+    return `TZS ${numeric.toLocaleString()}`;
   }
 
   if (!token || !isSeller) return null;
 
   return (
     <>
-      <section>
-        <div className="mx-auto max-w-[1280px]">
-          <div className="mb-6 flex justify-end">
-            <button type="button" onClick={openCreate} className="rounded-xl bg-[#f7941d] px-5 py-3 font-semibold text-white transition hover:brightness-95">Add Product</button>
+      <div className="mx-auto max-w-[1500px] space-y-5">
+        {!sellerApproved && (
+          <div className="flex items-start gap-3 rounded-2xl border border-amber-200 bg-amber-50 p-5 text-amber-800">
+            <AlertCircle size={20} className="mt-0.5 shrink-0" />
+            <div>
+              <p className="font-semibold">Product listing is currently locked</p>
+              <p className="mt-1 text-sm leading-6">
+                Your seller account must be approved before you can create or
+                manage marketplace products.
+              </p>
+            </div>
           </div>
+        )}
 
-          <div className="mb-8 rounded-xl bg-white dark:bg-darkTheme-card shadow-1 p-6 sm:p-8">
-            <div className="grid grid-cols-1 md:grid-cols-3 gap-5">
-              <div className="md:col-span-2">
-                <label className="block mb-2.5 dark:text-darkTheme-body-color">Search</label>
-                <input
-                  type="text"
-                  value={search}
-                  onChange={(event) => setSearch(event.target.value)}
-                  placeholder="Search product, SKU, category, or brand"
-                  className="rounded-lg border border-gray-3 dark:border-darkTheme-border-color bg-gray-1 dark:bg-darkTheme-secondary-bg dark:text-darkTheme-body-color w-full py-3 px-5 outline-none focus:ring-2 focus:ring-blue/20"
-                />
-              </div>
-              <div>
-                <label className="block mb-2.5 dark:text-darkTheme-body-color">Status</label>
-                <select
-                  value={statusFilter}
-                  onChange={(event) => setStatusFilter(event.target.value)}
-                  className="rounded-lg border border-gray-3 dark:border-darkTheme-border-color bg-gray-1 dark:bg-darkTheme-secondary-bg dark:text-darkTheme-body-color w-full py-3 px-5 outline-none focus:ring-2 focus:ring-blue/20"
-                >
-                  {STATUS_OPTIONS.map((status) => (
-                    <option key={status} value={status}>
-                      {status === "all" ? "All statuses" : status}
-                    </option>
-                  ))}
-                </select>
-              </div>
+        <section className="rounded-2xl border border-[#e7ebf0] bg-white p-5 shadow-sm sm:p-6">
+          <div className="flex flex-col gap-5 xl:flex-row xl:items-center xl:justify-between">
+            <div>
+              <p className="text-xs font-bold uppercase tracking-[0.14em] text-[#f7941d]">
+                Seller catalogue
+              </p>
+              <h1 className="mt-1 text-2xl font-bold tracking-[-0.025em] text-[#111827]">
+                Products
+              </h1>
+              <p className="mt-2 max-w-2xl text-sm leading-6 text-[#64748b]">
+                Create product listings, upload real product images, save drafts
+                and submit completed products for marketplace review.
+              </p>
+            </div>
+
+            <button
+              type="button"
+              disabled={!sellerApproved}
+              onClick={openCreate}
+              className="inline-flex h-11 items-center justify-center gap-2 rounded-xl bg-[#f7941d] px-5 text-sm font-semibold text-white shadow-[0_8px_20px_rgba(247,148,29,0.18)] transition hover:bg-[#e98716] disabled:cursor-not-allowed disabled:opacity-50"
+            >
+              <Plus size={17} />
+              Add Product
+            </button>
+          </div>
+        </section>
+
+        <section className="grid grid-cols-2 gap-3 md:grid-cols-3 xl:grid-cols-5">
+          <StatCard label="All products" value={counts.total} icon={ShoppingBag} />
+          <StatCard label="Draft" value={counts.draft} icon={FileText} />
+          <StatCard label="Under review" value={counts.review} icon={Clock3} />
+          <StatCard label="Approved" value={counts.approved} icon={BadgeCheck} />
+          <StatCard label="Rejected" value={counts.rejected} icon={AlertCircle} />
+        </section>
+
+        <section className="rounded-2xl border border-[#e7ebf0] bg-white shadow-sm">
+          <div className="flex flex-col gap-3 border-b border-[#edf0f4] p-5 lg:flex-row lg:items-center lg:justify-between">
+            <div className="relative min-w-0 flex-1 lg:max-w-xl">
+              <Search
+                size={17}
+                className="absolute left-3.5 top-1/2 -translate-y-1/2 text-[#94a3b8]"
+              />
+              <input
+                value={search}
+                onChange={(event) => setSearch(event.target.value)}
+                placeholder="Search by product name, SKU, category or brand..."
+                className="h-11 w-full rounded-xl border border-[#e1e6ec] bg-[#f8fafc] pl-10 pr-4 text-sm outline-none transition focus:border-[#f7941d] focus:bg-white"
+              />
+            </div>
+
+            <div className="flex gap-2">
+              <select
+                value={statusFilter}
+                onChange={(event) => setStatusFilter(event.target.value)}
+                className="h-11 rounded-xl border border-[#e1e6ec] bg-white px-4 text-sm outline-none"
+              >
+                {STATUS_OPTIONS.map((status) => (
+                  <option key={status} value={status}>
+                    {status === "all" ? "All statuses" : statusLabel(status)}
+                  </option>
+                ))}
+              </select>
+
+              <button
+                type="button"
+                onClick={() => void loadData()}
+                className="inline-flex h-11 items-center justify-center gap-2 rounded-xl border border-[#e1e6ec] bg-white px-4 text-sm font-semibold text-[#475569] hover:bg-slate-50"
+              >
+                <RefreshCw size={15} />
+                Refresh
+              </button>
             </div>
           </div>
 
-          <div className="mb-6 rounded-xl border border-dashed border-gray-3 bg-gray-1 p-4 text-sm text-dark-4 dark:border-darkTheme-border-color dark:bg-darkTheme-secondary-bg dark:text-darkTheme-body-color">The backend currently returns a limited product list without total-count metadata or server-side status/search filters. The table shows only records returned by the API and does not present them as complete totals.</div>
+          {loading ? (
+            <div className="p-16 text-center">
+              <RefreshCw
+                className="mx-auto animate-spin text-[#f7941d]"
+                size={25}
+              />
+              <p className="mt-3 text-sm text-[#64748b]">Loading products...</p>
+            </div>
+          ) : error ? (
+            <div className="p-12 text-center text-red-600">{error}</div>
+          ) : filteredProducts.length === 0 ? (
+            <div className="p-14 text-center">
+              <Package className="mx-auto text-[#cbd5e1]" size={40} />
+              <h3 className="mt-3 font-semibold text-[#111827]">
+                No products found
+              </h3>
+              <p className="mt-1 text-sm text-[#64748b]">
+                {products.length
+                  ? "Try changing your search or status filter."
+                  : "Create your first product listing to start building your seller catalogue."}
+              </p>
+              {!products.length && sellerApproved && (
+                <button
+                  type="button"
+                  onClick={openCreate}
+                  className="mt-5 rounded-xl bg-[#f7941d] px-5 py-2.5 text-sm font-semibold text-white"
+                >
+                  Add your first product
+                </button>
+              )}
+            </div>
+          ) : (
+            <div className="grid gap-4 p-5 sm:grid-cols-2 xl:grid-cols-3 2xl:grid-cols-4">
+              {filteredProducts.map((product) => {
+                const category = categories.find(
+                  (item) => item.id === product.category_id,
+                );
+                const brand = brands.find(
+                  (item) => item.id === product.brand_id,
+                );
+                const editable = product.status !== "pending_review";
 
-          <div className="rounded-xl bg-white dark:bg-darkTheme-card shadow-1 overflow-hidden">
-            {loading ? (
-              <div className="p-12 text-center text-dark-4 dark:text-darkTheme-body-color">Loading products...</div>
-            ) : error ? (
-              <div className="p-12 text-center text-red"><p>{error}</p><button type="button" onClick={() => void loadData()} className="mt-3 rounded-lg bg-red px-4 py-2 text-sm font-semibold text-white">Retry</button></div>
-            ) : filteredProducts.length === 0 ? (
-              <div className="p-12 text-center text-dark-4 dark:text-darkTheme-body-color">
-                No products found. Click &quot;Add Product&quot; to create your first product.
-              </div>
-            ) : (
-              <div className="overflow-x-auto">
-                <table className="w-full text-left">
-                  <thead className="bg-gray-1 dark:bg-darkTheme-secondary-bg">
-                    <tr>
-                      <th className="px-6 py-4 text-sm font-medium text-dark dark:text-white">Product</th>
-                      <th className="px-6 py-4 text-sm font-medium text-dark dark:text-white">SKU</th>
-                      <th className="px-6 py-4 text-sm font-medium text-dark dark:text-white">Category</th>
-                      <th className="px-6 py-4 text-sm font-medium text-dark dark:text-white">Price</th>
-                      <th className="px-6 py-4 text-sm font-medium text-dark dark:text-white">Status</th>
-                      <th className="px-6 py-4 text-sm font-medium text-dark dark:text-white text-right">Actions</th>
-                    </tr>
-                  </thead>
-                  <tbody className="divide-y divide-gray-3 dark:divide-darkTheme-border-color">
-                    {filteredProducts.map((product) => {
-                      const category = categories.find((c) => c.id === product.category_id);
-                      const brand = brands.find((b) => b.id === product.brand_id);
-                      return (
-                        <tr key={product.id} className="hover:bg-gray-1/50 dark:hover:bg-darkTheme-secondary-bg/50">
-                          <td className="px-6 py-4">
-                            <div>
-                              <p className="font-medium text-dark dark:text-white">{product.name}</p>
-                              {brand && (
-                                <p className="text-sm text-dark-4 dark:text-darkTheme-body-color">{brand.name}</p>
-                              )}
-                            </div>
-                          </td>
-                          <td className="px-6 py-4 text-dark-4 dark:text-darkTheme-body-color">
-                            {product.sku ?? "-"}
-                          </td>
-                          <td className="px-6 py-4 text-dark-4 dark:text-darkTheme-body-color">
-                            {category?.name ?? "-"}
-                          </td>
-                          <td className="px-6 py-4 text-dark dark:text-white">
-                            {product.currency} {formatPrice(product.price)}
-                            {product.sale_price ? (
-                              <span className="block text-sm text-success">
-                                Sale: {product.currency} {formatPrice(product.sale_price)}
-                              </span>
-                            ) : null}
-                          </td>
-                          <td className="px-6 py-4">
-                            <span
-                              className={`inline-flex rounded-full px-3 py-1 text-xs font-medium capitalize ${
-                                product.status === "approved"
-                                  ? "bg-success/10 text-success"
-                                  : product.status === "rejected"
-                                  ? "bg-red/10 text-red"
-                                  : product.status === "draft"
-                                  ? "bg-gray-2 text-dark-2"
-                                  : "bg-warning/10 text-warning"
-                              }`}
-                            >
-                              {product.status ?? "pending"}
-                            </span>
-                          </td>
-                          <td className="px-6 py-4 text-right">
-                            <div className="flex items-center justify-end gap-3">
-                              <button
-                                type="button"
-                                onClick={() => openEdit(product)}
-                                className="text-sm text-blue hover:text-blue-dark"
-                              >
-                                Edit
-                              </button>
-                              <button
-                                type="button"
-                                onClick={() => setDeleteTarget(product)}
-                                className="text-sm text-red hover:text-red-dark"
-                              >
-                                Delete
-                              </button>
-                            </div>
-                          </td>
-                        </tr>
-                      );
-                    })}
-                  </tbody>
-                </table>
-              </div>
-            )}
-          </div>
-        </div>
-      </section>
-
-      {modalOpen && (
-        <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/50 px-4 py-8 overflow-y-auto">
-          <div className="w-full max-w-2xl rounded-xl bg-white dark:bg-darkTheme-card shadow-1 p-6 sm:p-8 my-auto">
-            <h2 className="text-xl font-semibold text-dark dark:text-white mb-6">
-              {editingProduct ? "Edit Product" : "Add Product"}
-            </h2>
-
-            <form onSubmit={handleSubmit} className="space-y-5">
-              <div className="grid grid-cols-1 md:grid-cols-2 gap-5">
-                <div>
-                  <label className="block mb-2.5 dark:text-darkTheme-body-color">
-                    Category <span className="text-red">*</span>
-                  </label>
-                  <select
-                    value={form.category_id}
-                    onChange={(event) => setForm({ ...form, category_id: event.target.value })}
-                    required
-                    disabled={isSubmitting}
-                    className="rounded-lg border border-gray-3 dark:border-darkTheme-border-color bg-gray-1 dark:bg-darkTheme-secondary-bg dark:text-darkTheme-body-color w-full py-3 px-5 outline-none focus:ring-2 focus:ring-blue/20"
+                return (
+                  <article
+                    key={String(product.id)}
+                    className="overflow-hidden rounded-2xl border border-[#e7ebf0] bg-white transition hover:-translate-y-0.5 hover:shadow-lg"
                   >
-                    <option value="">Select category</option>
-                    {categories.map((category) => (
-                      <option key={category.id} value={category.id}>
-                        {category.name}
-                      </option>
-                    ))}
-                  </select>
-                </div>
+                    <div className="relative flex h-40 items-center justify-center bg-gradient-to-br from-slate-50 to-slate-100">
+                      {product.images?.[0]?.image_url ? (
+                        <Image
+                          src={resolveImageUrl(product.images[0].image_url)}
+                          alt={product.name}
+                          fill
+                          unoptimized
+                          className="object-cover"
+                        />
+                      ) : (
+                        <Package size={38} className="text-[#cbd5e1]" />
+                      )}
 
-                <div>
-                  <label className="block mb-2.5 dark:text-darkTheme-body-color">Brand</label>
-                  <select
-                    value={form.brand_id ?? ""}
-                    onChange={(event) =>
-                      setForm({ ...form, brand_id: event.target.value ? event.target.value : null })
-                    }
-                    disabled={isSubmitting}
-                    className="rounded-lg border border-gray-3 dark:border-darkTheme-border-color bg-gray-1 dark:bg-darkTheme-secondary-bg dark:text-darkTheme-body-color w-full py-3 px-5 outline-none focus:ring-2 focus:ring-blue/20"
-                  >
-                    <option value="">No brand</option>
-                    {brands.map((brand) => (
-                      <option key={brand.id} value={brand.id}>
-                        {brand.name}
-                      </option>
-                    ))}
-                  </select>
-                </div>
-              </div>
+                      <span
+                        className={`absolute left-3 top-3 rounded-full border px-2.5 py-1 text-[10px] font-bold capitalize ${statusClasses(
+                          product.status,
+                        )}`}
+                      >
+                        {statusLabel(product.status)}
+                      </span>
+                    </div>
 
-              <div className="grid grid-cols-1 md:grid-cols-2 gap-5">
-                <div>
-                  <label className="block mb-2.5 dark:text-darkTheme-body-color">
-                    Product name <span className="text-red">*</span>
-                  </label>
-                  <input
-                    type="text"
-                    value={form.name}
-                    onChange={(event) => setForm({ ...form, name: event.target.value })}
-                    required
-                    disabled={isSubmitting}
-                    className="rounded-lg border border-gray-3 dark:border-darkTheme-border-color bg-gray-1 dark:bg-darkTheme-secondary-bg dark:text-darkTheme-body-color w-full py-3 px-5 outline-none focus:ring-2 focus:ring-blue/20"
-                  />
-                </div>
+                    <div className="p-4">
+                      <p className="text-[10px] font-bold uppercase tracking-[0.12em] text-[#f7941d]">
+                        {category?.name || "Uncategorised"}
+                      </p>
 
-                <div>
-                  <label className="block mb-2.5 dark:text-darkTheme-body-color">
-                    Slug <span className="text-red">*</span>
-                  </label>
-                  <input
-                    type="text"
-                    value={form.slug}
-                    onChange={(event) => setForm({ ...form, slug: event.target.value })}
-                    required
-                    disabled={isSubmitting}
-                    className="rounded-lg border border-gray-3 dark:border-darkTheme-border-color bg-gray-1 dark:bg-darkTheme-secondary-bg dark:text-darkTheme-body-color w-full py-3 px-5 outline-none focus:ring-2 focus:ring-blue/20"
-                  />
-                </div>
-              </div>
+                      <h3 className="mt-1 line-clamp-1 font-semibold text-[#111827]">
+                        {product.name}
+                      </h3>
 
-              <div className="grid grid-cols-1 md:grid-cols-2 gap-5">
-                <div>
-                  <label className="block mb-2.5 dark:text-darkTheme-body-color">
-                    SKU <span className="text-red">*</span>
-                  </label>
-                  <input
-                    type="text"
-                    value={form.sku}
-                    onChange={(event) => setForm({ ...form, sku: event.target.value })}
-                    required
-                    disabled={isSubmitting || Boolean(editingProduct)}
-                    className="rounded-lg border border-gray-3 dark:border-darkTheme-border-color bg-gray-1 dark:bg-darkTheme-secondary-bg dark:text-darkTheme-body-color w-full py-3 px-5 outline-none focus:ring-2 focus:ring-blue/20 disabled:opacity-60"
-                  />
-                </div>
+                      <p className="mt-1 text-xs text-[#94a3b8]">
+                        SKU: {product.sku}
+                        {brand?.name ? ` · ${brand.name}` : ""}
+                      </p>
 
-                <div>
-                  <label className="block mb-2.5 dark:text-darkTheme-body-color">Currency</label>
-                  <input
-                    type="text"
-                    value={form.currency}
-                    onChange={(event) => setForm({ ...form, currency: event.target.value })}
-                    disabled={isSubmitting}
-                    className="rounded-lg border border-gray-3 dark:border-darkTheme-border-color bg-gray-1 dark:bg-darkTheme-secondary-bg dark:text-darkTheme-body-color w-full py-3 px-5 outline-none focus:ring-2 focus:ring-blue/20"
-                  />
-                </div>
-              </div>
+                      <div className="mt-4 flex items-end justify-between gap-3">
+                        <div>
+                          <p className="text-xs text-[#94a3b8]">Selling price</p>
+                          <p className="mt-0.5 font-bold text-[#111827]">
+                            {formatPrice(product.sale_price || product.price)}
+                          </p>
+                        </div>
 
+                        {product.sale_price && (
+                          <p className="text-xs text-[#94a3b8] line-through">
+                            {formatPrice(product.price)}
+                          </p>
+                        )}
+                      </div>
+
+                      {product.rejection_reason && (
+                        <div className="mt-4 rounded-xl border border-red-200 bg-red-50 p-3">
+                          <p className="text-[10px] font-bold uppercase tracking-wider text-red-700">
+                            Admin feedback
+                          </p>
+                          <p className="mt-1 text-xs leading-5 text-red-700">
+                            {product.rejection_reason}
+                          </p>
+                        </div>
+                      )}
+
+                      <div className="mt-4 flex flex-wrap gap-2 border-t border-[#edf0f4] pt-4">
+                        {editable && (
+                          <button
+                            type="button"
+                            onClick={() => void openEdit(product)}
+                            className="inline-flex items-center gap-1.5 rounded-lg border border-[#e1e6ec] px-3 py-2 text-xs font-semibold text-[#475569] hover:border-[#f7941d] hover:text-[#f7941d]"
+                          >
+                            <Pencil size={13} />
+                            Edit
+                          </button>
+                        )}
+
+                        {["draft", "rejected"].includes(product.status) && (
+                          <button
+                            type="button"
+                            disabled={
+                              submittingProductId === String(product.id)
+                            }
+                            onClick={() => void submitExistingProduct(product)}
+                            className="inline-flex items-center gap-1.5 rounded-lg bg-[#111827] px-3 py-2 text-xs font-semibold text-white disabled:opacity-50"
+                          >
+                            <Send size={13} />
+                            {submittingProductId === String(product.id)
+                              ? "Submitting..."
+                              : "Submit review"}
+                          </button>
+                        )}
+
+                        {product.status !== "pending_review" && (
+                          <button
+                            type="button"
+                            onClick={() => setDeleteTarget(product)}
+                            className="ml-auto inline-flex items-center gap-1.5 rounded-lg px-2.5 py-2 text-xs font-semibold text-red-600 hover:bg-red-50"
+                          >
+                            <Archive size={13} />
+                            Archive
+                          </button>
+                        )}
+                      </div>
+                    </div>
+                  </article>
+                );
+              })}
+            </div>
+          )}
+        </section>
+      </div>
+
+      {editorOpen && (
+        <div
+          className="fixed inset-0 z-[100] flex justify-end bg-black/45 backdrop-blur-[2px]"
+          onMouseDown={closeEditor}
+        >
+          <aside
+            className="flex h-full w-full max-w-4xl flex-col bg-[#f8fafc] shadow-2xl"
+            onMouseDown={(event) => event.stopPropagation()}
+          >
+            <div className="flex shrink-0 items-start justify-between border-b border-[#e7ebf0] bg-white px-5 py-4 sm:px-7">
               <div>
-                <label className="block mb-2.5 dark:text-darkTheme-body-color">Description</label>
-                <textarea
-                  value={form.description ?? ""}
-                  onChange={(event) => setForm({ ...form, description: event.target.value })}
-                  disabled={isSubmitting}
-                  rows={4}
-                  className="rounded-lg border border-gray-3 dark:border-darkTheme-border-color bg-gray-1 dark:bg-darkTheme-secondary-bg dark:text-darkTheme-body-color w-full py-3 px-5 outline-none focus:ring-2 focus:ring-blue/20 resize-none"
-                />
+                <p className="text-xs font-bold uppercase tracking-[0.14em] text-[#f7941d]">
+                  Seller catalogue
+                </p>
+                <h2 className="mt-1 text-xl font-bold text-[#111827]">
+                  {editingProduct ? "Edit Product" : "Create New Product"}
+                </h2>
+                <p className="mt-1 text-xs text-[#64748b]">
+                  Product ownership is automatically linked to your approved
+                  seller account.
+                </p>
               </div>
 
-              <div>
-                <div className="mb-2.5 flex items-center justify-between gap-3">
-                  <label className="dark:text-darkTheme-body-color">
-                    Product images{" "}
-                    {!editingProduct ? <span className="text-red">*</span> : null}
-                  </label>
-                  <span className="text-xs text-dark-4 dark:text-darkTheme-body-color">
-                    {existingImages.length + newImages.length}/{MAX_PRODUCT_IMAGES}
-                  </span>
-                </div>
+              <button
+                type="button"
+                onClick={closeEditor}
+                disabled={isSubmitting}
+                className="flex h-10 w-10 items-center justify-center rounded-xl border border-[#e7ebf0] bg-white text-[#64748b] hover:bg-slate-50"
+              >
+                <X size={18} />
+              </button>
+            </div>
 
-                <div className="rounded-xl border border-dashed border-gray-3 bg-gray-1 px-5 py-5 dark:border-darkTheme-border-color dark:bg-darkTheme-secondary-bg">
-                  <span className="block text-sm font-semibold text-dark dark:text-white">
-                    Add up to 5 product image URLs
-                  </span>
-                  <span className="mt-1 block text-xs text-dark-4 dark:text-darkTheme-body-color">
-                    The current backend accepts an existing image URL, not a file upload.
-                  </span>
-                  <div className="mt-3 flex gap-2">
-                    <input
-                      type="url"
-                      value={newImageUrl}
-                      placeholder="https://example.com/product.jpg"
-                      disabled={
-                        isSubmitting ||
-                        existingImages.length + newImages.length >=
-                          MAX_PRODUCT_IMAGES
-                      }
-                      onChange={(event) => setNewImageUrl(event.target.value)}
-                      className="min-w-0 flex-1 rounded-lg border border-gray-3 bg-white px-3 py-2 text-sm"
-                    />
-                    <button
-                      type="button"
-                      onClick={addImageUrl}
-                      disabled={
-                        isSubmitting ||
-                        !newImageUrl.trim() ||
-                        existingImages.length + newImages.length >=
-                          MAX_PRODUCT_IMAGES
-                      }
-                      className="rounded-lg bg-blue px-4 py-2 text-sm font-semibold text-white disabled:opacity-50"
+            <form
+              onSubmit={handleSubmit}
+              className="flex min-h-0 flex-1 flex-col"
+            >
+              <div className="flex-1 space-y-5 overflow-y-auto p-5 sm:p-7">
+                {editingProduct?.rejection_reason && (
+                  <div className="rounded-2xl border border-red-200 bg-red-50 p-4 text-red-700">
+                    <p className="text-xs font-bold uppercase tracking-wider">
+                      Admin correction request
+                    </p>
+                    <p className="mt-1 text-sm leading-6">
+                      {editingProduct.rejection_reason}
+                    </p>
+                  </div>
+                )}
+
+                <FormSection
+                  icon={Tag}
+                  title="Product identity"
+                  description="Choose the marketplace category and provide the basic product information."
+                >
+                  <div className="grid gap-4 md:grid-cols-2">
+                    <Field label="Product category" required>
+                      <select
+                        value={String(form.category_id || "")}
+                        onChange={(event) =>
+                          setForm((current) => ({
+                            ...current,
+                            category_id: event.target.value,
+                          }))
+                        }
+                        disabled={isSubmitting}
+                        className="input"
+                      >
+                        <option value="">Select category</option>
+                        {categories.map((category) => (
+                          <option
+                            key={String(category.id)}
+                            value={String(category.id)}
+                          >
+                            {category.name}
+                          </option>
+                        ))}
+                      </select>
+                    </Field>
+
+                    <Field label="Brand">
+                      <select
+                        value={String(form.brand_id || "")}
+                        onChange={(event) =>
+                          setForm((current) => ({
+                            ...current,
+                            brand_id: event.target.value || null,
+                          }))
+                        }
+                        disabled={isSubmitting}
+                        className="input"
+                      >
+                        <option value="">No brand / unbranded</option>
+                        {brands.map((brand) => (
+                          <option key={String(brand.id)} value={String(brand.id)}>
+                            {brand.name}
+                          </option>
+                        ))}
+                      </select>
+                    </Field>
+
+                    <Field label="Product name" required>
+                      <input
+                        value={form.name}
+                        onChange={(event) => updateName(event.target.value)}
+                        placeholder="e.g. Samsung Galaxy S24 256GB"
+                        disabled={isSubmitting}
+                        className="input"
+                      />
+                    </Field>
+
+                    <Field
+                      label="SKU / ownership reference"
+                      required
+                      hint="Your unique stock-keeping reference for this product."
                     >
-                      Add
+                      <input
+                        value={form.sku}
+                        onChange={(event) =>
+                          setForm((current) => ({
+                            ...current,
+                            sku: event.target.value.toUpperCase(),
+                          }))
+                        }
+                        placeholder="e.g. PHYSIO-001"
+                        disabled={isSubmitting}
+                        className="input"
+                      />
+                    </Field>
+
+                    <div className="md:col-span-2">
+                      <Field
+                        label="Product slug"
+                        required
+                        hint="Used in product URLs. Generated from the product name and editable."
+                      >
+                        <input
+                          value={form.slug}
+                          onChange={(event) =>
+                            setForm((current) => ({
+                              ...current,
+                              slug: slugify(event.target.value),
+                            }))
+                          }
+                          placeholder="samsung-galaxy-s24-256gb"
+                          disabled={isSubmitting}
+                          className="input"
+                        />
+                      </Field>
+                    </div>
+                  </div>
+                </FormSection>
+
+                <FormSection
+                  icon={FileText}
+                  title="Description"
+                  description="Explain exactly what the buyer is purchasing, its condition and important features."
+                >
+                  <Field label="Product description" required>
+                    <textarea
+                      value={form.description ?? ""}
+                      onChange={(event) =>
+                        setForm((current) => ({
+                          ...current,
+                          description: event.target.value,
+                        }))
+                      }
+                      rows={6}
+                      maxLength={5000}
+                      placeholder="Describe the product, specifications, material, condition, package contents and other important buyer information..."
+                      disabled={isSubmitting}
+                      className="input min-h-36 resize-y"
+                    />
+                    <p className="mt-1 text-right text-[11px] text-[#94a3b8]">
+                      {(form.description?.length ?? 0).toLocaleString()} / 5,000
+                    </p>
+                  </Field>
+                </FormSection>
+
+                <FormSection
+                  icon={Camera}
+                  title="Product images"
+                  description={`Upload up to ${MAX_PRODUCT_IMAGES} real product images. JPEG, PNG or WEBP only, maximum 5 MB each.`}
+                >
+                  <label className="flex cursor-pointer flex-col items-center justify-center rounded-2xl border-2 border-dashed border-[#d7dee7] bg-[#f8fafc] px-5 py-8 text-center transition hover:border-[#f7941d] hover:bg-orange-50/30">
+                    <UploadCloud size={30} className="text-[#f7941d]" />
+                    <span className="mt-3 text-sm font-semibold text-[#111827]">
+                      Choose product images
+                    </span>
+                    <span className="mt-1 text-xs text-[#64748b]">
+                      Select multiple files · JPEG, PNG, WEBP · max 5 MB each
+                    </span>
+                    <input
+                      type="file"
+                      multiple
+                      accept="image/jpeg,image/png,image/webp,.jpg,.jpeg,.png,.webp"
+                      disabled={
+                        isSubmitting ||
+                        existingImages.length + selectedImages.length >=
+                          MAX_PRODUCT_IMAGES
+                      }
+                      onChange={selectImages}
+                      className="hidden"
+                    />
+                  </label>
+
+                  {imagesLoading && (
+                    <p className="mt-3 inline-flex items-center gap-2 text-sm text-[#64748b]">
+                      <RefreshCw size={14} className="animate-spin" />
+                      Loading stored product images...
+                    </p>
+                  )}
+
+                  {(existingImages.length > 0 || selectedImages.length > 0) && (
+                    <div className="mt-4 grid grid-cols-2 gap-3 sm:grid-cols-3 lg:grid-cols-5">
+                      {existingImages.map((image, index) => (
+                        <div
+                          key={String(image.id)}
+                          className="group relative overflow-hidden rounded-xl border border-[#e1e6ec] bg-white"
+                        >
+                          <div className="relative h-28">
+                            <Image
+                              src={resolveImageUrl(
+                                image.thumbnail_url || image.image_url,
+                              )}
+                              alt={
+                                image.alt_text ||
+                                `${form.name || "Product"} image ${index + 1}`
+                              }
+                              fill
+                              unoptimized
+                              className="object-cover"
+                            />
+                          </div>
+
+                          {image.is_primary && (
+                            <span className="absolute left-2 top-2 rounded-full bg-[#111827] px-2 py-1 text-[9px] font-bold uppercase text-white">
+                              Primary
+                            </span>
+                          )}
+
+                          <button
+                            type="button"
+                            disabled={isSubmitting}
+                            onClick={() => void removeExistingImage(image)}
+                            className="flex w-full items-center justify-center gap-1.5 border-t border-[#edf0f4] px-2 py-2 text-[11px] font-semibold text-red-600 hover:bg-red-50"
+                          >
+                            <Trash2 size={12} />
+                            Remove
+                          </button>
+                        </div>
+                      ))}
+
+                      {selectedImages.map((image, index) => (
+                        <div
+                          key={image.previewUrl}
+                          className="relative overflow-hidden rounded-xl border border-orange-200 bg-white"
+                        >
+                          <div className="relative h-28">
+                            <Image
+                              src={image.previewUrl}
+                              alt={`New product image ${index + 1}`}
+                              fill
+                              unoptimized
+                              className="object-cover"
+                            />
+                          </div>
+
+                          <span className="absolute left-2 top-2 rounded-full bg-[#f7941d] px-2 py-1 text-[9px] font-bold uppercase text-white">
+                            New
+                          </span>
+
+                          <button
+                            type="button"
+                            disabled={isSubmitting}
+                            onClick={() => removeSelectedImage(index)}
+                            className="flex w-full items-center justify-center gap-1.5 border-t border-[#edf0f4] px-2 py-2 text-[11px] font-semibold text-red-600 hover:bg-red-50"
+                          >
+                            <Trash2 size={12} />
+                            Remove
+                          </button>
+                        </div>
+                      ))}
+                    </div>
+                  )}
+
+                  <div className="mt-3 flex items-center justify-between gap-3 text-xs">
+                    <span className="text-[#64748b]">
+                      {existingImages.length + selectedImages.length} /{" "}
+                      {MAX_PRODUCT_IMAGES} images selected
+                    </span>
+                    <span className="text-[#94a3b8]">
+                      The first uploaded image becomes the primary image.
+                    </span>
+                  </div>
+
+                  {imageError && (
+                    <p className="mt-3 rounded-xl border border-red-200 bg-red-50 px-3 py-2 text-xs font-medium text-red-700">
+                      {imageError}
+                    </p>
+                  )}
+                </FormSection>
+
+                <FormSection
+                  icon={Boxes}
+                  title="Pricing & physical details"
+                  description="Set your selling price and optional physical product information."
+                >
+                  <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-4">
+                    <Field label="Currency" required>
+                      <select
+                        value={form.currency || "TZS"}
+                        onChange={(event) =>
+                          setForm((current) => ({
+                            ...current,
+                            currency: event.target.value,
+                          }))
+                        }
+                        disabled={isSubmitting}
+                        className="input"
+                      >
+                        <option value="TZS">TZS — Tanzanian Shilling</option>
+                        <option value="USD">USD — US Dollar</option>
+                      </select>
+                    </Field>
+
+                    <Field label="Regular price" required>
+                      <input
+                        type="number"
+                        min="0"
+                        step="0.01"
+                        value={form.price}
+                        onChange={(event) =>
+                          setForm((current) => ({
+                            ...current,
+                            price: event.target.value,
+                          }))
+                        }
+                        placeholder="0.00"
+                        disabled={isSubmitting}
+                        className="input"
+                      />
+                    </Field>
+
+                    <Field
+                      label="Sale price"
+                      hint="Optional. Must be lower than regular price."
+                    >
+                      <input
+                        type="number"
+                        min="0"
+                        step="0.01"
+                        value={form.sale_price ?? ""}
+                        onChange={(event) =>
+                          setForm((current) => ({
+                            ...current,
+                            sale_price: event.target.value || null,
+                          }))
+                        }
+                        placeholder="0.00"
+                        disabled={isSubmitting}
+                        className="input"
+                      />
+                    </Field>
+
+                    <Field label="Weight (kg)">
+                      <input
+                        type="number"
+                        min="0"
+                        step="0.01"
+                        value={form.weight ?? ""}
+                        onChange={(event) =>
+                          setForm((current) => ({
+                            ...current,
+                            weight: event.target.value || null,
+                          }))
+                        }
+                        placeholder="e.g. 0.75"
+                        disabled={isSubmitting}
+                        className="input"
+                      />
+                    </Field>
+                  </div>
+                </FormSection>
+
+                <div className="rounded-2xl border border-blue-200 bg-blue-50 p-4">
+                  <div className="flex items-start gap-3">
+                    <CheckCircle2
+                      size={19}
+                      className="mt-0.5 shrink-0 text-blue-600"
+                    />
+                    <div>
+                      <p className="text-sm font-semibold text-blue-900">
+                        Product ownership & review
+                      </p>
+                      <p className="mt-1 text-xs leading-5 text-blue-700">
+                        This product is automatically owned by your seller
+                        account. You can save it as a draft, or submit it for
+                        Admin review. Products become visible to customers only
+                        after approval.
+                      </p>
+                    </div>
+                  </div>
+                </div>
+              </div>
+
+              <div className="shrink-0 border-t border-[#e7ebf0] bg-white px-5 py-4 sm:px-7">
+                <div className="flex flex-col-reverse gap-3 sm:flex-row sm:items-center sm:justify-between">
+                  <button
+                    type="button"
+                    onClick={closeEditor}
+                    disabled={isSubmitting}
+                    className="h-11 rounded-xl border border-[#e1e6ec] px-5 text-sm font-semibold text-[#475569] hover:bg-slate-50"
+                  >
+                    Cancel
+                  </button>
+
+                  <div className="flex flex-col gap-2 sm:flex-row">
+                    <button
+                      type="submit"
+                      disabled={isSubmitting}
+                      onClick={() => setSubmitIntent("draft")}
+                      className="inline-flex h-11 items-center justify-center gap-2 rounded-xl border border-[#111827] bg-white px-5 text-sm font-semibold text-[#111827] disabled:opacity-50"
+                    >
+                      <FileText size={15} />
+                      {isSubmitting && submitIntent === "draft"
+                        ? "Saving..."
+                        : "Save Draft"}
+                    </button>
+
+                    <button
+                      type="submit"
+                      disabled={isSubmitting}
+                      onClick={() => setSubmitIntent("review")}
+                      className="inline-flex h-11 items-center justify-center gap-2 rounded-xl bg-[#f7941d] px-5 text-sm font-semibold text-white shadow-[0_6px_18px_rgba(247,148,29,0.18)] disabled:opacity-50"
+                    >
+                      <Send size={15} />
+                      {isSubmitting && submitIntent === "review"
+                        ? "Submitting..."
+                        : "Save & Submit for Review"}
                     </button>
                   </div>
                 </div>
-
-                {imagesLoading ? (
-                  <p className="mt-3 text-sm text-dark-4">
-                    Loading product images...
-                  </p>
-                ) : null}
-
-                {existingImages.length || newImages.length ? (
-                  <div className="mt-4 grid grid-cols-2 gap-3 sm:grid-cols-3 md:grid-cols-5">
-                    {existingImages.map((image, index) => (
-                      <div
-                        key={String(image.id)}
-                        className="relative overflow-hidden rounded-xl border border-gray-3 bg-white"
-                      >
-                        <Image
-                          src={resolveImageUrl(image.image_url)}
-                          alt={`${form.name || "Product"} image ${index + 1}`}
-                          width={160}
-                          height={130}
-                          unoptimized
-                          className="h-28 w-full object-cover"
-                        />
-                        {image.is_primary ? (
-                          <span className="absolute left-2 top-2 rounded-full bg-blue px-2 py-1 text-[10px] font-semibold text-white">
-                            Primary
-                          </span>
-                        ) : null}
-                        <button
-                          type="button"
-                          disabled={
-                            isSubmitting ||
-                            deletingImageId === String(image.id)
-                          }
-                          onClick={() => void removeExistingImage(image)}
-                          className="w-full bg-red-50 px-2 py-2 text-xs font-semibold text-red-600 disabled:opacity-50"
-                        >
-                          {deletingImageId === String(image.id)
-                            ? "Removing..."
-                            : "Remove"}
-                        </button>
-                      </div>
-                    ))}
-
-                    {newImages.map((imageUrl, index) => (
-                      <div
-                        key={imageUrl}
-                        className="relative overflow-hidden rounded-xl border border-blue/30 bg-white"
-                      >
-                        <Image
-                          src={resolveImageUrl(imageUrl)}
-                          alt={`New product image ${index + 1}`}
-                          width={160}
-                          height={130}
-                          unoptimized
-                          className="h-28 w-full object-cover"
-                        />
-                        <span className="absolute left-2 top-2 rounded-full bg-orange-500 px-2 py-1 text-[10px] font-semibold text-white">
-                          New
-                        </span>
-                        <button
-                          type="button"
-                          disabled={isSubmitting}
-                          onClick={() =>
-                            setNewImages((current) =>
-                              current.filter((url) => url !== imageUrl),
-                            )
-                          }
-                          className="w-full bg-red-50 px-2 py-2 text-xs font-semibold text-red-600 disabled:opacity-50"
-                        >
-                          Remove
-                        </button>
-                      </div>
-                    ))}
-                  </div>
-                ) : null}
-
-                {imageError ? (
-                  <p className="mt-2 text-sm font-medium text-red">
-                    {imageError}
-                  </p>
-                ) : null}
-              </div>
-
-              <div className="grid grid-cols-1 md:grid-cols-3 gap-5">
-                <div>
-                  <label className="block mb-2.5 dark:text-darkTheme-body-color">
-                    Price <span className="text-red">*</span>
-                  </label>
-                  <input
-                    type="number"
-                    min="0"
-                    step="0.01"
-                    value={form.price}
-                    onChange={(event) => setForm({ ...form, price: event.target.value })}
-                    required
-                    disabled={isSubmitting}
-                    className="rounded-lg border border-gray-3 dark:border-darkTheme-border-color bg-gray-1 dark:bg-darkTheme-secondary-bg dark:text-darkTheme-body-color w-full py-3 px-5 outline-none focus:ring-2 focus:ring-blue/20"
-                  />
-                </div>
-
-                <div>
-                  <label className="block mb-2.5 dark:text-darkTheme-body-color">Sale price</label>
-                  <input
-                    type="number"
-                    min="0"
-                    step="0.01"
-                    value={form.sale_price ?? ""}
-                    onChange={(event) =>
-                      setForm({ ...form, sale_price: event.target.value ? event.target.value : null })
-                    }
-                    disabled={isSubmitting}
-                    className="rounded-lg border border-gray-3 dark:border-darkTheme-border-color bg-gray-1 dark:bg-darkTheme-secondary-bg dark:text-darkTheme-body-color w-full py-3 px-5 outline-none focus:ring-2 focus:ring-blue/20"
-                  />
-                </div>
-
-                <div>
-                  <label className="block mb-2.5 dark:text-darkTheme-body-color">Weight (kg)</label>
-                  <input
-                    type="number"
-                    min="0"
-                    step="0.01"
-                    value={form.weight ?? ""}
-                    onChange={(event) =>
-                      setForm({ ...form, weight: event.target.value ? event.target.value : null })
-                    }
-                    disabled={isSubmitting}
-                    className="rounded-lg border border-gray-3 dark:border-darkTheme-border-color bg-gray-1 dark:bg-darkTheme-secondary-bg dark:text-darkTheme-body-color w-full py-3 px-5 outline-none focus:ring-2 focus:ring-blue/20"
-                  />
-                </div>
-              </div>
-
-              <div className="flex gap-3 justify-end pt-4">
-                <button
-                  type="button"
-                  onClick={() => {
-                    setModalOpen(false);
-                    setEditingProduct(null);
-                    setForm(INITIAL_FORM);
-                    setNewImages([]);
-                    setExistingImages([]);
-                    setImageError("");
-                  }}
-                  disabled={isSubmitting}
-                  className="rounded-lg border border-gray-3 dark:border-darkTheme-border-color text-dark dark:text-white py-2.5 px-5 hover:bg-gray-1 dark:hover:bg-darkTheme-secondary-bg"
-                >
-                  Cancel
-                </button>
-                <button
-                  type="submit"
-                  disabled={isSubmitting}
-                  className="rounded-lg bg-blue text-white py-2.5 px-5 hover:bg-blue-dark disabled:opacity-60"
-                >
-                  {isSubmitting ? "Saving..." : editingProduct ? "Update Product" : "Create Product"}
-                </button>
               </div>
             </form>
-          </div>
+          </aside>
         </div>
       )}
 
       {deleteTarget && (
-        <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/50 px-4">
-          <div className="max-w-md w-full rounded-xl bg-white dark:bg-darkTheme-card shadow-1 p-6">
-            <h3 className="text-lg font-semibold text-dark dark:text-white mb-2">Delete product?</h3>
-            <p className="text-dark-4 dark:text-darkTheme-body-color mb-6">
-              This action cannot be undone. Product: {deleteTarget.name}
+        <div className="fixed inset-0 z-[110] flex items-center justify-center bg-black/55 p-4">
+          <div className="w-full max-w-md rounded-2xl bg-white p-6 shadow-2xl">
+            <div className="flex h-11 w-11 items-center justify-center rounded-xl bg-red-50 text-red-600">
+              <Archive size={20} />
+            </div>
+            <h3 className="mt-4 text-lg font-semibold text-[#111827]">
+              Archive this product?
+            </h3>
+            <p className="mt-2 text-sm leading-6 text-[#64748b]">
+              <strong>{deleteTarget.name}</strong> will be removed from active
+              seller products. A product currently under review cannot be
+              archived.
             </p>
-            <div className="flex gap-3 justify-end">
+
+            <div className="mt-6 flex gap-3">
               <button
                 type="button"
-                onClick={() => setDeleteTarget(null)}
                 disabled={isDeleting}
-                className="rounded-lg border border-gray-3 dark:border-darkTheme-border-color text-dark dark:text-white py-2.5 px-5 hover:bg-gray-1 dark:hover:bg-darkTheme-secondary-bg"
+                onClick={() => setDeleteTarget(null)}
+                className="flex-1 rounded-xl border border-[#e1e6ec] px-4 py-3 text-sm font-semibold text-[#475569]"
               >
                 Cancel
               </button>
               <button
                 type="button"
-                onClick={handleDelete}
                 disabled={isDeleting}
-                className="rounded-lg bg-red text-white py-2.5 px-5 hover:bg-red-dark disabled:opacity-60"
+                onClick={() => void handleDelete()}
+                className="flex-1 rounded-xl bg-red-600 px-4 py-3 text-sm font-semibold text-white disabled:opacity-50"
               >
-                {isDeleting ? "Deleting..." : "Delete"}
+                {isDeleting ? "Archiving..." : "Archive Product"}
               </button>
             </div>
           </div>
         </div>
       )}
+
+      <style jsx global>{`
+        .input {
+          width: 100%;
+          min-height: 44px;
+          border-radius: 0.75rem;
+          border: 1px solid #e1e6ec;
+          background: #ffffff;
+          padding: 0.7rem 0.9rem;
+          font-size: 0.875rem;
+          color: #111827;
+          outline: none;
+          transition:
+            border-color 160ms ease,
+            box-shadow 160ms ease;
+        }
+
+        .input:focus {
+          border-color: #f7941d;
+          box-shadow: 0 0 0 3px rgba(247, 148, 29, 0.09);
+        }
+
+        .input:disabled {
+          cursor: not-allowed;
+          background: #f8fafc;
+          opacity: 0.7;
+        }
+      `}</style>
     </>
   );
 };
+
+function StatCard({
+  label,
+  value,
+  icon: Icon,
+}: {
+  label: string;
+  value: number;
+  icon: typeof ShoppingBag;
+}) {
+  return (
+    <div className="rounded-2xl border border-[#e7ebf0] bg-white p-4 shadow-sm">
+      <div className="flex items-center justify-between">
+        <span className="flex h-9 w-9 items-center justify-center rounded-xl bg-orange-50 text-[#f7941d]">
+          <Icon size={17} />
+        </span>
+        <span className="text-2xl font-bold tracking-[-0.03em] text-[#111827]">
+          {value}
+        </span>
+      </div>
+      <p className="mt-3 text-xs font-medium text-[#64748b]">{label}</p>
+    </div>
+  );
+}
+
+function FormSection({
+  icon: Icon,
+  title,
+  description,
+  children,
+}: {
+  icon: typeof Tag;
+  title: string;
+  description: string;
+  children: React.ReactNode;
+}) {
+  return (
+    <section className="rounded-2xl border border-[#e7ebf0] bg-white p-5 shadow-sm sm:p-6">
+      <div className="mb-5 flex items-start gap-3">
+        <span className="flex h-10 w-10 shrink-0 items-center justify-center rounded-xl bg-orange-50 text-[#f7941d]">
+          <Icon size={18} />
+        </span>
+        <div>
+          <h3 className="font-semibold text-[#111827]">{title}</h3>
+          <p className="mt-1 text-xs leading-5 text-[#64748b]">{description}</p>
+        </div>
+      </div>
+      {children}
+    </section>
+  );
+}
+
+function Field({
+  label,
+  required,
+  hint,
+  children,
+}: {
+  label: string;
+  required?: boolean;
+  hint?: string;
+  children: React.ReactNode;
+}) {
+  return (
+    <label className="block">
+      <span className="text-sm font-semibold text-[#334155]">
+        {label}
+        {required && <span className="ml-1 text-red-500">*</span>}
+      </span>
+      {hint && (
+        <span className="mt-0.5 block text-[11px] leading-4 text-[#94a3b8]">
+          {hint}
+        </span>
+      )}
+      <div className="mt-2">{children}</div>
+    </label>
+  );
+}
 
 export default SellerProducts;
