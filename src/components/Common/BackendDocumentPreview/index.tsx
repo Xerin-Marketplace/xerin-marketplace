@@ -67,8 +67,14 @@ export default function BackendDocumentPreview({
     documentUrl.toLowerCase().includes(".pdf");
 
   return (
-    <div className="fixed inset-0 z-[120] flex items-center justify-center bg-black/65 p-4 backdrop-blur-sm">
-      <div className="flex max-h-[94vh] w-full max-w-5xl flex-col overflow-hidden rounded-2xl bg-white shadow-2xl dark:bg-[#1f2937]">
+    <div
+      className="fixed inset-0 z-[100001] flex items-center bg-black/35 p-3 backdrop-blur-[2px] lg:right-[42rem] lg:justify-center lg:bg-black/20 lg:p-5"
+      onMouseDown={onClose}
+    >
+      <div
+        className="flex max-h-[94vh] w-full max-w-5xl flex-col overflow-hidden rounded-2xl border border-slate-200 bg-white shadow-2xl dark:bg-[#1f2937]"
+        onMouseDown={(event) => event.stopPropagation()}
+      >
         <div className="flex items-center justify-between border-b border-[#e7ebf0] px-5 py-4 dark:border-white/10">
           <div className="min-w-0">
             <p className="text-xs font-bold uppercase tracking-[0.14em] text-[#f7941d]">
@@ -89,7 +95,7 @@ export default function BackendDocumentPreview({
           </button>
         </div>
 
-        <div className="min-h-[480px] flex-1 bg-slate-100 p-4 dark:bg-black/20">
+        <div className="min-h-[420px] flex-1 bg-slate-100 p-3 dark:bg-black/20 sm:p-4">
           {loading ? (
             <div className="flex h-[68vh] flex-col items-center justify-center text-[#64748b]">
               <Loader2 className="animate-spin text-[#f7941d]" size={28} />
@@ -111,10 +117,10 @@ export default function BackendDocumentPreview({
             <iframe
               src={blobUrl}
               title={title}
-              className="h-[72vh] w-full rounded-lg bg-white"
+              className="h-[70vh] w-full rounded-lg bg-white"
             />
           ) : blobUrl ? (
-            <div className="flex h-[72vh] items-center justify-center">
+            <div className="flex h-[70vh] items-center justify-center">
               <img
                 src={blobUrl}
                 alt={title}

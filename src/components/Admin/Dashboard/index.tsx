@@ -1003,7 +1003,7 @@ export default function AdminDashboard() {
     : Gauge;
 
   return (
-    <section className="admin-dashboard-shell min-h-screen overflow-x-hidden bg-[#f5f7fb] text-[#0f172a] dark:bg-[#111827] dark:text-white">
+    <section className="admin-dashboard-shell min-h-screen overflow-x-hidden bg-[#f6f7f9] text-[#111827] antialiased dark:bg-[#111827] dark:text-white" style={{ fontFamily: 'Inter, "Segoe UI", Roboto, Helvetica, Arial, sans-serif' }}>
       {isMobileSidebarOpen ? (
         <button
           aria-label="Close admin navigation"
@@ -1013,12 +1013,12 @@ export default function AdminDashboard() {
       ) : null}
       <div className="w-full">
         <div
-          className={`grid min-h-screen grid-cols-1 gap-0 ${isSidebarCollapsed ? "xl:grid-cols-[82px_minmax(0,1fr)]" : "xl:grid-cols-[250px_minmax(0,1fr)]"}`}
+          className={`grid min-h-screen grid-cols-1 gap-0 ${isSidebarCollapsed ? "xl:grid-cols-[88px_minmax(0,1fr)]" : "xl:grid-cols-[270px_minmax(0,1fr)]"}`}
         >
           <aside
-            className={`${isMobileSidebarOpen ? "translate-x-0" : "-translate-x-full"} fixed inset-y-0 left-0 z-50 flex w-[270px] flex-col overflow-y-auto border-r border-[#e6eaf0] bg-white p-3 text-[#0f172a] shadow-2xl transition-all xl:sticky xl:top-0 xl:h-screen xl:w-auto xl:translate-x-0 xl:shadow-none dark:border-white/10 dark:bg-[#161d29] ${isSidebarCollapsed ? "xl:px-3" : ""}`}
+            className={`${isMobileSidebarOpen ? "translate-x-0" : "-translate-x-full"} fixed inset-y-0 left-0 z-50 flex w-[280px] flex-col overflow-y-auto border-r border-[#e7ebf0] bg-white/85 text-[#111827] shadow-[8px_0_30px_rgba(15,23,42,0.035)] backdrop-blur-xl transition-all xl:sticky xl:top-0 xl:h-screen xl:w-auto xl:translate-x-0 dark:border-white/10 dark:bg-[#1f2937]/90 dark:text-white`}
           >
-            <div className="border-b border-gray-100 px-2 pb-3">
+            <div className="flex h-[74px] shrink-0 items-center border-b border-[#e7ebf0] px-5 dark:border-white/10">
               <div className="flex items-center">
                 {!isSidebarCollapsed && (
                   <div>
@@ -1027,10 +1027,10 @@ export default function AdminDashboard() {
                       alt="Xerin Marketplace logo"
                       width={150}
                       height={46}
-                      className="h-9 w-auto object-contain"
+                      className="h-10 w-auto object-contain"
                       priority
                     />
-                    <h2 className="mt-1 text-sm font-semibold text-gray-500">
+                    <h2 className="mt-1 text-xs text-[#94a3b8] dark:text-white/50">
                       Admin Center
                     </h2>
                   </div>
@@ -1050,13 +1050,13 @@ export default function AdminDashboard() {
                 onClick={() => {
                   applySidebarSelection("overview", "Dashboard", null);
                 }}
-                className={`w-full rounded-xl px-3 py-2.5 text-left transition-colors ${
+                className={`flex w-full items-center gap-3 rounded-xl px-3 py-2.5 text-left text-[13px] transition ${
                   activeSidebarItem === "Dashboard"
-                    ? "bg-orange-50 text-[#f7941d]"
-                    : "text-gray-600 hover:bg-gray-50"
+                    ? "bg-[#f7941d] font-semibold text-white shadow-[0_6px_18px_rgba(247,148,29,0.18)]"
+                    : "text-[#64748b] hover:bg-slate-100 hover:text-[#111827] dark:text-white/65 dark:hover:bg-white/[0.08] dark:hover:text-white"
                 }`}
               >
-                <span className="inline-flex items-center gap-2.5 text-sm font-semibold">
+                <span className="inline-flex items-center gap-3 text-[13px]">
                   <span className="inline-flex h-5 w-5 items-center justify-center shrink-0">
                     {tabIcon("overview")}
                   </span>
@@ -1065,7 +1065,7 @@ export default function AdminDashboard() {
               </button>
             </div>
 
-            <nav className="mt-4 flex-1 space-y-1.5">
+            <nav className="mt-4 flex-1 space-y-3 overflow-y-auto px-1 pb-3">
               {sidebarGroups.map((group) => {
                 const GroupIcon = group.icon;
                 const isOpen =
@@ -1106,10 +1106,10 @@ export default function AdminDashboard() {
                           openSidebarGroup === group.title ? null : group.title;
                         setOpenSidebarGroup(nextOpenGroup);
                       }}
-                      className={`w-full rounded-xl px-2.5 py-2 text-left text-[13px] font-semibold uppercase tracking-[0.08em] transition-all ${
+                      className={`w-full rounded-xl px-3 py-2.5 text-left text-[13px] transition ${
                         isGroupActive || isOpen
-                          ? "bg-orange-50 text-[#f7941d]"
-                          : "text-gray-500 hover:bg-gray-50 hover:text-gray-700"
+                          ? "bg-slate-100 font-semibold text-[#111827] dark:bg-white/[0.08] dark:text-white"
+                          : "text-[#64748b] hover:bg-slate-100 hover:text-[#111827] dark:text-white/65 dark:hover:bg-white/[0.08] dark:hover:text-white"
                       }`}
                     >
                       <span className="flex items-center justify-between gap-2">
@@ -1136,7 +1136,7 @@ export default function AdminDashboard() {
                     </button>
 
                     {isOpen && !isSidebarCollapsed ? (
-                      <div className="mt-1 space-y-1 border-l border-gray-100 pl-3">
+                      <div className="mt-1 space-y-1 border-l border-[#e7ebf0] pl-3 dark:border-white/10">
                         {group.items.map((item) => {
                           const subItemKey = `${group.title}:${item.label}`;
                           const isSelected = activeSidebarItem === subItemKey;
@@ -1146,15 +1146,15 @@ export default function AdminDashboard() {
                             <Link
                               key={item.label}
                               href={item.href}
-                              className={`block w-full rounded-lg px-2.5 py-1.5 text-left text-sm transition-colors ${
+                              className={`flex w-full items-center gap-2.5 rounded-xl px-3 py-2 text-left text-[13px] transition ${
                                 pathname.startsWith(item.href.split("?")[0])
-                                  ? "font-semibold text-[#f7941d]"
-                                  : "text-gray-500 hover:text-gray-800"
+                                  ? "bg-[#f7941d] font-semibold text-white shadow-[0_5px_14px_rgba(247,148,29,0.15)]"
+                                  : "text-[#64748b] hover:bg-slate-100 hover:text-[#111827] dark:text-white/60 dark:hover:bg-white/[0.08] dark:hover:text-white"
                               }`}
                             >
                               <span className="inline-flex items-center gap-2">
                                 <span
-                                  className={`h-1.5 w-1.5 rounded-full ${pathname.startsWith(item.href.split("?")[0]) ? "bg-[#f7941d]" : "bg-gray-300"}`}
+                                  className={`h-1.5 w-1.5 rounded-full ${pathname.startsWith(item.href.split("?")[0]) ? "bg-white" : "bg-slate-300 dark:bg-white/30"}`}
                                 />
                                 <span>{item.label}</span>
                               </span>
@@ -1196,15 +1196,15 @@ export default function AdminDashboard() {
                                   group.title,
                                 );
                               }}
-                              className={`block w-full rounded-lg px-2.5 py-1.5 text-left text-sm transition-colors ${
+                              className={`flex w-full items-center gap-2.5 rounded-xl px-3 py-2 text-left text-[13px] transition ${
                                 isSelected
-                                  ? "bg-orange-50 font-semibold text-[#f7941d]"
-                                  : "text-gray-500 hover:bg-gray-50 hover:text-gray-800"
+                                  ? "bg-[#f7941d] font-semibold text-white shadow-[0_5px_14px_rgba(247,148,29,0.15)]"
+                                  : "text-[#64748b] hover:bg-slate-100 hover:text-[#111827] dark:text-white/60 dark:hover:bg-white/[0.08] dark:hover:text-white"
                               }`}
                             >
                               <span className="inline-flex items-center gap-2">
                                 <span
-                                  className={`h-1.5 w-1.5 rounded-full ${isSelected ? "bg-[#f7941d]" : "bg-gray-300"}`}
+                                  className={`h-1.5 w-1.5 rounded-full ${isSelected ? "bg-white" : "bg-slate-300 dark:bg-white/30"}`}
                                 />
                                 <span>{item.label}</span>
                               </span>
@@ -1219,18 +1219,18 @@ export default function AdminDashboard() {
             </nav>
 
             {!isSidebarCollapsed && (
-              <div className="mt-6 rounded-xl border border-gray-100 bg-gray-50 p-3">
-                <p className="text-xs font-medium text-gray-500">Quick Moderation Queue</p>
-                <div className="mt-2 space-y-1 text-sm text-gray-700">
+              <div className="mt-6 rounded-2xl border border-[#e7ebf0] bg-white/65 p-4 shadow-sm dark:border-white/10 dark:bg-white/[0.06]">
+                <p className="text-[10px] font-semibold uppercase tracking-[.16em] text-[#94a3b8]">Quick Moderation Queue</p>
+                <div className="mt-3 space-y-1.5 text-sm text-[#475467] dark:text-white/70">
                   <p>
                     Sellers:{" "}
-                    <span className="font-semibold text-gray-900">
+                    <span className="font-semibold text-[#111827] dark:text-white">
                       {pendingSellers.length}
                     </span>
                   </p>
                   <p>
                     Products:{" "}
-                    <span className="font-semibold text-gray-900">
+                    <span className="font-semibold text-[#111827] dark:text-white">
                       {pendingProducts.length}
                     </span>
                   </p>
@@ -1241,14 +1241,14 @@ export default function AdminDashboard() {
             <button
               type="button"
               onClick={() => setIsSidebarCollapsed((v) => !v)}
-              className="mt-4 hidden w-full rounded-xl border border-gray-200 px-3 py-2 text-sm text-gray-500 hover:bg-gray-50 xl:block"
+              className="mt-4 hidden w-full rounded-xl border border-[#e7ebf0] px-3 py-2.5 text-sm font-medium text-[#64748b] transition hover:bg-slate-50 hover:text-[#111827] dark:border-white/10 dark:text-white/65 dark:hover:bg-white/10 dark:hover:text-white xl:block"
             >
               {isSidebarCollapsed ? "Expand" : "Collapse sidebar"}
             </button>
           </aside>
 
-          <main className="min-w-0 space-y-4 px-4 pb-8 pt-3 sm:px-5 lg:px-6 xl:px-7">
-            <header className="sticky top-0 z-30 -mx-4 border-b border-[#e5e9f0] bg-white/95 px-4 py-2.5 backdrop-blur dark:border-white/10 dark:bg-[#161d29]/95 sm:-mx-5 sm:px-5 lg:-mx-6 lg:px-6 xl:-mx-7 xl:px-7">
+          <main className="min-w-0 space-y-5 px-4 pb-10 pt-4 sm:px-5 lg:px-6 xl:px-7">
+            <header className="sticky top-0 z-30 -mx-4 border-b border-[#e7ebf0]/90 bg-white/90 px-4 py-3 backdrop-blur-xl dark:border-white/10 dark:bg-[#1f2937]/90 sm:-mx-5 sm:px-5 lg:-mx-6 lg:px-6 xl:-mx-7 xl:px-7">
               <div className="flex items-center gap-3">
                 <button
                   type="button"
@@ -1374,7 +1374,7 @@ export default function AdminDashboard() {
                         {legacyTheme[legacyVisualGroup].eyebrow}
                       </p>
                     ) : null}
-                    <h1 className="mt-0.5 truncate text-xl font-semibold text-[#111827] sm:text-2xl">
+                    <h1 className="mt-0.5 truncate text-xl font-bold tracking-[-0.02em] text-[#111827] sm:text-2xl dark:text-white">
                       {activeTab === "orders"
                         ? "Order Management"
                         : activeTab === "inventory"
@@ -1402,12 +1402,12 @@ export default function AdminDashboard() {
                     value={surfaceSearch}
                     onChange={(event) => setSurfaceSearch(event.target.value)}
                     placeholder={dynamicSearchPlaceholder}
-                    className="w-full rounded-xl border border-gray-200 bg-[#f8fafc] px-4 py-2.5 text-sm text-gray-700 placeholder:text-gray-400 sm:w-[240px]"
+                    className="w-full rounded-xl border border-[#e7ebf0] bg-white/80 px-4 py-2.5 text-sm text-[#344054] shadow-sm outline-none transition placeholder:text-[#98a2b3] focus:border-[#f7941d] focus:ring-2 focus:ring-[#f7941d]/10 dark:border-white/10 dark:bg-white/[0.05] dark:text-white dark:placeholder:text-white/40 sm:w-[250px]"
                   />
                   <button
                     type="button"
                     onClick={loadOverviewData}
-                    className="inline-flex items-center justify-center gap-2 whitespace-nowrap rounded-xl bg-[#111827] px-4 py-2.5 text-sm font-medium text-white transition hover:bg-[#1f2937]"
+                    className="inline-flex items-center justify-center gap-2 whitespace-nowrap rounded-xl bg-[#f7941d] px-4 py-2.5 text-sm font-semibold text-white shadow-sm transition hover:bg-[#e6810f]"
                   >
                     <RefreshCw size={15} />
                     Refresh Data

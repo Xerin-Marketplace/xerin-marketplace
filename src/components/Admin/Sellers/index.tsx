@@ -7,7 +7,23 @@ import {
   type AdminSeller,
   type AdminSellerDocument,
 } from "@/lib/api/endpoints/admin";
-import { Eye, FileText, RefreshCw, ShieldCheck, X } from "lucide-react";
+import {
+  AlertCircle,
+  Building2,
+  CheckCircle2,
+  Clock3,
+  Eye,
+  FileText,
+  Globe2,
+  Mail,
+  MapPin,
+  Phone,
+  RefreshCw,
+  Search,
+  ShieldCheck,
+  UserCheck,
+  X,
+} from "lucide-react";
 import { useEffect, useMemo, useState } from "react";
 import toast from "react-hot-toast";
 
@@ -29,6 +45,35 @@ const documentLabel = (type: string) => {
   );
 };
 
+
+const sellerStatusStyle = (status: string) => {
+  switch (status) {
+    case "approved":
+      return "bg-emerald-50 text-emerald-700 border-emerald-200";
+    case "rejected":
+      return "bg-red-50 text-red-700 border-red-200";
+    case "under_review":
+      return "bg-blue-50 text-blue-700 border-blue-200";
+    case "pending":
+      return "bg-amber-50 text-amber-700 border-amber-200";
+    default:
+      return "bg-slate-50 text-slate-700 border-slate-200";
+  }
+};
+
+const documentStatusStyle = (status: string) => {
+  switch (status) {
+    case "approved":
+      return "bg-emerald-50 text-emerald-700";
+    case "rejected":
+      return "bg-red-50 text-red-700";
+    case "under_review":
+      return "bg-blue-50 text-blue-700";
+    default:
+      return "bg-amber-50 text-amber-700";
+  }
+};
+
 export default function AdminSellers({
   mode = "all",
 }: {
@@ -48,6 +93,7 @@ export default function AdminSellers({
     url: string;
   } | null>(null);
   const [rejectReason, setRejectReason] = useState("");
+  const [showRejectModal, setShowRejectModal] = useState(false);
   const [busy, setBusy] = useState<string | null>(null);
 
   const load = async () => {
@@ -80,6 +126,7 @@ export default function AdminSellers({
   const openSeller = async (seller: AdminSeller) => {
     setSelected(seller);
     setRejectReason("");
+    setShowRejectModal(false);
     setDocuments([]);
     setDocumentsLoading(true);
 
@@ -135,7 +182,11 @@ export default function AdminSellers({
       );
       setSelected(updated);
       setDocuments(await adminService.getSellerDocuments(selected.id));
-      toast.success("Seller application rejected. The seller can now edit documents and see your reason.");
+      setShowRejectModal(false);
+      setRejectReason("");
+      toast.success(
+        "Seller application rejected. The seller can now see the reason and correct the rejected documents.",
+      );
     } catch (error) {
       toast.error(errorMessage(error));
     } finally {
@@ -145,16 +196,18 @@ export default function AdminSellers({
 
   const counts = {
     total: sellers.length,
-    review: sellers.filter((seller) => seller.status.includes("review")).length,
+    pending: sellers.filter((seller) => seller.status === "pending").length,
+    review: sellers.filter((seller) => seller.status === "under_review").length,
     approved: sellers.filter((seller) => seller.status === "approved").length,
     rejected: sellers.filter((seller) => seller.status === "rejected").length,
   };
 
   return (
     <div className="space-y-5">
-      <div className="grid grid-cols-2 gap-3 xl:grid-cols-4">
+      <div className="grid grid-cols-2 gap-3 lg:grid-cols-3 2xl:grid-cols-5">
         {[
           ["All sellers", counts.total],
+          ["Pending", counts.pending],
           ["Under review", counts.review],
           ["Approved", counts.approved],
           ["Rejected", counts.rejected],
@@ -165,6 +218,7 @@ export default function AdminSellers({
               [
                 "border-orange-100 bg-gradient-to-br from-white to-orange-50",
                 "border-amber-100 bg-gradient-to-br from-white to-amber-50",
+                "border-blue-100 bg-gradient-to-br from-white to-blue-50",
                 "border-green-100 bg-gradient-to-br from-white to-green-50",
                 "border-red-100 bg-gradient-to-br from-white to-red-50",
               ][index]
@@ -175,6 +229,7 @@ export default function AdminSellers({
                 [
                   "bg-orange-500",
                   "bg-amber-500",
+                  "bg-blue-500",
                   "bg-green-500",
                   "bg-red-500",
                 ][index]
@@ -186,95 +241,113 @@ export default function AdminSellers({
         ))}
       </div>
 
-      <div className="rounded-2xl border border-gray-200 bg-white shadow-sm">
-        <div className="flex flex-col gap-3 border-b border-gray-100 p-5 lg:flex-row lg:items-center lg:justify-between">
-          <div>
-            <h3 className="text-lg font-semibold text-[#111827]">
-              {mode === "applications" ? "Seller applications" : "All sellers"}
-            </h3>
-            <p className="text-sm text-gray-500">
-              {mode === "applications"
-                ? "Review business details and submitted KYC documents before approval."
-                : "Search, review and manage every seller account on the marketplace."}
-            </p>
-          </div>
+      <div className="overflow-hidden rounded-2xl border border-slate-200 bg-white shadow-[0_8px_30px_rgba(15,23,42,0.05)]">
+        <div className="border-b border-slate-100 bg-white p-5 lg:p-6">
+          <div className="flex flex-col gap-4 xl:flex-row xl:items-end xl:justify-between">
+            <div>
+              <div className="flex items-center gap-2">
+                <span className="flex h-9 w-9 items-center justify-center rounded-xl bg-orange-50 text-[#f47524]">
+                  <Building2 size={18} />
+                </span>
+                <div>
+                  <h3 className="text-lg font-semibold text-slate-900">
+                    {mode === "applications" ? "Seller applications" : "Seller directory"}
+                  </h3>
+                  <p className="mt-0.5 text-sm text-slate-500">
+                    {filtered.length} of {sellers.length} seller{filtered.length === 1 ? "" : "s"}
+                  </p>
+                </div>
+              </div>
+            </div>
 
-          <div className="flex flex-col gap-2 sm:flex-row">
-            <input
-              value={query}
-              onChange={(event) => setQuery(event.target.value)}
-              placeholder="Search business, email or phone"
-              className="min-w-[260px] rounded-xl border border-gray-200 bg-[#f8fafc] px-4 py-2.5 text-sm outline-none focus:border-[#f47524]"
-            />
-            <select
-              value={status}
-              onChange={(event) => setStatus(event.target.value)}
-              className="rounded-xl border border-gray-200 bg-white px-4 py-2.5 text-sm"
-            >
-              <option value="all">All statuses</option>
-              <option value="under_review">Under review</option>
-              <option value="approved">Approved</option>
-              <option value="rejected">Rejected</option>
-            </select>
-            <button
-              type="button"
-              onClick={() => void load()}
-              className="inline-flex items-center gap-2 rounded-xl bg-[#111827] px-4 py-2.5 text-sm font-medium text-white"
-            >
-              <RefreshCw size={15} />
-              Refresh
-            </button>
+            <div className="flex w-full flex-col gap-2 sm:flex-row xl:w-auto">
+              <label className="relative min-w-0 flex-1 xl:w-[320px]">
+                <Search className="pointer-events-none absolute left-3.5 top-1/2 -translate-y-1/2 text-slate-400" size={16} />
+                <input
+                  value={query}
+                  onChange={(event) => setQuery(event.target.value)}
+                  placeholder="Search seller, email or phone..."
+                  className="h-11 w-full rounded-xl border border-slate-200 bg-slate-50 pl-10 pr-4 text-sm text-slate-700 outline-none transition focus:border-orange-300 focus:bg-white focus:ring-4 focus:ring-orange-50"
+                />
+              </label>
+              <select
+                value={status}
+                onChange={(event) => setStatus(event.target.value)}
+                className="h-11 rounded-xl border border-slate-200 bg-white px-4 text-sm font-medium text-slate-700 outline-none focus:border-orange-300"
+              >
+                <option value="all">All statuses</option>
+                <option value="pending">Pending</option>
+                <option value="under_review">Under review</option>
+                <option value="approved">Approved</option>
+                <option value="rejected">Rejected</option>
+              </select>
+              <button
+                type="button"
+                onClick={() => void load()}
+                className="inline-flex h-11 items-center justify-center gap-2 rounded-xl border border-slate-200 bg-white px-4 text-sm font-semibold text-slate-700 transition hover:border-orange-200 hover:bg-orange-50 hover:text-[#f47524]"
+              >
+                <RefreshCw size={15} />
+                Refresh
+              </button>
+            </div>
           </div>
         </div>
 
         {loading ? (
-          <div className="p-12 text-center text-gray-500">Loading sellers...</div>
+          <div className="p-14 text-center text-sm text-slate-500">Loading sellers...</div>
         ) : filtered.length === 0 ? (
-          <div className="p-12 text-center text-gray-500">
-            No sellers match these filters.
-          </div>
+          <div className="p-14 text-center text-sm text-slate-500">No sellers match these filters.</div>
         ) : (
           <div className="overflow-x-auto">
-            <table className="w-full min-w-[760px] text-left">
-              <thead className="bg-[#f8fafc] text-xs uppercase text-gray-500">
-                <tr>
-                  {["Business", "Contact", "Location", "Submitted", "Status", ""].map(
-                    (heading) => (
-                      <th key={heading} className="px-5 py-3">
-                        {heading}
-                      </th>
-                    ),
-                  )}
+            <table className="w-full min-w-[980px] table-auto text-left">
+              <thead>
+                <tr className="border-b border-slate-200 bg-slate-50/80 text-[11px] font-bold uppercase tracking-[0.08em] text-slate-500">
+                  <th className="px-6 py-3.5">Seller / Business</th>
+                  <th className="px-5 py-3.5">Contact</th>
+                  <th className="px-5 py-3.5">Location</th>
+                  <th className="px-5 py-3.5">Registered</th>
+                  <th className="px-5 py-3.5">Status</th>
+                  <th className="px-6 py-3.5 text-right">Action</th>
                 </tr>
               </thead>
-              <tbody className="divide-y divide-gray-100">
+              <tbody className="divide-y divide-slate-100">
                 {filtered.map((seller) => (
-                  <tr key={seller.id} className="hover:bg-orange-50/40">
-                    <td className="px-5 py-4 font-medium text-[#111827]">
-                      {seller.business_name}
-                    </td>
-                    <td className="px-5 py-4 text-sm text-gray-600">
-                      {seller.contact_email ?? seller.contact_phone ?? "—"}
-                    </td>
-                    <td className="px-5 py-4 text-sm text-gray-600">
-                      {[seller.business_city, seller.business_country]
-                        .filter(Boolean)
-                        .join(", ") || "—"}
-                    </td>
-                    <td className="px-5 py-4 text-sm text-gray-600">
-                      {new Date(seller.created_at).toLocaleDateString()}
+                  <tr key={seller.id} className="group transition hover:bg-orange-50/35">
+                    <td className="px-6 py-4">
+                      <div className="flex items-center gap-3">
+                        <span className="flex h-10 w-10 shrink-0 items-center justify-center rounded-xl border border-orange-100 bg-orange-50 text-sm font-bold uppercase text-[#f47524]">
+                          {seller.business_name?.trim().charAt(0) || "S"}
+                        </span>
+                        <div className="min-w-0">
+                          <p className="max-w-[260px] truncate text-sm font-semibold text-slate-900">{seller.business_name}</p>
+                          <p className="mt-0.5 text-xs text-slate-400">Seller ID: {seller.id.slice(0, 8)}…</p>
+                        </div>
+                      </div>
                     </td>
                     <td className="px-5 py-4">
-                      <span className="rounded-full bg-gray-100 px-3 py-1 text-xs font-medium capitalize text-gray-700">
+                      <p className="max-w-[230px] truncate text-sm font-medium text-slate-700">{seller.contact_email ?? "No email"}</p>
+                      <p className="mt-1 text-xs text-slate-400">{seller.contact_phone ?? "No phone"}</p>
+                    </td>
+                    <td className="px-5 py-4 text-sm text-slate-600">
+                      <div className="flex items-center gap-1.5"><MapPin size={14} className="shrink-0 text-slate-400" /><span>{[seller.business_city, seller.business_country].filter(Boolean).join(", ") || "—"}</span></div>
+                    </td>
+                    <td className="px-5 py-4">
+                      <p className="text-sm font-medium text-slate-700">{new Date(seller.created_at).toLocaleDateString(undefined, { day: "2-digit", month: "short", year: "numeric" })}</p>
+                    </td>
+                    <td className="px-5 py-4">
+                      <span className={`inline-flex items-center gap-1.5 rounded-full border px-3 py-1.5 text-xs font-semibold capitalize ${sellerStatusStyle(seller.status)}`}>
+                        <span className="h-1.5 w-1.5 rounded-full bg-current opacity-70" />
                         {seller.status.replaceAll("_", " ")}
                       </span>
                     </td>
-                    <td className="px-5 py-4 text-right">
+                    <td className="px-6 py-4 text-right">
                       <button
+                        type="button"
                         onClick={() => void openSeller(seller)}
-                        className="rounded-lg border border-gray-200 px-3 py-2 text-sm font-medium hover:border-[#f47524] hover:text-[#f47524]"
+                        className="inline-flex items-center gap-2 rounded-xl border border-slate-200 bg-white px-3.5 py-2 text-xs font-semibold text-slate-700 shadow-sm transition hover:border-orange-200 hover:bg-orange-50 hover:text-[#f47524]"
                       >
-                        {seller.status === "rejected" ? "View" : "Review"}
+                        <Eye size={14} />
+                        {seller.status === "approved" ? "View seller" : seller.status === "rejected" ? "Review correction" : "Review application"}
                       </button>
                     </td>
                   </tr>
@@ -288,12 +361,17 @@ export default function AdminSellers({
       {selected && (
         <div
           className="fixed inset-0 z-[99999] flex justify-end bg-black/40"
-          onMouseDown={() => setSelected(null)}
+          onMouseDown={() => {
+            setSelected(null);
+            setShowRejectModal(false);
+            setRejectReason("");
+          }}
         >
           <aside
-            className="h-full w-full max-w-2xl overflow-y-auto bg-white p-6 shadow-2xl"
+            className="flex h-full w-full max-w-2xl flex-col bg-white shadow-2xl"
             onMouseDown={(event) => event.stopPropagation()}
           >
+            <div className="flex-1 overflow-y-auto p-6">
             <div className="flex items-start justify-between">
               <div>
                 <p className="text-xs font-semibold uppercase tracking-wider text-[#f47524]">
@@ -315,30 +393,94 @@ export default function AdminSellers({
               </button>
             </div>
 
-            <div className="mt-6 grid grid-cols-2 gap-3">
-              {[
-                ["Status", selected.status.replaceAll("_", " ")],
-                ["Experience", selected.years_in_business ?? "—"],
-                [
-                  "Location",
-                  [selected.business_city, selected.business_country]
+            <div className="mt-6 rounded-2xl border border-[#e7ebf0] bg-[#f8fafc] p-5">
+              <div className="mb-4 flex items-center gap-2">
+                <Building2 size={18} className="text-[#f47524]" />
+                <h4 className="font-semibold text-[#111827]">
+                  Seller business details
+                </h4>
+              </div>
+
+              <div className="grid gap-3 sm:grid-cols-2">
+                <Detail icon={ShieldCheck} label="Seller Status" value={selected.status.replaceAll("_", " ")} />
+                <Detail icon={Clock3} label="Years in Business" value={selected.years_in_business ?? "—"} />
+                <Detail icon={Mail} label="Contact Email" value={selected.contact_email ?? "—"} />
+                <Detail icon={Phone} label="Contact Phone" value={selected.contact_phone ?? "—"} />
+                <Detail
+                  icon={MapPin}
+                  label="Business Location"
+                  value={[
+                    selected.business_address,
+                    selected.business_city,
+                    selected.business_region,
+                    selected.business_country,
+                  ]
                     .filter(Boolean)
-                    .join(", ") || "—",
-                ],
-                ["Agreement", selected.agreement_accepted ? "Accepted" : "Not accepted"],
-              ].map(([label, value]) => (
-                <div key={label} className="rounded-xl bg-[#f8fafc] p-4">
-                  <p className="text-xs text-gray-500">{label}</p>
-                  <p className="mt-1 text-sm font-medium capitalize text-[#111827]">
-                    {value}
+                    .join(", ") || "—"}
+                />
+                <Detail
+                  icon={Globe2}
+                  label="Website"
+                  value={selected.website_url ?? "—"}
+                />
+                <Detail
+                  icon={UserCheck}
+                  label="Seller Agreement"
+                  value={selected.agreement_accepted ? "Accepted" : "Not accepted"}
+                />
+                <Detail
+                  icon={FileText}
+                  label="Documents Submitted"
+                  value={documentsLoading ? "Loading..." : `${documents.length} document(s)`}
+                />
+              </div>
+
+              {selected.business_description && (
+                <div className="mt-4 rounded-xl border border-white bg-white p-4">
+                  <p className="text-xs font-semibold uppercase tracking-wider text-gray-400">
+                    Business description
+                  </p>
+                  <p className="mt-2 text-sm leading-6 text-gray-700">
+                    {selected.business_description}
                   </p>
                 </div>
-              ))}
+              )}
+
+              {selected.product_description && (
+                <div className="mt-3 rounded-xl border border-white bg-white p-4">
+                  <p className="text-xs font-semibold uppercase tracking-wider text-gray-400">
+                    Products / services
+                  </p>
+                  <p className="mt-2 text-sm leading-6 text-gray-700">
+                    {selected.product_description}
+                  </p>
+                </div>
+              )}
             </div>
 
-            <div className="mt-6 rounded-xl border border-blue-100 bg-blue-50 p-4 text-sm text-blue-800">
-              <p className="font-semibold">Admin review mode</p>
-              <p className="mt-1 text-xs leading-5">Seller documents are view-only during review. Admin does not edit them. Reject with a clear reason when the seller must correct a document.</p>
+            <div
+              className={`mt-6 rounded-xl border p-4 text-sm ${
+                selected.status === "rejected"
+                  ? "border-red-200 bg-red-50 text-red-800"
+                  : selected.status === "approved"
+                    ? "border-emerald-200 bg-emerald-50 text-emerald-800"
+                    : "border-blue-100 bg-blue-50 text-blue-800"
+              }`}
+            >
+              <p className="font-semibold">
+                {selected.status === "rejected"
+                  ? "Correction requested"
+                  : selected.status === "approved"
+                    ? "Seller verified"
+                    : "Admin review mode"}
+              </p>
+              <p className="mt-1 text-xs leading-5">
+                {selected.status === "rejected"
+                  ? "The seller can edit the rejected document(s). Review the corrected submission when it is uploaded again."
+                  : selected.status === "approved"
+                    ? "This seller has completed verification. Documents remain available for audit and viewing."
+                    : "Seller documents are view-only during review. Admin does not edit seller files. Reject with a clear reason when a correction is required."}
+              </p>
             </div>
 
             <div className="mt-6">
@@ -375,9 +517,13 @@ export default function AdminSellers({
                           <p className="font-medium text-[#111827]">
                             {documentLabel(document.document_type)}
                           </p>
-                          <p className="mt-0.5 text-xs capitalize text-gray-500">
+                          <span
+                            className={`mt-1 inline-flex rounded-full px-2.5 py-1 text-[10px] font-semibold capitalize ${documentStatusStyle(
+                              document.status,
+                            )}`}
+                          >
                             {document.status.replaceAll("_", " ")}
-                          </p>
+                          </span>
                         </div>
 
                         <button
@@ -398,9 +544,14 @@ export default function AdminSellers({
                       </div>
 
                       {document.rejection_reason && (
-                        <p className="mt-3 rounded-lg bg-red-50 p-3 text-xs leading-5 text-red-700">
-                          {document.rejection_reason}
-                        </p>
+                        <div className="mt-3 rounded-lg border border-red-200 bg-red-50 p-3">
+                          <p className="text-[10px] font-bold uppercase tracking-wider text-red-700">
+                            Rejection reason
+                          </p>
+                          <p className="mt-1 text-xs leading-5 text-red-700">
+                            {document.rejection_reason}
+                          </p>
+                        </div>
                       )}
                     </div>
                   ))}
@@ -414,37 +565,143 @@ export default function AdminSellers({
               )}
             </div>
 
-            <div className="mt-6 border-t border-gray-100 pt-6">
-              <label className="text-sm font-semibold text-[#111827]">
+            </div>
+
+            {selected.status !== "approved" && (
+              <div className="shrink-0 border-t border-gray-200 bg-white px-6 py-4 shadow-[0_-8px_24px_rgba(15,23,42,0.04)]">
+                <p className="mb-3 text-xs leading-5 text-gray-500">
+                  After reviewing the seller details and all submitted documents,
+                  approve the application or reject it and provide a correction reason.
+                </p>
+
+                <div className="grid grid-cols-2 gap-3">
+                  <button
+                    type="button"
+                    disabled={Boolean(busy) || documentsLoading || documents.length === 0}
+                    onClick={() => void approve()}
+                    className="inline-flex h-12 items-center justify-center gap-2 rounded-xl bg-emerald-600 px-4 text-sm font-semibold text-black transition hover:bg-emerald-700 disabled:cursor-not-allowed disabled:opacity-50"
+                  >
+                    <CheckCircle2 size={17} />
+                    {busy === "approve" ? "Approving..." : "Approve Seller"}
+                  </button>
+
+                  <button
+                    type="button"
+                    disabled={Boolean(busy) || documentsLoading || documents.length === 0}
+                    onClick={() => {
+                      setRejectReason("");
+                      setShowRejectModal(true);
+                    }}
+                    className="inline-flex h-12 items-center justify-center gap-2 rounded-xl bg-red-600 px-4 text-sm font-semibold text-black transition hover:bg-red-700 disabled:cursor-not-allowed disabled:opacity-50"
+                  >
+                    <AlertCircle size={17} />
+                    Reject Seller
+                  </button>
+                </div>
+              </div>
+            )}
+          </aside>
+        </div>
+      )}
+
+      {showRejectModal && selected && (
+        <div
+          className="fixed inset-0 z-[100000] flex items-center justify-center bg-black/55 p-4 backdrop-blur-sm"
+          onMouseDown={() => {
+            if (!busy) {
+              setShowRejectModal(false);
+              setRejectReason("");
+            }
+          }}
+        >
+          <div
+            className="w-full max-w-lg overflow-hidden rounded-2xl bg-white shadow-2xl"
+            onMouseDown={(event) => event.stopPropagation()}
+          >
+            <div className="flex items-start justify-between border-b border-gray-100 px-6 py-5">
+              <div>
+                <p className="text-xs font-bold uppercase tracking-[0.14em] text-red-600">
+                  Reject Seller Application
+                </p>
+                <h3 className="mt-1 text-xl font-semibold text-[#111827]">
+                  {selected.business_name}
+                </h3>
+                <p className="mt-1 text-sm leading-6 text-gray-500">
+                  Tell the seller exactly what must be corrected. This reason will
+                  be visible to the seller and will allow document editing again.
+                </p>
+              </div>
+
+              <button
+                type="button"
+                disabled={Boolean(busy)}
+                onClick={() => {
+                  setShowRejectModal(false);
+                  setRejectReason("");
+                }}
+                className="flex h-9 w-9 shrink-0 items-center justify-center rounded-lg bg-gray-100 text-gray-600 hover:bg-gray-200 disabled:opacity-50"
+              >
+                <X size={17} />
+              </button>
+            </div>
+
+            <div className="px-6 py-5">
+              <label
+                htmlFor="seller-rejection-reason"
+                className="text-sm font-semibold text-[#111827]"
+              >
                 Rejection reason <span className="text-red-600">*</span>
               </label>
-              <p className="mt-1 text-xs leading-5 text-gray-500">Required when rejecting. Tell the seller exactly which document or information must be corrected.</p>
+
+              <p className="mt-1 text-xs leading-5 text-gray-500">
+                Be specific. For example, identify the document and what is wrong
+                with it.
+              </p>
+
               <textarea
+                id="seller-rejection-reason"
                 value={rejectReason}
                 onChange={(event) => setRejectReason(event.target.value)}
-                rows={4}
-                placeholder="Example: The Business Licence is expired. Upload a valid current licence."
-                className="mt-2 w-full rounded-xl border border-gray-200 p-3 text-sm outline-none focus:border-[#f47524]"
+                rows={5}
+                autoFocus
+                maxLength={1000}
+                placeholder="Example: The Business Licence has expired. Please upload a valid current Business Licence."
+                className="mt-3 w-full resize-none rounded-xl border border-gray-200 p-3 text-sm outline-none transition focus:border-red-400 focus:ring-4 focus:ring-red-50"
               />
 
-              <div className="mt-3 flex gap-3">
+              <div className="mt-2 flex items-center justify-between text-xs text-gray-400">
+                <span>
+                  Minimum 5 characters
+                </span>
+                <span>{rejectReason.length}/1000</span>
+              </div>
+
+              <div className="mt-5 flex gap-3">
                 <button
+                  type="button"
                   disabled={Boolean(busy)}
-                  onClick={() => void approve()}
-                  className="flex-1 rounded-xl bg-green-600 px-4 py-3 text-sm font-semibold text-white disabled:opacity-50"
+                  onClick={() => {
+                    setShowRejectModal(false);
+                    setRejectReason("");
+                  }}
+                  className="flex-1 rounded-xl border border-gray-200 px-4 py-3 text-sm font-semibold text-[#334155] transition hover:bg-gray-50 disabled:opacity-50"
                 >
-                  {busy === "approve" ? "Approving..." : "Approve seller"}
+                  Cancel
                 </button>
+
                 <button
-                  disabled={Boolean(busy) || !rejectReason.trim()}
+                  type="button"
+                  disabled={Boolean(busy) || rejectReason.trim().length < 5}
                   onClick={() => void reject()}
-                  className="flex-1 rounded-xl bg-red-600 px-4 py-3 text-sm font-semibold text-white disabled:cursor-not-allowed disabled:opacity-50"
+                  className="flex-1 rounded-xl bg-red-600 px-4 py-3 text-sm font-semibold text-white transition hover:bg-red-700 disabled:cursor-not-allowed disabled:opacity-50"
                 >
-                  {busy === "reject" ? "Rejecting..." : "Reject application"}
+                  {busy === "reject"
+                    ? "Rejecting..."
+                    : "Confirm Rejection"}
                 </button>
               </div>
             </div>
-          </aside>
+          </div>
         </div>
       )}
 
@@ -457,3 +714,29 @@ export default function AdminSellers({
     </div>
   );
 }
+
+
+function Detail({
+  icon: Icon,
+  label,
+  value,
+}: {
+  icon: typeof ShieldCheck;
+  label: string;
+  value: string;
+}) {
+  return (
+    <div className="flex items-start gap-3 rounded-xl bg-white p-3">
+      <span className="mt-0.5 flex h-8 w-8 shrink-0 items-center justify-center rounded-lg bg-orange-50 text-[#f47524]">
+        <Icon size={15} />
+      </span>
+      <div className="min-w-0">
+        <p className="text-[11px] text-gray-400">{label}</p>
+        <p className="mt-0.5 break-words text-sm font-medium capitalize text-[#111827]">
+          {value}
+        </p>
+      </div>
+    </div>
+  );
+}
+
