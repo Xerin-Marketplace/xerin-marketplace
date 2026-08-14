@@ -73,7 +73,21 @@ export const hasSellerStatus = (
 };
 
 export const isAdminUser = (user?: GuardUser | null): boolean => {
-  return hasAnyAccountType(user, ["admin", "super_admin"]) || hasAnyRole(user, ["admin", "super_admin"]);
+  if (!user) return false;
+
+  if (
+    hasAnyAccountType(user, ["admin", "super_admin"]) ||
+    hasAnyRole(user, ["admin", "super_admin"])
+  ) {
+    return true;
+  }
+
+  const basicRoles = new Set(["buyer", "customer", "seller"]);
+  const roles = getUserRoles(user).map((role) => role.toLowerCase());
+
+  // A custom non-marketplace role is a staff role. The backend still decides
+  // what that staff user may actually view/do through permissions.
+  return roles.some((role) => !basicRoles.has(role));
 };
 
 export const isSellerUser = (user?: GuardUser | null): boolean => {

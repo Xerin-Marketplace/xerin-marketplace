@@ -30,6 +30,9 @@ import {
   Sun,
   Tag,
   Users,
+  UserPlus,
+  KeyRound,
+  LockKeyhole,
   WalletCards,
   X,
   Megaphone,
@@ -40,6 +43,7 @@ import {
 
 import { useTheme } from "@/app/context/ThemeContext";
 import { authStorage } from "@/lib/auth/storage";
+import { canAccessAdminItem, canAccessAdminSection } from "@/lib/auth/admin-access";
 
 export type AdminTab =
   | "overview"
@@ -60,6 +64,7 @@ type AdminUser = {
   email?: string;
   account_type?: string;
   roles?: string[];
+  permissions?: string[];
 };
 
 type NavItem = {
@@ -187,6 +192,18 @@ const sidebarGroups: SidebarGroup[] = [
     ],
   },
   {
+    title: "User Management",
+    key: "users",
+    icon: ShieldCheck,
+    items: [
+      { label: "Users", href: "/admin/dashboard?tab=users&menu=user-management&item=users", icon: Users },
+      { label: "Add New User", href: "/admin/dashboard?tab=users&menu=user-management&item=add-new-user", icon: UserPlus },
+      { label: "Roles", href: "/admin/dashboard?tab=users&menu=user-management&item=roles", icon: ShieldCheck },
+      { label: "Permissions", href: "/admin/dashboard?tab=users&menu=user-management&item=permissions", icon: KeyRound },
+      { label: "Active Sessions", href: "/admin/dashboard?tab=users&menu=user-management&item=active-sessions", icon: LockKeyhole },
+    ],
+  },
+  {
     title: "System Management",
     key: "overview",
     icon: Settings,
@@ -238,6 +255,22 @@ export default function AdminSidebar({
   const [mobileOpen, setMobileOpen] = useState(false);
   const [collapsed, setCollapsed] = useState(false);
   const user = authStorage.getUser<AdminUser>();
+  const visibleSidebarGroups = useMemo(
+    () =>
+      sidebarGroups
+        .map((group) => ({
+          ...group,
+          items: group.items.filter((item) =>
+            canAccessAdminItem(user, item.label)
+          ),
+        }))
+        .filter(
+          (group) =>
+            canAccessAdminSection(user, group.title) &&
+            group.items.length > 0
+        ),
+    [user],
+  );
 
   const displayName =
     [user?.first_name, user?.last_name].filter(Boolean).join(" ") ||
@@ -262,7 +295,7 @@ export default function AdminSidebar({
   }, [pathname]);
 
   const activeGroup = useMemo(() => {
-    return sidebarGroups.find((group) =>
+    return visibleSidebarGroups.find((group) =>
       group.items.some((item) => isItemActive(item.href, pathname, searchParams)),
     )?.title;
   }, [pathname, searchParams]);
@@ -363,7 +396,7 @@ export default function AdminSidebar({
             </Link>
           </div>
 
-          {sidebarGroups.map((group) => {
+          {visibleSidebarGroups.map((group) => {
             const GroupIcon = group.icon;
             const open = activeGroup === group.title;
 

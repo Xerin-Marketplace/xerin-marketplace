@@ -17,6 +17,8 @@ export type User = TimestampFields & {
   is_verified?: boolean;
   is_seller?: boolean;
   seller_status?: string | null;
+  roles?: string[];
+  permissions?: string[];
 };
 
 export type UpdateUserRequest = {

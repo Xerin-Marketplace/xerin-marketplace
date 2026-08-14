@@ -1,11 +1,12 @@
 "use client";
 import Image from "next/image";
 
-import { ReactNode, useEffect, useState } from "react";
+import { ReactNode, useEffect, useState, useMemo } from "react";
 import { usePathname, useRouter, useSearchParams } from "next/navigation";
 import Link from "next/link";
 import toast from "react-hot-toast";
 import { authStorage } from "@/lib/auth/storage";
+import { canAccessAdminDashboard, canAccessAdminItem, canAccessAdminSection } from "@/lib/auth/admin-access";
 import { ApiError } from "@/lib/api/client";
 import {
   adminService,
@@ -72,6 +73,7 @@ import {
   Sun,
   Tag,
   Users,
+  UserPlus,
   X,
   type LucideIcon,
 } from "lucide-react";
@@ -302,6 +304,7 @@ const sidebarGroups: SidebarGroup[] = [
     icon: ShieldCheck,
     items: [
       { label: "Users", href: "?tab=users&menu=user-management&item=users" },
+      { label: "Add New User", href: "?tab=users&menu=user-management&item=add-new-user" },
       { label: "Roles", href: "?tab=users&menu=user-management&item=roles" },
       {
         label: "Permissions",
@@ -496,19 +499,8 @@ const tabIcon = (tab: AdminTab): ReactNode => {
   }
 };
 
-const canAccessAdmin = (user: StoredUser | null) => {
-  if (!user) return false;
-
-  const accountType = (user.account_type ?? "").toLowerCase();
-  const roles = (user.roles ?? []).map((role) => role.toLowerCase());
-
-  return (
-    accountType === "admin" ||
-    accountType === "super_admin" ||
-    roles.includes("admin") ||
-    roles.includes("super_admin")
-  );
-};
+const canAccessAdmin = (user: StoredUser | null) =>
+  canAccessAdminDashboard(user);
 
 const normalizeSlug = (value: string) =>
   value
@@ -531,6 +523,22 @@ export default function AdminDashboard() {
   const { theme, toggleTheme } = useTheme();
   const { logout } = useAuth();
   const adminUser = authStorage.getUser<StoredUser>();
+  const visibleSidebarGroups = useMemo(
+    () =>
+      sidebarGroups
+        .map((group) => ({
+          ...group,
+          items: group.items.filter((item) =>
+            canAccessAdminItem(adminUser, item.label),
+          ),
+        }))
+        .filter(
+          (group) =>
+            canAccessAdminSection(adminUser, group.title) &&
+            group.items.length > 0,
+        ),
+    [adminUser],
+  );
   const adminName =
     [adminUser?.first_name, adminUser?.last_name].filter(Boolean).join(" ") ||
     "Administrator";
@@ -658,7 +666,9 @@ export default function AdminDashboard() {
     activeSidebarItem === "User Management" ||
     activeSidebarItem.startsWith("User Management:");
   const userManagementView: UserManagementView =
-    activeSidebarItem === "User Management:Roles"
+    activeSidebarItem === "User Management:Add New User"
+      ? "create-user"
+      : activeSidebarItem === "User Management:Roles"
       ? "roles"
       : activeSidebarItem === "User Management:Permissions"
         ? "permissions"
@@ -760,6 +770,7 @@ export default function AdminDashboard() {
       "Customers:Customer Reviews": "users",
       "Customers:Customer Support": "users",
       "User Management:Users": "users",
+      "User Management:Add New User": "users",
       "User Management:Roles": "users",
       "User Management:Permissions": "users",
       "User Management:Active Sessions": "users",
@@ -877,7 +888,7 @@ export default function AdminDashboard() {
       return;
     }
 
-    const matchedGroup = sidebarGroups.find(
+    const matchedGroup = visibleSidebarGroups.find(
       (group) => normalizeSlug(group.title) === menuParam,
     );
 
@@ -1066,7 +1077,7 @@ export default function AdminDashboard() {
             </div>
 
             <nav className="mt-4 flex-1 space-y-3 overflow-y-auto px-1 pb-3">
-              {sidebarGroups.map((group) => {
+              {visibleSidebarGroups.map((group) => {
                 const GroupIcon = group.icon;
                 const isOpen =
                   openSidebarGroup === group.title ||

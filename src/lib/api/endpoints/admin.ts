@@ -57,10 +57,108 @@ export type Coupon = { id: string; code: string; description: string | null; dis
 export type DiscountRule = { id: string; name: string; description: string | null; discount_type: string; discount_value: number; applies_to: string; minimum_order_amount: number | null; priority: number; is_active: boolean; valid_from: string | null; valid_until: string | null; created_at: string };
 export type PromotionCampaign = { id: string; name: string; objective: string; description: string | null; audience: string; channel: string; budget: number | null; currency: string; status: string; starts_at: string | null; ends_at: string | null; impressions: number; conversions: number; revenue: number; created_at: string };
 export type CommunicationMessage = { id: string; channel: "notification" | "email" | "sms"; title: string | null; body: string; audience: string; recipient: string | null; status: string; scheduled_at: string | null; sent_at: string | null; delivered_at: string | null; failure_reason: string | null; created_at: string };
-export type AccessUser = AdminUser & { roles: string[]; direct_permissions: string[]; active_sessions: number; last_login_at: string | null };
-export type AccessRole = { id: string; name: string; description: string | null; users_count: number; permissions: string[]; created_at: string };
-export type AccessPermission = { id: string; code: string; name: string; description: string | null; created_at: string };
-export type AccessSession = { id: string; user_id: string; user_name: string; email: string; created_at: string; expires_at: string; is_current_user: boolean };
+export type AccessUser = AdminUser & {
+  roles: string[];
+  role_ids: string[];
+  permissions: string[];
+  active_sessions?: number;
+  last_login_at?: string | null;
+};
+
+export type PaginatedAccessUsers = {
+  total: number;
+  page: number;
+  page_size: number;
+  results: AccessUser[];
+};
+
+export type ListAccessUsersParams = {
+  page?: number;
+  page_size?: number;
+  search?: string;
+  status_filter?: string;
+  role_filter?: string;
+};
+
+export type AccessRole = {
+  id: string;
+  name: string;
+  description: string | null;
+  users_count: number;
+  permissions: string[];
+  created_at?: string | null;
+};
+
+export type AccessPermission = {
+  id: string;
+  code: string;
+  name: string;
+  description: string | null;
+  created_at?: string | null;
+};
+
+export type AccessSession = {
+  id: string;
+  user_id: string;
+  user_name: string;
+  email: string;
+  created_at: string;
+  expires_at: string;
+  is_current_user: boolean;
+};
+
+export type RoleApiResponse = {
+  id: string;
+  name: string;
+  description: string | null;
+  created_at?: string | null;
+};
+
+export type RolePermissionsResponse = {
+  role_id: string;
+  role_name: string;
+  permissions: string[];
+};
+
+export type UserRolesResponse = {
+  user_id: string;
+  roles: RoleApiResponse[];
+};
+
+export type UserPermissionsResponse = {
+  user_id: string;
+  permissions: string[];
+};
+
+export type CreateRolePayload = {
+  name: string;
+  description?: string | null;
+  permission_codes?: string[];
+};
+
+export type CreateStaffPayload = {
+  first_name: string;
+  last_name: string;
+  email: string;
+  phone?: string | null;
+  password: string;
+  role_ids: string[];
+  status?: string;
+  is_verified?: boolean;
+};
+
+export type AdminStaffResponse = {
+  id: string;
+  first_name: string | null;
+  last_name: string | null;
+  email: string;
+  phone: string | null;
+  status: string;
+  is_verified: boolean;
+  created_at: string;
+  roles: string[];
+  permissions: string[];
+};
 export type AdminReport = { type: string; date_from: string; date_to: string; currency: string; metrics: Array<{label:string;value:number;format:"currency"|"number"|"percent"}>; breakdown: Array<{label:string;value:number}>; rows: Array<Record<string,string|number|null>> };
 export type AuditLog={id:string;actor_id:string|null;actor_name:string;action:string;resource_type:string;resource_id:string|null;details:Record<string,unknown>;created_at:string};
 export type SystemEvent={id:string;source:string;event_type:string;severity:string;message:string;metadata_json:Record<string,unknown>|null;status:string;acknowledged_at:string|null;created_at:string};
@@ -472,13 +570,161 @@ export const listCommunicationMessages = async (channel: CommunicationMessage["c
 export const createCommunicationMessage = async (payload: Partial<CommunicationMessage>) => (await axiosInstance.post<CommunicationMessage>("/communications", payload)).data;
 export const sendCommunicationMessage = async (id: string) => (await axiosInstance.post<CommunicationMessage>(`/communications/${id}/send`)).data;
 export const cancelCommunicationMessage = async (id: string) => (await axiosInstance.post<CommunicationMessage>(`/communications/${id}/cancel`)).data;
-export const listAccessUsers = async () => (await axiosInstance.get<AccessUser[]>("/admin/access-users")).data;
-export const updateAccessUser = async (id: string, payload: Partial<AdminUser>) => (await axiosInstance.patch<AdminUser>(`/admin/users/${id}`, payload)).data;
-export const updateUserRoles = async (id: string, roles: string[]) => (await axiosInstance.put<{ user_id: string; roles: string[] }>(`/admin/users/${id}/roles`, { roles })).data;
-export const listAccessRoles = async () => (await axiosInstance.get<AccessRole[]>("/admin/access-roles")).data;
-export const listAccessPermissions = async () => (await axiosInstance.get<AccessPermission[]>("/admin/permissions")).data;
-export const updateAccessRolePermissions = async (id: string, permission_codes: string[]) => (await axiosInstance.put(`/admin/roles/${id}/permissions`, { permission_codes })).data;
-export const listAccessSessions = async () => (await axiosInstance.get<AccessSession[]>("/admin/active-sessions")).data;
+export const listAccessPermissions = async (): Promise<AccessPermission[]> =>
+  (await axiosInstance.get<AccessPermission[]>("/admin/permissions")).data;
+
+export const getRolePermissions = async (
+  roleId: string,
+): Promise<RolePermissionsResponse> =>
+  (
+    await axiosInstance.get<RolePermissionsResponse>(
+      `/admin/roles/${roleId}/permissions`,
+    )
+  ).data;
+
+export const getRoleUsers = async (
+  roleId: string,
+): Promise<{ role_id: string; role_name: string; user_ids: string[] }> =>
+  (
+    await axiosInstance.get<{
+      role_id: string;
+      role_name: string;
+      user_ids: string[];
+    }>(`/admin/roles/${roleId}/users`)
+  ).data;
+
+export const listAccessRoles = async (): Promise<AccessRole[]> => {
+  const roles = (await axiosInstance.get<RoleApiResponse[]>("/admin/roles")).data;
+
+  return Promise.all(
+    roles.map(async (role) => {
+      const [permissionResult, usersResult] = await Promise.all([
+        getRolePermissions(role.id).catch(() => ({
+          role_id: role.id,
+          role_name: role.name,
+          permissions: [],
+        })),
+        getRoleUsers(role.id).catch(() => ({
+          role_id: role.id,
+          role_name: role.name,
+          user_ids: [],
+        })),
+      ]);
+
+      return {
+        ...role,
+        permissions: permissionResult.permissions,
+        users_count: usersResult.user_ids.length,
+      };
+    }),
+  );
+};
+
+export const createAccessRole = async (
+  payload: CreateRolePayload,
+): Promise<RolePermissionsResponse> =>
+  (
+    await axiosInstance.post<RolePermissionsResponse>("/admin/roles", {
+      ...payload,
+      permission_codes: payload.permission_codes ?? [],
+    })
+  ).data;
+
+export const updateAccessRole = async (
+  roleId: string,
+  payload: { name?: string; description?: string | null },
+): Promise<RoleApiResponse> =>
+  (
+    await axiosInstance.patch<RoleApiResponse>(
+      `/admin/roles/${roleId}`,
+      payload,
+    )
+  ).data;
+
+export const deleteAccessRole = async (roleId: string): Promise<void> => {
+  await axiosInstance.delete(`/admin/roles/${roleId}`);
+};
+
+export const updateAccessRolePermissions = async (
+  id: string,
+  permission_codes: string[],
+): Promise<RolePermissionsResponse> =>
+  (
+    await axiosInstance.put<RolePermissionsResponse>(
+      `/admin/roles/${id}/permissions`,
+      { permission_codes },
+    )
+  ).data;
+
+export const getUserRoles = async (
+  userId: string,
+): Promise<UserRolesResponse> =>
+  (
+    await axiosInstance.get<UserRolesResponse>(
+      `/admin/users/${userId}/roles`,
+    )
+  ).data;
+
+export const getUserEffectivePermissions = async (
+  userId: string,
+): Promise<UserPermissionsResponse> =>
+  (
+    await axiosInstance.get<UserPermissionsResponse>(
+      `/admin/users/${userId}/permissions`,
+    )
+  ).data;
+
+export const updateUserRoles = async (
+  id: string,
+  roleIds: string[],
+): Promise<UserRolesResponse> =>
+  (
+    await axiosInstance.put<UserRolesResponse>(
+      `/admin/users/${id}/roles`,
+      { role_ids: roleIds },
+    )
+  ).data;
+
+export const listAccessUsers = async (
+  params: ListAccessUsersParams = {},
+): Promise<PaginatedAccessUsers> => {
+  const res = await axiosInstance.get<PaginatedAccessUsers>(
+    "/admin/access-users",
+    { params },
+  );
+  return res.data;
+};
+
+export const createStaffAccount = async (
+  payload: CreateStaffPayload,
+): Promise<AdminStaffResponse> =>
+  (
+    await axiosInstance.post<AdminStaffResponse>(
+      "/admin/staff",
+      payload,
+    )
+  ).data;
+
+export const updateAccessUser = async (
+  id: string,
+  payload: Partial<AdminUser>,
+) =>
+  (
+    await axiosInstance.patch<AdminUser>(
+      `/admin/users/${id}`,
+      payload,
+    )
+  ).data;
+
+// Retain the old session hooks for the current Active Sessions screen.
+// If the backend does not expose this optional endpoint, the screen will
+// display the normal API error without affecting Roles/Users/Permissions.
+export const listAccessSessions = async () =>
+  (
+    await axiosInstance.get<AccessSession[]>(
+      "/admin/active-sessions",
+    )
+  ).data;
 export const revokeAccessSession = async (id: string) => (await axiosInstance.delete(`/admin/active-sessions/${id}`)).data;
 export const getAdminReport = async (type: string, params: {date_from?:string;date_to?:string}={}) => (await axiosInstance.get<AdminReport>(`/admin/reports/${type}`,{params})).data;
 export const listAuditLogs=async()=>(await axiosInstance.get<AuditLog[]>("/system/audit-logs")).data;
@@ -642,9 +888,17 @@ export const adminService = {
   sendCommunicationMessage,
   cancelCommunicationMessage,
   listAccessUsers,
+  createStaffAccount,
   updateAccessUser,
+  getUserRoles,
+  getUserEffectivePermissions,
   updateUserRoles,
   listAccessRoles,
+  createAccessRole,
+  updateAccessRole,
+  deleteAccessRole,
+  getRolePermissions,
+  getRoleUsers,
   listAccessPermissions,
   updateAccessRolePermissions,
   listAccessSessions,
