@@ -1,51 +1,56 @@
 "use client";
 
-import { useEffect, useState } from "react";
+import { useEffect, useMemo, useState } from "react";
+import Image from "next/image";
 import toast from "react-hot-toast";
+import { AlertCircle, CheckCircle2, Eye, Package, RefreshCw, Search, X } from "lucide-react";
 import { adminService, type AdminProduct } from "@/lib/api/endpoints/admin";
+import { API_BASE_URL } from "@/lib/api/endpoints";
 import { ApiError } from "@/lib/api/errors";
-import UnavailableFeature from "@/components/Admin/Common/UnavailableFeature";
 import { formatCurrency } from "@/lib/formatCurrency";
 
-const message = (error: unknown) => error instanceof ApiError || error instanceof Error ? error.message : "Unable to load product moderation data.";
+const err = (e: unknown) => e instanceof ApiError || e instanceof Error ? e.message : "Unable to load products.";
+const resolveImage = (url?: string | null) => {
+  if (!url) return "";
+  if (/^(data:|blob:)/.test(url)) return url;
+  try {
+    const api = new URL(API_BASE_URL);
+    if (/^https?:/.test(url)) {
+      const absolute = new URL(url);
+      if (absolute.pathname.startsWith("/api/v1/uploads/")) absolute.pathname = absolute.pathname.replace(/^\/api\/v1\/uploads\//, "/uploads/");
+      return absolute.toString();
+    }
+    return `${api.origin}${url.startsWith("/") ? "" : "/"}${url}`;
+  } catch { return url; }
+};
 
 export default function AdminProducts() {
-  const [products, setProducts] = useState<AdminProduct[]>([]);
-  const [loading, setLoading] = useState(true);
-  const [error, setError] = useState("");
-  const [busy, setBusy] = useState<string | null>(null);
-
-  const load = async () => {
-    setLoading(true);
-    setError("");
-    try { setProducts(await adminService.listPendingProducts()); }
-    catch (cause) { setError(message(cause)); }
-    finally { setLoading(false); }
-  };
-
-  useEffect(() => { void load(); }, []);
-
-  const approve = async (id: string) => {
-    setBusy(id);
-    try { await adminService.approveProduct(id); toast.success("Product approved."); await load(); }
-    catch (cause) { toast.error(message(cause)); }
-    finally { setBusy(null); }
-  };
-
-  const reject = async (id: string) => {
-    const reason = window.prompt("Enter the product rejection reason:")?.trim();
-    if (!reason) return;
-    setBusy(id);
-    try { await adminService.rejectProduct(id, reason); toast.success("Product rejected."); await load(); }
-    catch (cause) { toast.error(message(cause)); }
-    finally { setBusy(null); }
-  };
-
+  const [rows,setRows]=useState<AdminProduct[]>([]), [loading,setLoading]=useState(true), [error,setError]=useState("");
+  const [query,setQuery]=useState(""), [selected,setSelected]=useState<AdminProduct|null>(null), [detailLoading,setDetailLoading]=useState(false);
+  const [busy,setBusy]=useState(false), [rejectOpen,setRejectOpen]=useState(false), [reason,setReason]=useState("");
+  const load=async()=>{setLoading(true);setError("");try{setRows(await adminService.listPendingProducts())}catch(e){setError(err(e))}finally{setLoading(false)}};
+  useEffect(()=>{void load()},[]);
+  const visible=useMemo(()=>{const q=query.trim().toLowerCase();return rows.filter(r=>!q||`${r.name} ${r.sku} ${r.description??""}`.toLowerCase().includes(q))},[rows,query]);
+  const review=async(row:AdminProduct)=>{setSelected(row);setDetailLoading(true);try{setSelected(await adminService.getProductReviewDetail(row.id))}catch(e){toast.error(err(e))}finally{setDetailLoading(false)}};
+  const approve=async()=>{if(!selected)return;setBusy(true);try{await adminService.approveProduct(selected.id);toast.success("Product approved.");setSelected(null);await load()}catch(e){toast.error(err(e))}finally{setBusy(false)}};
+  const reject=async()=>{if(!selected||reason.trim().length<5)return;setBusy(true);try{await adminService.rejectProduct(selected.id,reason.trim());toast.success("Product rejected with correction reason.");setReason("");setRejectOpen(false);setSelected(null);await load()}catch(e){toast.error(err(e))}finally{setBusy(false)}};
   return <div className="space-y-5">
-    <UnavailableFeature title="Full admin product management is not available yet" description="The backend currently supports pending-product moderation only. Full listing, details, create, update, archive and admin delete operations are not simulated." />
-    <section className="overflow-hidden rounded-2xl border border-gray-200 bg-white shadow-sm">
-      <div className="flex items-center justify-between border-b p-5"><div><h3 className="text-lg font-semibold">Pending product moderation</h3><p className="text-sm text-gray-500">Live submissions returned by the backend.</p></div><button onClick={() => void load()} className="rounded-xl border px-4 py-2 text-sm font-semibold">Refresh</button></div>
-      {loading ? <p className="p-10 text-center text-gray-500">Loading pending products...</p> : error ? <div className="p-10 text-center"><p className="text-red-600">{error}</p><button onClick={() => void load()} className="mt-3 font-semibold text-orange-600">Retry</button></div> : products.length === 0 ? <p className="p-10 text-center text-gray-500">No products awaiting approval.</p> : <div className="overflow-x-auto"><table className="w-full min-w-[760px] text-left text-sm"><thead className="bg-gray-50"><tr>{["Product","SKU","Price","Status","Created","Actions"].map(label => <th key={label} className="px-5 py-3">{label}</th>)}</tr></thead><tbody className="divide-y">{products.map(product => <tr key={product.id}><td className="px-5 py-4 font-semibold">{product.name}</td><td className="px-5 py-4 text-gray-500">{product.sku}</td><td className="px-5 py-4">{formatCurrency(product.price, product.currency)}</td><td className="px-5 py-4 capitalize">{product.status.replaceAll("_", " ")}</td><td className="px-5 py-4 text-gray-500">{new Date(product.created_at).toLocaleDateString()}</td><td className="px-5 py-4"><div className="flex gap-2"><button disabled={busy === product.id} onClick={() => void approve(product.id)} className="rounded-lg bg-green-600 px-3 py-2 text-xs font-semibold text-white disabled:opacity-50">Approve</button><button disabled={busy === product.id} onClick={() => void reject(product.id)} className="rounded-lg bg-red-600 px-3 py-2 text-xs font-semibold text-white disabled:opacity-50">Reject</button></div></td></tr>)}</tbody></table></div>}
+    <section className="rounded-2xl border bg-white p-5 shadow-sm">
+      <div className="flex flex-col gap-4 lg:flex-row lg:items-center lg:justify-between"><div><p className="text-xs font-bold uppercase tracking-[.14em] text-[#f47524]">Product moderation</p><h2 className="mt-1 text-2xl font-bold">Products awaiting review</h2><p className="mt-1 text-sm text-gray-500">Review seller, images, category, description and pricing before making a decision.</p></div><button onClick={()=>void load()} className="inline-flex h-11 items-center gap-2 rounded-xl border px-4 text-sm font-semibold"><RefreshCw size={15}/>Refresh</button></div>
+      <div className="relative mt-5 max-w-xl"><Search size={16} className="absolute left-3 top-1/2 -translate-y-1/2 text-gray-400"/><input value={query} onChange={e=>setQuery(e.target.value)} placeholder="Search pending products..." className="h-11 w-full rounded-xl border-2 pl-9 pr-4 text-sm outline-none focus:border-[#f47524]"/></div>
     </section>
+    <section className="overflow-hidden rounded-2xl border bg-white shadow-sm">
+      {loading?<p className="p-12 text-center text-gray-500">Loading pending products...</p>:error?<p className="p-12 text-center text-red-600">{error}</p>:!visible.length?<div className="p-12 text-center"><CheckCircle2 className="mx-auto text-emerald-500"/><p className="mt-3 font-semibold">No products awaiting review.</p></div>:<div className="overflow-x-auto"><table className="w-full min-w-[900px] text-left text-sm"><thead className="bg-gray-50"><tr>{["Product","SKU","Price","Submitted","Images","Status","Action"].map(x=><th key={x} className="px-5 py-3">{x}</th>)}</tr></thead><tbody className="divide-y">{visible.map(p=>{const image=p.images?.find(i=>i.is_primary)||p.images?.[0];return <tr key={p.id}><td className="px-5 py-4"><div className="flex items-center gap-3"><div className="relative flex h-12 w-12 items-center justify-center overflow-hidden rounded-xl bg-slate-100">{image?.image_url?<Image src={resolveImage(image.thumbnail_url||image.image_url)} alt={p.name} fill unoptimized className="object-cover"/>:<Package size={18}/>}</div><div><p className="font-semibold">{p.name}</p><p className="max-w-xs truncate text-xs text-gray-500">{p.description||"No description"}</p></div></div></td><td className="px-5 py-4 text-gray-500">{p.sku}</td><td className="px-5 py-4 font-semibold">{formatCurrency(p.sale_price??p.price,p.currency)}</td><td className="px-5 py-4 text-gray-500">{new Date(p.submitted_at||p.created_at).toLocaleDateString()}</td><td className="px-5 py-4">{p.images?.length??0}</td><td className="px-5 py-4"><span className="rounded-full bg-blue-50 px-2.5 py-1 text-xs font-semibold capitalize text-blue-700">{p.status.replaceAll("_"," ")}</span></td><td className="px-5 py-4"><button onClick={()=>void review(p)} className="inline-flex items-center gap-2 rounded-xl bg-[#111827] px-4 py-2.5 text-xs font-semibold text-white"><Eye size={14}/>Review</button></td></tr>})}</tbody></table></div>}
+    </section>
+    {selected&&<div className="fixed inset-0 z-[100] flex justify-end bg-black/50" onMouseDown={()=>!busy&&setSelected(null)}><aside onMouseDown={e=>e.stopPropagation()} className="flex h-full w-full max-w-3xl flex-col bg-[#f8fafc] shadow-2xl"><div className="flex items-start justify-between border-b bg-white p-5"><div><p className="text-xs font-bold uppercase tracking-[.14em] text-[#f47524]">Product review</p><h3 className="mt-1 text-xl font-bold">{selected.name}</h3><p className="text-xs text-gray-500">SKU {selected.sku}</p></div><button onClick={()=>setSelected(null)} className="rounded-lg bg-gray-100 p-2"><X size={17}/></button></div><div className="flex-1 space-y-5 overflow-y-auto p-5">{detailLoading?<p className="py-16 text-center">Loading full product details...</p>:<>
+      <Card title="Product images">{selected.images?.length?<div className="grid grid-cols-2 gap-3 sm:grid-cols-3">{selected.images.map(img=><div key={img.id} className="relative h-44 overflow-hidden rounded-xl border bg-slate-50"><Image src={resolveImage(img.image_url)} alt={img.alt_text||selected.name} fill unoptimized className="object-contain"/>{img.is_primary&&<span className="absolute left-2 top-2 rounded bg-black px-2 py-1 text-[9px] font-bold text-white">PRIMARY</span>}</div>)}</div>:<p className="rounded-xl bg-amber-50 p-4 text-sm text-amber-800">No image submitted. Do not approve until an image is provided.</p>}</Card>
+      <div className="grid gap-4 sm:grid-cols-2"><Info label="Seller" value={selected.seller_business_name||selected.seller_id}/><Info label="Category" value={selected.category_name||selected.category_id}/><Info label="Brand" value={selected.brand_name||"Unbranded"}/><Info label="Weight" value={selected.weight?`${selected.weight} kg`:"Not provided"}/></div>
+      <Card title="Description"><p className="whitespace-pre-wrap text-sm leading-7 text-gray-600">{selected.description||"No description provided."}</p></Card>
+      <Card title="Pricing & ownership"><div className="grid gap-3 sm:grid-cols-2"><Info label="Regular price" value={formatCurrency(selected.price,selected.currency)}/><Info label="Sale price" value={selected.sale_price!=null?formatCurrency(selected.sale_price,selected.currency):"No sale price"}/><Info label="Seller SKU" value={selected.sku}/><Info label="Currency" value={selected.currency}/></div></Card>
+      <Card title="Seller contact"><div className="grid gap-3 sm:grid-cols-2"><Info label="Email" value={selected.seller_contact_email||"—"}/><Info label="Phone" value={selected.seller_contact_phone||"—"}/></div></Card>
+    </>}</div><div className="border-t bg-white p-5"><p className="mb-3 text-xs text-gray-500">Approve only when the listing is complete and acceptable.</p><div className="grid grid-cols-2 gap-3"><button disabled={busy||detailLoading} onClick={()=>void approve()} className="rounded-xl bg-emerald-600 py-3 text-sm font-semibold text-white disabled:opacity-50">Approve Product</button><button disabled={busy||detailLoading} onClick={()=>setRejectOpen(true)} className="rounded-xl bg-red-600 py-3 text-sm font-semibold text-white disabled:opacity-50">Reject Product</button></div></div></aside></div>}
+    {rejectOpen&&selected&&<div className="fixed inset-0 z-[120] flex items-center justify-center bg-black/55 p-4"><div className="w-full max-w-lg rounded-2xl bg-white p-6"><div className="flex gap-3"><AlertCircle className="text-red-600"/><div><h3 className="font-bold">Reject product</h3><p className="text-sm text-gray-500">Give the seller a clear correction reason.</p></div></div><textarea autoFocus rows={5} value={reason} onChange={e=>setReason(e.target.value)} placeholder="Example: The main image is unclear..." className="mt-5 w-full rounded-xl border-2 p-4 text-sm outline-none focus:border-red-400"/><div className="mt-4 grid grid-cols-2 gap-3"><button onClick={()=>{setRejectOpen(false);setReason("")}} className="rounded-xl border py-3 font-semibold">Cancel</button><button disabled={busy||reason.trim().length<5} onClick={()=>void reject()} className="rounded-xl bg-red-600 py-3 font-semibold text-white disabled:opacity-50">Confirm Rejection</button></div></div></div>}
   </div>;
 }
+function Card({title,children}:{title:string;children:React.ReactNode}){return <section className="rounded-2xl border bg-white p-5"><h4 className="mb-4 font-semibold">{title}</h4>{children}</section>}
+function Info({label,value}:{label:string;value:string}){return <div className="rounded-xl bg-[#f8fafc] p-4"><p className="text-xs text-gray-500">{label}</p><p className="mt-1 break-words text-sm font-semibold">{value}</p></div>}

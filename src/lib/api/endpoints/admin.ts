@@ -192,8 +192,18 @@ export type AdminProduct = {
   status: string;
   rejection_reason?: string | null;
   is_active: boolean;
+  submitted_at?: string | null;
+  approved_at?: string | null;
   created_at: string;
+  images?: Array<{ id:string; product_id:string; image_url:string; thumbnail_url?:string|null; alt_text?:string|null; is_primary:boolean; display_order?:number; }>;
+  seller_business_name?: string | null;
+  seller_contact_email?: string | null;
+  seller_contact_phone?: string | null;
+  category_name?: string | null;
+  brand_name?: string | null;
 };
+
+export type AdminCatalogSummary = { total_products:number; pending_products:number; approved_products:number; rejected_products:number; product_categories:number; business_categories:number; brands:number; };
 
 export type BusinessCategory = {
   id: string;
@@ -760,6 +770,9 @@ export const listPendingProducts = async (): Promise<AdminProduct[]> => {
   return res.data;
 };
 
+export const getCatalogSummary = async (): Promise<AdminCatalogSummary> => (await axiosInstance.get<AdminCatalogSummary>("/admin/catalog/summary")).data;
+export const getProductReviewDetail = async (productId:string): Promise<AdminProduct> => (await axiosInstance.get<AdminProduct>(`/admin/products/${productId}/review`)).data;
+
 export const approveProduct = async (productId: string): Promise<AdminProduct> => {
   const res = await axiosInstance.post<AdminProduct>(`/admin/products/${productId}/approve`);
   return res.data;
@@ -789,6 +802,8 @@ export const createBusinessCategory = async (payload: CreateBusinessCategoryPayl
   return res.data;
 };
 
+export const updateBusinessCategory = async (categoryId:string,payload:Partial<CreateBusinessCategoryPayload>):Promise<BusinessCategory> => (await axiosInstance.patch<BusinessCategory>(`/admin/business-categories/${categoryId}`,payload)).data;
+
 export const deleteBusinessCategory = async (categoryId: string): Promise<{ message: string }> => {
   const res = await axiosInstance.delete<{ message: string }>(`/admin/business-categories/${categoryId}`);
   return res.data;
@@ -804,6 +819,8 @@ export const createBrand = async (payload: CreateBrandPayload): Promise<Brand> =
   return res.data;
 };
 
+export const updateBrand = async (brandId:string,payload:Partial<CreateBrandPayload>):Promise<Brand> => (await axiosInstance.patch<Brand>(`/admin/brands/${brandId}`,payload)).data;
+
 export const deleteBrand = async (brandId: string): Promise<{ message: string }> => {
   const res = await axiosInstance.delete<{ message: string }>(`/admin/brands/${brandId}`);
   return res.data;
@@ -813,6 +830,8 @@ export const createProductCategory = async (payload: CreateProductCategoryPayloa
   const res = await axiosInstance.post<ProductCategory>("/admin/product-categories", payload);
   return res.data;
 };
+
+export const updateProductCategory = async (categoryId:string,payload:Partial<CreateProductCategoryPayload>):Promise<ProductCategory> => (await axiosInstance.patch<ProductCategory>(`/admin/product-categories/${categoryId}`,payload)).data;
 
 export const deleteProductCategory = async (categoryId: string): Promise<{ message: string }> => {
   const res = await axiosInstance.delete<{ message: string }>(`/admin/product-categories/${categoryId}`);
@@ -909,16 +928,21 @@ export const adminService = {
   approveSeller,
   rejectSeller,
   listPendingProducts,
+  getCatalogSummary,
+  getProductReviewDetail,
   approveProduct,
   rejectProduct,
   listBusinessCategories,
   listProductCategories,
   createBusinessCategory,
+  updateBusinessCategory,
   deleteBusinessCategory,
   listBrands,
   createBrand,
+  updateBrand,
   deleteBrand,
   createProductCategory,
+  updateProductCategory,
   deleteProductCategory,
   listProductReviews,
 };

@@ -1597,7 +1597,6 @@ function CreateStaffModal({
                 />
               </label>
             </div>
-
             <div className="border-b border-[#e2e8f0] p-4">
               <label className="block">
                 <span className="text-sm font-semibold text-[#1f2937]">
