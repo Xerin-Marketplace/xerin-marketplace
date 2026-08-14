@@ -8,7 +8,6 @@ export const axiosInstance = axios.create({
   timeout: 10_000,
   headers: {
     Accept: "application/json",
-    "Content-Type": "application/json",
   },
 });
 

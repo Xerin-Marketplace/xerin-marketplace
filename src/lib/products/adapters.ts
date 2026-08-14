@@ -5,16 +5,55 @@ import { API_BASE_URL } from "@/lib/api/endpoints";
 const PRODUCT_PLACEHOLDER_IMAGE = "/images/products/placeholder.svg";
 
 const resolveProductImageUrl = (imageUrl: string) => {
+  if (!imageUrl) return PRODUCT_PLACEHOLDER_IMAGE;
+
   if (
-    imageUrl.startsWith("http://") ||
-    imageUrl.startsWith("https://") ||
     imageUrl.startsWith("data:") ||
     imageUrl.startsWith("blob:")
   ) {
     return imageUrl;
   }
 
-  return `${API_BASE_URL.replace(/\/$/, "")}/${imageUrl.replace(/^\//, "")}`;
+  try {
+    const apiUrl = new URL(API_BASE_URL);
+    const apiOrigin = apiUrl.origin;
+
+    // Product uploads are static files served from the API host root.
+    // The API base itself contains /api/v1, so joining a stored path such as
+    // /uploads/products/... to API_BASE_URL incorrectly creates:
+    //   https://api.example.com/api/v1/uploads/products/...
+    // instead of:
+    //   https://api.example.com/uploads/products/...
+    if (imageUrl.startsWith("/uploads/")) {
+      return `${apiOrigin}${imageUrl}`;
+    }
+
+    if (imageUrl.startsWith("uploads/")) {
+      return `${apiOrigin}/${imageUrl}`;
+    }
+
+    // Also repair older absolute URLs that were built with /api/v1/uploads/.
+    if (
+      imageUrl.startsWith("http://") ||
+      imageUrl.startsWith("https://")
+    ) {
+      const absolute = new URL(imageUrl);
+
+      if (absolute.pathname.startsWith("/api/v1/uploads/")) {
+        absolute.pathname = absolute.pathname.replace(
+          /^\/api\/v1\/uploads\//,
+          "/uploads/",
+        );
+      }
+
+      return absolute.toString();
+    }
+
+    // Any other relative path is resolved against the API host.
+    return `${apiOrigin}/${imageUrl.replace(/^\//, "")}`;
+  } catch {
+    return imageUrl;
+  }
 };
 
 const toNumber = (value: number | string | null | undefined, fallback = 0) => {

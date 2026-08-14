@@ -17,48 +17,44 @@ const nextConfig = {
   generateEtags: true,
 
   images: {
-    dangerouslyAllowLocalIP: true,
-    qualities: [75, 90],
+  dangerouslyAllowLocalIP: true,
+  qualities: [75, 90],
 
-    remotePatterns: [
-      // Local FastAPI uploads
-      {
-        protocol: "http",
-        hostname: "127.0.0.1",
-        port: "8000",
-        pathname: "/uploads/**",
-      },
+  remotePatterns: [
+    {
+      protocol: "http",
+      hostname: "127.0.0.1",
+      port: "8000",
+      pathname: "/uploads/**",
+    },
+    {
+      protocol: "http",
+      hostname: "localhost",
+      port: "8000",
+      pathname: "/uploads/**",
+    },
 
-      // Localhost FastAPI uploads
-      {
-        protocol: "http",
-        hostname: "localhost",
-        port: "8000",
-        pathname: "/uploads/**",
-      },
+    // Production API product/category images
+    {
+      protocol: "https",
+      hostname: "api.xerinmarketplace.com",
+      pathname: "/api/v1/uploads/**",
+    },
 
-      // Unsplash mock product/category images
-      {
-        protocol: "https",
-        hostname: "images.unsplash.com",
-        pathname: "/**",
-      },
+    // Keep this too if some backend URLs are returned without /api/v1
+    {
+      protocol: "https",
+      hostname: "api.xerinmarketplace.com",
+      pathname: "/uploads/**",
+    },
 
-      // Optional: Unsplash source domain if you ever use it
-      {
-        protocol: "https",
-        hostname: "source.unsplash.com",
-        pathname: "/**",
-      },
-
-      // Production Xerin API uploads
-      {
-        protocol: "https",
-        hostname: "api.xerinmarketplace.com",
-        pathname: "/uploads/**",
-      },
-    ],
-  },
+    {
+      protocol: "https",
+      hostname: "images.unsplash.com",
+      pathname: "/**",
+    },
+  ],
+},
 
   // Fix Turbopack workspace root warning
   turbopack: {
