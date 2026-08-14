@@ -132,7 +132,6 @@ const sidebarGroups: SidebarGroup[] = [
     items: [
       { label: "All Sellers", href: "/admin/dashboard?tab=sellers&menu=sellers&item=all-sellers", icon: Store },
       { label: "Seller Applications", href: "/admin/dashboard?tab=sellers&menu=sellers&item=seller-applications", icon: ShieldCheck },
-      { label: "Seller Products", href: "/admin/dashboard?tab=products&menu=sellers&item=seller-products", icon: Package },
       { label: "Seller Orders", href: "/admin/dashboard?tab=orders&menu=sellers&item=seller-orders&orders_tab=all", icon: ClipboardList },
       { label: "Seller Performance", href: "/admin/dashboard?tab=sellers&menu=sellers&item=seller-performance", icon: BarChart3 },
     ],

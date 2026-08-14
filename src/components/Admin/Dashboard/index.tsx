@@ -222,10 +222,6 @@ const sidebarGroups: SidebarGroup[] = [
         href: "?tab=sellers&menu=sellers&item=seller-applications",
       },
       {
-        label: "Seller Products",
-        href: "?tab=sellers&menu=sellers&item=seller-products",
-      },
-      {
         label: "Seller Orders",
         href: "?tab=sellers&menu=sellers&item=seller-orders",
       },
