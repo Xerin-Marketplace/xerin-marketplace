@@ -205,6 +205,11 @@ export type AdminProduct = {
 
 export type AdminCatalogSummary = { total_products:number; pending_products:number; approved_products:number; rejected_products:number; product_categories:number; business_categories:number; brands:number; };
 
+export type CatalogPageParams = { page?:number; page_size?:number; search?:string };
+export type CatalogProductPageParams = CatalogPageParams & { status_filter?:string };
+export type BusinessCategoryPageParams = CatalogPageParams & { active_filter?:"all"|"active"|"inactive" };
+export type PaginatedCatalogResponse<T> = { total:number; page:number; page_size:number; total_pages:number; results:T[] };
+
 export type BusinessCategory = {
   id: string;
   name: string;
@@ -765,10 +770,8 @@ export const rejectSeller = async (sellerId: string, reason: string): Promise<Ad
   return res.data;
 };
 
-export const listPendingProducts = async (): Promise<AdminProduct[]> => {
-  const res = await axiosInstance.get<AdminProduct[]>("/admin/products/pending");
-  return res.data;
-};
+export const listCatalogProducts = async (params:CatalogProductPageParams={}): Promise<PaginatedCatalogResponse<AdminProduct>> => (await axiosInstance.get<PaginatedCatalogResponse<AdminProduct>>("/admin/catalog/products",{params})).data;
+export const listPendingProducts = async (): Promise<AdminProduct[]> => (await listCatalogProducts({page:1,page_size:100,status_filter:"pending_review"})).results;
 
 export const getCatalogSummary = async (): Promise<AdminCatalogSummary> => (await axiosInstance.get<AdminCatalogSummary>("/admin/catalog/summary")).data;
 export const getProductReviewDetail = async (productId:string): Promise<AdminProduct> => (await axiosInstance.get<AdminProduct>(`/admin/products/${productId}/review`)).data;
@@ -787,15 +790,10 @@ export const rejectProduct = async (productId: string, reason: string): Promise<
   return res.data;
 };
 
-export const listBusinessCategories = async (): Promise<BusinessCategory[]> => {
-  const res = await axiosInstance.get<BusinessCategory[]>("/admin/business-categories");
-  return res.data;
-};
-
-export const listProductCategories = async (): Promise<ProductCategory[]> => {
-  const res = await axiosInstance.get<ProductCategory[]>("/admin/product-categories");
-  return res.data;
-};
+export const listBusinessCategories = async (): Promise<BusinessCategory[]> => (await axiosInstance.get<BusinessCategory[]>("/admin/business-categories")).data;
+export const listBusinessCategoriesPaginated = async (params:BusinessCategoryPageParams={}):Promise<PaginatedCatalogResponse<BusinessCategory>> => (await axiosInstance.get<PaginatedCatalogResponse<BusinessCategory>>("/admin/catalog/business-categories",{params})).data;
+export const listProductCategories = async (): Promise<ProductCategory[]> => (await axiosInstance.get<ProductCategory[]>("/admin/product-categories")).data;
+export const listProductCategoriesPaginated = async (params:CatalogPageParams={}):Promise<PaginatedCatalogResponse<ProductCategory>> => (await axiosInstance.get<PaginatedCatalogResponse<ProductCategory>>("/admin/catalog/product-categories",{params})).data;
 
 export const createBusinessCategory = async (payload: CreateBusinessCategoryPayload): Promise<BusinessCategory> => {
   const res = await axiosInstance.post<BusinessCategory>("/admin/business-categories", payload);
@@ -809,10 +807,8 @@ export const deleteBusinessCategory = async (categoryId: string): Promise<{ mess
   return res.data;
 };
 
-export const listBrands = async (): Promise<Brand[]> => {
-  const res = await axiosInstance.get<Brand[]>("/admin/brands");
-  return res.data;
-};
+export const listBrands = async (): Promise<Brand[]> => (await axiosInstance.get<Brand[]>("/admin/brands")).data;
+export const listBrandsPaginated = async (params:CatalogPageParams={}):Promise<PaginatedCatalogResponse<Brand>> => (await axiosInstance.get<PaginatedCatalogResponse<Brand>>("/admin/catalog/brands",{params})).data;
 
 export const createBrand = async (payload: CreateBrandPayload): Promise<Brand> => {
   const res = await axiosInstance.post<Brand>("/admin/brands", payload);
@@ -928,16 +924,20 @@ export const adminService = {
   approveSeller,
   rejectSeller,
   listPendingProducts,
+  listCatalogProducts,
   getCatalogSummary,
   getProductReviewDetail,
   approveProduct,
   rejectProduct,
   listBusinessCategories,
+  listBusinessCategoriesPaginated,
   listProductCategories,
+  listProductCategoriesPaginated,
   createBusinessCategory,
   updateBusinessCategory,
   deleteBusinessCategory,
   listBrands,
+  listBrandsPaginated,
   createBrand,
   updateBrand,
   deleteBrand,
