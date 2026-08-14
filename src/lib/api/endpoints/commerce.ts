@@ -59,8 +59,24 @@ export const ordersApi = {
     (await axiosInstance.post<Order>("/orders", payload)).data,
   updateStatus: async (id: string, payload: { status: string; notes?: string }) =>
     (await axiosInstance.patch<Order>(`/orders/${id}/status`, payload)).data,
-  adminList: async (params: { page?: number; page_size?: number; status?: string } = {}, signal?: AbortSignal) =>
-    (await axiosInstance.get<PaginatedOrders>("/orders/admin/all", { params, signal })).data,
+  adminList: async (
+    params: {
+      page?: number;
+      page_size?: number;
+      status?: string;
+      search?: string;
+      payment_status?: string;
+      date_from?: string;
+      date_to?: string;
+    } = {},
+    signal?: AbortSignal,
+  ) =>
+    (
+      await axiosInstance.get<PaginatedOrders>("/orders/admin/all", {
+        params,
+        signal,
+      })
+    ).data,
 };
 
 export const paymentsApi = {

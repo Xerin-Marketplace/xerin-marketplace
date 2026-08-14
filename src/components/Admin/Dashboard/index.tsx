@@ -133,10 +133,10 @@ const sidebarGroups: SidebarGroup[] = [
         href: "?tab=categories&menu=catalog&item=categories",
       },
       { label: "Brands", href: "?tab=brands&menu=catalog&item=brands" },
-      {
-        label: "Product Reviews",
-        href: "?tab=reviews&menu=catalog&item=product-reviews",
-      },
+      // {
+      //   label: "Product Reviews",
+      //   href: "?tab=reviews&menu=catalog&item=product-reviews",
+      // },
     ],
   },
   {
@@ -201,10 +201,6 @@ const sidebarGroups: SidebarGroup[] = [
       {
         label: "All Customers",
         href: "?tab=users&menu=customers&item=all-customers",
-      },
-      {
-        label: "Customer Addresses",
-        href: "?tab=users&menu=customers&item=customer-addresses",
       },
       {
         label: "Customer Reviews",

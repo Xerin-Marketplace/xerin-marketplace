@@ -75,9 +75,12 @@ export type OrderItem = {
 
 export type Order = TimestampFields & {
   id: string;
+  order_number?: string | null;
   user_id: string;
   shipping_address_id: string | null;
+  seller_id?: string | null;
   status: string;
+  payment_status?: string | null;
   currency: string;
   subtotal: number | string;
   discount_amount: number | string;
@@ -86,6 +89,36 @@ export type Order = TimestampFields & {
   total: number | string;
   coupon_code: string | null;
   notes: string | null;
+  delivery_method?: string | null;
+  courier_name?: string | null;
+  tracking_number?: string | null;
+  estimated_delivery_date?: string | null;
+  delivered_at?: string | null;
+  cancellation_reason?: string | null;
+  refund_notes?: string | null;
+  user?: {
+    id: string;
+    first_name?: string | null;
+    last_name?: string | null;
+    email?: string | null;
+    phone?: string | null;
+  } | null;
+  payments?: Array<{
+    id: string;
+    method?: string | null;
+    status?: string | null;
+    amount?: number | string;
+    currency?: string;
+    transaction_reference?: string | null;
+    paid_at?: string | null;
+  }>;
+  address?: {
+    country?: string;
+    region?: string;
+    city?: string;
+    street?: string;
+    postal_code?: string | null;
+  } | null;
   items: OrderItem[];
   status_history: Array<{ id: string; status: string; notes: string | null; created_at: string }>;
 };

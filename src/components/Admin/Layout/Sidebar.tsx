@@ -89,7 +89,7 @@ const sidebarGroups: SidebarGroup[] = [
       { label: "Products", href: "/admin/dashboard?tab=products&menu=catalog&item=products", icon: ShoppingBag },
       { label: "Categories", href: "/admin/dashboard?tab=categories&menu=catalog&item=categories", icon: Boxes },
       { label: "Brands", href: "/admin/dashboard?tab=brands&menu=catalog&item=brands", icon: Tag },
-      { label: "Product Reviews", href: "/admin/dashboard?tab=reviews&menu=catalog&item=product-reviews", icon: FileCheck2 },
+      // { label: "Product Reviews", href: "/admin/dashboard?tab=reviews&menu=catalog&item=product-reviews", icon: FileCheck2 },
     ],
   },
   {
@@ -122,7 +122,6 @@ const sidebarGroups: SidebarGroup[] = [
     icon: Users,
     items: [
       { label: "All Customers", href: "/admin/customers", icon: Users },
-      { label: "Customer Addresses", href: "/admin/customers/addresses", icon: CircleUserRound },
       { label: "Customer Reviews", href: "/admin/customers/reviews", icon: FileCheck2 },
       { label: "Customer Support", href: "/admin/customers/support", icon: LifeBuoy },
     ],
