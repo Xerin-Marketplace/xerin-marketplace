@@ -121,7 +121,6 @@ const sidebarGroups: SidebarGroup[] = [
     key: "users",
     icon: Users,
     items: [
-      { label: "All Customers", href: "/admin/customers", icon: Users },
       { label: "Customer Reviews", href: "/admin/customers/reviews", icon: FileCheck2 },
       { label: "Customer Support", href: "/admin/customers/support", icon: LifeBuoy },
     ],

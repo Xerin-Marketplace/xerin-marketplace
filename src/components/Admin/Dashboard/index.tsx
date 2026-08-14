@@ -199,10 +199,6 @@ const sidebarGroups: SidebarGroup[] = [
     icon: Users,
     items: [
       {
-        label: "All Customers",
-        href: "?tab=users&menu=customers&item=all-customers",
-      },
-      {
         label: "Customer Reviews",
         href: "?tab=users&menu=customers&item=customer-reviews",
       },
