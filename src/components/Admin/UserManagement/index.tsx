@@ -1113,54 +1113,127 @@ function CreateRoleModal({
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
+  const roleInputClass =
+    "mt-3 h-12 w-full rounded-xl border-2 border-[#cfd8e3] bg-white px-4 text-sm font-medium text-[#111827] shadow-[0_1px_2px_rgba(15,23,42,0.03)] outline-none transition placeholder:text-[#a8b1bf] hover:border-[#b8c4d2] focus:border-[#f47524] focus:ring-4 focus:ring-orange-100/70";
+
   return (
     <Modal title="Create New Role" onClose={onClose}>
-      <p className="text-sm leading-6 text-gray-500">
-        Give the role a clear responsibility, then select exactly what users in
-        this role can view or do.
-      </p>
+      <div className="rounded-2xl border-2 border-[#d8e0e9] bg-[#f8fafc] p-5 shadow-[0_3px_12px_rgba(15,23,42,0.04)]">
+        <div className="flex items-start gap-3">
+          <span className="flex h-8 w-8 shrink-0 items-center justify-center rounded-full border border-[#d8e0e9] bg-white text-sm font-bold text-[#111827]">
+            1
+          </span>
+          <div>
+            <h3 className="text-sm font-bold text-[#111827]">Role details</h3>
+            <p className="mt-1 text-xs leading-5 text-gray-500">
+              Give this role a clear name and explain what responsibility it represents.
+            </p>
+          </div>
+        </div>
 
-      <div className="mt-5 grid gap-4">
-        <Field label="Role name" required>
-          <input
-            value={name}
-            onChange={(event) => setName(event.target.value)}
-            placeholder="e.g. Seller Verification Officer"
-            className="input"
-          />
-        </Field>
+        <div className="mt-5 overflow-hidden rounded-2xl border-2 border-[#d8e0e9] bg-white">
+          <div className="border-b border-[#e2e8f0] p-4">
+            <label className="block">
+              <span className="text-sm font-semibold text-[#1f2937]">
+                Role name <span className="text-red-500">*</span>
+              </span>
+              <span className="mt-1 block text-[11px] text-[#94a3b8]">
+                Use a clear job or responsibility name that administrators will recognize.
+              </span>
+              <input
+                value={name}
+                onChange={(event) => setName(event.target.value)}
+                placeholder="e.g. Finance Manager"
+                className={roleInputClass}
+              />
+            </label>
+          </div>
 
-        <Field label="Description">
-          <textarea
-            value={description}
-            onChange={(event) => setDescription(event.target.value)}
-            rows={3}
-            placeholder="Describe this staff role and its responsibility."
-            className="input resize-none"
-          />
-        </Field>
+          <div className="p-4">
+            <label className="block">
+              <span className="text-sm font-semibold text-[#1f2937]">
+                Role description
+              </span>
+              <span className="mt-1 block text-[11px] text-[#94a3b8]">
+                Briefly explain the duties and purpose of users assigned to this role.
+              </span>
+              <textarea
+                value={description}
+                onChange={(event) => setDescription(event.target.value)}
+                rows={4}
+                placeholder="e.g. Manages payments, refunds, commissions and finance reports."
+                className="mt-3 w-full resize-none rounded-xl border-2 border-[#cfd8e3] bg-white px-4 py-3 text-sm font-medium text-[#111827] shadow-[0_1px_2px_rgba(15,23,42,0.03)] outline-none transition placeholder:text-[#a8b1bf] hover:border-[#b8c4d2] focus:border-[#f47524] focus:ring-4 focus:ring-orange-100/70"
+              />
+            </label>
+          </div>
+        </div>
       </div>
 
-      <PermissionSelector
-        permissions={permissions}
-        selected={selected}
-        onChange={setSelected}
-      />
+      <div className="mt-5 rounded-2xl border-2 border-[#d8e0e9] bg-[#f8fafc] p-5 shadow-[0_3px_12px_rgba(15,23,42,0.04)]">
+        <div className="flex items-start justify-between gap-4">
+          <div className="flex items-start gap-3">
+            <span className="flex h-8 w-8 shrink-0 items-center justify-center rounded-full border border-[#d8e0e9] bg-white text-sm font-bold text-[#111827]">
+              2
+            </span>
+            <div>
+              <h3 className="text-sm font-bold text-[#111827]">
+                Assign permissions
+              </h3>
+              <p className="mt-1 text-xs leading-5 text-gray-500">
+                Select exactly what users with this role are allowed to view or do.
+              </p>
+            </div>
+          </div>
 
-      <button
-        type="button"
-        disabled={busy || name.trim().length < 2}
-        onClick={() =>
-          onCreate({
-            name: name.trim(),
-            description: description.trim(),
-            permissionCodes: selected,
-          })
-        }
-        className="mt-5 w-full rounded-xl bg-[#f47524] py-3 font-semibold text-white disabled:opacity-50"
-      >
-        {busy ? "Creating..." : "Create Role"}
-      </button>
+          <span className="shrink-0 rounded-full border border-[#fed7aa] bg-[#fff7ed] px-3 py-1 text-xs font-semibold text-[#f47524]">
+            {selected.length} selected
+          </span>
+        </div>
+
+        <div className="mt-4 rounded-2xl border border-[#e2e8f0] bg-white p-3">
+          <PermissionSelector
+            permissions={permissions}
+            selected={selected}
+            onChange={setSelected}
+          />
+        </div>
+      </div>
+
+      <div className="mt-5 rounded-2xl border-2 border-[#d8e0e9] bg-white p-4">
+        <div className="mb-4 flex items-start gap-3">
+          <span className="flex h-8 w-8 shrink-0 items-center justify-center rounded-full border border-[#d8e0e9] bg-[#f8fafc] text-sm font-bold text-[#111827]">
+            3
+          </span>
+          <div>
+            <p className="text-sm font-bold text-[#111827]">Create role</p>
+            <p className="mt-1 text-xs text-gray-500">
+              Review the role name and selected permissions before creating it.
+            </p>
+          </div>
+        </div>
+
+        {!selected.length && (
+          <div className="mb-4 rounded-xl border border-amber-200 bg-amber-50 px-4 py-3 text-xs leading-5 text-amber-800">
+            No permissions are selected yet. You can create the role, but users assigned
+            to it will not have functional access until permissions are added.
+          </div>
+        )}
+
+        <button
+          type="button"
+          disabled={busy || name.trim().length < 2}
+          onClick={() =>
+            onCreate({
+              name: name.trim(),
+              description: description.trim(),
+              permissionCodes: selected,
+            })
+          }
+          className="w-full rounded-xl bg-[#f47524] py-3 font-semibold text-white shadow-sm transition hover:bg-[#dc651d] disabled:cursor-not-allowed disabled:opacity-50"
+        >
+          {busy ? "Creating..." : "Create Role"}
+        </button>
+      </div>
     </Modal>
   );
 }
@@ -1217,42 +1290,168 @@ function CreateStaffWorkspace({
   }
 
   return (
-    <section className="rounded-2xl border border-[#e7ebf0] bg-white p-5 shadow-sm sm:p-6">
+    <section className="rounded-2xl border border-[#dfe5ec] bg-white p-5 shadow-sm sm:p-6">
       <div className="flex items-start gap-3 border-b border-[#edf0f4] pb-5">
-        <span className="flex h-11 w-11 items-center justify-center rounded-xl bg-slate-100 text-[#334155]">
+        <span className="flex h-11 w-11 shrink-0 items-center justify-center rounded-xl border border-[#e2e8f0] bg-[#f8fafc] text-[#334155]">
           <UserPlus size={19} />
         </span>
         <div>
-          <h3 className="text-lg font-semibold text-[#111827]">New staff account</h3>
-          <p className="mt-1 text-sm text-[#64748b]">
-            Create the account, choose its role, and the user will inherit only the permissions assigned to those roles.
+          <h3 className="text-lg font-semibold text-[#111827]">Create a new staff user</h3>
+          <p className="mt-1 max-w-3xl text-sm leading-6 text-[#64748b]">
+            Complete the account details below, then select at least one role. Required fields are marked with an asterisk.
           </p>
         </div>
       </div>
 
-      <div className="mt-5 grid gap-4 sm:grid-cols-2">
-        <Field label="First name" required><input className="input" value={form.first_name} onChange={(e)=>setForm({...form,first_name:e.target.value})} /></Field>
-        <Field label="Last name" required><input className="input" value={form.last_name} onChange={(e)=>setForm({...form,last_name:e.target.value})} /></Field>
-        <Field label="Email" required><input type="email" className="input" value={form.email} onChange={(e)=>setForm({...form,email:e.target.value})} /></Field>
-        <Field label="Phone"><input className="input" placeholder="+255..." value={form.phone} onChange={(e)=>setForm({...form,phone:e.target.value})} /></Field>
-        <div className="sm:col-span-2"><Field label="Temporary password" required hint="Minimum 8 characters."><input type="password" className="input" value={form.password} onChange={(e)=>setForm({...form,password:e.target.value})} /></Field></div>
-      </div>
+      <div className="mt-6 grid gap-6 xl:grid-cols-[minmax(0,1.15fr)_minmax(360px,.85fr)]">
+        <div className="rounded-2xl border-2 border-[#d8e0e9] bg-[#f8fafc] p-5 shadow-[0_3px_12px_rgba(15,23,42,0.04)] sm:p-6">
+          <div className="mb-5 flex items-start gap-3 border-b border-[#e7ebf0] pb-4">
+            <span className="flex h-8 w-8 shrink-0 items-center justify-center rounded-lg border border-[#e2e8f0] bg-white text-sm font-bold text-[#334155]">1</span>
+            <div>
+              <h4 className="font-semibold text-[#111827]">User details</h4>
+              <p className="mt-1 text-xs leading-5 text-[#64748b]">Enter the staff member's personal and login information.</p>
+            </div>
+          </div>
 
-      <div className="mt-6">
-        <p className="text-sm font-semibold text-[#334155]">Assign role(s) <span className="text-red-500">*</span></p>
-        <div className="mt-3 grid gap-3 md:grid-cols-2">
-          {roles.filter((role)=>!["customer","seller"].includes(role.name)).map((role)=>(
-            <label key={role.id} className={`flex cursor-pointer items-start gap-3 rounded-xl border p-4 ${roleIds.includes(role.id)?"border-[#111827] bg-slate-50":"border-[#e7ebf0]"}`}>
-              <input type="checkbox" className="mt-1" checked={roleIds.includes(role.id)} onChange={(e)=>setRoleIds((current)=>e.target.checked?[...current,role.id]:current.filter((id)=>id!==role.id))} />
-              <span><b className="text-sm">{pretty(role.name)}</b><small className="mt-1 block text-gray-500">{role.permissions.length} permissions</small></span>
-            </label>
-          ))}
+          <div className="overflow-hidden rounded-2xl border-2 border-[#d8e0e9] bg-white">
+            <div className="grid sm:grid-cols-2">
+              <div className="border-b border-[#e2e8f0] p-4 sm:border-r">
+                <label className="block">
+                  <span className="text-sm font-semibold text-[#1f2937]">
+                    First name <span className="text-red-500">*</span>
+                  </span>
+                  <span className="mt-1 block text-[11px] text-[#94a3b8]">
+                    Staff member&apos;s given name
+                  </span>
+                  <input
+                    className="mt-3 h-12 w-full rounded-xl border-2 border-[#cfd8e3] bg-white px-4 text-sm font-medium text-[#111827] shadow-[0_1px_2px_rgba(15,23,42,0.03)] outline-none transition placeholder:text-[#a8b1bf] hover:border-[#b8c4d2] focus:border-[#f47524] focus:ring-4 focus:ring-orange-100/70"
+                    placeholder="e.g. Juma"
+                    value={form.first_name}
+                    onChange={(e) => setForm({ ...form, first_name: e.target.value })}
+                  />
+                </label>
+              </div>
+
+              <div className="border-b border-[#e2e8f0] p-4">
+                <label className="block">
+                  <span className="text-sm font-semibold text-[#1f2937]">
+                    Last name <span className="text-red-500">*</span>
+                  </span>
+                  <span className="mt-1 block text-[11px] text-[#94a3b8]">
+                    Staff member&apos;s family name
+                  </span>
+                  <input
+                    className="mt-3 h-12 w-full rounded-xl border-2 border-[#cfd8e3] bg-white px-4 text-sm font-medium text-[#111827] shadow-[0_1px_2px_rgba(15,23,42,0.03)] outline-none transition placeholder:text-[#a8b1bf] hover:border-[#b8c4d2] focus:border-[#f47524] focus:ring-4 focus:ring-orange-100/70"
+                    placeholder="e.g. Mushi"
+                    value={form.last_name}
+                    onChange={(e) => setForm({ ...form, last_name: e.target.value })}
+                  />
+                </label>
+              </div>
+
+              <div className="border-b border-[#e2e8f0] p-4 sm:border-r">
+                <label className="block">
+                  <span className="text-sm font-semibold text-[#1f2937]">
+                    Email address <span className="text-red-500">*</span>
+                  </span>
+                  <span className="mt-1 block text-[11px] text-[#94a3b8]">
+                    This email will be used to sign in
+                  </span>
+                  <input
+                    type="email"
+                    className="mt-3 h-12 w-full rounded-xl border-2 border-[#cfd8e3] bg-white px-4 text-sm font-medium text-[#111827] shadow-[0_1px_2px_rgba(15,23,42,0.03)] outline-none transition placeholder:text-[#a8b1bf] hover:border-[#b8c4d2] focus:border-[#f47524] focus:ring-4 focus:ring-orange-100/70"
+                    placeholder="juma@xerinmarketplace.com"
+                    value={form.email}
+                    onChange={(e) => setForm({ ...form, email: e.target.value })}
+                  />
+                </label>
+              </div>
+
+              <div className="border-b border-[#e2e8f0] p-4">
+                <label className="block">
+                  <span className="text-sm font-semibold text-[#1f2937]">
+                    Phone number
+                  </span>
+                  <span className="mt-1 block text-[11px] text-[#94a3b8]">
+                    Use international format where possible
+                  </span>
+                  <input
+                    className="mt-3 h-12 w-full rounded-xl border-2 border-[#cfd8e3] bg-white px-4 text-sm font-medium text-[#111827] shadow-[0_1px_2px_rgba(15,23,42,0.03)] outline-none transition placeholder:text-[#a8b1bf] hover:border-[#b8c4d2] focus:border-[#f47524] focus:ring-4 focus:ring-orange-100/70"
+                    placeholder="+255..."
+                    value={form.phone}
+                    onChange={(e) => setForm({ ...form, phone: e.target.value })}
+                  />
+                </label>
+              </div>
+
+              <div className="p-4 sm:col-span-2">
+                <label className="block">
+                  <span className="text-sm font-semibold text-[#1f2937]">
+                    Temporary password <span className="text-red-500">*</span>
+                  </span>
+                  <span className="mt-1 block text-[11px] text-[#94a3b8]">
+                    Minimum 8 characters. The user can change it after signing in.
+                  </span>
+                  <input
+                    type="password"
+                    className="mt-3 h-12 w-full rounded-xl border-2 border-[#cfd8e3] bg-white px-4 text-sm font-medium text-[#111827] shadow-[0_1px_2px_rgba(15,23,42,0.03)] outline-none transition placeholder:text-[#a8b1bf] hover:border-[#b8c4d2] focus:border-[#f47524] focus:ring-4 focus:ring-orange-100/70"
+                    placeholder="Create a temporary password"
+                    value={form.password}
+                    onChange={(e) => setForm({ ...form, password: e.target.value })}
+                  />
+                </label>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <div className="rounded-2xl border-2 border-[#d8e0e9] bg-[#f8fafc] p-5 shadow-[0_3px_12px_rgba(15,23,42,0.04)] sm:p-6">
+          <div className="mb-5 flex items-start gap-3 border-b border-[#e7ebf0] pb-4">
+            <span className="flex h-8 w-8 shrink-0 items-center justify-center rounded-lg border border-[#e2e8f0] bg-white text-sm font-bold text-[#334155]">2</span>
+            <div>
+              <h4 className="font-semibold text-[#111827]">Assign role & access</h4>
+              <p className="mt-1 text-xs leading-5 text-[#64748b]">Select what responsibility this user will have in Xerin Market.</p>
+            </div>
+          </div>
+
+          <div className="rounded-xl border border-[#e2e8f0] bg-white p-3">
+            <p className="text-xs font-semibold uppercase tracking-[.12em] text-[#64748b]">Available roles <span className="text-red-500">*</span></p>
+            <p className="mt-1 text-xs text-[#94a3b8]">Click a role card to assign it. You can select more than one.</p>
+          </div>
+
+          <div className="mt-3 grid gap-3">
+            {roles.filter((role) => !["customer", "seller"].includes(role.name)).map((role) => {
+              const selected = roleIds.includes(role.id);
+              return (
+                <label key={role.id} className={`flex cursor-pointer items-start gap-3 rounded-xl border-2 bg-white p-4 transition ${selected ? "border-[#f47524] shadow-sm" : "border-[#e7ebf0] hover:border-[#cbd5e1]"}`}>
+                  <input type="checkbox" className="mt-1 h-4 w-4 accent-[#f47524]" checked={selected} onChange={(e) => setRoleIds((current) => e.target.checked ? [...current, role.id] : current.filter((id) => id !== role.id))} />
+                  <span className="min-w-0 flex-1">
+                    <span className="block text-sm font-semibold text-[#111827]">{pretty(role.name)}</span>
+                    <span className="mt-1 block text-xs text-[#64748b]">{role.description || `${role.permissions.length} permissions assigned to this role.`}</span>
+                    <span className="mt-2 inline-flex rounded-full bg-[#f1f5f9] px-2.5 py-1 text-[10px] font-semibold text-[#475569]">{role.permissions.length} permissions</span>
+                  </span>
+                </label>
+              );
+            })}
+          </div>
+
+          {roleIds.length === 0 && (
+            <div className="mt-4 rounded-xl border border-amber-200 bg-amber-50 px-4 py-3 text-xs leading-5 text-amber-800">
+              Select at least one role before creating the account.
+            </div>
+          )}
         </div>
       </div>
 
-      <button type="button" disabled={busy || !valid} onClick={()=>onCreate({...form,first_name:form.first_name.trim(),last_name:form.last_name.trim(),email:form.email.trim().toLowerCase(),phone:form.phone.trim(),role_ids:roleIds})} className="mt-6 inline-flex h-11 items-center justify-center gap-2 rounded-xl bg-[#111827] px-5 text-sm font-semibold text-white disabled:opacity-50">
-        <UserPlus size={16} /> {busy?"Creating...":"Create User Account"}
-      </button>
+      <div className="mt-6 flex flex-col gap-3 rounded-2xl border border-[#e2e8f0] bg-[#f8fafc] p-4 sm:flex-row sm:items-center sm:justify-between">
+        <div>
+          <p className="text-sm font-semibold text-[#334155]">Ready to create this account?</p>
+          <p className="mt-1 text-xs text-[#64748b]">Review the details and assigned role before saving.</p>
+        </div>
+        <button type="button" disabled={busy || !valid} onClick={() => onCreate({ ...form, first_name: form.first_name.trim(), last_name: form.last_name.trim(), email: form.email.trim().toLowerCase(), phone: form.phone.trim(), role_ids: roleIds })} className="inline-flex h-11 shrink-0 items-center justify-center gap-2 rounded-xl bg-[#111827] px-6 text-sm font-semibold text-white disabled:cursor-not-allowed disabled:opacity-40">
+          <UserPlus size={16} /> {busy ? "Creating..." : "Create User Account"}
+        </button>
+      </div>
     </section>
   );
 }
@@ -1308,150 +1507,291 @@ function CreateStaffModal({
     form.password.length >= 8 &&
     roleIds.length > 0;
 
+  const inputClass =
+    "mt-3 h-12 w-full rounded-xl border-2 border-[#cfd8e3] bg-white px-4 text-sm font-medium text-[#111827] shadow-[0_1px_2px_rgba(15,23,42,0.03)] outline-none transition placeholder:text-[#a8b1bf] hover:border-[#b8c4d2] focus:border-[#f47524] focus:ring-4 focus:ring-orange-100/70";
+
+  const availableRoles = roles.filter(
+    (role) => !["customer", "seller"].includes(role.name),
+  );
+
   return (
     <Modal title="Create Staff Account" onClose={onClose}>
-      <div className="rounded-xl border border-blue-200 bg-blue-50 p-4 text-sm leading-6 text-blue-800">
-        This account will only receive the access granted through the selected
-        role(s). Backend RBAC will independently enforce every protected action.
-      </div>
-
-      <div className="mt-5 grid gap-4 sm:grid-cols-2">
-        <Field label="First name" required>
-          <input
-            value={form.first_name}
-            onChange={(event) =>
-              setForm((current) => ({
-                ...current,
-                first_name: event.target.value,
-              }))
-            }
-            className="input"
-          />
-        </Field>
-
-        <Field label="Last name" required>
-          <input
-            value={form.last_name}
-            onChange={(event) =>
-              setForm((current) => ({
-                ...current,
-                last_name: event.target.value,
-              }))
-            }
-            className="input"
-          />
-        </Field>
-
-        <Field label="Email" required>
-          <input
-            type="email"
-            value={form.email}
-            onChange={(event) =>
-              setForm((current) => ({
-                ...current,
-                email: event.target.value,
-              }))
-            }
-            className="input"
-          />
-        </Field>
-
-        <Field label="Phone">
-          <input
-            value={form.phone}
-            onChange={(event) =>
-              setForm((current) => ({
-                ...current,
-                phone: event.target.value,
-              }))
-            }
-            placeholder="+255..."
-            className="input"
-          />
-        </Field>
-
-        <div className="sm:col-span-2">
-          <Field
-            label="Temporary password"
-            required
-            hint="Minimum 8 characters. The staff member should change it after first login."
-          >
-            <input
-              type="password"
-              value={form.password}
-              onChange={(event) =>
-                setForm((current) => ({
-                  ...current,
-                  password: event.target.value,
-                }))
-              }
-              className="input"
-            />
-          </Field>
+      <div className="rounded-2xl border-2 border-[#d8e0e9] bg-[#f8fafc] p-5 shadow-[0_3px_12px_rgba(15,23,42,0.04)]">
+        <div className="flex items-start gap-3">
+          <span className="flex h-8 w-8 shrink-0 items-center justify-center rounded-full border border-[#d8e0e9] bg-white text-sm font-bold text-[#111827]">
+            1
+          </span>
+          <div>
+            <h3 className="text-sm font-bold text-[#111827]">Staff details</h3>
+            <p className="mt-1 text-xs leading-5 text-gray-500">
+              Enter the staff member&apos;s personal and login information.
+            </p>
+          </div>
         </div>
-      </div>
 
-      <div className="mt-5">
-        <p className="text-sm font-semibold text-[#334155]">
-          Assign roles <span className="text-red-500">*</span>
-        </p>
-        <p className="mt-1 text-xs text-gray-500">
-          Multiple roles combine their permissions.
-        </p>
-
-        <div className="mt-3 max-h-72 space-y-2 overflow-y-auto">
-          {roles
-            .filter((role) => !["customer", "seller"].includes(role.name))
-            .map((role) => (
-              <label
-                key={role.id}
-                className={`flex cursor-pointer items-start gap-3 rounded-xl border p-3 transition ${
-                  roleIds.includes(role.id)
-                    ? "border-[#f47524] bg-orange-50/50"
-                    : "border-[#e7ebf0]"
-                }`}
-              >
-                <input
-                  type="checkbox"
-                  className="mt-1"
-                  checked={roleIds.includes(role.id)}
-                  onChange={(event) =>
-                    setRoleIds((current) =>
-                      event.target.checked
-                        ? [...current, role.id]
-                        : current.filter((id) => id !== role.id),
-                    )
-                  }
-                />
-
-                <span className="flex-1">
-                  <b className="text-sm">{pretty(role.name)}</b>
-                  <small className="mt-0.5 block text-gray-500">
-                    {role.permissions.length} permissions
-                  </small>
+        <div className="mt-5 overflow-hidden rounded-2xl border-2 border-[#d8e0e9] bg-white">
+          <div className="grid sm:grid-cols-2">
+            <div className="border-b border-[#e2e8f0] p-4 sm:border-r">
+              <label className="block">
+                <span className="text-sm font-semibold text-[#1f2937]">
+                  First name <span className="text-red-500">*</span>
                 </span>
+                <span className="mt-1 block text-[11px] text-[#94a3b8]">
+                  Staff member&apos;s given name
+                </span>
+                <input
+                  value={form.first_name}
+                  onChange={(event) =>
+                    setForm((current) => ({
+                      ...current,
+                      first_name: event.target.value,
+                    }))
+                  }
+                  placeholder="e.g. Juma"
+                  className={inputClass}
+                />
               </label>
-            ))}
+            </div>
+
+            <div className="border-b border-[#e2e8f0] p-4">
+              <label className="block">
+                <span className="text-sm font-semibold text-[#1f2937]">
+                  Last name <span className="text-red-500">*</span>
+                </span>
+                <span className="mt-1 block text-[11px] text-[#94a3b8]">
+                  Staff member&apos;s family name
+                </span>
+                <input
+                  value={form.last_name}
+                  onChange={(event) =>
+                    setForm((current) => ({
+                      ...current,
+                      last_name: event.target.value,
+                    }))
+                  }
+                  placeholder="e.g. Mushi"
+                  className={inputClass}
+                />
+              </label>
+            </div>
+
+            <div className="border-b border-[#e2e8f0] p-4 sm:border-r">
+              <label className="block">
+                <span className="text-sm font-semibold text-[#1f2937]">
+                  Email address <span className="text-red-500">*</span>
+                </span>
+                <span className="mt-1 block text-[11px] text-[#94a3b8]">
+                  This email will be used for staff sign in
+                </span>
+                <input
+                  type="email"
+                  value={form.email}
+                  onChange={(event) =>
+                    setForm((current) => ({
+                      ...current,
+                      email: event.target.value,
+                    }))
+                  }
+                  placeholder="juma@xerinmarketplace.com"
+                  className={inputClass}
+                />
+              </label>
+            </div>
+
+            <div className="border-b border-[#e2e8f0] p-4">
+              <label className="block">
+                <span className="text-sm font-semibold text-[#1f2937]">
+                  Phone number
+                </span>
+                <span className="mt-1 block text-[11px] text-[#94a3b8]">
+                  Use international format where possible
+                </span>
+                <input
+                  value={form.phone}
+                  onChange={(event) =>
+                    setForm((current) => ({
+                      ...current,
+                      phone: event.target.value,
+                    }))
+                  }
+                  placeholder="+255..."
+                  className={inputClass}
+                />
+              </label>
+            </div>
+
+            <div className="p-4 sm:col-span-2">
+              <label className="block">
+                <span className="text-sm font-semibold text-[#1f2937]">
+                  Temporary password <span className="text-red-500">*</span>
+                </span>
+                <span className="mt-1 block text-[11px] text-[#94a3b8]">
+                  Minimum 8 characters. The staff member should change it after first login.
+                </span>
+                <input
+                  type="password"
+                  value={form.password}
+                  onChange={(event) =>
+                    setForm((current) => ({
+                      ...current,
+                      password: event.target.value,
+                    }))
+                  }
+                  placeholder="Create a temporary password"
+                  className={inputClass}
+                />
+              </label>
+            </div>
+          </div>
         </div>
       </div>
 
-      <button
-        type="button"
-        disabled={busy || !valid}
-        onClick={() =>
-          onCreate({
-            ...form,
-            first_name: form.first_name.trim(),
-            last_name: form.last_name.trim(),
-            email: form.email.trim().toLowerCase(),
-            phone: form.phone.trim(),
-            role_ids: roleIds,
-          })
-        }
-        className="mt-6 w-full rounded-xl bg-[#f47524] py-3 font-semibold text-white disabled:cursor-not-allowed disabled:opacity-50"
-      >
-        {busy ? "Creating..." : "Create Staff Account"}
-      </button>
+      <div className="mt-5 rounded-2xl border-2 border-[#d8e0e9] bg-[#f8fafc] p-5 shadow-[0_3px_12px_rgba(15,23,42,0.04)]">
+        <div className="flex items-start justify-between gap-4">
+          <div className="flex items-start gap-3">
+            <span className="flex h-8 w-8 shrink-0 items-center justify-center rounded-full border border-[#d8e0e9] bg-white text-sm font-bold text-[#111827]">
+              2
+            </span>
+            <div>
+              <h3 className="text-sm font-bold text-[#111827]">
+                Assign role & access
+              </h3>
+              <p className="mt-1 text-xs leading-5 text-gray-500">
+                Select one or more staff roles. Multiple roles combine their permissions.
+              </p>
+            </div>
+          </div>
+
+          <span className="shrink-0 rounded-full border border-[#fed7aa] bg-[#fff7ed] px-3 py-1 text-xs font-semibold text-[#f47524]">
+            {roleIds.length} selected
+          </span>
+        </div>
+
+        <div className="mt-4 overflow-hidden rounded-2xl border-2 border-[#d8e0e9] bg-white">
+          <div className="grid gap-0 sm:grid-cols-2">
+            {availableRoles.map((role, index) => {
+              const selected = roleIds.includes(role.id);
+
+              return (
+                <label
+                  key={role.id}
+                  className={`flex cursor-pointer items-start gap-3 border-[#e2e8f0] p-4 transition ${
+                    index % 2 === 0 ? "sm:border-r" : ""
+                  } ${
+                    index < availableRoles.length - 2
+                      ? "border-b"
+                      : availableRoles.length % 2 === 0
+                        ? ""
+                        : index === availableRoles.length - 1
+                          ? ""
+                          : "border-b"
+                  } ${
+                    selected
+                      ? "bg-orange-50/60"
+                      : "bg-white hover:bg-[#f8fafc]"
+                  }`}
+                >
+                  <span
+                    className={`mt-0.5 flex h-5 w-5 shrink-0 items-center justify-center rounded-md border-2 ${
+                      selected
+                        ? "border-[#f47524] bg-[#f47524] text-white"
+                        : "border-[#cbd5e1] bg-white"
+                    }`}
+                  >
+                    {selected && <Check size={13} strokeWidth={3} />}
+                  </span>
+
+                  <input
+                    type="checkbox"
+                    className="sr-only"
+                    checked={selected}
+                    onChange={(event) =>
+                      setRoleIds((current) =>
+                        event.target.checked
+                          ? [...current, role.id]
+                          : current.filter((id) => id !== role.id),
+                      )
+                    }
+                  />
+
+                  <span className="min-w-0 flex-1">
+                    <b className="text-sm text-[#111827]">{pretty(role.name)}</b>
+                    <small className="mt-1 block text-gray-500">
+                      {role.permissions.length} permissions
+                    </small>
+                    {role.description && (
+                      <small className="mt-1 line-clamp-2 block leading-5 text-[#94a3b8]">
+                        {role.description}
+                      </small>
+                    )}
+                  </span>
+                </label>
+              );
+            })}
+          </div>
+        </div>
+
+        {!roleIds.length && (
+          <div className="mt-4 rounded-xl border border-amber-200 bg-amber-50 px-4 py-3 text-xs leading-5 text-amber-800">
+            Select at least one role before creating this staff account.
+          </div>
+        )}
+      </div>
+
+      <div className="mt-5 rounded-2xl border-2 border-[#d8e0e9] bg-white p-4">
+        <div className="mb-4 flex items-start gap-3">
+          <span className="flex h-8 w-8 shrink-0 items-center justify-center rounded-full border border-[#d8e0e9] bg-[#f8fafc] text-sm font-bold text-[#111827]">
+            3
+          </span>
+          <div>
+            <p className="text-sm font-bold text-[#111827]">Create staff account</p>
+            <p className="mt-1 text-xs leading-5 text-gray-500">
+              Review the user details and selected access roles before creating the account.
+              Backend RBAC will enforce the assigned permissions.
+            </p>
+          </div>
+        </div>
+
+        <div className="mb-4 grid gap-3 rounded-xl bg-[#f8fafc] p-4 sm:grid-cols-2">
+          <div>
+            <p className="text-[10px] font-bold uppercase tracking-wider text-[#94a3b8]">
+              Staff member
+            </p>
+            <p className="mt-1 text-sm font-semibold text-[#111827]">
+              {[form.first_name.trim(), form.last_name.trim()]
+                .filter(Boolean)
+                .join(" ") || "Not entered yet"}
+            </p>
+          </div>
+
+          <div>
+            <p className="text-[10px] font-bold uppercase tracking-wider text-[#94a3b8]">
+              Roles selected
+            </p>
+            <p className="mt-1 text-sm font-semibold text-[#111827]">
+              {roleIds.length}
+            </p>
+          </div>
+        </div>
+
+        <button
+          type="button"
+          disabled={busy || !valid}
+          onClick={() =>
+            onCreate({
+              ...form,
+              first_name: form.first_name.trim(),
+              last_name: form.last_name.trim(),
+              email: form.email.trim().toLowerCase(),
+              phone: form.phone.trim(),
+              role_ids: roleIds,
+            })
+          }
+          className="w-full rounded-xl bg-[#f47524] py-3 font-semibold text-white shadow-sm transition hover:bg-[#dc651d] disabled:cursor-not-allowed disabled:opacity-50"
+        >
+          {busy ? "Creating..." : "Create Staff Account"}
+        </button>
+      </div>
     </Modal>
   );
 }
