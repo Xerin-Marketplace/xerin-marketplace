@@ -84,11 +84,12 @@ export const ADMIN_SECTION_PERMISSIONS: Record<string, string[]> = {
     "can_reject_sellers",
   ],
   Payments: [
-    "payments:read",
-    "refunds:read",
-    "refunds:review",
-    "refunds:process",
-    "commissions:read",
+    "payments:dashboard", "payments:read", "payment_methods:read",
+    "payment_providers:read", "refunds:read", "refunds:review",
+    "refunds:process", "payment_disputes:read", "payouts:read",
+    "payouts:approve", "fraud_risk:read", "reconciliation:read",
+    "currencies:read", "countries:read", "commissions:read",
+    "finance_reports:read", "payment_audit:read",
   ],
   Promotions: [
     "promotions:read",
@@ -192,11 +193,23 @@ export const ADMIN_ITEM_PERMISSIONS: Record<string, string[]> = {
   "Seller Orders": ["orders:read", "seller_orders:read"],
   "Seller Performance": ["analytics:admin_read", "can_view_sellers"],
 
-  // Finance
+  // Payments / Finance
+  "Payments Dashboard": ["payments:dashboard", "payments:read"],
   Transactions: ["payments:read"],
-  "Payment Methods": ["payments:read"],
+  "Payment Methods": ["payment_methods:read", "payments:read"],
+  "Payment Providers": ["payment_providers:read", "payments:read"],
   Refunds: ["refunds:read", "refunds:review", "refunds:process"],
+  "Disputes & Chargebacks": ["payment_disputes:read", "refunds:review"],
+  "Seller Payouts": ["payouts:read", "commissions:read"],
+  "Pending Payouts": ["payouts:read", "payouts:approve"],
   "Failed Payments": ["payments:read"],
+  "Fraud & Risk": ["fraud_risk:read", "payments:read"],
+  Reconciliation: ["reconciliation:read", "payments:read"],
+  "Currencies & FX": ["currencies:read", "payments:read"],
+  Countries: ["countries:read", "payments:read"],
+  "Fees & Commissions": ["commissions:read", "payments:read"],
+  "Payment Reports": ["finance_reports:read", "analytics:admin_read", "payments:read"],
+  "Payment Audit Logs": ["payment_audit:read", "audit_logs:read"],
 
   // Promotions
   Coupons: ["coupons:read", "coupons:write"],

@@ -53,6 +53,68 @@ export type AdminSellerOrder = { id: string; order_id: string; order_number: str
 export type AdminSellerPerformance = { seller_id: string; seller_name: string; status: string; products: number; approved_products: number; orders: number; delivered_orders: number; cancelled_orders: number; revenue: number; currency: string; fulfillment_rate: number };
 export type AdminPayment = { id: string; order_id: string; order_number: string; user_id: string; customer_name: string; customer_email: string; amount: number; currency: string; method: string; provider: string | null; status: string; reference: string | null; failure_reason: string | null; paid_at: string | null; created_at: string; updated_at: string | null; transaction_count: number; refund_reason: string | null; refunded_at: string | null };
 export type AdminPaymentMethod = { method: string; provider: string; transactions: number; completed: number; failed: number; volume: number; currency: string };
+
+export type PaymentAdminPage<T> = { total:number; page:number; page_size:number; total_pages?:number; results:T[] };
+export type PaymentAdminParams = { page?:number; page_size?:number; search?:string; status_filter?:string; provider?:string; currency?:string; date_from?:string; date_to?:string };
+
+export type AdminPaymentProvider = {
+  id:string; name:string; code:string; provider_type:string; status:string;
+  supported_currencies:string[]; supported_methods:string[];
+  environment?:string|null; is_default?:boolean;
+};
+
+export type AdminPayout = {
+  id:string; seller_id:string; seller_name:string; amount:number; currency:string;
+  status:string; payout_method?:string|null; provider?:string|null;
+  reference?:string|null; failure_reason?:string|null;
+  requested_at?:string|null; processed_at?:string|null; created_at:string;
+};
+
+export type AdminPaymentDispute = {
+  id:string; payment_id?:string|null; order_id?:string|null; order_number?:string|null;
+  customer_name?:string|null; seller_name?:string|null; amount:number; currency:string;
+  reason:string; status:string; provider?:string|null; provider_reference?:string|null;
+  created_at:string;
+};
+
+export type AdminRiskEvent = {
+  id:string; event_type:string; severity:string; status:string;
+  payment_id?:string|null; order_id?:string|null; user_name?:string|null;
+  score?:number|null; reason?:string|null; created_at:string;
+};
+
+export type AdminReconciliation = {
+  id:string; order_number?:string|null; provider?:string|null;
+  provider_reference?:string|null; expected_amount:number; provider_amount:number;
+  currency:string; difference:number; status:string; created_at:string;
+};
+
+export type AdminCurrency = {
+  id:string; code:string; name:string; symbol:string;
+  is_base:boolean; is_active:boolean; decimal_places?:number;
+};
+
+export type AdminFxRate = {
+  id:string; base_currency:string; quote_currency:string; rate:number;
+  source?:string|null; effective_at:string; is_active:boolean;
+};
+
+export type AdminCountry = {
+  id:string; code:string; name:string; currency_code:string;
+  is_active:boolean; payments_enabled:boolean; payouts_enabled:boolean;
+};
+
+export type AdminFeeCommission = {
+  id:string; name:string; scope:string; rate_type:string; rate_value:number;
+  currency?:string|null; provider?:string|null; is_active:boolean;
+};
+
+export type AdminPaymentDashboard = {
+  processed_volume:number; successful_payments:number; pending_payments:number;
+  failed_payments:number; refunded_amount:number; pending_payouts:number;
+  completed_payouts:number; platform_commission:number; seller_earnings:number;
+  currency:string;
+};
 export type Coupon = { id: string; code: string; description: string | null; discount_type: string; discount_value: number; minimum_order_amount: number | null; maximum_discount_amount: number | null; usage_limit: number | null; usage_count: number; is_active: boolean; valid_from: string | null; valid_until: string | null; created_at: string };
 export type DiscountRule = { id: string; name: string; description: string | null; discount_type: string; discount_value: number; applies_to: string; minimum_order_amount: number | null; priority: number; is_active: boolean; valid_from: string | null; valid_until: string | null; created_at: string };
 export type PromotionCampaign = { id: string; name: string; objective: string; description: string | null; audience: string; channel: string; budget: number | null; currency: string; status: string; starts_at: string | null; ends_at: string | null; impressions: number; conversions: number; revenue: number; created_at: string };
@@ -567,11 +629,42 @@ export const getSellerDocumentViewUrl = (sellerId: string, documentId: string) =
 export const listSellerProducts = async () => (await axiosInstance.get<AdminSellerProduct[]>("/admin/seller-products")).data;
 export const listSellerOrders = async () => (await axiosInstance.get<AdminSellerOrder[]>("/admin/seller-orders")).data;
 export const listSellerPerformance = async () => (await axiosInstance.get<AdminSellerPerformance[]>("/admin/seller-performance")).data;
-export const listAdminPayments = async (params: { status_filter?: string; method?: string; search?: string } = {}) => (await axiosInstance.get<AdminPayment[]>("/admin/payments", { params })).data;
+const normalizePaymentPage = <T,>(data:T[]|PaymentAdminPage<T>, page=1, pageSize=20):PaymentAdminPage<T> => {
+  if (!Array.isArray(data)) return data;
+  const total=data.length; const start=(page-1)*pageSize;
+  return { total, page, page_size:pageSize, total_pages: total ? Math.ceil(total/pageSize) : 0, results:data.slice(start,start+pageSize) };
+};
+
+export const listAdminPayments = async (params:PaymentAdminParams={}) => {
+  const res=await axiosInstance.get<AdminPayment[]|PaymentAdminPage<AdminPayment>>("/admin/payments",{params});
+  return normalizePaymentPage(res.data,params.page,params.page_size);
+};
 export const listAdminPaymentMethods = async () => (await axiosInstance.get<AdminPaymentMethod[]>("/admin/payment-methods")).data;
-export const listAdminRefunds = async () => (await axiosInstance.get<AdminPayment[]>("/admin/refunds")).data;
-export const listAdminFailedPayments = async () => (await axiosInstance.get<AdminPayment[]>("/admin/failed-payments")).data;
-export const refundAdminPayment = async (paymentId: string, reason: string) => (await axiosInstance.post<AdminPayment>(`/admin/payments/${paymentId}/refund`, { reason })).data;
+export const listAdminRefunds = async (params:PaymentAdminParams={}) => {
+  const res=await axiosInstance.get<AdminPayment[]|PaymentAdminPage<AdminPayment>>("/admin/refunds",{params});
+  return normalizePaymentPage(res.data,params.page,params.page_size);
+};
+export const listAdminFailedPayments = async (params:PaymentAdminParams={}) => {
+  const res=await axiosInstance.get<AdminPayment[]|PaymentAdminPage<AdminPayment>>("/admin/failed-payments",{params});
+  return normalizePaymentPage(res.data,params.page,params.page_size);
+};
+
+const listPaymentResource = async <T,>(path:string,params:PaymentAdminParams={}) => {
+  const res=await axiosInstance.get<T[]|PaymentAdminPage<T>>(path,{params});
+  return normalizePaymentPage(res.data,params.page,params.page_size);
+};
+
+export const getAdminPaymentDashboard = async () => (await axiosInstance.get<AdminPaymentDashboard>("/admin/payments/dashboard")).data;
+export const listAdminPaymentProviders = async (params:PaymentAdminParams={}) => listPaymentResource<AdminPaymentProvider>("/admin/payment-providers",params);
+export const listAdminPayouts = async (params:PaymentAdminParams={}) => listPaymentResource<AdminPayout>("/admin/payouts",params);
+export const listAdminPaymentDisputes = async (params:PaymentAdminParams={}) => listPaymentResource<AdminPaymentDispute>("/admin/payment-disputes",params);
+export const listAdminRiskEvents = async (params:PaymentAdminParams={}) => listPaymentResource<AdminRiskEvent>("/admin/payment-risk-events",params);
+export const listAdminReconciliation = async (params:PaymentAdminParams={}) => listPaymentResource<AdminReconciliation>("/admin/reconciliation",params);
+export const listAdminCurrencies = async (params:PaymentAdminParams={}) => listPaymentResource<AdminCurrency>("/admin/currencies",params);
+export const listAdminFxRates = async (params:PaymentAdminParams={}) => listPaymentResource<AdminFxRate>("/admin/fx-rates",params);
+export const listAdminCountries = async (params:PaymentAdminParams={}) => listPaymentResource<AdminCountry>("/admin/payment-countries",params);
+export const listAdminFeesCommissions = async (params:PaymentAdminParams={}) => listPaymentResource<AdminFeeCommission>("/admin/fees-commissions",params);
+export const refundAdminPayment = async (paymentId:string,reason:string) => (await axiosInstance.post<AdminPayment>(`/admin/payments/${paymentId}/refund`,{reason})).data;
 export const listCoupons = async () => (await axiosInstance.get<Coupon[]>("/coupons")).data;
 export const createCoupon = async (payload: Partial<Coupon>) => (await axiosInstance.post<Coupon>("/coupons", payload)).data;
 export const updateCoupon = async (id: string, payload: Partial<Coupon>) => (await axiosInstance.put<Coupon>(`/coupons/${id}`, payload)).data;
@@ -888,6 +981,16 @@ export const adminService = {
   listAdminPaymentMethods,
   listAdminRefunds,
   listAdminFailedPayments,
+  getAdminPaymentDashboard,
+  listAdminPaymentProviders,
+  listAdminPayouts,
+  listAdminPaymentDisputes,
+  listAdminRiskEvents,
+  listAdminReconciliation,
+  listAdminCurrencies,
+  listAdminFxRates,
+  listAdminCountries,
+  listAdminFeesCommissions,
   refundAdminPayment,
   listCoupons,
   createCoupon,

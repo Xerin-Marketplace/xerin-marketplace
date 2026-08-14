@@ -236,19 +236,22 @@ const sidebarGroups: SidebarGroup[] = [
     key: "finance",
     icon: CreditCard,
     items: [
-      {
-        label: "Transactions",
-        href: "?tab=finance&menu=payments&item=transactions",
-      },
-      {
-        label: "Payment Methods",
-        href: "?tab=finance&menu=payments&item=payment-methods",
-      },
+      { label: "Payments Dashboard", href: "?tab=finance&menu=payments&item=payments-dashboard" },
+      { label: "Transactions", href: "?tab=finance&menu=payments&item=transactions" },
+      { label: "Payment Methods", href: "?tab=finance&menu=payments&item=payment-methods" },
+      { label: "Payment Providers", href: "?tab=finance&menu=payments&item=payment-providers" },
       { label: "Refunds", href: "?tab=finance&menu=payments&item=refunds" },
-      {
-        label: "Failed Payments",
-        href: "?tab=finance&menu=payments&item=failed-payments",
-      },
+      { label: "Disputes & Chargebacks", href: "?tab=finance&menu=payments&item=disputes-chargebacks" },
+      { label: "Seller Payouts", href: "?tab=finance&menu=payments&item=seller-payouts" },
+      { label: "Pending Payouts", href: "?tab=finance&menu=payments&item=pending-payouts" },
+      { label: "Failed Payments", href: "?tab=finance&menu=payments&item=failed-payments" },
+      { label: "Fraud & Risk", href: "?tab=finance&menu=payments&item=fraud-risk" },
+      { label: "Reconciliation", href: "?tab=finance&menu=payments&item=reconciliation" },
+      { label: "Currencies & FX", href: "?tab=finance&menu=payments&item=currencies-fx" },
+      { label: "Countries", href: "?tab=finance&menu=payments&item=countries" },
+      { label: "Fees & Commissions", href: "?tab=finance&menu=payments&item=fees-commissions" },
+      { label: "Payment Reports", href: "?tab=finance&menu=payments&item=payment-reports" },
+      { label: "Payment Audit Logs", href: "?tab=finance&menu=payments&item=payment-audit-logs" },
     ],
   },
   {
@@ -625,13 +628,22 @@ export default function AdminDashboard() {
     activeSidebarItem === "Payments" ||
     activeSidebarItem.startsWith("Payments:");
   const paymentView: PaymentView =
-    activeSidebarItem === "Payments:Payment Methods"
-      ? "methods"
-      : activeSidebarItem === "Payments:Refunds"
-        ? "refunds"
-        : activeSidebarItem === "Payments:Failed Payments"
-          ? "failed"
-          : "transactions";
+    activeSidebarItem === "Payments:Payments Dashboard" ? "dashboard"
+    : activeSidebarItem === "Payments:Payment Methods" ? "methods"
+    : activeSidebarItem === "Payments:Payment Providers" ? "providers"
+    : activeSidebarItem === "Payments:Refunds" ? "refunds"
+    : activeSidebarItem === "Payments:Disputes & Chargebacks" ? "disputes"
+    : activeSidebarItem === "Payments:Seller Payouts" ? "payouts"
+    : activeSidebarItem === "Payments:Pending Payouts" ? "pending-payouts"
+    : activeSidebarItem === "Payments:Failed Payments" ? "failed"
+    : activeSidebarItem === "Payments:Fraud & Risk" ? "risk"
+    : activeSidebarItem === "Payments:Reconciliation" ? "reconciliation"
+    : activeSidebarItem === "Payments:Currencies & FX" ? "currencies"
+    : activeSidebarItem === "Payments:Countries" ? "countries"
+    : activeSidebarItem === "Payments:Fees & Commissions" ? "fees"
+    : activeSidebarItem === "Payments:Payment Reports" ? "reports"
+    : activeSidebarItem === "Payments:Payment Audit Logs" ? "audit"
+    : "transactions";
   const isPromotionsWorkspace =
     activeSidebarItem === "Promotions" ||
     activeSidebarItem.startsWith("Promotions:");
@@ -1374,24 +1386,28 @@ export default function AdminDashboard() {
                       </p>
                     ) : null}
                     <h1 className="mt-0.5 truncate text-xl font-bold tracking-[-0.02em] text-[#111827] sm:text-2xl dark:text-white">
-                      {activeTab === "orders"
-                        ? "Order Management"
-                        : activeTab === "inventory"
-                          ? "Inventory Overview"
-                          : activeTab === "users" &&
-                              activeSidebarItem !== "Dashboard"
-                            ? "Customer Management"
-                            : "Dashboard Overview"}
+                      {isPaymentsWorkspace
+                        ? activeMenuLabel
+                        : activeTab === "orders"
+                          ? "Order Management"
+                          : activeTab === "inventory"
+                            ? "Inventory Overview"
+                            : activeTab === "users" &&
+                                activeSidebarItem !== "Dashboard"
+                              ? "Customer Management"
+                              : "Dashboard Overview"}
                     </h1>
                     <p className="mt-1 truncate text-sm text-gray-500">
-                      {activeTab === "orders"
-                        ? `Admin / Orders / ${activeMenuLabel}`
-                        : activeTab === "inventory"
-                          ? `Admin / Inventory / ${activeMenuLabel}`
-                          : activeTab === "users" &&
-                              activeSidebarItem !== "Dashboard"
-                            ? `Manage customer accounts, addresses, orders and engagement`
-                            : `Tab: ${activeMenuLabel}`}
+                      {isPaymentsWorkspace
+                        ? `Admin / Payments / ${activeMenuLabel}`
+                        : activeTab === "orders"
+                          ? `Admin / Orders / ${activeMenuLabel}`
+                          : activeTab === "inventory"
+                            ? `Admin / Inventory / ${activeMenuLabel}`
+                            : activeTab === "users" &&
+                                activeSidebarItem !== "Dashboard"
+                              ? `Manage customer accounts, addresses, orders and engagement`
+                              : `Tab: ${activeMenuLabel}`}
                     </p>
                   </div>
                 </div>
@@ -1821,7 +1837,9 @@ export default function AdminDashboard() {
               </>
             ) : null}
 
-            {activeTab === "finance" && !isLoading ? <AdminFinance /> : null}
+            {activeTab === "finance" && !isLoading && !isPaymentsWorkspace ? (
+              <AdminFinance />
+            ) : null}
 
             {activeTab === "analytics" && !isLoading ? <AdminAnalytics /> : null}
 
