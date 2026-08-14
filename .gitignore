@@ -36,6 +36,8 @@ yarn-error.log*
 next-env.d.ts
 
 # environment secrets
+.vscode
+.vscode/
 .env
 .env.*
 !.env.example
@@ -46,3 +48,4 @@ errors/
 Frontend/
 azampay_path/
 errors/
+.vscode/
