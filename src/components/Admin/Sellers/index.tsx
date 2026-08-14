@@ -11,6 +11,8 @@ import {
   AlertCircle,
   Building2,
   CheckCircle2,
+  ChevronLeft,
+  ChevronRight,
   Clock3,
   Eye,
   FileText,
@@ -95,6 +97,8 @@ export default function AdminSellers({
   const [rejectReason, setRejectReason] = useState("");
   const [showRejectModal, setShowRejectModal] = useState(false);
   const [busy, setBusy] = useState<string | null>(null);
+  const [page, setPage] = useState(1);
+  const [pageSize, setPageSize] = useState(10);
 
   const load = async () => {
     setLoading(true);
@@ -122,6 +126,15 @@ export default function AdminSellers({
       }),
     [query, sellers, status],
   );
+
+  useEffect(() => {
+    setPage(1);
+  }, [query, status, mode]);
+
+  const totalPages = Math.max(1, Math.ceil(filtered.length / pageSize));
+  const safePage = Math.min(page, totalPages);
+  const pageStart = (safePage - 1) * pageSize;
+  const visibleSellers = filtered.slice(pageStart, pageStart + pageSize);
 
   const openSeller = async (seller: AdminSeller) => {
     setSelected(seller);
@@ -204,40 +217,61 @@ export default function AdminSellers({
 
   return (
     <div className="space-y-5">
+      <section className="rounded-2xl border border-slate-200 bg-white p-5 shadow-sm">
+        <div className="flex flex-col gap-3 lg:flex-row lg:items-center lg:justify-between">
+          <div>
+            <p className="text-xs font-bold uppercase tracking-[0.14em] text-[#f47524]">
+              Seller operations
+            </p>
+            <h2 className="mt-1 text-2xl font-bold tracking-[-0.02em] text-slate-900">
+              {mode === "applications" ? "Seller Applications" : "Seller Management"}
+            </h2>
+            <p className="mt-1 max-w-3xl text-sm leading-6 text-slate-500">
+              {mode === "applications"
+                ? "Review onboarding details, KYC documents and business information before activating marketplace access."
+                : "Monitor every seller account, verification state and operational readiness from one workspace."}
+            </p>
+          </div>
+          <div className="rounded-xl border border-slate-200 bg-slate-50 px-4 py-3 text-right">
+            <p className="text-[10px] font-bold uppercase tracking-wider text-slate-400">
+              Marketplace sellers
+            </p>
+            <p className="mt-1 text-2xl font-bold text-slate-900">{counts.total}</p>
+          </div>
+        </div>
+      </section>
+
       <div className="grid grid-cols-2 gap-3 lg:grid-cols-3 2xl:grid-cols-5">
         {[
-          ["All sellers", counts.total],
-          ["Pending", counts.pending],
-          ["Under review", counts.review],
-          ["Approved", counts.approved],
-          ["Rejected", counts.rejected],
-        ].map(([label, value], index) => (
-          <div
+          ["All sellers", counts.total, "All registered seller accounts"],
+          ["Pending", counts.pending, "Waiting for review"],
+          ["Under review", counts.review, "Currently being assessed"],
+          ["Approved", counts.approved, "Marketplace access active"],
+          ["Rejected", counts.rejected, "Correction required"],
+        ].map(([label, value, hint]) => (
+          <article
             key={label}
-            className={`relative overflow-hidden rounded-2xl border p-5 shadow-sm ${
-              [
-                "border-orange-100 bg-gradient-to-br from-white to-orange-50",
-                "border-amber-100 bg-gradient-to-br from-white to-amber-50",
-                "border-blue-100 bg-gradient-to-br from-white to-blue-50",
-                "border-green-100 bg-gradient-to-br from-white to-green-50",
-                "border-red-100 bg-gradient-to-br from-white to-red-50",
-              ][index]
-            }`}
+            className="rounded-2xl border border-slate-200 bg-white p-5 shadow-sm"
           >
-            <span
-              className={`absolute inset-x-0 top-0 h-1 ${
-                [
-                  "bg-orange-500",
-                  "bg-amber-500",
-                  "bg-blue-500",
-                  "bg-green-500",
-                  "bg-red-500",
-                ][index]
-              }`}
-            />
-            <p className="text-sm text-gray-500">{label}</p>
-            <p className="mt-2 text-3xl font-semibold text-[#111827]">{value}</p>
-          </div>
+            <div className="flex items-center justify-between">
+              <p className="text-sm font-semibold text-slate-600">{label}</p>
+              <span className={`h-2.5 w-2.5 rounded-full ${
+                label === "Approved"
+                  ? "bg-emerald-500"
+                  : label === "Rejected"
+                    ? "bg-red-500"
+                    : label === "Under review"
+                      ? "bg-blue-500"
+                      : label === "Pending"
+                        ? "bg-amber-500"
+                        : "bg-[#f47524]"
+              }`} />
+            </div>
+            <p className="mt-3 text-3xl font-bold tracking-[-0.03em] text-slate-900">
+              {value}
+            </p>
+            <p className="mt-1 text-xs text-slate-400">{hint}</p>
+          </article>
         ))}
       </div>
 
@@ -311,7 +345,7 @@ export default function AdminSellers({
                 </tr>
               </thead>
               <tbody className="divide-y divide-slate-100">
-                {filtered.map((seller) => (
+                {visibleSellers.map((seller) => (
                   <tr key={seller.id} className="group transition hover:bg-orange-50/35">
                     <td className="px-6 py-4">
                       <div className="flex items-center gap-3">
@@ -354,6 +388,61 @@ export default function AdminSellers({
                 ))}
               </tbody>
             </table>
+          </div>
+        )}
+
+        {!loading && filtered.length > 0 && (
+          <div className="flex flex-col gap-3 border-t border-slate-100 bg-white px-5 py-4 sm:flex-row sm:items-center sm:justify-between">
+            <p className="text-sm text-slate-500">
+              Showing{" "}
+              <b className="text-slate-900">
+                {pageStart + 1}-{Math.min(pageStart + pageSize, filtered.length)}
+              </b>{" "}
+              of <b className="text-slate-900">{filtered.length}</b> sellers
+            </p>
+
+            <div className="flex flex-wrap items-center gap-2">
+              <select
+                value={pageSize}
+                onChange={(event) => {
+                  setPageSize(Number(event.target.value));
+                  setPage(1);
+                }}
+                className="h-10 rounded-xl border border-slate-200 bg-white px-3 text-sm text-slate-600"
+              >
+                {[10, 20, 50].map((size) => (
+                  <option key={size} value={size}>
+                    {size} / page
+                  </option>
+                ))}
+              </select>
+
+              <button
+                type="button"
+                disabled={safePage <= 1}
+                onClick={() => setPage((current) => Math.max(1, current - 1))}
+                className="inline-flex h-10 items-center gap-1 rounded-xl border border-slate-200 px-3 text-sm font-semibold text-slate-600 disabled:cursor-not-allowed disabled:opacity-40"
+              >
+                <ChevronLeft size={14} />
+                Previous
+              </button>
+
+              <span className="min-w-24 text-center text-xs font-semibold text-slate-500">
+                Page {safePage} of {totalPages}
+              </span>
+
+              <button
+                type="button"
+                disabled={safePage >= totalPages}
+                onClick={() =>
+                  setPage((current) => Math.min(totalPages, current + 1))
+                }
+                className="inline-flex h-10 items-center gap-1 rounded-xl border border-slate-200 px-3 text-sm font-semibold text-slate-600 disabled:cursor-not-allowed disabled:opacity-40"
+              >
+                Next
+                <ChevronRight size={14} />
+              </button>
+            </div>
           </div>
         )}
       </div>
