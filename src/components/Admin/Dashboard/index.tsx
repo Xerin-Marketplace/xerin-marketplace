@@ -1841,7 +1841,9 @@ export default function AdminDashboard() {
               <AdminFinance />
             ) : null}
 
-            {activeTab === "analytics" && !isLoading ? <AdminAnalytics /> : null}
+            {activeTab === "analytics" && !isLoading && !isReportsWorkspace ? (
+              <AdminAnalytics />
+            ) : null}
 
             {activeTab === "sellers" && !isLoading && !operationsWorkspace ? (
               sellerView === "all" || sellerView === "applications" ? (

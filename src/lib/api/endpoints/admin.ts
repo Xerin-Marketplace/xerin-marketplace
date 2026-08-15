@@ -360,13 +360,24 @@ export type UpdateProductCategoryPayload = {
 
 export type ProductReview = {
   id: string;
-  product_id: string;
-  user_id: string;
+  product_id?: string;
+  user_id?: string;
   rating: number;
+  title?: string | null;
   comment?: string | null;
   status: string;
-  admin_reply?: string | null;
+  seller_reply?: string | null;
+  verified_purchase?: boolean;
+  helpful_count?: number;
   created_at: string;
+};
+
+type ProductReviewListResponse = {
+  total: number;
+  page: number;
+  page_size: number;
+  average_rating: number | string;
+  results: ProductReview[];
 };
 
 export type UpdateProductReviewPayload = {
@@ -928,8 +939,10 @@ export const deleteProductCategory = async (categoryId: string): Promise<{ messa
 };
 
 export const listProductReviews = async (params: { status?: string } = {}): Promise<ProductReview[]> => {
-  const res = await axiosInstance.get<ProductReview[]>("/admin/reviews", { params });
-  return res.data;
+  const res = await axiosInstance.get<ProductReviewListResponse | ProductReview[]>("/admin/reviews", { params });
+  const payload = res.data;
+  if (Array.isArray(payload)) return payload;
+  return Array.isArray(payload.results) ? payload.results : [];
 };
 
 export type FinanceSummary = {

@@ -75,6 +75,8 @@ export const setupInterceptors = (instance: AxiosInstance) => {
         try {
           const res = await axios.post(`${API_BASE_URL}/auth/refresh-token`, {
             refresh_token: refreshToken,
+          }, {
+            timeout: 10_000,
           });
 
           const { access_token, refresh_token } = res.data;

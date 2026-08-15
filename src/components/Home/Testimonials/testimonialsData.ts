@@ -11,7 +11,7 @@ const testimonialsData: Testimonial[] = [
     review: `The seller experience feels simple. I can list products, receive orders, and prepare deliveries from one place.`,
     authorName: "Kelvin S.",
     authorImg: "/images/users/user-02.jpg",
-    authorRole: "Verified Seller",
+    authorRole: "Marketplace seller",
   },
   {
     review: `Order tracking gives buyers more confidence because they can follow delivery updates through Xerin Logistics.`,

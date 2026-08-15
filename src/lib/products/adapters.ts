@@ -14,6 +14,20 @@ const resolveProductImageUrl = (imageUrl: string) => {
     return imageUrl;
   }
 
+  // When the browser uses the same-origin Next.js proxy, keep uploads on that
+  // same origin as well. This works on localhost, LAN devices and tunnels.
+  if (API_BASE_URL.startsWith("/")) {
+    if (imageUrl.startsWith("/uploads/")) {
+      return imageUrl.replace(/^\/uploads\//, "/backend-uploads/");
+    }
+
+    if (imageUrl.startsWith("uploads/")) {
+      return `/backend-uploads/${imageUrl.replace(/^uploads\//, "")}`;
+    }
+
+    return imageUrl;
+  }
+
   try {
     const apiUrl = new URL(API_BASE_URL);
     const apiOrigin = apiUrl.origin;
@@ -85,14 +99,26 @@ export const mapApiProductToUiProduct = (product: ApiProduct): UiProduct => {
     : [primaryImageUrl];
   const displayPrice = price;
   const displayDiscountedPrice = discountedPrice || price;
-  const reviewCount = typeof product.review_count === "number" ? product.review_count : 0;
+  const reviewCount = typeof product.review_count === "number" ? product.review_count : undefined;
+  const rating = product.rating == null ? undefined : toNumber(product.rating);
 
   return {
     id: product.id as UiProduct["id"],
     title: product.name || product.slug || "Untitled product",
     reviews: reviewCount,
     reviewCount,
-    rating: toNumber(product.rating, 0),
+    rating,
+    description: product.description,
+    sku: product.sku,
+    status: product.status,
+    isActive: product.is_active,
+    variants: product.variants?.map((variant) => ({
+      id: variant.id,
+      name: variant.variant_name,
+      sku: variant.sku,
+      price: variant.price == null ? null : toNumber(variant.price),
+      attributes: variant.attributes,
+    })),
     price: displayPrice,
     discountedPrice: displayDiscountedPrice,
     imgs: {
@@ -107,19 +133,16 @@ export const mapApiProductsToUiProducts = (products: ApiProduct[]) =>
 
 export type UiCategoryFilter = {
   name: string;
-  products: number;
   isRefined: boolean;
   id?: string | number;
 };
 
 export const mapApiCategoryToFilter = (
-  category: ApiCategory,
-  index: number
+  category: ApiCategory
 ): UiCategoryFilter => ({
   id: category.id,
   name: category.name,
-  products: 0,
-  isRefined: index === 0,
+  isRefined: false,
 });
 
 export const mapApiCategoriesToFilters = (categories: ApiCategory[]) =>

@@ -149,10 +149,10 @@ const StarIcon = () => (
 );
 
 const FEATURES = [
-  { icon: <ShieldIcon />, title: "Secure Payments", description: "Your transactions are protected with escrow" },
-  { icon: <TruckIcon />, title: "Fast Delivery", description: "Nationwide shipping with real-time tracking" },
-  { icon: <WalletIcon />, title: "Seller Wallet", description: "Fast payouts to bank or mobile money" },
-  { icon: <TrendingUpIcon />, title: "Grow Your Business", description: "Reach thousands of customers across the region" },
+  { icon: <ShieldIcon />, title: "Marketplace Checkout", description: "Use payment methods made available for your order" },
+  { icon: <TruckIcon />, title: "Delivery Options", description: "See available shipping options during checkout" },
+  { icon: <WalletIcon />, title: "Seller Wallet", description: "Track balances and payout requests from Seller Center" },
+  { icon: <TrendingUpIcon />, title: "Manage Your Store", description: "List products and manage customer orders" },
 ];
 
 // ---------------------------------------------------------------------------
@@ -353,7 +353,7 @@ const SignInPanel = ({ onSwitchTab }: { onSwitchTab: (tab: AuthTab) => void }) =
     setIsSubmitting(true);
 
     try {
-      const session = await authApi.login({ email: email.trim(), password, remember: rememberMe });
+      const session = await authApi.login({ email: email.trim(), password });
       setSession(session);
 
       if (getPostLoginPath("/account", session.user) === "/account") {
@@ -714,7 +714,10 @@ const SellerPanel = ({ onSwitchTab }: { onSwitchTab: (tab: AuthTab) => void }) =
     setCategoriesError(false);
     try {
       const result = await sellersApi.getBusinessCategories();
-      setCategories(result);
+      setCategories(result.map((category) => ({
+        id: String(category.id),
+        name: category.name,
+      })));
     } catch {
       setCategoriesError(true);
     } finally {
@@ -1313,8 +1316,7 @@ const AuthPage = ({ initialTab = "signup" }: { initialTab?: AuthTab }) => {
               The marketplace built for Africa
             </h2>
             <p className="text-white/80 leading-relaxed mb-9">
-              Buy and sell products with confidence. Secure payments, fast delivery, and trusted
-              sellers — all in one platform.
+              Browse seller listings, review checkout options, and manage marketplace orders in one platform.
             </p>
             <ul className="space-y-5">
               {FEATURES.map((feature) => (
@@ -1334,15 +1336,15 @@ const AuthPage = ({ initialTab = "signup" }: { initialTab?: AuthTab }) => {
           <div className="flex items-center gap-6 text-white/80 text-sm">
             <span className="flex items-center gap-1.5">
               <UsersIcon />
-              10k+ Sellers
+              Seller marketplace
             </span>
             <span className="flex items-center gap-1.5">
               <span className="text-yellow-400">
                 <StarIcon />
               </span>
-              4.8 Rating
+              Backend-sourced reviews
             </span>
-            <span>1M+ Orders</span>
+            <span>Live order records</span>
           </div>
         </div>
       </div>

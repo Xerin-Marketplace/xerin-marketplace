@@ -154,16 +154,15 @@ const QuickViewModal = () => {
 
               <div className="flex flex-wrap items-center gap-5 mb-6">
                 <div className="flex items-center gap-1.5">
-                  <StarRating rating={product.rating} reviewCount={product.reviewCount ?? product.reviews} size={18} />
-                  <span>
-                    <span className="font-medium text-dark dark:text-white">
-                      {product.rating ?? 0} Rating
-                    </span>
-                    <span className="text-dark-2">
-                      {" "}
-                      ({product.reviewCount ?? product.reviews ?? 0} reviews)
-                    </span>
-                  </span>
+                  {product.rating != null && product.reviewCount != null ? (
+                    <>
+                      <StarRating rating={product.rating} reviewCount={product.reviewCount} size={18} />
+                      <span>
+                        <span className="font-medium text-dark dark:text-white">{product.rating} Rating</span>
+                        <span className="text-dark-2"> ({product.reviewCount} reviews)</span>
+                      </span>
+                    </>
+                  ) : null}
                 </div>
 
                 <div className="flex items-center gap-2">
@@ -191,7 +190,9 @@ const QuickViewModal = () => {
                     </defs>
                   </svg>
 
-                  <span className="font-medium text-dark dark:text-white"> In Stock </span>
+                  <span className="font-medium text-dark dark:text-white">
+                    {product.isActive && product.status === "approved" ? "Available" : "Availability not confirmed"}
+                  </span>
                 </div>
               </div>
 

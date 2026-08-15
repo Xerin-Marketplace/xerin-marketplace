@@ -8,7 +8,6 @@ import type {
   ProductImage,
   ProductImageRequest,
   ProductListQuery,
-  PopularCategory,
   ProductRequest,
   ProductTag,
   ProductTagRequest,
@@ -22,15 +21,21 @@ export const getProducts = async (query?: ProductListQuery): Promise<Product[]> 
     params: query,
   });
   return Promise.all(
-    res.data.map(async (product) => ({
-      ...product,
-      images: await getProductImages(product.id).catch(() => []),
-    })),
+    res.data.map(async (product) => {
+      // Current storefront responses already include images. Avoid an extra
+      // request per product; only use the legacy image endpoint when needed.
+      if (Array.isArray(product.images)) return product;
+      return {
+        ...product,
+        images: await getProductImages(product.id).catch(() => []),
+      };
+    }),
   );
 };
 
 export const getProduct = async (id: ID): Promise<Product> => {
   const res = await axiosInstance.get<Product>(API_ENDPOINTS.products.byId(id));
+  if (Array.isArray(res.data.images)) return res.data;
   return {
     ...res.data,
     images: await getProductImages(id).catch(() => []),
@@ -54,28 +59,6 @@ export const getMyProducts = async (query?: ProductListQuery | string | null): P
 export const getCategories = async (): Promise<Category[]> => {
   const res = await axiosInstance.get<Category[]>(API_ENDPOINTS.products.categories);
   return res.data;
-};
-
-export const getPopularCategories = async (
-  limit = 12,
-): Promise<PopularCategory[]> => {
-  const categories = await getCategories();
-  return categories.slice(0, limit).map((category) => ({
-    ...category,
-    image_url: category.image_url ?? null,
-    product_count: 0,
-    search_count: 0,
-    view_count: 0,
-    popularity_score: 0,
-  }));
-};
-
-export const trackCategoryEngagement = async (
-  categoryId: ID,
-  action: "view" | "search" = "view",
-): Promise<void> => {
-  void categoryId;
-  void action;
 };
 
 export const getBrands = async (): Promise<Brand[]> => {
@@ -229,8 +212,6 @@ export const productsApi = {
   getById: getProduct,
   getMyProducts,
   getCategories,
-  getPopularCategories,
-  trackCategoryEngagement,
   getBrands,
   create: createProduct,
   update: updateProduct,

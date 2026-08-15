@@ -39,8 +39,8 @@ const Categories = () => {
   const hasNextPage = productResults.length > PAGE_SIZE;
   const products = productResults.slice(0, PAGE_SIZE);
 
-  const categoryNameById = useMemo(
-    () => new Map(categories.map((category) => [String(category.id), category.name])),
+  const categoryNameById = useMemo<Map<string, string>>(
+    () => new Map(categories.map((category) => [String(category.id), category.name] as const)),
     [categories],
   );
 
@@ -287,9 +287,11 @@ const Categories = () => {
                       <span className="truncate text-xs font-medium uppercase tracking-wide text-orange">
                         {categoryNameById.get(String(product.category_id)) ?? "Marketplace"}
                       </span>
-                      <span className="rounded-full bg-green-50 px-2.5 py-1 text-[11px] font-semibold text-green-700 dark:bg-green-500/10 dark:text-green-300">
-                        Available
-                      </span>
+                      {product.is_active && product.status === "approved" ? (
+                        <span className="rounded-full bg-green-50 px-2.5 py-1 text-[11px] font-semibold text-green-700 dark:bg-green-500/10 dark:text-green-300">
+                          Available
+                        </span>
+                      ) : null}
                     </div>
 
                     <h3 className="line-clamp-2 min-h-[48px] text-base font-semibold leading-6 text-dark transition group-hover:text-orange dark:text-white">

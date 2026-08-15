@@ -8,6 +8,18 @@ export const resolveBackendDocumentUrl = (value?: string | null) => {
     return value;
   }
 
+  if (API_BASE_URL.startsWith("/")) {
+    if (value.startsWith("/uploads/")) {
+      return value.replace(/^\/uploads\//, "/backend-uploads/");
+    }
+
+    if (value.startsWith("uploads/")) {
+      return `/backend-uploads/${value.replace(/^uploads\//, "")}`;
+    }
+
+    return value;
+  }
+
   try {
     const api = new URL(API_BASE_URL);
 
@@ -42,8 +54,9 @@ export const fetchBackendDocumentBlob = async (value: string) => {
     },
   });
 
+  const contentTypeHeader = response.headers["content-type"];
   const contentType =
-    response.headers["content-type"] ||
+    (typeof contentTypeHeader === "string" ? contentTypeHeader : undefined) ||
     response.data.type ||
     "application/pdf";
 

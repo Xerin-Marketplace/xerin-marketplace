@@ -6,6 +6,7 @@ import type {
   PayoutAccountRequest,
   Seller,
   SellerBusinessCategory,
+  SellerDocumentType,
   SellerBusinessProfile,
   SellerKycDocument,
   SellerKycStatus,

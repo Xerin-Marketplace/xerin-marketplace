@@ -21,7 +21,7 @@ export default function PhoneVerification({ phone }: { phone?: string | null }) 
 
   const handleSendOtp = async () => {
     try {
-      await sendOtp({ phone });
+      await sendOtp({ phone, purpose: "generic" });
       setOtpSent(true);
       toast.success(`OTP sent to ${phone}`);
     } catch {
@@ -32,7 +32,7 @@ export default function PhoneVerification({ phone }: { phone?: string | null }) 
   const handleVerifyOtp = async () => {
     if (!otpCode.trim()) return;
     try {
-      await verifyOtp({ phone, otp_code: otpCode.trim() });
+      await verifyOtp({ phone, otp_code: otpCode.trim(), purpose: "generic" });
       setVerified(true);
       toast.success("Phone number verified");
     } catch {

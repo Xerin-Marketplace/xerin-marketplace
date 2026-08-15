@@ -4,7 +4,7 @@ import { Metadata } from "next";
 export const metadata: Metadata = {
   title: "Xerin Market | Africa's Premier E-Commerce Marketplace",
   description:
-    "Shop from trusted sellers across Africa with secure payments, fast delivery, and Xerin Logistics order tracking.",
+    "Browse products listed by sellers on Xerin Market.",
 };
 
 export default function HomePage() {

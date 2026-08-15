@@ -11,30 +11,9 @@ export const navigation = [
   },
   {
     name: "Categories",
-    path: "#",
+    path: "/shop-with-sidebar",
     permission: null,
-    submenu: [
-      {
-        name: "Electronics",
-        path: "/shop-with-sidebar?category=electronics",
-      },
-      {
-        name: "Fashion",
-        path: "/shop-with-sidebar?category=fashion",
-      },
-      {
-        name: "Home & Living",
-        path: "/shop-with-sidebar?category=home",
-      },
-      {
-        name: "Beauty & Health",
-        path: "/shop-with-sidebar?category=beauty",
-      },
-      {
-        name: "Groceries",
-        path: "/shop-with-sidebar?category=groceries",
-      },
-    ],
+    submenu: [],
   },
   {
     name: "Help",

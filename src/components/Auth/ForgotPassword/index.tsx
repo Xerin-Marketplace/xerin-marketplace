@@ -93,7 +93,7 @@ const StarIcon = () => (
 
 const FEATURES = [
   { icon: <ShieldIcon />, title: "Secure Accounts", description: "Protected verification and password recovery" },
-  { icon: <TruckIcon />, title: "Fast Delivery", description: "Nationwide shipping with real-time tracking" },
+  { icon: <TruckIcon />, title: "Delivery Options", description: "See available shipping options during checkout" },
   { icon: <WalletIcon />, title: "Seller Wallet", description: "Fast payouts to bank or mobile money" },
   { icon: <TrendingUpIcon />, title: "Grow Your Business", description: "Reach thousands of customers across the region" },
 ];
@@ -323,17 +323,17 @@ const ForgotPassword = () => {
           <div className="flex items-center gap-6 text-sm text-white/80">
             <span className="flex items-center gap-1.5">
               <UsersIcon />
-              10k+ Sellers
+              Seller marketplace
             </span>
 
             <span className="flex items-center gap-1.5">
               <span className="text-yellow-400">
                 <StarIcon />
               </span>
-              4.8 Rating
+              Backend-sourced reviews
             </span>
 
-            <span>1M+ Orders</span>
+            <span>Live order records</span>
           </div>
         </div>
       </div>

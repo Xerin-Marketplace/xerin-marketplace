@@ -1,15 +1,23 @@
 "use client";
 
+import Link from "next/link";
+import { useSearchParams } from "next/navigation";
 import { useState } from "react";
+import type { UiCategoryFilter } from "@/lib/products/adapters";
 
-const CategoryItem = ({ category }) => {
-  const [selected, setSelected] = useState(false);
+const CategoryItem = ({
+  category,
+  selected,
+}: {
+  category: UiCategoryFilter;
+  selected: boolean;
+}) => {
   return (
-    <button
+    <Link
+      href={`/shop-with-sidebar?category_id=${encodeURIComponent(String(category.id))}`}
       className={`${
         selected && "text-blue"
       } group flex items-center justify-between ease-out duration-200 hover:text-blue `}
-      onClick={() => setSelected(!selected)}
     >
       <div className="flex items-center gap-2">
         <div
@@ -38,19 +46,17 @@ const CategoryItem = ({ category }) => {
         <span>{category.name}</span>
       </div>
 
-      <span
-        className={`${
-          selected ? "text-white bg-blue" : "bg-gray-2"
-        } inline-flex rounded-[30px] text-custom-xs px-2 ease-out duration-200 group-hover:text-white group-hover:bg-blue`}
-      >
-        {category.products}
-      </span>
-    </button>
+    </Link>
   );
 };
 
-const CategoryDropdown = ({ categories }) => {
+const CategoryDropdown = ({
+  categories,
+}: {
+  categories: UiCategoryFilter[];
+}) => {
   const [toggleDropdown, setToggleDropdown] = useState(true);
+  const selectedCategoryId = useSearchParams().get("category_id");
 
   return (
     <div className="bg-white shadow-1 rounded-lg">
@@ -95,9 +101,17 @@ const CategoryDropdown = ({ categories }) => {
           toggleDropdown ? "flex" : "hidden"
         }`}
       >
-        {categories.map((category, key) => (
-          <CategoryItem key={key} category={category} />
-        ))}
+        {categories.length === 0 ? (
+          <p className="text-sm text-dark-4">No categories available.</p>
+        ) : (
+          categories.map((category) => (
+            <CategoryItem
+              key={String(category.id)}
+              category={category}
+              selected={String(category.id) === selectedCategoryId}
+            />
+          ))
+        )}
       </div>
     </div>
   );

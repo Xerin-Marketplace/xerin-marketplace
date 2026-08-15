@@ -13,20 +13,7 @@ export type Category = {
   parent_id: ID | null;
   name: string;
   slug: string;
-  image_url?: string | null;
   created_at: string;
-};
-
-export type PopularCategory = {
-  id: ID;
-  parent_id: ID | null;
-  name: string;
-  slug: string;
-  image_url: string | null;
-  product_count: number;
-  search_count: number;
-  view_count: number;
-  popularity_score: number;
 };
 
 export type Brand = {

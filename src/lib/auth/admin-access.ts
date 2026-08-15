@@ -208,7 +208,6 @@ export const ADMIN_ITEM_PERMISSIONS: Record<string, string[]> = {
   "Currencies & FX": ["currencies:read", "payments:read"],
   Countries: ["countries:read", "payments:read"],
   "Fees & Commissions": ["commissions:read", "payments:read"],
-  "Payment Reports": ["finance_reports:read", "analytics:admin_read", "payments:read"],
   "Payment Audit Logs": ["payment_audit:read", "audit_logs:read"],
 
   // Promotions
@@ -227,7 +226,7 @@ export const ADMIN_ITEM_PERMISSIONS: Record<string, string[]> = {
   "Product Reports": ["analytics:admin_read", "can_view_products"],
   "Inventory Reports": ["analytics:admin_read", "inventory:manage"],
   "Customer Reports": ["analytics:admin_read", "can_view_users"],
-  "Payment Reports": ["analytics:admin_read", "payments:read"],
+  "Payment Reports": ["finance_reports:read", "analytics:admin_read", "payments:read"],
 
   // Communications
   Notifications: ["admin_notifications:read", "admin_notifications:manage"],

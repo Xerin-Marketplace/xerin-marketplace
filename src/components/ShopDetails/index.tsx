@@ -170,7 +170,9 @@ const ShopDetails = ({ product }: { product: Product }) => {
                   </div>
 
                   <div className="flex flex-wrap items-center gap-3 sm:gap-5.5 mb-3 sm:mb-4.5">
-                    <StarRating rating={product.rating} reviewCount={product.reviewCount ?? product.reviews} size={18} />
+                    {product.rating != null && product.reviewCount != null ? (
+                      <StarRating rating={product.rating} reviewCount={product.reviewCount} size={18} />
+                    ) : null}
 
                     <div className="hidden flex items-center gap-2.5">
                       {/* <!-- stars --> */}
@@ -311,7 +313,9 @@ const ShopDetails = ({ product }: { product: Product }) => {
                         </defs>
                       </svg>
 
-                      <span className="text-green"> In Stock </span>
+                      <span className="text-green">
+                        {product.isActive && product.status === "approved" ? "Available" : "Availability not confirmed"}
+                      </span>
                     </div>
                   </div>
 
@@ -345,7 +349,7 @@ const ShopDetails = ({ product }: { product: Product }) => {
                           fill="#ff6c2f"
                         />
                       </svg>
-                      Free delivery available
+                      {product.sku ? `SKU: ${product.sku}` : "Product reference unavailable"}
                     </li>
 
                     <li className="flex items-center gap-2.5">
@@ -367,12 +371,31 @@ const ShopDetails = ({ product }: { product: Product }) => {
                           fill="#ff6c2f"
                         />
                       </svg>
-                      Sales 30% Off Use Code: PROMO30
+                      Delivery options and charges are calculated at checkout.
                     </li>
                   </ul>
 
                   <form onSubmit={(e) => e.preventDefault()}>
-                    <div className="flex flex-col gap-3 sm:gap-4.5 border-y border-gray-3 dark:border-darkTheme-border-color mt-5 sm:mt-7.5 mb-6 sm:mb-9 py-5 sm:py-9">
+                    {product.variants?.length ? (
+                      <div className="my-6 border-y border-gray-3 py-5 dark:border-darkTheme-border-color">
+                        <h4 className="mb-3 font-medium text-dark dark:text-darkTheme-body-color">
+                          Available variants
+                        </h4>
+                        <div className="flex flex-wrap gap-2">
+                          {product.variants.map((variant) => (
+                            <span
+                              key={String(variant.id)}
+                              className="rounded-lg border border-gray-3 px-3 py-2 text-sm dark:border-darkTheme-border-color"
+                            >
+                              {variant.name}
+                              {variant.sku ? ` · ${variant.sku}` : ""}
+                              {variant.price != null ? ` · ${formatCurrency(variant.price)}` : ""}
+                            </span>
+                          ))}
+                        </div>
+                      </div>
+                    ) : null}
+                    {false && <div className="flex flex-col gap-3 sm:gap-4.5 border-y border-gray-3 dark:border-darkTheme-border-color mt-5 sm:mt-7.5 mb-6 sm:mb-9 py-5 sm:py-9">
                       {/* <!-- details item --> */}
                       <div className="flex items-center gap-4">
                         <div className="min-w-[65px]">
@@ -610,7 +633,7 @@ const ShopDetails = ({ product }: { product: Product }) => {
                           ))}
                         </div>
                       </div>
-                    </div>
+                    </div>}
 
                     <div className="flex flex-wrap items-center gap-3 sm:gap-4.5">
                       <div className="flex items-center rounded-md border border-gray-3 dark:border-darkTheme-border-color">
@@ -740,38 +763,19 @@ const ShopDetails = ({ product }: { product: Product }) => {
                 >
                   <div className="max-w-[670px] w-full">
                     <h2 className="font-medium text-lg sm:text-2xl text-dark dark:text-white mb-4 sm:mb-7">
-                      Specifications:
+                      Product description
                     </h2>
-
-                    <p className="mb-4 sm:mb-6 text-sm sm:text-base">
-                      Keep the product in suitable storage conditions and follow seller
-                      guidance for handling, cleaning, charging, or usage based
-                      on the product category.
-                    </p>
-                    <p className="mb-4 sm:mb-6 text-sm sm:text-base">
-                      For warranty, returns, or support questions, contact Xerin Market support
-                      or review the seller&apos;s return policy before purchase.
-                    </p>
                     <p className="text-sm sm:text-base">
-                      Buyers can review product details, add items to cart, and complete
-                      checkout through supported payment options when backend
-                      integrations are connected.
+                      {product.description || "The seller has not provided a product description."}
                     </p>
                   </div>
 
                   <div className="max-w-[447px] w-full">
                     <h2 className="font-medium text-lg sm:text-2xl text-dark dark:text-white mb-4 sm:mb-7">
-                      Care & Maintenance:
+                      Listing information
                     </h2>
-
-                    <p className="mb-4 sm:mb-6 text-sm sm:text-base">
-                      Keep the product in suitable storage conditions and follow seller
-                      guidance for handling, cleaning, charging, or usage based
-                      on the product category.
-                    </p>
                     <p className="text-sm sm:text-base">
-                      For warranty, returns, or support questions, contact Xerin Market support
-                      or review the seller&apos;s return policy before purchase.
+                      {product.sku ? `SKU: ${product.sku}` : "No additional listing information is available."}
                     </p>
                   </div>
                 </div>

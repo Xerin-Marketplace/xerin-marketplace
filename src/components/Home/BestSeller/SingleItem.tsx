@@ -200,7 +200,7 @@ const SingleItem = ({ item }: { item: Product }) => {
         <div className="border-t border-gray-3 dark:border-darkTheme-border-color bg-white/70 dark:bg-darkTheme-card/70 px-5 py-4 backdrop-blur-sm">
           <div className="flex items-center justify-between gap-3 text-sm">
             <span className="font-medium text-dark dark:text-white">
-              Fast delivery ready
+              Marketplace listing
             </span>
             <button
               onClick={() => {

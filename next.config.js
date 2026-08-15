@@ -2,6 +2,11 @@ const path = require("path");
 
 const apiBaseUrl =
   process.env.NEXT_PUBLIC_API_BASE_URL || "http://localhost:8000";
+const backendBaseUrl =
+  process.env.BACKEND_INTERNAL_URL || "http://127.0.0.1:8000";
+const apiCspSource = /^https?:\/\//.test(apiBaseUrl)
+  ? new URL(apiBaseUrl).origin
+  : "";
 
 const siteUrl =
   process.env.NEXT_PUBLIC_SITE_URL || "http://localhost:3000";
@@ -70,6 +75,19 @@ const nextConfig = {
     "6a5b-197-250-96-203.ngrok-free.app",
   ],
 
+  async rewrites() {
+    return [
+      {
+        source: "/backend-api/:path*",
+        destination: `${backendBaseUrl}/api/v1/:path*`,
+      },
+      {
+        source: "/backend-uploads/:path*",
+        destination: `${backendBaseUrl}/uploads/:path*`,
+      },
+    ];
+  },
+
   async headers() {
     const csp = [
       "default-src 'self'",
@@ -85,12 +103,12 @@ const nextConfig = {
       // - HTTPS images
       // - FastAPI uploads
       // - Unsplash mock images
-      `img-src 'self' data: blob: https: ${apiBaseUrl} https://images.unsplash.com https://source.unsplash.com`,
+      `img-src 'self' data: blob: https: ${apiCspSource} https://images.unsplash.com https://source.unsplash.com`,
 
       "font-src 'self' data:",
 
       // Frontend API calls
-      `connect-src 'self' ${apiBaseUrl} https:`,
+      `connect-src 'self' ${apiCspSource} https:`,
 
       "frame-src 'self' blob:",
 

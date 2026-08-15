@@ -4,7 +4,6 @@ import {
   getProduct as apiGetProduct,
   getMyProducts as apiGetMyProducts,
   getCategories as apiGetCategories,
-  getPopularCategories as apiGetPopularCategories,
   getBrands as apiGetBrands,
   createProduct as apiCreateProduct,
   updateProduct as apiUpdateProduct,
@@ -20,6 +19,8 @@ export const useProducts = (query?: ProductListQuery) => {
   return useQuery({
     queryKey: ["products", query],
     queryFn: () => apiGetProducts(query),
+    retry: false,
+    staleTime: 30_000,
   });
 };
 
@@ -28,6 +29,7 @@ export const useProduct = (id: ID) => {
     queryKey: ["product", id],
     queryFn: () => apiGetProduct(id),
     enabled: Boolean(id),
+    retry: false,
   });
 };
 
@@ -35,6 +37,7 @@ export const useMyProducts = (query?: ProductListQuery) => {
   return useQuery({
     queryKey: ["my-products", query],
     queryFn: () => apiGetMyProducts(query),
+    retry: false,
   });
 };
 
@@ -42,14 +45,8 @@ export const useCategories = () => {
   return useQuery({
     queryKey: ["categories"],
     queryFn: apiGetCategories,
-  });
-};
-
-export const usePopularCategories = (limit = 12) => {
-  return useQuery({
-    queryKey: ["popular-categories", limit],
-    queryFn: () => apiGetPopularCategories(limit),
     staleTime: 60_000,
+    retry: false,
   });
 };
 
@@ -57,6 +54,7 @@ export const useBrands = () => {
   return useQuery({
     queryKey: ["brands"],
     queryFn: apiGetBrands,
+    retry: false,
   });
 };
 

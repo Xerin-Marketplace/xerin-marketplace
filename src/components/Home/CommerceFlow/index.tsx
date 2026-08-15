@@ -4,21 +4,21 @@ import { ROUTES } from "@/constants/links";
 const steps = [
   {
     step: "01",
-    title: "Discover trusted stores",
+    title: "Discover marketplace stores",
     description:
-      "Browse curated categories and products from verified sellers that fit your budget and needs.",
+      "Browse categories and products returned by the marketplace catalog.",
   },
   {
     step: "02",
-    title: "Checkout with confidence",
+    title: "Review your checkout",
     description:
-      "Pay with secure options and review order details before you confirm the purchase.",
+      "Review the payment and delivery options returned for your order before confirming.",
   },
   {
     step: "03",
-    title: "Track delivery end to end",
+    title: "Track available delivery updates",
     description:
-      "Follow the order from dispatch to doorstep with Xerin Logistics updates in one place.",
+      "See delivery events returned by the order tracking service in one place.",
   },
 ];
 
