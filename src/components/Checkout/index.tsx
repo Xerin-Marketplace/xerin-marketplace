@@ -75,14 +75,13 @@ const Checkout = () => {
   const isAuthenticated = useAuthStore((state) => state.isAuthenticated);
   const hasHydrated = useAuthStore((state) => state.hasHydrated);
   const [selectedAddressId, setSelectedAddressId] = useState("");
-  const [idempotencyKey] = useState(() =>
-    typeof crypto !== "undefined" && "randomUUID" in crypto
-      ? crypto.randomUUID()
-      : `checkout-${Date.now()}-${Math.random().toString(36).slice(2)}`,
-  );
+  const [paymentProvider, setPaymentProvider] = useState("");
+  const [paymentPhone, setPaymentPhone] = useState("");
   const { data: cart, isLoading: isLoadingCart, error: cartError } = useBackendCart(isAuthenticated);
   const { addresses, createAddress, isCreatingAddress, isLoadingAddresses } = useAddresses(isAuthenticated);
   const createOrder = useCreateOrder();
+  const cartItems = cart ? mapBackendCartToUi(cart) : [];
+  const cartSubtotal = Number(cart?.subtotal ?? 0);
 
   useEffect(() => {
     if (!selectedAddressId && addresses.length) {
@@ -92,13 +91,13 @@ const Checkout = () => {
   }, [addresses, selectedAddressId]);
 
   const shippingOptions = useQuery({
-    queryKey: ["checkout", "shipping-options", selectedAddressId],
-    queryFn: ({ signal }) => checkoutApi.shippingOptions(selectedAddressId, signal),
+    queryKey: ["checkout", "shipping-options", selectedAddressId, cartSubtotal],
+    queryFn: ({ signal }) => checkoutApi.shippingOptions(selectedAddressId, cartSubtotal, 0, signal),
     enabled: Boolean(selectedAddressId && isAuthenticated),
   });
   const paymentOptions = useQuery({
     queryKey: ["checkout", "payment-options"],
-    queryFn: ({ signal }) => checkoutApi.paymentOptions(signal),
+    queryFn: () => checkoutApi.paymentOptions(),
     enabled: isAuthenticated,
   });
 
@@ -116,18 +115,21 @@ const Checkout = () => {
     }
   }, [paymentOptions.data, form.paymentMethod]);
 
-  const cartItems = cart ? mapBackendCartToUi(cart) : [];
-  const quote = useQuery({
-    queryKey: ["checkout", "quote", selectedAddressId, form.shippingMethod, cart?.coupon_code],
-    queryFn: () => checkoutApi.quote({
-      shipping_address_id: selectedAddressId,
-      shipping_method_id: form.shippingMethod,
-      coupon_code: cart?.coupon_code ?? undefined,
-    }),
-    enabled: Boolean(selectedAddressId && form.shippingMethod && cartItems.length),
-  });
-  const shippingAmount = quote.data ? Number(quote.data.shipping_amount) : null;
-  const total = quote.data ? Number(quote.data.total) : null;
+  useEffect(() => {
+    const selectedOption = paymentOptions.data?.find((option) => option.id === form.paymentMethod);
+    if (!selectedOption) return;
+    if (selectedOption.requires_phone && !selectedOption.providers.includes(paymentProvider)) {
+      setPaymentProvider(selectedOption.providers[0] ?? "");
+    } else if (!selectedOption.requires_phone) {
+      setPaymentProvider(selectedOption.providers[0] ?? "azampay");
+    }
+  }, [form.paymentMethod, paymentOptions.data, paymentProvider]);
+
+  const selectedShipping = shippingOptions.data?.find((option) => option.id === form.shippingMethod);
+  const shippingAmount = selectedShipping ? Number(selectedShipping.amount) : null;
+  const total = shippingAmount === null
+    ? null
+    : cartSubtotal - Number(cart?.discount_amount ?? 0) + shippingAmount;
 
   const updateField = (field: keyof CheckoutForm, value: string | boolean) => {
     setForm((prev) => ({ ...prev, [field]: value }));
@@ -162,7 +164,7 @@ const Checkout = () => {
           is_default: addresses.length === 0,
         });
         shippingAddressId = String(billingAddress.id);
-        const available = await checkoutApi.shippingOptions(shippingAddressId);
+        const available = await checkoutApi.shippingOptions(shippingAddressId, cartSubtotal);
         if (!available.length) throw new Error("Delivery is unavailable for this address");
         shippingMethodId = available[0].id;
       }
@@ -171,26 +173,35 @@ const Checkout = () => {
         throw new Error("Select an available shipping and payment method");
       }
 
-      await checkoutApi.quote({
-        shipping_address_id: shippingAddressId,
-        shipping_method_id: shippingMethodId,
-        coupon_code: cart?.coupon_code ?? undefined,
-      });
+      const selectedPayment = paymentOptions.data?.find((option) => option.id === form.paymentMethod);
+      const phoneNumber = paymentPhone.trim() || form.phone.trim();
+      if (selectedPayment?.requires_phone && (!paymentProvider || !phoneNumber)) {
+        throw new Error("Select a mobile network and enter the AzamPay payment phone number");
+      }
 
       const order = await createOrder.mutateAsync({
         shipping_address_id: shippingAddressId,
-        shipping_method_id: shippingMethodId,
-        payment_method: form.paymentMethod,
-        idempotency_key: idempotencyKey,
+        shipping_rate_id: shippingMethodId,
         coupon_code: cart?.coupon_code || undefined,
         notes: form.notes || undefined,
       });
 
+      const successUrl = `${window.location.origin}/order-success/${order.id}?payment=success`;
+      const failureUrl = `${window.location.origin}/checkout?payment=failed&order_id=${order.id}`;
       const payment = await paymentsApi.initiate({
         order_id: String(order.id),
         method: form.paymentMethod,
+        provider: paymentProvider || "azampay",
+        phone_number: selectedPayment?.requires_phone ? phoneNumber : undefined,
+        success_url: form.paymentMethod === "card" ? successUrl : undefined,
+        failure_url: form.paymentMethod === "card" ? failureUrl : undefined,
       });
 
+      const checkoutUrl = payment.provider_response?.checkout_url;
+      if (form.paymentMethod === "card" && checkoutUrl) {
+        window.location.assign(checkoutUrl);
+        return;
+      }
       toast.success(payment.status === "pending" ? "Order placed. Payment is pending." : "Order placed successfully");
       router.push(`/order-success/${order.id}`);
     } catch (err: unknown) {
@@ -294,14 +305,14 @@ const Checkout = () => {
                     <div className="flex items-center justify-between py-5 border-b border-gray-3 dark:border-darkTheme-border-color">
                       <p className="text-dark dark:text-darkTheme-body-color">Shipping</p>
                       <p className="text-dark dark:text-darkTheme-body-color text-right">
-                        {shippingAmount === null ? "Select delivery address" : formatCurrency(shippingAmount, quote.data?.currency)}
+                        {shippingAmount === null ? "Select delivery address" : formatCurrency(shippingAmount, selectedShipping?.currency)}
                       </p>
                     </div>
 
                     <div className="flex items-center justify-between pt-5">
                       <p className="font-medium text-lg text-dark dark:text-white">Total</p>
                       <p className="font-medium text-lg text-dark dark:text-white text-right">
-                        {total === null ? "Pending quote" : formatCurrency(total, quote.data?.currency)}
+                        {total === null ? "Pending quote" : formatCurrency(total, selectedShipping?.currency ?? cart?.currency)}
                       </p>
                     </div>
                   </div>
@@ -319,11 +330,15 @@ const Checkout = () => {
                   selected={form.paymentMethod}
                   onChange={(value) => updateField("paymentMethod", value)}
                   isLoading={paymentOptions.isLoading}
+                  provider={paymentProvider}
+                  phoneNumber={paymentPhone}
+                  onProviderChange={setPaymentProvider}
+                  onPhoneNumberChange={setPaymentPhone}
                 />
 
                 <button
                   type="submit"
-                  disabled={createOrder.isPending || isCreatingAddress || quote.isFetching || !form.paymentMethod}
+                  disabled={createOrder.isPending || isCreatingAddress || shippingOptions.isFetching || !form.paymentMethod || !form.shippingMethod}
                   className="w-full flex justify-center font-medium text-white bg-blue py-3 px-6 rounded-md ease-out duration-200 hover:bg-blue-dark mt-7.5 disabled:opacity-50"
                 >
                   {createOrder.isPending || isCreatingAddress ? "Processing..." : "Place Order"}

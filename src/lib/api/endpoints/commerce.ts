@@ -1,7 +1,6 @@
 import axiosInstance from "../client";
 import type {
   Cart,
-  CheckoutQuote,
   GuestCartMergeResult,
   Order,
   PaginatedOrders,
@@ -29,18 +28,53 @@ export const cartApi = {
 };
 
 export const checkoutApi = {
-  shippingOptions: async (addressId: string, signal?: AbortSignal) =>
-    (await axiosInstance.get<ShippingOption[]>("/checkout/shipping-options", {
-      params: { address_id: addressId },
-      signal,
-    })).data,
-  paymentOptions: async (signal?: AbortSignal) =>
-    (await axiosInstance.get<PaymentOption[]>("/checkout/payment-options", { signal })).data,
-  quote: async (payload: {
-    shipping_address_id: string;
-    shipping_method_id: string;
-    coupon_code?: string;
-  }) => (await axiosInstance.post<CheckoutQuote>("/checkout/quote", payload)).data,
+  shippingOptions: async (
+    addressId: string,
+    subtotal: number,
+    weightKg = 0,
+    signal?: AbortSignal,
+  ) => {
+    type BackendShippingOption = {
+      rate_id: string;
+      method_id: string;
+      method_name: string;
+      carrier_name?: string | null;
+      amount: number | string;
+      currency: string;
+      min_delivery_days: number;
+      max_delivery_days: number;
+    };
+    const response = await axiosInstance.post<BackendShippingOption[]>(
+      "/shipping/quote",
+      { address_id: addressId, subtotal, weight_kg: weightKg },
+      { signal },
+    );
+    return response.data.map((option) => ({
+      id: option.rate_id,
+      method_id: option.method_id,
+      service_name: option.method_name,
+      carrier: option.carrier_name || "Marketplace delivery",
+      amount: option.amount,
+      currency: option.currency,
+      estimated_min_days: option.min_delivery_days,
+      estimated_max_days: option.max_delivery_days,
+      tracking_supported: true,
+    } satisfies ShippingOption));
+  },
+  paymentOptions: async (): Promise<PaymentOption[]> => [
+    {
+      id: "mobile_money",
+      label: "AzamPay Mobile Money",
+      requires_phone: true,
+      providers: ["Airtel", "Tigo", "Halopesa", "Azampesa", "Mpesa"],
+    },
+    {
+      id: "card",
+      label: "AzamPay Card",
+      requires_phone: false,
+      providers: ["azampay"],
+    },
+  ],
 };
 
 export const ordersApi = {
@@ -50,9 +84,7 @@ export const ordersApi = {
     (await axiosInstance.get<Order>(`/orders/${id}`, { signal })).data,
   create: async (payload: {
     shipping_address_id: string;
-    shipping_method_id: string;
-    payment_method: string;
-    idempotency_key: string;
+    shipping_rate_id: string;
     coupon_code?: string;
     notes?: string;
   }) =>
@@ -84,6 +116,6 @@ export const paymentsApi = {
     (await axiosInstance.get<Payment[]>("/payments/my-payments", { signal })).data,
   get: async (id: string, signal?: AbortSignal) =>
     (await axiosInstance.get<Payment>(`/payments/${id}`, { signal })).data,
-  initiate: async (payload: { order_id: string; method: string; provider?: string; phone_number?: string }) =>
+  initiate: async (payload: { order_id: string; method: string; provider?: string; phone_number?: string; success_url?: string; failure_url?: string }) =>
     (await axiosInstance.post<Payment>("/payments/initiate", payload)).data,
 };

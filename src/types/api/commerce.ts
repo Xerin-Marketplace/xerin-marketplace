@@ -33,6 +33,7 @@ export type GuestCartMergeResult = {
 
 export type ShippingOption = {
   id: string;
+  method_id: string;
   service_name: string;
   carrier: string;
   amount: number | string;
@@ -133,6 +134,11 @@ export type Payment = TimestampFields & {
   provider: string | null;
   status: string;
   provider_transaction_id: string | null;
+  provider_response?: {
+    checkout_url?: string | null;
+    message?: string | null;
+    [key: string]: unknown;
+  } | null;
   paid_at: string | null;
   transactions: Array<Record<string, unknown>>;
 };
