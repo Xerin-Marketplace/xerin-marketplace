@@ -1,17 +1,30 @@
 "use client";
-
-import { FileText } from "lucide-react";
-import SellerUnavailableModule from "@/components/Seller/shared/SellerUnavailableModule";
-
-export default function SellerOrderDetail({ orderId }: { orderId: string }) {
-  return (
-    <SellerUnavailableModule
-      title={`Order ${orderId}`}
-      description="View order details, update fulfilment status and manage tracking from the seller order detail page."
-      icon={FileText}
-      action="Seller order details are not available yet. A seller-scoped order API is required."
-      backHref="/seller/orders"
-      backLabel="Back to orders"
-    />
-  );
+import Link from "next/link";
+import {useEffect,useState} from "react";
+import {ArrowLeft,Box,CheckCircle2,MapPin,PackageCheck,RefreshCw,Truck,XCircle} from "lucide-react";
+import toast from "react-hot-toast";
+import {sellerOrdersApi} from "@/lib/api/endpoints/seller-orders";
+import type {SellerOrder} from "@/types/api/seller-order";
+import {Badge} from "./index";
+const money=(v:number|string,c="TZS")=>new Intl.NumberFormat("en-TZ",{style:"currency",currency:c,maximumFractionDigits:0}).format(Number(v||0));
+export default function SellerOrderDetail({orderId}:{orderId:string}){
+ const [order,setOrder]=useState<SellerOrder|null>(null),[loading,setLoading]=useState(true),[busy,setBusy]=useState(false),[notes,setNotes]=useState("");
+ const load=async()=>{setLoading(true);try{setOrder(await sellerOrdersApi.get(orderId))}catch(e:any){toast.error(e?.response?.data?.detail||"Unable to load order")}finally{setLoading(false)}};
+ useEffect(()=>{void load()},[orderId]);
+ const run=async(fn:()=>Promise<SellerOrder>,msg:string)=>{setBusy(true);try{setOrder(await fn());toast.success(msg)}catch(e:any){toast.error(e?.response?.data?.detail||"Order action failed")}finally{setBusy(false)}};
+ const dispatch=async()=>{const carrier=prompt("Carrier / logistics company name:",order?.shipping_carrier||"");if(!carrier)return;const tracking=prompt("Tracking number:");if(!tracking)return;await run(()=>sellerOrdersApi.dispatch(orderId,{carrier_name:carrier,tracking_number:tracking,notes:notes||null}),"Order dispatched")};
+ const cancel=async()=>{const reason=prompt("Reason for cancellation request:");if(!reason)return;await run(()=>sellerOrdersApi.cancel(orderId,reason,notes),"Cancellation requested")};
+ if(loading)return <div className="p-14 text-center text-slate-500"><RefreshCw className="mx-auto animate-spin"/><p className="mt-2">Loading order...</p></div>;
+ if(!order)return <div className="rounded-2xl border bg-white p-8">Seller order could not be loaded.</div>;
+ const s=order.seller_status;
+ return <div className="space-y-5">
+  <div className="flex flex-col gap-4 rounded-2xl border bg-white p-6 shadow-sm dark:border-white/10 dark:bg-[#1f2937] sm:flex-row sm:items-center sm:justify-between"><div><Link href="/seller/orders" className="inline-flex items-center gap-1 text-xs font-semibold text-slate-500"><ArrowLeft size={14}/>Back to orders</Link><h1 className="mt-3 text-2xl font-bold dark:text-white">Order #{order.order_id.slice(0,8)}</h1><div className="mt-2"><Badge status={s}/></div></div><div className="text-right"><p className="text-xs text-slate-400">Seller subtotal</p><p className="text-2xl font-bold text-[#f7941d]">{money(order.seller_subtotal,order.currency)}</p></div></div>
+  <div className="grid gap-5 xl:grid-cols-[1.4fr_.8fr]">
+   <div className="space-y-5"><section className="rounded-2xl border bg-white p-5 dark:border-white/10 dark:bg-[#1f2937]"><h2 className="font-bold dark:text-white">Items to fulfil</h2><div className="mt-4 divide-y dark:divide-white/10">{order.items.map(i=><div key={i.id} className="flex justify-between gap-4 py-4"><div><b className="dark:text-white">{i.product_name}</b><p className="text-xs text-slate-400">{i.variant_name||"Standard"} · Qty {i.quantity}</p></div><b>{money(i.total_price,order.currency)}</b></div>)}</div></section>
+   <section className="rounded-2xl border bg-white p-5 dark:border-white/10 dark:bg-[#1f2937]"><h2 className="font-bold dark:text-white">Fulfilment action</h2><p className="mt-1 text-xs text-slate-400">Actions follow the backend order state machine. Ready to Ship requires confirmed package details in the backend.</p><textarea value={notes} onChange={e=>setNotes(e.target.value)} placeholder="Optional seller notes..." className="mt-4 min-h-24 w-full rounded-xl border p-3 text-sm dark:border-white/10 dark:bg-white/5"/><div className="mt-4 flex flex-wrap gap-2">{s==="new"&&<Action icon={CheckCircle2} label="Accept order" busy={busy} onClick={()=>run(()=>sellerOrdersApi.accept(orderId,notes),"Order accepted")}/>} {s==="accepted"&&<Action icon={Box} label="Start processing" busy={busy} onClick={()=>run(()=>sellerOrdersApi.process(orderId,notes),"Processing started")}/>} {(s==="accepted"||s==="processing")&&<Action icon={PackageCheck} label="Mark ready to ship" busy={busy} onClick={()=>run(()=>sellerOrdersApi.ready(orderId,notes),"Ready to ship")}/>} {s==="ready_to_ship"&&<Action icon={Truck} label="Dispatch" busy={busy} onClick={dispatch}/>} {!['shipped','delivered','cancelled','cancellation_requested'].includes(s)&&<button disabled={busy} onClick={cancel} className="inline-flex items-center gap-2 rounded-xl border border-red-200 px-4 py-2.5 text-sm font-semibold text-red-600"><XCircle size={16}/>Request cancellation</button>}</div></section></div>
+   <div className="space-y-5"><section className="rounded-2xl border bg-white p-5 dark:border-white/10 dark:bg-[#1f2937]"><h2 className="font-bold dark:text-white">Customer</h2><p className="mt-3 font-semibold">{order.customer_name}</p><p className="text-sm text-slate-500">{order.customer_phone||"No phone"}</p></section><section className="rounded-2xl border bg-white p-5 dark:border-white/10 dark:bg-[#1f2937]"><h2 className="flex items-center gap-2 font-bold dark:text-white"><MapPin size={17}/>Delivery</h2><p className="mt-3 text-sm">{order.shipping_method_name||"Shipping method pending"}</p><p className="text-sm text-slate-500">{order.shipping_carrier||"Carrier pending"}</p><Address value={order.shipping_address}/></section>{order.cancellation_reason&&<section className="rounded-2xl border border-red-200 bg-red-50 p-5"><b className="text-red-700">Cancellation reason</b><p className="mt-2 text-sm text-red-700">{order.cancellation_reason}</p></section>}</div>
+  </div>
+ </div>
 }
+function Action({icon:Icon,label,busy,onClick}:{icon:any;label:string;busy:boolean;onClick:()=>void}){return <button disabled={busy} onClick={onClick} className="inline-flex items-center gap-2 rounded-xl bg-[#f7941d] px-4 py-2.5 text-sm font-semibold text-white disabled:opacity-50"><Icon size={16}/>{label}</button>}
+function Address({value}:{value?:Record<string,unknown>|null}){if(!value)return <p className="mt-3 text-xs text-slate-400">Shipping address unavailable.</p>;const parts=[value.recipient_name,value.street,value.ward,value.district,value.city,value.region,value.country].filter(Boolean).map(String);return <p className="mt-3 text-xs leading-5 text-slate-500">{parts.join(", ")}</p>}
