@@ -96,7 +96,7 @@ const approvedGroups: Array<{ label: string; items: NavItem[] }> = [
   {
     label: "Finance",
     items: [
-      { label: "Earnings", href: "/seller/earnings", icon: BarChart3 },
+      { label: "Wallet & Earnings", href: "/seller/earnings", icon: BarChart3 },
       { label: "Payout Accounts", href: "/seller/kyc?tab=payouts", icon: WalletCards },
       { label: "Transactions", href: "/seller/transactions", icon: CreditCard },
     ],
