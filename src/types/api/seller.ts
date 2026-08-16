@@ -73,6 +73,12 @@ export type PayoutAccount = TimestampFields & {
   account_number: string;
   currency: string;
   is_default?: boolean;
+
+  // Seller Phase 2 payout verification state.
+  is_active?: boolean;
+  verification_status?: "pending" | "verified" | "rejected" | string;
+  provider_reference?: string | null;
+  verified_at?: string | null;
 };
 
 export type PayoutAccountRequest = Omit<

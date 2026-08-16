@@ -8,9 +8,58 @@ import type { SellerDocumentType, SellerKycDocument, PayoutAccount, SellerKycSta
 import { useRouter, useSearchParams } from "next/navigation";
 import { FormEvent, useEffect, useMemo, useState } from "react";
 import toast from "react-hot-toast";
-import { Eye, FileText, ImageIcon, LockKeyhole, Pencil, X } from "lucide-react";
+import {
+  BadgeCheck,
+  Banknote,
+  CircleAlert,
+  Clock3,
+  CreditCard,
+  Eye,
+  FileText,
+  ImageIcon,
+  LockKeyhole,
+  Pencil,
+  ShieldCheck,
+  Smartphone,
+  Trash2,
+  WalletCards,
+  X,
+} from "lucide-react";
 import Link from "next/link";
 const documentLabel = (value: string) => value.replaceAll("_", " ").replace(/\b\w/g, (letter) => letter.toUpperCase());
+
+const payoutStatusMeta = (status?: string | null) => {
+  const value = (status || "pending").toLowerCase();
+
+  if (value === "verified") {
+    return {
+      label: "Verified",
+      className: "border-emerald-200 bg-emerald-50 text-emerald-700",
+      icon: BadgeCheck,
+    };
+  }
+
+  if (value === "rejected") {
+    return {
+      label: "Rejected",
+      className: "border-red-200 bg-red-50 text-red-700",
+      icon: CircleAlert,
+    };
+  }
+
+  return {
+    label: "Pending verification",
+    className: "border-amber-200 bg-amber-50 text-amber-700",
+    icon: Clock3,
+  };
+};
+
+const maskAccountNumber = (value: string) => {
+  const clean = value.trim();
+  if (clean.length <= 4) return clean;
+  return `${"•".repeat(Math.min(clean.length - 4, 8))}${clean.slice(-4)}`;
+};
+
 
 type StoredUser = {
   account_type?: string;
@@ -164,7 +213,9 @@ const SellerKyc = () => {
         },
         token
       );
-      toast.success("Payout account added successfully.");
+      toast.success(
+        "Payout account added. It must be verified before it can receive seller payouts.",
+      );
       setProvider("");
       setAccountName("");
       setAccountNumber("");
@@ -217,6 +268,23 @@ const SellerKyc = () => {
     (status?.required_documents ?? []).every((type) =>
       documents.some((document) => document.document_type === type)
     );
+  const verifiedPayoutAccounts = payoutAccounts.filter(
+    (account) =>
+      account.is_active !== false &&
+      (account.verification_status || "pending") === "verified",
+  );
+  const pendingPayoutAccounts = payoutAccounts.filter(
+    (account) =>
+      account.is_active !== false &&
+      (account.verification_status || "pending") === "pending",
+  );
+  const rejectedPayoutAccounts = payoutAccounts.filter(
+    (account) => (account.verification_status || "pending") === "rejected",
+  );
+  const defaultPayoutAccount = payoutAccounts.find(
+    (account) => account.is_default && account.is_active !== false,
+  );
+
   const reviewLocked =
     status?.seller_status === "approved" ||
     documents.some((document) => document.status === "under_review");
@@ -428,158 +496,423 @@ const SellerKyc = () => {
               )}
             </div>
 
-            <div className={`${activeTab === "payouts" ? "block" : "hidden"} rounded-xl bg-white dark:bg-darkTheme-card shadow-1 p-6 sm:p-8`}>
-              <h2 className="text-xl font-semibold text-dark dark:text-white mb-6">Payout Accounts</h2>
-
-              {payoutAccounts.length === 0 ? (
-                <p className="text-dark-4 dark:text-darkTheme-body-color mb-6">No payout accounts added yet.</p>
-              ) : (
-                <div className="space-y-4 mb-8">
-                  {payoutAccounts.map((account) => (
-                    <div
-                      key={account.id}
-                      className="flex items-start justify-between rounded-lg border border-gray-3 dark:border-darkTheme-border-color p-4"
-                    >
+            <div
+              className={`${activeTab === "payouts" ? "block" : "hidden"} space-y-5`}
+            >
+              <div className="rounded-2xl border border-[#e7ebf0] bg-white p-5 shadow-sm dark:border-white/10 dark:bg-darkTheme-card sm:p-6">
+                <div className="flex flex-col gap-4 lg:flex-row lg:items-start lg:justify-between">
+                  <div className="max-w-2xl">
+                    <div className="flex items-center gap-3">
+                      <span className="flex h-10 w-10 items-center justify-center rounded-xl bg-orange-50 text-[#f7941d] dark:bg-orange-400/10">
+                        <WalletCards size={20} />
+                      </span>
                       <div>
-                        <p className="font-medium text-dark dark:text-white">
-                          {account.account_name} — {account.provider}
-                        </p>
-                        <p className="text-sm text-dark-4 dark:text-darkTheme-body-color">
-                          {account.account_number}
-                        </p>
-                        <p className="text-sm text-dark-4 dark:text-darkTheme-body-color capitalize">
-                          {account.account_type} • {account.currency}
-                          {account.is_default ? " • Default" : ""}
+                        <h2 className="text-xl font-bold text-dark dark:text-white">
+                          Seller Payout Accounts
+                        </h2>
+                        <p className="mt-1 text-sm leading-6 text-dark-4 dark:text-darkTheme-body-color">
+                          Add the bank or mobile-money account where Xerin can settle
+                          released marketplace earnings. New payout accounts require
+                          verification before they can be used for payout requests.
                         </p>
                       </div>
-                      <div className="flex items-center gap-3">
-                        <button
-                          type="button"
-                          onClick={() => toast("Payout account updates are not available yet.")}
-                          className="text-sm text-blue hover:text-blue-dark"
-                        >
-                          Edit
-                        </button>
-                        {!account.is_default && (
-                          <button
-                            type="button"
-                            onClick={() => toast("Setting a default payout account is not available yet.")}
-                            className="text-sm text-warning hover:text-warning-dark"
+                    </div>
+                  </div>
+
+                  <div className="grid grid-cols-3 gap-2 sm:min-w-[340px]">
+                    <PayoutSummary
+                      label="Verified"
+                      value={verifiedPayoutAccounts.length}
+                      tone="green"
+                    />
+                    <PayoutSummary
+                      label="Pending"
+                      value={pendingPayoutAccounts.length}
+                      tone="amber"
+                    />
+                    <PayoutSummary
+                      label="Rejected"
+                      value={rejectedPayoutAccounts.length}
+                      tone="red"
+                    />
+                  </div>
+                </div>
+
+                <div className="mt-5 rounded-xl border border-blue-100 bg-blue-50/70 p-4 text-sm leading-6 text-blue-800 dark:border-blue-400/20 dark:bg-blue-400/10 dark:text-blue-200">
+                  <div className="flex items-start gap-3">
+                    <ShieldCheck size={18} className="mt-0.5 shrink-0" />
+                    <p>
+                      A payout request will only be accepted when the selected
+                      payout account is <strong>active and verified</strong>.
+                      Verification is performed by an authorized Xerin staff user.
+                    </p>
+                  </div>
+                </div>
+              </div>
+
+              <section className="grid gap-5 xl:grid-cols-[1fr_420px]">
+                <div className="rounded-2xl border border-[#e7ebf0] bg-white p-5 shadow-sm dark:border-white/10 dark:bg-darkTheme-card sm:p-6">
+                  <div className="mb-5 flex items-center justify-between gap-3">
+                    <div>
+                      <h3 className="font-bold text-dark dark:text-white">
+                        Registered accounts
+                      </h3>
+                      <p className="mt-1 text-xs text-dark-4 dark:text-darkTheme-body-color">
+                        {payoutAccounts.length
+                          ? `${payoutAccounts.length} payout account${payoutAccounts.length === 1 ? "" : "s"}`
+                          : "No payout account configured"}
+                      </p>
+                    </div>
+
+                    {defaultPayoutAccount && (
+                      <span className="rounded-full border border-orange-200 bg-orange-50 px-3 py-1 text-xs font-semibold text-[#c66c0b]">
+                        Default: {defaultPayoutAccount.provider}
+                      </span>
+                    )}
+                  </div>
+
+                  {payoutAccounts.length === 0 ? (
+                    <div className="rounded-2xl border border-dashed border-[#d9dee7] bg-slate-50 px-5 py-10 text-center dark:border-white/10 dark:bg-white/[0.03]">
+                      <WalletCards
+                        size={30}
+                        className="mx-auto text-[#94a3b8]"
+                      />
+                      <p className="mt-3 font-semibold text-dark dark:text-white">
+                        No payout account yet
+                      </p>
+                      <p className="mx-auto mt-1 max-w-md text-sm leading-6 text-dark-4 dark:text-darkTheme-body-color">
+                        Add a bank or mobile-money account using the form. The
+                        account will start in Pending Verification status.
+                      </p>
+                    </div>
+                  ) : (
+                    <div className="space-y-3">
+                      {payoutAccounts.map((account) => {
+                        const statusMeta = payoutStatusMeta(
+                          account.verification_status,
+                        );
+                        const StatusIcon = statusMeta.icon;
+                        const isInactive = account.is_active === false;
+
+                        return (
+                          <article
+                            key={account.id}
+                            className={`rounded-2xl border p-4 transition ${
+                              isInactive
+                                ? "border-slate-200 bg-slate-50 opacity-70 dark:border-white/10 dark:bg-white/[0.03]"
+                                : "border-[#e7ebf0] bg-white hover:border-orange-200 dark:border-white/10 dark:bg-white/[0.025]"
+                            }`}
                           >
-                            Set default
-                          </button>
-                        )}
+                            <div className="flex flex-col gap-4 sm:flex-row sm:items-start sm:justify-between">
+                              <div className="flex min-w-0 gap-3">
+                                <span className="flex h-11 w-11 shrink-0 items-center justify-center rounded-xl bg-slate-100 text-[#64748b] dark:bg-white/10">
+                                  {account.account_type === "mobile_money" ? (
+                                    <Smartphone size={20} />
+                                  ) : (
+                                    <Banknote size={20} />
+                                  )}
+                                </span>
+
+                                <div className="min-w-0">
+                                  <div className="flex flex-wrap items-center gap-2">
+                                    <p className="font-bold text-dark dark:text-white">
+                                      {account.provider}
+                                    </p>
+
+                                    {account.is_default && (
+                                      <span className="rounded-full bg-orange-50 px-2.5 py-1 text-[10px] font-bold uppercase tracking-wide text-[#c66c0b]">
+                                        Default
+                                      </span>
+                                    )}
+
+                                    {isInactive && (
+                                      <span className="rounded-full bg-slate-200 px-2.5 py-1 text-[10px] font-bold uppercase tracking-wide text-slate-600">
+                                        Inactive
+                                      </span>
+                                    )}
+                                  </div>
+
+                                  <p className="mt-1 text-sm font-medium text-[#334155] dark:text-white/80">
+                                    {account.account_name}
+                                  </p>
+                                  <p className="mt-0.5 font-mono text-sm text-[#64748b] dark:text-white/55">
+                                    {maskAccountNumber(account.account_number)}
+                                  </p>
+
+                                  <div className="mt-3 flex flex-wrap gap-2 text-[11px]">
+                                    <span className="rounded-full border border-slate-200 bg-slate-50 px-2.5 py-1 font-semibold text-slate-600 dark:border-white/10 dark:bg-white/5 dark:text-white/60">
+                                      {account.account_type === "mobile_money"
+                                        ? "Mobile Money"
+                                        : "Bank Account"}
+                                    </span>
+                                    <span className="rounded-full border border-slate-200 bg-slate-50 px-2.5 py-1 font-semibold text-slate-600 dark:border-white/10 dark:bg-white/5 dark:text-white/60">
+                                      {account.currency}
+                                    </span>
+                                  </div>
+                                </div>
+                              </div>
+
+                              <div className="flex flex-col items-start gap-2 sm:items-end">
+                                <span
+                                  className={`inline-flex items-center gap-1.5 rounded-full border px-2.5 py-1 text-xs font-semibold ${statusMeta.className}`}
+                                >
+                                  <StatusIcon size={13} />
+                                  {statusMeta.label}
+                                </span>
+
+                                {account.verified_at && (
+                                  <span className="text-[11px] text-[#94a3b8]">
+                                    Verified{" "}
+                                    {new Date(
+                                      account.verified_at,
+                                    ).toLocaleDateString()}
+                                  </span>
+                                )}
+
+                                {account.provider_reference && (
+                                  <span className="max-w-[220px] truncate text-[11px] text-[#94a3b8]">
+                                    Ref: {account.provider_reference}
+                                  </span>
+                                )}
+
+                                <button
+                                  type="button"
+                                  onClick={() => setDeleteTarget(account)}
+                                  className="mt-1 inline-flex items-center gap-1.5 rounded-lg border border-red-200 px-3 py-1.5 text-xs font-semibold text-red-600 transition hover:bg-red-50"
+                                >
+                                  <Trash2 size={13} />
+                                  {account.is_active === false
+                                    ? "Remove"
+                                    : "Delete / Deactivate"}
+                                </button>
+                              </div>
+                            </div>
+
+                            {(account.verification_status || "pending") ===
+                              "rejected" && (
+                              <div className="mt-4 rounded-xl border border-red-200 bg-red-50 p-3 text-xs leading-5 text-red-700">
+                                This payout account was rejected. Add a corrected
+                                payout account before requesting a payout.
+                              </div>
+                            )}
+
+                            {(account.verification_status || "pending") ===
+                              "pending" && (
+                              <div className="mt-4 rounded-xl border border-amber-200 bg-amber-50 p-3 text-xs leading-5 text-amber-700">
+                                This account is waiting for verification. It cannot
+                                receive a payout yet.
+                              </div>
+                            )}
+                          </article>
+                        );
+                      })}
+                    </div>
+                  )}
+                </div>
+
+                <div className="rounded-2xl border border-[#e7ebf0] bg-white p-5 shadow-sm dark:border-white/10 dark:bg-darkTheme-card sm:p-6">
+                  <div className="mb-5 flex items-center gap-3">
+                    <span className="flex h-9 w-9 items-center justify-center rounded-xl bg-orange-50 text-[#f7941d] dark:bg-orange-400/10">
+                      <CreditCard size={18} />
+                    </span>
+                    <div>
+                      <h3 className="font-bold text-dark dark:text-white">
+                        Add payout account
+                      </h3>
+                      <p className="mt-0.5 text-xs text-dark-4 dark:text-darkTheme-body-color">
+                        Settlement destination for released seller earnings.
+                      </p>
+                    </div>
+                  </div>
+
+                  <form onSubmit={handleAddAccount} className="space-y-4">
+                    <div>
+                      <label className="mb-1.5 block text-xs font-semibold text-[#475569] dark:text-white/70">
+                        Account type
+                      </label>
+                      <div className="grid grid-cols-2 gap-2">
                         <button
                           type="button"
-                          onClick={() => setDeleteTarget(account)}
-                          className="text-sm text-red hover:text-red-dark"
+                          disabled={isAddingAccount}
+                          onClick={() => {
+                            setAccountType("bank");
+                            setProvider("");
+                          }}
+                          className={`rounded-xl border px-3 py-3 text-sm font-semibold transition ${
+                            accountType === "bank"
+                              ? "border-orange-300 bg-orange-50 text-[#c66c0b]"
+                              : "border-[#e2e8f0] bg-white text-[#64748b] dark:border-white/10 dark:bg-white/5"
+                          }`}
                         >
-                          Delete
+                          <Banknote size={17} className="mx-auto mb-1.5" />
+                          Bank
+                        </button>
+                        <button
+                          type="button"
+                          disabled={isAddingAccount}
+                          onClick={() => {
+                            setAccountType("mobile_money");
+                            setProvider("");
+                          }}
+                          className={`rounded-xl border px-3 py-3 text-sm font-semibold transition ${
+                            accountType === "mobile_money"
+                              ? "border-orange-300 bg-orange-50 text-[#c66c0b]"
+                              : "border-[#e2e8f0] bg-white text-[#64748b] dark:border-white/10 dark:bg-white/5"
+                          }`}
+                        >
+                          <Smartphone size={17} className="mx-auto mb-1.5" />
+                          Mobile Money
                         </button>
                       </div>
                     </div>
-                  ))}
+
+                    <div>
+                      <label className="mb-1.5 block text-xs font-semibold text-[#475569] dark:text-white/70">
+                        {accountType === "bank"
+                          ? "Bank name"
+                          : "Mobile-money provider"}{" "}
+                        <span className="text-red">*</span>
+                      </label>
+
+                      {accountType === "mobile_money" ? (
+                        <select
+                          value={provider}
+                          onChange={(event) => setProvider(event.target.value)}
+                          disabled={isAddingAccount}
+                          className="h-11 w-full rounded-xl border border-[#e2e8f0] bg-[#f8fafc] px-3 text-sm outline-none focus:border-[#f7941d] dark:border-white/10 dark:bg-white/5"
+                        >
+                          <option value="">Select provider</option>
+                          <option value="M-Pesa">M-Pesa</option>
+                          <option value="Airtel Money">Airtel Money</option>
+                          <option value="Mixx by Yas">Mixx by Yas</option>
+                          <option value="HaloPesa">HaloPesa</option>
+                        </select>
+                      ) : (
+                        <input
+                          type="text"
+                          value={provider}
+                          onChange={(event) => setProvider(event.target.value)}
+                          placeholder="e.g. CRDB Bank"
+                          disabled={isAddingAccount}
+                          className="h-11 w-full rounded-xl border border-[#e2e8f0] bg-[#f8fafc] px-3 text-sm outline-none focus:border-[#f7941d] dark:border-white/10 dark:bg-white/5"
+                        />
+                      )}
+                    </div>
+
+                    <div>
+                      <label className="mb-1.5 block text-xs font-semibold text-[#475569] dark:text-white/70">
+                        Account holder name <span className="text-red">*</span>
+                      </label>
+                      <input
+                        type="text"
+                        value={accountName}
+                        onChange={(event) =>
+                          setAccountName(event.target.value)
+                        }
+                        placeholder="Name registered on the payout account"
+                        disabled={isAddingAccount}
+                        className="h-11 w-full rounded-xl border border-[#e2e8f0] bg-[#f8fafc] px-3 text-sm outline-none focus:border-[#f7941d] dark:border-white/10 dark:bg-white/5"
+                      />
+                    </div>
+
+                    <div>
+                      <label className="mb-1.5 block text-xs font-semibold text-[#475569] dark:text-white/70">
+                        {accountType === "bank"
+                          ? "Bank account number"
+                          : "Mobile-money number"}{" "}
+                        <span className="text-red">*</span>
+                      </label>
+                      <input
+                        type="text"
+                        value={accountNumber}
+                        onChange={(event) =>
+                          setAccountNumber(event.target.value)
+                        }
+                        placeholder={
+                          accountType === "bank"
+                            ? "Enter bank account number"
+                            : "+255..."
+                        }
+                        disabled={isAddingAccount}
+                        className="h-11 w-full rounded-xl border border-[#e2e8f0] bg-[#f8fafc] px-3 text-sm outline-none focus:border-[#f7941d] dark:border-white/10 dark:bg-white/5"
+                      />
+                    </div>
+
+                    <div>
+                      <label className="mb-1.5 block text-xs font-semibold text-[#475569] dark:text-white/70">
+                        Currency
+                      </label>
+                      <select
+                        value={currency}
+                        onChange={(event) => setCurrency(event.target.value)}
+                        disabled={isAddingAccount}
+                        className="h-11 w-full rounded-xl border border-[#e2e8f0] bg-[#f8fafc] px-3 text-sm outline-none focus:border-[#f7941d] dark:border-white/10 dark:bg-white/5"
+                      >
+                        <option value="TZS">TZS — Tanzanian Shilling</option>
+                        <option value="USD">USD — US Dollar</option>
+                      </select>
+                    </div>
+
+                    <label className="flex cursor-pointer items-start gap-3 rounded-xl border border-[#e2e8f0] p-3 dark:border-white/10">
+                      <input
+                        type="checkbox"
+                        checked={isDefault}
+                        onChange={(event) =>
+                          setIsDefault(event.target.checked)
+                        }
+                        disabled={isAddingAccount}
+                        className="mt-0.5 h-4 w-4 accent-[#f7941d]"
+                      />
+                      <span>
+                        <span className="block text-sm font-semibold text-dark dark:text-white">
+                          Make this my default payout account
+                        </span>
+                        <span className="mt-0.5 block text-xs leading-5 text-dark-4 dark:text-darkTheme-body-color">
+                          The backend will remove default status from your other
+                          payout accounts when this account is created as default.
+                        </span>
+                      </span>
+                    </label>
+
+                    <button
+                      type="submit"
+                      disabled={
+                        isAddingAccount ||
+                        !provider.trim() ||
+                        !accountName.trim() ||
+                        !accountNumber.trim()
+                      }
+                      className="w-full rounded-xl bg-[#f7941d] px-5 py-3 text-sm font-semibold text-white transition hover:bg-[#e88312] disabled:cursor-not-allowed disabled:opacity-50"
+                    >
+                      {isAddingAccount
+                        ? "Adding payout account..."
+                        : "Add Payout Account"}
+                    </button>
+
+                    <p className="text-xs leading-5 text-[#64748b] dark:text-white/55">
+                      For your security, payout-account verification and status
+                      changes are controlled by authorized Xerin staff. Seller-side
+                      editing is not enabled in the current backend; add a corrected
+                      account if details are wrong.
+                    </p>
+                  </form>
                 </div>
-              )}
-
-              <h3 className="text-lg font-semibold text-dark dark:text-white mb-4">Add Payout Account</h3>
-              <form onSubmit={handleAddAccount} className="space-y-5">
-                <div>
-                  <label className="block mb-2.5 dark:text-darkTheme-body-color">Account type</label>
-                  <select
-                    value={accountType}
-                    onChange={(event) => setAccountType(event.target.value as "bank" | "mobile_money")}
-                    disabled={isAddingAccount}
-                    className="rounded-lg border border-gray-3 dark:border-darkTheme-border-color bg-gray-1 dark:bg-darkTheme-secondary-bg dark:text-darkTheme-body-color w-full py-3 px-5 outline-none focus:ring-2 focus:ring-blue/20"
-                  >
-                    <option value="bank">Bank</option>
-                    <option value="mobile_money">Mobile Money</option>
-                  </select>
-                </div>
-
-                <div>
-                  <label className="block mb-2.5 dark:text-darkTheme-body-color">
-                    {accountType === "bank" ? "Bank name" : "Mobile money provider"} <span className="text-red">*</span>
-                  </label>
-                  <input
-                    type="text"
-                    value={provider}
-                    onChange={(event) => setProvider(event.target.value)}
-                    placeholder={accountType === "bank" ? "e.g. CRDB Bank" : "e.g. M-Pesa"}
-                    disabled={isAddingAccount}
-                    className="rounded-lg border border-gray-3 dark:border-darkTheme-border-color bg-gray-1 dark:bg-darkTheme-secondary-bg dark:text-darkTheme-body-color w-full py-3 px-5 outline-none focus:ring-2 focus:ring-blue/20"
-                  />
-                </div>
-
-                <div>
-                  <label className="block mb-2.5 dark:text-darkTheme-body-color">
-                    Account name <span className="text-red">*</span>
-                  </label>
-                  <input
-                    type="text"
-                    value={accountName}
-                    onChange={(event) => setAccountName(event.target.value)}
-                    placeholder="Account holder name"
-                    disabled={isAddingAccount}
-                    className="rounded-lg border border-gray-3 dark:border-darkTheme-border-color bg-gray-1 dark:bg-darkTheme-secondary-bg dark:text-darkTheme-body-color w-full py-3 px-5 outline-none focus:ring-2 focus:ring-blue/20"
-                  />
-                </div>
-
-                <div>
-                  <label className="block mb-2.5 dark:text-darkTheme-body-color">
-                    Account number <span className="text-red">*</span>
-                  </label>
-                  <input
-                    type="text"
-                    value={accountNumber}
-                    onChange={(event) => setAccountNumber(event.target.value)}
-                    placeholder={accountType === "bank" ? "Bank account number" : "Mobile money number"}
-                    disabled={isAddingAccount}
-                    className="rounded-lg border border-gray-3 dark:border-darkTheme-border-color bg-gray-1 dark:bg-darkTheme-secondary-bg dark:text-darkTheme-body-color w-full py-3 px-5 outline-none focus:ring-2 focus:ring-blue/20"
-                  />
-                </div>
-
-                <div>
-                  <label className="block mb-2.5 dark:text-darkTheme-body-color">Currency</label>
-                  <input
-                    type="text"
-                    value={currency}
-                    onChange={(event) => setCurrency(event.target.value)}
-                    disabled={isAddingAccount}
-                    className="rounded-lg border border-gray-3 dark:border-darkTheme-border-color bg-gray-1 dark:bg-darkTheme-secondary-bg dark:text-darkTheme-body-color w-full py-3 px-5 outline-none focus:ring-2 focus:ring-blue/20"
-                  />
-                </div>
-
-                <label className="flex items-center gap-2.5 cursor-pointer">
-                  <input
-                    type="checkbox"
-                    checked={isDefault}
-                    onChange={(event) => setIsDefault(event.target.checked)}
-                    disabled={isAddingAccount}
-                    className="w-4 h-4 rounded border-gray-3 text-blue focus:ring-blue"
-                  />
-                  <span className="dark:text-darkTheme-body-color">Set as default account</span>
-                </label>
-
-                <button
-                  type="submit"
-                  disabled={isAddingAccount}
-                  className="w-full rounded-lg bg-blue text-white py-3.5 px-6 font-medium hover:bg-blue-dark disabled:opacity-60 disabled:cursor-not-allowed transition"
-                >
-                  {isAddingAccount ? "Adding..." : "Add Payout Account"}
-                </button>
-              </form>
+              </section>
+            </div>
             </div>
           </div>
-        </div>
       </section>
 
       {deleteTarget && (
         <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/50 px-4">
           <div className="max-w-md w-full rounded-xl bg-white dark:bg-darkTheme-card shadow-1 p-6">
-            <h3 className="text-lg font-semibold text-dark dark:text-white mb-2">Delete payout account?</h3>
+            <h3 className="text-lg font-semibold text-dark dark:text-white mb-2">
+              Remove payout account?
+            </h3>
             <p className="text-dark-4 dark:text-darkTheme-body-color mb-6">
-              This action cannot be undone. Account: {deleteTarget.account_name} — {deleteTarget.provider}
+              Account: {deleteTarget.account_name} — {deleteTarget.provider}. If
+              this account already has payout history, the backend will safely
+              deactivate it instead of deleting the historical relationship.
             </p>
             <div className="flex gap-3 justify-end">
               <button
@@ -619,6 +952,33 @@ const SellerKyc = () => {
     </>
   );
 };
+
+function PayoutSummary({
+  label,
+  value,
+  tone,
+}: {
+  label: string;
+  value: number;
+  tone: "green" | "amber" | "red";
+}) {
+  const toneClass =
+    tone === "green"
+      ? "border-emerald-200 bg-emerald-50 text-emerald-700"
+      : tone === "red"
+        ? "border-red-200 bg-red-50 text-red-700"
+        : "border-amber-200 bg-amber-50 text-amber-700";
+
+  return (
+    <div className={`rounded-xl border p-3 text-center ${toneClass}`}>
+      <p className="text-xl font-bold">{value}</p>
+      <p className="mt-0.5 text-[10px] font-bold uppercase tracking-wide">
+        {label}
+      </p>
+    </div>
+  );
+}
+
 
 export default SellerKyc;
 

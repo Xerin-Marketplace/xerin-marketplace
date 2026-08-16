@@ -240,8 +240,22 @@ export default function SellerAccount({ view }: { view: SellerAccountView }) {
         />
         <Status
           label="Payout Status"
-          value={payouts.length ? "Configured" : "Not Configured"}
-          good={payouts.length > 0}
+          value={
+            payouts.some(
+              (account) =>
+                account.is_active !== false &&
+                account.verification_status === "verified",
+            )
+              ? "Verified & Ready"
+              : payouts.length
+                ? "Verification Pending"
+                : "Not Configured"
+          }
+          good={payouts.some(
+            (account) =>
+              account.is_active !== false &&
+              account.verification_status === "verified",
+          )}
         />
       </div>
       <form onSubmit={saveProfile}>
