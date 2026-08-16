@@ -45,7 +45,12 @@ export type ProductVariant = {
   product_id: ID;
   variant_name: string;
   sku: string;
+  seller_base_price?: string | null;
+  seller_sale_price?: string | null;
+  commission_rate_snapshot?: string | null;
+  commission_amount_snapshot?: string | null;
   price: string | null;
+  sale_price?: string | null;
   attributes: Record<string, unknown> | null;
   created_at: string;
 };
@@ -65,6 +70,14 @@ export type Product = TimestampFields & {
   name: string;
   slug: string;
   description: string | null;
+
+  // Seller-entered prices are preserved separately from customer-facing prices.
+  seller_base_price?: string;
+  seller_sale_price?: string | null;
+  commission_rate_snapshot?: string;
+  commission_amount_snapshot?: string;
+
+  // Marketplace/customer-facing prices.
   price: string;
   sale_price: string | null;
   currency: string;

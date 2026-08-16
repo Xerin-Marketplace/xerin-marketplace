@@ -3,6 +3,7 @@
 import { ApiError } from "@/lib/api/client";
 import { API_BASE_URL } from "@/lib/api/endpoints";
 import { productsApi } from "@/lib/api/endpoints/products";
+import { sellersApi } from "@/lib/api/endpoints/sellers";
 import { authStorage } from "@/lib/auth/storage";
 import type {
   Brand,
@@ -11,6 +12,7 @@ import type {
   ProductImage,
   ProductRequest,
 } from "@/types/api/product";
+import type { SellerPricingPreviewResponse } from "@/types/api/seller";
 import {
   AlertCircle,
   Archive,
@@ -21,6 +23,8 @@ import {
   Clock3,
   Eye,
   FileText,
+  CircleDollarSign,
+  Percent,
   ImagePlus,
   Package,
   Pencil,
@@ -156,6 +160,10 @@ const SellerProducts = () => {
   const [imageError, setImageError] = useState("");
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [submitIntent, setSubmitIntent] = useState<"draft" | "review">("draft");
+  const [pricingPreview, setPricingPreview] =
+    useState<SellerPricingPreviewResponse | null>(null);
+  const [pricingPreviewLoading, setPricingPreviewLoading] = useState(false);
+  const [pricingPreviewError, setPricingPreviewError] = useState("");
   const [deleteTarget, setDeleteTarget] = useState<Product | null>(null);
   const [isDeleting, setIsDeleting] = useState(false);
   const [submittingProductId, setSubmittingProductId] = useState<string | null>(
@@ -225,6 +233,64 @@ const SellerProducts = () => {
     };
   }, []);
 
+
+  // Phase 1 pricing preview is always calculated by the backend.
+  // The browser never decides marketplace commission by itself.
+  useEffect(() => {
+    const basePrice = Number(form.price);
+    const salePrice =
+      form.sale_price === null || form.sale_price === ""
+        ? null
+        : Number(form.sale_price);
+
+    if (
+      !editorOpen ||
+      !form.category_id ||
+      !Number.isFinite(basePrice) ||
+      basePrice <= 0 ||
+      (salePrice !== null && (!Number.isFinite(salePrice) || salePrice <= 0))
+    ) {
+      setPricingPreview(null);
+      setPricingPreviewError("");
+      return;
+    }
+
+    const timer = window.setTimeout(async () => {
+      setPricingPreviewLoading(true);
+      setPricingPreviewError("");
+
+      try {
+        const preview = await sellersApi.previewPricing({
+          seller_base_price: basePrice,
+          seller_sale_price: salePrice,
+          category_id: form.category_id,
+          product_id: editingProduct?.id ?? null,
+          currency: form.currency || "TZS",
+        });
+
+        setPricingPreview(preview);
+      } catch (cause) {
+        setPricingPreview(null);
+        setPricingPreviewError(
+          cause instanceof ApiError
+            ? cause.message
+            : "Unable to calculate marketplace pricing.",
+        );
+      } finally {
+        setPricingPreviewLoading(false);
+      }
+    }, 350);
+
+    return () => window.clearTimeout(timer);
+  }, [
+    editorOpen,
+    editingProduct?.id,
+    form.category_id,
+    form.currency,
+    form.price,
+    form.sale_price,
+  ]);
+
   const filteredProducts = useMemo(() => {
     return products.filter((product) => {
       const category = categories.find((item) => item.id === product.category_id);
@@ -275,6 +341,8 @@ const SellerProducts = () => {
     setEditorOpen(false);
     setEditingProduct(null);
     setForm(INITIAL_FORM);
+    setPricingPreview(null);
+    setPricingPreviewError("");
     setExistingImages([]);
     setImageError("");
     setSubmitIntent("draft");
@@ -310,12 +378,14 @@ const SellerProducts = () => {
       name: product.name,
       slug: product.slug ?? "",
       description: product.description ?? "",
-      price: product.price,
-      sale_price: product.sale_price ?? null,
+      price: product.seller_base_price ?? product.price,
+      sale_price: product.seller_sale_price ?? product.sale_price ?? null,
       currency: product.currency ?? "TZS",
       weight: product.weight ?? null,
     });
     setImageError("");
+    setPricingPreview(null);
+    setPricingPreviewError("");
     setExistingImages([]);
     setSubmitIntent("draft");
     setEditorOpen(true);
@@ -437,7 +507,7 @@ const SellerProducts = () => {
 
     const price = Number(form.price);
     if (!Number.isFinite(price) || price < 0) {
-      return "Enter a valid product price.";
+      return "Enter a valid seller base price.";
     }
 
     if (form.sale_price !== null && form.sale_price !== "") {
@@ -448,7 +518,7 @@ const SellerProducts = () => {
       }
 
       if (salePrice > price) {
-        return "Sale price cannot be greater than the regular price.";
+        return "Your promotional base price cannot be greater than your regular base price.";
       }
     }
 
@@ -759,20 +829,41 @@ const SellerProducts = () => {
                         {brand?.name ? ` · ${brand.name}` : ""}
                       </p>
 
-                      <div className="mt-4 flex items-end justify-between gap-3">
-                        <div>
-                          <p className="text-xs text-[#94a3b8]">Selling price</p>
-                          <p className="mt-0.5 font-bold text-[#111827]">
-                            {formatPrice(product.sale_price || product.price)}
+                      <div className="mt-4 grid grid-cols-2 gap-3">
+                        <div className="rounded-xl bg-slate-50 p-3">
+                          <p className="text-[10px] font-bold uppercase tracking-wide text-[#94a3b8]">
+                            Your base price
+                          </p>
+                          <p className="mt-1 font-bold text-[#111827]">
+                            {formatPrice(
+                              product.seller_sale_price ||
+                                product.seller_base_price ||
+                                product.sale_price ||
+                                product.price,
+                            )}
                           </p>
                         </div>
 
-                        {product.sale_price && (
-                          <p className="text-xs text-[#94a3b8] line-through">
-                            {formatPrice(product.price)}
+                        <div className="rounded-xl bg-orange-50 p-3">
+                          <p className="text-[10px] font-bold uppercase tracking-wide text-[#c66c0b]">
+                            Customer price
                           </p>
-                        )}
+                          <p className="mt-1 font-bold text-[#111827]">
+                            {formatPrice(product.sale_price || product.price)}
+                          </p>
+                        </div>
                       </div>
+
+                      {product.commission_rate_snapshot !== undefined && (
+                        <p className="mt-2 text-xs text-[#64748b]">
+                          Marketplace commission:{" "}
+                          <b className="text-[#111827]">
+                            {Number(product.commission_rate_snapshot).toLocaleString()}%
+                          </b>
+                          {" · "}
+                          {formatPrice(product.commission_amount_snapshot)}
+                        </p>
+                      )}
 
                       {product.rejection_reason && (
                         <div className="mt-4 rounded-xl border border-red-200 bg-red-50 p-3">
@@ -1138,7 +1229,7 @@ const SellerProducts = () => {
                 <FormSection
                   icon={Boxes}
                   title="Pricing & physical details"
-                  description="Set your selling price and optional physical product information."
+                  description="Enter the amount you want to receive. Xerin calculates the marketplace commission and customer-facing price from Admin commission rules."
                 >
                   <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-4">
                     <Field label="Currency" required>
@@ -1158,7 +1249,11 @@ const SellerProducts = () => {
                       </select>
                     </Field>
 
-                    <Field label="Regular price" required>
+                    <Field
+                      label="Your base price"
+                      required
+                      hint="The amount you want for this product before Xerin marketplace commission."
+                    >
                       <input
                         type="number"
                         min="0"
@@ -1177,8 +1272,8 @@ const SellerProducts = () => {
                     </Field>
 
                     <Field
-                      label="Sale price"
-                      hint="Optional. Must be lower than regular price."
+                      label="Your promotional base price"
+                      hint="Optional seller price before commission. Must be lower than your regular base price."
                     >
                       <input
                         type="number"
@@ -1215,7 +1310,75 @@ const SellerProducts = () => {
                       />
                     </Field>
                   </div>
-                </FormSection>
+                
+
+                  <div className="mt-5 rounded-2xl border border-orange-200 bg-orange-50/60 p-4 sm:p-5">
+                    <div className="flex items-start gap-3">
+                      <span className="flex h-10 w-10 shrink-0 items-center justify-center rounded-xl bg-white text-[#f7941d] shadow-sm">
+                        <CircleDollarSign size={19} />
+                      </span>
+                      <div className="min-w-0 flex-1">
+                        <div className="flex flex-col gap-1 sm:flex-row sm:items-center sm:justify-between">
+                          <div>
+                            <p className="text-sm font-bold text-[#111827]">
+                              Marketplace pricing preview
+                            </p>
+                            <p className="mt-0.5 text-xs leading-5 text-[#64748b]">
+                              Calculated from the active Admin commission rule. The final amount is recalculated again by the backend when the product is saved.
+                            </p>
+                          </div>
+                          {pricingPreview?.commission_scope && (
+                            <span className="mt-2 inline-flex w-fit rounded-full border border-orange-200 bg-white px-2.5 py-1 text-[10px] font-bold uppercase tracking-wide text-[#c66c0b] sm:mt-0">
+                              {pricingPreview.commission_scope.replaceAll("_", " ")} rule
+                            </span>
+                          )}
+                        </div>
+
+                        {pricingPreviewLoading ? (
+                          <div className="mt-4 flex items-center gap-2 text-sm text-[#64748b]">
+                            <RefreshCw size={15} className="animate-spin" />
+                            Calculating customer price...
+                          </div>
+                        ) : pricingPreview ? (
+                          <div className="mt-4 grid gap-3 sm:grid-cols-2 xl:grid-cols-4">
+                            <PricingStat
+                              label="Your base price"
+                              value={formatPrice(pricingPreview.seller_base_price)}
+                            />
+                            <PricingStat
+                              label="Commission"
+                              value={`${Number(pricingPreview.commission_rate).toLocaleString()}%`}
+                              detail={formatPrice(pricingPreview.commission_amount)}
+                            />
+                            <PricingStat
+                              label="Customer regular price"
+                              value={formatPrice(pricingPreview.customer_price)}
+                              highlight
+                            />
+                            <PricingStat
+                              label="Customer sale price"
+                              value={
+                                pricingPreview.customer_sale_price
+                                  ? formatPrice(pricingPreview.customer_sale_price)
+                                  : "Not set"
+                              }
+                            />
+                          </div>
+                        ) : (
+                          <p className="mt-4 text-sm text-[#64748b]">
+                            Select a category and enter your base price to see the marketplace calculation.
+                          </p>
+                        )}
+
+                        {pricingPreviewError && (
+                          <p className="mt-3 rounded-xl border border-red-200 bg-red-50 px-3 py-2 text-xs font-medium text-red-700">
+                            {pricingPreviewError}
+                          </p>
+                        )}
+                      </div>
+                    </div>
+                  </div>
+</FormSection>
 
                 <div className="rounded-2xl border border-blue-200 bg-blue-50 p-4">
                   <div className="flex items-start gap-3">
@@ -1397,6 +1560,41 @@ function FormSection({
       </div>
       {children}
     </section>
+  );
+}
+
+
+function PricingStat({
+  label,
+  value,
+  detail,
+  highlight = false,
+}: {
+  label: string;
+  value: string;
+  detail?: string;
+  highlight?: boolean;
+}) {
+  return (
+    <div
+      className={`rounded-xl border p-3 ${
+        highlight
+          ? "border-orange-200 bg-white shadow-sm"
+          : "border-white/80 bg-white/70"
+      }`}
+    >
+      <p className="text-[10px] font-bold uppercase tracking-wide text-[#94a3b8]">
+        {label}
+      </p>
+      <p
+        className={`mt-1 text-base font-bold ${
+          highlight ? "text-[#f7941d]" : "text-[#111827]"
+        }`}
+      >
+        {value}
+      </p>
+      {detail && <p className="mt-0.5 text-xs text-[#64748b]">{detail}</p>}
+    </div>
   );
 }
 

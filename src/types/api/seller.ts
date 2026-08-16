@@ -87,3 +87,23 @@ export type SellerKycStatus = {
   missing_documents: string[];
   can_submit_for_review: boolean;
 };
+
+
+export type SellerPricingPreviewRequest = {
+  seller_base_price: number;
+  seller_sale_price?: number | null;
+  category_id: ID;
+  product_id?: ID | null;
+  currency?: string;
+};
+
+export type SellerPricingPreviewResponse = {
+  seller_base_price: number | string;
+  seller_sale_price?: number | string | null;
+  commission_rate: number | string;
+  commission_amount: number | string;
+  customer_price: number | string;
+  customer_sale_price?: number | string | null;
+  commission_scope?: string | null;
+  currency: string;
+};
