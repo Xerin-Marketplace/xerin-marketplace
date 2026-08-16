@@ -4,3 +4,29 @@ export type SellerOrder={id:string;order_id:string;seller_id:string;order_status
 export type SellerOrderList={total:number;page:number;page_size:number;results:SellerOrder[]};
 export type SellerOrderSummary={total_orders:number;new_orders:number;accepted_orders:number;processing_orders:number;ready_to_ship_orders:number;shipped_orders:number;delivered_orders:number;cancellation_requests:number;gross_sales:number|string;units_sold:number};
 export type SellerOrderQuery={page?:number;page_size?:number;search?:string;status?:SellerOrderStatus;date_from?:string;date_to?:string};
+
+
+export type SellerOrderMessageAttachment = {
+  id: string;
+  file_url: string;
+  file_name?: string | null;
+  mime_type?: string | null;
+  created_at: string;
+};
+
+export type SellerOrderMessage = {
+  id: string;
+  seller_order_id: string;
+  sender_user_id?: string | null;
+  sender_role_label?: string | null;
+  message: string;
+  is_internal: boolean;
+  attachments: SellerOrderMessageAttachment[];
+  created_at: string;
+};
+
+export type SellerOrderMessageCreate = {
+  message: string;
+  is_internal?: boolean;
+  attachment_urls?: string[];
+};

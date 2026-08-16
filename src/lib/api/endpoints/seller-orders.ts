@@ -1,5 +1,5 @@
 import axiosInstance from "../client";
-import type {SellerOrder,SellerOrderList,SellerOrderQuery,SellerOrderSummary} from "@/types/api/seller-order";
+import type {SellerOrder,SellerOrderList,SellerOrderQuery,SellerOrderSummary,SellerOrderMessage,SellerOrderMessageCreate} from "@/types/api/seller-order";
 const ROOT="/seller/orders";
 export const sellerOrdersApi={
  summary:async()=>(await axiosInstance.get<SellerOrderSummary>(`${ROOT}/summary`)).data,
@@ -10,4 +10,6 @@ export const sellerOrdersApi={
  ready:async(id:string,notes?:string)=>(await axiosInstance.post<SellerOrder>(`${ROOT}/${id}/ready-to-ship`,{notes:notes||null})).data,
  dispatch:async(id:string,payload:{carrier_name:string;tracking_number:string;tracking_url?:string|null;location?:string|null;notes?:string|null})=>(await axiosInstance.post<SellerOrder>(`${ROOT}/${id}/dispatch`,payload)).data,
  cancel:async(id:string,reason:string,notes?:string)=>(await axiosInstance.post<SellerOrder>(`${ROOT}/${id}/request-cancellation`,{reason,notes:notes||null})).data,
+ messages:async(id:string)=>(await axiosInstance.get<SellerOrderMessage[]>(`/seller/orders/${id}/messages`)).data,
+ sendMessage:async(id:string,payload:SellerOrderMessageCreate)=>(await axiosInstance.post<SellerOrderMessage>(`/seller/orders/${id}/messages`,payload)).data,
 };
