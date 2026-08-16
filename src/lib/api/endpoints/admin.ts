@@ -1062,3 +1062,324 @@ export const adminService = {
   deleteProductCategory,
   listProductReviews,
 };
+
+
+// ============================================================
+// ADMIN PHASE 1-3 CONFIGURATION
+// Marketplace Settings, Logistics and Finance
+// ============================================================
+
+export type AdminMarketplaceSettings = {
+  id?: string | null;
+  escrow_release_hours: number | null;
+  dispute_period_hours: number | null;
+  cod_allowed: boolean | null;
+  international_delivery_allowed: boolean | null;
+  configured: boolean;
+  updated_by_id?: string | null;
+  created_at?: string | null;
+  updated_at?: string | null;
+};
+
+export type AdminCommissionRule = {
+  id: string;
+  name: string;
+  scope: "global" | "category" | "seller" | "product";
+  rule_type: "percentage" | "fixed";
+  rate: number;
+  seller_id?: string | null;
+  category_id?: string | null;
+  product_id?: string | null;
+  priority: number;
+  is_active: boolean;
+  starts_at?: string | null;
+  ends_at?: string | null;
+  created_at: string;
+};
+
+export type AdminLogisticsCompany = {
+  id: string;
+  name: string;
+  code: string;
+  description?: string | null;
+  contact_name?: string | null;
+  contact_email?: string | null;
+  contact_phone?: string | null;
+  website_url?: string | null;
+  scope: "local" | "international" | "both";
+  status: "pending" | "active" | "suspended" | "inactive";
+  supports_cod: boolean;
+  supports_tracking: boolean;
+  supports_webhooks: boolean;
+  metadata_json?: Record<string, unknown>;
+  created_at: string;
+  updated_at?: string | null;
+};
+
+export type AdminLogisticsService = {
+  id: string;
+  logistics_company_id?: string | null;
+  name: string;
+  service_code?: string | null;
+  description?: string | null;
+  carrier_name?: string | null;
+  scope: "local" | "international" | "both";
+  supports_cod: boolean;
+  supports_tracking: boolean;
+  min_delivery_days: number;
+  max_delivery_days: number;
+  is_active: boolean;
+  created_at: string;
+  updated_at?: string | null;
+};
+
+export type AdminLogisticsZone = {
+  id: string;
+  name: string;
+  country: string;
+  scope: "local" | "international" | "both";
+  regions: string[];
+  cities: string[];
+  is_active: boolean;
+  created_at: string;
+  updated_at?: string | null;
+};
+
+export type AdminLogisticsRate = {
+  id: string;
+  zone_id: string;
+  method_id: string;
+  rate_type: "flat" | "weight_based" | "free";
+  currency: string;
+  base_amount: number;
+  amount_per_kg: number;
+  free_shipping_threshold?: number | null;
+  min_weight_kg?: number | null;
+  max_weight_kg?: number | null;
+  is_active: boolean;
+  zone: AdminLogisticsZone;
+  method: AdminLogisticsService;
+  created_at: string;
+  updated_at?: string | null;
+};
+
+export type AdminLogisticsIntegration = {
+  id: string;
+  logistics_company_id: string;
+  api_base_url?: string | null;
+  outbound_webhook_url?: string | null;
+  auth_type: "none" | "api_key" | "bearer" | "basic" | "oauth2" | "custom";
+  credential_reference?: string | null;
+  webhook_secret_reference?: string | null;
+  api_key_header?: string | null;
+  extra_config?: Record<string, unknown>;
+  is_active: boolean;
+  last_tested_at?: string | null;
+  last_test_success?: boolean | null;
+  last_test_message?: string | null;
+  created_at: string;
+  updated_at?: string | null;
+};
+
+export type AdminFinanceSettings = {
+  id: string;
+  singleton_key: string;
+  default_payment_provider_code?: string | null;
+  settlement_currency: string;
+  minimum_payout_amount: number;
+  payout_fee_type: "fixed" | "percentage";
+  payout_fee_value: number;
+  payout_processing_days: number;
+  auto_payout_enabled: boolean;
+  escrow_enabled: boolean;
+  auto_release_enabled: boolean;
+  allow_partial_release: boolean;
+  hold_commission_until_release: boolean;
+  created_at: string;
+  updated_at?: string | null;
+};
+
+export type AdminEscrowHold = {
+  id: string;
+  payment_id?: string | null;
+  order_id: string;
+  order_item_id?: string | null;
+  seller_id?: string | null;
+  currency: string;
+  gross_amount: number;
+  seller_amount: number;
+  commission_amount: number;
+  refunded_amount: number;
+  released_amount: number;
+  status: string;
+  release_after?: string | null;
+  released_at?: string | null;
+  disputed_at?: string | null;
+  refunded_at?: string | null;
+  reference: string;
+  note?: string | null;
+  created_at: string;
+  updated_at?: string | null;
+};
+
+export type AdminPaged<T> = {
+  total: number;
+  page: number;
+  page_size: number;
+  total_pages: number;
+  results: T[];
+};
+
+export const getMarketplaceSettings = async () =>
+  (await axiosInstance.get<AdminMarketplaceSettings>("/admin/marketplace-settings")).data;
+
+export const saveMarketplaceSettings = async (payload: {
+  escrow_release_hours: number;
+  dispute_period_hours: number;
+  cod_allowed: boolean;
+  international_delivery_allowed: boolean;
+}) =>
+  (await axiosInstance.put<AdminMarketplaceSettings>("/admin/marketplace-settings", payload)).data;
+
+export const listCommissionRules = async (params: {
+  page?: number; page_size?: number; search?: string; scope?: string; active?: boolean;
+} = {}) =>
+  (await axiosInstance.get<AdminPaged<AdminCommissionRule>>(
+    "/admin/marketplace-settings/commission-rules",
+    { params },
+  )).data;
+
+export const createCommissionRule = async (payload: {
+  name: string;
+  scope: string;
+  rule_type: string;
+  rate: number;
+  seller_id?: string | null;
+  category_id?: string | null;
+  product_id?: string | null;
+  priority?: number;
+  is_active?: boolean;
+}) =>
+  (await axiosInstance.post<AdminCommissionRule>(
+    "/admin/marketplace-settings/commission-rules",
+    payload,
+  )).data;
+
+export const updateCommissionRule = async (
+  id: string,
+  payload: Partial<Pick<AdminCommissionRule, "name" | "rate" | "priority" | "is_active">>,
+) =>
+  (await axiosInstance.patch<AdminCommissionRule>(
+    `/admin/marketplace-settings/commission-rules/${id}`,
+    payload,
+  )).data;
+
+export const deleteCommissionRule = async (id: string) =>
+  axiosInstance.delete(`/admin/marketplace-settings/commission-rules/${id}`);
+
+export const listLogisticsCompanies = async (params: {
+  page?: number; page_size?: number; search?: string; status?: string; scope?: string;
+} = {}) =>
+  (await axiosInstance.get<AdminPaged<AdminLogisticsCompany>>("/logistics/companies", { params })).data;
+
+export const createLogisticsCompany = async (payload: Partial<AdminLogisticsCompany> & {
+  name: string; code: string;
+}) =>
+  (await axiosInstance.post<AdminLogisticsCompany>("/logistics/companies", payload)).data;
+
+export const updateLogisticsCompany = async (id: string, payload: Partial<AdminLogisticsCompany>) =>
+  (await axiosInstance.patch<AdminLogisticsCompany>(`/logistics/companies/${id}`, payload)).data;
+
+export const deactivateLogisticsCompany = async (id: string) =>
+  axiosInstance.delete(`/logistics/companies/${id}`);
+
+export const listLogisticsServices = async (params: {
+  page?: number; page_size?: number; search?: string; company_id?: string; scope?: string; active?: boolean;
+} = {}) =>
+  (await axiosInstance.get<AdminPaged<AdminLogisticsService>>("/logistics/services", { params })).data;
+
+export const createLogisticsService = async (payload: Partial<AdminLogisticsService> & { name: string }) =>
+  (await axiosInstance.post<AdminLogisticsService>("/logistics/services", payload)).data;
+
+export const updateLogisticsService = async (id: string, payload: Partial<AdminLogisticsService>) =>
+  (await axiosInstance.patch<AdminLogisticsService>(`/logistics/services/${id}`, payload)).data;
+
+export const deactivateLogisticsService = async (id: string) =>
+  axiosInstance.delete(`/logistics/services/${id}`);
+
+export const listLogisticsZones = async (params: {
+  page?: number; page_size?: number; search?: string; scope?: string; active?: boolean;
+} = {}) =>
+  (await axiosInstance.get<AdminPaged<AdminLogisticsZone>>("/logistics/zones", { params })).data;
+
+export const createLogisticsZone = async (payload: Partial<AdminLogisticsZone> & {
+  name: string; country: string;
+}) =>
+  (await axiosInstance.post<AdminLogisticsZone>("/logistics/zones", payload)).data;
+
+export const updateLogisticsZone = async (id: string, payload: Partial<AdminLogisticsZone>) =>
+  (await axiosInstance.patch<AdminLogisticsZone>(`/logistics/zones/${id}`, payload)).data;
+
+export const deactivateLogisticsZone = async (id: string) =>
+  axiosInstance.delete(`/logistics/zones/${id}`);
+
+export const listLogisticsRates = async (params: {
+  page?: number; page_size?: number; search?: string; company_id?: string; active?: boolean;
+} = {}) =>
+  (await axiosInstance.get<AdminPaged<AdminLogisticsRate>>("/logistics/rates", { params })).data;
+
+export const createLogisticsRate = async (payload: {
+  zone_id: string; method_id: string; rate_type: string; currency: string;
+  base_amount: number; amount_per_kg: number; free_shipping_threshold?: number | null;
+  min_weight_kg?: number | null; max_weight_kg?: number | null; is_active: boolean;
+}) =>
+  (await axiosInstance.post<AdminLogisticsRate>("/logistics/rates", payload)).data;
+
+export const deactivateLogisticsRate = async (id: string) =>
+  axiosInstance.delete(`/logistics/rates/${id}`);
+
+export const getLogisticsIntegration = async (companyId: string) =>
+  (await axiosInstance.get<AdminLogisticsIntegration>(
+    `/logistics/companies/${companyId}/integration`,
+  )).data;
+
+export const saveLogisticsIntegration = async (
+  companyId: string,
+  payload: {
+    api_base_url?: string | null;
+    outbound_webhook_url?: string | null;
+    auth_type: string;
+    credential_reference?: string | null;
+    webhook_secret_reference?: string | null;
+    api_key_header?: string | null;
+    extra_config?: Record<string, unknown>;
+    is_active: boolean;
+  },
+) =>
+  (await axiosInstance.put<AdminLogisticsIntegration>(
+    `/logistics/companies/${companyId}/integration`,
+    payload,
+  )).data;
+
+export const getFinanceSettings = async () =>
+  (await axiosInstance.get<AdminFinanceSettings>("/admin/finance/settings")).data;
+
+export const updateFinanceSettings = async (payload: Partial<AdminFinanceSettings>) =>
+  (await axiosInstance.patch<AdminFinanceSettings>("/admin/finance/settings", payload)).data;
+
+export const listEscrowHolds = async (params: {
+  page?: number; page_size?: number; search?: string; status?: string; currency?: string;
+} = {}) =>
+  (await axiosInstance.get<AdminPaged<AdminEscrowHold>>("/admin/finance/escrow-holds", { params })).data;
+
+export const disputeEscrowHold = async (id: string, note?: string) =>
+  (await axiosInstance.post<AdminEscrowHold>(
+    `/admin/finance/escrow-holds/${id}/dispute`,
+    { note: note || null },
+  )).data;
+
+export const releaseEscrowHold = async (id: string, amount?: number, note?: string) =>
+  (await axiosInstance.post<AdminEscrowHold>(
+    `/admin/finance/escrow-holds/${id}/release`,
+    { amount: amount ?? null, note: note || null },
+  )).data;

@@ -34,6 +34,8 @@ import {
   KeyRound,
   LockKeyhole,
   WalletCards,
+  Truck,
+  Globe2,
   X,
   Megaphone,
   Scale,
@@ -211,6 +213,36 @@ const sidebarGroups: SidebarGroup[] = [
       { label: "Roles", href: "/admin/dashboard?tab=users&menu=user-management&item=roles", icon: ShieldCheck },
       { label: "Permissions", href: "/admin/dashboard?tab=users&menu=user-management&item=permissions", icon: KeyRound },
       { label: "Active Sessions", href: "/admin/dashboard?tab=users&menu=user-management&item=active-sessions", icon: LockKeyhole },
+    ],
+  },
+  {
+    title: "Marketplace Settings",
+    key: "overview",
+    icon: SlidersHorizontal,
+    items: [
+      { label: "Marketplace Rules", href: "/admin/dashboard?tab=overview&menu=marketplace-settings&item=marketplace-rules", icon: SlidersHorizontal },
+      { label: "Commission Rules", href: "/admin/dashboard?tab=overview&menu=marketplace-settings&item=commission-rules", icon: Scale },
+    ],
+  },
+  {
+    title: "Logistics",
+    key: "overview",
+    icon: Truck,
+    items: [
+      { label: "Logistics Companies", href: "/admin/dashboard?tab=overview&menu=logistics&item=logistics-companies", icon: Store },
+      { label: "Delivery Services", href: "/admin/dashboard?tab=overview&menu=logistics&item=delivery-services", icon: Truck },
+      { label: "Shipping Zones", href: "/admin/dashboard?tab=overview&menu=logistics&item=shipping-zones", icon: Globe2 },
+      { label: "Shipping Rates", href: "/admin/dashboard?tab=overview&menu=logistics&item=shipping-rates", icon: WalletCards },
+      { label: "API & Webhooks", href: "/admin/dashboard?tab=overview&menu=logistics&item=api-webhooks", icon: Settings },
+    ],
+  },
+  {
+    title: "Finance Configuration",
+    key: "finance",
+    icon: WalletCards,
+    items: [
+      { label: "Finance Settings", href: "/admin/dashboard?tab=finance&menu=finance-configuration&item=finance-settings", icon: Settings },
+      { label: "Escrow Holds", href: "/admin/dashboard?tab=finance&menu=finance-configuration&item=escrow-holds", icon: LockKeyhole },
     ],
   },
   {

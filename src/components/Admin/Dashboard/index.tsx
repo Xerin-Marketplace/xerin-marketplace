@@ -47,6 +47,7 @@ import AdminSystemManagement, {
 import AdminAccount, { AccountView } from "@/components/Admin/Account";
 import AdminFinance from "@/components/Admin/Finance";
 import AdminAnalytics from "@/components/Admin/Analytics";
+import AdminConfiguration, { AdminConfigurationView } from "@/components/Admin/Configuration";
 import { useTheme } from "@/app/context/ThemeContext";
 import { useAuth } from "@/hooks/useAuth";
 import { formatCurrency } from "@/lib/formatCurrency";
@@ -70,6 +71,11 @@ import {
   ShieldCheck,
   ShoppingBag,
   Store,
+  Truck,
+  Globe2,
+  Scale,
+  LockKeyhole,
+  WalletCards,
   Sun,
   Tag,
   Users,
@@ -339,6 +345,36 @@ const sidebarGroups: SidebarGroup[] = [
     ],
   },
   {
+    title: "Marketplace Settings",
+    key: "overview",
+    icon: Settings,
+    items: [
+      { label: "Marketplace Rules", href: "?tab=overview&menu=marketplace-settings&item=marketplace-rules" },
+      { label: "Commission Rules", href: "?tab=overview&menu=marketplace-settings&item=commission-rules" },
+    ],
+  },
+  {
+    title: "Logistics",
+    key: "overview",
+    icon: Truck,
+    items: [
+      { label: "Logistics Companies", href: "?tab=overview&menu=logistics&item=logistics-companies" },
+      { label: "Delivery Services", href: "?tab=overview&menu=logistics&item=delivery-services" },
+      { label: "Shipping Zones", href: "?tab=overview&menu=logistics&item=shipping-zones" },
+      { label: "Shipping Rates", href: "?tab=overview&menu=logistics&item=shipping-rates" },
+      { label: "API & Webhooks", href: "?tab=overview&menu=logistics&item=api-webhooks" },
+    ],
+  },
+  {
+    title: "Finance Configuration",
+    key: "finance",
+    icon: WalletCards,
+    items: [
+      { label: "Finance Settings", href: "?tab=finance&menu=finance-configuration&item=finance-settings" },
+      { label: "Escrow Holds", href: "?tab=finance&menu=finance-configuration&item=escrow-holds" },
+    ],
+  },
+  {
     title: "System Management",
     key: "overview",
     icon: Settings,
@@ -554,6 +590,9 @@ export default function AdminDashboard() {
   const hiddenOverviewMenuGroups = [
     "Communications",
     "System Management",
+    "Marketplace Settings",
+    "Logistics",
+    "Finance Configuration",
     "Account",
   ];
   const isOverviewHiddenByMenuSelection = hiddenOverviewMenuGroups.some(
@@ -709,6 +748,30 @@ export default function AdminDashboard() {
       : activeSidebarItem === "Account:Logout"
         ? "logout"
         : "profile";
+  const isConfigurationWorkspace =
+    activeSidebarItem.startsWith("Marketplace Settings:") ||
+    activeSidebarItem.startsWith("Logistics:") ||
+    activeSidebarItem.startsWith("Finance Configuration:");
+
+  const configurationView: AdminConfigurationView =
+    activeSidebarItem === "Marketplace Settings:Commission Rules"
+      ? "commissions"
+      : activeSidebarItem === "Marketplace Settings:Marketplace Rules"
+        ? "marketplace"
+        : activeSidebarItem === "Logistics:Delivery Services"
+          ? "logistics-services"
+          : activeSidebarItem === "Logistics:Shipping Zones"
+            ? "logistics-zones"
+            : activeSidebarItem === "Logistics:Shipping Rates"
+              ? "logistics-rates"
+              : activeSidebarItem === "Logistics:API & Webhooks"
+                ? "logistics-integration"
+                : activeSidebarItem === "Logistics:Logistics Companies"
+                  ? "logistics-companies"
+                  : activeSidebarItem === "Finance Configuration:Escrow Holds"
+                    ? "escrow"
+                    : "finance-settings";
+
   const operationsWorkspace = null;
   const sellerView =
     activeSidebarItem === "Sellers:Seller Applications"
@@ -1733,6 +1796,10 @@ export default function AdminDashboard() {
               <AdminOperationsWorkspace workspace={operationsWorkspace} />
             ) : null}
 
+            {isConfigurationWorkspace && !isLoading ? (
+              <AdminConfiguration view={configurationView} />
+            ) : null}
+
             {isPaymentsWorkspace && !isLoading ? (
               <AdminPayments view={paymentView} />
             ) : null}
@@ -1837,7 +1904,7 @@ export default function AdminDashboard() {
               </>
             ) : null}
 
-            {activeTab === "finance" && !isLoading && !isPaymentsWorkspace ? (
+            {activeTab === "finance" && !isLoading && !isPaymentsWorkspace && !isConfigurationWorkspace ? (
               <AdminFinance />
             ) : null}
 

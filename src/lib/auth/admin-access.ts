@@ -130,6 +130,33 @@ export const ADMIN_SECTION_PERMISSIONS: Record<string, string[]> = {
     "admin_activity_logs:read",
     "admin_system_alerts:manage",
   ],
+  "Marketplace Settings": [
+    "marketplace_settings:read",
+    "marketplace_settings:manage",
+    "commissions:read",
+    "commissions:manage",
+  ],
+  Logistics: [
+    "logistics_companies:read",
+    "logistics_companies:manage",
+    "logistics_services:read",
+    "logistics_services:manage",
+    "logistics_zones:read",
+    "logistics_zones:manage",
+    "logistics_rates:read",
+    "logistics_rates:manage",
+    "logistics_integrations:read",
+    "logistics_integrations:manage",
+  ],
+  "Finance Configuration": [
+    "finance_settings:read",
+    "finance_settings:manage",
+    "escrow:read",
+    "escrow:manage",
+    "escrow:release",
+    "payment_providers:read",
+    "currencies:read",
+  ],
   Account: [],
 };
 
