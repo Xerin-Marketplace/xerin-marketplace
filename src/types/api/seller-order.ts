@@ -30,3 +30,39 @@ export type SellerOrderMessageCreate = {
   is_internal?: boolean;
   attachment_urls?: string[];
 };
+
+
+export type SellerOrderPackageAttachment = {
+  id: string;
+  file_url: string;
+  file_name?: string | null;
+  mime_type?: string | null;
+  created_at: string;
+};
+
+export type SellerOrderPackage = {
+  id: string;
+  seller_order_id: string;
+  weight_kg?: number | string | null;
+  length_cm?: number | string | null;
+  width_cm?: number | string | null;
+  height_cm?: number | string | null;
+  package_count: number;
+  notes?: string | null;
+  is_ready: boolean;
+  prepared_at?: string | null;
+  attachments: SellerOrderPackageAttachment[];
+  created_at: string;
+  updated_at?: string | null;
+};
+
+export type SellerOrderPackageUpsert = {
+  weight_kg?: number | null;
+  length_cm?: number | null;
+  width_cm?: number | null;
+  height_cm?: number | null;
+  package_count: number;
+  notes?: string | null;
+  is_ready: boolean;
+  attachment_urls?: string[];
+};
