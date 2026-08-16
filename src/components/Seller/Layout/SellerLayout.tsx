@@ -10,6 +10,7 @@ import { useAuthStore } from "@/store/useAuthStore";
 import type { Seller } from "@/types/api/seller";
 import {
   BarChart3,
+  Banknote,
   Bell,
   Box,
   ChevronDown,
@@ -97,6 +98,7 @@ const approvedGroups: Array<{ label: string; items: NavItem[] }> = [
     label: "Finance",
     items: [
       { label: "Wallet & Earnings", href: "/seller/earnings", icon: BarChart3 },
+      { label: "Payout Requests", href: "/seller/payouts", icon: Banknote },
       { label: "Payout Accounts", href: "/seller/kyc?tab=payouts", icon: WalletCards },
       { label: "Transactions", href: "/seller/transactions", icon: CreditCard },
     ],
@@ -208,9 +210,11 @@ export default function SellerLayout({
                                 ? "Reviews"
                                 : pathname.includes("/messages")
                                   ? "Messages"
-                                  : pathname.includes("/earnings")
-                                    ? "Earnings"
-                                    : pathname.includes("/transactions")
+                                  : pathname.includes("/payouts")
+                                    ? "Payout Requests"
+                                    : pathname.includes("/earnings")
+                                      ? "Wallet & Earnings"
+                                      : pathname.includes("/transactions")
                                       ? "Transactions"
                                       : "Seller Dashboard";
   const crumbs = useMemo(

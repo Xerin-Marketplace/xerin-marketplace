@@ -56,3 +56,48 @@ export type SellerWalletTransactionParams = {
   page?: number;
   page_size?: number;
 };
+
+
+export type PayoutStatus =
+  | "pending"
+  | "approved"
+  | "processing"
+  | "completed"
+  | "rejected"
+  | "failed"
+  | "cancelled"
+  | string;
+
+export type SellerPayoutRequest = {
+  id: string;
+  seller_id: string;
+  payout_account_id: string;
+  amount: number | string;
+  currency: string;
+  status: PayoutStatus;
+  provider_reference?: string | null;
+  seller_note?: string | null;
+  admin_note?: string | null;
+  requested_at: string;
+  processed_at?: string | null;
+  completed_at?: string | null;
+};
+
+export type SellerPayoutCreateRequest = {
+  payout_account_id: string;
+  amount: number;
+  note?: string | null;
+};
+
+export type PaginatedSellerPayoutResponse = {
+  total: number;
+  page: number;
+  page_size: number;
+  total_pages: number;
+  results: SellerPayoutRequest[];
+};
+
+export type SellerPayoutListParams = {
+  page?: number;
+  page_size?: number;
+};

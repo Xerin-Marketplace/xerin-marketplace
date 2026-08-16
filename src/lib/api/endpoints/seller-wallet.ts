@@ -4,6 +4,10 @@ import type {
   SellerEarningsSummary,
   SellerWallet,
   SellerWalletTransactionParams,
+  PaginatedSellerPayoutResponse,
+  SellerPayoutCreateRequest,
+  SellerPayoutListParams,
+  SellerPayoutRequest,
 } from "@/types/api/seller-wallet";
 
 export const getSellerEarningsSummary =
@@ -33,4 +37,37 @@ export const sellerWalletApi = {
   earningsSummary: getSellerEarningsSummary,
   wallet: getSellerWallet,
   transactions: getSellerWalletTransactions,
+  payouts: getSellerPayouts,
+  requestPayout: requestSellerPayout,
+  cancelPayout: cancelSellerPayout,
+};
+
+
+export const getSellerPayouts = async (
+  params: SellerPayoutListParams = {},
+): Promise<PaginatedSellerPayoutResponse> => {
+  const res = await axiosInstance.get<PaginatedSellerPayoutResponse>(
+    "/wallet/me/payouts",
+    { params },
+  );
+  return res.data;
+};
+
+export const requestSellerPayout = async (
+  payload: SellerPayoutCreateRequest,
+): Promise<SellerPayoutRequest> => {
+  const res = await axiosInstance.post<SellerPayoutRequest>(
+    "/wallet/me/payouts",
+    payload,
+  );
+  return res.data;
+};
+
+export const cancelSellerPayout = async (
+  payoutId: string,
+): Promise<SellerPayoutRequest> => {
+  const res = await axiosInstance.post<SellerPayoutRequest>(
+    `/wallet/me/payouts/${payoutId}/cancel`,
+  );
+  return res.data;
 };
