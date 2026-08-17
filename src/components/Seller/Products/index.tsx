@@ -4,6 +4,7 @@ import { ApiError } from "@/lib/api/client";
 import { API_BASE_URL } from "@/lib/api/endpoints";
 import { productsApi } from "@/lib/api/endpoints/products";
 import { sellersApi } from "@/lib/api/endpoints/sellers";
+import { sellerInventoryApi } from "@/lib/api/endpoints/seller-inventory";
 import { authStorage } from "@/lib/auth/storage";
 import type {
   Brand,
@@ -36,6 +37,7 @@ import {
   Tag,
   Trash2,
   UploadCloud,
+  Warehouse,
   X,
 } from "lucide-react";
 import Image from "next/image";
@@ -61,6 +63,20 @@ type StoredUser = {
 type SelectedImage = {
   file: File;
   previewUrl: string;
+};
+
+type InitialStockForm = {
+  quantity: string;
+  low_stock_threshold: string;
+  warehouse_location: string;
+  restock_date: string;
+};
+
+const INITIAL_STOCK_FORM: InitialStockForm = {
+  quantity: "0",
+  low_stock_threshold: "5",
+  warehouse_location: "",
+  restock_date: "",
 };
 
 const STATUS_OPTIONS = [
@@ -154,6 +170,8 @@ const SellerProducts = () => {
   const [editorOpen, setEditorOpen] = useState(false);
   const [editingProduct, setEditingProduct] = useState<Product | null>(null);
   const [form, setForm] = useState<ProductRequest>(INITIAL_FORM);
+  const [stockForm, setStockForm] =
+    useState<InitialStockForm>(INITIAL_STOCK_FORM);
   const [existingImages, setExistingImages] = useState<ProductImage[]>([]);
   const [selectedImages, setSelectedImages] = useState<SelectedImage[]>([]);
   const [imagesLoading, setImagesLoading] = useState(false);
@@ -341,6 +359,7 @@ const SellerProducts = () => {
     setEditorOpen(false);
     setEditingProduct(null);
     setForm(INITIAL_FORM);
+    setStockForm(INITIAL_STOCK_FORM);
     setPricingPreview(null);
     setPricingPreviewError("");
     setExistingImages([]);
@@ -358,6 +377,7 @@ const SellerProducts = () => {
     setEditingProduct(null);
     setExistingImages([]);
     setForm(INITIAL_FORM);
+    setStockForm(INITIAL_STOCK_FORM);
     setImageError("");
     setSubmitIntent("draft");
     setEditorOpen(true);
@@ -522,6 +542,19 @@ const SellerProducts = () => {
       }
     }
 
+    if (!editingProduct) {
+      const openingStock = Number(stockForm.quantity);
+      const threshold = Number(stockForm.low_stock_threshold);
+
+      if (!Number.isInteger(openingStock) || openingStock < 0) {
+        return "Enter a valid opening stock quantity (0 or more).";
+      }
+
+      if (!Number.isInteger(threshold) || threshold < 0) {
+        return "Enter a valid low-stock threshold (0 or more).";
+      }
+    }
+
     const totalImages = existingImages.length + selectedImages.length;
 
     if (totalImages < 1) {
@@ -572,6 +605,20 @@ const SellerProducts = () => {
       const product = editingProduct
         ? await productsApi.update(editingProduct.id, payload)
         : await productsApi.create(payload);
+
+      if (!editingProduct) {
+        await sellerInventoryApi.configure({
+          product_id: String(product.id),
+          variant_id: null,
+          quantity: Number(stockForm.quantity),
+          low_stock_threshold: Number(stockForm.low_stock_threshold),
+          warehouse_location:
+            stockForm.warehouse_location.trim() || null,
+          restock_date: stockForm.restock_date
+            ? new Date(stockForm.restock_date).toISOString()
+            : null,
+        });
+      }
 
       if (selectedImages.length) {
         await productsApi.uploadImageFiles(
@@ -1312,6 +1359,106 @@ const SellerProducts = () => {
                   </div>
                 
 
+
+                  {!editingProduct && (
+                    <div className="mt-5 rounded-2xl border border-[#dfe5ec] bg-[#f8fafc] p-4 sm:p-5">
+                      <div className="flex items-start gap-3">
+                        <span className="flex h-10 w-10 shrink-0 items-center justify-center rounded-xl bg-white text-[#f7941d] shadow-sm">
+                          <Warehouse size={19} />
+                        </span>
+                        <div className="min-w-0 flex-1">
+                          <p className="text-sm font-bold text-[#111827]">
+                            Opening inventory
+                          </p>
+                          <p className="mt-1 text-xs leading-5 text-[#64748b]">
+                            Enter the seller's real physical stock for this product.
+                            Xerin calculates available quantity as physical quantity
+                            minus units reserved by active orders.
+                          </p>
+
+                          <div className="mt-4 grid gap-4 sm:grid-cols-2 lg:grid-cols-4">
+                            <Field label="Opening stock" required>
+                              <input
+                                type="number"
+                                min="0"
+                                step="1"
+                                value={stockForm.quantity}
+                                onChange={(event) =>
+                                  setStockForm((current) => ({
+                                    ...current,
+                                    quantity: event.target.value,
+                                  }))
+                                }
+                                disabled={isSubmitting}
+                                className="input"
+                              />
+                            </Field>
+
+                            <Field label="Low-stock threshold">
+                              <input
+                                type="number"
+                                min="0"
+                                step="1"
+                                value={stockForm.low_stock_threshold}
+                                onChange={(event) =>
+                                  setStockForm((current) => ({
+                                    ...current,
+                                    low_stock_threshold: event.target.value,
+                                  }))
+                                }
+                                disabled={isSubmitting}
+                                className="input"
+                              />
+                            </Field>
+
+                            <Field label="Warehouse / stock location">
+                              <input
+                                value={stockForm.warehouse_location}
+                                onChange={(event) =>
+                                  setStockForm((current) => ({
+                                    ...current,
+                                    warehouse_location: event.target.value,
+                                  }))
+                                }
+                                placeholder="e.g. Main Store - Rack A"
+                                disabled={isSubmitting}
+                                className="input"
+                              />
+                            </Field>
+
+                            <Field label="Expected restock date">
+                              <input
+                                type="date"
+                                value={stockForm.restock_date}
+                                onChange={(event) =>
+                                  setStockForm((current) => ({
+                                    ...current,
+                                    restock_date: event.target.value,
+                                  }))
+                                }
+                                disabled={isSubmitting}
+                                className="input"
+                              />
+                            </Field>
+                          </div>
+
+                          <div className="mt-4 grid gap-3 sm:grid-cols-3">
+                            <InventoryPreviewStat
+                              label="Physical quantity"
+                              value={Math.max(0, Number(stockForm.quantity) || 0)}
+                            />
+                            <InventoryPreviewStat label="Reserved" value={0} />
+                            <InventoryPreviewStat
+                              label="Available to customers"
+                              value={Math.max(0, Number(stockForm.quantity) || 0)}
+                              highlight
+                            />
+                          </div>
+                        </div>
+                      </div>
+                    </div>
+                  )}
+
                   <div className="mt-5 rounded-2xl border border-orange-200 bg-orange-50/60 p-4 sm:p-5">
                     <div className="flex items-start gap-3">
                       <span className="flex h-10 w-10 shrink-0 items-center justify-center rounded-xl bg-white text-[#f7941d] shadow-sm">
@@ -1563,6 +1710,37 @@ function FormSection({
   );
 }
 
+
+function InventoryPreviewStat({
+  label,
+  value,
+  highlight = false,
+}: {
+  label: string;
+  value: number;
+  highlight?: boolean;
+}) {
+  return (
+    <div
+      className={`rounded-xl border p-3 ${
+        highlight
+          ? "border-emerald-200 bg-emerald-50"
+          : "border-[#e2e8f0] bg-white"
+      }`}
+    >
+      <p className="text-[10px] font-bold uppercase tracking-wide text-[#94a3b8]">
+        {label}
+      </p>
+      <p
+        className={`mt-1 text-lg font-bold ${
+          highlight ? "text-emerald-700" : "text-[#111827]"
+        }`}
+      >
+        {value.toLocaleString()}
+      </p>
+    </div>
+  );
+}
 
 function PricingStat({
   label,
