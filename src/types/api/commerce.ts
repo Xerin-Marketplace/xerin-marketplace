@@ -10,12 +10,28 @@ export type CartItem = {
   product: Product;
 };
 
+export type AppliedCartPromotion = {
+  promotion_id: string;
+  code: string | null;
+  name: string;
+  promotion_type: string;
+  funding_source: string;
+  eligible_subtotal: number | string;
+  discount_amount: number | string;
+  seller_id?: string | null;
+  stackable: boolean;
+};
+
 export type Cart = {
   id: string;
   user_id: string;
   coupon_code: string | null;
+  promotion_code: string | null;
+  promotion: AppliedCartPromotion | null;
   items: CartItem[];
   subtotal: number | string;
+  coupon_discount_amount: number | string;
+  promotion_discount_amount: number | string;
   discount_amount: number | string;
   total: number | string;
   currency: string;

@@ -94,3 +94,23 @@ export type SellerPromotionListParams = {
   search?: string;
   active?: boolean;
 };
+
+
+export type CustomerPromotionOffer = {
+  promotion_id: string;
+  code?: string | null;
+  name: string;
+  description?: string | null;
+  promotion_type: string;
+  funding_source: string;
+  seller_id?: string | null;
+  eligible_subtotal: number | string;
+  discount_amount: number | string;
+  total_after_discount: number | string;
+  stackable: boolean;
+  automatic: boolean;
+  minimum_order_amount?: number | string | null;
+  maximum_discount_amount?: number | string | null;
+  starts_at?: string | null;
+  ends_at?: string | null;
+};

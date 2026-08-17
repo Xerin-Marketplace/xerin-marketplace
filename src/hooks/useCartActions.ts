@@ -32,8 +32,9 @@ export const mapBackendCartToUi = (cart: Cart): CartItemUi[] => {
       cartItemId: item.id,
       productId: item.product_id,
       title: product.title,
-      price: product.price,
-      discountedPrice: product.discountedPrice,
+      // Cart unit_price is refreshed by the backend and is the financial source of truth.
+      price: Number(item.unit_price),
+      discountedPrice: Number(item.unit_price),
       quantity: item.quantity,
       imgs: product.imgs,
     };
@@ -75,7 +76,21 @@ export const useCartView = () => {
     subtotal: isAuthenticated
       ? Number(backend.data?.subtotal ?? 0)
       : items.reduce((sum, item) => sum + item.discountedPrice * item.quantity, 0),
-    discountAmount: isAuthenticated ? Number(backend.data?.discount_amount ?? 0) : 0,
+    couponCode: isAuthenticated ? backend.data?.coupon_code ?? null : null,
+    promotionCode: isAuthenticated ? backend.data?.promotion_code ?? null : null,
+    promotion: isAuthenticated ? backend.data?.promotion ?? null : null,
+    couponDiscountAmount: isAuthenticated
+      ? Number(backend.data?.coupon_discount_amount ?? 0)
+      : 0,
+    promotionDiscountAmount: isAuthenticated
+      ? Number(backend.data?.promotion_discount_amount ?? 0)
+      : 0,
+    discountAmount: isAuthenticated
+      ? Number(backend.data?.discount_amount ?? 0)
+      : 0,
+    validationMessages: isAuthenticated
+      ? backend.data?.validation_messages ?? []
+      : [],
     currency: backend.data?.currency ?? "TZS",
   };
 };
@@ -171,8 +186,12 @@ export const useApplyCoupon = () => {
       queryClient.setQueryData(["cart"], cart);
       toast.success("Coupon applied");
     },
-    onError: () => {
-      toast.error("Invalid or expired coupon");
+    onError: (error: any) => {
+      toast.error(
+        error?.response?.data?.detail ||
+          error?.message ||
+          "Invalid or expired coupon",
+      );
     },
   });
 };
@@ -203,3 +222,79 @@ export const addProductToCartPayload = (product: UiProduct, quantity = 1, varian
     imgs: product.imgs,
   },
 });
+
+
+export const useAvailableCartPromotions = (enabled = true) =>
+  useQuery({
+    queryKey: ["cart-promotions"],
+    queryFn: cartApi.availablePromotions,
+    enabled:
+      enabled &&
+      useAuthStore.getState().isAuthenticated,
+    retry: false,
+  });
+
+export const useApplyPromotion = () => {
+  const queryClient = useQueryClient();
+
+  return useMutation({
+    mutationFn: cartApi.applyPromotion,
+    onSuccess: (cart) => {
+      queryClient.setQueryData(["cart"], cart);
+      queryClient.invalidateQueries({ queryKey: ["cart-promotions"] });
+      toast.success("Seller promotion applied");
+    },
+    onError: (error: any) => {
+      toast.error(
+        error?.response?.data?.detail ||
+          error?.message ||
+          "Unable to apply promotion",
+      );
+    },
+  });
+};
+
+export const useRemovePromotion = () => {
+  const queryClient = useQueryClient();
+
+  return useMutation({
+    mutationFn: cartApi.removePromotion,
+    onSuccess: (cart) => {
+      queryClient.setQueryData(["cart"], cart);
+      queryClient.invalidateQueries({ queryKey: ["cart-promotions"] });
+      toast.success("Seller promotion removed");
+    },
+    onError: (error: any) => {
+      toast.error(
+        error?.response?.data?.detail ||
+          error?.message ||
+          "Unable to remove promotion",
+      );
+    },
+  });
+};
+
+export const useValidateCart = () => {
+  const queryClient = useQueryClient();
+
+  return useMutation({
+    mutationFn: cartApi.validate,
+    onSuccess: (cart) => {
+      queryClient.setQueryData(["cart"], cart);
+      queryClient.invalidateQueries({ queryKey: ["cart-promotions"] });
+
+      if (cart.validation_messages?.length) {
+        toast.success("Cart refreshed. Please review the notices.");
+      } else {
+        toast.success("Cart price and stock are up to date.");
+      }
+    },
+    onError: (error: any) => {
+      toast.error(
+        error?.response?.data?.detail ||
+          error?.message ||
+          "Unable to validate cart",
+      );
+    },
+  });
+};

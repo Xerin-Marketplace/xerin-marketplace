@@ -5,6 +5,7 @@ import type {
   SellerPromotionListResponse,
   SellerPromotionRequest,
   SellerPromotionUpdateRequest,
+  CustomerPromotionOffer,
 } from "@/types/api/promotion";
 
 const SELLER_PROMOTIONS = "/seller/promotions";
@@ -51,4 +52,11 @@ export const sellerPromotionsApi = {
   create: createSellerPromotion,
   update: updateSellerPromotion,
   delete: deleteSellerPromotion,
+};
+
+
+export const customerPromotionsApi = {
+  availableForCart: async (): Promise<CustomerPromotionOffer[]> =>
+    (await axiosInstance.get<CustomerPromotionOffer[]>("/cart/promotions/available"))
+      .data,
 };

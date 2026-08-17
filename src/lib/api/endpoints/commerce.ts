@@ -22,6 +22,18 @@ export const cartApi = {
   applyCoupon: async (code: string) =>
     (await axiosInstance.post<Cart>("/cart/apply-coupon", { code })).data,
   removeCoupon: async () => (await axiosInstance.delete<Cart>("/cart/coupon")).data,
+  availablePromotions: async () =>
+    (
+      await axiosInstance.get<
+        import("@/types/api/promotion").CustomerPromotionOffer[]
+      >("/cart/promotions/available")
+    ).data,
+  applyPromotion: async (code: string) =>
+    (
+      await axiosInstance.post<Cart>("/cart/apply-promotion", { code })
+    ).data,
+  removePromotion: async () =>
+    (await axiosInstance.delete<Cart>("/cart/promotion")).data,
   validate: async () => (await axiosInstance.post<Cart>("/cart/validate")).data,
   merge: async (items: Array<{ product_id: string; variant_id?: string | null; quantity: number }>) =>
     (await axiosInstance.post<GuestCartMergeResult>("/cart/merge", { items })).data,
