@@ -113,3 +113,26 @@ export type SellerPricingPreviewResponse = {
   commission_scope?: string | null;
   currency: string;
 };
+
+
+export type SellerDashboardPerformance = {
+  products_total: number;
+  products_approved: number;
+  products_pending_review: number;
+  active_promotions: number;
+
+  orders_total: number;
+  orders_new: number;
+  orders_processing: number;
+  orders_ready_to_ship: number;
+
+  wallet_currency: string;
+  wallet_pending: number | string;
+  wallet_available: number | string;
+  wallet_reserved: number | string;
+  pending_payouts: number;
+
+  rating_average: number | string;
+  review_count: number;
+  unanswered_questions: number;
+};

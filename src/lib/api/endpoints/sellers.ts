@@ -14,6 +14,7 @@ import type {
   UploadSellerKycDocumentRequest,
   SellerPricingPreviewRequest,
   SellerPricingPreviewResponse,
+  SellerDashboardPerformance,
 } from "@/types/api/seller";
 
 export const getBusinessCategories = async (): Promise<SellerBusinessCategory[]> => {
@@ -156,6 +157,15 @@ export const previewSellerPricing = async (
   return res.data;
 };
 
+
+export const getSellerDashboardPerformance =
+  async (): Promise<SellerDashboardPerformance> => {
+    const res = await axiosInstance.get<SellerDashboardPerformance>(
+      "/seller/dashboard",
+    );
+    return res.data;
+  };
+
 export const sellersApi = {
   getBusinessCategories,
   register: registerSeller,
@@ -174,4 +184,5 @@ export const sellersApi = {
   createPayoutAccount,
   deletePayoutAccount,
   previewPricing: previewSellerPricing,
+  getDashboardPerformance: getSellerDashboardPerformance,
 };

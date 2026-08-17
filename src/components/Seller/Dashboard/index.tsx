@@ -15,6 +15,7 @@ import type {
   SellerBusinessProfile,
   SellerKycDocument,
   SellerKycStatus,
+  SellerDashboardPerformance,
 } from "@/types/api/seller";
 import {
   AlertCircle,
@@ -39,6 +40,11 @@ import {
   TrendingUp,
   WalletCards,
   Warehouse,
+  Star,
+  MessageCircleQuestion,
+  TicketPercent,
+  Truck,
+  CircleDollarSign,
 } from "lucide-react";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
@@ -64,6 +70,13 @@ const pretty = (value: string) =>
 
 const number = new Intl.NumberFormat("en-US");
 
+const formatMoney = (value: number, currency: string) =>
+  new Intl.NumberFormat("en-TZ", {
+    style: "currency",
+    currency,
+    maximumFractionDigits: 0,
+  }).format(Number.isFinite(value) ? value : 0);
+
 export default function SellerDashboard() {
   const router = useRouter();
   const user = authStorage.getUser<CurrentUser>();
@@ -85,6 +98,8 @@ export default function SellerDashboard() {
   const [payouts, setPayouts] = useState<PayoutAccount[]>([]);
   const [seller, setSeller] = useState<Seller | null>(null);
   const [profile, setProfile] = useState<SellerBusinessProfile | null>(null);
+  const [performance, setPerformance] =
+    useState<SellerDashboardPerformance | null>(null);
   const [state, setState] = useState<LoadState>("loading");
   const [refreshing, setRefreshing] = useState(false);
   const [error, setError] = useState("");
@@ -128,19 +143,23 @@ export default function SellerDashboard() {
       setProfile(profileData);
 
       if (sellerData.status === "approved") {
-        const [productData, inventoryData, payoutList] = await Promise.all([
-          productsApi.getMyProducts({ skip: 0, limit: 100 }),
-          sellerInventoryApi.list().catch(() => []),
-          sellersApi.getPayoutAccounts(token),
-        ]);
+        const [productData, inventoryData, payoutList, performanceData] =
+          await Promise.all([
+            productsApi.getMyProducts({ skip: 0, limit: 100 }),
+            sellerInventoryApi.list().catch(() => []),
+            sellersApi.getPayoutAccounts(token),
+            sellersApi.getDashboardPerformance(),
+          ]);
 
         setProducts(productData);
         setInventory(inventoryData);
         setPayouts(payoutList);
+        setPerformance(performanceData);
       } else {
         setProducts([]);
         setInventory([]);
         setPayouts([]);
+        setPerformance(null);
       }
 
       setState("ready");
@@ -225,6 +244,28 @@ export default function SellerDashboard() {
     0,
     inventory.length - lowStockRows.length - outOfStockRows.length,
   );
+
+  const dashboardProductsTotal = performance?.products_total ?? products.length;
+  const dashboardProductsApproved =
+    performance?.products_approved ?? approvedProducts;
+  const dashboardProductsPending =
+    performance?.products_pending_review ?? pendingProducts;
+
+  const ordersTotal = performance?.orders_total ?? 0;
+  const ordersNew = performance?.orders_new ?? 0;
+  const ordersProcessing = performance?.orders_processing ?? 0;
+  const ordersReady = performance?.orders_ready_to_ship ?? 0;
+
+  const walletCurrency = performance?.wallet_currency || "TZS";
+  const walletPending = Number(performance?.wallet_pending ?? 0);
+  const walletAvailable = Number(performance?.wallet_available ?? 0);
+  const walletReserved = Number(performance?.wallet_reserved ?? 0);
+
+  const activePromotions = performance?.active_promotions ?? 0;
+  const averageRating = Number(performance?.rating_average ?? 0);
+  const reviewCount = performance?.review_count ?? 0;
+  const unansweredQuestions = performance?.unanswered_questions ?? 0;
+  const pendingPayouts = performance?.pending_payouts ?? 0;
 
   const kycProgress = requiredDocuments.length
     ? Math.round(
@@ -336,41 +377,48 @@ export default function SellerDashboard() {
         refresh={() => void load(true)}
       />
 
-      <section className="grid gap-4 sm:grid-cols-2 xl:grid-cols-5">
+      <section className="grid gap-4 sm:grid-cols-2 xl:grid-cols-4 2xl:grid-cols-6">
         <MetricCard
           label="Total Products"
-          value={number.format(products.length)}
-          helper="Catalog records"
+          value={number.format(dashboardProductsTotal)}
+          helper={`${number.format(dashboardProductsApproved)} approved`}
           icon={ShoppingBag}
           tone="orange"
         />
         <MetricCard
-          label="Approved"
-          value={number.format(approvedProducts)}
-          helper="Visible after approval"
-          icon={BadgeCheck}
-          tone="green"
-        />
-        <MetricCard
           label="Pending Review"
-          value={number.format(pendingProducts)}
-          helper="Awaiting moderation"
+          value={number.format(dashboardProductsPending)}
+          helper="Awaiting catalog approval"
           icon={Clock3}
           tone="amber"
         />
         <MetricCard
-          label="Units Available"
-          value={number.format(availableUnits)}
-          helper="Current inventory"
-          icon={Warehouse}
+          label="Total Orders"
+          value={number.format(ordersTotal)}
+          helper={`${number.format(ordersNew)} new`}
+          icon={PackageCheck}
           tone="blue"
         />
         <MetricCard
-          label="Low / Out of Stock"
-          value={number.format(lowStockRows.length + outOfStockRows.length)}
-          helper="Needs attention"
-          icon={PackageOpen}
-          tone="red"
+          label="Available Balance"
+          value={formatMoney(walletAvailable, walletCurrency)}
+          helper={`${number.format(pendingPayouts)} pending payout${pendingPayouts === 1 ? "" : "s"}`}
+          icon={WalletCards}
+          tone="green"
+        />
+        <MetricCard
+          label="Average Rating"
+          value={`${averageRating.toFixed(2)} / 5`}
+          helper={`${number.format(reviewCount)} review${reviewCount === 1 ? "" : "s"}`}
+          icon={Star}
+          tone="amber"
+        />
+        <MetricCard
+          label="Unanswered Q&A"
+          value={number.format(unansweredQuestions)}
+          helper="Customer questions"
+          icon={MessageCircleQuestion}
+          tone={unansweredQuestions ? "red" : "green"}
         />
       </section>
 
@@ -474,47 +522,268 @@ export default function SellerDashboard() {
 
       <RecentProducts products={products} inventory={inventory} />
 
-      <section className="grid gap-5 xl:grid-cols-2">
+      <section className="grid gap-5 xl:grid-cols-[1.15fr_.85fr]">
         <Card>
           <SectionHeading
-            eyebrow="Sales"
-            title="Orders & revenue"
-            description="This area is ready for the seller order and sales analytics endpoints."
+            eyebrow="Order operations"
+            title="Fulfilment pipeline"
+            description="Live seller-order workload from the Seller Phase 10 dashboard endpoint."
             icon={PackageCheck}
           />
-          <EmptyFutureState
-            icon={PackageCheck}
-            title="Sales graph will appear here"
-            text="I did not add fake revenue or order numbers. Connect the seller sales analytics endpoint and this panel can become a real revenue trend chart."
-          />
+
+          <div className="mt-6 grid gap-3 sm:grid-cols-2 xl:grid-cols-4">
+            <PipelineStat
+              label="New"
+              value={ordersNew}
+              total={Math.max(ordersTotal, 1)}
+              href="/seller/orders?status=new"
+            />
+            <PipelineStat
+              label="Processing"
+              value={ordersProcessing}
+              total={Math.max(ordersTotal, 1)}
+              href="/seller/orders?status=processing"
+            />
+            <PipelineStat
+              label="Ready to Ship"
+              value={ordersReady}
+              total={Math.max(ordersTotal, 1)}
+              href="/seller/orders?status=ready_to_ship"
+            />
+            <PipelineStat
+              label="All Orders"
+              value={ordersTotal}
+              total={Math.max(ordersTotal, 1)}
+              href="/seller/orders"
+            />
+          </div>
+
+          <div className="mt-6">
+            <PerformanceBar
+              label="New orders"
+              value={ordersNew}
+              total={Math.max(ordersTotal, 1)}
+              className="bg-blue-500"
+            />
+            <PerformanceBar
+              label="Processing"
+              value={ordersProcessing}
+              total={Math.max(ordersTotal, 1)}
+              className="bg-amber-500"
+            />
+            <PerformanceBar
+              label="Ready to ship"
+              value={ordersReady}
+              total={Math.max(ordersTotal, 1)}
+              className="bg-emerald-500"
+            />
+          </div>
+
+          <Link
+            href="/seller/orders"
+            className="mt-5 inline-flex items-center gap-2 text-sm font-semibold text-[#f7941d]"
+          >
+            Open order workspace <ArrowRight size={15} />
+          </Link>
         </Card>
 
         <Card>
           <SectionHeading
             eyebrow="Finance"
-            title="Earnings & payouts"
-            description="Your payout setup is connected; wallet totals require the seller finance API."
-            icon={WalletCards}
+            title="Wallet position"
+            description="Current pending, available and reserved seller balances."
+            icon={CircleDollarSign}
           />
-          <div className="mt-5 grid grid-cols-2 gap-3">
-            <MiniStat label="Payout accounts" value={number.format(payouts.length)} />
-            <MiniStat
-              label="Default payout"
-              value={payouts.some((item) => item.is_default) ? "Configured" : "Not set"}
+
+          <div className="mt-5 grid gap-3 sm:grid-cols-3 xl:grid-cols-1 2xl:grid-cols-3">
+            <WalletStat
+              label="Pending"
+              value={formatMoney(walletPending, walletCurrency)}
+              icon={Clock3}
+            />
+            <WalletStat
+              label="Available"
+              value={formatMoney(walletAvailable, walletCurrency)}
+              icon={WalletCards}
+              highlight
+            />
+            <WalletStat
+              label="Reserved"
+              value={formatMoney(walletReserved, walletCurrency)}
+              icon={ShieldCheck}
             />
           </div>
-          <Link
-            href="/seller/kyc?tab=payouts"
-            className="mt-5 inline-flex items-center gap-2 text-sm font-semibold text-[#f7941d]"
-          >
-            Manage payout accounts <ArrowRight size={15} />
-          </Link>
+
+          <div className="mt-5 grid grid-cols-2 gap-3">
+            <MiniStat
+              label="Payout accounts"
+              value={number.format(payouts.length)}
+            />
+            <MiniStat
+              label="Pending payouts"
+              value={number.format(pendingPayouts)}
+            />
+          </div>
+
+          <div className="mt-5 flex flex-wrap gap-3">
+            <Link
+              href="/seller/earnings"
+              className="inline-flex items-center gap-2 text-sm font-semibold text-[#f7941d]"
+            >
+              Wallet & earnings <ArrowRight size={15} />
+            </Link>
+            <Link
+              href="/seller/payouts"
+              className="inline-flex items-center gap-2 text-sm font-semibold text-[#64748b]"
+            >
+              Payout requests <ArrowRight size={15} />
+            </Link>
+          </div>
         </Card>
+      </section>
+
+      <section className="grid gap-5 xl:grid-cols-3">
+        <PerformanceLinkCard
+          href="/seller/promotions"
+          icon={TicketPercent}
+          eyebrow="Promotions"
+          value={number.format(activePromotions)}
+          title="Active promotions"
+          description="Seller-funded promotions currently active."
+        />
+        <PerformanceLinkCard
+          href="/seller/reviews"
+          icon={Star}
+          eyebrow="Reputation"
+          value={averageRating.toFixed(2)}
+          title={`${number.format(reviewCount)} customer reviews`}
+          description="Average product-review rating across your seller catalog."
+        />
+        <PerformanceLinkCard
+          href="/seller/questions"
+          icon={MessageCircleQuestion}
+          eyebrow="Customer Q&A"
+          value={number.format(unansweredQuestions)}
+          title="Questions need attention"
+          description="Respond quickly to product questions before customers abandon purchase decisions."
+          alert={unansweredQuestions > 0}
+        />
       </section>
     </div>
   );
 }
 
+
+function PipelineStat({
+  label,
+  value,
+  total,
+  href,
+}: {
+  label: string;
+  value: number;
+  total: number;
+  href: string;
+}) {
+  const percent = Math.min(100, Math.max(0, (value / total) * 100));
+  return (
+    <Link
+      href={href}
+      className="rounded-xl border border-[#e7ebf0] bg-slate-50 p-4 transition hover:border-orange-200 hover:bg-orange-50/40 dark:border-white/10 dark:bg-white/[0.03]"
+    >
+      <p className="text-2xl font-bold tracking-[-0.03em]">{number.format(value)}</p>
+      <p className="mt-1 text-xs font-semibold text-[#64748b]">{label}</p>
+      <div className="mt-3 h-1.5 overflow-hidden rounded-full bg-slate-200 dark:bg-white/10">
+        <div className="h-full rounded-full bg-[#f7941d]" style={{ width: `${percent}%` }} />
+      </div>
+    </Link>
+  );
+}
+
+function PerformanceBar({
+  label,
+  value,
+  total,
+  className,
+}: {
+  label: string;
+  value: number;
+  total: number;
+  className: string;
+}) {
+  const percent = Math.min(100, Math.max(0, (value / total) * 100));
+  return (
+    <div className="mb-4 last:mb-0">
+      <div className="flex items-center justify-between gap-4 text-xs">
+        <span className="font-semibold text-[#64748b]">{label}</span>
+        <span className="font-bold">{number.format(value)}</span>
+      </div>
+      <div className="mt-2 h-2 overflow-hidden rounded-full bg-slate-100 dark:bg-white/10">
+        <div className={`h-full rounded-full ${className}`} style={{ width: `${percent}%` }} />
+      </div>
+    </div>
+  );
+}
+
+function WalletStat({
+  label,
+  value,
+  icon: Icon,
+  highlight = false,
+}: {
+  label: string;
+  value: string;
+  icon: typeof WalletCards;
+  highlight?: boolean;
+}) {
+  return (
+    <div className={`rounded-xl border p-4 ${highlight ? "border-orange-200 bg-orange-50" : "border-[#e7ebf0] bg-slate-50 dark:border-white/10 dark:bg-white/[0.03]"}`}>
+      <Icon size={17} className={highlight ? "text-[#f7941d]" : "text-[#94a3b8]"} />
+      <p className="mt-3 text-xs font-semibold text-[#64748b]">{label}</p>
+      <p className="mt-1 text-lg font-bold tracking-[-0.025em]">{value}</p>
+    </div>
+  );
+}
+
+function PerformanceLinkCard({
+  href,
+  icon: Icon,
+  eyebrow,
+  value,
+  title,
+  description,
+  alert = false,
+}: {
+  href: string;
+  icon: typeof Star;
+  eyebrow: string;
+  value: string;
+  title: string;
+  description: string;
+  alert?: boolean;
+}) {
+  return (
+    <Link
+      href={href}
+      className={`rounded-2xl border bg-white p-5 shadow-sm transition hover:-translate-y-0.5 hover:shadow-md dark:bg-[#1f2937] ${
+        alert ? "border-amber-200" : "border-[#e7ebf0] dark:border-white/10"
+      }`}
+    >
+      <div className="flex items-start justify-between gap-4">
+        <span className={`flex h-10 w-10 items-center justify-center rounded-xl ${alert ? "bg-amber-50 text-amber-600" : "bg-orange-50 text-[#f7941d]"}`}>
+          <Icon size={18} />
+        </span>
+        <ArrowRight size={16} className="text-[#94a3b8]" />
+      </div>
+      <p className="mt-4 text-[10px] font-bold uppercase tracking-[.12em] text-[#94a3b8]">
+        {eyebrow}
+      </p>
+      <p className="mt-1 text-3xl font-bold tracking-[-0.04em]">{value}</p>
+      <p className="mt-1 text-sm font-semibold">{title}</p>
+      <p className="mt-2 text-xs leading-5 text-[#64748b]">{description}</p>
+    </Link>
+  );
+}
 
 function SellerActivationDashboard({
   seller,

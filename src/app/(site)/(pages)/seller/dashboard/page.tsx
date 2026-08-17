@@ -3,7 +3,7 @@ import SellerDashboard from "@/components/Seller/Dashboard";
 
 export const metadata: Metadata = {
   title: "Seller Dashboard | Xerin Market",
-  description: "Manage onboarding, KYC, and products from your seller dashboard.",
+  description: "Monitor seller products, orders, wallet, promotions, reviews, payouts and product Q&A.",
 };
 
 const SellerDashboardPage = () => {
