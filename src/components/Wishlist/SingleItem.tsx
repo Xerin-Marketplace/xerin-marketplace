@@ -77,7 +77,7 @@ const SingleItem = ({ item }: { item: WishListItem }) => {
       </div>
 
       <div className="min-w-[205px]">
-        <p className="text-dark dark:text-darkTheme-body-color">{formatCurrency(item.discountedPrice)}</p>
+        <p className="text-dark dark:text-darkTheme-body-color">{formatCurrency(item.discountedPrice, item.currency)}</p>
       </div>
 
       <div className="min-w-[265px]">
@@ -105,7 +105,7 @@ const SingleItem = ({ item }: { item: WishListItem }) => {
             />
           </svg>
 
-          <span className="text-dark-4"> Availability checked when added to cart </span>
+          <span className="text-dark-4"> {item.status === "in_stock" ? "In stock" : item.status === "out_of_stock" ? "Out of stock" : "Unavailable"} </span>
         </div>
       </div>
 

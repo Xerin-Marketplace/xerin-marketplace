@@ -67,25 +67,38 @@ export const deleteAddress = async (id: ID): Promise<ApiMessageResponse> => {
   return res.data;
 };
 
-export const getWishlist = async (): Promise<Product[]> => {
-  const res = await axiosInstance.get<Product[]>("/users/me/wishlist");
+export const getWishlist = async (
+  params: { page?: number; page_size?: number } = {},
+): Promise<WishlistProductListResponse> => {
+  const res = await axiosInstance.get<WishlistProductListResponse>(
+    "/wishlist/products",
+    { params },
+  );
   return res.data;
 };
 
-export const addToWishlist = async (productId: string): Promise<ApiMessageResponse> => {
-  const res = await axiosInstance.post<ApiMessageResponse>("/users/me/wishlist", {
-    product_id: productId,
-  });
+export const addToWishlist = async (
+  productId: string,
+): Promise<WishlistMutationResponse> => {
+  const res = await axiosInstance.post<WishlistMutationResponse>(
+    `/wishlist/products/${productId}`,
+  );
   return res.data;
 };
 
-export const removeFromWishlist = async (productId: string): Promise<ApiMessageResponse> => {
-  const res = await axiosInstance.delete<ApiMessageResponse>(`/users/me/wishlist/${productId}`);
+export const removeFromWishlist = async (
+  productId: string,
+): Promise<WishlistMutationResponse> => {
+  const res = await axiosInstance.delete<WishlistMutationResponse>(
+    `/wishlist/products/${productId}`,
+  );
   return res.data;
 };
 
-export const clearWishlist = async (): Promise<ApiMessageResponse> => {
-  const res = await axiosInstance.delete<ApiMessageResponse>("/users/me/wishlist");
+export const clearWishlist = async (): Promise<WishlistMutationResponse> => {
+  const res = await axiosInstance.delete<WishlistMutationResponse>(
+    "/wishlist/clear",
+  );
   return res.data;
 };
 
