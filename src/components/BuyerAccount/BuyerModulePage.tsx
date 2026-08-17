@@ -68,6 +68,14 @@ export default function BuyerModulePage({ view }: { view: View }) {
   });
   const [paymentSearch, setPaymentSearch] = useState("");
   const [paymentStatusFilter, setPaymentStatusFilter] = useState("all");
+  const [orderPage, setOrderPage] = useState(1);
+  const [orderMeta, setOrderMeta] = useState({
+    total: 0,
+    total_pages: 0,
+  });
+  const [orderSearch, setOrderSearch] = useState("");
+  const [orderStatusFilter, setOrderStatusFilter] = useState("all");
+  const [orderPaymentFilter, setOrderPaymentFilter] = useState("all");
   const [passwords, setPasswords] = useState({
     current: "",
     next: "",
@@ -83,8 +91,26 @@ export default function BuyerModulePage({ view }: { view: View }) {
     setLoading(true);
     setError(false);
     try {
-      if (view === "orders")
-        setOrders((await ordersApi.mine()).results);
+      if (view === "orders") {
+        const result = await ordersApi.mine({
+          page: orderPage,
+          page_size: 20,
+          search: orderSearch.trim() || undefined,
+          status:
+            orderStatusFilter === "all"
+              ? undefined
+              : orderStatusFilter,
+          payment_status:
+            orderPaymentFilter === "all"
+              ? undefined
+              : orderPaymentFilter,
+        });
+        setOrders(result.results);
+        setOrderMeta({
+          total: result.total,
+          total_pages: result.total_pages || 0,
+        });
+      }
       else if (view === "payments") {
         const result = await paymentsApi.mine({
           page: paymentPage,
@@ -123,7 +149,16 @@ export default function BuyerModulePage({ view }: { view: View }) {
   }
   useEffect(() => {
     void load();
-  }, [view, paymentPage, paymentSearch, paymentStatusFilter]);
+  }, [
+    view,
+    paymentPage,
+    paymentSearch,
+    paymentStatusFilter,
+    orderPage,
+    orderSearch,
+    orderStatusFilter,
+    orderPaymentFilter,
+  ]);
   async function saveDetails(e: FormEvent) {
     e.preventDefault();
     try {
@@ -184,7 +219,28 @@ export default function BuyerModulePage({ view }: { view: View }) {
             </button>
           </div>
         ) : view === "orders" ? (
-          <Orders items={orders} />
+          <Orders
+            items={orders}
+            page={orderPage}
+            total={orderMeta.total}
+            totalPages={orderMeta.total_pages}
+            search={orderSearch}
+            statusFilter={orderStatusFilter}
+            paymentFilter={orderPaymentFilter}
+            onSearch={(value) => {
+              setOrderSearch(value);
+              setOrderPage(1);
+            }}
+            onStatusFilter={(value) => {
+              setOrderStatusFilter(value);
+              setOrderPage(1);
+            }}
+            onPaymentFilter={(value) => {
+              setOrderPaymentFilter(value);
+              setOrderPage(1);
+            }}
+            onPage={setOrderPage}
+          />
         ) : view === "payments" ? (
           <Payments
             items={payments}
@@ -385,69 +441,165 @@ function Payments({
   );
 }
 
-function Orders({ items }: { items: Order[] }) {
-  if (!items.length)
-    return (
-      <Empty
-        title="No orders yet"
-        text="Your orders will appear here after you complete a purchase."
-        action="Start Shopping"
-        href="/shop-with-sidebar"
-      />
-    );
+function Orders({
+  items,
+  page,
+  total,
+  totalPages,
+  search,
+  statusFilter,
+  paymentFilter,
+  onSearch,
+  onStatusFilter,
+  onPaymentFilter,
+  onPage,
+}: {
+  items: Order[];
+  page: number;
+  total: number;
+  totalPages: number;
+  search: string;
+  statusFilter: string;
+  paymentFilter: string;
+  onSearch: (value: string) => void;
+  onStatusFilter: (value: string) => void;
+  onPaymentFilter: (value: string) => void;
+  onPage: (value: number) => void;
+}) {
   return (
-    <div className="overflow-x-auto">
-      <table className="w-full min-w-[720px] text-left text-sm">
-        <thead className="bg-[#f8fafc] dark:bg-white/5">
-          <tr>
-            {[
-              "Order",
-              "Date",
-              "Total",
-              "Payment",
-              "Fulfilment",
-              "Items",
-              "Action",
-            ].map((x) => (
-              <th key={x} className="p-3">
-                {x}
-              </th>
-            ))}
-          </tr>
-        </thead>
-        <tbody>
-          {items.map((o) => (
-            <tr
-              key={o.id}
-              className="border-t border-[#e2e8f0] dark:border-white/10"
-            >
-              <td className="p-3 font-semibold">
-                {o.id.slice(0, 8)}
-              </td>
-              <td className="p-3">
-                {o.created_at
-                  ? new Date(o.created_at).toLocaleDateString()
-                  : "—"}
-              </td>
-              <td className="p-3">{formatCurrency(o.total, o.currency)}</td>
-              <td className="p-3 text-[#64748b]">Unavailable</td>
-              <td className="p-3 capitalize">{o.status.replaceAll("_", " ")}</td>
-              <td className="p-3">{o.items.length}</td>
-              <td className="p-3">
-                <Link
-                  href={`/account/orders/${o.id}`}
-                  className="font-semibold text-[#f7941d]"
+    <div>
+      <div className="mb-5 flex flex-col gap-3 xl:flex-row xl:items-end xl:justify-between">
+        <div>
+          <p className="text-sm font-semibold">Order History</p>
+          <p className="mt-1 text-xs text-[#64748b]">
+            {total} order{total === 1 ? "" : "s"} · Search and filters are
+            processed by the backend before pagination.
+          </p>
+        </div>
+
+        <div className="grid gap-2 sm:grid-cols-3">
+          <input
+            value={search}
+            onChange={(event) => onSearch(event.target.value)}
+            placeholder="Order, product, tracking..."
+            className="h-10 rounded-xl border border-[#e2e8f0] px-3 text-sm outline-none dark:border-white/10 dark:bg-white/5"
+          />
+
+          <select
+            value={statusFilter}
+            onChange={(event) => onStatusFilter(event.target.value)}
+            className="h-10 rounded-xl border border-[#e2e8f0] bg-white px-3 text-sm dark:border-white/10 dark:bg-white/5"
+          >
+            <option value="all">All fulfilment</option>
+            <option value="pending">Pending</option>
+            <option value="paid">Paid</option>
+            <option value="processing">Processing</option>
+            <option value="shipped">Shipped</option>
+            <option value="delivered">Delivered</option>
+            <option value="cancelled">Cancelled</option>
+            <option value="refunded">Refunded</option>
+          </select>
+
+          <select
+            value={paymentFilter}
+            onChange={(event) => onPaymentFilter(event.target.value)}
+            className="h-10 rounded-xl border border-[#e2e8f0] bg-white px-3 text-sm dark:border-white/10 dark:bg-white/5"
+          >
+            <option value="all">All payments</option>
+            <option value="pending">Payment pending</option>
+            <option value="processing">Payment processing</option>
+            <option value="completed">Paid</option>
+            <option value="failed">Payment failed</option>
+            <option value="refunded">Refunded</option>
+          </select>
+        </div>
+      </div>
+
+      {!items.length ? (
+        <Empty
+          title="No orders found"
+          text="Try another search/filter or start shopping."
+          action="Start Shopping"
+          href="/search"
+        />
+      ) : (
+        <div className="overflow-x-auto">
+          <table className="w-full min-w-[850px] text-left text-sm">
+            <thead className="bg-[#f8fafc] dark:bg-white/5">
+              <tr>
+                {[
+                  "Order",
+                  "Date",
+                  "Total",
+                  "Fulfilment",
+                  "Items",
+                  "Action",
+                ].map((x) => (
+                  <th key={x} className="p-3">
+                    {x}
+                  </th>
+                ))}
+              </tr>
+            </thead>
+            <tbody>
+              {items.map((order) => (
+                <tr
+                  key={order.id}
+                  className="border-t border-[#e2e8f0] dark:border-white/10"
                 >
-                  View Details
-                </Link>
-              </td>
-            </tr>
-          ))}
-        </tbody>
-      </table>
+                  <td className="p-3 font-semibold">
+                    {order.id.slice(0, 8).toUpperCase()}
+                  </td>
+                  <td className="p-3">
+                    {new Date(order.created_at).toLocaleDateString()}
+                  </td>
+                  <td className="p-3">
+                    {formatCurrency(order.total, order.currency)}
+                  </td>
+                  <td className="p-3 capitalize">
+                    {order.status.replaceAll("_", " ")}
+                  </td>
+                  <td className="p-3">{order.items.length}</td>
+                  <td className="p-3">
+                    <Link
+                      href={`/account/orders/${order.id}`}
+                      className="font-semibold text-[#f7941d]"
+                    >
+                      Track Order
+                    </Link>
+                  </td>
+                </tr>
+              ))}
+            </tbody>
+          </table>
+        </div>
+      )}
+
+      {totalPages > 1 && (
+        <div className="mt-5 flex items-center justify-end gap-3">
+          <button
+            disabled={page <= 1}
+            onClick={() => onPage(page - 1)}
+            className="rounded-lg border border-[#e2e8f0] px-3 py-2 text-sm font-semibold disabled:opacity-40"
+          >
+            Previous
+          </button>
+          <span className="text-xs text-[#64748b]">
+            Page {page} of {Math.max(totalPages, 1)}
+          </span>
+          <button
+            disabled={page >= totalPages}
+            onClick={() => onPage(page + 1)}
+            className="rounded-lg border border-[#e2e8f0] px-3 py-2 text-sm font-semibold disabled:opacity-40"
+          >
+            Next
+          </button>
+        </div>
+      )}
     </div>
   );
 }
+
 function Addresses({ items }: { items: Address[] }) {
   const [rows, setRows] = useState(items);
   async function remove(a: Address) {

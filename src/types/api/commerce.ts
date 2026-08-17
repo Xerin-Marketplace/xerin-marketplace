@@ -190,3 +190,87 @@ export type Payment = TimestampFields & {
 
 export type PaginatedOrders = PaginatedResults<Order>;
 export type PaginatedPayments = PaginatedResults<Payment>;
+
+
+export type ShipmentTrackingEvent = {
+  id: string;
+  shipment_id: string;
+  status: string;
+  location?: string | null;
+  notes?: string | null;
+  created_by_id?: string | null;
+  created_at: string;
+};
+
+export type ShipmentItem = {
+  id: string;
+  order_item_id: string;
+  quantity: number;
+};
+
+export type Shipment = {
+  id: string;
+  order_id: string;
+  seller_id: string;
+  logistics_company_id?: string | null;
+  shipping_method_id?: string | null;
+  status: string;
+  carrier_name?: string | null;
+  tracking_number?: string | null;
+  estimated_delivery_from?: string | null;
+  estimated_delivery_to?: string | null;
+  dispatched_at?: string | null;
+  delivered_at?: string | null;
+  items: ShipmentItem[];
+  tracking_events: ShipmentTrackingEvent[];
+  created_at: string;
+  updated_at?: string | null;
+};
+
+export type CustomerOrderPaymentSummary = {
+  id: string;
+  amount: number | string;
+  currency: string;
+  method: string;
+  provider?: string | null;
+  status: string;
+  provider_transaction_id?: string | null;
+  paid_at?: string | null;
+  created_at: string;
+};
+
+export type CustomerSellerOrderSummary = {
+  id: string;
+  seller_id: string;
+  status: string;
+  seller_subtotal: number | string;
+  item_count: number;
+  accepted_at?: string | null;
+  processing_at?: string | null;
+  ready_to_ship_at?: string | null;
+  shipped_at?: string | null;
+  delivered_at?: string | null;
+  created_at: string;
+};
+
+export type CustomerOrderAddressSummary = {
+  label?: string | null;
+  recipient_name?: string | null;
+  recipient_phone?: string | null;
+  country?: string | null;
+  region?: string | null;
+  district?: string | null;
+  ward?: string | null;
+  city?: string | null;
+  street?: string | null;
+  landmark?: string | null;
+  postal_code?: string | null;
+};
+
+export type CustomerOrderDetail = Order & {
+  payment_status?: string | null;
+  payments: CustomerOrderPaymentSummary[];
+  shipping_address?: CustomerOrderAddressSummary | null;
+  shipments: Shipment[];
+  seller_orders: CustomerSellerOrderSummary[];
+};

@@ -149,10 +149,31 @@ export const checkoutApi = {
 };
 
 export const ordersApi = {
-  mine: async (params: { page?: number; page_size?: number } = {}, signal?: AbortSignal) =>
-    (await axiosInstance.get<PaginatedOrders>("/orders/my-orders", { params, signal })).data,
+  mine: async (
+    params: {
+      page?: number;
+      page_size?: number;
+      search?: string;
+      status?: string;
+      payment_status?: string;
+    } = {},
+    signal?: AbortSignal,
+  ) =>
+    (
+      await axiosInstance.get<PaginatedOrders>("/orders/my-orders", {
+        params,
+        signal,
+      })
+    ).data,
   get: async (id: string, signal?: AbortSignal) =>
     (await axiosInstance.get<Order>(`/orders/${id}`, { signal })).data,
+  customerDetail: async (id: string, signal?: AbortSignal) =>
+    (
+      await axiosInstance.get<CustomerOrderDetail>(
+        `/orders/${id}/customer-detail`,
+        { signal },
+      )
+    ).data,
   create: async (payload: {
     shipping_address_id: string;
     shipping_rate_id: string;
