@@ -85,6 +85,25 @@ export type PaymentOption = {
   providers: string[];
 };
 
+export type PaymentInitiatePayload = {
+  order_id: string;
+  method: string;
+  provider?: string;
+  phone_number?: string;
+  success_url?: string;
+  failure_url?: string;
+};
+
+export type PaymentProviderErrorDetail = {
+  code?: string;
+  message: string;
+  provider?: string;
+  provider_status?: number | null;
+  order_id?: string;
+  payment_id?: string;
+  retryable?: boolean;
+};
+
 export type CheckoutQuote = {
   cart_id: string;
   currency: string;

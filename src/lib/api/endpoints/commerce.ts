@@ -5,6 +5,7 @@ import type {
   Order,
   PaginatedOrders,
   Payment,
+  PaymentInitiatePayload,
   PaginatedPayments,
   PaymentOption,
   ShippingOption,
@@ -224,6 +225,6 @@ export const paymentsApi = {
     ).data,
   get: async (id: string, signal?: AbortSignal) =>
     (await axiosInstance.get<Payment>(`/payments/${id}`, { signal })).data,
-  initiate: async (payload: { order_id: string; method: string; provider?: string; phone_number?: string; success_url?: string; failure_url?: string }) =>
+  initiate: async (payload: PaymentInitiatePayload) =>
     (await axiosInstance.post<Payment>("/payments/initiate", payload)).data,
 };

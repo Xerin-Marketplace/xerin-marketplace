@@ -10,8 +10,19 @@ export const useMyOrders = (params: { page?: number; page_size?: number } = {}) 
 export const useOrder = (id: string) =>
   useQuery({ queryKey: ["orders", id], queryFn: ({ signal }) => ordersApi.get(id, signal), enabled: Boolean(id) });
 
-export const useMyPayments = () =>
-  useQuery({ queryKey: ["payments", "mine"], queryFn: ({ signal }) => paymentsApi.mine(signal) });
+export const useMyPayments = (
+  params: {
+    page?: number;
+    page_size?: number;
+    search?: string;
+    payment_status?: string;
+    method?: string;
+  } = {},
+) =>
+  useQuery({
+    queryKey: ["payments", "mine", params],
+    queryFn: ({ signal }) => paymentsApi.mine(params, signal),
+  });
 
 export const useAddCartItem = () => {
   const queryClient = useQueryClient();

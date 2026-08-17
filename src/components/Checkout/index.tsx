@@ -322,6 +322,8 @@ const Checkout = () => {
       }
     }
 
+    let createdOrderId: string | null = null;
+
     try {
       const selectedPayment = paymentOptions.data?.find(
         (option) => option.id === form.paymentMethod,
@@ -346,6 +348,28 @@ const Checkout = () => {
         promotion_code: cart?.promotion_code || undefined,
         notes: form.notes || undefined,
       });
+
+      const paymentRetryKey = `xerin:payment-retry:${order.id}`;
+      const paymentRetryContext = {
+        method: form.paymentMethod,
+        provider:
+          form.paymentMethod === "cash_on_delivery"
+            ? undefined
+            : paymentProvider || "azampay",
+        phone_number:
+          selectedPayment?.requires_phone
+            ? phoneNumber
+            : undefined,
+      };
+
+      if (typeof window !== "undefined") {
+        sessionStorage.setItem(
+          paymentRetryKey,
+          JSON.stringify(paymentRetryContext),
+        );
+      }
+
+      createdOrderId = String(order.id);
 
       const confirmedTotal = Number(order.total || 0);
       if (
@@ -378,6 +402,10 @@ const Checkout = () => {
           form.paymentMethod === "card" ? failureUrl : undefined,
       });
 
+      if (typeof window !== "undefined") {
+        sessionStorage.removeItem(paymentRetryKey);
+      }
+
       if (isCod) {
         toast.success(
           "Order placed with Cash on Delivery. Payment will be collected at delivery.",
@@ -402,11 +430,50 @@ const Checkout = () => {
       );
     } catch (error: unknown) {
       const candidate = error as {
-        response?: { data?: { detail?: string } };
+        response?: {
+          status?: number;
+          data?: {
+            detail?:
+              | string
+              | {
+                  code?: string;
+                  message?: string;
+                  order_id?: string;
+                  payment_id?: string;
+                  retryable?: boolean;
+                };
+          };
+        };
         message?: string;
       };
+
+      const detail = candidate.response?.data?.detail;
+      const detailMessage =
+        typeof detail === "string"
+          ? detail
+          : detail?.message;
+
+      if (createdOrderId) {
+        const retryable =
+          typeof detail === "object"
+            ? detail?.retryable !== false
+            : true;
+
+        toast.error(
+          detailMessage ||
+            "Your order was created, but payment could not be started.",
+        );
+
+        router.push(
+          `/order-success/${createdOrderId}?payment=failed&retryable=${
+            retryable ? "1" : "0"
+          }`,
+        );
+        return;
+      }
+
       toast.error(
-        candidate.response?.data?.detail ||
+        detailMessage ||
           candidate.message ||
           "Checkout failed",
       );
