@@ -43,7 +43,7 @@ const nextConfig = {
     {
       protocol: "https",
       // hostname: "api.xerinmarketplace.com",
-      hostname: "http://169.58.54.110:8000",
+      hostname: "169.58.54.110:8000",
       pathname: "/api/v1/uploads/**",
     },
 
@@ -51,7 +51,7 @@ const nextConfig = {
     {
       protocol: "https",
       // hostname: "api.xerinmarketplace.com",
-      hostname: "http://169.58.54.110:8000",
+      hostname: "169.58.54.110:8000",
       pathname: "/uploads/**",
     },
 
