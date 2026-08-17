@@ -42,16 +42,14 @@ const nextConfig = {
     // Production API product/category images
     {
       protocol: "https",
-      // hostname: "api.xerinmarketplace.com",
-      hostname: "169.58.54.110:8000",
+      hostname: "api.xerinmarketplace.com",
       pathname: "/api/v1/uploads/**",
     },
 
     // Keep this too if some backend URLs are returned without /api/v1
     {
       protocol: "https",
-      // hostname: "api.xerinmarketplace.com",
-      hostname: "169.58.54.110:8000",
+      hostname: "api.xerinmarketplace.com",
       pathname: "/uploads/**",
     },
 
@@ -76,7 +74,6 @@ const nextConfig = {
     "192.168.1.142",
     "e12a-41-207-244-106.ngrok-free.app",
     "backendtest.adam.com",
-    "169.58.54.110",
   ],
 
   async rewrites() {
