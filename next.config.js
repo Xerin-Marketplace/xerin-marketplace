@@ -58,6 +58,20 @@ const nextConfig = {
       hostname: "images.unsplash.com",
       pathname: "/**",
     },
+
+    {
+        protocol: 'http',
+        hostname: '169.58.54.110',
+        port: '8000',
+        pathname: '/api/v1/uploads/**', 
+      },
+
+    {
+        protocol: 'http',
+        hostname: '169.58.54.110',
+        port: '8000',
+        pathname: '/uploads/**',
+    },
   ],
 },
 
