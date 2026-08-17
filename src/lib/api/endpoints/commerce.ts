@@ -140,7 +140,9 @@ export const ordersApi = {
   create: async (payload: {
     shipping_address_id: string;
     shipping_rate_id: string;
+    delivery_mode: DeliveryMode;
     coupon_code?: string;
+    promotion_code?: string;
     notes?: string;
   }) =>
     (await axiosInstance.post<Order>("/orders", payload)).data,

@@ -332,9 +332,24 @@ const Checkout = () => {
       const order = await createOrder.mutateAsync({
         shipping_address_id: selectedAddressId,
         shipping_rate_id: selectedShipping.id,
+        delivery_mode: deliveryMode,
         coupon_code: cart?.coupon_code || undefined,
+        promotion_code: cart?.promotion_code || undefined,
         notes: form.notes || undefined,
       });
+
+      const confirmedTotal = Number(order.total || 0);
+      if (
+        checkoutTotal !== null &&
+        Math.abs(confirmedTotal - checkoutTotal) >= 0.01
+      ) {
+        toast(
+          `Checkout was refreshed by the backend. Confirmed order total: ${formatCurrency(
+            confirmedTotal,
+            order.currency,
+          )}`,
+        );
+      }
 
       const successUrl = `${window.location.origin}/order-success/${order.id}?payment=success`;
       const failureUrl = `${window.location.origin}/checkout?payment=failed&order_id=${order.id}`;
@@ -671,6 +686,14 @@ const Checkout = () => {
                   onProviderChange={setPaymentProvider}
                   onPhoneNumberChange={setPaymentPhone}
                 />
+
+                <div className="mt-7.5 rounded-xl border border-blue-200 bg-blue-50 p-4 text-xs leading-5 text-blue-800">
+                  <b>Final checkout protection:</b> when you place the order, the
+                  backend rechecks the current product prices, stock, seller
+                  promotion, platform coupon, delivery address, logistics scope,
+                  shipment weight and selected shipping rate. The amount stored on
+                  the Order becomes the payment source of truth.
+                </div>
 
                 <button
                   type="submit"

@@ -107,6 +107,8 @@ export type OrderItem = {
   quantity: number;
   unit_price: number | string;
   total_price: number | string;
+  promotion_discount_amount?: number | string;
+  customer_total?: number | string;
 };
 
 export type Order = TimestampFields & {
@@ -119,11 +121,19 @@ export type Order = TimestampFields & {
   payment_status?: string | null;
   currency: string;
   subtotal: number | string;
+  coupon_discount_amount?: number | string;
+  promotion_discount_amount?: number | string;
   discount_amount: number | string;
+  original_shipping_amount?: number | string;
+  shipping_discount_amount?: number | string;
   shipping_amount: number | string;
   tax_amount: number | string;
   total: number | string;
   coupon_code: string | null;
+  promotion_code?: string | null;
+  promotion_seller_id?: string | null;
+  delivery_mode?: DeliveryMode | null;
+  logistics_company_id?: string | null;
   notes: string | null;
   delivery_method?: string | null;
   courier_name?: string | null;
