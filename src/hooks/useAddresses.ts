@@ -3,14 +3,16 @@ import { usersApi } from "@/lib/api/endpoints/users";
 import type { ID } from "@/types/api/common";
 import type { AddressRequest } from "@/types/api/user";
 
-export const addressesQueryKey = ["addresses"];
+export const addressesQueryKey = ["addresses"] as const;
+const EMPTY_ADDRESSES: import("@/types/api/user").Address[] = [];
 
 export const useAddresses = (enabled = true) => {
   const queryClient = useQueryClient();
 
   const addressesQuery = useQuery({
     queryKey: addressesQueryKey,
-    queryFn: usersApi.getAddresses,
+    queryFn: ({ signal }) =>
+      usersApi.getAddresses({ page: 1, page_size: 100 }, signal),
     enabled,
   });
 
@@ -44,7 +46,7 @@ export const useAddresses = (enabled = true) => {
   });
 
   return {
-    addresses: addressesQuery.data ?? [],
+    addresses: addressesQuery.data ?? EMPTY_ADDRESSES,
     isLoadingAddresses: addressesQuery.isLoading,
     isFetchingAddresses: addressesQuery.isFetching,
     addressesError: addressesQuery.error,

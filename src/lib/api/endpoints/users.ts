@@ -22,10 +22,11 @@ export const updateMe = async (payload: UpdateUserRequest): Promise<User> => {
 
 export const getAddresses = async (
   params: { page?: number; page_size?: number } = { page: 1, page_size: 100 },
+  signal?: AbortSignal,
 ): Promise<Address[]> => {
   const res = await axiosInstance.get<PaginatedAddressResponse | Address[]>(
     API_ENDPOINTS.users.addresses,
-    { params },
+    { params, signal },
   );
 
   if (Array.isArray(res.data)) {

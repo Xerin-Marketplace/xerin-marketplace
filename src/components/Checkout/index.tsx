@@ -133,10 +133,19 @@ const Checkout = () => {
     const preferred =
       matchingAddresses.find((address) => address.is_default) ||
       matchingAddresses[0];
+    const nextAddressId = preferred ? String(preferred.id) : "";
 
-    setSelectedAddressId(preferred ? String(preferred.id) : "");
-    setForm((current) => ({ ...current, shippingMethod: "" }));
+    // Do nothing when the derived selection is already the current state.
+    // This prevents a render loop while addresses are still loading/empty.
+    if (nextAddressId === selectedAddressId) return;
+
+    setSelectedAddressId(nextAddressId);
     setSelectedCompanyId("");
+    setForm((current) =>
+      current.shippingMethod
+        ? { ...current, shippingMethod: "" }
+        : current,
+    );
   }, [matchingAddresses, selectedAddressId]);
 
   const selectedAddress = matchingAddresses.find(
