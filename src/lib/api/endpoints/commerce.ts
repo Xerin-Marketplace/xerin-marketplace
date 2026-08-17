@@ -6,6 +6,7 @@ import type {
   PaginatedOrders,
   Payment,
   PaymentInitiatePayload,
+  PaymentRetryPayload,
   PaginatedPayments,
   PaymentOption,
   ShippingOption,
@@ -227,4 +228,6 @@ export const paymentsApi = {
     (await axiosInstance.get<Payment>(`/payments/${id}`, { signal })).data,
   initiate: async (payload: PaymentInitiatePayload) =>
     (await axiosInstance.post<Payment>("/payments/initiate", payload)).data,
+  retry: async (id: string, payload: PaymentRetryPayload) =>
+    (await axiosInstance.post<Payment>(`/payments/${id}/retry`, payload)).data,
 };

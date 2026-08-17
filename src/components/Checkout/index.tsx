@@ -394,7 +394,7 @@ const Checkout = () => {
       }
 
       const successUrl = `${window.location.origin}/order-success/${order.id}?payment=success`;
-      const failureUrl = `${window.location.origin}/checkout?payment=failed&order_id=${order.id}`;
+      const failureUrl = `${window.location.origin}/order-success/${order.id}?payment=failed&retryable=1`;
 
       const isCod = form.paymentMethod === "cash_on_delivery";
 
@@ -411,11 +411,10 @@ const Checkout = () => {
           form.paymentMethod === "card" ? failureUrl : undefined,
       });
 
-      if (typeof window !== "undefined") {
-        sessionStorage.removeItem(paymentRetryKey);
-      }
-
       if (isCod) {
+        if (typeof window !== "undefined") {
+          sessionStorage.removeItem(paymentRetryKey);
+        }
         toast.success(
           "Order placed with Cash on Delivery. Payment will be collected at delivery.",
         );
@@ -473,10 +472,16 @@ const Checkout = () => {
             "Your order was created, but payment could not be started.",
         );
 
+        const failedPaymentId =
+          typeof detail === "object" ? detail?.payment_id : undefined;
+        const paymentIdQuery = failedPaymentId
+          ? `&payment_id=${encodeURIComponent(failedPaymentId)}`
+          : "";
+
         router.push(
           `/order-success/${createdOrderId}?payment=failed&retryable=${
             retryable ? "1" : "0"
-          }`,
+          }${paymentIdQuery}`,
         );
         return;
       }

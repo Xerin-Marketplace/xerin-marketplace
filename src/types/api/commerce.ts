@@ -94,6 +94,13 @@ export type PaymentInitiatePayload = {
   failure_url?: string;
 };
 
+export type PaymentRetryPayload = {
+  provider?: string;
+  phone_number?: string;
+  success_url?: string;
+  failure_url?: string;
+};
+
 export type PaymentProviderErrorDetail = {
   code?: string;
   message: string;

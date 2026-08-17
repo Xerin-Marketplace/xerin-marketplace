@@ -5,8 +5,9 @@ import { productsApi } from "@/lib/api/endpoints/products";
 import { sellersApi } from "@/lib/api/endpoints/sellers";
 import {
   sellerInventoryApi,
-  type SellerInventory,
-} from "@/lib/api/endpoints/seller-inventory";
+  type SellerInventoryItem,
+} 
+from "@/lib/api/endpoints/seller-inventory";
 import { authStorage } from "@/lib/auth/storage";
 import type { Product } from "@/types/api/product";
 import type {
@@ -92,7 +93,7 @@ export default function SellerDashboard() {
   );
 
   const [products, setProducts] = useState<Product[]>([]);
-  const [inventory, setInventory] = useState<SellerInventory[]>([]);
+  const [inventory, setInventory] = useState<SellerInventoryItem[]>([]);
   const [kyc, setKyc] = useState<SellerKycStatus | null>(null);
   const [documents, setDocuments] = useState<SellerKycDocument[]>([]);
   const [payouts, setPayouts] = useState<PayoutAccount[]>([]);
@@ -144,17 +145,28 @@ export default function SellerDashboard() {
 
       if (sellerData.status === "approved") {
         const [productData, inventoryData, payoutList, performanceData] =
-          await Promise.all([
-            productsApi.getMyProducts({ skip: 0, limit: 100 }),
-            sellerInventoryApi.list().catch(() => []),
-            sellersApi.getPayoutAccounts(token),
-            sellersApi.getDashboardPerformance(),
-          ]);
+  await Promise.all([
+    productsApi.getMyProducts({ skip: 0, limit: 100 }),
+    sellerInventoryApi.list().catch(() => ({
+      total: 0,
+      page: 1,
+      page_size: 0,
+      results: [],
+    })),
+    sellersApi.getPayoutAccounts(token),
+    sellersApi.getDashboardPerformance(),
+  ]);
 
-        setProducts(productData);
-        setInventory(inventoryData);
-        setPayouts(payoutList);
-        setPerformance(performanceData);
+setProducts(productData);
+
+setInventory(
+  Array.isArray(inventoryData?.results)
+    ? inventoryData.results
+    : [],
+);
+
+setPayouts(payoutList);
+setPerformance(performanceData);
       } else {
         setProducts([]);
         setInventory([]);

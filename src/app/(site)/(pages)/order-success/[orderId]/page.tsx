@@ -15,7 +15,6 @@ import { useMyPayments, useOrder } from "@/hooks/useCommerce";
 import { paymentsApi } from "@/lib/api/endpoints/commerce";
 import { formatCurrency } from "@/lib/formatCurrency";
 import type {
-  PaymentInitiatePayload,
   PaymentProviderErrorDetail,
 } from "@/types/api/commerce";
 
@@ -54,13 +53,24 @@ export default function OrderSuccessPage() {
     readRetryContext(orderId),
   );
 
-  const payment = useMemo(
-    () =>
-      payments.data?.results.find(
-        (item) => item.order_id === orderId,
-      ),
-    [payments.data, orderId],
-  );
+  const paymentIdFromQuery = searchParams.get("payment_id");
+  const payment = useMemo(() => {
+    const orderPayments = (payments.data?.results ?? [])
+      .filter((item) => item.order_id === orderId)
+      .sort(
+        (a, b) =>
+          new Date(b.created_at).getTime() -
+          new Date(a.created_at).getTime(),
+      );
+
+    if (paymentIdFromQuery) {
+      return (
+        orderPayments.find((item) => item.id === paymentIdFromQuery) ??
+        orderPayments[0]
+      );
+    }
+    return orderPayments[0];
+  }, [payments.data, orderId, paymentIdFromQuery]);
 
   const queryPaymentState = searchParams.get("payment");
   const retryableFromQuery =
@@ -97,6 +107,8 @@ export default function OrderSuccessPage() {
   const paymentCompleted = payment?.status === "completed";
   const canRetry =
     data.status === "pending" &&
+    Boolean(payment) &&
+    ["failed", "cancelled"].includes(payment?.status ?? "") &&
     !paymentCompleted &&
     retryableFromQuery &&
     Boolean(retryContext.method);
@@ -114,25 +126,19 @@ export default function OrderSuccessPage() {
       const successUrl = `${window.location.origin}/order-success/${data.id}?payment=success`;
       const failureUrl = `${window.location.origin}/order-success/${data.id}?payment=failed&retryable=1`;
 
-      const payload: PaymentInitiatePayload = {
-        order_id: String(data.id),
-        method: retryContext.method,
+      if (!payment) {
+        toast.error("The failed payment attempt could not be found. Refresh the page and try again.");
+        return;
+      }
+
+      const nextPayment = await paymentsApi.retry(payment.id, {
         provider: retryContext.provider,
         phone_number: retryContext.phone_number,
         success_url:
-          retryContext.method === "card"
-            ? successUrl
-            : undefined,
+          retryContext.method === "card" ? successUrl : undefined,
         failure_url:
-          retryContext.method === "card"
-            ? failureUrl
-            : undefined,
-      };
-
-      const nextPayment = await paymentsApi.initiate(payload);
-
-      sessionStorage.removeItem(retryStorageKey(data.id));
-      setRetryContext({});
+          retryContext.method === "card" ? failureUrl : undefined,
+      });
 
       const checkoutUrl =
         nextPayment.provider_response?.checkout_url;
@@ -150,6 +156,11 @@ export default function OrderSuccessPage() {
           : "Payment request started.",
       );
       await payments.refetch();
+      window.history.replaceState(
+        null,
+        "",
+        `/order-success/${data.id}?payment_id=${nextPayment.id}&payment=${nextPayment.status}`,
+      );
     } catch (error: unknown) {
       const candidate = error as {
         response?: {
@@ -277,6 +288,12 @@ export default function OrderSuccessPage() {
                   />
                   {retrying ? "Retrying..." : "Retry Payment"}
                 </button>
+
+                {!payment && (
+                  <p className="mt-3 text-xs">
+                    The failed payment attempt is still loading. Refresh this page before retrying.
+                  </p>
+                )}
 
                 {!retryContext.method && (
                   <p className="mt-3 text-xs">
