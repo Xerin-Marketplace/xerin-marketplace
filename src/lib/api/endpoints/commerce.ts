@@ -3,6 +3,7 @@ import type {
   Cart,
   GuestCartMergeResult,
   Order,
+  OrderPaymentState,
   PaginatedOrders,
   Payment,
   PaymentInitiatePayload,
@@ -246,4 +247,11 @@ export const paymentsApi = {
     (await axiosInstance.post<Payment>("/payments/initiate", payload)).data,
   retry: async (id: string, payload: PaymentRetryPayload) =>
     (await axiosInstance.post<Payment>(`/payments/${id}/retry`, payload)).data,
+  orderState: async (orderId: string, signal?: AbortSignal) =>
+    (
+      await axiosInstance.get<OrderPaymentState>(
+        `/payments/orders/${orderId}/state`,
+        { signal },
+      )
+    ).data,
 };

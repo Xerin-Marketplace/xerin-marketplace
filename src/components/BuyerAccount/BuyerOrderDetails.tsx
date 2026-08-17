@@ -371,7 +371,13 @@ export default function BuyerOrderDetails({ orderId }: { orderId: string }) {
                         ? `Paid ${new Date(payment.paid_at).toLocaleString()}`
                         : payment.method === "cash_on_delivery"
                           ? "Collection due on delivery"
-                          : "Awaiting payment confirmation"}
+                          : payment.status === "processing"
+                            ? "Authorization sent — waiting for provider confirmation"
+                            : payment.status === "failed"
+                              ? "Payment failed — retry from the payment confirmation page"
+                              : payment.status === "cancelled"
+                                ? "Payment cancelled — a new attempt can be made"
+                                : "Awaiting payment confirmation"}
                     </p>
                   </div>
                 ))

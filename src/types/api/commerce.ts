@@ -205,6 +205,7 @@ export type Payment = TimestampFields & {
   provider: string | null;
   status: string;
   provider_transaction_id: string | null;
+  failure_reason?: string | null;
   provider_response?: {
     checkout_url?: string | null;
     message?: string | null;
@@ -319,4 +320,23 @@ export type CustomerEscrowSummary = {
   remaining_amount: number | string;
   release_after?: string | null;
   can_customer_approve: boolean;
+};
+
+
+export type OrderPaymentState = {
+  order_id: string;
+  order_status: string;
+  payment_status:
+    | "not_started"
+    | "pending"
+    | "processing"
+    | "completed"
+    | "failed"
+    | "cancelled"
+    | "refunded";
+  latest_payment?: Payment | null;
+  retryable: boolean;
+  terminal: boolean;
+  poll_after_seconds?: number | null;
+  message: string;
 };
