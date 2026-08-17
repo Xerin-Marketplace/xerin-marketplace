@@ -1064,10 +1064,10 @@ export const adminService = {
 };
 
 
-// ============================================================
+//  ===
 // ADMIN PHASE 1-3 CONFIGURATION
 // Marketplace Settings, Logistics and Finance
-// ============================================================
+//  ===
 
 export type AdminMarketplaceSettings = {
   id?: string | null;
