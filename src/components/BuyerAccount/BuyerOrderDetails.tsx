@@ -3,6 +3,7 @@
 import { ordersApi } from "@/lib/api/endpoints/commerce";
 import { formatCurrency } from "@/lib/formatCurrency";
 import type {
+  CustomerEscrowSummary,
   CustomerOrderDetail,
   Shipment,
 } from "@/types/api/commerce";
@@ -14,6 +15,7 @@ import {
   MapPin,
   PackageCheck,
   RefreshCw,
+  ShieldCheck,
   Truck,
 } from "lucide-react";
 import Link from "next/link";
@@ -42,12 +44,20 @@ export default function BuyerOrderDetails({ orderId }: { orderId: string }) {
   const [order, setOrder] = useState<CustomerOrderDetail | null>(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState("");
+  const [escrow, setEscrow] = useState<CustomerEscrowSummary | null>(null);
+  const [approvingReceipt, setApprovingReceipt] = useState(false);
+  const [escrowMessage, setEscrowMessage] = useState("");
 
   const load = async () => {
     setLoading(true);
     setError("");
     try {
-      setOrder(await ordersApi.customerDetail(orderId));
+      const [orderData, escrowData] = await Promise.all([
+        ordersApi.customerDetail(orderId),
+        ordersApi.escrowStatus(orderId),
+      ]);
+      setOrder(orderData);
+      setEscrow(escrowData);
     } catch (cause) {
       const err = cause as {
         response?: { data?: { detail?: string } };
@@ -60,6 +70,40 @@ export default function BuyerOrderDetails({ orderId }: { orderId: string }) {
       );
     } finally {
       setLoading(false);
+    }
+  };
+
+  const approveReceipt = async () => {
+    if (!escrow?.can_customer_approve || approvingReceipt) return;
+    const confirmed = window.confirm(
+      "Confirm that you received the complete order in acceptable condition? This releases the seller funds from Xerin escrow.",
+    );
+    if (!confirmed) return;
+
+    setApprovingReceipt(true);
+    setEscrowMessage("");
+    try {
+      const updated = await ordersApi.approveReceipt(
+        orderId,
+        "Customer confirmed complete and satisfactory receipt",
+      );
+      setEscrow(updated);
+      setEscrowMessage(
+        "Receipt approved. Seller funds have been released from Xerin escrow.",
+      );
+      await load();
+    } catch (cause) {
+      const err = cause as {
+        response?: { data?: { detail?: string } };
+        message?: string;
+      };
+      setEscrowMessage(
+        err.response?.data?.detail ||
+          err.message ||
+          "Unable to approve receipt.",
+      );
+    } finally {
+      setApprovingReceipt(false);
     }
   };
 
@@ -337,6 +381,88 @@ export default function BuyerOrderDetails({ orderId }: { orderId: string }) {
                 </p>
               )}
             </div>
+          </Card>
+
+          <Card title="Xerin Escrow">
+            {escrow && escrow.status !== "not_applicable" ? (
+              <div className="space-y-3">
+                <div className="flex items-center gap-2">
+                  <ShieldCheck size={18} className="text-emerald-600" />
+                  <p className="font-semibold capitalize">
+                    {pretty(escrow.status)}
+                  </p>
+                </div>
+
+                <div className="rounded-xl bg-[#f8fafc] p-3 text-sm dark:bg-white/5">
+                  <Summary
+                    label="Seller entitlement"
+                    value={formatCurrency(
+                      escrow.seller_amount,
+                      escrow.currency,
+                    )}
+                  />
+                  <Summary
+                    label="Marketplace commission"
+                    value={formatCurrency(
+                      escrow.commission_amount,
+                      escrow.currency,
+                    )}
+                  />
+                  <Summary
+                    label="Still protected"
+                    value={formatCurrency(
+                      escrow.remaining_amount,
+                      escrow.currency,
+                    )}
+                    strong
+                  />
+                </div>
+
+                {escrow.status === "held" && !escrow.can_customer_approve && (
+                  <p className="text-xs leading-5 text-[#64748b]">
+                    Xerin is holding the seller funds until delivery is completed,
+                    you approve receipt, or the configured escrow release period
+                    is reached.
+                  </p>
+                )}
+
+                {escrow.can_customer_approve && (
+                  <button
+                    type="button"
+                    onClick={() => void approveReceipt()}
+                    disabled={approvingReceipt}
+                    className="w-full rounded-xl bg-emerald-600 px-4 py-3 text-sm font-bold text-white disabled:cursor-not-allowed disabled:opacity-60"
+                  >
+                    {approvingReceipt
+                      ? "Releasing Escrow..."
+                      : "Approve Receipt & Release Seller Funds"}
+                  </button>
+                )}
+
+                {escrow.status === "released" && (
+                  <p className="text-xs font-semibold text-emerald-700">
+                    You approved the order or the escrow release conditions were
+                    satisfied. Seller funds are now available for payout.
+                  </p>
+                )}
+
+                {escrow.status === "disputed" && (
+                  <p className="text-xs font-semibold text-red-700">
+                    Escrow is frozen while this order is under dispute.
+                  </p>
+                )}
+
+                {escrowMessage && (
+                  <p className="text-xs leading-5 text-[#64748b]">
+                    {escrowMessage}
+                  </p>
+                )}
+              </div>
+            ) : (
+              <p className="text-sm text-[#64748b]">
+                No online-payment escrow applies to this order.
+              </p>
+            )}
           </Card>
 
           <Card title="Delivery Address">

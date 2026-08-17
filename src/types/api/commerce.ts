@@ -300,3 +300,23 @@ export type CustomerOrderDetail = Order & {
   shipments: Shipment[];
   seller_orders: CustomerSellerOrderSummary[];
 };
+
+
+export type CustomerEscrowSummary = {
+  order_id: string;
+  currency: string;
+  status:
+    | "not_applicable"
+    | "held"
+    | "partially_released"
+    | "released"
+    | "disputed";
+  hold_count: number;
+  gross_amount: number | string;
+  seller_amount: number | string;
+  commission_amount: number | string;
+  released_amount: number | string;
+  remaining_amount: number | string;
+  release_after?: string | null;
+  can_customer_approve: boolean;
+};

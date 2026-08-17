@@ -12,6 +12,8 @@ import type {
   ShippingOption,
   DeliveryCheckoutConfig,
   DeliveryMode,
+  CustomerOrderDetail,
+  CustomerEscrowSummary,
 } from "@/types/api/commerce";
 
 export const cartApi = {
@@ -187,6 +189,20 @@ export const ordersApi = {
     (await axiosInstance.post<Order>("/orders", payload)).data,
   updateStatus: async (id: string, payload: { status: string; notes?: string }) =>
     (await axiosInstance.patch<Order>(`/orders/${id}/status`, payload)).data,
+  escrowStatus: async (id: string, signal?: AbortSignal) =>
+    (
+      await axiosInstance.get<CustomerEscrowSummary>(
+        `/orders/${id}/escrow`,
+        { signal },
+      )
+    ).data,
+  approveReceipt: async (id: string, note?: string) =>
+    (
+      await axiosInstance.post<CustomerEscrowSummary>(
+        `/orders/${id}/approve-receipt`,
+        { note: note || undefined },
+      )
+    ).data,
   adminList: async (
     params: {
       page?: number;
