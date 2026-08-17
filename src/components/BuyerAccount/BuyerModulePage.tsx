@@ -61,6 +61,13 @@ export default function BuyerModulePage({ view }: { view: View }) {
     [orders, setOrders] = useState<Order[]>([]),
     [payments, setPayments] = useState<Payment[]>([]),
     [profile, setProfile] = useState<User | null>(null);
+  const [paymentPage, setPaymentPage] = useState(1);
+  const [paymentMeta, setPaymentMeta] = useState({
+    total: 0,
+    total_pages: 0,
+  });
+  const [paymentSearch, setPaymentSearch] = useState("");
+  const [paymentStatusFilter, setPaymentStatusFilter] = useState("all");
   const [passwords, setPasswords] = useState({
     current: "",
     next: "",
@@ -78,8 +85,22 @@ export default function BuyerModulePage({ view }: { view: View }) {
     try {
       if (view === "orders")
         setOrders((await ordersApi.mine()).results);
-      else if (view === "payments")
-        setPayments(await paymentsApi.mine());
+      else if (view === "payments") {
+        const result = await paymentsApi.mine({
+          page: paymentPage,
+          page_size: 20,
+          search: paymentSearch.trim() || undefined,
+          payment_status:
+            paymentStatusFilter === "all"
+              ? undefined
+              : paymentStatusFilter,
+        });
+        setPayments(result.results);
+        setPaymentMeta({
+          total: result.total,
+          total_pages: result.total_pages,
+        });
+      }
       else if (view === "addresses")
         setProfile(await usersApi.getMe());
       else if (view === "details") {
@@ -102,7 +123,7 @@ export default function BuyerModulePage({ view }: { view: View }) {
   }
   useEffect(() => {
     void load();
-  }, [view]);
+  }, [view, paymentPage, paymentSearch, paymentStatusFilter]);
   async function saveDetails(e: FormEvent) {
     e.preventDefault();
     try {
@@ -165,7 +186,23 @@ export default function BuyerModulePage({ view }: { view: View }) {
         ) : view === "orders" ? (
           <Orders items={orders} />
         ) : view === "payments" ? (
-          <Payments items={payments} />
+          <Payments
+            items={payments}
+            page={paymentPage}
+            total={paymentMeta.total}
+            totalPages={paymentMeta.total_pages}
+            search={paymentSearch}
+            statusFilter={paymentStatusFilter}
+            onSearch={(value) => {
+              setPaymentSearch(value);
+              setPaymentPage(1);
+            }}
+            onStatusFilter={(value) => {
+              setPaymentStatusFilter(value);
+              setPaymentPage(1);
+            }}
+            onPage={setPaymentPage}
+          />
         ) : view === "addresses" ? (
           <AddressBookSection
             isActive
@@ -193,66 +230,161 @@ export default function BuyerModulePage({ view }: { view: View }) {
     </div>
   );
 }
-function Payments({ items }: { items: Payment[] }) {
-  if (!items.length)
-    return (
-      <Empty
-        title="No payments yet"
-        text="Payments will appear here after you initiate checkout."
-        action="Start Shopping"
-        href="/shop-with-sidebar"
-      />
-    );
+function Payments({
+  items,
+  page,
+  total,
+  totalPages,
+  search,
+  statusFilter,
+  onSearch,
+  onStatusFilter,
+  onPage,
+}: {
+  items: Payment[];
+  page: number;
+  total: number;
+  totalPages: number;
+  search: string;
+  statusFilter: string;
+  onSearch: (value: string) => void;
+  onStatusFilter: (value: string) => void;
+  onPage: (value: number) => void;
+}) {
   return (
-    <div className="overflow-x-auto">
-      <table className="w-full min-w-[720px] text-left text-sm">
-        <thead className="bg-[#f8fafc] dark:bg-white/5">
-          <tr>
-            {[
-              "Reference",
-              "Order",
-              "Amount",
-              "Method",
-              "Status",
-              "Date",
-              "Receipt",
-            ].map((x) => (
-              <th key={x} className="p-3">
-                {x}
-              </th>
-            ))}
-          </tr>
-        </thead>
-        <tbody>
-          {items.map((p) => (
-            <tr
-              key={p.id}
-              className="border-t border-[#e2e8f0] dark:border-white/10"
-            >
-              <td className="p-3 font-semibold">
-                {p.provider_transaction_id || p.id.slice(0, 8)}
-              </td>
-              <td className="p-3">{p.order_id.slice(0, 8)}</td>
-              <td className="p-3">
-                {formatCurrency(p.amount, p.currency)}
-              </td>
-              <td className="p-3 capitalize">
-                {(p.provider || p.method || "—").replaceAll("_", " ")}
-              </td>
-              <td className="p-3 capitalize">{p.status || "Unavailable"}</td>
-              <td className="p-3">
-                {p.created_at
-                  ? new Date(p.created_at).toLocaleDateString()
-                  : "—"}
-              </td>
-              <td className="p-3 text-[#64748b]">Unavailable</td>
-            </tr>
-          ))}
-        </tbody>
-      </table>
+    <div>
+      <div className="mb-5 flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
+        <div>
+          <p className="text-sm font-semibold">Payment History</p>
+          <p className="mt-1 text-xs text-[#64748b]">
+            {total} payment record{total === 1 ? "" : "s"}
+          </p>
+        </div>
+
+        <div className="flex flex-col gap-2 sm:flex-row">
+          <input
+            value={search}
+            onChange={(event) => onSearch(event.target.value)}
+            placeholder="Search payment or order..."
+            className="h-10 rounded-xl border border-[#e2e8f0] px-3 text-sm outline-none dark:border-white/10 dark:bg-white/5"
+          />
+          <select
+            value={statusFilter}
+            onChange={(event) => onStatusFilter(event.target.value)}
+            className="h-10 rounded-xl border border-[#e2e8f0] bg-white px-3 text-sm dark:border-white/10 dark:bg-white/5"
+          >
+            <option value="all">All statuses</option>
+            <option value="pending">Pending</option>
+            <option value="processing">Processing</option>
+            <option value="completed">Completed</option>
+            <option value="failed">Failed</option>
+            <option value="cancelled">Cancelled</option>
+            <option value="refunded">Refunded</option>
+          </select>
+        </div>
+      </div>
+
+      {!items.length ? (
+        <Empty
+          title="No payments found"
+          text="Payment records will appear here after checkout."
+          action="Start Shopping"
+          href="/search"
+        />
+      ) : (
+        <div className="overflow-x-auto">
+          <table className="w-full min-w-[850px] text-left text-sm">
+            <thead className="bg-[#f8fafc] dark:bg-white/5">
+              <tr>
+                {[
+                  "Reference",
+                  "Order",
+                  "Amount",
+                  "Method",
+                  "Provider",
+                  "Status",
+                  "Paid",
+                  "Date",
+                ].map((x) => (
+                  <th key={x} className="p-3">
+                    {x}
+                  </th>
+                ))}
+              </tr>
+            </thead>
+            <tbody>
+              {items.map((p) => (
+                <tr
+                  key={p.id}
+                  className="border-t border-[#e2e8f0] dark:border-white/10"
+                >
+                  <td className="p-3 font-semibold">
+                    {p.provider_transaction_id || p.id.slice(0, 8)}
+                  </td>
+                  <td className="p-3">
+                    <Link
+                      href={`/account/orders/${p.order_id}`}
+                      className="font-semibold text-[#f7941d]"
+                    >
+                      {p.order_id.slice(0, 8)}
+                    </Link>
+                  </td>
+                  <td className="p-3">
+                    {formatCurrency(p.amount, p.currency)}
+                  </td>
+                  <td className="p-3 capitalize">
+                    {p.method.replaceAll("_", " ")}
+                  </td>
+                  <td className="p-3 capitalize">
+                    {(p.provider || "—").replaceAll("_", " ")}
+                  </td>
+                  <td className="p-3">
+                    <span className="rounded-full bg-slate-100 px-2.5 py-1 text-xs font-semibold capitalize">
+                      {p.status}
+                    </span>
+                  </td>
+                  <td className="p-3">
+                    {p.paid_at
+                      ? new Date(p.paid_at).toLocaleString()
+                      : p.method === "cash_on_delivery"
+                        ? "On delivery"
+                        : "—"}
+                  </td>
+                  <td className="p-3">
+                    {new Date(p.created_at).toLocaleString()}
+                  </td>
+                </tr>
+              ))}
+            </tbody>
+          </table>
+        </div>
+      )}
+
+      {totalPages > 1 && (
+        <div className="mt-5 flex items-center justify-end gap-3">
+          <button
+            disabled={page <= 1}
+            onClick={() => onPage(page - 1)}
+            className="rounded-lg border border-[#e2e8f0] px-3 py-2 text-sm font-semibold disabled:opacity-40"
+          >
+            Previous
+          </button>
+          <span className="text-xs text-[#64748b]">
+            Page {page} of {Math.max(totalPages, 1)}
+          </span>
+          <button
+            disabled={page >= totalPages}
+            onClick={() => onPage(page + 1)}
+            className="rounded-lg border border-[#e2e8f0] px-3 py-2 text-sm font-semibold disabled:opacity-40"
+          >
+            Next
+          </button>
+        </div>
+      )}
     </div>
   );
 }
+
 function Orders({ items }: { items: Order[] }) {
   if (!items.length)
     return (

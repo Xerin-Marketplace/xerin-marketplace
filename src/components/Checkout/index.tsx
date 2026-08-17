@@ -163,9 +163,18 @@ const Checkout = () => {
     retry: false,
   });
 
+  const selectedShipping = shippingOptions.data?.find(
+    (option) => option.id === form.shippingMethod,
+  );
+
   const paymentOptions = useQuery({
-    queryKey: ["checkout", "payment-options"],
-    queryFn: () => checkoutApi.paymentOptions(),
+    queryKey: [
+      "checkout",
+      "payment-options",
+      Boolean(selectedShipping?.supports_cod),
+    ],
+    queryFn: () =>
+      checkoutApi.paymentOptions(Boolean(selectedShipping?.supports_cod)),
     enabled: isAuthenticated,
   });
 
@@ -224,13 +233,13 @@ const Checkout = () => {
     ) {
       setPaymentProvider(selectedOption.providers[0] ?? "");
     } else if (!selectedOption.requires_phone) {
-      setPaymentProvider(selectedOption.providers[0] ?? "azampay");
+      setPaymentProvider(
+        selectedOption.id === "cash_on_delivery"
+          ? ""
+          : selectedOption.providers[0] ?? "azampay",
+      );
     }
   }, [form.paymentMethod, paymentOptions.data, paymentProvider]);
-
-  const selectedShipping = shippingOptions.data?.find(
-    (option) => option.id === form.shippingMethod,
-  );
 
   const shippingAmount = selectedShipping
     ? Number(selectedShipping.amount)
@@ -354,10 +363,12 @@ const Checkout = () => {
       const successUrl = `${window.location.origin}/order-success/${order.id}?payment=success`;
       const failureUrl = `${window.location.origin}/checkout?payment=failed&order_id=${order.id}`;
 
+      const isCod = form.paymentMethod === "cash_on_delivery";
+
       const payment = await paymentsApi.initiate({
         order_id: String(order.id),
         method: form.paymentMethod,
-        provider: paymentProvider || "azampay",
+        provider: isCod ? undefined : paymentProvider || "azampay",
         phone_number: selectedPayment?.requires_phone
           ? phoneNumber
           : undefined,
@@ -367,6 +378,14 @@ const Checkout = () => {
           form.paymentMethod === "card" ? failureUrl : undefined,
       });
 
+      if (isCod) {
+        toast.success(
+          "Order placed with Cash on Delivery. Payment will be collected at delivery.",
+        );
+        router.push(`/order-success/${order.id}?payment=cod`);
+        return;
+      }
+
       const checkoutUrl = payment.provider_response?.checkout_url;
       if (form.paymentMethod === "card" && checkoutUrl) {
         window.location.assign(checkoutUrl);
@@ -374,11 +393,13 @@ const Checkout = () => {
       }
 
       toast.success(
-        payment.status === "pending"
-          ? "Order placed. Payment is pending."
+        payment.status === "processing"
+          ? "Payment request sent to AzamPay. Complete the payment on your phone."
           : "Order placed successfully",
       );
-      router.push(`/order-success/${order.id}`);
+      router.push(
+        `/order-success/${order.id}?payment_id=${payment.id}&payment=${payment.status}`,
+      );
     } catch (error: unknown) {
       const candidate = error as {
         response?: { data?: { detail?: string } };

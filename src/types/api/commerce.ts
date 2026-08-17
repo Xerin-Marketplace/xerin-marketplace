@@ -189,3 +189,4 @@ export type Payment = TimestampFields & {
 };
 
 export type PaginatedOrders = PaginatedResults<Order>;
+export type PaginatedPayments = PaginatedResults<Payment>;

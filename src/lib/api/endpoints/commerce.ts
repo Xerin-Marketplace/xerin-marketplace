@@ -5,6 +5,7 @@ import type {
   Order,
   PaginatedOrders,
   Payment,
+  PaginatedPayments,
   PaymentOption,
   ShippingOption,
   DeliveryCheckoutConfig,
@@ -116,20 +117,35 @@ export const checkoutApi = {
     );
   },
 
-  paymentOptions: async (): Promise<PaymentOption[]> => [
-    {
-      id: "mobile_money",
-      label: "AzamPay Mobile Money",
-      requires_phone: true,
-      providers: ["Airtel", "Tigo", "Halopesa", "Azampesa", "Mpesa"],
-    },
-    {
-      id: "card",
-      label: "AzamPay Card",
-      requires_phone: false,
-      providers: ["azampay"],
-    },
-  ],
+  paymentOptions: async (
+    supportsCod = false,
+  ): Promise<PaymentOption[]> => {
+    const methods: PaymentOption[] = [
+      {
+        id: "mobile_money",
+        label: "AzamPay Mobile Money",
+        requires_phone: true,
+        providers: ["Airtel", "Tigo", "Halopesa", "Azampesa", "Mpesa"],
+      },
+      {
+        id: "card",
+        label: "AzamPay Card",
+        requires_phone: false,
+        providers: ["azampay"],
+      },
+    ];
+
+    if (supportsCod) {
+      methods.push({
+        id: "cash_on_delivery",
+        label: "Cash on Delivery",
+        requires_phone: false,
+        providers: [],
+      });
+    }
+
+    return methods;
+  },
 };
 
 export const ordersApi = {
@@ -169,8 +185,22 @@ export const ordersApi = {
 };
 
 export const paymentsApi = {
-  mine: async (signal?: AbortSignal) =>
-    (await axiosInstance.get<Payment[]>("/payments/my-payments", { signal })).data,
+  mine: async (
+    params: {
+      page?: number;
+      page_size?: number;
+      search?: string;
+      payment_status?: string;
+      method?: string;
+    } = {},
+    signal?: AbortSignal,
+  ) =>
+    (
+      await axiosInstance.get<PaginatedPayments>(
+        "/payments/my-payments",
+        { params, signal },
+      )
+    ).data,
   get: async (id: string, signal?: AbortSignal) =>
     (await axiosInstance.get<Payment>(`/payments/${id}`, { signal })).data,
   initiate: async (payload: { order_id: string; method: string; provider?: string; phone_number?: string; success_url?: string; failure_url?: string }) =>
