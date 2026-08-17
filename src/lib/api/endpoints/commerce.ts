@@ -7,6 +7,8 @@ import type {
   Payment,
   PaymentOption,
   ShippingOption,
+  DeliveryCheckoutConfig,
+  DeliveryMode,
 } from "@/types/api/commerce";
 
 export const cartApi = {
@@ -40,39 +42,80 @@ export const cartApi = {
 };
 
 export const checkoutApi = {
+  deliveryConfig: async (): Promise<DeliveryCheckoutConfig> =>
+    (
+      await axiosInstance.get<DeliveryCheckoutConfig>(
+        "/shipping/checkout-config",
+      )
+    ).data,
+
   shippingOptions: async (
-    addressId: string,
-    subtotal: number,
-    weightKg = 0,
+    payload: {
+      address_id: string;
+      delivery_mode: DeliveryMode;
+      logistics_company_id?: string | null;
+      method_id?: string | null;
+    },
     signal?: AbortSignal,
   ) => {
     type BackendShippingOption = {
       rate_id: string;
       method_id: string;
+      logistics_company_id?: string | null;
+      logistics_company_name?: string | null;
       method_name: string;
       carrier_name?: string | null;
+      scope: DeliveryMode | "both";
+      supports_cod: boolean;
+      supports_tracking: boolean;
+      original_amount: number | string;
+      shipping_discount_amount: number | string;
       amount: number | string;
       currency: string;
       min_delivery_days: number;
       max_delivery_days: number;
+      free_shipping_applied: boolean;
+      promotion_code?: string | null;
+      promotion_name?: string | null;
     };
+
     const response = await axiosInstance.post<BackendShippingOption[]>(
       "/shipping/quote",
-      { address_id: addressId, subtotal, weight_kg: weightKg },
+      payload,
       { signal },
     );
-    return response.data.map((option) => ({
-      id: option.rate_id,
-      method_id: option.method_id,
-      service_name: option.method_name,
-      carrier: option.carrier_name || "Marketplace delivery",
-      amount: option.amount,
-      currency: option.currency,
-      estimated_min_days: option.min_delivery_days,
-      estimated_max_days: option.max_delivery_days,
-      tracking_supported: true,
-    } satisfies ShippingOption));
+
+    return response.data.map(
+      (option) =>
+        ({
+          id: option.rate_id,
+          method_id: option.method_id,
+          logistics_company_id: option.logistics_company_id || null,
+          logistics_company_name:
+            option.logistics_company_name ||
+            option.carrier_name ||
+            "Marketplace delivery",
+          service_name: option.method_name,
+          carrier:
+            option.carrier_name ||
+            option.logistics_company_name ||
+            "Marketplace delivery",
+          scope: option.scope,
+          supports_cod: option.supports_cod,
+          tracking_supported: option.supports_tracking,
+          original_amount: option.original_amount,
+          shipping_discount_amount: option.shipping_discount_amount,
+          amount: option.amount,
+          currency: option.currency,
+          estimated_min_days: option.min_delivery_days,
+          estimated_max_days: option.max_delivery_days,
+          free_shipping_applied: option.free_shipping_applied,
+          promotion_code: option.promotion_code,
+          promotion_name: option.promotion_name,
+        }) satisfies ShippingOption,
+    );
   },
+
   paymentOptions: async (): Promise<PaymentOption[]> => [
     {
       id: "mobile_money",

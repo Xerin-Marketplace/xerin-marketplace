@@ -47,16 +47,35 @@ export type GuestCartMergeResult = {
   }>;
 };
 
+export type DeliveryMode = "local" | "international";
+
+export type DeliveryCheckoutConfig = {
+  default_country: string;
+  local_delivery_allowed: boolean;
+  international_delivery_allowed: boolean;
+  cod_allowed: boolean;
+  configured: boolean;
+};
+
 export type ShippingOption = {
   id: string;
   method_id: string;
+  logistics_company_id: string | null;
+  logistics_company_name: string;
   service_name: string;
   carrier: string;
+  scope: DeliveryMode | "both";
+  supports_cod: boolean;
+  tracking_supported: boolean;
+  original_amount: number | string;
+  shipping_discount_amount: number | string;
   amount: number | string;
   currency: string;
   estimated_min_days: number;
   estimated_max_days: number;
-  tracking_supported: boolean;
+  free_shipping_applied: boolean;
+  promotion_code?: string | null;
+  promotion_name?: string | null;
 };
 
 export type PaymentOption = {
