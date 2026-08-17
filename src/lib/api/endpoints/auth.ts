@@ -14,6 +14,7 @@ import type {
   RefreshTokenRequest,
   ResendVerificationRequest,
   VerifyAccountOtpRequest,
+  ChangePasswordRequest,
 } from "@/types/api/auth";
 import type { ApiMessageResponse } from "@/types/api/common";
 
@@ -77,6 +78,17 @@ export const resetPassword = async (payload: ResetPasswordRequest): Promise<ApiM
   return res.data;
 };
 
+
+export const changePassword = async (
+  payload: ChangePasswordRequest,
+): Promise<ApiMessageResponse> => {
+  const res = await axiosInstance.post<ApiMessageResponse>(
+    API_ENDPOINTS.auth.changePassword,
+    payload,
+  );
+  return res.data;
+};
+
 export const authApi = {
   login,
   registerBuyer,
@@ -88,4 +100,5 @@ export const authApi = {
   verifyAccountOtp,
   forgotPassword,
   resetPassword,
+  changePassword,
 };

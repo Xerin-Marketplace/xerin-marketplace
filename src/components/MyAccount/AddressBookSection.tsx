@@ -47,6 +47,8 @@ const AddressBookSection = ({
     isCreatingAddress,
     updateAddress,
     isUpdatingAddress,
+    setDefaultAddress,
+    isSettingDefaultAddress,
     deleteAddress,
     isDeletingAddress,
   } = useAddresses();
@@ -96,6 +98,15 @@ const AddressBookSection = ({
       setEditingAddress(null);
     } catch (error) {
       toast.error(getErrorMessage(error, "Unable to save address."));
+    }
+  };
+
+  const handleSetDefault = async (address: Address) => {
+    try {
+      await setDefaultAddress(address.id);
+      toast.success("Default delivery address updated.");
+    } catch (error) {
+      toast.error(getErrorMessage(error, "Unable to set default address."));
     }
   };
 

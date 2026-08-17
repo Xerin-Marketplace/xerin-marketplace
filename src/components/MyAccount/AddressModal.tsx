@@ -3,7 +3,7 @@
 import React, { FormEvent, useEffect, useState } from "react";
 import type { Address, AddressRequest } from "@/types/api/user";
 
-type AddressModalProps = {
+type Props = {
   isOpen: boolean;
   closeModal: () => void;
   initialAddress?: Address | null;
@@ -12,241 +12,146 @@ type AddressModalProps = {
 };
 
 const emptyForm: AddressRequest = {
-  country: "",
+  label: "Home",
+  recipient_name: "",
+  recipient_phone: "",
+  country: "Tanzania",
   region: "",
+  district: "",
+  ward: "",
   city: "",
   street: "",
+  landmark: "",
   postal_code: "",
+  latitude: null,
+  longitude: null,
   is_default: false,
 };
 
-const AddressModal = ({
+const input =
+  "mt-1.5 w-full rounded-xl border border-[#e2e8f0] bg-[#f8fafc] px-4 py-3 text-sm outline-none transition focus:border-[#f7941d] focus:ring-4 focus:ring-orange-50 disabled:opacity-60 dark:border-white/10 dark:bg-white/5";
+
+export default function AddressModal({
   isOpen,
   closeModal,
   initialAddress,
   isSubmitting = false,
   onSubmit,
-}: AddressModalProps) => {
+}: Props) {
   const [form, setForm] = useState<AddressRequest>(emptyForm);
 
   useEffect(() => {
-    if (!isOpen) {
-      return;
-    }
-
+    if (!isOpen) return;
     setForm({
-      country: initialAddress?.country ?? "",
-      region: initialAddress?.region ?? "",
-      city: initialAddress?.city ?? "",
-      street: initialAddress?.street ?? "",
-      postal_code: initialAddress?.postal_code ?? "",
+      label: initialAddress?.label || "Home",
+      recipient_name: initialAddress?.recipient_name || "",
+      recipient_phone: initialAddress?.recipient_phone || "",
+      country: initialAddress?.country || "Tanzania",
+      region: initialAddress?.region || "",
+      district: initialAddress?.district || "",
+      ward: initialAddress?.ward || "",
+      city: initialAddress?.city || "",
+      street: initialAddress?.street || "",
+      landmark: initialAddress?.landmark || "",
+      postal_code: initialAddress?.postal_code || "",
+      latitude: initialAddress?.latitude == null ? null : Number(initialAddress.latitude),
+      longitude: initialAddress?.longitude == null ? null : Number(initialAddress.longitude),
       is_default: Boolean(initialAddress?.is_default),
     });
   }, [initialAddress, isOpen]);
 
-  useEffect(() => {
-    function handleClickOutside(event: MouseEvent) {
-      const target = event.target as HTMLElement | null;
+  if (!isOpen) return null;
 
-      if (target && !target.closest(".modal-content")) {
-        closeModal();
-      }
-    }
+  const set = (key: keyof AddressRequest, value: string | boolean | number | null) =>
+    setForm((current) => ({ ...current, [key]: value }));
 
-    if (isOpen) {
-      document.addEventListener("mousedown", handleClickOutside);
-    }
-
-    return () => {
-      document.removeEventListener("mousedown", handleClickOutside);
-    };
-  }, [isOpen, closeModal]);
-
-  const handleChange = (field: keyof AddressRequest, value: string | boolean) => {
-    setForm((current) => ({
-      ...current,
-      [field]: value,
-    }));
-  };
-
-  const handleSubmit = async (event: FormEvent<HTMLFormElement>) => {
+  const submit = async (event: FormEvent) => {
     event.preventDefault();
-
     await onSubmit({
+      label: form.label?.trim() || null,
+      recipient_name: form.recipient_name?.trim() || null,
+      recipient_phone: form.recipient_phone?.trim() || null,
       country: form.country.trim(),
       region: form.region.trim(),
+      district: form.district?.trim() || null,
+      ward: form.ward?.trim() || null,
       city: form.city.trim(),
       street: form.street.trim(),
+      landmark: form.landmark?.trim() || null,
       postal_code: form.postal_code?.trim() || null,
+      latitude: form.latitude == null ? null : Number(form.latitude),
+      longitude: form.longitude == null ? null : Number(form.longitude),
       is_default: Boolean(form.is_default),
     });
   };
 
   return (
-    <div
-      className={`fixed top-0 left-0 overflow-y-auto no-scrollbar w-full h-screen sm:py-20 xl:py-25 2xl:py-[230px] bg-dark/70 sm:px-8 px-4 py-5 ${
-        isOpen ? "block z-99999" : "hidden"
-      }`}
-    >
-      <div className="flex items-center justify-center">
-        <div className="w-full max-w-[760px] rounded-xl shadow-3 bg-white dark:bg-darkTheme-card p-7.5 relative modal-content">
-          <button
-            onClick={closeModal}
-            aria-label="button for close modal"
-            className="absolute top-0 right-0 sm:top-3 sm:right-3 flex items-center justify-center w-10 h-10 rounded-full ease-in duration-150 bg-meta text-body hover:text-dark"
-            type="button"
-          >
-            <svg
-              className="fill-current"
-              width="26"
-              height="26"
-              viewBox="0 0 26 26"
-              fill="none"
-              xmlns="http://www.w3.org/2000/svg"
-            >
-              <path
-                fillRule="evenodd"
-                clipRule="evenodd"
-                d="M14.3108 13L19.2291 8.08167C19.5866 7.72417 19.5866 7.12833 19.2291 6.77083C19.0543 6.59895 18.8189 6.50262 18.5737 6.50262C18.3285 6.50262 18.0932 6.59895 17.9183 6.77083L13 11.6892L8.08164 6.77083C7.90679 6.59895 7.67142 6.50262 7.42623 6.50262C7.18104 6.50262 6.94566 6.59895 6.77081 6.77083C6.41331 7.12833 6.41331 7.72417 6.77081 8.08167L11.6891 13L6.77081 17.9183C6.41331 18.2758 6.41331 18.8717 6.77081 19.2292C7.12831 19.5867 7.72414 19.5867 8.08164 19.2292L13 14.3108L17.9183 19.2292C18.2758 19.5867 18.8716 19.5867 19.2291 19.2292C19.5866 18.8717 19.5866 18.2758 19.2291 17.9183L14.3108 13Z"
-                fill=""
-              />
-            </svg>
-          </button>
-
+    <div className="fixed inset-0 z-[120] overflow-y-auto bg-black/55 p-4 sm:p-8">
+      <div className="mx-auto my-8 w-full max-w-3xl rounded-2xl bg-white p-5 shadow-2xl dark:bg-darkTheme-card sm:p-7">
+        <div className="flex items-start justify-between gap-4">
           <div>
-            <div className="mb-7">
-              <h3 className="text-xl font-semibold text-dark dark:text-white">
-                {initialAddress ? "Edit Address" : "Add Address"}
-              </h3>
-              <p className="mt-2 text-custom-sm text-dark-4 dark:text-darkTheme-secondary-muted">
-                Add delivery details exactly as required by the backend address schema.
-              </p>
-            </div>
-
-            <form onSubmit={handleSubmit}>
-              <div className="grid grid-cols-1 sm:grid-cols-2 gap-5 mb-5">
-                <div>
-                  <label htmlFor="country" className="block mb-2.5 dark:text-darkTheme-body-color">
-                    Country <span className="text-red">*</span>
-                  </label>
-
-                  <input
-                    id="country"
-                    type="text"
-                    value={form.country}
-                    onChange={(event) => handleChange("country", event.target.value)}
-                    placeholder="Tanzania"
-                    required
-                    disabled={isSubmitting}
-                    className="rounded-md border border-gray-3 dark:border-darkTheme-border-color bg-gray-1 dark:bg-darkTheme-secondary-bg dark:text-darkTheme-body-color placeholder:text-dark-4 dark:placeholder:text-darkTheme-secondary-muted w-full py-2.5 px-5 outline-none duration-200 focus:border-transparent focus:shadow-input focus:ring-2 focus:ring-blue/20 disabled:opacity-70"
-                  />
-                </div>
-
-                <div>
-                  <label htmlFor="region" className="block mb-2.5 dark:text-darkTheme-body-color">
-                    Region <span className="text-red">*</span>
-                  </label>
-
-                  <input
-                    id="region"
-                    type="text"
-                    value={form.region}
-                    onChange={(event) => handleChange("region", event.target.value)}
-                    placeholder="Dar es Salaam"
-                    required
-                    disabled={isSubmitting}
-                    className="rounded-md border border-gray-3 dark:border-darkTheme-border-color bg-gray-1 dark:bg-darkTheme-secondary-bg dark:text-darkTheme-body-color placeholder:text-dark-4 dark:placeholder:text-darkTheme-secondary-muted w-full py-2.5 px-5 outline-none duration-200 focus:border-transparent focus:shadow-input focus:ring-2 focus:ring-blue/20 disabled:opacity-70"
-                  />
-                </div>
-              </div>
-
-              <div className="grid grid-cols-1 sm:grid-cols-2 gap-5 mb-5">
-                <div>
-                  <label htmlFor="city" className="block mb-2.5 dark:text-darkTheme-body-color">
-                    City <span className="text-red">*</span>
-                  </label>
-
-                  <input
-                    id="city"
-                    type="text"
-                    value={form.city}
-                    onChange={(event) => handleChange("city", event.target.value)}
-                    placeholder="Ilala"
-                    required
-                    disabled={isSubmitting}
-                    className="rounded-md border border-gray-3 dark:border-darkTheme-border-color bg-gray-1 dark:bg-darkTheme-secondary-bg dark:text-darkTheme-body-color placeholder:text-dark-4 dark:placeholder:text-darkTheme-secondary-muted w-full py-2.5 px-5 outline-none duration-200 focus:border-transparent focus:shadow-input focus:ring-2 focus:ring-blue/20 disabled:opacity-70"
-                  />
-                </div>
-
-                <div>
-                  <label htmlFor="postalCode" className="block mb-2.5 dark:text-darkTheme-body-color">
-                    Postal Code
-                  </label>
-
-                  <input
-                    id="postalCode"
-                    type="text"
-                    value={form.postal_code ?? ""}
-                    onChange={(event) => handleChange("postal_code", event.target.value)}
-                    placeholder="Optional"
-                    disabled={isSubmitting}
-                    className="rounded-md border border-gray-3 dark:border-darkTheme-border-color bg-gray-1 dark:bg-darkTheme-secondary-bg dark:text-darkTheme-body-color placeholder:text-dark-4 dark:placeholder:text-darkTheme-secondary-muted w-full py-2.5 px-5 outline-none duration-200 focus:border-transparent focus:shadow-input focus:ring-2 focus:ring-blue/20 disabled:opacity-70"
-                  />
-                </div>
-              </div>
-
-              <div className="mb-5">
-                <label htmlFor="street" className="block mb-2.5 dark:text-darkTheme-body-color">
-                  Street / Delivery Area <span className="text-red">*</span>
-                </label>
-
-                <input
-                  id="street"
-                  type="text"
-                  value={form.street}
-                  onChange={(event) => handleChange("street", event.target.value)}
-                  placeholder="Street, house number, landmark"
-                  required
-                  disabled={isSubmitting}
-                  className="rounded-md border border-gray-3 dark:border-darkTheme-border-color bg-gray-1 dark:bg-darkTheme-secondary-bg dark:text-darkTheme-body-color placeholder:text-dark-4 dark:placeholder:text-darkTheme-secondary-muted w-full py-2.5 px-5 outline-none duration-200 focus:border-transparent focus:shadow-input focus:ring-2 focus:ring-blue/20 disabled:opacity-70"
-                />
-              </div>
-
-              <label className="mb-6 flex items-center gap-3 text-custom-sm text-dark dark:text-white">
-                <input
-                  type="checkbox"
-                  checked={Boolean(form.is_default)}
-                  onChange={(event) => handleChange("is_default", event.target.checked)}
-                  disabled={isSubmitting}
-                  className="h-4 w-4"
-                />
-                Set as default address
-              </label>
-
-              <div className="flex flex-col sm:flex-row gap-3">
-                <button
-                  type="submit"
-                  disabled={isSubmitting}
-                  className="inline-flex justify-center font-medium text-white bg-blue py-3 px-7 rounded-md ease-out duration-200 hover:bg-blue-dark disabled:opacity-70 disabled:cursor-not-allowed"
-                >
-                  {isSubmitting ? "Saving..." : "Save Address"}
-                </button>
-
-                <button
-                  type="button"
-                  onClick={closeModal}
-                  disabled={isSubmitting}
-                  className="inline-flex justify-center font-medium text-dark dark:text-white bg-gray-1 dark:bg-darkTheme-secondary-bg py-3 px-7 rounded-md ease-out duration-200 hover:text-blue disabled:opacity-70 disabled:cursor-not-allowed"
-                >
-                  Cancel
-                </button>
-              </div>
-            </form>
+            <h3 className="text-xl font-bold">{initialAddress ? "Edit Delivery Address" : "Add Delivery Address"}</h3>
+            <p className="mt-1 text-sm text-[#64748b]">
+              These details are used for checkout, shipping quotes and logistics handover.
+            </p>
           </div>
+          <button type="button" disabled={isSubmitting} onClick={closeModal} className="rounded-xl border border-[#e2e8f0] px-3 py-2 text-sm font-semibold">Close</button>
         </div>
+
+        <form onSubmit={submit} className="mt-6">
+          <div className="grid gap-4 sm:grid-cols-2">
+            <Field label="Address label">
+              <input value={form.label || ""} onChange={(e)=>set("label",e.target.value)} className={input} placeholder="Home, Office..." />
+            </Field>
+            <Field label="Recipient name">
+              <input value={form.recipient_name || ""} onChange={(e)=>set("recipient_name",e.target.value)} className={input} placeholder="Person receiving delivery" />
+            </Field>
+            <Field label="Recipient phone">
+              <input value={form.recipient_phone || ""} onChange={(e)=>set("recipient_phone",e.target.value)} className={input} placeholder="+255..." />
+            </Field>
+            <Field label="Country" required>
+              <input required value={form.country} onChange={(e)=>set("country",e.target.value)} className={input} />
+            </Field>
+            <Field label="Region" required>
+              <input required value={form.region} onChange={(e)=>set("region",e.target.value)} className={input} placeholder="Dar es Salaam" />
+            </Field>
+            <Field label="District">
+              <input value={form.district || ""} onChange={(e)=>set("district",e.target.value)} className={input} placeholder="Kinondoni" />
+            </Field>
+            <Field label="Ward">
+              <input value={form.ward || ""} onChange={(e)=>set("ward",e.target.value)} className={input} placeholder="Mikocheni" />
+            </Field>
+            <Field label="City" required>
+              <input required value={form.city} onChange={(e)=>set("city",e.target.value)} className={input} placeholder="Dar es Salaam" />
+            </Field>
+            <Field label="Street / address line" required wide>
+              <input required value={form.street} onChange={(e)=>set("street",e.target.value)} className={input} placeholder="Street, building and house number" />
+            </Field>
+            <Field label="Landmark" wide>
+              <input value={form.landmark || ""} onChange={(e)=>set("landmark",e.target.value)} className={input} placeholder="Near..." />
+            </Field>
+            <Field label="Postal code">
+              <input value={form.postal_code || ""} onChange={(e)=>set("postal_code",e.target.value)} className={input} placeholder="Optional" />
+            </Field>
+          </div>
+
+          <label className="mt-5 flex cursor-pointer items-center gap-3 rounded-xl border border-[#e2e8f0] p-4 text-sm dark:border-white/10">
+            <input type="checkbox" checked={Boolean(form.is_default)} onChange={(e)=>set("is_default",e.target.checked)} />
+            <span><b>Use as default delivery address</b><span className="mt-0.5 block text-xs font-normal text-[#64748b]">Checkout will prefer this address.</span></span>
+          </label>
+
+          <div className="mt-6 flex flex-col gap-3 sm:flex-row sm:justify-end">
+            <button type="button" disabled={isSubmitting} onClick={closeModal} className="rounded-xl border border-[#e2e8f0] px-5 py-3 text-sm font-semibold">Cancel</button>
+            <button type="submit" disabled={isSubmitting} className="rounded-xl bg-[#f7941d] px-5 py-3 text-sm font-semibold text-white disabled:opacity-50">
+              {isSubmitting ? "Saving..." : initialAddress ? "Save Changes" : "Add Address"}
+            </button>
+          </div>
+        </form>
       </div>
     </div>
   );
-};
+}
 
-export default AddressModal;
+function Field({label,required=false,wide=false,children}:{label:string;required?:boolean;wide?:boolean;children:React.ReactNode}) {
+  return <label className={`text-sm font-semibold ${wide ? "sm:col-span-2" : ""}`}>{label}{required && <span className="text-red-500"> *</span>}{children}</label>;
+}

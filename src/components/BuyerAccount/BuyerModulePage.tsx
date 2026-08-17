@@ -1,10 +1,7 @@
 "use client";
 import { formatCurrency } from "@/lib/formatCurrency";
 import { ordersApi, paymentsApi } from "@/lib/api/endpoints/commerce";
-import {
-  sellerAccountApi,
-  type SellerSession,
-} from "@/lib/api/endpoints/seller-account";
+import { authApi } from "@/lib/api/endpoints/auth";
 import { usersApi } from "@/lib/api/endpoints/users";
 import type { Address, User } from "@/types/api/user";
 import type { Order, Payment } from "@/types/api/commerce";
@@ -63,8 +60,7 @@ export default function BuyerModulePage({ view }: { view: View }) {
     [error, setError] = useState(false),
     [orders, setOrders] = useState<Order[]>([]),
     [payments, setPayments] = useState<Payment[]>([]),
-    [profile, setProfile] = useState<User | null>(null),
-    [sessions, setSessions] = useState<SellerSession[]>([]);
+    [profile, setProfile] = useState<User | null>(null);
   const [passwords, setPasswords] = useState({
     current: "",
     next: "",
@@ -94,8 +90,10 @@ export default function BuyerModulePage({ view }: { view: View }) {
           last_name: p.last_name || "",
           phone: p.phone || "",
         });
-      } else if (view === "security")
-        setSessions(await sellerAccountApi.listSessions());
+      } else if (view === "security") {
+        // Change-password is available. Session-management endpoints are not
+        // exposed by the current backend, so do not fail this page trying to load them.
+      }
     } catch {
       setError(true);
     } finally {
@@ -120,7 +118,10 @@ export default function BuyerModulePage({ view }: { view: View }) {
     if (passwords.next !== passwords.confirm)
       return toast.error("Passwords do not match.");
     try {
-      await sellerAccountApi.changePassword(passwords.current, passwords.next);
+      await authApi.changePassword({
+        current_password: passwords.current,
+        new_password: passwords.next,
+      });
       toast.success("Password changed. Sign in again.");
       window.location.assign("/signin");
     } catch {
@@ -181,15 +182,9 @@ export default function BuyerModulePage({ view }: { view: View }) {
           />
         ) : view === "security" ? (
           <Security
-            sessions={sessions}
             passwords={passwords}
             setPasswords={setPasswords}
             submit={changePassword}
-            revoke={async (id) => {
-              await sellerAccountApi.revokeSession(id);
-              setSessions((v) => v.filter((s) => s.id !== id));
-              toast.success("Session signed out.");
-            }}
           />
         ) : (
           <Unavailable view={view} />
@@ -435,73 +430,54 @@ function Details({
   );
 }
 function Security({
-  sessions,
   passwords,
   setPasswords,
   submit,
-  revoke,
 }: {
-  sessions: SellerSession[];
   passwords: { current: string; next: string; confirm: string };
   setPasswords: (v: typeof passwords) => void;
   submit: (e: FormEvent) => void;
-  revoke: (id: string) => void;
 }) {
+  const strong =
+    passwords.next.length >= 8 &&
+    /[A-Za-z]/.test(passwords.next) &&
+    /\d/.test(passwords.next);
+
   return (
-    <div className="space-y-7">
-      <form onSubmit={submit}>
-        <h3 className="mb-3 font-bold">Change password</h3>
-        <div className="grid gap-4 sm:grid-cols-3">
-          <Field
-            type="password"
-            label="Current password"
-            value={passwords.current}
-            set={(v) => setPasswords({ ...passwords, current: v })}
-          />
-          <Field
-            type="password"
-            label="New password"
-            value={passwords.next}
-            set={(v) => setPasswords({ ...passwords, next: v })}
-          />
-          <Field
-            type="password"
-            label="Confirm password"
-            value={passwords.confirm}
-            set={(v) => setPasswords({ ...passwords, confirm: v })}
-          />
+    <div className="space-y-6">
+      <div className="rounded-xl border border-[#e2e8f0] p-5 dark:border-white/10">
+        <div className="flex items-start gap-3">
+          <span className="rounded-xl bg-orange-50 p-2.5 text-[#f7941d]">
+            <KeyRound size={18} />
+          </span>
+          <div>
+            <h3 className="font-bold">Change password</h3>
+            <p className="mt-1 text-sm text-[#64748b]">
+              Changing your password invalidates existing refresh sessions. You will need to sign in again.
+            </p>
+          </div>
         </div>
-        <button className="mt-4 rounded-xl bg-[#f7941d] px-5 py-2.5 text-sm font-semibold text-white">
-          Change password
-        </button>
-      </form>
-      <div>
-        <h3 className="mb-3 font-bold">Active sessions</h3>
-        {sessions.length ? (
-          sessions.map((s) => (
-            <div
-              key={s.id}
-              className="flex justify-between border-t border-[#e2e8f0] py-3 text-sm dark:border-white/10"
-            >
-              <span>
-                Session created {new Date(s.created_at).toLocaleString()}
-              </span>
-              <button
-                onClick={() => revoke(s.id)}
-                className="font-semibold text-red-600"
-              >
-                Sign out
-              </button>
-            </div>
-          ))
-        ) : (
-          <p className="text-sm text-[#64748b]">No other active sessions.</p>
-        )}
+
+        <form onSubmit={submit} className="mt-5">
+          <div className="grid gap-4">
+            <Field type="password" label="Current password" value={passwords.current} set={(v)=>setPasswords({...passwords,current:v})}/>
+            <Field type="password" label="New password" value={passwords.next} set={(v)=>setPasswords({...passwords,next:v})}/>
+            <Field type="password" label="Confirm new password" value={passwords.confirm} set={(v)=>setPasswords({...passwords,confirm:v})}/>
+          </div>
+          <div className="mt-3 rounded-xl bg-[#f8fafc] p-3 text-xs text-[#64748b] dark:bg-white/5">
+            Use at least 8 characters. A combination of letters and numbers is recommended.
+            {passwords.next && <span className={`ml-2 font-bold ${strong ? "text-emerald-600" : "text-amber-600"}`}>{strong ? "Good password format" : "Password can be stronger"}</span>}
+          </div>
+          <button disabled={!passwords.current || !passwords.next || passwords.next !== passwords.confirm} className="mt-4 rounded-xl bg-[#f7941d] px-5 py-2.5 text-sm font-semibold text-white disabled:cursor-not-allowed disabled:opacity-50">
+            Change password
+          </button>
+        </form>
       </div>
-      <div className="rounded-xl bg-[#f8fafc] p-4 text-sm dark:bg-white/5">
-        <b>Two-factor authentication</b>
-        <p className="text-[#64748b]">
-          Two-factor authentication is unavailable because the backend does not expose a 2FA enrollment contract.
+
+      <div className="rounded-xl border border-[#e2e8f0] p-5 dark:border-white/10">
+        <h3 className="font-bold">Account security status</h3>
+        <p className="mt-2 text-sm leading-6 text-[#64748b]">
+          Password changes are supported by the backend. Active-session management and two-factor authentication are not currently exposed as customer APIs, so this page does not show non-functional controls for them.
         </p>
       </div>
     </div>

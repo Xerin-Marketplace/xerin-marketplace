@@ -17,12 +17,14 @@ export const API_ENDPOINTS = {
     verifyAccountOtp: "/auth/verify-account-otp",
     forgotPassword: "/auth/forgot-password",
     resetPassword: "/auth/reset-password",
+    changePassword: "/auth/change-password",
   },
 
   users: {
     me: "/users/me",
     addresses: "/addresses",
     addressById: (id: string | number) => `/addresses/${id}`,
+    setDefaultAddress: (id: string | number) => `/addresses/${id}/default`,
   },
 
   sellers: {

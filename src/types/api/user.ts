@@ -29,20 +29,36 @@ export type UpdateUserRequest = {
 
 export type Address = TimestampFields & {
   id: ID;
+  label?: string | null;
+  recipient_name?: string | null;
+  recipient_phone?: string | null;
   country: string;
   region: string;
+  district?: string | null;
+  ward?: string | null;
   city: string;
   street: string;
+  landmark?: string | null;
   postal_code?: string | null;
+  latitude?: number | string | null;
+  longitude?: number | string | null;
   is_default?: boolean;
 };
 
 export type AddressRequest = {
+  label?: string | null;
+  recipient_name?: string | null;
+  recipient_phone?: string | null;
   country: string;
   region: string;
+  district?: string | null;
+  ward?: string | null;
   city: string;
   street: string;
+  landmark?: string | null;
   postal_code?: string | null;
+  latitude?: number | null;
+  longitude?: number | null;
   is_default?: boolean;
 };
 

@@ -20,9 +20,12 @@ export const updateMe = async (payload: UpdateUserRequest): Promise<User> => {
   return res.data;
 };
 
-export const getAddresses = async (): Promise<Address[]> => {
+export const getAddresses = async (
+  params: { page?: number; page_size?: number } = { page: 1, page_size: 100 },
+): Promise<Address[]> => {
   const res = await axiosInstance.get<PaginatedAddressResponse | Address[]>(
-    API_ENDPOINTS.users.addresses
+    API_ENDPOINTS.users.addresses,
+    { params },
   );
 
   if (Array.isArray(res.data)) {
@@ -46,6 +49,13 @@ export const updateAddress = async (
     payload
   );
 
+  return res.data;
+};
+
+export const setDefaultAddress = async (id: ID): Promise<Address> => {
+  const res = await axiosInstance.post<Address>(
+    API_ENDPOINTS.users.setDefaultAddress(id),
+  );
   return res.data;
 };
 
@@ -85,6 +95,7 @@ export const usersApi = {
   getAddresses,
   createAddress,
   updateAddress,
+  setDefaultAddress,
   deleteAddress,
   getWishlist,
   addToWishlist,

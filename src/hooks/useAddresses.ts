@@ -29,6 +29,13 @@ export const useAddresses = (enabled = true) => {
     },
   });
 
+  const setDefaultAddressMutation = useMutation({
+    mutationFn: (id: ID) => usersApi.setDefaultAddress(id),
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: addressesQueryKey });
+    },
+  });
+
   const deleteAddressMutation = useMutation({
     mutationFn: (id: ID) => usersApi.deleteAddress(id),
     onSuccess: () => {
@@ -50,6 +57,9 @@ export const useAddresses = (enabled = true) => {
     updateAddress: updateAddressMutation.mutateAsync,
     isUpdatingAddress: updateAddressMutation.isPending,
     updateAddressError: updateAddressMutation.error,
+
+    setDefaultAddress: setDefaultAddressMutation.mutateAsync,
+    isSettingDefaultAddress: setDefaultAddressMutation.isPending,
 
     deleteAddress: deleteAddressMutation.mutateAsync,
     isDeletingAddress: deleteAddressMutation.isPending,
