@@ -83,17 +83,17 @@ const ShopDetails = ({ product }: { product: Product }) => {
 
   return (
     <>
-      <Breadcrumb title={"Shop Details"} pages={["shop details"]} />
+      <div className="hidden sm:block"><Breadcrumb title={"Shop Details"} pages={["shop details"]} /></div>
 
       {product.title === "" ? (
         "Please add product"
       ) : (
         <>
-          <section className="overflow-hidden relative pb-10 sm:pb-20 pt-4 sm:pt-5 lg:pt-20 xl:pt-28">
-            <div className="max-w-[1170px] w-full mx-auto px-4 sm:px-8 xl:px-0">
+          <section className="relative overflow-hidden pb-7 pt-3 sm:pb-20 sm:pt-5 lg:pt-20 xl:pt-28">
+            <div className="mx-auto w-full max-w-[1170px] px-3 sm:px-8 xl:px-0">
               <div className="flex flex-col lg:flex-row gap-5 sm:gap-7.5 xl:gap-17.5">
                 <div className="lg:max-w-[570px] w-full">
-                  <div className="min-h-[280px] sm:min-h-[400px] lg:min-h-[512px] rounded-lg shadow-1 bg-gray-2 dark:bg-darkTheme-secondary-bg p-3 sm:p-7.5 relative flex items-center justify-center">
+                  <div className="relative flex min-h-[250px] items-center justify-center rounded-xl bg-gray-2 p-3 shadow-sm dark:bg-darkTheme-secondary-bg sm:min-h-[400px] sm:p-7.5 sm:shadow-1 lg:min-h-[512px]">
                     <div>
                       <button
                         onClick={handlePreviewSlider}
@@ -124,7 +124,7 @@ const ShopDetails = ({ product }: { product: Product }) => {
                           width={400}
                           height={400}
                           className="object-contain"
-                          style={{ width: "auto", height: "min(280px, 60vw)" }}
+                          style={{ width: "auto", height: "min(250px, 64vw)" }}
                           sizes="(max-width: 640px) 280px, 400px"
                         />
                       )}
@@ -132,12 +132,12 @@ const ShopDetails = ({ product }: { product: Product }) => {
                   </div>
 
                   {/* ?  &apos;border-blue &apos; :  &apos;border-transparent&apos; */}
-                  <div className="flex flex-wrap sm:flex-nowrap gap-2.5 sm:gap-4.5 mt-4 sm:mt-6">
+                  <div className="no-scrollbar mt-3 flex gap-2.5 overflow-x-auto pb-1 sm:mt-6 sm:flex-wrap sm:gap-4.5 sm:overflow-visible">
                     {product.imgs?.thumbnails.map((item, key) => (
                       <button
                         onClick={() => setPreviewImg(key)}
                         key={key}
-                        className={`flex items-center justify-center w-12 h-12 sm:w-25 sm:h-25 overflow-hidden rounded-lg bg-gray-2 dark:bg-darkTheme-secondary-bg shadow-1 ease-out duration-200 border-2 hover:border-blue ${key === previewImg
+                        className={`flex h-14 w-14 shrink-0 items-center justify-center overflow-hidden rounded-lg sm:h-25 sm:w-25 bg-gray-2 dark:bg-darkTheme-secondary-bg shadow-1 ease-out duration-200 border-2 hover:border-blue ${key === previewImg
                           ? "border-blue"
                           : "border-transparent"
                           }`}
@@ -635,8 +635,8 @@ const ShopDetails = ({ product }: { product: Product }) => {
                       </div>
                     </div>}
 
-                    <div className="flex flex-wrap items-center gap-3 sm:gap-4.5">
-                      <div className="flex items-center rounded-md border border-gray-3 dark:border-darkTheme-border-color">
+                    <div className="grid grid-cols-[auto_minmax(0,1fr)] gap-2.5 sm:flex sm:flex-wrap sm:items-center sm:gap-4.5">
+                      <div className="col-span-2 flex w-fit items-center rounded-xl border border-gray-3 dark:border-darkTheme-border-color sm:col-auto sm:rounded-md">
                         <button
                           aria-label="button for remove product"
                           className="flex items-center justify-center w-10 h-10 sm:w-12 sm:h-12 ease-out duration-200 hover:text-blue"
@@ -691,7 +691,7 @@ const ShopDetails = ({ product }: { product: Product }) => {
                       <button
                         onClick={() => addCartItem.mutate(addProductToCartPayload(product, quantity))}
                         disabled={addCartItem.isPending}
-                        className="inline-flex font-medium text-2xs sm:text-custom-sm text-white bg-blue py-2.5 sm:py-3 px-5 sm:px-7 rounded-md ease-out duration-200 hover:bg-blue-dark disabled:opacity-50"
+                        className="flex h-11 min-w-0 items-center justify-center rounded-xl bg-blue px-3 text-sm font-semibold text-white transition hover:bg-blue-dark disabled:opacity-50 sm:inline-flex sm:h-auto sm:px-7 sm:py-3 sm:text-custom-sm sm:font-medium"
                       >
                         {addCartItem.isPending ? "Adding..." : "Add to Cart"}
                       </button>
@@ -703,14 +703,14 @@ const ShopDetails = ({ product }: { product: Product }) => {
                           })
                         }
                         disabled={addCartItem.isPending}
-                        className="inline-flex font-medium text-2xs sm:text-custom-sm text-white bg-dark py-2.5 sm:py-3 px-5 sm:px-7 rounded-md ease-out duration-200 hover:bg-opacity-90 disabled:opacity-50"
+                        className="flex h-11 min-w-0 items-center justify-center rounded-xl bg-dark px-3 text-sm font-semibold text-white transition hover:bg-opacity-90 disabled:opacity-50 sm:inline-flex sm:h-auto sm:px-7 sm:py-3 sm:text-custom-sm sm:font-medium"
                       >
                         Buy Now
                       </button>
 
                       <a
                         href={ROUTES.wishlist}
-                        className="flex items-center justify-center w-10 h-10 sm:w-12 sm:h-12 rounded-md border border-gray-3 dark:border-darkTheme-border-color dark:text-darkTheme-body-color ease-out duration-200 hover:text-white hover:bg-dark hover:border-transparent"
+                        className="flex h-11 w-11 items-center justify-center rounded-xl border sm:h-12 sm:w-12 sm:rounded-md border-gray-3 dark:border-darkTheme-border-color dark:text-darkTheme-body-color ease-out duration-200 hover:text-white hover:bg-dark hover:border-transparent"
                       >
                         <svg
                           className="fill-current"

@@ -11,14 +11,14 @@ const SingleItem = ({ item }: { item: CartItemUi }) => {
   };
 
   return (
-    <div className="flex items-center justify-between gap-5">
-      <div className="w-full flex items-center gap-6">
-        <div className="flex items-center justify-center rounded-[10px] bg-gray-3 dark:bg-darkTheme-secondary-bg max-w-[90px] w-full h-22.5">
+    <div className="flex items-center justify-between gap-3 sm:gap-5">
+      <div className="flex min-w-0 flex-1 items-center gap-3 sm:gap-6">
+        <div className="flex h-20 w-20 shrink-0 items-center justify-center rounded-[10px] bg-gray-3 dark:bg-darkTheme-secondary-bg sm:h-22.5 sm:w-full sm:max-w-[90px]">
           <Image src={item.imgs?.thumbnails?.[0] || "/images/products/placeholder.svg"} alt="product" width={100} height={100} />
         </div>
 
-        <div>
-          <h3 className="font-medium text-dark dark:text-darkTheme-body-color mb-1 ease-out duration-200 hover:text-blue">
+        <div className="min-w-0 flex-1">
+          <h3 className="mb-1 line-clamp-2 text-sm font-semibold text-dark transition hover:text-blue dark:text-darkTheme-body-color sm:text-base sm:font-medium">
             <a href={`/products/${item.productId}`}> {item.title} </a>
           </h3>
           <p className="text-custom-sm dark:text-darkTheme-secondary-muted">Price: {formatCurrency(item.discountedPrice)}</p>
@@ -29,7 +29,7 @@ const SingleItem = ({ item }: { item: CartItemUi }) => {
         onClick={handleRemoveFromCart}
         disabled={removeItem.isPending}
         aria-label="button for remove product from cart"
-        className="flex items-center justify-center rounded-lg max-w-[38px] w-full h-9.5 bg-gray-2 dark:bg-darkTheme-secondary-bg border border-gray-3 dark:border-darkTheme-border-color text-dark dark:text-darkTheme-body-color ease-out duration-200 hover:bg-red-light-6 hover:border-red-light-4 hover:text-red disabled:opacity-50"
+        className="flex h-11 w-11 shrink-0 items-center justify-center rounded-xl sm:h-9.5 sm:w-full sm:max-w-[38px] sm:rounded-lg bg-gray-2 dark:bg-darkTheme-secondary-bg border border-gray-3 dark:border-darkTheme-border-color text-dark dark:text-darkTheme-body-color ease-out duration-200 hover:bg-red-light-6 hover:border-red-light-4 hover:text-red disabled:opacity-50"
       >
         <svg
           className="fill-current"

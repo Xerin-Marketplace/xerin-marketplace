@@ -32,13 +32,13 @@ const CartSidebarModal = () => {
   return (
     <div
       aria-hidden={!isCartModalOpen}
-      className={`fixed top-0 left-0 z-99999 overflow-y-auto no-scrollbar w-full h-screen bg-dark/70 ease-linear duration-300 ${
+      className={`fixed inset-0 z-99999 w-full overflow-hidden bg-dark/70 ease-linear duration-300 ${
         isCartModalOpen ? "visible translate-x-0 opacity-100" : "invisible pointer-events-none translate-x-full opacity-0"
       }`}
     >
-      <div className="flex items-center justify-end">
-        <div className="w-full max-w-[500px] shadow-1 bg-white dark:bg-darkTheme-card px-4 sm:px-7.5 lg:px-11 relative modal-content min-h-screen">
-          <div className="sticky top-0 bg-white dark:bg-darkTheme-card flex items-center justify-between pb-7 pt-4 sm:pt-7.5 lg:pt-11 border-b border-gray-3 dark:border-darkTheme-border-color mb-7.5">
+      <div className="flex min-h-[100dvh] items-stretch justify-end">
+        <div className="modal-content relative flex h-[100dvh] w-full max-w-[500px] flex-col bg-white px-4 shadow-1 dark:bg-darkTheme-card sm:px-7.5 lg:px-11">
+          <div className="z-10 flex shrink-0 items-center justify-between border-b border-gray-3 bg-white pb-4 pt-[max(14px,env(safe-area-inset-top))] dark:border-darkTheme-border-color dark:bg-darkTheme-card sm:pb-7 sm:pt-7.5 lg:pt-11">
             <h2 className="font-medium text-dark dark:text-white text-lg sm:text-2xl">
               Cart View
             </h2>
@@ -69,7 +69,7 @@ const CartSidebarModal = () => {
             </button>
           </div>
 
-          <div className="h-[66vh] overflow-y-auto no-scrollbar">
+          <div className="no-scrollbar min-h-0 flex-1 overflow-y-auto py-4 sm:py-7.5">
             <div className="flex flex-col gap-6">
               {/* <!-- cart item --> */}
               {cartItems.length > 0 ? (
@@ -85,25 +85,25 @@ const CartSidebarModal = () => {
             </div>
           </div>
 
-          {cartItems.length > 0 && <div className="border-t border-gray-3 dark:border-darkTheme-border-color bg-white dark:bg-darkTheme-card pt-5 pb-4 sm:pb-7.5 lg:pb-11 mt-7.5 sticky bottom-0">
+          {cartItems.length > 0 && <div className="shrink-0 border-t border-gray-3 bg-white pb-[calc(var(--xerin-mobile-nav-height)+var(--xerin-safe-bottom)+10px)] pt-4 dark:border-darkTheme-border-color dark:bg-darkTheme-card sm:pb-7.5 sm:pt-5 lg:pb-11">
             <div className="flex items-center justify-between gap-5 mb-6">
               <p className="font-medium text-xl text-dark dark:text-white">Subtotal:</p>
 
               <p className="font-medium text-xl text-dark dark:text-white">{formatCurrency(totalPrice)}</p>
             </div>
 
-            <div className="flex items-center gap-4">
+            <div className="grid grid-cols-2 gap-2.5 sm:flex sm:items-center sm:gap-4">
               <Link
                 onClick={() => closeCartModal()}
                 href="/cart"
-                className="w-full flex justify-center font-medium text-white bg-blue py-[13px] px-6 rounded-md ease-out duration-200 hover:bg-blue-dark"
+                className="flex h-12 w-full items-center justify-center rounded-xl bg-blue px-3 text-sm font-semibold text-white transition hover:bg-blue-dark sm:rounded-md sm:px-6 sm:font-medium"
               >
                 View Cart
               </Link>
 
               <Link
                 href={isAuthenticated ? "/checkout" : "/signin?redirect=/checkout"}
-                className="w-full flex justify-center font-medium text-white bg-dark py-[13px] px-6 rounded-md ease-out duration-200 hover:bg-opacity-95"
+                className="flex h-12 w-full items-center justify-center rounded-xl bg-dark px-3 text-sm font-semibold text-white transition hover:bg-opacity-95 sm:rounded-md sm:px-6 sm:font-medium"
               >
                 Checkout
               </Link>

@@ -543,35 +543,18 @@ input[type='search']::-webkit-search-results-decoration {
   }
 }
 
-
-/* =========================================================
-   PHASE 11 / TASK 8 — RESPONSIVE QA & FINAL CLEANUP
-   ========================================================= */
-@media (max-width: 359px) {
-  /* 320px devices: keep the mobile header comfortably inside the viewport. */
-  .xerin-page-shell {
-    --xerin-mobile-gutter: 12px;
-  }
-}
-
 @media (max-width: 639px) {
-  /* Long API/order references must never push a page wider than the viewport. */
-  pre,
-  code,
-  .break-mobile-content {
-    overflow-wrap: anywhere;
-    word-break: break-word;
+  .xerin-checkout-page {
+    padding-bottom: calc(var(--xerin-mobile-nav-height) + var(--xerin-safe-bottom) + 92px);
   }
 
-  /* Avoid iOS zoom in payment retry and assistant inputs. */
-  input,
-  select,
-  textarea {
-    font-size: max(16px, 1em);
-  }
-
-  /* Provide comfortable space above the persistent marketplace navigation. */
-  main {
-    min-width: 0;
+  .xerin-checkout-mobile-cta {
+    position: fixed;
+    left: 12px;
+    right: 12px;
+    bottom: calc(var(--xerin-mobile-nav-height) + var(--xerin-safe-bottom) + 8px);
+    z-index: 9990;
+    margin: 0 !important;
+    border: 1px solid rgba(226, 232, 240, 0.95);
   }
 }
