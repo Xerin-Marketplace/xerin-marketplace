@@ -61,12 +61,12 @@ const Categories = () => {
   const showingTo = products.length ? showingFrom + products.length - 1 : 0;
 
   return (
-    <section className="overflow-hidden bg-gray-1 pt-1 pb-2 dark:bg-darkTheme-bg sm:pt-12 sm:pb 1">
+    <section className="overflow-hidden bg-gray-1 pb-4 pt-3 dark:bg-darkTheme-bg sm:pb-8 sm:pt-10">
       <div className="mx-auto w-full max-w-[1440px] px-4 sm:px-6 lg:px-8 xl:px-10 2xl:px-6">
         {/* Heading */}
-        <div className="mb-3 flex flex-col gap-5 lg:flex-row lg:items-end lg:justify-between">
+        <div className="mb-3 flex items-end justify-between gap-3 sm:mb-5 lg:items-end">
           <div>
-            <span className="mb-1 flex items-center gap-2 text-sm font-medium text-orange sm:text-base">
+            <span className="mb-1 hidden items-center gap-2 text-sm font-medium text-orange sm:flex sm:text-base">
               <svg
                 width="20"
                 height="20"
@@ -90,10 +90,10 @@ const Categories = () => {
               </svg>
               Marketplace Products
             </span>
-            <h2 className="text-xl font-semibold text-dark dark:text-white sm:text-2xl xl:text-heading-5">
+            <h2 className="text-lg font-bold text-dark dark:text-white sm:text-2xl xl:text-heading-5">
               Explore products from our sellers
             </h2>
-            <p className="mt-1 max-w-2xl text-sm text-dark-4 dark:text-darkTheme-secondary-muted">
+            <p className="mt-1 hidden max-w-2xl text-sm text-dark-4 dark:text-darkTheme-secondary-muted sm:block">
               Browse live products published by sellers. Search by product name, description or SKU,
               or filter the catalog by category.
             </p>
@@ -101,14 +101,49 @@ const Categories = () => {
 
           <Link
             href="/shop-with-sidebar"
-            className="inline-flex w-fit items-center justify-center rounded-lg border border-gray-3 bg-white px-5 py-2.5 text-sm font-semibold text-dark transition hover:border-orange hover:text-orange dark:border-darkTheme-border-color dark:bg-darkTheme-card dark:text-white"
+            className="shrink-0 text-xs font-bold text-orange sm:inline-flex sm:w-fit sm:items-center sm:justify-center sm:rounded-lg sm:border sm:border-gray-3 sm:bg-white sm:px-5 sm:py-2.5 sm:text-sm sm:text-dark sm:transition sm:hover:border-orange sm:hover:text-orange dark:sm:border-darkTheme-border-color dark:sm:bg-darkTheme-card dark:sm:text-white"
           >
             Open full shop
           </Link>
         </div>
 
+        {/* Mobile category rail */}
+        <div className="xerin-horizontal-scroll -mx-4 mb-4 flex gap-2 px-4 pb-1 sm:hidden">
+          <button
+            type="button"
+            onClick={() => {
+              setCategoryId("");
+              setPage(1);
+            }}
+            className={`shrink-0 rounded-full border px-4 py-2 text-xs font-bold ${
+              !categoryId
+                ? "border-orange bg-orange text-white"
+                : "border-gray-3 bg-white text-dark"
+            }`}
+          >
+            All
+          </button>
+          {categories.map((category) => (
+            <button
+              key={String(category.id)}
+              type="button"
+              onClick={() => {
+                setCategoryId(String(category.id));
+                setPage(1);
+              }}
+              className={`shrink-0 rounded-full border px-4 py-2 text-xs font-bold ${
+                categoryId === String(category.id)
+                  ? "border-orange bg-orange text-white"
+                  : "border-gray-3 bg-white text-dark"
+              }`}
+            >
+              {category.name}
+            </button>
+          ))}
+        </div>
+
         {/* Search and filters */}
-        <div className="mb-8 rounded-2xl border border-gray-3 bg-white p-4 shadow-sm dark:border-darkTheme-border-color dark:bg-darkTheme-card sm:p-5">
+        <div className="mb-8 hidden rounded-2xl border border-gray-3 bg-white p-4 shadow-sm dark:border-darkTheme-border-color dark:bg-darkTheme-card sm:block sm:p-5">
           <form
             onSubmit={handleSearch}
             className="grid gap-3 md:grid-cols-[minmax(0,1fr)_260px_auto]"
@@ -186,7 +221,7 @@ const Categories = () => {
         </div>
 
         {/* Results information */}
-        <div className="mb-5 flex flex-wrap items-center justify-between gap-3">
+        <div className="mb-3 hidden flex-wrap items-center justify-between gap-3 sm:flex sm:mb-5">
           <p className="text-sm text-dark-4 dark:text-darkTheme-secondary-muted">
             {isLoading
               ? "Loading products..."
@@ -201,14 +236,14 @@ const Categories = () => {
 
         {/* Product states */}
         {isLoading ? (
-          <div className="grid grid-cols-1 gap-6 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4">
+          <div className="grid grid-cols-2 gap-2.5 sm:gap-5 lg:grid-cols-3 xl:grid-cols-4">
             {Array.from({ length: 8 }).map((_, index) => (
               <div
                 key={index}
                 className="overflow-hidden rounded-2xl border border-gray-3 bg-white shadow-sm dark:border-darkTheme-border-color dark:bg-darkTheme-card"
               >
-                <div className="h-64 animate-pulse bg-gray-2 dark:bg-darkTheme-secondary-bg" />
-                <div className="space-y-3 p-5">
+                <div className="aspect-square animate-pulse bg-gray-2 dark:bg-darkTheme-secondary-bg sm:h-64 sm:aspect-auto" />
+                <div className="space-y-2 p-3 sm:space-y-3 sm:p-5">
                   <div className="h-3 w-1/3 animate-pulse rounded bg-gray-2 dark:bg-darkTheme-secondary-bg" />
                   <div className="h-5 w-4/5 animate-pulse rounded bg-gray-2 dark:bg-darkTheme-secondary-bg" />
                   <div className="h-4 w-full animate-pulse rounded bg-gray-2 dark:bg-darkTheme-secondary-bg" />
@@ -248,7 +283,7 @@ const Categories = () => {
             )}
           </div>
         ) : (
-          <div className="grid grid-cols-1 gap-6 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4">
+          <div className="grid grid-cols-2 gap-2.5 sm:gap-5 lg:grid-cols-3 xl:grid-cols-4">
             {products.map((product) => {
               const uiProduct = mapApiProductToUiProduct(product);
               const imageUrl = uiProduct.imgs?.previews?.[0] ?? "/images/products/placeholder.svg";
@@ -262,14 +297,14 @@ const Categories = () => {
               return (
                 <article
                   key={String(product.id)}
-                  className="group flex h-full flex-col overflow-hidden rounded-2xl border border-gray-3 bg-white shadow-sm transition duration-300 hover:-translate-y-1 hover:shadow-lg dark:border-darkTheme-border-color dark:bg-darkTheme-card"
+                  className="group flex h-full min-w-0 flex-col overflow-hidden rounded-xl border border-gray-3 bg-white shadow-sm transition duration-300 hover:shadow-lg dark:border-darkTheme-border-color dark:bg-darkTheme-card sm:rounded-2xl sm:hover:-translate-y-1"
                 >
                   <Link
                     href={`/products/${product.id}`}
-                    className="relative flex h-64 items-center justify-center overflow-hidden bg-[#f7f8fa] p-6 dark:bg-darkTheme-secondary-bg"
+                    className="relative flex aspect-square items-center justify-center overflow-hidden bg-[#f7f8fa] p-2.5 dark:bg-darkTheme-secondary-bg sm:h-64 sm:aspect-auto sm:p-6"
                   >
                     {hasDiscount && (
-                      <span className="absolute left-4 top-4 z-10 rounded-full bg-orange px-3 py-1 text-xs font-semibold text-white shadow-sm">
+                      <span className="absolute left-2 top-2 z-10 rounded bg-[#ef4444] px-1.5 py-0.5 text-[10px] font-bold text-white shadow-sm sm:left-4 sm:top-4 sm:rounded-full sm:px-3 sm:py-1 sm:text-xs">
                         -{discountPercentage}%
                       </span>
                     )}
@@ -282,42 +317,42 @@ const Categories = () => {
                     />
                   </Link>
 
-                  <div className="flex flex-1 flex-col p-5">
-                    <div className="mb-2 flex items-center justify-between gap-3">
-                      <span className="truncate text-xs font-medium uppercase tracking-wide text-orange">
+                  <div className="flex flex-1 flex-col p-2.5 sm:p-5">
+                    <div className="mb-1 flex items-center justify-between gap-2 sm:mb-2 sm:gap-3">
+                      <span className="truncate text-[10px] font-bold uppercase tracking-wide text-orange sm:text-xs sm:font-medium">
                         {categoryNameById.get(String(product.category_id)) ?? "Marketplace"}
                       </span>
                       {product.is_active && product.status === "approved" ? (
-                        <span className="rounded-full bg-green-50 px-2.5 py-1 text-[11px] font-semibold text-green-700 dark:bg-green-500/10 dark:text-green-300">
+                        <span className="hidden rounded-full bg-green-50 px-2.5 py-1 text-[11px] font-semibold text-green-700 dark:bg-green-500/10 dark:text-green-300 sm:inline-flex">
                           Available
                         </span>
                       ) : null}
                     </div>
 
-                    <h3 className="line-clamp-2 min-h-[48px] text-base font-semibold leading-6 text-dark transition group-hover:text-orange dark:text-white">
+                    <h3 className="line-clamp-2 min-h-[38px] text-[13px] font-semibold leading-[19px] text-dark transition group-hover:text-orange dark:text-white sm:min-h-[48px] sm:text-base sm:leading-6">
                       <Link href={`/products/${product.id}`}>{product.name}</Link>
                     </h3>
 
-                    <p className="mt-2 line-clamp-2 min-h-[40px] text-sm leading-5 text-dark-4 dark:text-darkTheme-secondary-muted">
+                    <p className="mt-2 hidden line-clamp-2 min-h-[40px] text-sm leading-5 text-dark-4 dark:text-darkTheme-secondary-muted sm:block">
                       {product.description || "Seller-listed product available in the marketplace."}
                     </p>
 
-                    <div className="mt-3 flex items-center justify-between gap-3 text-xs text-dark-4 dark:text-darkTheme-secondary-muted">
+                    <div className="mt-3 hidden items-center justify-between gap-3 text-xs text-dark-4 dark:text-darkTheme-secondary-muted sm:flex">
                       <span className="truncate">SKU: {product.sku}</span>
                       {typeof product.review_count === "number" && product.review_count > 0 && (
                         <span>{product.review_count} review{product.review_count === 1 ? "" : "s"}</span>
                       )}
                     </div>
 
-                    <div className="mt-4 flex items-end justify-between gap-3 border-t border-gray-3 pt-4 dark:border-darkTheme-border-color">
+                    <div className="mt-2 flex items-end justify-between gap-2 border-t border-gray-3 pt-2 dark:border-darkTheme-border-color sm:mt-4 sm:gap-3 sm:pt-4">
                       <div>
-                        <p className="text-xs text-dark-4 dark:text-darkTheme-secondary-muted">Price</p>
+                        <p className="hidden text-xs text-dark-4 dark:text-darkTheme-secondary-muted sm:block">Price</p>
                         <div className="mt-0.5 flex flex-wrap items-center gap-2">
-                          <span className="text-lg font-bold text-dark dark:text-white">
+                          <span className="text-[15px] font-extrabold text-[#ef4444] dark:text-white sm:text-lg sm:text-dark">
                             {formatCurrency(hasDiscount ? salePrice! : regularPrice, product.currency)}
                           </span>
                           {hasDiscount && (
-                            <span className="text-xs text-dark-4 line-through">
+                            <span className="text-[10px] text-dark-4 line-through sm:text-xs">
                               {formatCurrency(regularPrice, product.currency)}
                             </span>
                           )}
@@ -326,7 +361,7 @@ const Categories = () => {
 
                       <Link
                         href={`/products/${product.id}`}
-                        className="inline-flex items-center justify-center rounded-lg bg-dark px-4 py-2.5 text-xs font-semibold text-white transition hover:bg-orange dark:bg-white dark:text-dark dark:hover:bg-orange dark:hover:text-white"
+                        className="hidden items-center justify-center rounded-lg bg-dark px-4 py-2.5 text-xs font-semibold text-white transition hover:bg-orange dark:bg-white dark:text-dark dark:hover:bg-orange dark:hover:text-white sm:inline-flex"
                       >
                         View product
                       </Link>
@@ -340,7 +375,7 @@ const Categories = () => {
 
         {/* Pagination */}
         {!isLoading && !isError && (page > 1 || hasNextPage) && (
-          <div className="mt-6 flex items-center justify-center gap-3">
+          <div className="mt-5 flex items-center justify-center gap-2 sm:mt-6 sm:gap-3">
             <button
               type="button"
               onClick={() => {

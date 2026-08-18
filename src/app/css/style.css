@@ -446,3 +446,28 @@ input[type='search']::-webkit-search-results-decoration {
     padding-bottom: var(--xerin-safe-bottom);
   }
 }
+
+@media (max-width: 639px) {
+  .hero-carousel .swiper-pagination {
+    bottom: 8px !important;
+  }
+
+  .hero-carousel .swiper-pagination-bullet {
+    width: 6px;
+    height: 6px;
+    opacity: 0.35;
+  }
+
+  .hero-carousel .swiper-pagination-bullet-active {
+    width: 16px;
+    border-radius: 999px;
+    opacity: 1;
+  }
+}
+@media (max-width: 639px) {
+  /* Prevent iOS from zooming form fields while keeping the auth UI compact. */
+  #signin-email,
+  #signin-password {
+    font-size: 16px;
+  }
+}

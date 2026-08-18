@@ -155,9 +155,9 @@ const FEATURES = [
   { icon: <TrendingUpIcon />, title: "Manage Your Store", description: "List products and manage customer orders" },
 ];
 
-// ---------------------------------------------------------------------------
+     
 // Small shared field components
-// ---------------------------------------------------------------------------
+     
 
 const FieldLabel = ({
   htmlFor,
@@ -183,7 +183,7 @@ const TextInput = (props: React.InputHTMLAttributes<HTMLInputElement>) => (
   <input
     {...props}
     className={
-      "rounded-lg border border-gray-3 dark:border-darkTheme-border-color bg-gray-1 dark:bg-darkTheme-secondary-bg dark:text-darkTheme-body-color placeholder:text-dark-4 dark:placeholder:text-darkTheme-secondary-muted w-full py-3 px-4 outline-none duration-200 focus:border-transparent focus:ring-2 focus:ring-orange/30 disabled:cursor-not-allowed disabled:opacity-70 " +
+      "h-12 rounded-xl border border-gray-3 dark:border-darkTheme-border-color bg-gray-1 dark:bg-darkTheme-secondary-bg dark:text-darkTheme-body-color placeholder:text-dark-4 dark:placeholder:text-darkTheme-secondary-muted w-full px-4 text-base sm:text-sm outline-none duration-200 focus:border-transparent focus:ring-2 focus:ring-orange/30 disabled:cursor-not-allowed disabled:opacity-70 " +
       (props.className || "")
     }
   />
@@ -278,7 +278,7 @@ const PasswordInput = ({
       onChange={(event) => onChange(event.target.value)}
       autoComplete={autoComplete}
       disabled={disabled}
-      className={`rounded-lg border border-gray-3 dark:border-darkTheme-border-color bg-gray-1 dark:bg-darkTheme-secondary-bg dark:text-darkTheme-body-color placeholder:text-dark-4 dark:placeholder:text-darkTheme-secondary-muted w-full py-3 ${
+      className={`h-12 rounded-xl border border-gray-3 dark:border-darkTheme-border-color bg-gray-1 dark:bg-darkTheme-secondary-bg dark:text-darkTheme-body-color placeholder:text-dark-4 dark:placeholder:text-darkTheme-secondary-muted w-full text-base sm:text-sm ${
         withIcon ? "pl-11" : "pl-4"
       } pr-12 outline-none duration-200 focus:border-transparent focus:ring-2 focus:ring-orange/30 disabled:cursor-not-allowed disabled:opacity-70`}
     />
@@ -287,7 +287,7 @@ const PasswordInput = ({
       onClick={onToggleShow}
       tabIndex={-1}
       aria-label={show ? "Hide password" : "Show password"}
-      className="absolute inset-y-0 right-0 flex items-center pr-4 text-dark-4 dark:text-darkTheme-secondary-muted hover:text-dark dark:hover:text-white"
+      className="absolute inset-y-0 right-0 flex w-12 items-center justify-center text-dark-4 dark:text-darkTheme-secondary-muted hover:text-dark dark:hover:text-white"
     >
       {show ? <EyeOffIcon /> : <EyeIcon />}
     </button>
@@ -320,9 +320,9 @@ const PasswordChecklist = ({ password }: { password: string }) => {
   );
 };
 
-// ---------------------------------------------------------------------------
+     
 // Sign In panel
-// ---------------------------------------------------------------------------
+     
 
 const SignInPanel = ({ onSwitchTab }: { onSwitchTab: (tab: AuthTab) => void }) => {
   const router = useRouter();
@@ -400,7 +400,7 @@ const SignInPanel = ({ onSwitchTab }: { onSwitchTab: (tab: AuthTab) => void }) =
         </div>
       )}
 
-      <div className="mb-5">
+      <div className="mb-4 sm:mb-5">
         <FieldLabel htmlFor="signin-email">Email</FieldLabel>
         <div className="relative">
           <span className="absolute inset-y-0 left-0 flex items-center pl-4 text-dark-4 dark:text-darkTheme-secondary-muted">
@@ -420,7 +420,7 @@ const SignInPanel = ({ onSwitchTab }: { onSwitchTab: (tab: AuthTab) => void }) =
         </div>
       </div>
 
-      <div className="mb-5">
+      <div className="mb-4 sm:mb-5">
         <div className="flex items-center justify-between mb-2">
           <label htmlFor="signin-password" className="text-sm font-medium text-dark dark:text-darkTheme-body-color">
             Password
@@ -453,18 +453,18 @@ const SignInPanel = ({ onSwitchTab }: { onSwitchTab: (tab: AuthTab) => void }) =
         <span className="flex items-center justify-center w-4.5 h-4.5 rounded border border-gray-3 dark:border-darkTheme-border-color peer-checked:bg-orange peer-checked:border-orange text-white transition-colors">
           {rememberMe && <CheckIcon />}
         </span>
-        <span className="text-sm text-dark-4 dark:text-darkTheme-secondary-muted">Remember me for 30 days</span>
+        <span className="px-4 text-sm text-dark-4 dark:text-darkTheme-secondary-muted">Remember me for 30 days</span>
       </label>
 
       <button
         type="submit"
         disabled={isSubmitting}
-        className="w-full flex justify-center font-medium text-white bg-orange py-3 px-6 rounded-lg ease-out duration-200 hover:bg-orange-dark disabled:cursor-not-allowed disabled:opacity-70"
+        className="flex h-12 w-full items-center justify-center rounded-xl bg-orange px-6 text-base font-semibold text-white shadow-sm ease-out duration-200 hover:bg-orange-dark disabled:cursor-not-allowed disabled:opacity-70 sm:text-sm"
       >
         {isSubmitting ? "Signing in..." : "Sign in"}
       </button>
 
-      <p className="text-center mt-6 text-sm">
+      <p className="mt-5 text-center text-sm sm:mt-6">
         <span className="text-dark-4 dark:text-darkTheme-secondary-muted">Don&apos;t have an account? </span>
         <button type="button" onClick={() => onSwitchTab("signup")} className="font-medium text-orange hover:underline">
           Sign up
@@ -474,9 +474,9 @@ const SignInPanel = ({ onSwitchTab }: { onSwitchTab: (tab: AuthTab) => void }) =
   );
 };
 
-// ---------------------------------------------------------------------------
+     
 // Buyer Sign Up panel
-// ---------------------------------------------------------------------------
+     
 
 const SignUpPanel = ({ onSwitchTab }: { onSwitchTab: (tab: AuthTab) => void }) => {
   const router = useRouter();
@@ -643,9 +643,9 @@ const SignUpPanel = ({ onSwitchTab }: { onSwitchTab: (tab: AuthTab) => void }) =
   );
 };
 
-// ---------------------------------------------------------------------------
+     
 // Seller Sign Up panel
-// ---------------------------------------------------------------------------
+     
 
 interface SellerFormState {
   firstName: string;
@@ -1226,9 +1226,9 @@ const SellerPanel = ({ onSwitchTab }: { onSwitchTab: (tab: AuthTab) => void }) =
   );
 };
 
-// ---------------------------------------------------------------------------
+     
 // Page shell
-// ---------------------------------------------------------------------------
+     
 
 const AuthPage = ({ initialTab = "signup" }: { initialTab?: AuthTab }) => {
   const [activeTab, setActiveTab] = useState<AuthTab>(initialTab);
@@ -1240,30 +1240,35 @@ const AuthPage = ({ initialTab = "signup" }: { initialTab?: AuthTab }) => {
   };
 
   return (
-    <section className="min-h-screen grid lg:grid-cols-2 bg-white dark:bg-darkTheme-bg">
+    <section className="min-h-[100dvh] bg-white dark:bg-darkTheme-bg lg:grid lg:grid-cols-2">
       {/* Left panel: forms */}
-      <div className="flex flex-col px-6 sm:px-10 xl:px-20 py-8">
-        <Link href="/" className="inline-flex items-center gap-2.5 w-fit">
-          <Image src="/images/logo/logo.png" alt="XerinMarket" width={32} height={32} priority className="object-contain" />
-          <span className="font-semibold text-lg text-dark dark:text-white">XerinMarket</span>
-        </Link>
+      <div className="flex min-h-[100dvh] flex-col px-4 pb-[max(20px,env(safe-area-inset-bottom))] pt-[max(18px,env(safe-area-inset-top))] sm:px-10 sm:py-8 xl:px-20">
+        <div className="flex items-center justify-between">
+          <Link href="/" className="inline-flex w-fit items-center gap-2">
+            <Image src="/images/logo/logo.png" alt="XerinMarket" width={30} height={30} priority className="h-[30px] w-[30px] object-contain" />
+            <span className="text-base font-bold text-dark dark:text-white sm:text-lg">XerinMarket</span>
+          </Link>
+          <Link href="/" className="rounded-full border border-gray-3 px-3 py-1.5 text-xs font-semibold text-dark-4 transition hover:text-orange dark:border-darkTheme-border-color dark:text-darkTheme-secondary-muted lg:hidden">
+            Shop
+          </Link>
+        </div>
 
-        <div className={`flex-1 flex ${activeTab === "seller" ? "items-start" : "items-center"} justify-center py-10`}>
-          <div className={`w-full ${activeTab === "seller" ? "max-w-[640px]" : "max-w-[400px]"}`}>
-            <div className="text-center mb-7">
+        <div className={`flex flex-1 ${activeTab === "seller" ? "items-start" : "items-center"} justify-center py-5 sm:py-10`}>
+          <div className={`w-full ${activeTab === "seller" ? "max-w-[640px]" : "max-w-[420px]"}`}>
+            <div className="mb-5 text-center sm:mb-7">
               <Image
                 src="/images/logo/logo.png"
                 alt="XerinMarket"
-                width={56}
-                height={56}
-                className="object-contain mx-auto mb-4"
+                width={52}
+                height={52}
+                className="mx-auto mb-3 h-12 w-12 object-contain sm:mb-4 sm:h-14 sm:w-14"
               />
-              <h1 className="font-semibold text-2xl text-dark dark:text-white mb-1.5">{headings[activeTab].title}</h1>
+              <h1 className="mb-1.5 text-2xl font-bold text-dark dark:text-white sm:font-semibold">{headings[activeTab].title}</h1>
               <p className="text-sm text-dark-4 dark:text-darkTheme-secondary-muted">{headings[activeTab].subtitle}</p>
             </div>
 
             {/* Tab switcher */}
-            <div className="grid grid-cols-3 gap-1 p-1 mb-6 rounded-lg bg-gray-1 dark:bg-darkTheme-secondary-bg border border-gray-3 dark:border-darkTheme-border-color">
+            <div className="mb-5 grid grid-cols-3 gap-1 rounded-xl border border-gray-3 bg-gray-1 p-1 dark:border-darkTheme-border-color dark:bg-darkTheme-secondary-bg sm:mb-6">
               {AUTH_TABS.map((tab) => {
                 const isActive = tab.key === activeTab;
                 return (
@@ -1271,7 +1276,7 @@ const AuthPage = ({ initialTab = "signup" }: { initialTab?: AuthTab }) => {
                     key={tab.key}
                     type="button"
                     onClick={() => setActiveTab(tab.key)}
-                    className={`text-center text-sm font-medium py-2 rounded-md transition-colors ${
+                    className={`min-h-10 rounded-lg px-2 text-center text-sm font-semibold transition-colors ${
                       isActive
                         ? "bg-white dark:bg-darkTheme-card text-dark dark:text-white shadow-sm"
                         : "text-dark-4 dark:text-darkTheme-secondary-muted hover:text-dark dark:hover:text-white"
@@ -1289,7 +1294,7 @@ const AuthPage = ({ initialTab = "signup" }: { initialTab?: AuthTab }) => {
           </div>
         </div>
 
-        <div className="flex items-center justify-center gap-4 text-xs text-dark-4 dark:text-darkTheme-secondary-muted">
+        <div className="flex flex-wrap items-center justify-center gap-x-3 gap-y-1 pb-1 text-[11px] text-dark-4 dark:text-darkTheme-secondary-muted sm:gap-4 sm:text-xs">
           <Link href="/help" className="hover:text-dark dark:hover:text-white">Help Center</Link>
           <span>•</span>
           <Link href="/terms" className="hover:text-dark dark:hover:text-white">Terms</Link>
