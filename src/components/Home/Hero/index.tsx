@@ -25,7 +25,7 @@ const Hero = () => {
           </div>
 
           {/* Side cards - right */}
-          <div className="xerin-horizontal-scroll -mx-4 flex gap-3 px-4 pb-1 sm:mx-0 sm:grid sm:grid-cols-2 sm:px-0 lg:grid-cols-1 lg:grid-rows-2 xl:gap-5">
+          <div className="hidden lg:grid lg:grid-cols-1 lg:grid-rows-2 lg:gap-4 xl:gap-5">
             <div className="relative flex min-h-[132px] min-w-[82vw] max-w-[340px] items-center overflow-hidden rounded-2xl bg-white p-4 shadow-sm transition-shadow duration-300 hover:shadow-md dark:bg-darkTheme-card sm:min-h-[190px] sm:min-w-0 sm:max-w-none sm:p-6 lg:min-h-0 xl:p-7">
               <div className="flex w-full items-center justify-between gap-4">
                 <div className="min-w-0 flex-1">
