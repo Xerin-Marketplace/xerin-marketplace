@@ -140,9 +140,7 @@ const ProductItem = ({ item }: { item: Product }) => {
           <Link href={`/products/${item.id}`}>{item.title}</Link>
         </h3>
 
-        <p className="mb-4 text-sm leading-6 text-dark-4 dark:text-darkTheme-secondary-muted">
-          View current product details, pricing, and availability before checkout.
-        </p>
+
 
         <div className="flex items-end justify-between gap-4">
           <div>
