@@ -20,6 +20,7 @@ import ChatBot from "@/components/Common/ChatBot";
 // import ScrollToTop from "@/components/Common/ScrollToTop";
 import PreLoader from "@/components/Common/PreLoader";
 import BuyerAccountFooter from "@/components/BuyerAccount/BuyerAccountFooter";
+import MobileBottomNav from "@/components/Header/MobileBottomNav";
 
 export default function RootLayout({
   children,
@@ -65,6 +66,7 @@ export default function RootLayout({
                       {!hideStorefrontChrome ? <QuickViewModal /> : null}
                       {!hideStorefrontChrome ? <CartSidebarModal /> : null}
                       {!hideStorefrontChrome ? <PreviewSliderModal /> : null}
+                      {!hideStorefrontChrome ? <MobileBottomNav /> : null}
                     </>
                   )}
                 </PreviewSliderProvider>

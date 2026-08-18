@@ -5,10 +5,37 @@
 @layer base {
   html {
     @apply scroll-smooth;
+    min-width: 320px;
+    -webkit-text-size-adjust: 100%;
+    text-size-adjust: 100%;
   }
 
   body {
     @apply font-sans font-normal text-base text-dark relative z-1 bg-body-bg dark:bg-darkTheme-body-bg dark:text-darkTheme-text;
+    min-width: 320px;
+    overflow-x: hidden;
+    -webkit-font-smoothing: antialiased;
+    -moz-osx-font-smoothing: grayscale;
+  }
+
+  img,
+  video,
+  canvas,
+  svg {
+    max-width: 100%;
+  }
+
+  img,
+  video {
+    height: auto;
+  }
+
+  button,
+  a,
+  input,
+  select,
+  textarea {
+    -webkit-tap-highlight-color: transparent;
   }
 
   h1, h2, h3, h4, h5, h6 {
@@ -254,5 +281,168 @@ input[type='search']::-webkit-search-results-decoration {
 @layer utilities {
   .storefront-shell {
     @apply mx-auto w-full max-w-[1440px] px-4 sm:px-6 lg:px-8 xl:px-10 2xl:px-6;
+  }
+}
+
+:root {
+  --xerin-mobile-gutter: 16px;
+  --xerin-mobile-section-gap: 20px;
+  --xerin-touch-target: 44px;
+  --xerin-mobile-nav-height: 64px;
+  --xerin-safe-bottom: env(safe-area-inset-bottom, 0px);
+}
+
+@media (min-width: 640px) {
+  :root {
+    --xerin-mobile-gutter: 24px;
+    --xerin-mobile-section-gap: 28px;
+  }
+}
+
+@layer utilities {
+  /* Base page container that never causes horizontal overflow on small screens. */
+  .xerin-page-shell {
+    width: 100%;
+    max-width: 1440px;
+    margin-inline: auto;
+    padding-inline: var(--xerin-mobile-gutter);
+  }
+
+  .xerin-mobile-section {
+    padding-block: var(--xerin-mobile-section-gap);
+  }
+
+  /* Compact marketplace grid: 2 columns on phones, expands progressively. */
+  .xerin-product-grid {
+    display: grid;
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    gap: 10px;
+  }
+
+  @media (min-width: 640px) {
+    .xerin-product-grid {
+      grid-template-columns: repeat(3, minmax(0, 1fr));
+      gap: 16px;
+    }
+  }
+
+  @media (min-width: 1024px) {
+    .xerin-product-grid {
+      grid-template-columns: repeat(4, minmax(0, 1fr));
+      gap: 20px;
+    }
+  }
+
+  @media (min-width: 1280px) {
+    .xerin-product-grid {
+      grid-template-columns: repeat(5, minmax(0, 1fr));
+      gap: 22px;
+    }
+  }
+
+  .xerin-touch-target {
+    min-width: var(--xerin-touch-target);
+    min-height: var(--xerin-touch-target);
+  }
+
+  .xerin-mobile-scroll {
+    display: flex;
+    gap: 10px;
+    overflow-x: auto;
+    overscroll-behavior-inline: contain;
+    scroll-snap-type: x proximity;
+    scrollbar-width: none;
+    -webkit-overflow-scrolling: touch;
+  }
+
+  .xerin-mobile-scroll::-webkit-scrollbar {
+    display: none;
+  }
+
+  .xerin-mobile-scroll > * {
+    flex: 0 0 auto;
+    scroll-snap-align: start;
+  }
+
+  .xerin-responsive-media {
+    display: block;
+    width: 100%;
+    height: auto;
+    object-fit: cover;
+  }
+
+  .xerin-mobile-sticky-bottom {
+    position: sticky;
+    bottom: 0;
+    z-index: 40;
+    padding-bottom: max(12px, var(--xerin-safe-bottom));
+  }
+
+  .xerin-safe-bottom {
+    padding-bottom: max(16px, var(--xerin-safe-bottom));
+  }
+
+  .xerin-mobile-only {
+    display: block;
+  }
+
+  .xerin-desktop-only {
+    display: none;
+  }
+
+  @media (min-width: 1024px) {
+    .xerin-mobile-only {
+      display: none;
+    }
+
+    .xerin-desktop-only {
+      display: block;
+    }
+  }
+}
+
+/* iOS Safari zooms form controls smaller than 16px. Keep mobile forms stable. */
+@media (max-width: 767px) {
+  input,
+  select,
+  textarea {
+    font-size: 16px !important;
+  }
+
+  .storefront-shell {
+    padding-inline: var(--xerin-mobile-gutter);
+  }
+
+  /* Future fixed bottom navigation must not cover the last page controls. */
+  body.has-mobile-bottom-nav {
+    padding-bottom: calc(var(--xerin-mobile-nav-height) + var(--xerin-safe-bottom));
+  }
+}
+
+/* Accessibility + mobile performance: respect reduced-motion preference. */
+@media (prefers-reduced-motion: reduce) {
+  html {
+    scroll-behavior: auto !important;
+  }
+
+  *,
+  *::before,
+  *::after {
+    scroll-behavior: auto !important;
+    transition-duration: 0.01ms !important;
+    animation-duration: 0.01ms !important;
+    animation-iteration-count: 1 !important;
+  }
+}
+
+@media (max-width: 1023px) {
+  /* Header is fixed; reserve space for the compact two-row mobile header. */
+  body {
+    scroll-padding-top: 118px;
+  }
+
+  /* Keep fixed bottom navigation above iOS browser/home-indicator chrome. */
+  .xerin-mobile-bottom-nav {
+    padding-bottom: var(--xerin-safe-bottom);
   }
 }

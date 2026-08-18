@@ -75,8 +75,8 @@ export default function RootLayout({
   children: React.ReactNode;
 }) {
   return (
-    <html lang="en" suppressHydrationWarning={true}>
-      <body className="bg-body-bg dark:bg-darkTheme-bg">{children}</body>
+    <html lang="en" suppressHydrationWarning={true} data-scroll-behavior="smooth">
+      <body className="min-h-dvh overflow-x-hidden bg-body-bg dark:bg-darkTheme-bg">{children}</body>
     </html>
   );
 }

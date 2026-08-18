@@ -14,6 +14,7 @@ import { formatCurrency } from "@/lib/formatCurrency";
 import { useAuthStore } from "@/store/useAuthStore";
 import { useRouter } from "next/navigation";
 import { useCategories } from "@/hooks/useProducts";
+import MobileStorefrontHeader from "./MobileStorefrontHeader";
 
 const Header = () => {
   const [searchQuery, setSearchQuery] = useState("");
@@ -77,7 +78,8 @@ const Header = () => {
         stickyMenu && "shadow"
       }`}
     >
-      <div className="max-w-[1440px] mx-auto px-4 sm:px-6 lg:px-8 xl:px-10 2xl:px-6">
+      <MobileStorefrontHeader />
+      <div className="hidden lg:block max-w-[1440px] mx-auto px-4 sm:px-6 lg:px-8 xl:px-10 2xl:px-6">
         {/* <!-- header top start --> */}
         <div
           className={`flex flex-col lg:flex-row gap-3 lg:gap-5 items-stretch lg:items-center xl:justify-between ease-out duration-200 ${
@@ -527,7 +529,7 @@ const Header = () => {
 
       {/* <!-- Mobile Navigation Drawer --> */}
       {navigationOpen && (
-        <div className="xl:hidden border-t border-gray-3 dark:border-darkTheme-border-color bg-white dark:bg-darkTheme-card shadow-lg">
+        <div className="hidden lg:block xl:hidden border-t border-gray-3 dark:border-darkTheme-border-color bg-white dark:bg-darkTheme-card shadow-lg">
           <div className="max-w-[1440px] mx-auto px-4 sm:px-7.5 py-4">
             <nav>
               <ul className="flex flex-col gap-1">
