@@ -44,10 +44,10 @@ const ProductItem = ({ item }: { item: Product }) => {
   };
 
   return (
-    <div className="group h-full rounded-2xl border border-gray-3 dark:border-darkTheme-border-color bg-white dark:bg-darkTheme-card shadow-sm transition-all duration-300 hover:-translate-y-1 hover:shadow-lg">
-      <div className="relative overflow-hidden rounded-t-2xl bg-[#F6F7FB] dark:bg-darkTheme-secondary-bg min-h-[285px] flex items-center justify-center">
+    <div className="group flex h-full min-w-0 flex-col overflow-hidden rounded-xl border border-gray-3 bg-white shadow-sm transition-all duration-300 hover:shadow-md dark:border-darkTheme-border-color dark:bg-darkTheme-card sm:rounded-2xl sm:hover:-translate-y-1 sm:hover:shadow-lg">
+      <div className="relative flex aspect-square items-center justify-center overflow-hidden bg-[#F6F7FB] dark:bg-darkTheme-secondary-bg sm:aspect-auto sm:min-h-[285px]">
         {hasDiscount && (
-          <span className="absolute left-4 top-4 z-10 rounded-full bg-orange px-3 py-1 text-xs font-semibold text-white shadow-sm">
+          <span className="absolute left-2 top-2 z-10 rounded-md bg-orange px-2 py-1 text-[10px] font-bold text-white shadow-sm sm:left-4 sm:top-4 sm:rounded-full sm:px-3 sm:text-xs sm:font-semibold">
             Save {savingsPercent}%
           </span>
         )}
@@ -56,7 +56,7 @@ const ProductItem = ({ item }: { item: Product }) => {
           onClick={() => handleItemToWishList()}
           disabled={addToWishlist.isPending}
           aria-label="Add to wishlist"
-          className="absolute right-4 top-4 z-10 flex h-9 w-9 items-center justify-center rounded-full bg-white/95 text-dark shadow-sm transition-colors duration-200 hover:bg-blue hover:text-white dark:bg-darkTheme-tertiary-bg dark:text-darkTheme-body-color disabled:opacity-50"
+          className="absolute right-2 top-2 z-10 flex h-9 w-9 items-center justify-center rounded-full bg-white/95 text-dark shadow-sm transition-colors duration-200 hover:bg-blue hover:text-white dark:bg-darkTheme-tertiary-bg dark:text-darkTheme-body-color disabled:opacity-50 sm:right-4 sm:top-4"
         >
           <svg
             className="fill-current"
@@ -80,10 +80,10 @@ const ProductItem = ({ item }: { item: Product }) => {
           alt={item.title}
           width={250}
           height={250}
-          className="object-contain px-8 py-8 transition-transform duration-300 group-hover:scale-[1.03]"
+          className="h-auto max-h-[160px] w-auto max-w-[90%] object-contain p-3 transition-transform duration-300 group-hover:scale-[1.03] sm:max-h-[240px] sm:p-8"
         />
 
-        <div className="absolute inset-x-0 bottom-0 flex translate-y-full items-center justify-center gap-2.5 px-4 pb-5 transition-transform duration-300 group-hover:translate-y-0">
+        <div className="absolute inset-x-0 bottom-0 hidden translate-y-full items-center justify-center gap-2.5 px-4 pb-5 transition-transform duration-300 group-hover:translate-y-0 sm:flex">
           <button
             onClick={() => {
               openModal();
@@ -125,33 +125,33 @@ const ProductItem = ({ item }: { item: Product }) => {
         </div>
       </div>
 
-      <div className="px-4 sm:px-5 py-5">
-        <div className="flex items-center justify-between gap-3 mb-3">
+      <div className="flex flex-1 flex-col p-2.5 sm:p-5">
+        <div className="mb-2 flex min-w-0 items-center justify-between gap-2 sm:mb-3 sm:gap-3">
           <StarRating rating={item.rating} reviewCount={item.reviewCount ?? item.reviews} size={14} />
 
-          <span className="rounded-full bg-green/10 px-3 py-1 text-xs font-semibold text-green">
+          <span className="hidden rounded-full bg-green/10 px-3 py-1 text-xs font-semibold text-green sm:inline-flex">
             Delivery options at checkout
           </span>
         </div>
 
         <h3
-          className="mb-2 font-semibold text-dark dark:text-white transition-colors duration-200 hover:text-blue"
+          className="mb-2 line-clamp-2 min-h-[38px] text-[13px] font-semibold leading-[19px] text-dark transition-colors duration-200 hover:text-blue dark:text-white sm:min-h-0 sm:text-base sm:leading-normal"
         >
           <Link href={`/products/${item.id}`}>{item.title}</Link>
         </h3>
 
 
 
-        <div className="flex items-end justify-between gap-4">
+        <div className="mt-auto flex min-w-0 items-end justify-between gap-2 sm:gap-4">
           <div>
-            <span className="block text-xs font-medium uppercase tracking-[0.2em] text-dark-4 dark:text-darkTheme-secondary-muted mb-1">
+            <span className="mb-1 hidden text-xs font-medium uppercase tracking-[0.2em] text-dark-4 dark:text-darkTheme-secondary-muted sm:block">
               Price
             </span>
-            <span className="flex flex-wrap items-center gap-2 font-semibold text-lg">
-              <span className="text-dark dark:text-white">
+            <span className="flex min-w-0 flex-wrap items-baseline gap-1 text-sm font-extrabold sm:gap-2 sm:text-lg sm:font-semibold">
+              <span className="text-[#ef4444] dark:text-white sm:text-dark">
                 {formatCurrency(item.discountedPrice)}
               </span>
-              <span className="text-dark-4 dark:text-darkTheme-secondary-muted line-through">
+              <span className="text-[10px] text-dark-4 line-through dark:text-darkTheme-secondary-muted sm:text-sm">
                 {formatCurrency(item.price)}
               </span>
             </span>
@@ -162,11 +162,20 @@ const ProductItem = ({ item }: { item: Product }) => {
               openModal();
               handleQuickViewUpdate();
             }}
-            className="inline-flex items-center justify-center rounded-md border border-gray-3 dark:border-darkTheme-border-color px-4 py-2 text-sm font-medium text-dark dark:text-darkTheme-body-color transition-colors duration-200 hover:bg-dark hover:text-white dark:hover:bg-darkTheme-tertiary-bg"
+            className="hidden items-center justify-center rounded-md border border-gray-3 px-4 py-2 text-sm font-medium text-dark transition-colors duration-200 hover:bg-dark hover:text-white dark:border-darkTheme-border-color dark:text-darkTheme-body-color dark:hover:bg-darkTheme-tertiary-bg sm:inline-flex"
           >
             Quick view
           </button>
         </div>
+
+        <button
+          type="button"
+          onClick={handleAddToCart}
+          disabled={addCartItem.isPending}
+          className="mt-2 flex h-10 w-full items-center justify-center rounded-lg bg-orange px-3 text-xs font-bold text-white transition hover:bg-orange-dark disabled:cursor-not-allowed disabled:opacity-50 sm:hidden"
+        >
+          {addCartItem.isPending ? "Adding..." : "Add to cart"}
+        </button>
       </div>
     </div>
   );
