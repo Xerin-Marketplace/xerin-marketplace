@@ -471,3 +471,24 @@ input[type='search']::-webkit-search-results-decoration {
     font-size: 16px;
   }
 }
+
+@media (max-width: 639px) {
+  #name,
+  #email,
+  #phone,
+  #password,
+  #re-type-password {
+    font-size: 16px;
+  }
+}
+
+@media (max-width: 639px) {
+  #verification-identifier,
+  #otpCode {
+    font-size: 16px;
+  }
+
+  #otpCode {
+    font-size: 28px;
+  }
+}

@@ -2,7 +2,7 @@
 
 import Image from "next/image";
 import Link from "next/link";
-import React, { FormEvent, useMemo, useState } from "react";
+import React, { FormEvent, useEffect, useMemo, useState } from "react";
 import { useRouter, useSearchParams } from "next/navigation";
 import { useAuth } from "@/hooks/useAuth";
 import type { OtpPurpose } from "@/types/api/auth";
@@ -83,6 +83,15 @@ const VerifyOtp = () => {
   const [otpCode, setOtpCode] = useState("");
   const [successMessage, setSuccessMessage] = useState("");
   const [errorMessage, setErrorMessage] = useState("");
+  const [resendCooldown, setResendCooldown] = useState(0);
+
+  useEffect(() => {
+    if (resendCooldown <= 0) return;
+    const timer = window.setInterval(() => {
+      setResendCooldown((current) => Math.max(0, current - 1));
+    }, 1000);
+    return () => window.clearInterval(timer);
+  }, [resendCooldown]);
 
   const cleanOtp = otpCode.replace(/\D/g, "").slice(0, 6);
   const cleanIdentifier = identifier.trim();
@@ -150,6 +159,7 @@ const VerifyOtp = () => {
       setSuccessMessage(
         "A fresh verification code has been sent to your registered contact details.",
       );
+      setResendCooldown(30);
     } catch (error) {
       setErrorMessage(
         getApiErrorMessage(error, "Unable to resend the verification code."),
@@ -199,40 +209,49 @@ const VerifyOtp = () => {
   };
 
   return (
-    <section className="min-h-screen grid bg-white dark:bg-darkTheme-bg lg:grid-cols-2">
-      <div className="flex min-h-screen flex-col px-6 py-8 sm:px-10 xl:px-20">
-        <Link href="/" className="inline-flex w-fit items-center gap-2.5">
-          <Image
-            src="/images/logo/logo.png"
-            alt="XerinMarket"
-            width={32}
-            height={32}
-            priority
-            className="object-contain"
-          />
-          <span className="text-lg font-semibold text-dark dark:text-white">
-            XerinMarket
-          </span>
-        </Link>
+    <section className="min-h-[100dvh] bg-white dark:bg-darkTheme-bg lg:grid lg:grid-cols-2">
+      <div className="flex min-h-[100dvh] flex-col px-4 pb-[max(24px,env(safe-area-inset-bottom))] pt-[max(18px,env(safe-area-inset-top))] sm:px-10 sm:py-8 xl:px-20">
+        <div className="flex items-center justify-between">
+          <Link href="/" className="inline-flex w-fit items-center gap-2">
+            <Image
+              src="/images/logo/logo.png"
+              alt="XerinMarket"
+              width={30}
+              height={30}
+              priority
+              className="h-[30px] w-[30px] object-contain"
+            />
+            <span className="text-base font-bold text-dark dark:text-white sm:text-lg">
+              XerinMarket
+            </span>
+          </Link>
 
-        <div className="flex flex-1 items-center justify-center py-10">
+          <Link
+            href="/"
+            className="rounded-full border border-gray-3 px-3 py-1.5 text-xs font-semibold text-dark-4 transition hover:text-orange dark:border-darkTheme-border-color dark:text-darkTheme-secondary-muted lg:hidden"
+          >
+            Shop
+          </Link>
+        </div>
+
+        <div className="flex flex-1 items-center justify-center py-5 sm:py-10">
           <div className="w-full max-w-[430px]">
-            <div className="mb-8 text-center">
-              <div className="mx-auto mb-5 flex h-14 w-14 items-center justify-center rounded-2xl bg-orange/10 text-orange">
+            <div className="mb-5 text-center sm:mb-8">
+              <div className="mx-auto mb-3 flex h-12 w-12 items-center justify-center rounded-2xl bg-orange/10 text-orange sm:mb-5 sm:h-14 sm:w-14">
                 <ShieldIcon />
               </div>
 
-              <h1 className="mb-2 text-2xl font-semibold text-dark dark:text-white">
+              <h1 className="mb-1.5 text-2xl font-bold text-dark dark:text-white sm:mb-2 sm:font-semibold">
                 {title}
               </h1>
 
-              <p className="mx-auto max-w-[390px] text-sm leading-6 text-dark-4 dark:text-darkTheme-secondary-muted">
+              <p className="mx-auto max-w-[390px] px-2 text-sm leading-5 text-dark-4 dark:text-darkTheme-secondary-muted sm:px-0 sm:leading-6">
                 {subtitle}
               </p>
             </div>
 
             {registrationContext && (
-              <div className="mb-6 rounded-xl border border-gray-3 bg-gray-1 p-4 dark:border-darkTheme-border-color dark:bg-darkTheme-secondary-bg">
+              <div className="mb-4 rounded-xl border border-gray-3 bg-gray-1 p-3 dark:border-darkTheme-border-color dark:bg-darkTheme-secondary-bg sm:mb-6 sm:p-4">
                 <p className="text-xs font-medium uppercase tracking-wider text-dark-4 dark:text-darkTheme-secondary-muted">
                   Verification sent to
                 </p>
@@ -248,20 +267,20 @@ const VerifyOtp = () => {
             )}
 
             {successMessage && (
-              <div className="mb-5 rounded-lg border border-green/20 bg-green-light-6 px-4 py-3 text-sm text-green">
+              <div className="mb-4 rounded-xl border border-green/20 bg-green-light-6 px-3 py-3 text-sm text-green sm:mb-5 sm:px-4">
                 {successMessage}
               </div>
             )}
 
             {errorMessage && (
-              <div className="mb-5 rounded-lg border border-red/20 bg-red-light-6 px-4 py-3 text-sm text-red">
+              <div className="mb-4 rounded-xl border border-red/20 bg-red-light-6 px-3 py-3 text-sm text-red sm:mb-5 sm:px-4">
                 {errorMessage}
               </div>
             )}
 
             <form onSubmit={handleVerify}>
               {accountRecoveryContext && !registrationContext && (
-                <div className="mb-5">
+                <div className="mb-4 sm:mb-5">
                   <label
                     htmlFor="verification-identifier"
                     className="mb-2 block text-sm font-medium text-dark dark:text-white"
@@ -277,7 +296,7 @@ const VerifyOtp = () => {
                     placeholder="you@example.com or 255712345678"
                     autoComplete="username"
                     disabled={isBusy}
-                    className="h-12 w-full rounded-lg border border-gray-3 bg-gray-1 px-4 text-sm text-dark outline-none transition focus:border-orange focus:bg-white focus:ring-4 focus:ring-orange/10 dark:border-darkTheme-border-color dark:bg-darkTheme-secondary-bg dark:text-white"
+                    className="h-12 w-full rounded-xl border border-gray-3 bg-gray-1 px-4 text-base text-dark outline-none transition focus:border-orange focus:bg-white focus:ring-4 focus:ring-orange/10 dark:border-darkTheme-border-color dark:bg-darkTheme-secondary-bg dark:text-white sm:text-sm"
                   />
 
                   <p className="mt-2 text-xs leading-5 text-dark-4 dark:text-darkTheme-secondary-muted">
@@ -286,7 +305,7 @@ const VerifyOtp = () => {
                 </div>
               )}
 
-              <div className="mb-5">
+              <div className="mb-4 sm:mb-5">
                 <label
                   htmlFor="otpCode"
                   className="mb-2 block text-sm font-medium text-dark dark:text-white"
@@ -308,7 +327,7 @@ const VerifyOtp = () => {
                   autoFocus
                   required
                   disabled={isBusy}
-                  className="h-16 w-full rounded-xl border border-gray-3 bg-gray-1 px-5 text-center text-2xl font-semibold tracking-[0.45em] text-dark outline-none transition placeholder:text-dark-4 placeholder:opacity-40 focus:border-orange focus:bg-white focus:ring-4 focus:ring-orange/10 dark:border-darkTheme-border-color dark:bg-darkTheme-secondary-bg dark:text-white"
+                  className="h-16 w-full rounded-2xl border border-gray-3 bg-gray-1 px-3 text-center text-[28px] font-bold tracking-[0.28em] text-dark outline-none transition placeholder:text-dark-4 placeholder:opacity-30 focus:border-orange focus:bg-white focus:ring-4 focus:ring-orange/10 dark:border-darkTheme-border-color dark:bg-darkTheme-secondary-bg dark:text-white sm:px-5 sm:text-2xl sm:font-semibold sm:tracking-[0.45em]"
                 />
               </div>
 
@@ -319,14 +338,14 @@ const VerifyOtp = () => {
                   cleanOtp.length < 4 ||
                   (!registrationContext && !cleanIdentifier)
                 }
-                className="flex h-12 w-full items-center justify-center rounded-lg bg-orange px-6 text-sm font-semibold text-white transition hover:bg-orange-dark disabled:cursor-not-allowed disabled:opacity-50"
+                className="flex h-12 w-full items-center justify-center rounded-xl bg-orange px-6 text-base font-semibold text-white shadow-sm transition hover:bg-orange-dark disabled:cursor-not-allowed disabled:opacity-50 sm:text-sm"
               >
                 {isVerifyingOtp || isVerifyingAccountOtp
                   ? "Verifying..."
                   : "Verify & Continue"}
               </button>
 
-              <div className="mt-5 rounded-xl border border-gray-3 p-4 dark:border-darkTheme-border-color">
+              <div className="mt-4 rounded-xl border border-gray-3 bg-gray-1/60 p-3 dark:border-darkTheme-border-color dark:bg-darkTheme-secondary-bg/60 sm:mt-5 sm:p-4">
                 <p className="text-center text-sm text-dark-4 dark:text-darkTheme-secondary-muted">
                   OTP expired or didn&apos;t arrive?
                 </p>
@@ -341,18 +360,22 @@ const VerifyOtp = () => {
                   type="button"
                   onClick={handleResend}
                   disabled={
-                    isBusy || (!registrationContext && !cleanIdentifier)
+                    isBusy ||
+                    resendCooldown > 0 ||
+                    (!registrationContext && !cleanIdentifier)
                   }
                   className="mt-3 flex h-11 w-full items-center justify-center rounded-lg border border-orange px-5 text-sm font-semibold text-orange transition hover:bg-orange/5 disabled:cursor-not-allowed disabled:opacity-50"
                 >
                   {isSendingOtp || isResendingVerification
                     ? "Sending..."
-                    : "Resend OTP"}
+                    : resendCooldown > 0
+                      ? `Resend available in ${resendCooldown}s`
+                      : "Resend OTP"}
                 </button>
               </div>
             </form>
 
-            <div className="mt-7 text-center">
+            <div className="mt-5 text-center sm:mt-7">
               <Link
                 href="/signin"
                 className="text-sm font-medium text-dark-4 hover:text-orange dark:text-darkTheme-secondary-muted"
@@ -361,7 +384,7 @@ const VerifyOtp = () => {
               </Link>
             </div>
 
-            <p className="mt-6 text-center text-xs leading-5 text-dark-4 dark:text-darkTheme-secondary-muted">
+            <p className="mt-4 text-center text-xs leading-5 text-dark-4 dark:text-darkTheme-secondary-muted sm:mt-6">
               Never share your verification code with anyone.
             </p>
           </div>

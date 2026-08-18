@@ -171,45 +171,45 @@ const Signup = () => {
   };
 
   return (
-    <section className="overflow-hidden py-20 bg-gray-2 dark:bg-darkTheme-bg min-h-screen flex items-center">
-      <div className="max-w-[1170px] w-full mx-auto px-4 sm:px-8 xl:px-0">
-        <div className="max-w-[570px] w-full mx-auto rounded-xl bg-white dark:bg-darkTheme-card shadow-1 p-4 sm:p-7.5 xl:p-11">
-          <div className="text-center mb-8">
+    <section className="flex min-h-[100dvh] items-start overflow-hidden bg-gray-2 pb-[max(24px,env(safe-area-inset-bottom))] pt-[max(18px,env(safe-area-inset-top))] dark:bg-darkTheme-bg sm:items-center sm:py-12 lg:py-16">
+      <div className="mx-auto w-full max-w-[1170px] px-3 sm:px-8 xl:px-0">
+        <div className="mx-auto w-full max-w-[570px] rounded-2xl bg-white p-4 shadow-sm dark:bg-darkTheme-card sm:p-7.5 sm:shadow-1 xl:p-11">
+          <div className="mb-5 text-center sm:mb-8">
             {/* Xerin Logo */}
-            <Link href="/" className="inline-flex justify-center mb-6">
+            <Link href="/" className="mb-3 inline-flex justify-center sm:mb-6">
               <Image
                 src="/images/logo/logo.png"
                 alt="Xerin Marketplace Logo"
-                width={180}
-                height={60}
+                width={150}
+                height={50}
                 priority
-                className="object-contain"
+                className="h-auto w-[130px] object-contain sm:w-[180px]"
               />
             </Link>
 
-            <h2 className="font-semibold text-xl sm:text-2xl xl:text-heading-5 text-dark dark:text-white mb-1.5">
+            <h2 className="mb-1.5 text-2xl font-bold text-dark dark:text-white sm:text-2xl sm:font-semibold xl:text-heading-5">
               Create an Account
             </h2>
 
-            <p className="dark:text-darkTheme-body-color">Enter your details below</p>
+            <p className="text-sm text-dark-4 dark:text-darkTheme-secondary-muted sm:text-base">Create your buyer account to start shopping on Xerin.</p>
           </div>
 
           {/* Seller Registration Notice */}
-          <div className="mb-8 rounded-xl border border-blue-200 bg-blue-50 dark:border-blue-900 dark:bg-blue-950/30 p-4">
+          <div className="mb-5 rounded-xl border border-blue-200 bg-blue-50 p-3 dark:border-blue-900 dark:bg-blue-950/30 sm:mb-8 sm:p-4">
             <div className="flex items-start gap-3">
-              <div className="text-2xl">💡</div>
+              <div className="text-xl sm:text-2xl">💡</div>
 
               <div className="text-left">
-                <h3 className="font-semibold text-dark dark:text-white mb-1">Are you a seller?</h3>
+                <h3 className="mb-0.5 text-sm font-semibold text-dark dark:text-white sm:mb-1 sm:text-base">Are you a seller?</h3>
 
-                <p className="text-sm text-dark-4 dark:text-darkTheme-secondary-muted leading-relaxed">
+                <p className="text-xs leading-5 text-dark-4 dark:text-darkTheme-secondary-muted sm:text-sm sm:leading-relaxed">
                   If you want to sell products on Xerin Marketplace, please create a seller account
                   instead.
                 </p>
 
                 <Link
                   href="/seller/register"
-                  className="inline-flex mt-3 text-sm font-medium text-blue hover:underline"
+                  className="mt-2 inline-flex min-h-10 items-center text-sm font-semibold text-blue hover:underline sm:mt-3"
                 >
                   Register as Seller →
                 </Link>
@@ -217,10 +217,10 @@ const Signup = () => {
             </div>
           </div>
 
-          <div className="mt-5.5">
+          <div className="mt-4 sm:mt-5.5">
             <form onSubmit={handleSubmit}>
-              <div className="mb-5">
-                <label htmlFor="name" className="block mb-2.5 dark:text-darkTheme-body-color">
+              <div className="mb-4 sm:mb-5">
+                <label htmlFor="name" className="mb-2 block text-sm font-medium dark:text-darkTheme-body-color">
                   Full Name <span className="text-red">*</span>
                 </label>
 
@@ -233,12 +233,12 @@ const Signup = () => {
                   onChange={(event) => setFullName(event.target.value)}
                   autoComplete="name"
                   disabled={isSubmitting}
-                  className="rounded-lg border border-gray-3 dark:border-darkTheme-border-color bg-gray-1 dark:bg-darkTheme-secondary-bg dark:text-darkTheme-body-color placeholder:text-dark-4 dark:placeholder:text-darkTheme-secondary-muted w-full py-3 px-5 outline-none duration-200 focus:border-transparent focus:ring-2 focus:ring-blue/20 disabled:cursor-not-allowed disabled:opacity-70"
+                  className="h-12 w-full rounded-xl border border-gray-3 bg-gray-1 px-4 text-base outline-none duration-200 placeholder:text-dark-4 focus:border-transparent focus:ring-2 focus:ring-orange/25 disabled:cursor-not-allowed disabled:opacity-70 dark:border-darkTheme-border-color dark:bg-darkTheme-secondary-bg dark:text-darkTheme-body-color dark:placeholder:text-darkTheme-secondary-muted sm:text-sm"
                 />
               </div>
 
-              <div className="mb-5">
-                <label htmlFor="email" className="block mb-2.5 dark:text-darkTheme-body-color">
+              <div className="mb-4 sm:mb-5">
+                <label htmlFor="email" className="mb-2 block text-sm font-medium dark:text-darkTheme-body-color">
                   Email Address <span className="text-red">*</span>
                 </label>
 
@@ -251,24 +251,24 @@ const Signup = () => {
                   onChange={(event) => setEmail(event.target.value)}
                   autoComplete="email"
                   disabled={isSubmitting}
-                  className="rounded-lg border border-gray-3 dark:border-darkTheme-border-color bg-gray-1 dark:bg-darkTheme-secondary-bg dark:text-darkTheme-body-color placeholder:text-dark-4 dark:placeholder:text-darkTheme-secondary-muted w-full py-3 px-5 outline-none duration-200 focus:border-transparent focus:ring-2 focus:ring-blue/20 disabled:cursor-not-allowed disabled:opacity-70"
+                  className="h-12 w-full rounded-xl border border-gray-3 bg-gray-1 px-4 text-base outline-none duration-200 placeholder:text-dark-4 focus:border-transparent focus:ring-2 focus:ring-orange/25 disabled:cursor-not-allowed disabled:opacity-70 dark:border-darkTheme-border-color dark:bg-darkTheme-secondary-bg dark:text-darkTheme-body-color dark:placeholder:text-darkTheme-secondary-muted sm:text-sm"
                 />
               </div>
 
-              <div className="mb-5">
-                <label htmlFor="phone" className="block mb-2.5 dark:text-darkTheme-body-color">
+              <div className="mb-4 sm:mb-5">
+                <label htmlFor="phone" className="mb-2 block text-sm font-medium dark:text-darkTheme-body-color">
                   Phone Number{" "}
                   <span className="text-dark-4 dark:text-darkTheme-secondary-muted">(optional)</span>
                 </label>
 
                 <div
-                  className={`flex items-stretch rounded-lg border bg-gray-1 dark:bg-darkTheme-secondary-bg overflow-hidden focus-within:ring-2 focus-within:ring-blue/20 ${
+                  className={`flex h-12 items-stretch overflow-hidden rounded-xl border bg-gray-1 focus-within:ring-2 focus-within:ring-orange/25 dark:bg-darkTheme-secondary-bg ${
                     phone && !isPhoneValid
                       ? "border-red"
                       : "border-gray-3 dark:border-darkTheme-border-color"
                   }`}
                 >
-                  <span className="flex items-center gap-1 px-4 text-dark-4 dark:text-darkTheme-secondary-muted bg-gray-2 dark:bg-darkTheme-bg border-r border-gray-3 dark:border-darkTheme-border-color select-none">
+                  <span className="flex shrink-0 items-center gap-1 border-r border-gray-3 bg-gray-2 px-3 text-sm font-medium text-dark-4 select-none dark:border-darkTheme-border-color dark:bg-darkTheme-bg dark:text-darkTheme-secondary-muted sm:px-4">
                     🇹🇿 +{COUNTRY_CODE}
                   </span>
 
@@ -283,7 +283,7 @@ const Signup = () => {
                     autoComplete="tel-national"
                     disabled={isSubmitting}
                     aria-invalid={phone ? !isPhoneValid : false}
-                    className="flex-1 min-w-0 py-3 px-4 bg-transparent outline-none dark:text-darkTheme-body-color placeholder:text-dark-4 dark:placeholder:text-darkTheme-secondary-muted disabled:cursor-not-allowed disabled:opacity-70"
+                    className="min-w-0 flex-1 bg-transparent px-3 text-base outline-none placeholder:text-dark-4 disabled:cursor-not-allowed disabled:opacity-70 dark:text-darkTheme-body-color dark:placeholder:text-darkTheme-secondary-muted sm:px-4 sm:text-sm"
                   />
                 </div>
 
@@ -294,8 +294,8 @@ const Signup = () => {
                 )}
               </div>
 
-              <div className="mb-5">
-                <label htmlFor="password" className="block mb-2.5 dark:text-darkTheme-body-color">
+              <div className="mb-4 sm:mb-5">
+                <label htmlFor="password" className="mb-2 block text-sm font-medium dark:text-darkTheme-body-color">
                   Password <span className="text-red">*</span>
                 </label>
 
@@ -309,7 +309,7 @@ const Signup = () => {
                     onChange={(event) => setPassword(event.target.value)}
                     autoComplete="new-password"
                     disabled={isSubmitting}
-                    className="rounded-lg border border-gray-3 dark:border-darkTheme-border-color bg-gray-1 dark:bg-darkTheme-secondary-bg dark:text-darkTheme-body-color placeholder:text-dark-4 dark:placeholder:text-darkTheme-secondary-muted w-full py-3 pl-5 pr-12 outline-none duration-200 focus:border-transparent focus:ring-2 focus:ring-blue/20 disabled:cursor-not-allowed disabled:opacity-70"
+                    className="h-12 w-full rounded-xl border border-gray-3 bg-gray-1 pl-4 pr-12 text-base outline-none duration-200 placeholder:text-dark-4 focus:border-transparent focus:ring-2 focus:ring-orange/25 disabled:cursor-not-allowed disabled:opacity-70 dark:border-darkTheme-border-color dark:bg-darkTheme-secondary-bg dark:text-darkTheme-body-color dark:placeholder:text-darkTheme-secondary-muted sm:text-sm"
                   />
 
                   <button
@@ -317,7 +317,7 @@ const Signup = () => {
                     onClick={() => setShowPassword((prev) => !prev)}
                     tabIndex={-1}
                     aria-label={showPassword ? "Hide password" : "Show password"}
-                    className="absolute inset-y-0 right-0 flex items-center px-4 text-dark-4 dark:text-darkTheme-secondary-muted hover:text-dark dark:hover:text-white"
+                    className="absolute inset-y-0 right-0 flex w-12 items-center justify-center text-dark-4 hover:text-dark dark:text-darkTheme-secondary-muted dark:hover:text-white"
                   >
                     {showPassword ? <EyeOffIcon /> : <EyeIcon />}
                   </button>
@@ -325,11 +325,11 @@ const Signup = () => {
 
                 {/* Password strength checklist */}
                 {password && (
-                  <ul className="mt-3 grid grid-cols-1 sm:grid-cols-2 gap-x-4 gap-y-1.5">
+                  <ul className="mt-3 grid grid-cols-1 gap-x-4 gap-y-1 sm:grid-cols-2 sm:gap-y-1.5">
                     {passwordChecks.map((check) => (
                       <li
                         key={check.label}
-                        className={`flex items-center gap-2 text-sm ${
+                        className={`flex items-center gap-2 text-xs sm:text-sm ${
                           check.passed
                             ? "text-green-600 dark:text-green-400"
                             : "text-dark-4 dark:text-darkTheme-secondary-muted"
@@ -351,10 +351,10 @@ const Signup = () => {
                 )}
               </div>
 
-              <div className="mb-5.5">
+              <div className="mb-4 sm:mb-5.5">
                 <label
                   htmlFor="re-type-password"
-                  className="block mb-2.5 dark:text-darkTheme-body-color"
+                  className="mb-2 block text-sm font-medium dark:text-darkTheme-body-color"
                 >
                   Re-type Password <span className="text-red">*</span>
                 </label>
@@ -370,7 +370,7 @@ const Signup = () => {
                     autoComplete="new-password"
                     disabled={isSubmitting}
                     aria-invalid={isPasswordMismatch}
-                    className="rounded-lg border border-gray-3 dark:border-darkTheme-border-color bg-gray-1 dark:bg-darkTheme-secondary-bg dark:text-darkTheme-body-color placeholder:text-dark-4 dark:placeholder:text-darkTheme-secondary-muted w-full py-3 pl-5 pr-12 outline-none duration-200 focus:border-transparent focus:ring-2 focus:ring-blue/20 disabled:cursor-not-allowed disabled:opacity-70"
+                    className="h-12 w-full rounded-xl border border-gray-3 bg-gray-1 pl-4 pr-12 text-base outline-none duration-200 placeholder:text-dark-4 focus:border-transparent focus:ring-2 focus:ring-orange/25 disabled:cursor-not-allowed disabled:opacity-70 dark:border-darkTheme-border-color dark:bg-darkTheme-secondary-bg dark:text-darkTheme-body-color dark:placeholder:text-darkTheme-secondary-muted sm:text-sm"
                   />
 
                   <button
@@ -378,7 +378,7 @@ const Signup = () => {
                     onClick={() => setShowConfirmPassword((prev) => !prev)}
                     tabIndex={-1}
                     aria-label={showConfirmPassword ? "Hide password" : "Show password"}
-                    className="absolute inset-y-0 right-0 flex items-center px-4 text-dark-4 dark:text-darkTheme-secondary-muted hover:text-dark dark:hover:text-white"
+                    className="absolute inset-y-0 right-0 flex w-12 items-center justify-center text-dark-4 hover:text-dark dark:text-darkTheme-secondary-muted dark:hover:text-white"
                   >
                     {showConfirmPassword ? <EyeOffIcon /> : <EyeIcon />}
                   </button>
@@ -392,39 +392,39 @@ const Signup = () => {
               <button
                 type="submit"
                 disabled={isSubmitting}
-                className="w-full flex justify-center font-medium text-white bg-dark py-3 px-6 rounded-lg ease-out duration-200 hover:bg-blue mt-7.5 disabled:cursor-not-allowed disabled:opacity-70"
+                className="mt-6 flex h-12 w-full items-center justify-center rounded-xl bg-orange px-6 text-base font-semibold text-white shadow-sm duration-200 hover:bg-orange-dark disabled:cursor-not-allowed disabled:opacity-70 sm:mt-7.5 sm:text-sm"
               >
                 {isSubmitting ? "Creating account..." : "Create Account"}
               </button>
 
-              <p className="text-center mt-6">
+              <p className="mt-5 text-center text-sm sm:mt-6">
                 <span className="dark:text-darkTheme-body-color">Already have an account?</span>
 
                 <Link
                   href="/signin"
-                  className="text-dark dark:text-darkTheme-body-color hover:text-blue pl-2"
+                  className="pl-1 font-semibold text-orange hover:underline dark:text-orange"
                 >
                   Sign in Now
                 </Link>
               </p>
 
-              <p className="text-center mt-3 text-sm">
+              <p className="mt-2.5 text-center text-sm sm:mt-3">
                 <span className="dark:text-darkTheme-body-color">Want to sell on Xerin?</span>
 
                 <Link
                   href="/seller/register"
-                  className="text-dark dark:text-darkTheme-body-color hover:text-blue pl-2"
+                  className="pl-1 font-semibold text-orange hover:underline dark:text-orange"
                 >
                   Register as Seller
                 </Link>
               </p>
 
-              <p className="text-center mt-3 text-sm">
+              <p className="mt-2.5 text-center text-sm sm:mt-3">
                 <span className="dark:text-darkTheme-body-color">Already have an OTP?</span>
 
                 <Link
                   href="/verify-otp"
-                  className="text-dark dark:text-darkTheme-body-color hover:text-blue pl-2"
+                  className="pl-1 font-semibold text-orange hover:underline dark:text-orange"
                 >
                   Verify Account
                 </Link>
