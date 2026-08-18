@@ -199,6 +199,16 @@ export type AdvertisementPayload = {
   metadata_json?: Record<string, unknown>;
 };
 
+export type AdvertisementImageUpload = {
+  image_url: string;
+  original_filename: string;
+  mime_type: string;
+  file_size: number;
+  width: number;
+  height: number;
+  variant: "desktop" | "mobile";
+};
+
 export type AdvertisementActionResponse = {
   id: string;
   status: AdvertisementStoredStatus;
@@ -1534,4 +1544,24 @@ export const deleteAdvertisement = async (
   advertisementId: string,
 ): Promise<void> => {
   await axiosInstance.delete(`/admin/advertisements/${advertisementId}`);
+};
+
+
+export const uploadAdvertisementImage = async (
+  file: File,
+  variant: "desktop" | "mobile",
+): Promise<AdvertisementImageUpload> => {
+  const formData = new FormData();
+  formData.append("file", file);
+
+  return (
+    await axiosInstance.post<AdvertisementImageUpload>(
+      "/admin/advertisements/upload-image",
+      formData,
+      {
+        params: { variant },
+        headers: { "Content-Type": "multipart/form-data" },
+      },
+    )
+  ).data;
 };

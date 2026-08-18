@@ -8,6 +8,7 @@ import {
   listAdvertisements,
   pauseAdvertisement,
   updateAdvertisement,
+  uploadAdvertisementImage,
   type AdvertisementBillingType,
   type AdvertisementEffectiveStatus,
   type AdvertisementPayload,
@@ -449,6 +450,54 @@ function AdvertisementEditor({
 }) {
   const [saving, setSaving] = useState(false);
   const [previewUrl, setPreviewUrl] = useState(advertisement?.image_url || "");
+  const [desktopImageUrl, setDesktopImageUrl] = useState(advertisement?.image_url || "");
+  const [mobileImageUrl, setMobileImageUrl] = useState(advertisement?.mobile_image_url || "");
+  const [uploading, setUploading] = useState<"desktop" | "mobile" | null>(null);
+
+  const uploadCreative = async (
+    file: File,
+    variant: "desktop" | "mobile",
+  ) => {
+    const allowed = ["image/jpeg", "image/png", "image/webp"];
+
+    if (!allowed.includes(file.type)) {
+      onError("Only JPEG, PNG and WEBP banner images are allowed.");
+      return;
+    }
+
+    if (file.size > 5 * 1024 * 1024) {
+      onError("Banner image must not exceed 5 MB.");
+      return;
+    }
+
+    setUploading(variant);
+    onError("");
+
+    const localPreview = URL.createObjectURL(file);
+    if (variant === "desktop") {
+      setPreviewUrl(localPreview);
+    }
+
+    try {
+      const uploaded = await uploadAdvertisementImage(file, variant);
+
+      if (variant === "desktop") {
+        setDesktopImageUrl(uploaded.image_url);
+        setPreviewUrl(uploaded.image_url);
+      } else {
+        setMobileImageUrl(uploaded.image_url);
+      }
+    } catch (cause) {
+      onError(
+        cause instanceof Error
+          ? cause.message
+          : "Could not upload advertisement image.",
+      );
+    } finally {
+      URL.revokeObjectURL(localPreview);
+      setUploading(null);
+    }
+  };
 
   const submit = async (event: FormEvent<HTMLFormElement>) => {
     event.preventDefault();
@@ -461,6 +510,12 @@ function AdvertisementEditor({
 
     if (!starts || !ends) {
       onError("Start and end date/time are required.");
+      setSaving(false);
+      return;
+    }
+
+    if (!desktopImageUrl.trim()) {
+      onError("Upload a desktop advertisement banner before saving.");
       setSaving(false);
       return;
     }
@@ -478,9 +533,8 @@ function AdvertisementEditor({
       advertiser_name: String(data.get("advertiser_name") || "").trim(),
       title: String(data.get("title") || "").trim(),
       description: String(data.get("description") || "").trim() || null,
-      image_url: String(data.get("image_url") || "").trim(),
-      mobile_image_url:
-        String(data.get("mobile_image_url") || "").trim() || null,
+      image_url: desktopImageUrl.trim(),
+      mobile_image_url: mobileImageUrl.trim() || null,
       alt_text: String(data.get("alt_text") || "").trim() || null,
       target_url: String(data.get("target_url") || "").trim() || null,
       cta_label: String(data.get("cta_label") || "").trim() || "Shop Now",
@@ -578,21 +632,23 @@ function AdvertisementEditor({
             <div>
               <h4 className="font-bold">Creative</h4>
               <p className="text-xs text-slate-500">
-                Task 5 will add direct banner uploads. For now use an existing
-                image URL/path.
+                Upload campaign creatives directly from your computer.
+                Xerin validates the image and stores a browser-friendly WEBP file.
               </p>
             </div>
-            <Field
-              label="Desktop image URL"
-              name="image_url"
-              defaultValue={advertisement?.image_url}
-              required
-              onChange={(value) => setPreviewUrl(value)}
+            <CreativeUploader
+              label="Desktop banner"
+              description="Required. JPEG, PNG or WEBP, maximum 5 MB."
+              value={desktopImageUrl}
+              uploading={uploading === "desktop"}
+              onUpload={(file) => void uploadCreative(file, "desktop")}
             />
-            <Field
-              label="Mobile image URL (optional)"
-              name="mobile_image_url"
-              defaultValue={advertisement?.mobile_image_url || ""}
+            <CreativeUploader
+              label="Mobile banner"
+              description="Optional. Upload a separate crop for phones."
+              value={mobileImageUrl}
+              uploading={uploading === "mobile"}
+              onUpload={(file) => void uploadCreative(file, "mobile")}
             />
             <div className="grid gap-4 sm:grid-cols-2">
               <Field
@@ -691,11 +747,13 @@ function AdvertisementEditor({
               Cancel
             </button>
             <button
-              disabled={saving}
+              disabled={saving || uploading !== null}
               className="h-12 flex-[1.5] rounded-xl bg-[#f47524] font-bold text-white disabled:opacity-50"
             >
-              {saving
-                ? "Saving..."
+              {uploading
+                ? "Uploading banner..."
+                : saving
+                  ? "Saving..."
                 : advertisement
                   ? "Save Advertisement"
                   : "Create Advertisement"}
@@ -772,5 +830,68 @@ function SelectField({
         ))}
       </select>
     </label>
+  );
+}
+
+
+function CreativeUploader({
+  label,
+  description,
+  value,
+  uploading,
+  onUpload,
+}: {
+  label: string;
+  description: string;
+  value: string;
+  uploading: boolean;
+  onUpload: (file: File) => void;
+}) {
+  return (
+    <div>
+      <div className="flex items-end justify-between gap-3">
+        <div>
+          <p className="text-sm font-semibold">{label}</p>
+          <p className="mt-0.5 text-xs text-slate-500 dark:text-white/50">
+            {description}
+          </p>
+        </div>
+        {value ? (
+          <span className="rounded-full bg-emerald-50 px-2.5 py-1 text-[11px] font-bold text-emerald-700">
+            Uploaded
+          </span>
+        ) : null}
+      </div>
+
+      <label className="mt-2 flex min-h-28 cursor-pointer flex-col items-center justify-center rounded-2xl border-2 border-dashed border-slate-200 bg-slate-50 px-4 py-5 text-center transition hover:border-[#f47524] hover:bg-orange-50/30 dark:border-white/10 dark:bg-white/[0.03]">
+        <input
+          type="file"
+          accept="image/jpeg,image/png,image/webp"
+          className="sr-only"
+          disabled={uploading}
+          onChange={(event) => {
+            const file = event.target.files?.[0];
+            if (file) onUpload(file);
+            event.currentTarget.value = "";
+          }}
+        />
+
+        <span className="text-2xl">🖼️</span>
+        <span className="mt-2 text-sm font-bold text-slate-800 dark:text-white">
+          {uploading
+            ? "Uploading..."
+            : value
+              ? "Replace banner"
+              : "Choose banner image"}
+        </span>
+        <span className="mt-1 text-xs text-slate-500">
+          Click to select a file from this device
+        </span>
+      </label>
+
+      {value ? (
+        <p className="mt-2 break-all text-[11px] text-slate-400">{value}</p>
+      ) : null}
+    </div>
   );
 }

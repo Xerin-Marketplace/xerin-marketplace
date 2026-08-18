@@ -155,9 +155,9 @@ const FEATURES = [
   { icon: <TrendingUpIcon />, title: "Manage Your Store", description: "List products and manage customer orders" },
 ];
 
-// ---------------------------------------------------------------------------
+    
 // Small shared field components
-// ---------------------------------------------------------------------------
+    
 
 const FieldLabel = ({
   htmlFor,
@@ -320,9 +320,9 @@ const PasswordChecklist = ({ password }: { password: string }) => {
   );
 };
 
-// ---------------------------------------------------------------------------
+    
 // Sign In panel
-// ---------------------------------------------------------------------------
+    
 
 const SignInPanel = ({ onSwitchTab }: { onSwitchTab: (tab: AuthTab) => void }) => {
   const router = useRouter();
@@ -457,9 +457,9 @@ const SignInPanel = ({ onSwitchTab }: { onSwitchTab: (tab: AuthTab) => void }) =
   );
 };
 
-// ---------------------------------------------------------------------------
+    
 // Buyer Sign Up panel
-// ---------------------------------------------------------------------------
+    
 
 const SignUpPanel = ({ onSwitchTab }: { onSwitchTab: (tab: AuthTab) => void }) => {
   const router = useRouter();
@@ -626,9 +626,9 @@ const SignUpPanel = ({ onSwitchTab }: { onSwitchTab: (tab: AuthTab) => void }) =
   );
 };
 
-// ---------------------------------------------------------------------------
+    
 // Seller Sign Up panel
-// ---------------------------------------------------------------------------
+    
 
 interface SellerFormState {
   firstName: string;
@@ -1212,9 +1212,9 @@ const SellerPanel = ({ onSwitchTab }: { onSwitchTab: (tab: AuthTab) => void }) =
   );
 };
 
-// ---------------------------------------------------------------------------
+    
 // Page shell
-// ---------------------------------------------------------------------------
+    
 
 const AuthPage = ({ initialTab = "signup" }: { initialTab?: AuthTab }) => {
   const [activeTab, setActiveTab] = useState<AuthTab>(initialTab);
