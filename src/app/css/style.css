@@ -492,3 +492,86 @@ input[type='search']::-webkit-search-results-decoration {
     font-size: 28px;
   }
 }
+
+@media (max-width: 639px) {
+  #firstName,
+  #lastName,
+  #companyName,
+  #country,
+  #street,
+  #street2,
+  #city,
+  #region,
+  #postalCode,
+  #phone,
+  #email,
+  #shippingCountry,
+  #shippingStreet,
+  #shippingStreet2,
+  #shippingCity,
+  #shippingRegion,
+  #shippingPostalCode,
+  #shippingPhone,
+  #shippingEmail,
+  #notes,
+  #coupon {
+    font-size: 16px;
+  }
+
+  .xerin-checkout-mobile-cta {
+    position: sticky;
+    bottom: calc(var(--xerin-mobile-nav-height) + var(--xerin-safe-bottom) + 8px);
+    z-index: 40;
+    border-radius: 16px;
+    background: rgba(255, 255, 255, 0.96);
+    padding: 8px;
+    box-shadow: 0 -8px 26px rgba(15, 23, 42, 0.12);
+    backdrop-filter: blur(10px);
+  }
+
+  .dark .xerin-checkout-mobile-cta {
+    background: rgba(31, 35, 39, 0.96);
+  }
+}
+
+@media (min-width: 640px) {
+  .xerin-checkout-mobile-cta {
+    position: static;
+    padding: 0;
+    background: transparent;
+    box-shadow: none;
+  }
+}
+
+
+/* =========================================================
+   PHASE 11 / TASK 8 — RESPONSIVE QA & FINAL CLEANUP
+   ========================================================= */
+@media (max-width: 359px) {
+  /* 320px devices: keep the mobile header comfortably inside the viewport. */
+  .xerin-page-shell {
+    --xerin-mobile-gutter: 12px;
+  }
+}
+
+@media (max-width: 639px) {
+  /* Long API/order references must never push a page wider than the viewport. */
+  pre,
+  code,
+  .break-mobile-content {
+    overflow-wrap: anywhere;
+    word-break: break-word;
+  }
+
+  /* Avoid iOS zoom in payment retry and assistant inputs. */
+  input,
+  select,
+  textarea {
+    font-size: max(16px, 1em);
+  }
+
+  /* Provide comfortable space above the persistent marketplace navigation. */
+  main {
+    min-width: 0;
+  }
+}

@@ -51,8 +51,8 @@ const ShippingMethod = ({
   const selectedOption = options.find((option) => option.id === selected);
 
   return (
-    <section className="mt-7.5 rounded-2xl border border-[#e7ebf0] bg-white shadow-sm dark:border-white/10 dark:bg-darkTheme-card">
-      <div className="border-b border-gray-3 px-5 py-5 dark:border-white/10 sm:px-6">
+    <section className="mt-4 rounded-2xl border border-[#e7ebf0] bg-white shadow-sm dark:border-white/10 dark:bg-darkTheme-card sm:mt-7.5">
+      <div className="border-b border-gray-3 px-4 py-4 dark:border-white/10 sm:px-6 sm:py-5">
         <div className="flex items-center gap-3">
           <span className="flex h-9 w-9 items-center justify-center rounded-xl bg-orange/10 text-orange">
             <Truck size={17} />
@@ -70,7 +70,7 @@ const ShippingMethod = ({
         </div>
       </div>
 
-      <div className="p-5 sm:p-6">
+      <div className="p-4 sm:p-6">
         {isLoading ? (
           <p className="text-sm text-dark-4">
             Finding logistics companies and rates…
@@ -82,7 +82,7 @@ const ShippingMethod = ({
               <select
                 value={selectedCompanyId}
                 onChange={(event) => onCompanyChange(event.target.value)}
-                className="mt-1.5 h-11 w-full rounded-xl border border-gray-3 bg-white px-3 text-sm text-dark outline-none focus:border-orange dark:border-white/10 dark:bg-white/5 dark:text-white"
+                className="mt-1.5 h-12 w-full rounded-xl border border-gray-3 bg-white px-3 text-base text-dark outline-none focus:border-orange dark:border-white/10 dark:bg-white/5 dark:text-white sm:h-11 sm:text-sm"
               >
                 {companies.map((company) => (
                   <option key={company.id} value={company.id}>
@@ -100,7 +100,7 @@ const ShippingMethod = ({
               {companyOptions.map((option) => (
                 <label
                   key={option.id}
-                  className={`flex cursor-pointer items-start gap-3 rounded-xl border p-4 transition ${
+                  className={`flex min-h-[76px] cursor-pointer items-start gap-3 rounded-xl border p-3 transition sm:p-4 ${
                     selected === option.id
                       ? "border-orange bg-orange/5"
                       : "border-gray-3 dark:border-white/10"

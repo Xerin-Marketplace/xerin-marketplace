@@ -8,15 +8,15 @@ interface BillingProps {
 
 const Billing = ({ form, updateField }: BillingProps) => {
   return (
-    <div className="mt-9">
-      <h2 className="font-medium text-dark dark:text-white text-xl sm:text-2xl mb-5.5">
+    <div className="mt-5 sm:mt-9">
+      <h2 className="mb-3 text-lg font-bold text-dark dark:text-white sm:mb-5.5 sm:text-2xl sm:font-medium">
         Delivery details
       </h2>
 
-      <div className="bg-white dark:bg-darkTheme-card shadow-1 rounded-[10px] p-4 sm:p-8.5">
-        <div className="flex flex-col lg:flex-row gap-5 sm:gap-8 mb-5">
+      <div className="rounded-2xl border border-[#e7ebf0] bg-white p-4 shadow-sm dark:border-white/10 dark:bg-darkTheme-card sm:p-6 lg:p-8.5">
+        <div className="mb-4 grid grid-cols-1 gap-4 sm:mb-5 sm:grid-cols-2 sm:gap-5">
           <div className="w-full">
-            <label htmlFor="firstName" className="block mb-2.5 dark:text-darkTheme-body-color">
+            <label htmlFor="firstName" className="mb-2 block text-sm font-medium dark:text-darkTheme-body-color">
               First Name <span className="text-red">*</span>
             </label>
             <input
@@ -25,12 +25,12 @@ const Billing = ({ form, updateField }: BillingProps) => {
               value={form.firstName}
               onChange={(e) => updateField("firstName", e.target.value)}
               placeholder="John"
-              className="rounded-md border border-gray-3 dark:border-darkTheme-border-color bg-gray-1 dark:bg-darkTheme-secondary-bg dark:text-darkTheme-body-color placeholder:text-dark-4 dark:placeholder:text-darkTheme-secondary-muted w-full py-2.5 px-5 outline-none duration-200 focus:border-transparent focus:shadow-input focus:ring-2 focus:ring-blue/20"
+              className="h-12 w-full rounded-xl border border-gray-3 bg-gray-1 px-4 text-base outline-none duration-200 placeholder:text-dark-4 focus:border-transparent focus:ring-2 focus:ring-orange/25 dark:border-darkTheme-border-color dark:bg-darkTheme-secondary-bg dark:text-darkTheme-body-color dark:placeholder:text-darkTheme-secondary-muted sm:text-sm"
             />
           </div>
 
           <div className="w-full">
-            <label htmlFor="lastName" className="block mb-2.5 dark:text-darkTheme-body-color">
+            <label htmlFor="lastName" className="mb-2 block text-sm font-medium dark:text-darkTheme-body-color">
               Last Name <span className="text-red">*</span>
             </label>
             <input
@@ -39,13 +39,13 @@ const Billing = ({ form, updateField }: BillingProps) => {
               value={form.lastName}
               onChange={(e) => updateField("lastName", e.target.value)}
               placeholder="Doe"
-              className="rounded-md border border-gray-3 dark:border-darkTheme-border-color bg-gray-1 dark:bg-darkTheme-secondary-bg dark:text-darkTheme-body-color placeholder:text-dark-4 dark:placeholder:text-darkTheme-secondary-muted w-full py-2.5 px-5 outline-none duration-200 focus:border-transparent focus:shadow-input focus:ring-2 focus:ring-blue/20"
+              className="h-12 w-full rounded-xl border border-gray-3 bg-gray-1 px-4 text-base outline-none duration-200 placeholder:text-dark-4 focus:border-transparent focus:ring-2 focus:ring-orange/25 dark:border-darkTheme-border-color dark:bg-darkTheme-secondary-bg dark:text-darkTheme-body-color dark:placeholder:text-darkTheme-secondary-muted sm:text-sm"
             />
           </div>
         </div>
 
-        <div className="mb-5">
-          <label htmlFor="companyName" className="block mb-2.5 dark:text-darkTheme-body-color">
+        <div className="mb-4 sm:mb-5">
+          <label htmlFor="companyName" className="mb-2 block text-sm font-medium dark:text-darkTheme-body-color">
             Business Name (optional)
           </label>
           <input
@@ -53,12 +53,12 @@ const Billing = ({ form, updateField }: BillingProps) => {
             id="companyName"
             value={form.companyName}
             onChange={(e) => updateField("companyName", e.target.value)}
-            className="rounded-md border border-gray-3 dark:border-darkTheme-border-color bg-gray-1 dark:bg-darkTheme-secondary-bg dark:text-darkTheme-body-color placeholder:text-dark-4 dark:placeholder:text-darkTheme-secondary-muted w-full py-2.5 px-5 outline-none duration-200 focus:border-transparent focus:shadow-input focus:ring-2 focus:ring-blue/20"
+            className="h-12 w-full rounded-xl border border-gray-3 bg-gray-1 px-4 text-base outline-none duration-200 placeholder:text-dark-4 focus:border-transparent focus:ring-2 focus:ring-orange/25 dark:border-darkTheme-border-color dark:bg-darkTheme-secondary-bg dark:text-darkTheme-body-color dark:placeholder:text-darkTheme-secondary-muted sm:text-sm"
           />
         </div>
 
-        <div className="mb-5">
-          <label htmlFor="country" className="block mb-2.5 dark:text-darkTheme-body-color">
+        <div className="mb-4 sm:mb-5">
+          <label htmlFor="country" className="mb-2 block text-sm font-medium dark:text-darkTheme-body-color">
             Country <span className="text-red">*</span>
           </label>
           <input
@@ -67,12 +67,12 @@ const Billing = ({ form, updateField }: BillingProps) => {
             value={form.country}
             onChange={(e) => updateField("country", e.target.value)}
             placeholder="Country"
-            className="rounded-md border border-gray-3 dark:border-darkTheme-border-color bg-gray-1 dark:bg-darkTheme-secondary-bg dark:text-darkTheme-body-color placeholder:text-dark-4 dark:placeholder:text-darkTheme-secondary-muted w-full py-2.5 px-5 outline-none duration-200 focus:border-transparent focus:shadow-input focus:ring-2 focus:ring-blue/20"
+            className="h-12 w-full rounded-xl border border-gray-3 bg-gray-1 px-4 text-base outline-none duration-200 placeholder:text-dark-4 focus:border-transparent focus:ring-2 focus:ring-orange/25 dark:border-darkTheme-border-color dark:bg-darkTheme-secondary-bg dark:text-darkTheme-body-color dark:placeholder:text-darkTheme-secondary-muted sm:text-sm"
           />
         </div>
 
-        <div className="mb-5">
-          <label htmlFor="street" className="block mb-2.5 dark:text-darkTheme-body-color">
+        <div className="mb-4 sm:mb-5">
+          <label htmlFor="street" className="mb-2 block text-sm font-medium dark:text-darkTheme-body-color">
             Delivery Address <span className="text-red">*</span>
           </label>
           <input
@@ -81,23 +81,23 @@ const Billing = ({ form, updateField }: BillingProps) => {
             value={form.street}
             onChange={(e) => updateField("street", e.target.value)}
             placeholder="House number and street name"
-            className="rounded-md border border-gray-3 dark:border-darkTheme-border-color bg-gray-1 dark:bg-darkTheme-secondary-bg dark:text-darkTheme-body-color placeholder:text-dark-4 dark:placeholder:text-darkTheme-secondary-muted w-full py-2.5 px-5 outline-none duration-200 focus:border-transparent focus:shadow-input focus:ring-2 focus:ring-blue/20"
+            className="h-12 w-full rounded-xl border border-gray-3 bg-gray-1 px-4 text-base outline-none duration-200 placeholder:text-dark-4 focus:border-transparent focus:ring-2 focus:ring-orange/25 dark:border-darkTheme-border-color dark:bg-darkTheme-secondary-bg dark:text-darkTheme-body-color dark:placeholder:text-darkTheme-secondary-muted sm:text-sm"
           />
-          <div className="mt-5">
+          <div className="mt-3 sm:mt-5">
             <input
               type="text"
               id="street2"
               value={form.street2}
               onChange={(e) => updateField("street2", e.target.value)}
               placeholder="Apartment, suite, unit, etc. (optional)"
-              className="rounded-md border border-gray-3 dark:border-darkTheme-border-color bg-gray-1 dark:bg-darkTheme-secondary-bg dark:text-darkTheme-body-color placeholder:text-dark-4 dark:placeholder:text-darkTheme-secondary-muted w-full py-2.5 px-5 outline-none duration-200 focus:border-transparent focus:shadow-input focus:ring-2 focus:ring-blue/20"
+              className="h-12 w-full rounded-xl border border-gray-3 bg-gray-1 px-4 text-base outline-none duration-200 placeholder:text-dark-4 focus:border-transparent focus:ring-2 focus:ring-orange/25 dark:border-darkTheme-border-color dark:bg-darkTheme-secondary-bg dark:text-darkTheme-body-color dark:placeholder:text-darkTheme-secondary-muted sm:text-sm"
             />
           </div>
         </div>
 
-        <div className="flex flex-col lg:flex-row gap-5 sm:gap-8 mb-5">
+        <div className="mb-4 grid grid-cols-1 gap-4 sm:mb-5 sm:grid-cols-2 sm:gap-5">
           <div className="w-full">
-            <label htmlFor="city" className="block mb-2.5 dark:text-darkTheme-body-color">
+            <label htmlFor="city" className="mb-2 block text-sm font-medium dark:text-darkTheme-body-color">
               City <span className="text-red">*</span>
             </label>
             <input
@@ -105,12 +105,12 @@ const Billing = ({ form, updateField }: BillingProps) => {
               id="city"
               value={form.city}
               onChange={(e) => updateField("city", e.target.value)}
-              className="rounded-md border border-gray-3 dark:border-darkTheme-border-color bg-gray-1 dark:bg-darkTheme-secondary-bg dark:text-darkTheme-body-color placeholder:text-dark-4 dark:placeholder:text-darkTheme-secondary-muted w-full py-2.5 px-5 outline-none duration-200 focus:border-transparent focus:shadow-input focus:ring-2 focus:ring-blue/20"
+              className="h-12 w-full rounded-xl border border-gray-3 bg-gray-1 px-4 text-base outline-none duration-200 placeholder:text-dark-4 focus:border-transparent focus:ring-2 focus:ring-orange/25 dark:border-darkTheme-border-color dark:bg-darkTheme-secondary-bg dark:text-darkTheme-body-color dark:placeholder:text-darkTheme-secondary-muted sm:text-sm"
             />
           </div>
 
           <div className="w-full">
-            <label htmlFor="region" className="block mb-2.5 dark:text-darkTheme-body-color">
+            <label htmlFor="region" className="mb-2 block text-sm font-medium dark:text-darkTheme-body-color">
               Region/State <span className="text-red">*</span>
             </label>
             <input
@@ -118,13 +118,13 @@ const Billing = ({ form, updateField }: BillingProps) => {
               id="region"
               value={form.region}
               onChange={(e) => updateField("region", e.target.value)}
-              className="rounded-md border border-gray-3 dark:border-darkTheme-border-color bg-gray-1 dark:bg-darkTheme-secondary-bg dark:text-darkTheme-body-color placeholder:text-dark-4 dark:placeholder:text-darkTheme-secondary-muted w-full py-2.5 px-5 outline-none duration-200 focus:border-transparent focus:shadow-input focus:ring-2 focus:ring-blue/20"
+              className="h-12 w-full rounded-xl border border-gray-3 bg-gray-1 px-4 text-base outline-none duration-200 placeholder:text-dark-4 focus:border-transparent focus:ring-2 focus:ring-orange/25 dark:border-darkTheme-border-color dark:bg-darkTheme-secondary-bg dark:text-darkTheme-body-color dark:placeholder:text-darkTheme-secondary-muted sm:text-sm"
             />
           </div>
         </div>
 
-        <div className="mb-5">
-          <label htmlFor="postalCode" className="block mb-2.5 dark:text-darkTheme-body-color">
+        <div className="mb-4 sm:mb-5">
+          <label htmlFor="postalCode" className="mb-2 block text-sm font-medium dark:text-darkTheme-body-color">
             Postal Code
           </label>
           <input
@@ -132,13 +132,13 @@ const Billing = ({ form, updateField }: BillingProps) => {
             id="postalCode"
             value={form.postalCode}
             onChange={(e) => updateField("postalCode", e.target.value)}
-            className="rounded-md border border-gray-3 dark:border-darkTheme-border-color bg-gray-1 dark:bg-darkTheme-secondary-bg dark:text-darkTheme-body-color placeholder:text-dark-4 dark:placeholder:text-darkTheme-secondary-muted w-full py-2.5 px-5 outline-none duration-200 focus:border-transparent focus:shadow-input focus:ring-2 focus:ring-blue/20"
+            className="h-12 w-full rounded-xl border border-gray-3 bg-gray-1 px-4 text-base outline-none duration-200 placeholder:text-dark-4 focus:border-transparent focus:ring-2 focus:ring-orange/25 dark:border-darkTheme-border-color dark:bg-darkTheme-secondary-bg dark:text-darkTheme-body-color dark:placeholder:text-darkTheme-secondary-muted sm:text-sm"
           />
         </div>
 
-        <div className="flex flex-col lg:flex-row gap-5 sm:gap-8 mb-5">
+        <div className="mb-4 grid grid-cols-1 gap-4 sm:mb-5 sm:grid-cols-2 sm:gap-5">
           <div className="w-full">
-            <label htmlFor="phone" className="block mb-2.5 dark:text-darkTheme-body-color">
+            <label htmlFor="phone" className="mb-2 block text-sm font-medium dark:text-darkTheme-body-color">
               Phone Number <span className="text-red">*</span>
             </label>
             <input
@@ -146,12 +146,12 @@ const Billing = ({ form, updateField }: BillingProps) => {
               id="phone"
               value={form.phone}
               onChange={(e) => updateField("phone", e.target.value)}
-              className="rounded-md border border-gray-3 dark:border-darkTheme-border-color bg-gray-1 dark:bg-darkTheme-secondary-bg dark:text-darkTheme-body-color placeholder:text-dark-4 dark:placeholder:text-darkTheme-secondary-muted w-full py-2.5 px-5 outline-none duration-200 focus:border-transparent focus:shadow-input focus:ring-2 focus:ring-blue/20"
+              className="h-12 w-full rounded-xl border border-gray-3 bg-gray-1 px-4 text-base outline-none duration-200 placeholder:text-dark-4 focus:border-transparent focus:ring-2 focus:ring-orange/25 dark:border-darkTheme-border-color dark:bg-darkTheme-secondary-bg dark:text-darkTheme-body-color dark:placeholder:text-darkTheme-secondary-muted sm:text-sm"
             />
           </div>
 
           <div className="w-full">
-            <label htmlFor="email" className="block mb-2.5 dark:text-darkTheme-body-color">
+            <label htmlFor="email" className="mb-2 block text-sm font-medium dark:text-darkTheme-body-color">
               Email Address <span className="text-red">*</span>
             </label>
             <input
@@ -159,7 +159,7 @@ const Billing = ({ form, updateField }: BillingProps) => {
               id="email"
               value={form.email}
               onChange={(e) => updateField("email", e.target.value)}
-              className="rounded-md border border-gray-3 dark:border-darkTheme-border-color bg-gray-1 dark:bg-darkTheme-secondary-bg dark:text-darkTheme-body-color placeholder:text-dark-4 dark:placeholder:text-darkTheme-secondary-muted w-full py-2.5 px-5 outline-none duration-200 focus:border-transparent focus:shadow-input focus:ring-2 focus:ring-blue/20"
+              className="h-12 w-full rounded-xl border border-gray-3 bg-gray-1 px-4 text-base outline-none duration-200 placeholder:text-dark-4 focus:border-transparent focus:ring-2 focus:ring-orange/25 dark:border-darkTheme-border-color dark:bg-darkTheme-secondary-bg dark:text-darkTheme-body-color dark:placeholder:text-darkTheme-secondary-muted sm:text-sm"
             />
           </div>
         </div>

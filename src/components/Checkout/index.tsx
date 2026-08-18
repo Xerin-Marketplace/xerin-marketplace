@@ -535,18 +535,18 @@ const Checkout = () => {
     <>
       <Breadcrumb title="Checkout" pages={["checkout"]} />
 
-      <section className="overflow-hidden bg-gray-2 py-12 dark:bg-darkTheme-bg sm:py-16">
-        <div className="mx-auto w-full max-w-[1220px] px-4 sm:px-8">
+      <section className="overflow-hidden bg-gray-2 pb-8 pt-5 dark:bg-darkTheme-bg sm:py-12 lg:py-16">
+        <div className="mx-auto w-full max-w-[1220px] px-3 sm:px-6 lg:px-8">
           <form onSubmit={handleSubmit}>
-            <div className="grid gap-7 lg:grid-cols-[1fr_440px]">
-              <div className="space-y-6">
+            <div className="grid gap-5 sm:gap-7 lg:grid-cols-[minmax(0,1fr)_420px] xl:grid-cols-[minmax(0,1fr)_440px]">
+              <div className="min-w-0 space-y-4 sm:space-y-6">
                 <DeliveryModeSelector
                   value={deliveryMode}
                   onChange={changeDeliveryMode}
                   config={deliveryConfig.data}
                 />
 
-                <section className="rounded-2xl border border-[#e7ebf0] bg-white p-5 shadow-sm dark:border-white/10 dark:bg-darkTheme-card sm:p-6">
+                <section className="rounded-2xl border border-[#e7ebf0] bg-white p-4 shadow-sm dark:border-white/10 dark:bg-darkTheme-card sm:p-6">
                   <div className="flex items-start gap-3">
                     <span className="flex h-10 w-10 items-center justify-center rounded-xl bg-slate-100 text-slate-600">
                       {deliveryMode === "local" ? (
@@ -574,7 +574,7 @@ const Checkout = () => {
                         onChange={(event) =>
                           setSelectedAddressId(event.target.value)
                         }
-                        className="mt-5 h-12 w-full rounded-xl border border-gray-3 bg-white px-4 text-sm outline-none focus:border-orange dark:border-white/10 dark:bg-white/5 dark:text-white"
+                        className="mt-4 h-12 w-full rounded-xl border border-gray-3 bg-white px-3 text-base outline-none focus:border-orange dark:border-white/10 dark:bg-white/5 dark:text-white sm:mt-5 sm:px-4 sm:text-sm"
                       >
                         {matchingAddresses.map((address) => (
                           <option
@@ -591,7 +591,7 @@ const Checkout = () => {
                       </select>
 
                       {selectedAddress && (
-                        <div className="mt-3 rounded-xl bg-slate-50 p-3 text-xs leading-5 text-slate-600 dark:bg-white/5 dark:text-white/60">
+                        <div className="mt-3 break-words rounded-xl bg-slate-50 p-3 text-xs leading-5 text-slate-600 dark:bg-white/5 dark:text-white/60">
                           {selectedAddress.recipient_name && (
                             <b>{selectedAddress.recipient_name} · </b>
                           )}
@@ -626,7 +626,7 @@ const Checkout = () => {
                 <Billing form={form} updateField={updateField} />
                 <Shipping form={form} updateField={updateField} />
 
-                <div className="rounded-2xl border border-[#e7ebf0] bg-white p-5 shadow-sm dark:border-white/10 dark:bg-darkTheme-card sm:p-6">
+                <div className="rounded-2xl border border-[#e7ebf0] bg-white p-4 shadow-sm dark:border-white/10 dark:bg-darkTheme-card sm:p-6">
                   <label
                     htmlFor="notes"
                     className="mb-2.5 block font-semibold dark:text-darkTheme-body-color"
@@ -641,24 +641,24 @@ const Checkout = () => {
                       updateField("notes", event.target.value)
                     }
                     placeholder="Building access, delivery instructions, package notes..."
-                    className="w-full rounded-xl border border-gray-3 bg-gray-1 p-4 outline-none focus:border-orange dark:border-white/10 dark:bg-white/5 dark:text-white"
+                    className="w-full rounded-xl border border-gray-3 bg-gray-1 p-3 text-base outline-none focus:border-orange dark:border-white/10 dark:bg-white/5 dark:text-white sm:p-4 sm:text-sm"
                   />
                 </div>
               </div>
 
               <aside className="min-w-0">
                 <div className="rounded-2xl border border-[#e7ebf0] bg-white shadow-sm dark:border-white/10 dark:bg-darkTheme-card">
-                  <div className="border-b border-gray-3 px-5 py-5 dark:border-white/10">
-                    <h3 className="text-xl font-bold text-dark dark:text-white">
+                  <div className="border-b border-gray-3 px-4 py-4 dark:border-white/10 sm:px-5 sm:py-5">
+                    <h3 className="text-lg font-bold text-dark dark:text-white sm:text-xl">
                       Your Order
                     </h3>
                   </div>
 
-                  <div className="px-5 pb-6 pt-2">
+                  <div className="px-4 pb-4 pt-1 sm:px-5 sm:pb-6 sm:pt-2">
                     {cartItems.map((item) => (
                       <div
                         key={item.cartItemId}
-                        className="flex items-center justify-between gap-4 border-b border-gray-3 py-4 dark:border-white/10"
+                        className="flex items-start justify-between gap-3 border-b border-gray-3 py-3 dark:border-white/10 sm:items-center sm:gap-4 sm:py-4"
                       >
                         <div className="min-w-0">
                           <p className="truncate text-sm font-medium">
@@ -789,7 +789,7 @@ const Checkout = () => {
                   onPhoneNumberChange={setPaymentPhone}
                 />
 
-                <div className="mt-7.5 rounded-xl border border-blue-200 bg-blue-50 p-4 text-xs leading-5 text-blue-800">
+                <div className="mt-4 rounded-xl border border-blue-200 bg-blue-50 p-3 text-[11px] leading-5 text-blue-800 sm:mt-7.5 sm:p-4 sm:text-xs">
                   <b>Final checkout protection:</b> when you place the order, the
                   backend rechecks the current product prices, stock, seller
                   promotion, platform coupon, delivery address, logistics scope,
@@ -797,6 +797,7 @@ const Checkout = () => {
                   the Order becomes the payment source of truth.
                 </div>
 
+                <div className="xerin-checkout-mobile-cta mt-4 sm:mt-7.5">
                 <button
                   type="submit"
                   disabled={
@@ -807,12 +808,13 @@ const Checkout = () => {
                     !form.paymentMethod ||
                     !form.shippingMethod
                   }
-                  className="mt-7.5 flex w-full justify-center rounded-xl bg-orange px-6 py-3 font-semibold text-white transition hover:bg-orange-dark disabled:cursor-not-allowed disabled:opacity-50"
+                  className="flex h-12 w-full items-center justify-center rounded-xl bg-orange px-5 text-base font-semibold text-white shadow-sm transition hover:bg-orange-dark disabled:cursor-not-allowed disabled:opacity-50 sm:text-sm"
                 >
                   {createOrder.isPending || isCreatingAddress
                     ? "Processing..."
-                    : "Continue with Selected Delivery"}
+                    : "Place Order & Continue to Payment"}
                 </button>
+                </div>
 
                 <p className="mt-3 text-center text-[11px] leading-5 text-dark-4">
                   The backend revalidates the selected zone, logistics service,
@@ -839,7 +841,7 @@ function SummaryRow({
   strong?: boolean;
 }) {
   return (
-    <div className="flex items-center justify-between gap-4 py-3">
+    <div className="flex items-center justify-between gap-3 py-2.5 sm:gap-4 sm:py-3">
       <span
         className={
           strong
@@ -852,7 +854,7 @@ function SummaryRow({
       <span
         className={`text-right ${
           strong
-            ? "text-lg font-bold text-dark dark:text-white"
+            ? "text-base font-bold text-dark dark:text-white sm:text-lg"
             : saving
               ? "text-sm font-bold text-emerald-700"
               : "text-sm font-semibold"

@@ -36,8 +36,8 @@ const PaymentMethod = ({
   const selectedOption = options.find((item) => item.id === selected);
 
   return (
-    <section className="mt-7.5 rounded-2xl border border-[#e7ebf0] bg-white shadow-sm dark:border-white/10 dark:bg-darkTheme-card">
-      <div className="border-b border-gray-3 px-5 py-5 dark:border-white/10 sm:px-6">
+    <section className="mt-4 rounded-2xl border border-[#e7ebf0] bg-white shadow-sm dark:border-white/10 dark:bg-darkTheme-card sm:mt-7.5">
+      <div className="border-b border-gray-3 px-4 py-4 dark:border-white/10 sm:px-6 sm:py-5">
         <h3 className="font-bold text-dark dark:text-white">
           Payment Method
         </h3>
@@ -47,7 +47,7 @@ const PaymentMethod = ({
         </p>
       </div>
 
-      <div className="p-5 sm:p-6">
+      <div className="p-4 sm:p-6">
         {isLoading ? (
           <p className="text-dark-4">Loading payment options…</p>
         ) : options.length ? (
@@ -57,7 +57,7 @@ const PaymentMethod = ({
               return (
                 <label
                   key={method.id}
-                  className={`flex cursor-pointer items-start gap-3 rounded-xl border p-4 transition ${
+                  className={`flex min-h-[76px] cursor-pointer items-start gap-3 rounded-xl border p-3 transition sm:p-4 ${
                     selected === method.id
                       ? "border-orange bg-orange/5"
                       : "border-gray-3 dark:border-white/10"
@@ -90,7 +90,7 @@ const PaymentMethod = ({
             })}
 
             {selectedOption?.requires_phone && (
-              <div className="mt-4 grid gap-3 rounded-xl bg-slate-50 p-4 sm:grid-cols-2 dark:bg-white/5">
+              <div className="mt-4 grid gap-3 rounded-xl bg-slate-50 p-3 sm:grid-cols-2 sm:p-4 dark:bg-white/5">
                 <label className="text-sm font-medium text-dark dark:text-white">
                   Mobile network
                   <select
@@ -98,7 +98,7 @@ const PaymentMethod = ({
                     onChange={(event) =>
                       onProviderChange(event.target.value)
                     }
-                    className="mt-2 w-full rounded-xl border border-gray-3 bg-white p-3 dark:border-white/10 dark:bg-white/5"
+                    className="mt-2 h-12 w-full rounded-xl border border-gray-3 bg-white px-3 text-base dark:border-white/10 dark:bg-white/5 sm:text-sm"
                   >
                     <option value="">Select network</option>
                     {selectedOption.providers.map((name) => (
@@ -118,7 +118,7 @@ const PaymentMethod = ({
                       onPhoneNumberChange(event.target.value)
                     }
                     placeholder="+255 7XX XXX XXX"
-                    className="mt-2 w-full rounded-xl border border-gray-3 bg-white p-3 dark:border-white/10 dark:bg-white/5"
+                    className="mt-2 h-12 w-full rounded-xl border border-gray-3 bg-white px-3 text-base dark:border-white/10 dark:bg-white/5 sm:text-sm"
                   />
                 </label>
               </div>

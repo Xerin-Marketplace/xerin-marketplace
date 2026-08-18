@@ -249,15 +249,15 @@ export default function OrderSuccessPage() {
   const data = order.data;
 
   return (
-    <section className="bg-gray-2 py-16 dark:bg-darkTheme-bg">
-      <div className="mx-auto max-w-2xl space-y-5 px-4">
-        <div className="rounded-2xl bg-white p-8 shadow-1 dark:bg-darkTheme-card">
+    <section className="bg-gray-2 pb-8 pt-5 dark:bg-darkTheme-bg sm:py-12 lg:py-16">
+      <div className="mx-auto max-w-2xl space-y-4 px-3 sm:space-y-5 sm:px-4">
+        <div className="rounded-2xl bg-white p-4 shadow-sm dark:bg-darkTheme-card sm:p-8 sm:shadow-1">
           <p className="font-semibold text-green">Order received</p>
-          <h1 className="mt-2 text-3xl font-semibold text-dark dark:text-white">
+          <h1 className="mt-1.5 text-2xl font-bold leading-tight text-dark dark:text-white sm:mt-2 sm:text-3xl sm:font-semibold">
             Thank you for your order
           </h1>
 
-          <dl className="mt-8 grid gap-4 sm:grid-cols-2">
+          <dl className="mt-5 grid gap-3 sm:mt-8 sm:grid-cols-2 sm:gap-4">
             <div>
               <dt className="text-sm text-dark-4">Order number</dt>
               <dd className="break-all font-medium">{data.id}</dd>
@@ -284,7 +284,7 @@ export default function OrderSuccessPage() {
         </div>
 
         {isProcessing && !isCod && (
-          <div className="rounded-2xl border border-blue-200 bg-blue-50 p-5 text-blue-900">
+          <div className="rounded-2xl border border-blue-200 bg-blue-50 p-4 sm:p-5 text-blue-900">
             <div className="flex items-start gap-3">
               <LoaderCircle size={20} className="mt-0.5 shrink-0 animate-spin" />
               <div className="flex-1">
@@ -306,7 +306,7 @@ export default function OrderSuccessPage() {
         )}
 
         {isCod && (
-          <div className="rounded-2xl border border-amber-200 bg-amber-50 p-5 text-amber-900">
+          <div className="rounded-2xl border border-amber-200 bg-amber-50 p-4 sm:p-5 text-amber-900">
             <div className="flex items-start gap-3">
               <Clock3 size={20} className="mt-0.5 shrink-0" />
               <div>
@@ -320,7 +320,7 @@ export default function OrderSuccessPage() {
         )}
 
         {isFailed && !isCompleted && (
-          <div className="rounded-2xl border border-amber-200 bg-amber-50 p-5 text-amber-900">
+          <div className="rounded-2xl border border-amber-200 bg-amber-50 p-4 sm:p-5 text-amber-900">
             <div className="flex items-start gap-3">
               <AlertTriangle size={20} className="mt-0.5 shrink-0" />
               <div className="min-w-0 flex-1">
@@ -339,7 +339,7 @@ export default function OrderSuccessPage() {
                       <select
                         value={provider}
                         onChange={(event) => setProvider(event.target.value)}
-                        className="mt-1 h-11 w-full rounded-lg border border-amber-200 bg-white px-3"
+                        className="mt-1 h-12 w-full rounded-xl border border-amber-200 bg-white px-3 text-base sm:text-sm"
                       >
                         <option value="">Select network</option>
                         {MNO_PROVIDERS.map((row) => (
@@ -353,7 +353,7 @@ export default function OrderSuccessPage() {
                         value={phone}
                         onChange={(event) => setPhone(event.target.value)}
                         placeholder="2557XXXXXXXX"
-                        className="mt-1 h-11 w-full rounded-lg border border-amber-200 bg-white px-3"
+                        className="mt-1 h-12 w-full rounded-xl border border-amber-200 bg-white px-3 text-base sm:text-sm"
                       />
                     </label>
                   </div>
@@ -370,7 +370,7 @@ export default function OrderSuccessPage() {
                   type="button"
                   disabled={!canRetry || retrying}
                   onClick={() => void retryPayment()}
-                  className="mt-4 inline-flex items-center gap-2 rounded-xl bg-[#f7941d] px-4 py-2.5 text-sm font-semibold text-white disabled:cursor-not-allowed disabled:opacity-50"
+                  className="mt-4 flex h-12 w-full items-center justify-center gap-2 rounded-xl bg-[#f7941d] px-4 text-base font-semibold text-white disabled:cursor-not-allowed disabled:opacity-50 sm:inline-flex sm:h-auto sm:w-auto sm:py-2.5 sm:text-sm"
                 >
                   <RefreshCw
                     size={14}
@@ -384,7 +384,7 @@ export default function OrderSuccessPage() {
         )}
 
         {isCompleted && (
-          <div className="flex items-start gap-3 rounded-2xl border border-emerald-200 bg-emerald-50 p-5 text-emerald-800">
+          <div className="flex items-start gap-3 rounded-2xl border border-emerald-200 bg-emerald-50 p-4 sm:p-5 text-emerald-800">
             <CheckCircle2 size={20} className="mt-0.5" />
             <div>
               <p className="font-bold">Payment confirmed</p>
@@ -409,26 +409,26 @@ export default function OrderSuccessPage() {
           </div>
         )}
 
-        <div className="rounded-2xl bg-white p-6 shadow-1 dark:bg-darkTheme-card">
-          <div className="flex flex-wrap gap-3">
+        <div className="rounded-2xl bg-white p-4 shadow-sm dark:bg-darkTheme-card sm:p-6 sm:shadow-1">
+          <div className="grid gap-2 sm:flex sm:flex-wrap sm:gap-3">
             <button
               type="button"
               onClick={() => void refreshPaymentState()}
               disabled={statusLoading}
-              className="inline-flex items-center gap-2 rounded-lg border border-gray-3 px-5 py-3 font-medium disabled:opacity-50"
+              className="inline-flex h-12 w-full items-center justify-center gap-2 rounded-xl border border-gray-3 px-4 font-semibold disabled:opacity-50 sm:h-auto sm:w-auto sm:rounded-lg sm:px-5 sm:py-3 sm:font-medium"
             >
               <RefreshCw size={14} className={statusLoading ? "animate-spin" : ""} />
               Refresh Payment
             </button>
             <Link
               href={`/account/orders/${data.id}`}
-              className="rounded-lg bg-blue px-5 py-3 font-medium text-white"
+              className="flex h-12 w-full items-center justify-center rounded-xl bg-blue px-4 font-semibold text-white sm:h-auto sm:w-auto sm:rounded-lg sm:px-5 sm:py-3 sm:font-medium"
             >
               View order
             </Link>
             <Link
               href="/shop-with-sidebar"
-              className="rounded-lg border border-gray-3 px-5 py-3 font-medium"
+              className="flex h-12 w-full items-center justify-center rounded-xl border border-gray-3 px-4 font-semibold sm:h-auto sm:w-auto sm:rounded-lg sm:px-5 sm:py-3 sm:font-medium"
             >
               Continue shopping
             </Link>

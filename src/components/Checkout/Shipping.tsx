@@ -10,10 +10,10 @@ const Shipping = ({ form, updateField }: ShippingProps) => {
   const [dropdown, setDropdown] = useState(false);
 
   return (
-    <div className="bg-white dark:bg-darkTheme-card shadow-1 rounded-[10px] mt-7.5">
+    <div className="mt-4 rounded-2xl border border-[#e7ebf0] bg-white shadow-sm dark:border-white/10 dark:bg-darkTheme-card sm:mt-7.5">
       <div
         onClick={() => setDropdown(!dropdown)}
-        className="cursor-pointer flex items-center gap-2.5 font-medium text-lg text-dark dark:text-white py-5 px-5.5"
+        className="flex min-h-14 cursor-pointer items-center justify-between gap-3 px-4 py-4 text-sm font-semibold text-dark dark:text-white sm:px-5.5 sm:py-5 sm:text-lg sm:font-medium"
       >
         Ship to a different address?
         <svg
@@ -33,9 +33,9 @@ const Shipping = ({ form, updateField }: ShippingProps) => {
         </svg>
       </div>
 
-      <div className={`p-4 sm:p-8.5 ${dropdown ? "block" : "hidden"}`}>
-        <div className="mb-5">
-          <label htmlFor="shippingCountry" className="block mb-2.5 dark:text-darkTheme-body-color">
+      <div className={`border-t border-gray-3 p-4 dark:border-white/10 sm:p-6 lg:p-8.5 ${dropdown ? "block" : "hidden"}`}>
+        <div className="mb-4 sm:mb-5">
+          <label htmlFor="shippingCountry" className="mb-2 block text-sm font-medium dark:text-darkTheme-body-color">
             Country <span className="text-red">*</span>
           </label>
           <input
@@ -43,12 +43,12 @@ const Shipping = ({ form, updateField }: ShippingProps) => {
             id="shippingCountry"
             value={form.shippingCountry}
             onChange={(e) => updateField("shippingCountry", e.target.value)}
-            className="rounded-md border border-gray-3 dark:border-darkTheme-border-color bg-gray-1 dark:bg-darkTheme-secondary-bg dark:text-darkTheme-body-color placeholder:text-dark-4 dark:placeholder:text-darkTheme-secondary-muted w-full py-2.5 px-5 outline-none duration-200 focus:border-transparent focus:shadow-input focus:ring-2 focus:ring-blue/20"
+            className="h-12 w-full rounded-xl border border-gray-3 bg-gray-1 px-4 text-base outline-none duration-200 placeholder:text-dark-4 focus:border-transparent focus:ring-2 focus:ring-orange/25 dark:border-darkTheme-border-color dark:bg-darkTheme-secondary-bg dark:text-darkTheme-body-color dark:placeholder:text-darkTheme-secondary-muted sm:text-sm"
           />
         </div>
 
-        <div className="mb-5">
-          <label htmlFor="shippingStreet" className="block mb-2.5 dark:text-darkTheme-body-color">
+        <div className="mb-4 sm:mb-5">
+          <label htmlFor="shippingStreet" className="mb-2 block text-sm font-medium dark:text-darkTheme-body-color">
             Delivery Address <span className="text-red">*</span>
           </label>
           <input
@@ -57,23 +57,23 @@ const Shipping = ({ form, updateField }: ShippingProps) => {
             value={form.shippingStreet}
             onChange={(e) => updateField("shippingStreet", e.target.value)}
             placeholder="House number and street name"
-            className="rounded-md border border-gray-3 dark:border-darkTheme-border-color bg-gray-1 dark:bg-darkTheme-secondary-bg dark:text-darkTheme-body-color placeholder:text-dark-4 dark:placeholder:text-darkTheme-secondary-muted w-full py-2.5 px-5 outline-none duration-200 focus:border-transparent focus:shadow-input focus:ring-2 focus:ring-blue/20"
+            className="h-12 w-full rounded-xl border border-gray-3 bg-gray-1 px-4 text-base outline-none duration-200 placeholder:text-dark-4 focus:border-transparent focus:ring-2 focus:ring-orange/25 dark:border-darkTheme-border-color dark:bg-darkTheme-secondary-bg dark:text-darkTheme-body-color dark:placeholder:text-darkTheme-secondary-muted sm:text-sm"
           />
-          <div className="mt-5">
+          <div className="mt-3 sm:mt-5">
             <input
               type="text"
               id="shippingStreet2"
               value={form.shippingStreet2}
               onChange={(e) => updateField("shippingStreet2", e.target.value)}
               placeholder="Apartment, suite, unit, etc. (optional)"
-              className="rounded-md border border-gray-3 dark:border-darkTheme-border-color bg-gray-1 dark:bg-darkTheme-secondary-bg dark:text-darkTheme-body-color placeholder:text-dark-4 dark:placeholder:text-darkTheme-secondary-muted w-full py-2.5 px-5 outline-none duration-200 focus:border-transparent focus:shadow-input focus:ring-2 focus:ring-blue/20"
+              className="h-12 w-full rounded-xl border border-gray-3 bg-gray-1 px-4 text-base outline-none duration-200 placeholder:text-dark-4 focus:border-transparent focus:ring-2 focus:ring-orange/25 dark:border-darkTheme-border-color dark:bg-darkTheme-secondary-bg dark:text-darkTheme-body-color dark:placeholder:text-darkTheme-secondary-muted sm:text-sm"
             />
           </div>
         </div>
 
-        <div className="flex flex-col lg:flex-row gap-5 sm:gap-8 mb-5">
+        <div className="mb-4 grid grid-cols-1 gap-4 sm:mb-5 sm:grid-cols-2 sm:gap-5">
           <div className="w-full">
-            <label htmlFor="shippingCity" className="block mb-2.5 dark:text-darkTheme-body-color">
+            <label htmlFor="shippingCity" className="mb-2 block text-sm font-medium dark:text-darkTheme-body-color">
               City <span className="text-red">*</span>
             </label>
             <input
@@ -81,12 +81,12 @@ const Shipping = ({ form, updateField }: ShippingProps) => {
               id="shippingCity"
               value={form.shippingCity}
               onChange={(e) => updateField("shippingCity", e.target.value)}
-              className="rounded-md border border-gray-3 dark:border-darkTheme-border-color bg-gray-1 dark:bg-darkTheme-secondary-bg dark:text-darkTheme-body-color placeholder:text-dark-4 dark:placeholder:text-darkTheme-secondary-muted w-full py-2.5 px-5 outline-none duration-200 focus:border-transparent focus:shadow-input focus:ring-2 focus:ring-blue/20"
+              className="h-12 w-full rounded-xl border border-gray-3 bg-gray-1 px-4 text-base outline-none duration-200 placeholder:text-dark-4 focus:border-transparent focus:ring-2 focus:ring-orange/25 dark:border-darkTheme-border-color dark:bg-darkTheme-secondary-bg dark:text-darkTheme-body-color dark:placeholder:text-darkTheme-secondary-muted sm:text-sm"
             />
           </div>
 
           <div className="w-full">
-            <label htmlFor="shippingRegion" className="block mb-2.5 dark:text-darkTheme-body-color">
+            <label htmlFor="shippingRegion" className="mb-2 block text-sm font-medium dark:text-darkTheme-body-color">
               Region/State <span className="text-red">*</span>
             </label>
             <input
@@ -94,13 +94,13 @@ const Shipping = ({ form, updateField }: ShippingProps) => {
               id="shippingRegion"
               value={form.shippingRegion}
               onChange={(e) => updateField("shippingRegion", e.target.value)}
-              className="rounded-md border border-gray-3 dark:border-darkTheme-border-color bg-gray-1 dark:bg-darkTheme-secondary-bg dark:text-darkTheme-body-color placeholder:text-dark-4 dark:placeholder:text-darkTheme-secondary-muted w-full py-2.5 px-5 outline-none duration-200 focus:border-transparent focus:shadow-input focus:ring-2 focus:ring-blue/20"
+              className="h-12 w-full rounded-xl border border-gray-3 bg-gray-1 px-4 text-base outline-none duration-200 placeholder:text-dark-4 focus:border-transparent focus:ring-2 focus:ring-orange/25 dark:border-darkTheme-border-color dark:bg-darkTheme-secondary-bg dark:text-darkTheme-body-color dark:placeholder:text-darkTheme-secondary-muted sm:text-sm"
             />
           </div>
         </div>
 
-        <div className="mb-5">
-          <label htmlFor="shippingPostalCode" className="block mb-2.5 dark:text-darkTheme-body-color">
+        <div className="mb-4 sm:mb-5">
+          <label htmlFor="shippingPostalCode" className="mb-2 block text-sm font-medium dark:text-darkTheme-body-color">
             Postal Code
           </label>
           <input
@@ -108,13 +108,13 @@ const Shipping = ({ form, updateField }: ShippingProps) => {
             id="shippingPostalCode"
             value={form.shippingPostalCode}
             onChange={(e) => updateField("shippingPostalCode", e.target.value)}
-            className="rounded-md border border-gray-3 dark:border-darkTheme-border-color bg-gray-1 dark:bg-darkTheme-secondary-bg dark:text-darkTheme-body-color placeholder:text-dark-4 dark:placeholder:text-darkTheme-secondary-muted w-full py-2.5 px-5 outline-none duration-200 focus:border-transparent focus:shadow-input focus:ring-2 focus:ring-blue/20"
+            className="h-12 w-full rounded-xl border border-gray-3 bg-gray-1 px-4 text-base outline-none duration-200 placeholder:text-dark-4 focus:border-transparent focus:ring-2 focus:ring-orange/25 dark:border-darkTheme-border-color dark:bg-darkTheme-secondary-bg dark:text-darkTheme-body-color dark:placeholder:text-darkTheme-secondary-muted sm:text-sm"
           />
         </div>
 
         <div className="flex flex-col lg:flex-row gap-5 sm:gap-8">
           <div className="w-full">
-            <label htmlFor="shippingPhone" className="block mb-2.5 dark:text-darkTheme-body-color">
+            <label htmlFor="shippingPhone" className="mb-2 block text-sm font-medium dark:text-darkTheme-body-color">
               Phone Number <span className="text-red">*</span>
             </label>
             <input
@@ -122,12 +122,12 @@ const Shipping = ({ form, updateField }: ShippingProps) => {
               id="shippingPhone"
               value={form.shippingPhone}
               onChange={(e) => updateField("shippingPhone", e.target.value)}
-              className="rounded-md border border-gray-3 dark:border-darkTheme-border-color bg-gray-1 dark:bg-darkTheme-secondary-bg dark:text-darkTheme-body-color placeholder:text-dark-4 dark:placeholder:text-darkTheme-secondary-muted w-full py-2.5 px-5 outline-none duration-200 focus:border-transparent focus:shadow-input focus:ring-2 focus:ring-blue/20"
+              className="h-12 w-full rounded-xl border border-gray-3 bg-gray-1 px-4 text-base outline-none duration-200 placeholder:text-dark-4 focus:border-transparent focus:ring-2 focus:ring-orange/25 dark:border-darkTheme-border-color dark:bg-darkTheme-secondary-bg dark:text-darkTheme-body-color dark:placeholder:text-darkTheme-secondary-muted sm:text-sm"
             />
           </div>
 
           <div className="w-full">
-            <label htmlFor="shippingEmail" className="block mb-2.5 dark:text-darkTheme-body-color">
+            <label htmlFor="shippingEmail" className="mb-2 block text-sm font-medium dark:text-darkTheme-body-color">
               Email Address <span className="text-red">*</span>
             </label>
             <input
@@ -135,7 +135,7 @@ const Shipping = ({ form, updateField }: ShippingProps) => {
               id="shippingEmail"
               value={form.shippingEmail}
               onChange={(e) => updateField("shippingEmail", e.target.value)}
-              className="rounded-md border border-gray-3 dark:border-darkTheme-border-color bg-gray-1 dark:bg-darkTheme-secondary-bg dark:text-darkTheme-body-color placeholder:text-dark-4 dark:placeholder:text-darkTheme-secondary-muted w-full py-2.5 px-5 outline-none duration-200 focus:border-transparent focus:shadow-input focus:ring-2 focus:ring-blue/20"
+              className="h-12 w-full rounded-xl border border-gray-3 bg-gray-1 px-4 text-base outline-none duration-200 placeholder:text-dark-4 focus:border-transparent focus:ring-2 focus:ring-orange/25 dark:border-darkTheme-border-color dark:bg-darkTheme-secondary-bg dark:text-darkTheme-body-color dark:placeholder:text-darkTheme-secondary-muted sm:text-sm"
             />
           </div>
         </div>

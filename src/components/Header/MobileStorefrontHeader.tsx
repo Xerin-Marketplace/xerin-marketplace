@@ -31,21 +31,21 @@ export default function MobileStorefrontHeader() {
               width={116}
               height={36}
               priority
-              className="h-auto w-[108px] object-contain sm:w-[116px]"
+              className="h-auto w-[92px] object-contain min-[360px]:w-[104px] sm:w-[116px]"
             />
           </a>
 
           <div className="flex min-w-0 items-center gap-1.5">
             <a
               href="/account/addresses"
-              className="flex min-w-0 max-w-[145px] items-center gap-1.5 rounded-full px-2 py-2 text-xs font-semibold text-[#475569] dark:text-white/70"
+              className="flex min-w-0 items-center gap-1.5 rounded-full px-1.5 py-2 text-xs font-semibold text-[#475569] dark:text-white/70 min-[360px]:max-w-[125px] min-[360px]:px-2 sm:max-w-[145px]"
               aria-label="Delivery location"
             >
               <svg width="16" height="16" viewBox="0 0 24 24" fill="none" className="shrink-0">
                 <path d="M12 21s7-6.1 7-13a7 7 0 10-14 0c0 6.9 7 13 7 13Z" stroke="currentColor" strokeWidth="1.8"/>
                 <circle cx="12" cy="8" r="2.5" stroke="currentColor" strokeWidth="1.8"/>
               </svg>
-              <span className="truncate">Deliver to Tanzania</span>
+              <span className="hidden truncate min-[360px]:inline">Deliver to Tanzania</span>
             </a>
 
             <button
