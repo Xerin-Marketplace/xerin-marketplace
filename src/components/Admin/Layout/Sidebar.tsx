@@ -173,6 +173,7 @@ const sidebarGroups: SidebarGroup[] = [
       { label: "Scheduled Ads", href: "/admin/dashboard?tab=products&menu=advertising&item=scheduled-ads", icon: Megaphone },
       { label: "Paused Ads", href: "/admin/dashboard?tab=products&menu=advertising&item=paused-ads", icon: Megaphone },
       { label: "Expired Ads", href: "/admin/dashboard?tab=products&menu=advertising&item=expired-ads", icon: Megaphone },
+      { label: "Advertisement Analytics", href: "/admin/dashboard?tab=products&menu=advertising&item=advertisement-analytics", icon: Megaphone },
     ],
   },
   {

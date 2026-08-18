@@ -272,6 +272,7 @@ const sidebarGroups: SidebarGroup[] = [
       { label: "Scheduled Ads", href: "?tab=products&menu=advertising&item=scheduled-ads" },
       { label: "Paused Ads", href: "?tab=products&menu=advertising&item=paused-ads" },
       { label: "Expired Ads", href: "?tab=products&menu=advertising&item=expired-ads" },
+      { label: "Advertisement Analytics", href: "?tab=products&menu=advertising&item=advertisement-analytics" },
     ],
   },
   {
@@ -711,7 +712,9 @@ export default function AdminDashboard() {
             ? "paused"
             : activeSidebarItem === "Advertising:Expired Ads"
               ? "expired"
-              : "all";
+              : activeSidebarItem === "Advertising:Advertisement Analytics"
+                ? "analytics"
+                : "all";
   const isPromotionsWorkspace =
     activeSidebarItem === "Promotions" ||
     activeSidebarItem.startsWith("Promotions:");

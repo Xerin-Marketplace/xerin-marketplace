@@ -199,6 +199,66 @@ export type AdvertisementPayload = {
   metadata_json?: Record<string, unknown>;
 };
 
+export type AdvertisementRevenueByCurrency = {
+  currency: string;
+  estimated_revenue: number;
+};
+
+export type AdvertisementAnalyticsStatusCounts = {
+  total: number;
+  draft: number;
+  scheduled: number;
+  active: number;
+  paused: number;
+  expired: number;
+};
+
+export type AdvertisementAnalyticsCampaign = {
+  id: string;
+  advertiser_name: string;
+  title: string;
+  placement: AdvertisementPlacement;
+  effective_status: AdvertisementEffectiveStatus;
+  billing_type: AdvertisementBillingType;
+  price: number | null;
+  currency: string;
+  impressions: number;
+  clicks: number;
+  ctr_percent: number;
+  estimated_revenue: number;
+  starts_at: string;
+  ends_at: string;
+};
+
+export type AdvertisementAnalyticsDailyPoint = {
+  date: string;
+  impressions: number;
+  clicks: number;
+};
+
+export type AdvertisementAnalyticsAdvertiser = {
+  advertiser_name: string;
+  campaigns: number;
+  impressions: number;
+  clicks: number;
+  ctr_percent: number;
+  revenue_by_currency: AdvertisementRevenueByCurrency[];
+};
+
+export type AdvertisementAnalyticsOverview = {
+  generated_at: string;
+  days: number;
+  status_counts: AdvertisementAnalyticsStatusCounts;
+  total_impressions: number;
+  total_clicks: number;
+  ctr_percent: number;
+  revenue_by_currency: AdvertisementRevenueByCurrency[];
+  daily_engagement: AdvertisementAnalyticsDailyPoint[];
+  top_campaigns: AdvertisementAnalyticsCampaign[];
+  advertisers: AdvertisementAnalyticsAdvertiser[];
+  revenue_note: string;
+};
+
 export type AdvertisementImageUpload = {
   image_url: string;
   original_filename: string;
@@ -1565,3 +1625,20 @@ export const uploadAdvertisementImage = async (
     )
   ).data;
 };
+
+
+export const getAdvertisementAnalytics = async (
+  days = 30,
+  topLimit = 10,
+): Promise<AdvertisementAnalyticsOverview> =>
+  (
+    await axiosInstance.get<AdvertisementAnalyticsOverview>(
+      "/admin/advertisements/analytics/overview",
+      {
+        params: {
+          days,
+          top_limit: topLimit,
+        },
+      },
+    )
+  ).data;

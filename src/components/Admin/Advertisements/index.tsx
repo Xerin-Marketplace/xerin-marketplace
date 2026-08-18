@@ -6,9 +6,11 @@ import {
   createAdvertisement,
   deleteAdvertisement,
   listAdvertisements,
+  getAdvertisementAnalytics,
   pauseAdvertisement,
   updateAdvertisement,
   uploadAdvertisementImage,
+  type AdvertisementAnalyticsOverview,
   type AdvertisementBillingType,
   type AdvertisementEffectiveStatus,
   type AdvertisementPayload,
@@ -22,7 +24,8 @@ export type AdvertisementView =
   | "active"
   | "scheduled"
   | "paused"
-  | "expired";
+  | "expired"
+  | "analytics";
 
 const PLACEMENTS: AdvertisementPlacement[] = [
   "hero_side_top",
@@ -73,6 +76,18 @@ const effectiveFilterForView = (
 };
 
 export default function AdminAdvertisements({
+  view = "all",
+}: {
+  view?: AdvertisementView;
+}) {
+  return view === "analytics" ? (
+    <AdvertisementAnalyticsDashboard />
+  ) : (
+    <AdvertisementManager view={view} />
+  );
+}
+
+function AdvertisementManager({
   view = "all",
 }: {
   view?: AdvertisementView;
@@ -434,6 +449,354 @@ export default function AdminAdvertisements({
         />
       ) : null}
     </div>
+  );
+}
+
+function AdvertisementAnalyticsDashboard() {
+  const [days, setDays] = useState(30);
+  const [data, setData] = useState<AdvertisementAnalyticsOverview | null>(null);
+  const [loadingAnalytics, setLoadingAnalytics] = useState(true);
+  const [analyticsError, setAnalyticsError] = useState("");
+
+  const loadAnalytics = useCallback(async () => {
+    setLoadingAnalytics(true);
+    setAnalyticsError("");
+
+    try {
+      setData(await getAdvertisementAnalytics(days, 10));
+    } catch (cause) {
+      setAnalyticsError(
+        cause instanceof Error
+          ? cause.message
+          : "Could not load advertisement analytics.",
+      );
+    } finally {
+      setLoadingAnalytics(false);
+    }
+  }, [days]);
+
+  useEffect(() => {
+    void loadAnalytics();
+  }, [loadAnalytics]);
+
+  const maxDaily = Math.max(
+    1,
+    ...(data?.daily_engagement.map((point) =>
+      Math.max(point.impressions, point.clicks),
+    ) || [1]),
+  );
+
+  return (
+    <div className="space-y-5">
+      <section className="rounded-2xl border border-slate-200 bg-white p-5 shadow-sm dark:border-white/10 dark:bg-[#1f2937]">
+        <div className="flex flex-col gap-4 sm:flex-row sm:items-end sm:justify-between">
+          <div>
+            <p className="text-xs font-bold uppercase tracking-[0.16em] text-[#f47524]">
+              Advertising performance
+            </p>
+            <h2 className="mt-1 text-2xl font-bold text-slate-950 dark:text-white">
+              Revenue & Analytics
+            </h2>
+            <p className="mt-1 max-w-2xl text-sm text-slate-500 dark:text-white/60">
+              Monitor sponsored campaign reach, engagement, CTR and estimated
+              advertising revenue.
+            </p>
+          </div>
+
+          <div className="flex gap-2">
+            <select
+              value={days}
+              onChange={(event) => setDays(Number(event.target.value))}
+              className="h-11 rounded-xl border border-slate-200 bg-white px-3 text-sm font-semibold dark:border-white/10 dark:bg-white/5 dark:text-white"
+            >
+              <option value={7}>Last 7 days</option>
+              <option value={30}>Last 30 days</option>
+              <option value={90}>Last 90 days</option>
+              <option value={365}>Last 12 months</option>
+            </select>
+            <button
+              type="button"
+              onClick={() => void loadAnalytics()}
+              className="h-11 rounded-xl border border-slate-200 px-4 text-sm font-semibold dark:border-white/10"
+            >
+              Refresh
+            </button>
+          </div>
+        </div>
+      </section>
+
+      {analyticsError ? (
+        <div className="rounded-xl border border-red-200 bg-red-50 px-4 py-3 text-sm text-red-700">
+          {analyticsError}
+        </div>
+      ) : null}
+
+      {loadingAnalytics || !data ? (
+        <div className="rounded-2xl border border-slate-200 bg-white p-12 text-center text-sm text-slate-500 dark:border-white/10 dark:bg-[#1f2937]">
+          Loading advertisement analytics...
+        </div>
+      ) : (
+        <>
+          <div className="grid gap-4 sm:grid-cols-2 xl:grid-cols-5">
+            <AnalyticsCard
+              label="Impressions"
+              value={data.total_impressions.toLocaleString()}
+              helper={`${data.days}-day engagement window`}
+            />
+            <AnalyticsCard
+              label="Clicks"
+              value={data.total_clicks.toLocaleString()}
+              helper="Tracked sponsored clicks"
+            />
+            <AnalyticsCard
+              label="CTR"
+              value={`${data.ctr_percent.toFixed(2)}%`}
+              helper="Clicks ÷ impressions"
+            />
+            <AnalyticsCard
+              label="Active campaigns"
+              value={data.status_counts.active.toLocaleString()}
+              helper={`${data.status_counts.scheduled} scheduled`}
+            />
+            <AnalyticsCard
+              label="All campaigns"
+              value={data.status_counts.total.toLocaleString()}
+              helper={`${data.status_counts.expired} expired`}
+            />
+          </div>
+
+          <section className="rounded-2xl border border-slate-200 bg-white p-5 shadow-sm dark:border-white/10 dark:bg-[#1f2937]">
+            <div className="flex flex-col gap-4 lg:flex-row lg:items-start lg:justify-between">
+              <div>
+                <p className="text-xs font-bold uppercase tracking-wide text-slate-400">
+                  Estimated earned advertising revenue
+                </p>
+                <div className="mt-2 flex flex-wrap gap-3">
+                  {data.revenue_by_currency.length ? (
+                    data.revenue_by_currency.map((row) => (
+                      <div
+                        key={row.currency}
+                        className="rounded-xl bg-slate-50 px-4 py-3 dark:bg-white/5"
+                      >
+                        <p className="text-xs font-bold text-slate-400">
+                          {row.currency}
+                        </p>
+                        <p className="mt-1 text-2xl font-black text-[#f47524]">
+                          {money(row.estimated_revenue, row.currency)}
+                        </p>
+                      </div>
+                    ))
+                  ) : (
+                    <p className="text-sm text-slate-500">No revenue data yet.</p>
+                  )}
+                </div>
+              </div>
+              <p className="max-w-lg rounded-xl bg-amber-50 px-4 py-3 text-xs leading-5 text-amber-800">
+                {data.revenue_note}
+              </p>
+            </div>
+          </section>
+
+          <section className="rounded-2xl border border-slate-200 bg-white p-5 shadow-sm dark:border-white/10 dark:bg-[#1f2937]">
+            <div className="flex items-center justify-between gap-3">
+              <div>
+                <h3 className="font-bold text-slate-950 dark:text-white">
+                  Daily engagement
+                </h3>
+                <p className="text-xs text-slate-500">
+                  Impression and click activity in the selected period.
+                </p>
+              </div>
+            </div>
+
+            <div className="mt-5 overflow-x-auto">
+              <div className="flex min-w-[680px] items-end gap-2">
+                {data.daily_engagement.map((point) => {
+                  const impressionHeight = Math.max(
+                    3,
+                    Math.round((point.impressions / maxDaily) * 150),
+                  );
+                  const clickHeight = Math.max(
+                    point.clicks > 0 ? 3 : 0,
+                    Math.round((point.clicks / maxDaily) * 150),
+                  );
+
+                  return (
+                    <div
+                      key={point.date}
+                      className="flex min-w-[24px] flex-1 flex-col items-center"
+                      title={`${point.date}: ${point.impressions} impressions, ${point.clicks} clicks`}
+                    >
+                      <div className="flex h-40 items-end gap-0.5">
+                        <div
+                          className="w-2 rounded-t bg-slate-300"
+                          style={{ height: `${impressionHeight}px` }}
+                        />
+                        <div
+                          className="w-2 rounded-t bg-[#f47524]"
+                          style={{ height: `${clickHeight}px` }}
+                        />
+                      </div>
+                      <span className="mt-2 rotate-[-45deg] whitespace-nowrap text-[9px] text-slate-400">
+                        {new Date(`${point.date}T00:00:00`).toLocaleDateString(
+                          undefined,
+                          { month: "short", day: "numeric" },
+                        )}
+                      </span>
+                    </div>
+                  );
+                })}
+              </div>
+            </div>
+
+            <div className="mt-7 flex gap-4 text-xs font-semibold text-slate-500">
+              <span className="flex items-center gap-1.5">
+                <span className="h-2.5 w-2.5 rounded-sm bg-slate-300" />
+                Impressions
+              </span>
+              <span className="flex items-center gap-1.5">
+                <span className="h-2.5 w-2.5 rounded-sm bg-[#f47524]" />
+                Clicks
+              </span>
+            </div>
+          </section>
+
+          <section className="overflow-hidden rounded-2xl border border-slate-200 bg-white shadow-sm dark:border-white/10 dark:bg-[#1f2937]">
+            <div className="border-b border-slate-200 px-5 py-4 dark:border-white/10">
+              <h3 className="font-bold">Top campaigns</h3>
+              <p className="text-xs text-slate-500">
+                Ranked by clicks, then impressions and estimated revenue.
+              </p>
+            </div>
+            <div className="overflow-x-auto">
+              <table className="w-full min-w-[920px] text-left text-sm">
+                <thead className="bg-slate-50 text-[11px] uppercase tracking-wide text-slate-500 dark:bg-white/5">
+                  <tr>
+                    <th className="px-5 py-3">Campaign</th>
+                    <th className="px-5 py-3">Status</th>
+                    <th className="px-5 py-3">Impressions</th>
+                    <th className="px-5 py-3">Clicks</th>
+                    <th className="px-5 py-3">CTR</th>
+                    <th className="px-5 py-3">Billing</th>
+                    <th className="px-5 py-3">Estimated Revenue</th>
+                  </tr>
+                </thead>
+                <tbody className="divide-y divide-slate-100 dark:divide-white/10">
+                  {data.top_campaigns.map((campaign) => (
+                    <tr key={campaign.id}>
+                      <td className="px-5 py-4">
+                        <p className="font-bold">{campaign.title}</p>
+                        <p className="text-xs text-[#f47524]">
+                          {campaign.advertiser_name}
+                        </p>
+                      </td>
+                      <td className="px-5 py-4">
+                        <span
+                          className={`inline-flex rounded-full px-2.5 py-1 text-xs font-bold ring-1 ring-inset ${statusClasses[campaign.effective_status]}`}
+                        >
+                          {pretty(campaign.effective_status)}
+                        </span>
+                      </td>
+                      <td className="px-5 py-4 font-semibold">
+                        {campaign.impressions.toLocaleString()}
+                      </td>
+                      <td className="px-5 py-4 font-semibold">
+                        {campaign.clicks.toLocaleString()}
+                      </td>
+                      <td className="px-5 py-4">
+                        {campaign.ctr_percent.toFixed(2)}%
+                      </td>
+                      <td className="px-5 py-4 uppercase">
+                        {campaign.billing_type}
+                      </td>
+                      <td className="px-5 py-4 font-bold text-[#f47524]">
+                        {money(campaign.estimated_revenue, campaign.currency)}
+                      </td>
+                    </tr>
+                  ))}
+                </tbody>
+              </table>
+            </div>
+          </section>
+
+          <section className="overflow-hidden rounded-2xl border border-slate-200 bg-white shadow-sm dark:border-white/10 dark:bg-[#1f2937]">
+            <div className="border-b border-slate-200 px-5 py-4 dark:border-white/10">
+              <h3 className="font-bold">Advertiser performance</h3>
+              <p className="text-xs text-slate-500">
+                Aggregated campaign reach and engagement by brand/advertiser.
+              </p>
+            </div>
+            <div className="grid gap-px bg-slate-100 sm:grid-cols-2 xl:grid-cols-3 dark:bg-white/10">
+              {data.advertisers.map((advertiser) => (
+                <article
+                  key={advertiser.advertiser_name}
+                  className="bg-white p-5 dark:bg-[#1f2937]"
+                >
+                  <h4 className="font-bold">{advertiser.advertiser_name}</h4>
+                  <p className="mt-1 text-xs text-slate-500">
+                    {advertiser.campaigns} campaigns
+                  </p>
+
+                  <div className="mt-4 grid grid-cols-3 gap-2 text-sm">
+                    <div>
+                      <p className="text-xs text-slate-400">Impressions</p>
+                      <p className="font-bold">
+                        {advertiser.impressions.toLocaleString()}
+                      </p>
+                    </div>
+                    <div>
+                      <p className="text-xs text-slate-400">Clicks</p>
+                      <p className="font-bold">
+                        {advertiser.clicks.toLocaleString()}
+                      </p>
+                    </div>
+                    <div>
+                      <p className="text-xs text-slate-400">CTR</p>
+                      <p className="font-bold">
+                        {advertiser.ctr_percent.toFixed(2)}%
+                      </p>
+                    </div>
+                  </div>
+
+                  <div className="mt-4 flex flex-wrap gap-2">
+                    {advertiser.revenue_by_currency.map((row) => (
+                      <span
+                        key={row.currency}
+                        className="rounded-lg bg-orange-50 px-2.5 py-1.5 text-xs font-bold text-[#f47524]"
+                      >
+                        {money(row.estimated_revenue, row.currency)}
+                      </span>
+                    ))}
+                  </div>
+                </article>
+              ))}
+            </div>
+          </section>
+        </>
+      )}
+    </div>
+  );
+}
+
+function AnalyticsCard({
+  label,
+  value,
+  helper,
+}: {
+  label: string;
+  value: string;
+  helper: string;
+}) {
+  return (
+    <article className="rounded-2xl border border-slate-200 bg-white p-5 shadow-sm dark:border-white/10 dark:bg-[#1f2937]">
+      <p className="text-xs font-bold uppercase tracking-wide text-slate-400">
+        {label}
+      </p>
+      <p className="mt-2 text-3xl font-black text-slate-950 dark:text-white">
+        {value}
+      </p>
+      <p className="mt-1 text-xs text-slate-500">{helper}</p>
+    </article>
   );
 }
 

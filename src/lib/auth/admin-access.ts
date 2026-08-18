@@ -245,6 +245,7 @@ export const ADMIN_ITEM_PERMISSIONS: Record<string, string[]> = {
   "Scheduled Ads": ["advertisements:read"],
   "Paused Ads": ["advertisements:read"],
   "Expired Ads": ["advertisements:read"],
+  "Advertisement Analytics": ["advertisements:read"],
 
   // Promotions
   Coupons: ["coupons:read", "coupons:write"],
