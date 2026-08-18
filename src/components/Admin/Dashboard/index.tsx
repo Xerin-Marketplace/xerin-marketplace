@@ -264,6 +264,7 @@ const sidebarGroups: SidebarGroup[] = [
   {
     title: "Advertising",
     key: "products",
+    icon: Megaphone,
     items: [
       { label: "All Advertisements", href: "?tab=products&menu=advertising&item=all-advertisements" },
       { label: "Create Advertisement", href: "?tab=products&menu=advertising&item=create-advertisement" },
