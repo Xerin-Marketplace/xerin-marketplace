@@ -91,6 +91,7 @@ export const ADMIN_SECTION_PERMISSIONS: Record<string, string[]> = {
     "currencies:read", "countries:read", "commissions:read",
     "finance_reports:read", "payment_audit:read",
   ],
+  Advertising: ["advertisements:read", "advertisements:manage"],
   Promotions: [
     "promotions:read",
     "promotions:create",
@@ -236,6 +237,14 @@ export const ADMIN_ITEM_PERMISSIONS: Record<string, string[]> = {
   Countries: ["countries:read", "payments:read"],
   "Fees & Commissions": ["commissions:read", "payments:read"],
   "Payment Audit Logs": ["payment_audit:read", "audit_logs:read"],
+
+  // Advertising
+  "All Advertisements": ["advertisements:read"],
+  "Create Advertisement": ["advertisements:manage"],
+  "Active Ads": ["advertisements:read"],
+  "Scheduled Ads": ["advertisements:read"],
+  "Paused Ads": ["advertisements:read"],
+  "Expired Ads": ["advertisements:read"],
 
   // Promotions
   Coupons: ["coupons:read", "coupons:write"],

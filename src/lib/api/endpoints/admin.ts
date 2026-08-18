@@ -118,6 +118,93 @@ export type AdminPaymentDashboard = {
 export type Coupon = { id: string; code: string; description: string | null; discount_type: string; discount_value: number; minimum_order_amount: number | null; maximum_discount_amount: number | null; usage_limit: number | null; usage_count: number; is_active: boolean; valid_from: string | null; valid_until: string | null; created_at: string };
 export type DiscountRule = { id: string; name: string; description: string | null; discount_type: string; discount_value: number; applies_to: string; minimum_order_amount: number | null; priority: number; is_active: boolean; valid_from: string | null; valid_until: string | null; created_at: string };
 export type PromotionCampaign = { id: string; name: string; objective: string; description: string | null; audience: string; channel: string; budget: number | null; currency: string; status: string; starts_at: string | null; ends_at: string | null; impressions: number; conversions: number; revenue: number; created_at: string };
+export type AdvertisementPlacement =
+  | "hero_side_top"
+  | "hero_side_bottom"
+  | "homepage_banner"
+  | "category_banner"
+  | "search_banner";
+
+export type AdvertisementStoredStatus = "draft" | "active" | "paused";
+export type AdvertisementEffectiveStatus =
+  | "draft"
+  | "scheduled"
+  | "active"
+  | "paused"
+  | "expired";
+export type AdvertisementBillingType = "fixed" | "cpc" | "cpm";
+
+export type AdminAdvertisement = {
+  id: string;
+  advertiser_name: string;
+  title: string;
+  description: string | null;
+  image_url: string;
+  mobile_image_url: string | null;
+  alt_text: string | null;
+  target_url: string | null;
+  cta_label: string | null;
+  placement: AdvertisementPlacement;
+  status: AdvertisementStoredStatus;
+  effective_status: AdvertisementEffectiveStatus;
+  starts_at: string;
+  ends_at: string;
+  priority: number;
+  billing_type: AdvertisementBillingType;
+  price: number | null;
+  currency: string;
+  impression_count: number;
+  click_count: number;
+  metadata_json: Record<string, unknown>;
+  created_by_id: string | null;
+  updated_by_id: string | null;
+  created_at: string;
+  updated_at: string | null;
+};
+
+export type PaginatedAdvertisements = {
+  total: number;
+  page: number;
+  page_size: number;
+  total_pages: number;
+  results: AdminAdvertisement[];
+};
+
+export type AdvertisementListParams = {
+  page?: number;
+  page_size?: number;
+  search?: string;
+  placement?: AdvertisementPlacement;
+  stored_status?: AdvertisementStoredStatus;
+  effective_status?: AdvertisementEffectiveStatus;
+};
+
+export type AdvertisementPayload = {
+  advertiser_name: string;
+  title: string;
+  description?: string | null;
+  image_url: string;
+  mobile_image_url?: string | null;
+  alt_text?: string | null;
+  target_url?: string | null;
+  cta_label?: string | null;
+  placement: AdvertisementPlacement;
+  status?: AdvertisementStoredStatus;
+  starts_at: string;
+  ends_at: string;
+  priority?: number;
+  billing_type?: AdvertisementBillingType;
+  price?: number | null;
+  currency?: string;
+  metadata_json?: Record<string, unknown>;
+};
+
+export type AdvertisementActionResponse = {
+  id: string;
+  status: AdvertisementStoredStatus;
+  effective_status: AdvertisementEffectiveStatus;
+  message: string;
+};
 export type CommunicationMessage = { id: string; channel: "notification" | "email" | "sms"; title: string | null; body: string; audience: string; recipient: string | null; status: string; scheduled_at: string | null; sent_at: string | null; delivered_at: string | null; failure_reason: string | null; created_at: string };
 export type AccessUser = AdminUser & {
   roles: string[];
@@ -1383,3 +1470,68 @@ export const releaseEscrowHold = async (id: string, amount?: number, note?: stri
     `/admin/finance/escrow-holds/${id}/release`,
     { amount: amount ?? null, note: note || null },
   )).data;
+
+
+export const listAdvertisements = async (
+  params: AdvertisementListParams = {},
+): Promise<PaginatedAdvertisements> =>
+  (
+    await axiosInstance.get<PaginatedAdvertisements>(
+      "/admin/advertisements",
+      { params },
+    )
+  ).data;
+
+export const getAdvertisement = async (
+  advertisementId: string,
+): Promise<AdminAdvertisement> =>
+  (
+    await axiosInstance.get<AdminAdvertisement>(
+      `/admin/advertisements/${advertisementId}`,
+    )
+  ).data;
+
+export const createAdvertisement = async (
+  payload: AdvertisementPayload,
+): Promise<AdminAdvertisement> =>
+  (
+    await axiosInstance.post<AdminAdvertisement>(
+      "/admin/advertisements",
+      payload,
+    )
+  ).data;
+
+export const updateAdvertisement = async (
+  advertisementId: string,
+  payload: Partial<AdvertisementPayload>,
+): Promise<AdminAdvertisement> =>
+  (
+    await axiosInstance.patch<AdminAdvertisement>(
+      `/admin/advertisements/${advertisementId}`,
+      payload,
+    )
+  ).data;
+
+export const activateAdvertisement = async (
+  advertisementId: string,
+): Promise<AdvertisementActionResponse> =>
+  (
+    await axiosInstance.post<AdvertisementActionResponse>(
+      `/admin/advertisements/${advertisementId}/activate`,
+    )
+  ).data;
+
+export const pauseAdvertisement = async (
+  advertisementId: string,
+): Promise<AdvertisementActionResponse> =>
+  (
+    await axiosInstance.post<AdvertisementActionResponse>(
+      `/admin/advertisements/${advertisementId}/pause`,
+    )
+  ).data;
+
+export const deleteAdvertisement = async (
+  advertisementId: string,
+): Promise<void> => {
+  await axiosInstance.delete(`/admin/advertisements/${advertisementId}`);
+};

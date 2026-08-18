@@ -33,6 +33,7 @@ import AdminOperationsWorkspace from "@/components/Admin/Operations";
 import AdminSellers from "@/components/Admin/Sellers";
 import SellerSubWorkspace from "@/components/Admin/Sellers/SubWorkspace";
 import AdminPayments, { PaymentView } from "@/components/Admin/Payments";
+import AdminAdvertisements, { AdvertisementView } from "@/components/Admin/Advertisements";
 import AdminPromotions, { PromotionView } from "@/components/Admin/Promotions";
 import AdminCommunications, {
   CommunicationView,
@@ -258,6 +259,18 @@ const sidebarGroups: SidebarGroup[] = [
       { label: "Fees & Commissions", href: "?tab=finance&menu=payments&item=fees-commissions" },
       { label: "Payment Reports", href: "?tab=finance&menu=payments&item=payment-reports" },
       { label: "Payment Audit Logs", href: "?tab=finance&menu=payments&item=payment-audit-logs" },
+    ],
+  },
+  {
+    title: "Advertising",
+    key: "products",
+    items: [
+      { label: "All Advertisements", href: "?tab=products&menu=advertising&item=all-advertisements" },
+      { label: "Create Advertisement", href: "?tab=products&menu=advertising&item=create-advertisement" },
+      { label: "Active Ads", href: "?tab=products&menu=advertising&item=active-ads" },
+      { label: "Scheduled Ads", href: "?tab=products&menu=advertising&item=scheduled-ads" },
+      { label: "Paused Ads", href: "?tab=products&menu=advertising&item=paused-ads" },
+      { label: "Expired Ads", href: "?tab=products&menu=advertising&item=expired-ads" },
     ],
   },
   {
@@ -683,6 +696,21 @@ export default function AdminDashboard() {
     : activeSidebarItem === "Payments:Payment Reports" ? "reports"
     : activeSidebarItem === "Payments:Payment Audit Logs" ? "audit"
     : "transactions";
+  const isAdvertisingWorkspace =
+    activeSidebarItem === "Advertising" ||
+    activeSidebarItem.startsWith("Advertising:");
+  const advertisementView: AdvertisementView =
+    activeSidebarItem === "Advertising:Create Advertisement"
+      ? "create"
+      : activeSidebarItem === "Advertising:Active Ads"
+        ? "active"
+        : activeSidebarItem === "Advertising:Scheduled Ads"
+          ? "scheduled"
+          : activeSidebarItem === "Advertising:Paused Ads"
+            ? "paused"
+            : activeSidebarItem === "Advertising:Expired Ads"
+              ? "expired"
+              : "all";
   const isPromotionsWorkspace =
     activeSidebarItem === "Promotions" ||
     activeSidebarItem.startsWith("Promotions:");
@@ -1803,6 +1831,9 @@ export default function AdminDashboard() {
             {isPaymentsWorkspace && !isLoading ? (
               <AdminPayments view={paymentView} />
             ) : null}
+            {isAdvertisingWorkspace && !isLoading ? (
+              <AdminAdvertisements view={advertisementView} />
+            ) : null}
             {isPromotionsWorkspace && !isLoading ? (
               <AdminPromotions view={promotionView} />
             ) : null}
@@ -1825,6 +1856,7 @@ export default function AdminDashboard() {
             {activeTab === "products" &&
             !isLoading &&
             !operationsWorkspace &&
+            !isAdvertisingWorkspace &&
             !isPromotionsWorkspace ? (
               <AdminProducts />
             ) : null}

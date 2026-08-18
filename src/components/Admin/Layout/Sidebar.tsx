@@ -163,6 +163,19 @@ const sidebarGroups: SidebarGroup[] = [
     ],
   },
   {
+    title: "Advertising",
+    key: "products",
+    icon: Megaphone,
+    items: [
+      { label: "All Advertisements", href: "/admin/dashboard?tab=products&menu=advertising&item=all-advertisements", icon: Megaphone },
+      { label: "Create Advertisement", href: "/admin/dashboard?tab=products&menu=advertising&item=create-advertisement", icon: Megaphone },
+      { label: "Active Ads", href: "/admin/dashboard?tab=products&menu=advertising&item=active-ads", icon: Megaphone },
+      { label: "Scheduled Ads", href: "/admin/dashboard?tab=products&menu=advertising&item=scheduled-ads", icon: Megaphone },
+      { label: "Paused Ads", href: "/admin/dashboard?tab=products&menu=advertising&item=paused-ads", icon: Megaphone },
+      { label: "Expired Ads", href: "/admin/dashboard?tab=products&menu=advertising&item=expired-ads", icon: Megaphone },
+    ],
+  },
+  {
     title: "Promotions",
     key: "products",
     icon: Tag,
