@@ -18,11 +18,19 @@ import {
   Webhook,
   X,
 } from "lucide-react";
+import type { LucideIcon } from "lucide-react";
 import Link from "next/link";
 import { usePathname, useRouter } from "next/navigation";
 import { useEffect, useState } from "react";
 
-const nav = [
+type LogisticsNavItem = {
+  label: string;
+  href: string;
+  icon: LucideIcon;
+  soon?: boolean;
+};
+
+const nav: LogisticsNavItem[] = [
   { label: "Dashboard", href: "/logistics/dashboard", icon: LayoutDashboard },
   { label: "Shipments", href: "/logistics/shipments", icon: Truck },
   { label: "Pickup jobs", href: "/logistics/pickups", icon: PackageCheck },
