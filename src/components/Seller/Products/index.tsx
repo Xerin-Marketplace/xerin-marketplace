@@ -224,7 +224,7 @@ const SellerProducts = () => {
     }
 
     if (!isSeller) {
-      router.replace("/my-account");
+      router.replace("/account");
       return;
     }
 

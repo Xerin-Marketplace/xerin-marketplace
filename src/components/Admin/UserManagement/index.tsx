@@ -38,6 +38,7 @@ import {
 } from "lucide-react";
 import { useEffect, useMemo, useState } from "react";
 import toast from "react-hot-toast";
+import { ConfirmActionDialog } from "@/components/Admin/shared/ActionDialog";
 
 export type UserManagementView =
   | "users"
@@ -115,6 +116,7 @@ export default function AdminUserManagement({
   const [statusFilter, setStatusFilter] = useState("");
   const [selectedUser, setSelectedUser] = useState<AccessUser | null>(null);
   const [selectedRole, setSelectedRole] = useState<AccessRole | null>(null);
+  const [deleteRoleTarget, setDeleteRoleTarget] = useState<AccessRole | null>(null);
   const [showCreateRole, setShowCreateRole] = useState(false);
   const [showCreateStaff, setShowCreateStaff] = useState(false);
   const [busy, setBusy] = useState(false);
@@ -341,21 +343,13 @@ export default function AdminUserManagement({
 
   const removeRole = async (role: AccessRole) => {
     if (roleIsSystem(role)) return;
-
-    if (
-      !window.confirm(
-        `Delete the role "${pretty(role.name)}"? It must not be assigned to any users.`,
-      )
-    ) {
-      return;
-    }
-
     setBusy(true);
 
     try {
       await deleteAccessRole(role.id);
       toast.success("Role deleted.");
       setSelectedRole(null);
+      setDeleteRoleTarget(null);
       await load();
     } catch (cause) {
       toast.error(getError(cause, "Could not delete this role."));
@@ -601,7 +595,7 @@ export default function AdminUserManagement({
           busy={busy}
           onClose={() => setSelectedRole(null)}
           onSave={saveRole}
-          onDelete={removeRole}
+          onDelete={setDeleteRoleTarget}
         />
       )}
 
@@ -623,6 +617,7 @@ export default function AdminUserManagement({
           onCreate={createStaff}
         />
       )}
+      <ConfirmActionDialog open={Boolean(deleteRoleTarget)} title="Delete access role?" description={<>The role <strong>{deleteRoleTarget ? pretty(deleteRoleTarget.name) : ""}</strong> will be permanently deleted. The backend will refuse deletion while it is assigned to users.</>} confirmLabel="Delete role" busy={busy} onCancel={() => setDeleteRoleTarget(null)} onConfirm={() => deleteRoleTarget && void removeRole(deleteRoleTarget)} />
     </div>
   );
 }

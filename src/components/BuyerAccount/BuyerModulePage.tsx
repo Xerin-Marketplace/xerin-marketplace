@@ -3,7 +3,7 @@ import { formatCurrency } from "@/lib/formatCurrency";
 import { ordersApi, paymentsApi } from "@/lib/api/endpoints/commerce";
 import { authApi } from "@/lib/api/endpoints/auth";
 import { usersApi } from "@/lib/api/endpoints/users";
-import type { Address, User } from "@/types/api/user";
+import type { User } from "@/types/api/user";
 import type { Order, Payment } from "@/types/api/commerce";
 import {
   AlertCircle,
@@ -604,78 +604,6 @@ function Orders({
   );
 }
 
-function Addresses({ items }: { items: Address[] }) {
-  const [rows, setRows] = useState(items);
-  async function remove(a: Address) {
-    if (a.is_default && rows.length > 1)
-      return toast.error(
-        "Select another default address before deleting this one.",
-      );
-    if (!window.confirm("Delete this saved address?")) return;
-    try {
-      await usersApi.deleteAddress(a.id);
-      setRows((v) => v.filter((x) => x.id !== a.id));
-      toast.success("Address deleted.");
-    } catch {
-      toast.error("Unable to delete address.");
-    }
-  }
-  async function makeDefault(a: Address) {
-    try {
-      const updated = await usersApi.updateAddress(a.id, {
-        country: a.country,
-        region: a.region,
-        city: a.city,
-        street: a.street,
-        postal_code: a.postal_code,
-        is_default: true,
-      });
-      setRows((v) => v.map((x) => ({ ...x, is_default: x.id === updated.id })));
-      toast.success("Default address updated.");
-    } catch {
-      toast.error("Unable to update default address.");
-    }
-  }
-  if (!rows.length)
-    return (
-      <Empty
-        title="No saved addresses"
-        text="Add a delivery address to make checkout faster."
-        action="Add Delivery Address"
-        href="/account/details"
-      />
-    );
-  return (
-    <div className="grid gap-4 sm:grid-cols-2">
-      {rows.map((a) => (
-        <article
-          key={String(a.id)}
-          className="rounded-xl border border-[#e2e8f0] p-4 dark:border-white/10"
-        >
-          <div className="flex justify-between">
-            <b>{a.is_default ? "Default address" : "Saved address"}</b>
-            {a.is_default && (
-              <span className="rounded-full bg-green-50 px-2 py-1 text-xs text-green-700">
-                Default
-              </span>
-            )}
-          </div>
-          <p className="mt-2 text-sm text-[#64748b]">
-            {a.street}, {a.city}, {a.region}, {a.country}
-          </p>
-          <div className="mt-4 flex gap-3 text-sm font-semibold text-[#f7941d]">
-            {!a.is_default && (
-              <button onClick={() => void makeDefault(a)}>Set default</button>
-            )}
-            <button onClick={() => void remove(a)} className="text-red-600">
-              Delete
-            </button>
-          </div>
-        </article>
-      ))}
-    </div>
-  );
-}
 function Details({
   profile,
   form,

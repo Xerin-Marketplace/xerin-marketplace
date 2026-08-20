@@ -114,6 +114,7 @@ export default function SellerPayouts() {
   const [historyLoading, setHistoryLoading] = useState(true);
   const [submitting, setSubmitting] = useState(false);
   const [busyPayout, setBusyPayout] = useState<string | null>(null);
+  const [cancelTarget, setCancelTarget] = useState<SellerPayoutRequest | null>(null);
 
   const [page, setPage] = useState(1);
   const [pageSize, setPageSize] = useState(10);
@@ -282,19 +283,14 @@ export default function SellerPayouts() {
     }
   };
 
-  const cancelPayout = async (row: SellerPayoutRequest) => {
-    if (
-      !window.confirm(
-        `Cancel payout request for ${money(row.amount, row.currency)}?`,
-      )
-    ) {
-      return;
-    }
-
+  const cancelPayout = async () => {
+    if (!cancelTarget) return;
+    const row = cancelTarget;
     setBusyPayout(row.id);
     try {
       await sellerWalletApi.cancelPayout(row.id);
       toast.success("Payout request cancelled.");
+      setCancelTarget(null);
       await Promise.all([loadFoundation(), loadHistory()]);
     } catch (error) {
       toast.error(errorMessage(error));
@@ -664,7 +660,7 @@ export default function SellerPayouts() {
                               <button
                                 type="button"
                                 disabled={busyPayout === row.id}
-                                onClick={() => void cancelPayout(row)}
+                                onClick={() => setCancelTarget(row)}
                                 className="inline-flex items-center gap-1.5 rounded-lg border border-red-200 px-3 py-2 text-xs font-semibold text-red-600 disabled:opacity-50"
                               >
                                 <XCircle size={13} />
@@ -715,6 +711,14 @@ export default function SellerPayouts() {
           )}
         </section>
       </section>
+      {cancelTarget && (
+        <div className="fixed inset-0 z-[150] flex items-end justify-center bg-black/60 sm:items-center sm:p-4">
+          <div role="dialog" aria-modal="true" aria-labelledby="cancel-payout-title" className="w-full max-w-md rounded-t-2xl bg-white p-5 shadow-2xl dark:bg-[#1f2937] sm:rounded-2xl sm:p-6">
+            <div className="flex items-start gap-3"><span className="grid h-11 w-11 shrink-0 place-items-center rounded-xl bg-red-50 text-red-600 dark:bg-red-500/10"><CircleAlert size={20} /></span><div><h2 id="cancel-payout-title" className="font-bold text-slate-900 dark:text-white">Cancel payout request?</h2><p className="mt-1 text-sm leading-6 text-slate-500">The request for <strong className="text-slate-700 dark:text-white/80">{money(cancelTarget.amount, cancelTarget.currency)}</strong> will be cancelled. Funds will be returned according to the wallet rules.</p></div></div>
+            <div className="mt-6 flex flex-col-reverse gap-2 sm:flex-row sm:justify-end"><button type="button" disabled={busyPayout !== null} onClick={() => setCancelTarget(null)} className="min-h-11 rounded-xl border border-slate-200 px-4 text-sm font-semibold dark:border-white/10">Keep request</button><button type="button" disabled={busyPayout !== null} onClick={() => void cancelPayout()} className="inline-flex min-h-11 items-center justify-center gap-2 rounded-xl bg-red-600 px-4 text-sm font-bold text-white disabled:opacity-50">{busyPayout && <RefreshCw className="animate-spin" size={15} />}Cancel payout</button></div>
+          </div>
+        </div>
+      )}
     </div>
   );
 }

@@ -115,6 +115,7 @@ export default function SellerPromotions() {
   const [form, setForm] = useState<PromotionFormState>(initialForm);
   const [saving, setSaving] = useState(false);
   const [productSearch, setProductSearch] = useState("");
+  const [deleteTarget, setDeleteTarget] = useState<SellerPromotion | null>(null);
 
   const activeFilter =
     filter === "active" ? true : filter === "inactive" ? false : undefined;
@@ -335,12 +336,6 @@ export default function SellerPromotions() {
   };
 
   const removePromotion = async (promotion: SellerPromotion) => {
-    const message = promotion.usage_count
-      ? "This promotion already has usage history. The backend will safely deactivate it instead of deleting history. Continue?"
-      : "Delete this promotion?";
-
-    if (!window.confirm(message)) return;
-
     setBusy(String(promotion.id));
     try {
       await sellerPromotionsApi.delete(promotion.id);
@@ -349,6 +344,7 @@ export default function SellerPromotions() {
           ? "Promotion deactivated and history preserved."
           : "Promotion deleted.",
       );
+      setDeleteTarget(null);
       await loadPromotions();
     } catch (cause) {
       toast.error(apiError(cause));
@@ -601,7 +597,7 @@ export default function SellerPromotions() {
 
                           <button
                             type="button"
-                            disabled={busy === promotion.id}
+                            disabled={busy === String(promotion.id)}
                             onClick={() => void togglePromotion(promotion)}
                             className="rounded-lg border border-[#e2e8f0] px-3 py-2 text-xs font-semibold text-[#475569] disabled:opacity-50 dark:border-white/10 dark:text-white/70"
                           >
@@ -610,8 +606,8 @@ export default function SellerPromotions() {
 
                           <button
                             type="button"
-                            disabled={busy === promotion.id}
-                            onClick={() => void removePromotion(promotion)}
+                            disabled={busy === String(promotion.id)}
+                            onClick={() => setDeleteTarget(promotion)}
                             className="inline-flex h-9 w-9 items-center justify-center rounded-lg border border-red-200 text-red-600 hover:bg-red-50 disabled:opacity-50"
                             aria-label="Delete promotion"
                           >
@@ -670,6 +666,14 @@ export default function SellerPromotions() {
           onClose={closeEditor}
           onSave={() => void submit()}
         />
+      )}
+      {deleteTarget && (
+        <div className="fixed inset-0 z-[150] flex items-end justify-center bg-black/60 sm:items-center sm:p-4">
+          <div role="dialog" aria-modal="true" aria-labelledby="delete-promotion-title" className="w-full max-w-md rounded-t-2xl bg-white p-5 shadow-2xl dark:bg-[#1f2937] sm:rounded-2xl sm:p-6">
+            <div className="flex items-start gap-3"><span className="grid h-11 w-11 shrink-0 place-items-center rounded-xl bg-red-50 text-red-600 dark:bg-red-500/10"><Trash2 size={20} /></span><div><h2 id="delete-promotion-title" className="font-bold text-slate-900 dark:text-white">{deleteTarget.usage_count ? "Deactivate promotion?" : "Delete promotion?"}</h2><p className="mt-1 text-sm leading-6 text-slate-500">{deleteTarget.usage_count ? `“${deleteTarget.name}” has usage history, so it will be safely deactivated and its records preserved.` : `“${deleteTarget.name}” will be permanently deleted. This action cannot be undone.`}</p></div></div>
+            <div className="mt-6 flex flex-col-reverse gap-2 sm:flex-row sm:justify-end"><button type="button" disabled={busy !== null} onClick={() => setDeleteTarget(null)} className="min-h-11 rounded-xl border border-slate-200 px-4 text-sm font-semibold dark:border-white/10">Keep promotion</button><button type="button" disabled={busy !== null} onClick={() => void removePromotion(deleteTarget)} className="inline-flex min-h-11 items-center justify-center gap-2 rounded-xl bg-red-600 px-4 text-sm font-bold text-white disabled:opacity-50">{busy && <RefreshCw className="animate-spin" size={15} />}{deleteTarget.usage_count ? "Deactivate" : "Delete promotion"}</button></div>
+          </div>
+        </div>
       )}
     </div>
   );

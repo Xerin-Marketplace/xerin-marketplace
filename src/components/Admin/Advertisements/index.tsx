@@ -17,6 +17,7 @@ import {
   type AdvertisementPlacement,
   type AdminAdvertisement,
 } from "@/lib/api/endpoints/admin";
+import { ConfirmActionDialog } from "@/components/Admin/shared/ActionDialog";
 
 export type AdvertisementView =
   | "all"
@@ -105,6 +106,7 @@ function AdvertisementManager({
   const [editor, setEditor] = useState<AdminAdvertisement | "new" | null>(
     view === "create" ? "new" : null,
   );
+  const [deleteTarget, setDeleteTarget] = useState<AdminAdvertisement | null>(null);
 
   const load = useCallback(async () => {
     setLoading(true);
@@ -169,12 +171,9 @@ function AdvertisementManager({
         const result = await pauseAdvertisement(ad.id);
         setMessage(result.message);
       } else {
-        const confirmed = window.confirm(
-          `Delete "${ad.title}"? This cannot be undone.`,
-        );
-        if (!confirmed) return;
         await deleteAdvertisement(ad.id);
         setMessage("Advertisement deleted.");
+        setDeleteTarget(null);
       }
       await load();
     } catch (cause) {
@@ -384,7 +383,7 @@ function AdvertisementManager({
                       <button
                         type="button"
                         disabled={busy === `delete:${ad.id}`}
-                        onClick={() => void act(ad, "delete")}
+                        onClick={() => setDeleteTarget(ad)}
                         className="text-red-600 disabled:opacity-40"
                       >
                         Delete
@@ -448,6 +447,7 @@ function AdvertisementManager({
           onError={setError}
         />
       ) : null}
+      <ConfirmActionDialog open={Boolean(deleteTarget)} title="Delete advertisement?" description={<>The campaign <strong>{deleteTarget?.title}</strong> will be permanently deleted and removed from all placements.</>} confirmLabel="Delete advertisement" busy={Boolean(deleteTarget && busy === `delete:${deleteTarget.id}`)} onCancel={() => setDeleteTarget(null)} onConfirm={() => deleteTarget && void act(deleteTarget, "delete")} />
     </div>
   );
 }

@@ -24,7 +24,7 @@ export const dashboardModules: DashboardModule[] = [
     id: "buyer-account",
     title: "My Account",
     description: "Manage profile, addresses, account details, and buyer preferences.",
-    href: "/my-account",
+    href: "/account",
     group: "buyer",
     status: "ready",
     access: {
@@ -35,7 +35,7 @@ export const dashboardModules: DashboardModule[] = [
     id: "buyer-orders",
     title: "Orders",
     description: "View order history, order status, and order tracking.",
-    href: "/orders",
+    href: "/account/orders",
     group: "buyer",
     status: "ready",
     access: {

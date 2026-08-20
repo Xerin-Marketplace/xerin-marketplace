@@ -4,6 +4,7 @@ import { isAdminUser, isSellerUser } from "@/guards/permissions";
 import { useAuthStore } from "@/store/useAuthStore";
 import {
   Bell,
+  BadgeCheck,
   CreditCard,
   Heart,
   LayoutDashboard,
@@ -25,6 +26,7 @@ const nav = [
   ["Dashboard", "/account", LayoutDashboard],
   ["Orders", "/account/orders", Package],
   ["Pickup verification", "/account/pickup-verification", ScanSearch],
+  ["Delivery verification", "/account/delivery-verification", BadgeCheck],
   ["Payments", "/account/payments", CreditCard],
   ["Addresses", "/account/addresses", MapPin],
   ["Cart", "/cart", ShoppingCart],
@@ -70,16 +72,19 @@ export default function BuyerAccountLayout({
         <div className="mx-auto grid max-w-[1170px] gap-6 px-4 pb-12 sm:px-8 lg:grid-cols-[240px_1fr]">
           <aside className="min-w-0">
             <div className="flex gap-2 overflow-x-auto rounded-2xl border border-[#e2e8f0] bg-white p-2 shadow-sm dark:border-white/10 dark:bg-darkTheme-card lg:sticky lg:top-44 lg:flex-col lg:p-3">
-              {nav.map(([label, href, Icon]) => (
-                <Link
-                  key={href}
-                  href={href}
-                  className={`flex shrink-0 items-center gap-3 rounded-xl px-3 py-2.5 text-sm font-semibold ${pathname === href ? "bg-[#f7941d] text-white" : "text-[#4a4f54] hover:bg-orange-50 dark:text-white/70 dark:hover:bg-white/5"}`}
-                >
-                  <Icon size={18} />
-                  {label}
-                </Link>
-              ))}
+              {nav.map(([label, href, Icon]) => {
+                const active = pathname === href || (href !== "/account" && pathname.startsWith(`${href}/`));
+                return (
+                  <Link
+                    key={href}
+                    href={href}
+                    className={`flex shrink-0 items-center gap-3 rounded-xl px-3 py-2.5 text-sm font-semibold ${active ? "bg-[#f7941d] text-white" : "text-[#4a4f54] hover:bg-orange-50 dark:text-white/70 dark:hover:bg-white/5"}`}
+                  >
+                    <Icon size={18} />
+                    {label}
+                  </Link>
+                );
+              })}
               <button
                 onClick={() => void logout()}
                 className="flex shrink-0 items-center gap-3 rounded-xl px-3 py-2.5 text-sm font-semibold text-red-600 hover:bg-red-50"

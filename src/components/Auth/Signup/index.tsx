@@ -153,7 +153,7 @@ const Signup = () => {
       if (hasAuthToken(response)) {
         setSession(response);
         toast.success("Account created successfully.");
-        router.push("/my-account");
+        router.push("/account");
         return;
       }
 

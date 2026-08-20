@@ -9,7 +9,7 @@ export const metadata: Metadata = {
 
 export default function SellerStorePage() {
   return (
-    <RouteGuard accountTypes={["seller"]} fallbackPath="/my-account">
+    <RouteGuard accountTypes={["seller"]} fallbackPath="/account">
       <SellerStoreSettings />
     </RouteGuard>
   );

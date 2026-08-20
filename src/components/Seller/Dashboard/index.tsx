@@ -112,7 +112,7 @@ export default function SellerDashboard() {
     }
 
     if (!isSeller) {
-      router.replace("/my-account");
+      router.replace("/account");
       return;
     }
 

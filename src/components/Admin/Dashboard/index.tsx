@@ -1,5 +1,6 @@
 "use client";
 import Image from "next/image";
+import "../admin-ui.css";
 
 import { ReactNode, useEffect, useState, useMemo } from "react";
 import { usePathname, useRouter, useSearchParams } from "next/navigation";
@@ -24,12 +25,12 @@ import AdminInventoryAdjustments from "@/components/Admin/Inventory/Adjustments"
 import AdminInventoryLowStock from "@/components/Admin/Inventory/LowStock";
 import AdminProductInventoryDetails from "@/components/Admin/Inventory/ProductDetails";
 import AdminWarehouseDetails from "@/components/Admin/Inventory/WarehouseDetails";
+import { ReasonActionDialog } from "@/components/Admin/shared/ActionDialog";
 import AdminCustomers from "@/components/Admin/Customers/Customers";
 import AdminCustomerDetails from "@/components/Admin/Customers/CustomerDetails";
 import AdminCustomerAddresses from "@/components/Admin/Customers/Addresses";
 import AdminCustomerReviews from "@/components/Admin/Customers/Reviews";
 import AdminCustomerSupport from "@/components/Admin/Customers/Support";
-import AdminOperationsWorkspace from "@/components/Admin/Operations";
 import AdminSellers from "@/components/Admin/Sellers";
 import SellerSubWorkspace from "@/components/Admin/Sellers/SubWorkspace";
 import AdminPayments, { PaymentView } from "@/components/Admin/Payments";
@@ -804,7 +805,6 @@ export default function AdminDashboard() {
                     ? "escrow"
                     : "finance-settings";
 
-  const operationsWorkspace = null;
   const sellerView =
     activeSidebarItem === "Sellers:Seller Applications"
       ? "applications"
@@ -817,6 +817,7 @@ export default function AdminDashboard() {
             : "all";
 
   const [busyAction, setBusyAction] = useState<string | null>(null);
+  const [rejectionTarget, setRejectionTarget] = useState<{ kind: "seller" | "product"; id: string } | null>(null);
 
   const syncSidebarUrl = (tab: AdminTab, sidebarItem: string) => {
     const params = new URLSearchParams(searchParams.toString());
@@ -1026,24 +1027,7 @@ export default function AdminDashboard() {
     }
   };
 
-  const handleRejectSeller = async (sellerId: string) => {
-    const reason = window.prompt("Andika sababu ya kumkataa seller:");
-
-    if (!reason || !reason.trim()) {
-      return;
-    }
-
-    setBusyAction(`reject-seller-${sellerId}`);
-    try {
-      await adminService.rejectSeller(sellerId, reason.trim());
-      toast.success("Seller rejected.");
-      await refreshModerationQueues();
-    } catch (error) {
-      toast.error(getErrorMessage(error));
-    } finally {
-      setBusyAction(null);
-    }
-  };
+  const handleRejectSeller = (sellerId: string) => setRejectionTarget({ kind: "seller", id: sellerId });
 
   const handleApproveProduct = async (productId: string) => {
     setBusyAction(`approve-product-${productId}`);
@@ -1058,17 +1042,17 @@ export default function AdminDashboard() {
     }
   };
 
-  const handleRejectProduct = async (productId: string) => {
-    const reason = window.prompt("Andika sababu ya kukataa product:");
+  const handleRejectProduct = (productId: string) => setRejectionTarget({ kind: "product", id: productId });
 
-    if (!reason || !reason.trim()) {
-      return;
-    }
-
-    setBusyAction(`reject-product-${productId}`);
+  const submitRejection = async (reason: string) => {
+    if (!rejectionTarget) return;
+    const { kind, id } = rejectionTarget;
+    setBusyAction(`reject-${kind}-${id}`);
     try {
-      await adminService.rejectProduct(productId, reason.trim());
-      toast.success("Product rejected.");
+      if (kind === "seller") await adminService.rejectSeller(id, reason);
+      else await adminService.rejectProduct(id, reason);
+      toast.success(`${kind === "seller" ? "Seller" : "Product"} rejected.`);
+      setRejectionTarget(null);
       await refreshModerationQueues();
     } catch (error) {
       toast.error(getErrorMessage(error));
@@ -1109,7 +1093,7 @@ export default function AdminDashboard() {
     : Gauge;
 
   return (
-    <section className="admin-dashboard-shell min-h-screen overflow-x-hidden bg-[#f6f7f9] text-[#111827] antialiased dark:bg-[#111827] dark:text-white" style={{ fontFamily: 'Inter, "Segoe UI", Roboto, Helvetica, Arial, sans-serif' }}>
+    <section className="admin-dashboard-shell min-h-screen overflow-x-clip bg-[#f6f7f9] text-[#111827] antialiased dark:bg-[#111827] dark:text-white" style={{ fontFamily: 'Inter, "Segoe UI", Roboto, Helvetica, Arial, sans-serif' }}>
       {isMobileSidebarOpen ? (
         <button
           aria-label="Close admin navigation"
@@ -1122,7 +1106,7 @@ export default function AdminDashboard() {
           className={`grid min-h-screen grid-cols-1 gap-0 ${isSidebarCollapsed ? "xl:grid-cols-[88px_minmax(0,1fr)]" : "xl:grid-cols-[270px_minmax(0,1fr)]"}`}
         >
           <aside
-            className={`${isMobileSidebarOpen ? "translate-x-0" : "-translate-x-full"} fixed inset-y-0 left-0 z-50 flex w-[280px] flex-col overflow-y-auto border-r border-[#e7ebf0] bg-white/85 text-[#111827] shadow-[8px_0_30px_rgba(15,23,42,0.035)] backdrop-blur-xl transition-all xl:sticky xl:top-0 xl:h-screen xl:w-auto xl:translate-x-0 dark:border-white/10 dark:bg-[#1f2937]/90 dark:text-white`}
+            className={`${isMobileSidebarOpen ? "translate-x-0" : "-translate-x-full"} fixed inset-y-0 left-0 z-50 flex h-dvh w-[280px] flex-col overflow-hidden border-r border-[#e7ebf0] bg-white/95 text-[#111827] shadow-[8px_0_30px_rgba(15,23,42,0.035)] backdrop-blur-xl transition-all xl:sticky xl:top-0 xl:w-auto xl:translate-x-0 dark:border-white/10 dark:bg-[#1f2937]/95 dark:text-white`}
           >
             <div className="flex h-[74px] shrink-0 items-center border-b border-[#e7ebf0] px-5 dark:border-white/10">
               <div className="flex items-center">
@@ -1171,7 +1155,7 @@ export default function AdminDashboard() {
               </button>
             </div>
 
-            <nav className="mt-4 flex-1 space-y-3 overflow-y-auto px-1 pb-3">
+            <nav className="mt-4 min-h-0 flex-1 space-y-3 overflow-y-auto overscroll-contain px-1 pb-3 [scrollbar-gutter:stable]">
               {visibleSidebarGroups.map((group) => {
                 const GroupIcon = group.icon;
                 const isOpen =
@@ -1325,7 +1309,7 @@ export default function AdminDashboard() {
             </nav>
 
             {!isSidebarCollapsed && (
-              <div className="mt-6 rounded-2xl border border-[#e7ebf0] bg-white/65 p-4 shadow-sm dark:border-white/10 dark:bg-white/[0.06]">
+              <div className="mx-1 mt-3 shrink-0 rounded-2xl border border-[#e7ebf0] bg-white/65 p-4 shadow-sm dark:border-white/10 dark:bg-white/[0.06]">
                 <p className="text-[10px] font-semibold uppercase tracking-[.16em] text-[#94a3b8]">Quick Moderation Queue</p>
                 <div className="mt-3 space-y-1.5 text-sm text-[#475467] dark:text-white/70">
                   <p>
@@ -1347,7 +1331,7 @@ export default function AdminDashboard() {
             <button
               type="button"
               onClick={() => setIsSidebarCollapsed((v) => !v)}
-              className="mt-4 hidden w-full rounded-xl border border-[#e7ebf0] px-3 py-2.5 text-sm font-medium text-[#64748b] transition hover:bg-slate-50 hover:text-[#111827] dark:border-white/10 dark:text-white/65 dark:hover:bg-white/10 dark:hover:text-white xl:block"
+              className="mx-1 mb-3 mt-3 hidden w-[calc(100%-0.5rem)] shrink-0 rounded-xl border border-[#e7ebf0] px-3 py-2.5 text-sm font-medium text-[#64748b] transition hover:bg-slate-50 hover:text-[#111827] dark:border-white/10 dark:text-white/65 dark:hover:bg-white/10 dark:hover:text-white xl:block"
             >
               {isSidebarCollapsed ? "Expand" : "Collapse sidebar"}
             </button>
@@ -1824,10 +1808,6 @@ export default function AdminDashboard() {
               </>
             ) : null}
 
-            {operationsWorkspace && !isLoading ? (
-              <AdminOperationsWorkspace workspace={operationsWorkspace} />
-            ) : null}
-
             {isConfigurationWorkspace && !isLoading ? (
               <AdminConfiguration view={configurationView} />
             ) : null}
@@ -1859,7 +1839,6 @@ export default function AdminDashboard() {
 
             {activeTab === "products" &&
             !isLoading &&
-            !operationsWorkspace &&
             !isAdvertisingWorkspace &&
             !isPromotionsWorkspace ? (
               <AdminProducts />
@@ -1911,7 +1890,6 @@ export default function AdminDashboard() {
 
             {activeTab === "users" &&
             !isLoading &&
-            !operationsWorkspace &&
             !isUserManagementWorkspace ? (
               <>
                 {pathname.includes("/admin/customers/") &&
@@ -1948,7 +1926,7 @@ export default function AdminDashboard() {
               <AdminAnalytics />
             ) : null}
 
-            {activeTab === "sellers" && !isLoading && !operationsWorkspace ? (
+            {activeTab === "sellers" && !isLoading ? (
               sellerView === "all" || sellerView === "applications" ? (
                 <AdminSellers mode={sellerView} />
               ) : (
@@ -1957,8 +1935,7 @@ export default function AdminDashboard() {
             ) : null}
             {false &&
             activeTab === "sellers" &&
-            !isLoading &&
-            !operationsWorkspace ? (
+            !isLoading ? (
               <div className="rounded-2xl border border-gray-200 bg-white p-5 shadow-sm">
                 <h3 className="text-xl font-semibold text-[#111827] mb-4">
                   Pending Seller Applications
@@ -2019,6 +1996,7 @@ export default function AdminDashboard() {
           </main>
         </div>
       </div>
+      <ReasonActionDialog key={rejectionTarget ? `${rejectionTarget.kind}:${rejectionTarget.id}` : "closed"} open={Boolean(rejectionTarget)} title={`Reject ${rejectionTarget?.kind || "item"}?`} description="Provide a clear reason. It will be submitted through the backend moderation workflow and should help the applicant understand the decision." busy={Boolean(busyAction?.startsWith("reject-"))} onCancel={() => setRejectionTarget(null)} onSubmit={(reason) => void submitRejection(reason)} />
     </section>
   );
 }

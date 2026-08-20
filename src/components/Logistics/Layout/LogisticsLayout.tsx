@@ -6,6 +6,7 @@ import { authStorage } from "@/lib/auth/storage";
 import { useAuthStore } from "@/store/useAuthStore";
 import {
   Boxes,
+  BadgeCheck,
   Building2,
   LayoutDashboard,
   LogOut,
@@ -34,6 +35,7 @@ const nav: LogisticsNavItem[] = [
   { label: "Dashboard", href: "/logistics/dashboard", icon: LayoutDashboard },
   { label: "Shipments", href: "/logistics/shipments", icon: Truck },
   { label: "Pickup jobs", href: "/logistics/pickups", icon: PackageCheck },
+  { label: "Delivery verification", href: "/logistics/delivery-verification", icon: BadgeCheck },
   { label: "Zones & rates", href: "/logistics/pricing", icon: Boxes },
   { label: "Team", href: "/logistics/team", icon: Users },
   { label: "Wallet", href: "/logistics/wallet", icon: WalletCards },

@@ -1,6 +1,7 @@
 "use client";
 
 import Image from "next/image";
+import "../admin-ui.css";
 import Link from "next/link";
 import { ReactNode, useEffect, useMemo, useState } from "react";
 import { usePathname, useSearchParams } from "next/navigation";
@@ -287,8 +288,6 @@ const sidebarGroups: SidebarGroup[] = [
     key: "overview",
     icon: CircleUserRound,
     items: [
-      { label: "Profile", href: "/my-account", icon: CircleUserRound },
-      { label: "Security", href: "/my-account?tab=security", icon: ShieldCheck },
       { label: "Logout", href: "/signout", icon: X },
     ],
   },
@@ -370,7 +369,7 @@ export default function AdminSidebar({
 
   return (
     <div
-      className="min-h-screen bg-[#f6f7f9] text-[#111827] antialiased dark:bg-[#111827] dark:text-white"
+      className="admin-dashboard-shell min-h-screen bg-[#f6f7f9] text-[#111827] antialiased dark:bg-[#111827] dark:text-white"
       style={{
         fontFamily:
           'Inter, "Segoe UI", Roboto, Helvetica, Arial, sans-serif',
@@ -387,7 +386,7 @@ export default function AdminSidebar({
       <aside
         className={`${mobileOpen ? "translate-x-0" : "-translate-x-full"} ${
           collapsed ? "lg:w-[88px]" : "lg:w-[270px]"
-        } fixed inset-y-0 left-0 z-50 flex w-[282px] flex-col border-r border-[#e7ebf0] bg-white/85 text-[#111827] shadow-[8px_0_30px_rgba(15,23,42,0.035)] backdrop-blur-xl transition-all duration-200 dark:border-white/10 dark:bg-[#1f2937]/90 dark:text-white lg:translate-x-0`}
+        } fixed inset-y-0 left-0 z-50 flex h-dvh w-[282px] flex-col overflow-hidden border-r border-[#e7ebf0] bg-white/95 text-[#111827] shadow-[8px_0_30px_rgba(15,23,42,0.035)] backdrop-blur-xl transition-all duration-200 dark:border-white/10 dark:bg-[#1f2937]/95 dark:text-white lg:translate-x-0`}
       >
         {/* Brand */}
         <div className="flex h-[74px] shrink-0 items-center border-b border-[#e7ebf0] px-5 dark:border-white/10">
@@ -443,7 +442,7 @@ export default function AdminSidebar({
         )}
 
         {/* Navigation */}
-        <nav className="flex-1 space-y-5 overflow-y-auto px-3 py-4">
+        <nav className="min-h-0 flex-1 space-y-5 overflow-y-auto overscroll-contain px-3 py-4 [scrollbar-gutter:stable]">
           <div>
             {!collapsed && (
               <p className="mb-2 px-3 text-[10px] font-semibold uppercase tracking-[.18em] text-[#94a3b8] dark:text-white/35">

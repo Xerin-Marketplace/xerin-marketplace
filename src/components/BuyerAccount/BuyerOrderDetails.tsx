@@ -8,6 +8,7 @@ import type {
   Shipment,
 } from "@/types/api/commerce";
 import {
+  AlertTriangle,
   BadgeCheck,
   CalendarClock,
   CircleDollarSign,
@@ -47,6 +48,7 @@ export default function BuyerOrderDetails({ orderId }: { orderId: string }) {
   const [escrow, setEscrow] = useState<CustomerEscrowSummary | null>(null);
   const [approvingReceipt, setApprovingReceipt] = useState(false);
   const [escrowMessage, setEscrowMessage] = useState("");
+  const [receiptDialogOpen, setReceiptDialogOpen] = useState(false);
 
   const load = async () => {
     setLoading(true);
@@ -75,11 +77,6 @@ export default function BuyerOrderDetails({ orderId }: { orderId: string }) {
 
   const approveReceipt = async () => {
     if (!escrow?.can_customer_approve || approvingReceipt) return;
-    const confirmed = window.confirm(
-      "Confirm that you received the complete order in acceptable condition? This releases the seller funds from Xerin escrow.",
-    );
-    if (!confirmed) return;
-
     setApprovingReceipt(true);
     setEscrowMessage("");
     try {
@@ -91,6 +88,7 @@ export default function BuyerOrderDetails({ orderId }: { orderId: string }) {
       setEscrowMessage(
         "Receipt approved. Seller funds have been released from Xerin escrow.",
       );
+      setReceiptDialogOpen(false);
       await load();
     } catch (cause) {
       const err = cause as {
@@ -435,7 +433,7 @@ export default function BuyerOrderDetails({ orderId }: { orderId: string }) {
                 {escrow.can_customer_approve && (
                   <button
                     type="button"
-                    onClick={() => void approveReceipt()}
+                    onClick={() => setReceiptDialogOpen(true)}
                     disabled={approvingReceipt}
                     className="w-full rounded-xl bg-emerald-600 px-4 py-3 text-sm font-bold text-white disabled:cursor-not-allowed disabled:opacity-60"
                   >
@@ -554,6 +552,18 @@ export default function BuyerOrderDetails({ orderId }: { orderId: string }) {
       >
         ← Back to orders
       </Link>
+
+      {receiptDialogOpen && (
+        <div className="fixed inset-0 z-[150] flex items-end justify-center bg-black/60 sm:items-center sm:p-4">
+          <div role="dialog" aria-modal="true" aria-labelledby="approve-receipt-title" className="w-full max-w-md rounded-t-2xl bg-white p-5 shadow-2xl dark:bg-darkTheme-card sm:rounded-2xl sm:p-6">
+            <div className="flex items-start gap-3">
+              <span className="grid h-11 w-11 shrink-0 place-items-center rounded-xl bg-amber-50 text-amber-700 dark:bg-amber-500/10"><AlertTriangle size={20} /></span>
+              <div><h2 id="approve-receipt-title" className="font-bold text-slate-900 dark:text-white">Approve complete receipt?</h2><p className="mt-1 text-sm leading-6 text-slate-500">Confirm only after receiving the complete order in acceptable condition. Approval releases the protected seller funds from Xerin escrow and cannot be reversed from this page.</p></div>
+            </div>
+            <div className="mt-6 flex flex-col-reverse gap-2 sm:flex-row sm:justify-end"><button type="button" disabled={approvingReceipt} onClick={() => setReceiptDialogOpen(false)} className="min-h-11 rounded-xl border border-slate-200 px-4 text-sm font-semibold dark:border-white/10">Not yet</button><button type="button" disabled={approvingReceipt} onClick={() => void approveReceipt()} className="inline-flex min-h-11 items-center justify-center gap-2 rounded-xl bg-emerald-600 px-4 text-sm font-bold text-white disabled:opacity-60">{approvingReceipt && <RefreshCw className="animate-spin" size={15} />}Approve & release funds</button></div>
+          </div>
+        </div>
+      )}
     </div>
   );
 }

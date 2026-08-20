@@ -5,6 +5,7 @@ import toast from "react-hot-toast";
 import { useAddresses } from "@/hooks/useAddresses";
 import type { Address, AddressRequest } from "@/types/api/user";
 import AddressModal from "./AddressModal";
+import { AlertTriangle, Loader2, Trash2 } from "lucide-react";
 
 type AddressBookSectionProps = {
   isActive: boolean;
@@ -55,6 +56,7 @@ const AddressBookSection = ({
 
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [editingAddress, setEditingAddress] = useState<Address | null>(null);
+  const [deleteTarget, setDeleteTarget] = useState<Address | null>(null);
 
   const defaultAddress = useMemo(() => {
     return addresses.find((address) => address.is_default) ?? addresses[0] ?? null;
@@ -110,21 +112,17 @@ const AddressBookSection = ({
     }
   };
 
-  const handleDeleteAddress = async (address: Address) => {
-    if (address.is_default && addresses.length > 1) {
-      toast.error("Select another default address before deleting this one.");
-      return;
-    }
+  const openDeleteDialog = (address: Address) => {
+    if (address.is_default && addresses.length > 1) return toast.error("Select another default address before deleting this one.");
+    setDeleteTarget(address);
+  };
 
-    const confirmed = window.confirm("Delete this address?");
-
-    if (!confirmed) {
-      return;
-    }
-
+  const handleDeleteAddress = async () => {
+    if (!deleteTarget) return;
     try {
-      await deleteAddress(address.id);
+      await deleteAddress(deleteTarget.id);
       toast.success("Address deleted successfully.");
+      setDeleteTarget(null);
     } catch (error) {
       toast.error(getErrorMessage(error, "Unable to delete address."));
     }
@@ -279,7 +277,7 @@ const AddressBookSection = ({
 
                         <button
                           type="button"
-                          onClick={() => handleDeleteAddress(address)}
+                          onClick={() => openDeleteDialog(address)}
                           disabled={isDeletingAddress}
                           className="text-custom-sm font-medium text-red hover:underline disabled:opacity-70 disabled:cursor-not-allowed"
                         >
@@ -302,6 +300,14 @@ const AddressBookSection = ({
         isSubmitting={isSubmittingAddress}
         onSubmit={handleSubmitAddress}
       />
+      {deleteTarget && (
+        <div className="fixed inset-0 z-[150] flex items-end justify-center bg-black/60 sm:items-center sm:p-4">
+          <div role="dialog" aria-modal="true" aria-labelledby="delete-address-title" className="w-full max-w-md rounded-t-2xl bg-white p-5 shadow-2xl dark:bg-darkTheme-card sm:rounded-2xl sm:p-6">
+            <div className="flex items-start gap-3"><span className="grid h-11 w-11 shrink-0 place-items-center rounded-xl bg-red-50 text-red-600 dark:bg-red-500/10"><AlertTriangle size={20} /></span><div><h2 id="delete-address-title" className="font-bold text-dark dark:text-white">Delete saved address?</h2><p className="mt-1 text-sm leading-6 text-dark-4 dark:text-white/60">{formatAddress(deleteTarget)} will be permanently removed from your delivery addresses.</p></div></div>
+            <div className="mt-6 flex flex-col-reverse gap-2 sm:flex-row sm:justify-end"><button type="button" disabled={isDeletingAddress} onClick={() => setDeleteTarget(null)} className="min-h-11 rounded-xl border border-gray-3 px-4 text-sm font-semibold dark:border-white/10">Keep address</button><button type="button" disabled={isDeletingAddress} onClick={() => void handleDeleteAddress()} className="inline-flex min-h-11 items-center justify-center gap-2 rounded-xl bg-red-600 px-4 text-sm font-bold text-white disabled:opacity-60">{isDeletingAddress ? <Loader2 className="animate-spin" size={16} /> : <Trash2 size={16} />}Delete address</button></div>
+          </div>
+        </div>
+      )}
     </>
   );
 };

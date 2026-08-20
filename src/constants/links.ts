@@ -8,7 +8,7 @@ export const ROUTES = {
   signin: "/signin",
   adminLogin: "/admin/login",
   signup: "/signup",
-  account: "/my-account",
+  account: "/account",
   contact: "/contact",
 
   blogGrid: "/blogs/blog-grid",
@@ -16,8 +16,7 @@ export const ROUTES = {
   blogGridWithSidebar: "/blogs/blog-grid-with-sidebar",
   blogDetailsWithSidebar: "/blogs/blog-details-with-sidebar",
 
-  // Temporary routes until final pages are built
-  trackOrder: "/my-account",
+  trackOrder: "/account/orders",
   returnsRefunds: "/contact",
   helpCenter: "/contact",
   sellerRegister: "/seller/register",

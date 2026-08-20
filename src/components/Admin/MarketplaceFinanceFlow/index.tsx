@@ -7,6 +7,7 @@ import Link from "next/link";
 import { useCallback, useEffect, useMemo, useState } from "react";
 
 type Tab = "escrow" | "commissions" | "wallets" | "payouts" | "reconciliation";
+type FinanceAction = { kind: "payout"; row: FinancePayout; status: string } | { kind: "reconciliation"; row: Reconciliation };
 const pretty = (value?: string | null) => (value || "unknown").replaceAll("_", " ").replace(/\b\w/g, (x) => x.toUpperCase());
 const money = (value: number | string, currency = "TZS") => new Intl.NumberFormat("en-TZ", { style: "currency", currency, maximumFractionDigits: currency === "TZS" ? 0 : 2 }).format(Number(value));
 const statusClass = (value: string) => ["completed", "released", "matched", "reconciled", "active"].includes(value) ? "bg-emerald-100 text-emerald-700" : ["failed", "rejected", "disputed", "frozen"].includes(value) ? "bg-red-100 text-red-700" : "bg-amber-100 text-amber-800";
@@ -16,26 +17,130 @@ export default function MarketplaceFinanceFlow() {
   const [escrow, setEscrow] = useState<EscrowHold[]>([]); const [commissions, setCommissions] = useState<CommissionRule[]>([]);
   const [payouts, setPayouts] = useState<FinancePayout[]>([]); const [reconciliation, setReconciliation] = useState<Reconciliation[]>([]);
   const [tab, setTab] = useState<Tab>("escrow"); const [loading, setLoading] = useState(true); const [error, setError] = useState(""); const [busy, setBusy] = useState("");
+  const [financeAction, setFinanceAction] = useState<FinanceAction | null>(null); const [actionNote, setActionNote] = useState(""); const [providerReference, setProviderReference] = useState("");
   const load = useCallback(async () => { setLoading(true); setError(""); const results = await Promise.allSettled([financeFlowApi.dashboard(), financeFlowApi.sellerWallets(), financeFlowApi.escrow(), financeFlowApi.commissions(), financeFlowApi.payouts(), financeFlowApi.reconciliation()]); const failures: string[] = []; const take = <T,>(index: number, apply: (value: T) => void) => { const result = results[index]; if (result.status === "fulfilled") apply(result.value as T); else failures.push(result.reason instanceof Error ? result.reason.message : "A finance resource could not be loaded."); }; take<FinanceDashboard>(0, setDashboard); take<SellerWallet[]>(1, setWallets); take<{ results: EscrowHold[] }>(2, (x) => setEscrow(x.results)); take<{ results: CommissionRule[] }>(3, (x) => setCommissions(x.results)); take<{ results: FinancePayout[] }>(4, (x) => setPayouts(x.results)); take<{ results: Reconciliation[] }>(5, (x) => setReconciliation(x.results)); if (failures.length) setError(Array.from(new Set(failures)).join(" ")); setLoading(false); }, []);
   useEffect(() => { void load(); }, [load]);
   const walletTotals = useMemo(() => wallets.reduce((sum, wallet) => ({ available: sum.available + Number(wallet.available_balance), pending: sum.pending + Number(wallet.pending_balance), reserved: sum.reserved + Number(wallet.reserved_balance) }), { available: 0, pending: 0, reserved: 0 }), [wallets]);
-  const payoutAction = async (row: FinancePayout, status: string) => { const note = window.prompt(`Administrative note for ${status}:`); if (note === null) return; const reference = status === "completed" ? window.prompt("Provider reference:") || undefined : undefined; setBusy(row.id); setError(""); try { await financeFlowApi.updatePayout(row.id, { status, note: note || undefined, provider_reference: reference }); await load(); } catch (e) { setError(e instanceof Error ? e.message : "Payout update failed."); } finally { setBusy(""); } };
-  const reconcile = async (row: Reconciliation) => { const note = window.prompt("Reconciliation note:"); if (!note) return; setBusy(row.id); setError(""); try { await financeFlowApi.updateReconciliation(row.id, { status: "reconciled", reconciliation_note: note }); await load(); } catch (e) { setError(e instanceof Error ? e.message : "Reconciliation update failed."); } finally { setBusy(""); } };
-  return <div className="space-y-5"><section className="overflow-hidden rounded-2xl bg-gradient-to-br from-slate-950 via-slate-800 to-emerald-600 p-5 text-white shadow-lg sm:p-7"><div className="flex flex-col gap-4 lg:flex-row lg:items-end lg:justify-between"><div><p className="text-xs font-bold uppercase tracking-[.16em] text-emerald-200">Marketplace settlement</p><h2 className="mt-2 text-2xl font-bold sm:text-3xl">Financial flow control</h2><p className="mt-2 max-w-3xl text-sm leading-6 text-white/75">Trace collections through escrow allocation, commission, wallet credit, payout and provider reconciliation.</p></div><button onClick={() => void load()} disabled={loading} className="inline-flex min-h-11 items-center justify-center gap-2 rounded-xl bg-white px-4 text-sm font-bold text-slate-900 disabled:opacity-60"><RefreshCw size={17} className={loading ? "animate-spin" : ""} />Refresh finance</button></div></section>
+  const payoutAction = async (row: FinancePayout, status: string) => { setActionNote(""); setProviderReference(""); setFinanceAction({ kind: "payout", row, status }); };
+  const reconcile = async (row: Reconciliation) => { setActionNote(""); setProviderReference(""); setFinanceAction({ kind: "reconciliation", row }); };
+  const submitFinanceAction = async () => { if (!financeAction || actionNote.trim().length < 3) return; const id = financeAction.row.id; setBusy(id); setError(""); try { if (financeAction.kind === "payout") await financeFlowApi.updatePayout(id, { status: financeAction.status, note: actionNote.trim(), provider_reference: financeAction.status === "completed" ? providerReference.trim() || undefined : undefined }); else await financeFlowApi.updateReconciliation(id, { status: "reconciled", reconciliation_note: actionNote.trim() }); setFinanceAction(null); await load(); } catch (e) { setError(e instanceof Error ? e.message : "Finance action failed."); } finally { setBusy(""); } };
+  return <div className="space-y-5">
+<section className="rounded-2xl border border-slate-200 bg-white p-5 shadow-sm dark:border-slate-700 dark:bg-slate-800 sm:p-6">
+<div className="flex flex-col gap-4 lg:flex-row lg:items-end lg:justify-between">
+<div>
+<p className="text-xs font-bold uppercase tracking-[.16em] text-emerald-600">Marketplace settlement</p>
+<h2 className="mt-2 text-2xl font-bold sm:text-3xl">Financial flow control</h2>
+<p className="mt-2 max-w-3xl text-sm leading-6 text-slate-500">Trace collections through escrow allocation, commission, wallet credit, payout and provider reconciliation.</p>
+</div>
+<button onClick={() => void load()} disabled={loading} className="inline-flex min-h-11 items-center justify-center gap-2 rounded-xl bg-slate-900 px-4 text-sm font-bold text-white disabled:opacity-60 dark:bg-emerald-600">
+<RefreshCw size={17} className={loading ? "animate-spin" : ""} />Refresh finance</button>
+</div>
+</section>
     {error && <p className="rounded-2xl border border-amber-200 bg-amber-50 p-4 text-sm text-amber-900">Some financial resources are unavailable for this account: {error}</p>}
-    <section className="grid grid-cols-2 gap-3 xl:grid-cols-4"><Metric icon={CircleDollarSign} label="Processed volume" value={dashboard ? money(dashboard.processed_volume, dashboard.currency) : "—"} /><Metric icon={RotateCcw} label="Refunded" value={dashboard ? money(dashboard.refunded_amount, dashboard.currency) : "—"} /><Metric icon={Landmark} label="Commission" value={dashboard ? money(dashboard.platform_commission, dashboard.currency) : "—"} /><Metric icon={Banknote} label="Seller earnings" value={dashboard ? money(dashboard.seller_earnings, dashboard.currency) : "—"} /></section>
-    <section className="grid gap-3 md:grid-cols-3"><FlowCard step="1–2" title="Payment → Escrow" value={`${dashboard?.successful_payments ?? 0} successful · ${escrow.filter((x) => ["held", "release_pending"].includes(x.status)).length} held`} href="/admin/dashboard?tab=finance&menu=finance-configuration&item=escrow-holds" /><FlowCard step="3–4" title="Commission → Wallet" value={`${commissions.filter((x) => x.is_active).length} active rules · ${wallets.length} wallets`} href="/admin/dashboard?tab=overview&menu=marketplace-settings&item=commission-rules" /><FlowCard step="5–6" title="Payout → Reconciliation" value={`${dashboard?.pending_payouts ?? 0} pending · ${reconciliation.filter((x) => Number(x.difference) !== 0).length} differences`} href="/admin/dashboard?tab=finance&menu=payments&item=reconciliation" /></section>
-    <section className="rounded-2xl border border-slate-200 bg-white shadow-sm dark:border-slate-700 dark:bg-slate-800"><div className="overflow-x-auto border-b dark:border-slate-700"><div className="flex min-w-max gap-1 p-2">{(["escrow", "commissions", "wallets", "payouts", "reconciliation"] as Tab[]).map((value) => <button key={value} onClick={() => setTab(value)} className={`min-h-11 rounded-xl px-4 text-sm font-bold capitalize ${tab === value ? "bg-emerald-600 text-white" : "text-slate-500 hover:bg-slate-100 dark:hover:bg-slate-700"}`}>{value}</button>)}</div></div><div className="p-3 sm:p-5">{loading ? <Loading /> : tab === "escrow" ? <Escrow rows={escrow} /> : tab === "commissions" ? <Commissions rows={commissions} /> : tab === "wallets" ? <Wallets rows={wallets} totals={walletTotals} /> : tab === "payouts" ? <Payouts rows={payouts} busy={busy} action={payoutAction} /> : <Reconciliations rows={reconciliation} busy={busy} reconcile={reconcile} />}</div></section>
+    <section className="grid grid-cols-2 gap-3 xl:grid-cols-4">
+<Metric icon={CircleDollarSign} label="Processed volume" value={dashboard ? money(dashboard.processed_volume, dashboard.currency) : "—"} />
+<Metric icon={RotateCcw} label="Refunded" value={dashboard ? money(dashboard.refunded_amount, dashboard.currency) : "—"} />
+<Metric icon={Landmark} label="Commission" value={dashboard ? money(dashboard.platform_commission, dashboard.currency) : "—"} />
+<Metric icon={Banknote} label="Seller earnings" value={dashboard ? money(dashboard.seller_earnings, dashboard.currency) : "—"} />
+</section>
+    <section className="grid gap-3 md:grid-cols-3">
+<FlowCard step="1–2" title="Payment → Escrow" value={`${dashboard?.successful_payments ?? 0} successful · ${escrow.filter((x) => ["held", "release_pending"].includes(x.status)).length} held`} href="/admin/dashboard?tab=finance&menu=finance-configuration&item=escrow-holds" />
+<FlowCard step="3–4" title="Commission → Wallet" value={`${commissions.filter((x) => x.is_active).length} active rules · ${wallets.length} wallets`} href="/admin/dashboard?tab=overview&menu=marketplace-settings&item=commission-rules" />
+<FlowCard step="5–6" title="Payout → Reconciliation" value={`${dashboard?.pending_payouts ?? 0} pending · ${reconciliation.filter((x) => Number(x.difference) !== 0).length} differences`} href="/admin/dashboard?tab=finance&menu=payments&item=reconciliation" />
+</section>
+    <section className="rounded-2xl border border-slate-200 bg-white shadow-sm dark:border-slate-700 dark:bg-slate-800">
+<div className="overflow-x-auto border-b dark:border-slate-700">
+<div className="flex min-w-max gap-1 p-2">{(["escrow", "commissions", "wallets", "payouts", "reconciliation"] as Tab[]).map((value) => <button key={value} onClick={() => setTab(value)} className={`min-h-11 rounded-xl px-4 text-sm font-bold capitalize ${tab === value ? "bg-emerald-600 text-white" : "text-slate-500 hover:bg-slate-100 dark:hover:bg-slate-700"}`}>{value}</button>)}</div>
+</div>
+<div className="p-3 sm:p-5">{loading ? <Loading /> : tab === "escrow" ? <Escrow rows={escrow} /> : tab === "commissions" ? <Commissions rows={commissions} /> : tab === "wallets" ? <Wallets rows={wallets} totals={walletTotals} /> : tab === "payouts" ? <Payouts rows={payouts} busy={busy} action={payoutAction} /> : <Reconciliations rows={reconciliation} busy={busy} reconcile={reconcile} />}</div>
+</section>
+    {financeAction && <div className="fixed inset-0 z-[130] grid place-items-center bg-slate-950/60 p-4 backdrop-blur-sm" onMouseDown={() => !busy && setFinanceAction(null)}><div className="w-full max-w-lg rounded-2xl bg-white p-5 shadow-2xl dark:bg-slate-800 sm:p-6" onMouseDown={(event) => event.stopPropagation()}><p className="text-xs font-bold uppercase tracking-[.15em] text-emerald-600">Controlled finance action</p><h3 className="mt-2 text-xl font-bold">{financeAction.kind === "payout" ? `${pretty(financeAction.status)} payout` : "Mark reconciliation complete"}</h3><p className="mt-1 text-sm text-slate-500">A clear administrative note is required and will be sent to the live finance endpoint.</p><label className="mt-5 block text-sm font-semibold">Administrative note<textarea autoFocus rows={4} value={actionNote} onChange={(event) => setActionNote(event.target.value)} className="mt-2 w-full rounded-xl border p-3 text-sm outline-none focus:border-emerald-500" placeholder="Explain the verification and decision…"/></label>{financeAction.kind === "payout" && financeAction.status === "completed" && <label className="mt-4 block text-sm font-semibold">Provider reference<input value={providerReference} onChange={(event) => setProviderReference(event.target.value)} className="mt-2 min-h-11 w-full rounded-xl border px-3 text-sm outline-none focus:border-emerald-500" placeholder="Settlement or transfer reference"/></label>}<div className="mt-5 grid gap-3 sm:grid-cols-2"><button disabled={Boolean(busy)} onClick={() => setFinanceAction(null)} className="min-h-11 rounded-xl border font-bold">Cancel</button><button disabled={Boolean(busy) || actionNote.trim().length < 3 || (financeAction.kind === "payout" && financeAction.status === "completed" && !providerReference.trim())} onClick={() => void submitFinanceAction()} className="min-h-11 rounded-xl bg-emerald-600 font-bold text-white disabled:opacity-40">{busy ? "Saving…" : "Confirm action"}</button></div></div></div>}
   </div>;
 }
-function Metric({ icon: Icon, label, value }: { icon: typeof CircleDollarSign; label: string; value: string }) { return <article className="rounded-2xl border border-slate-200 bg-white p-4 dark:border-slate-700 dark:bg-slate-800"><Icon size={18} className="text-emerald-600" /><p className="mt-3 break-words text-lg font-bold sm:text-xl">{value}</p><p className="text-xs text-slate-500">{label}</p></article>; }
-function FlowCard({ step, title, value, href }: { step: string; title: string; value: string; href: string }) { return <Link href={href} className="group rounded-2xl border border-slate-200 bg-white p-4 shadow-sm dark:border-slate-700 dark:bg-slate-800"><span className="text-xs font-bold text-emerald-600">STAGE {step}</span><div className="mt-2 flex items-center justify-between gap-3"><div><h3 className="font-bold">{title}</h3><p className="mt-1 text-xs text-slate-500">{value}</p></div><ArrowRight className="shrink-0 transition group-hover:translate-x-1" /></div></Link>; }
+function Metric({ icon: Icon, label, value }: { icon: typeof CircleDollarSign; label: string; value: string }) { return <article className="rounded-2xl border border-slate-200 bg-white p-4 dark:border-slate-700 dark:bg-slate-800">
+<Icon size={18} className="text-emerald-600" />
+<p className="mt-3 break-words text-lg font-bold sm:text-xl">{value}</p>
+<p className="text-xs text-slate-500">{label}</p>
+</article>; }
+function FlowCard({ step, title, value, href }: { step: string; title: string; value: string; href: string }) { return <Link href={href} className="group rounded-2xl border border-slate-200 bg-white p-4 shadow-sm dark:border-slate-700 dark:bg-slate-800">
+<span className="text-xs font-bold text-emerald-600">STAGE {step}</span>
+<div className="mt-2 flex items-center justify-between gap-3">
+<div>
+<h3 className="font-bold">{title}</h3>
+<p className="mt-1 text-xs text-slate-500">{value}</p>
+</div>
+<ArrowRight className="shrink-0 transition group-hover:translate-x-1" />
+</div>
+</Link>; }
 function Badge({ value }: { value: string }) { return <span className={`rounded-full px-2 py-1 text-[10px] font-bold uppercase ${statusClass(value.toLowerCase())}`}>{pretty(value)}</span>; }
 function Empty({ text }: { text: string }) { return <p className="rounded-xl border border-dashed p-8 text-center text-sm text-slate-500">{text}</p>; }
-function Loading() { return <div className="p-10 text-center text-sm text-slate-500"><RefreshCw className="mx-auto animate-spin" /><p className="mt-2">Loading live finance data…</p></div>; }
-function Escrow({ rows }: { rows: EscrowHold[] }) { return <div className="grid gap-3 md:grid-cols-2">{rows.map((row) => <article key={row.id} className="rounded-xl border p-4 dark:border-slate-700"><div className="flex items-start justify-between gap-2"><div><p className="break-all text-sm font-bold">{row.reference}</p><p className="text-xs text-slate-500">Order {row.order_id.slice(0, 8)}</p></div><Badge value={row.status} /></div><div className="mt-3 grid grid-cols-3 gap-2 text-xs"><Mini label="Gross" value={money(row.gross_amount, row.currency)} /><Mini label="Seller" value={money(row.seller_amount, row.currency)} /><Mini label="Commission" value={money(row.commission_amount, row.currency)} /></div></article>)}{!rows.length && <Empty text="No escrow holds found." />}</div>; }
-function Commissions({ rows }: { rows: CommissionRule[] }) { return <div className="grid gap-3 md:grid-cols-2 xl:grid-cols-3">{rows.map((row) => <article key={row.id} className="rounded-xl border p-4 dark:border-slate-700"><div className="flex justify-between gap-2"><h3 className="font-bold">{row.name}</h3><Badge value={row.is_active ? "active" : "inactive"} /></div><p className="mt-2 text-2xl font-bold text-emerald-600">{row.rule_type === "percentage" ? `${row.rate}%` : row.rate}</p><p className="text-xs capitalize text-slate-500">{row.scope} · priority {row.priority}</p></article>)}{!rows.length && <Empty text="No commission rules found." />}</div>; }
-function Wallets({ rows, totals }: { rows: SellerWallet[]; totals: { available: number; pending: number; reserved: number } }) { return <div className="space-y-4"><div className="grid grid-cols-3 gap-2"><Mini label="Available" value={money(totals.available)} /><Mini label="Pending" value={money(totals.pending)} /><Mini label="Reserved" value={money(totals.reserved)} /></div><div className="grid gap-3 md:grid-cols-2">{rows.map((row) => <article key={row.id} className="rounded-xl border p-4 dark:border-slate-700"><div className="flex justify-between gap-2"><p className="break-all text-xs font-bold">Seller {row.seller_id}</p><Badge value={row.is_frozen ? "frozen" : "active"} /></div><p className="mt-3 text-lg font-bold">{money(row.available_balance, row.currency)}</p><p className="text-xs text-slate-500">Available balance</p></article>)}{!rows.length && <Empty text="No seller wallets found." />}</div></div>; }
-function Payouts({ rows, busy, action }: { rows: FinancePayout[]; busy: string; action: (row: FinancePayout, status: string) => Promise<void> }) { return <div className="grid gap-3 md:grid-cols-2">{rows.map((row) => <article key={row.id} className="rounded-xl border p-4 dark:border-slate-700"><div className="flex justify-between gap-2"><div><p className="font-bold">{row.seller_name}</p><p className="text-xs text-slate-500">{row.provider || "Provider pending"}</p></div><Badge value={row.status} /></div><p className="mt-3 text-xl font-bold">{money(row.amount, row.currency)}</p>{["pending", "approved", "processing"].includes(row.status) && <div className="mt-3 grid grid-cols-2 gap-2"><button disabled={busy === row.id} onClick={() => void action(row, row.status === "pending" ? "approved" : row.status === "approved" ? "processing" : "completed")} className="min-h-10 rounded-xl bg-emerald-600 text-xs font-bold text-white disabled:opacity-50">Advance</button><button disabled={busy === row.id} onClick={() => void action(row, "rejected")} className="min-h-10 rounded-xl border border-red-200 text-xs font-bold text-red-700 disabled:opacity-50">Reject</button></div>}</article>)}{!rows.length && <Empty text="No payout requests found." />}</div>; }
-function Reconciliations({ rows, busy, reconcile }: { rows: Reconciliation[]; busy: string; reconcile: (row: Reconciliation) => Promise<void> }) { return <div className="grid gap-3 md:grid-cols-2">{rows.map((row) => <article key={row.id} className="rounded-xl border p-4 dark:border-slate-700"><div className="flex justify-between gap-2"><div><p className="font-bold">{row.provider || "Provider"}</p><p className="text-xs text-slate-500">Order {row.order_number || "—"}</p></div><Badge value={row.status} /></div><div className="mt-3 grid grid-cols-3 gap-2"><Mini label="Expected" value={money(row.expected_amount, row.currency)} /><Mini label="Provider" value={money(row.provider_amount, row.currency)} /><Mini label="Difference" value={money(row.difference, row.currency)} /></div>{!["matched", "reconciled"].includes(row.status) && <button disabled={busy === row.id} onClick={() => void reconcile(row)} className="mt-3 min-h-10 w-full rounded-xl bg-slate-900 text-xs font-bold text-white disabled:opacity-50 dark:bg-emerald-600">Mark reconciled</button>}</article>)}{!rows.length && <Empty text="No reconciliation records found." />}</div>; }
-function Mini({ label, value }: { label: string; value: string }) { return <div className="min-w-0 rounded-lg bg-slate-100 p-2 dark:bg-slate-700"><p className="break-words text-xs font-bold">{value}</p><p className="mt-1 text-[10px] text-slate-500 dark:text-slate-300">{label}</p></div>; }
+function Loading() { return <div className="p-10 text-center text-sm text-slate-500">
+<RefreshCw className="mx-auto animate-spin" />
+<p className="mt-2">Loading live finance data…</p>
+</div>; }
+function Escrow({ rows }: { rows: EscrowHold[] }) { return <div className="grid gap-3 md:grid-cols-2">{rows.map((row) => <article key={row.id} className="rounded-xl border p-4 dark:border-slate-700">
+<div className="flex items-start justify-between gap-2">
+<div>
+<p className="break-all text-sm font-bold">{row.reference}</p>
+<p className="text-xs text-slate-500">Order {row.order_id.slice(0, 8)}</p>
+</div>
+<Badge value={row.status} />
+</div>
+<div className="mt-3 grid grid-cols-3 gap-2 text-xs">
+<Mini label="Gross" value={money(row.gross_amount, row.currency)} />
+<Mini label="Seller" value={money(row.seller_amount, row.currency)} />
+<Mini label="Commission" value={money(row.commission_amount, row.currency)} />
+</div>
+</article>)}{!rows.length && <Empty text="No escrow holds found." />}</div>; }
+function Commissions({ rows }: { rows: CommissionRule[] }) { return <div className="grid gap-3 md:grid-cols-2 xl:grid-cols-3">{rows.map((row) => <article key={row.id} className="rounded-xl border p-4 dark:border-slate-700">
+<div className="flex justify-between gap-2">
+<h3 className="font-bold">{row.name}</h3>
+<Badge value={row.is_active ? "active" : "inactive"} />
+</div>
+<p className="mt-2 text-2xl font-bold text-emerald-600">{row.rule_type === "percentage" ? `${row.rate}%` : row.rate}</p>
+<p className="text-xs capitalize text-slate-500">{row.scope} · priority {row.priority}</p>
+</article>)}{!rows.length && <Empty text="No commission rules found." />}</div>; }
+function Wallets({ rows, totals }: { rows: SellerWallet[]; totals: { available: number; pending: number; reserved: number } }) { return <div className="space-y-4">
+<div className="grid grid-cols-3 gap-2">
+<Mini label="Available" value={money(totals.available)} />
+<Mini label="Pending" value={money(totals.pending)} />
+<Mini label="Reserved" value={money(totals.reserved)} />
+</div>
+<div className="grid gap-3 md:grid-cols-2">{rows.map((row) => <article key={row.id} className="rounded-xl border p-4 dark:border-slate-700">
+<div className="flex justify-between gap-2">
+<p className="break-all text-xs font-bold">Seller {row.seller_id}</p>
+<Badge value={row.is_frozen ? "frozen" : "active"} />
+</div>
+<p className="mt-3 text-lg font-bold">{money(row.available_balance, row.currency)}</p>
+<p className="text-xs text-slate-500">Available balance</p>
+</article>)}{!rows.length && <Empty text="No seller wallets found." />}</div>
+</div>; }
+function Payouts({ rows, busy, action }: { rows: FinancePayout[]; busy: string; action: (row: FinancePayout, status: string) => Promise<void> }) { return <div className="grid gap-3 md:grid-cols-2">{rows.map((row) => <article key={row.id} className="rounded-xl border p-4 dark:border-slate-700">
+<div className="flex justify-between gap-2">
+<div>
+<p className="font-bold">{row.seller_name}</p>
+<p className="text-xs text-slate-500">{row.provider || "Provider pending"}</p>
+</div>
+<Badge value={row.status} />
+</div>
+<p className="mt-3 text-xl font-bold">{money(row.amount, row.currency)}</p>{["pending", "approved", "processing"].includes(row.status) && <div className="mt-3 grid grid-cols-2 gap-2">
+<button disabled={busy === row.id} onClick={() => void action(row, row.status === "pending" ? "approved" : row.status === "approved" ? "processing" : "completed")} className="min-h-10 rounded-xl bg-emerald-600 text-xs font-bold text-white disabled:opacity-50">Advance</button>
+<button disabled={busy === row.id} onClick={() => void action(row, "rejected")} className="min-h-10 rounded-xl border border-red-200 text-xs font-bold text-red-700 disabled:opacity-50">Reject</button>
+</div>}</article>)}{!rows.length && <Empty text="No payout requests found." />}</div>; }
+function Reconciliations({ rows, busy, reconcile }: { rows: Reconciliation[]; busy: string; reconcile: (row: Reconciliation) => Promise<void> }) { return <div className="grid gap-3 md:grid-cols-2">{rows.map((row) => <article key={row.id} className="rounded-xl border p-4 dark:border-slate-700">
+<div className="flex justify-between gap-2">
+<div>
+<p className="font-bold">{row.provider || "Provider"}</p>
+<p className="text-xs text-slate-500">Order {row.order_number || "—"}</p>
+</div>
+<Badge value={row.status} />
+</div>
+<div className="mt-3 grid grid-cols-3 gap-2">
+<Mini label="Expected" value={money(row.expected_amount, row.currency)} />
+<Mini label="Provider" value={money(row.provider_amount, row.currency)} />
+<Mini label="Difference" value={money(row.difference, row.currency)} />
+</div>{!["matched", "reconciled"].includes(row.status) && <button disabled={busy === row.id} onClick={() => void reconcile(row)} className="mt-3 min-h-10 w-full rounded-xl bg-slate-900 text-xs font-bold text-white disabled:opacity-50 dark:bg-emerald-600">Mark reconciled</button>}</article>)}{!rows.length && <Empty text="No reconciliation records found." />}</div>; }
+function Mini({ label, value }: { label: string; value: string }) { return <div className="min-w-0 rounded-lg bg-slate-100 p-2 dark:bg-slate-700">
+<p className="break-words text-xs font-bold">{value}</p>
+<p className="mt-1 text-[10px] text-slate-500 dark:text-slate-300">{label}</p>
+</div>; }

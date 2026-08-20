@@ -5,6 +5,7 @@ import Link from "next/link";
 import toast from "react-hot-toast";
 import { customersService, type Customer, type CustomerSummary } from "@/lib/api/endpoints/customers";
 import { ApiError } from "@/lib/api/client";
+import { ConfirmActionDialog } from "@/components/Admin/shared/ActionDialog";
 
 const getErrorMessage = (error: unknown) => {
   if (error instanceof ApiError) return error.message;
@@ -39,6 +40,7 @@ const AdminCustomers = () => {
   const [customerType, setCustomerType] = useState("");
   const [debouncedSearch, setDebouncedSearch] = useState("");
   const [busyCustomerId, setBusyCustomerId] = useState<string | null>(null);
+  const [statusTarget, setStatusTarget] = useState<Customer | null>(null);
 
   useEffect(() => {
     const timer = setTimeout(() => setDebouncedSearch(search), 400);
@@ -96,7 +98,6 @@ const AdminCustomers = () => {
   const toggleCustomerStatus = async (customer: Customer) => {
     const nextStatus = customer.status === "suspended" ? "active" : "suspended";
     const action = nextStatus === "suspended" ? "suspend" : "reactivate";
-    if (!window.confirm(`Are you sure you want to ${action} this customer?`)) return;
     setBusyCustomerId(customer.id);
     try {
       const updated = await customersService.updateCustomerStatus(customer.id, nextStatus);
@@ -104,6 +105,7 @@ const AdminCustomers = () => {
       toast.success(`Customer ${action}d successfully.`);
       const summaryData = await customersService.getSummary();
       setSummary(summaryData);
+      setStatusTarget(null);
     } catch (error) {
       toast.error(getErrorMessage(error));
     } finally {
@@ -260,7 +262,7 @@ const AdminCustomers = () => {
                           <button
                             type="button"
                             disabled={busyCustomerId === c.id}
-                            onClick={() => void toggleCustomerStatus(c)}
+                            onClick={() => setStatusTarget(c)}
                             className="rounded-lg bg-[#f8fafc] px-2.5 py-1.5 text-xs font-medium text-gray-700 hover:bg-gray-100 disabled:opacity-50"
                           >
                             {busyCustomerId === c.id ? "Updating..." : c.status === "suspended" ? "Reactivate" : "Suspend"}
@@ -299,6 +301,7 @@ const AdminCustomers = () => {
           </>
         )}
       </div>
+      <ConfirmActionDialog open={Boolean(statusTarget)} title={statusTarget?.status === "suspended" ? "Reactivate customer?" : "Suspend customer?"} description={statusTarget?.status === "suspended" ? <>Restore marketplace access for <strong>{statusTarget.email}</strong>.</> : <>Suspend marketplace access for <strong>{statusTarget?.email}</strong>. Existing records will be preserved.</>} confirmLabel={statusTarget?.status === "suspended" ? "Reactivate customer" : "Suspend customer"} busy={Boolean(statusTarget && busyCustomerId === statusTarget.id)} tone={statusTarget?.status === "suspended" ? "warning" : "danger"} onCancel={() => setStatusTarget(null)} onConfirm={() => statusTarget && void toggleCustomerStatus(statusTarget)} />
     </div>
   );
 };
