@@ -108,7 +108,9 @@ export default function BuyerModulePage({ view }: { view: View }) {
         setOrders(result.results);
         setOrderMeta({
           total: result.total,
-          total_pages: result.total_pages || 0,
+          total_pages: result.total
+            ? Math.ceil(result.total / Math.max(1, result.page_size))
+            : 0,
         });
       }
       else if (view === "payments") {
@@ -124,7 +126,9 @@ export default function BuyerModulePage({ view }: { view: View }) {
         setPayments(result.results);
         setPaymentMeta({
           total: result.total,
-          total_pages: result.total_pages,
+          total_pages: result.total
+            ? Math.ceil(result.total / Math.max(1, result.page_size))
+            : 0,
         });
       }
       else if (view === "addresses")
