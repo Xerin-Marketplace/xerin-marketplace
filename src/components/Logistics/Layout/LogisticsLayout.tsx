@@ -26,7 +26,7 @@ const nav = [
   { label: "Dashboard", href: "/logistics/dashboard", icon: LayoutDashboard },
   { label: "Shipments", href: "/logistics/shipments", icon: Truck },
   { label: "Pickup jobs", href: "/logistics/pickups", icon: PackageCheck },
-  { label: "Zones & rates", href: "/logistics/pricing", icon: Boxes, soon: true },
+  { label: "Zones & rates", href: "/logistics/pricing", icon: Boxes },
   { label: "Team", href: "/logistics/team", icon: Users, soon: true },
   { label: "Wallet", href: "/logistics/wallet", icon: WalletCards, soon: true },
   { label: "Integration", href: "/logistics/integration", icon: Webhook, soon: true },
