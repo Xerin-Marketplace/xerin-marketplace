@@ -66,3 +66,26 @@ export type SellerOrderPackageUpsert = {
   is_ready: boolean;
   attachment_urls?: string[];
 };
+
+export type SellerFulfillmentReadinessCheck = {
+  code: string;
+  label: string;
+  ready: boolean;
+  blocking: boolean;
+  detail?: string | null;
+};
+
+export type SellerFulfillmentReadiness = {
+  seller_order_id: string;
+  ready_to_ship: boolean;
+  pickup_location_id?: string | null;
+  package_id?: string | null;
+  package_ids: string[];
+  package_groups: number;
+  physical_package_count: number;
+  total_weight_kg: number | string;
+  shipment_id?: string | null;
+  blockers: string[];
+  warnings: string[];
+  checks: SellerFulfillmentReadinessCheck[];
+};

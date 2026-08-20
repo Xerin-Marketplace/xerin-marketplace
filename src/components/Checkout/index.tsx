@@ -7,6 +7,7 @@ import Breadcrumb from "../Common/Breadcrumb";
 import Billing from "./Billing";
 import Shipping from "./Shipping";
 import ShippingMethod from "./ShippingMethod";
+import MapPinConfirmation from "./MapPinConfirmation";
 import DeliveryModeSelector from "./DeliveryMode";
 import PaymentMethod from "./PaymentMethod";
 import Coupon from "./Coupon";
@@ -102,6 +103,7 @@ const Checkout = () => {
     addresses,
     isCreatingAddress,
     isLoadingAddresses,
+    refetchAddresses,
   } = useAddresses(isAuthenticated);
 
   const createOrder = useCreateOrder();
@@ -152,29 +154,53 @@ const Checkout = () => {
     (address) => String(address.id) === selectedAddressId,
   );
 
-  const shippingOptions = useQuery({
+  const eligibleLogistics = useQuery({
     queryKey: [
       "checkout",
-      "shipping-options",
+      "eligible-logistics",
       selectedAddressId,
       deliveryMode,
-      cart?.promotion_code,
     ],
     queryFn: ({ signal }) =>
-      checkoutApi.shippingOptions(
+      checkoutApi.eligibleLogistics(
         {
           address_id: selectedAddressId,
           delivery_mode: deliveryMode,
         },
         signal,
       ),
-    enabled: Boolean(selectedAddressId && isAuthenticated && cartItems.length),
+    enabled: Boolean(selectedAddressId && selectedAddress?.delivery_ready && isAuthenticated && cartItems.length),
     retry: false,
   });
 
-  const selectedShipping = shippingOptions.data?.find(
-    (option) => option.id === form.shippingMethod,
+  const deliveryPricing = useQuery({
+    queryKey: ["checkout", "multi-seller-pricing", selectedAddressId, selectedCompanyId, deliveryMode, cart?.total, cart?.coupon_code, cart?.promotion_code],
+    queryFn: ({ signal }) => checkoutApi.multiSellerPricing({
+      address_id: selectedAddressId,
+      logistics_company_id: selectedCompanyId,
+      delivery_mode: deliveryMode,
+    }, signal),
+    enabled: Boolean(selectedAddress?.delivery_ready && selectedCompanyId && cartItems.length),
+    retry: false,
+  });
+
+  const selectedShipping = deliveryPricing.data?.options.find(
+    (option) => option.rate_id === form.shippingMethod,
   );
+
+  const frozenQuote = useQuery({
+    queryKey: ["checkout", "frozen-delivery-quote", selectedAddressId, selectedCompanyId, form.shippingMethod, deliveryMode, cart?.total, cart?.coupon_code, cart?.promotion_code],
+    queryFn: () => checkoutApi.freezeDeliveryQuote({
+      address_id: selectedAddressId,
+      logistics_company_id: selectedCompanyId,
+      rate_id: form.shippingMethod,
+      delivery_mode: deliveryMode,
+    }),
+    enabled: Boolean(selectedAddress?.delivery_ready && selectedCompanyId && form.shippingMethod),
+    retry: false,
+    staleTime: 10 * 60 * 1000,
+    refetchOnWindowFocus: false,
+  });
 
   const paymentOptions = useQuery({
     queryKey: [
@@ -188,34 +214,28 @@ const Checkout = () => {
   });
 
   useEffect(() => {
-    const options = shippingOptions.data ?? [];
-    if (!options.length) {
+    const companies = eligibleLogistics.data?.results ?? [];
+    if (!companies.length) {
       setSelectedCompanyId("");
       setForm((current) => ({ ...current, shippingMethod: "" }));
       return;
     }
+    if (!companies.some((company) => company.logistics_company_id === selectedCompanyId)) {
+      setSelectedCompanyId(companies[0].logistics_company_id);
+      setForm((current) => ({ ...current, shippingMethod: "" }));
+    }
+  }, [eligibleLogistics.data, selectedCompanyId]);
 
-    const currentOption = options.find(
-      (option) => option.id === form.shippingMethod,
-    );
-    if (currentOption) {
-      setSelectedCompanyId(
-        currentOption.logistics_company_id ||
-          `carrier:${currentOption.logistics_company_name}`,
-      );
+  useEffect(() => {
+    const options = deliveryPricing.data?.options ?? [];
+    if (!options.length) {
+      setForm((current) => current.shippingMethod ? { ...current, shippingMethod: "" } : current);
       return;
     }
-
-    const first = options[0];
-    setSelectedCompanyId(
-      first.logistics_company_id ||
-        `carrier:${first.logistics_company_name}`,
-    );
-    setForm((current) => ({
-      ...current,
-      shippingMethod: first.id,
-    }));
-  }, [shippingOptions.data, form.shippingMethod]);
+    if (!options.some((option) => option.rate_id === form.shippingMethod)) {
+      setForm((current) => ({ ...current, shippingMethod: options[0].rate_id }));
+    }
+  }, [deliveryPricing.data, form.shippingMethod]);
 
   useEffect(() => {
     const options = paymentOptions.data ?? [];
@@ -251,7 +271,7 @@ const Checkout = () => {
   }, [form.paymentMethod, paymentOptions.data, paymentProvider]);
 
   const shippingAmount = selectedShipping
-    ? Number(selectedShipping.amount)
+    ? Number(selectedShipping.delivery_amount)
     : null;
 
   const checkoutTotal =
@@ -276,16 +296,9 @@ const Checkout = () => {
 
   const changeCompany = (companyId: string) => {
     setSelectedCompanyId(companyId);
-    const option = (shippingOptions.data ?? []).find((row) => {
-      const rowCompany =
-        row.logistics_company_id ||
-        `carrier:${row.logistics_company_name}`;
-      return rowCompany === companyId;
-    });
-
     setForm((current) => ({
       ...current,
-      shippingMethod: option?.id || "",
+      shippingMethod: "",
     }));
   };
 
@@ -308,6 +321,16 @@ const Checkout = () => {
 
     if (!selectedShipping) {
       toast.error("Select a logistics company and delivery service");
+      return;
+    }
+
+    if (!selectedAddress?.delivery_ready) {
+      toast.error("Confirm the exact delivery map pin before continuing");
+      return;
+    }
+
+    if (!frozenQuote.data) {
+      toast.error("Wait for the protected delivery quote to finish");
       return;
     }
 
@@ -351,7 +374,8 @@ const Checkout = () => {
 
       const order = await createOrder.mutateAsync({
         shipping_address_id: selectedAddressId,
-        shipping_rate_id: selectedShipping.id,
+        shipping_rate_id: selectedShipping.rate_id,
+        delivery_quote_id: frozenQuote.data.id,
         delivery_mode: deliveryMode,
         coupon_code: cart?.coupon_code || undefined,
         promotion_code: cart?.promotion_code || undefined,
@@ -591,7 +615,7 @@ const Checkout = () => {
                       </select>
 
                       {selectedAddress && (
-                        <div className="mt-3 break-words rounded-xl bg-slate-50 p-3 text-xs leading-5 text-slate-600 dark:bg-white/5 dark:text-white/60">
+                        <><div className="mt-3 break-words rounded-xl bg-slate-50 p-3 text-xs leading-5 text-slate-600 dark:bg-white/5 dark:text-white/60">
                           {selectedAddress.recipient_name && (
                             <b>{selectedAddress.recipient_name} · </b>
                           )}
@@ -602,7 +626,7 @@ const Checkout = () => {
                           {selectedAddress.recipient_phone
                             ? ` · ${selectedAddress.recipient_phone}`
                             : ""}
-                        </div>
+                        </div><MapPinConfirmation address={selectedAddress} onConfirmed={() => { void refetchAddresses(); }} /></>
                       )}
                     </>
                   ) : (
@@ -708,42 +732,17 @@ const Checkout = () => {
                     )}
 
                     <SummaryRow
-                      label="Shipping"
+                      label="Delivery"
                       value={
                         shippingAmount === null
                           ? "Select delivery"
-                          : selectedShipping?.free_shipping_applied &&
-                              Number(selectedShipping.original_amount) > 0
-                            ? "FREE"
-                            : formatCurrency(
-                                shippingAmount,
-                                selectedShipping?.currency,
-                              )
+                          : formatCurrency(shippingAmount, selectedShipping?.currency)
                       }
-                      saving={Boolean(
-                        selectedShipping?.free_shipping_applied,
-                      )}
                     />
-
-                    {selectedShipping?.free_shipping_applied && (
-                      <div className="rounded-lg bg-emerald-50 p-3 text-xs leading-5 text-emerald-700">
-                        {selectedShipping.promotion_name ||
-                          selectedShipping.promotion_code ||
-                          "Seller promotion"}{" "}
-                        removed{" "}
-                        {formatCurrency(
-                          Number(
-                            selectedShipping.shipping_discount_amount,
-                          ),
-                          selectedShipping.currency,
-                        )}{" "}
-                        from delivery.
-                      </div>
-                    )}
 
                     <div className="mt-2 border-t border-gray-3 pt-2 dark:border-white/10">
                       <SummaryRow
-                        label="Checkout total"
+                        label="Grand Total"
                         value={
                           checkoutTotal === null
                             ? "Pending delivery quote"
@@ -755,12 +754,16 @@ const Checkout = () => {
                         }
                         strong
                       />
+                      {frozenQuote.data && <p className="pb-2 text-right text-[10px] leading-4 text-emerald-700">Protected quote ready · expires {new Date(frozenQuote.data.expires_at).toLocaleTimeString([], { hour: "2-digit", minute: "2-digit" })}</p>}
                     </div>
                   </div>
                 </div>
 
+                {(eligibleLogistics.error || deliveryPricing.error || frozenQuote.error) && <div className="mt-4 rounded-xl border border-red-200 bg-red-50 p-3 text-xs leading-5 text-red-700">{errorText(eligibleLogistics.error || deliveryPricing.error || frozenQuote.error)}</div>}
+
                 <ShippingMethod
-                  options={shippingOptions.data ?? []}
+                  companies={eligibleLogistics.data?.results ?? []}
+                  options={deliveryPricing.data?.options ?? []}
                   selected={form.shippingMethod}
                   onChange={(value) =>
                     updateField("shippingMethod", value)
@@ -768,10 +771,8 @@ const Checkout = () => {
                   selectedCompanyId={selectedCompanyId}
                   onCompanyChange={changeCompany}
                   deliveryMode={deliveryMode}
-                  isLoading={
-                    shippingOptions.isLoading ||
-                    shippingOptions.isFetching
-                  }
+                  isLoadingCompanies={eligibleLogistics.isLoading || eligibleLogistics.isFetching}
+                  isLoadingPricing={deliveryPricing.isLoading || deliveryPricing.isFetching}
                 />
 
                 <Coupon />
@@ -803,10 +804,14 @@ const Checkout = () => {
                   disabled={
                     createOrder.isPending ||
                     isCreatingAddress ||
-                    shippingOptions.isFetching ||
+                    eligibleLogistics.isFetching ||
+                    deliveryPricing.isFetching ||
+                    frozenQuote.isFetching ||
                     !selectedAddressId ||
+                    !selectedAddress?.delivery_ready ||
                     !form.paymentMethod ||
-                    !form.shippingMethod
+                    !form.shippingMethod ||
+                    !frozenQuote.data
                   }
                   className="flex h-12 w-full items-center justify-center rounded-xl bg-orange px-5 text-base font-semibold text-white shadow-sm transition hover:bg-orange-dark disabled:cursor-not-allowed disabled:opacity-50 sm:text-sm"
                 >
@@ -817,8 +822,8 @@ const Checkout = () => {
                 </div>
 
                 <p className="mt-3 text-center text-[11px] leading-5 text-dark-4">
-                  The backend revalidates the selected zone, logistics service,
-                  shipment weight and delivery rate when the order is created.
+                  Products + delivery = Grand Total. The backend freezes and
+                  revalidates this quote before creating the order.
                 </p>
               </aside>
             </div>
@@ -864,6 +869,10 @@ function SummaryRow({
       </span>
     </div>
   );
+}
+
+function errorText(error: unknown) {
+  return error instanceof Error ? error.message : "Delivery quotation could not be completed. Check the address pin and try again.";
 }
 
 export default Checkout;

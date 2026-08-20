@@ -12,7 +12,7 @@ import {
 import { authStorage } from "@/lib/auth/storage";
 import { authCookies } from "@/lib/auth/cookies";
 import { useAuthStore } from "@/store/useAuthStore";
-import { isAdminUser, isSellerUser } from "@/guards/permissions";
+import { isAdminUser, isLogisticsUser, isSellerUser } from "@/guards/permissions";
 import type { AuthTokenResponse } from "@/types/api/auth";
 
 type AuthUser = {
@@ -60,6 +60,13 @@ export default function AuthProvider({ children }: { children: ReactNode }) {
       authCookies.setSeller();
     } else {
       authCookies.clearSeller();
+    }
+
+
+    if (isLogisticsUser(user as any)) {
+      authCookies.setLogistics();
+    } else {
+      authCookies.clearLogistics();
     }
   }, []);
 

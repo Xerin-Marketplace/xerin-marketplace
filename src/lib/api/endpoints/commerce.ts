@@ -15,6 +15,9 @@ import type {
   DeliveryMode,
   CustomerOrderDetail,
   CustomerEscrowSummary,
+  EligibleLogisticsResponse,
+  MultiSellerPricingResponse,
+  CheckoutDeliveryQuote,
 } from "@/types/api/commerce";
 
 export const cartApi = {
@@ -54,6 +57,42 @@ export const checkoutApi = {
         "/shipping/checkout-config",
       )
     ).data,
+
+  eligibleLogistics: async (
+    payload: { address_id: string; delivery_mode: DeliveryMode },
+    signal?: AbortSignal,
+  ): Promise<EligibleLogisticsResponse> =>
+    (await axiosInstance.post<EligibleLogisticsResponse>(
+      "/shipping/eligible-logistics",
+      payload,
+      { params: { page: 1, page_size: 100 }, signal },
+    )).data,
+
+  multiSellerPricing: async (
+    payload: {
+      address_id: string;
+      logistics_company_id: string;
+      delivery_mode: DeliveryMode;
+      method_id?: string;
+    },
+    signal?: AbortSignal,
+  ): Promise<MultiSellerPricingResponse> =>
+    (await axiosInstance.post<MultiSellerPricingResponse>(
+      "/shipping/multi-seller-pricing",
+      payload,
+      { signal },
+    )).data,
+
+  freezeDeliveryQuote: async (payload: {
+    address_id: string;
+    logistics_company_id: string;
+    rate_id: string;
+    delivery_mode: DeliveryMode;
+  }): Promise<CheckoutDeliveryQuote> =>
+    (await axiosInstance.post<CheckoutDeliveryQuote>(
+      "/shipping/checkout-delivery-quote",
+      payload,
+    )).data,
 
   shippingOptions: async (
     payload: {
@@ -181,7 +220,8 @@ export const ordersApi = {
     ).data,
   create: async (payload: {
     shipping_address_id: string;
-    shipping_rate_id: string;
+    shipping_rate_id?: string;
+    delivery_quote_id?: string;
     delivery_mode: DeliveryMode;
     coupon_code?: string;
     promotion_code?: string;

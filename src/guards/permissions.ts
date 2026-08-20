@@ -6,6 +6,24 @@ export type GuardUser = {
   seller_status?: string | null;
 };
 
+const LOGISTICS_ACCOUNT_TYPES = ["logistics", "logistics_company"];
+const LOGISTICS_ROLES = [
+  "company_admin",
+  "operations_manager",
+  "dispatcher",
+  "driver",
+];
+const LOGISTICS_PERMISSIONS = [
+  "profile:manage",
+  "users:manage",
+  "zones:manage",
+  "rates:manage",
+  "pickups:manage",
+  "shipments:manage",
+  "integrations:manage",
+  "dashboard:read",
+];
+
 export const getUserPermissions = (user?: GuardUser | null): string[] => {
   return user?.permissions ?? [];
 };
@@ -82,6 +100,9 @@ export const isAdminUser = (user?: GuardUser | null): boolean => {
     return true;
   }
 
+  // Logistics members have custom role names, but are not marketplace admins.
+  if (isLogisticsUser(user)) return false;
+
   const basicRoles = new Set(["buyer", "customer", "seller"]);
   const roles = getUserRoles(user).map((role) => role.toLowerCase());
 
@@ -93,3 +114,17 @@ export const isAdminUser = (user?: GuardUser | null): boolean => {
 export const isSellerUser = (user?: GuardUser | null): boolean => {
   return Boolean(user?.is_seller) || hasAnyAccountType(user, ["seller"]) || hasAnyRole(user, ["seller"]);
 };
+
+export function isLogisticsUser(user?: GuardUser | null): boolean {
+  if (!user) return false;
+  if (hasAnyAccountType(user, LOGISTICS_ACCOUNT_TYPES)) return true;
+
+  const roles = getUserRoles(user).map((role) => role.toLowerCase());
+  if (roles.some((role) => LOGISTICS_ROLES.includes(role))) return true;
+
+  // "viewer" is intentionally not enough by itself because other systems may
+  // use that role. A logistics permission makes the membership unambiguous.
+  return getUserPermissions(user).some((permission) =>
+    LOGISTICS_PERMISSIONS.includes(permission.toLowerCase()),
+  );
+}

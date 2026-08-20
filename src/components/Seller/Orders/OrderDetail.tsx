@@ -27,6 +27,7 @@ import type {
   SellerOrder,
   SellerOrderMessage,
   SellerOrderPackage,
+  SellerFulfillmentReadiness,
 } from "@/types/api/seller-order";
 import { Badge } from "./index";
 
@@ -39,10 +40,11 @@ const money = (value: number | string, currency = "TZS") =>
 
 const errorMessage = (error: unknown) => {
   const candidate = error as {
-    response?: { data?: { detail?: string } };
+    response?: { data?: { detail?: string | { message?: string; blockers?: string[] } } };
     message?: string;
   };
-  return candidate.response?.data?.detail || candidate.message || "Request failed";
+  const detail = candidate.response?.data?.detail;
+  return (typeof detail === "string" ? detail : detail?.message) || candidate.message || "Request failed";
 };
 
 export default function SellerOrderDetail({ orderId }: { orderId: string }) {
@@ -66,6 +68,9 @@ export default function SellerOrderDetail({ orderId }: { orderId: string }) {
     attachment_urls: [] as string[],
   });
   const [packageAttachmentDraft, setPackageAttachmentDraft] = useState("");
+  const [readiness, setReadiness] = useState<SellerFulfillmentReadiness | null>(null);
+  const [readinessLoading, setReadinessLoading] = useState(true);
+  const [readinessError, setReadinessError] = useState("");
 
   const [messages, setMessages] = useState<SellerOrderMessage[]>([]);
   const [messagesLoading, setMessagesLoading] = useState(true);
@@ -114,6 +119,18 @@ export default function SellerOrderDetail({ orderId }: { orderId: string }) {
       }
     } finally {
       setPackageLoading(false);
+    }
+  };
+
+  const loadReadiness = async () => {
+    setReadinessLoading(true);
+    setReadinessError("");
+    try {
+      setReadiness(await sellerOrdersApi.readiness(orderId));
+    } catch (error) {
+      setReadinessError(errorMessage(error));
+    } finally {
+      setReadinessLoading(false);
     }
   };
 
@@ -194,6 +211,7 @@ export default function SellerOrderDetail({ orderId }: { orderId: string }) {
           ? "Package confirmed and ready for pickup."
           : "Package details saved as a draft.",
       );
+      void loadReadiness();
     } catch (error) {
       toast.error(errorMessage(error));
     } finally {
@@ -216,12 +234,14 @@ export default function SellerOrderDetail({ orderId }: { orderId: string }) {
     void load();
     void loadMessages();
     void loadPackage();
+    void loadReadiness();
   }, [orderId]);
 
   const run = async (fn: () => Promise<SellerOrder>, message: string) => {
     setBusy(true);
     try {
       setOrder(await fn());
+      void loadReadiness();
       toast.success(message);
     } catch (error) {
       toast.error(errorMessage(error));
@@ -378,6 +398,25 @@ export default function SellerOrderDetail({ orderId }: { orderId: string }) {
                 </div>
               ))}
             </div>
+          </section>
+
+          <section className="rounded-2xl border bg-white p-4 dark:border-white/10 dark:bg-[#1f2937] sm:p-5">
+            <div className="flex flex-col gap-3 sm:flex-row sm:items-start sm:justify-between">
+              <div>
+                <h2 className="flex items-center gap-2 font-bold dark:text-white"><PackageCheck size={18} />Fulfillment readiness</h2>
+                <p className="mt-1 text-xs leading-5 text-slate-400">Every blocking requirement must pass before Ready to Ship is accepted.</p>
+              </div>
+              <button type="button" onClick={() => void loadReadiness()} disabled={readinessLoading} className="inline-flex min-h-11 items-center justify-center gap-2 rounded-xl border px-4 text-xs font-semibold dark:border-white/10"><RefreshCw size={14} className={readinessLoading ? "animate-spin" : ""} />Refresh checks</button>
+            </div>
+
+            {readinessLoading ? <div className="mt-4 grid gap-2 sm:grid-cols-2">{Array.from({ length: 6 }).map((_, index) => <div key={index} className="h-16 animate-pulse rounded-xl bg-slate-100 dark:bg-white/5" />)}</div> : readinessError ? <div className="mt-4 rounded-xl border border-red-200 bg-red-50 p-4 text-sm text-red-700"><b>Readiness check unavailable.</b><p className="mt-1 break-words text-xs">{readinessError}</p></div> : readiness ? <>
+              <div className={`mt-4 rounded-xl border p-4 ${readiness.ready_to_ship ? "border-emerald-200 bg-emerald-50 text-emerald-800" : "border-amber-200 bg-amber-50 text-amber-800"}`}><p className="font-bold">{readiness.ready_to_ship ? "All blocking checks passed" : `${readiness.blockers.length} requirement${readiness.blockers.length === 1 ? "" : "s"} still blocking`}</p><p className="mt-1 text-xs leading-5">{readiness.ready_to_ship ? "This seller order can now be marked Ready to Ship." : "Complete the failed items below, then refresh the checklist."}</p></div>
+              <div className="mt-3 grid gap-2 sm:grid-cols-2">{readiness.checks.map((check) => <div key={check.code} className={`flex min-h-16 items-start gap-3 rounded-xl border p-3 ${check.ready ? "border-emerald-100 bg-emerald-50/60" : check.blocking ? "border-red-100 bg-red-50/60" : "border-amber-100 bg-amber-50/60"}`}>
+                {check.ready ? <CheckCircle2 className="mt-0.5 shrink-0 text-emerald-600" size={18} /> : <XCircle className={`mt-0.5 shrink-0 ${check.blocking ? "text-red-500" : "text-amber-500"}`} size={18} />}
+                <div className="min-w-0"><p className="text-sm font-semibold text-slate-800">{check.label}</p>{check.detail && <p className="mt-0.5 break-words text-xs leading-5 text-slate-500">{check.detail}</p>}{!check.blocking && !check.ready && <span className="mt-1 inline-block text-[10px] font-bold uppercase text-amber-700">Recommended</span>}</div>
+              </div>)}</div>
+              <div className="mt-3 flex flex-wrap gap-2 text-xs"><span className="rounded-full bg-slate-100 px-3 py-1.5">{readiness.physical_package_count} physical package{readiness.physical_package_count === 1 ? "" : "s"}</span><span className="rounded-full bg-slate-100 px-3 py-1.5">{Number(readiness.total_weight_kg).toLocaleString()} kg total</span>{!readiness.pickup_location_id && <Link href="/seller/pickup-locations" className="rounded-full bg-orange/10 px-3 py-1.5 font-semibold text-orange">Configure pickup location</Link>}</div>
+            </> : null}
           </section>
 
           <section className="rounded-2xl border bg-white p-5 dark:border-white/10 dark:bg-[#1f2937]">
@@ -584,7 +623,7 @@ export default function SellerOrderDetail({ orderId }: { orderId: string }) {
                   <Action
                     icon={PackageCheck}
                     label="Mark ready to ship"
-                    busy={busy || packageLoading || !packageInfo?.is_ready}
+                    busy={busy || readinessLoading || !readiness?.ready_to_ship}
                     onClick={() =>
                       run(
                         () => sellerOrdersApi.ready(orderId, notes),
@@ -592,9 +631,9 @@ export default function SellerOrderDetail({ orderId }: { orderId: string }) {
                       )
                     }
                   />
-                  {!packageLoading && !packageInfo?.is_ready && (
+                  {!readinessLoading && !readiness?.ready_to_ship && (
                     <span className="text-[11px] text-amber-600">
-                      Confirm package readiness first.
+                      Complete all blocking readiness checks first.
                     </span>
                   )}
                 </div>

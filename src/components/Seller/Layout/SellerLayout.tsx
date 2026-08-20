@@ -37,6 +37,7 @@ import {
   ShoppingBag,
   Star,
   MessageCircle,
+  MapPinned,
   Store,
   Sun,
   Tag,
@@ -90,6 +91,7 @@ const approvedGroups: Array<{ label: string; items: NavItem[] }> = [
     label: "Store Operations",
     items: [
       { label: "Store Profile", href: "/seller/store", icon: Store },
+      { label: "Pickup Locations", href: "/seller/pickup-locations", icon: MapPinned },
       { label: "Promotions", href: "/seller/promotions", icon: Tag },
       { label: "Reviews", href: "/seller/reviews", icon: Star },
       { label: "Product Q&A", href: "/seller/questions", icon: MessageCircle },

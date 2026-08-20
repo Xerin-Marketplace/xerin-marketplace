@@ -5,4 +5,5 @@ export const APP_ROUTES = {
   sellerRegister: "/seller/register",
   sellerDashboard: "/seller/dashboard",
   adminDashboard: "/admin/dashboard",
+  logisticsDashboard: "/logistics/dashboard",
 } as const;

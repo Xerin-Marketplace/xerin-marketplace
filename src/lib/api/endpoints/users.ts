@@ -7,6 +7,9 @@ import type {
   PaginatedAddressResponse,
   UpdateUserRequest,
   User,
+  MapAutocompleteSuggestion,
+  MapPinConfirmationResponse,
+  MapResolvedLocation,
 } from "@/types/api/user";
 import type { Product } from "@/types/product";
 
@@ -68,6 +71,40 @@ export const deleteAddress = async (id: ID): Promise<ApiMessageResponse> => {
   return res.data;
 };
 
+export const searchMapPlaces = async (
+  query: string,
+  countryCode?: string,
+  signal?: AbortSignal,
+): Promise<MapAutocompleteSuggestion[]> =>
+  (await axiosInstance.get<{ results: MapAutocompleteSuggestion[] }>(
+    "/locations/map/autocomplete",
+    { params: { query, country_code: countryCode, limit: 6 }, signal },
+  )).data.results;
+
+export const getMapPlace = async (placeId: string, regionCode?: string): Promise<MapResolvedLocation> =>
+  (await axiosInstance.get<MapResolvedLocation>(
+    `/locations/map/places/${encodeURIComponent(placeId)}`,
+    { params: { region_code: regionCode } },
+  )).data;
+
+export const reverseGeocode = async (
+  latitude: number,
+  longitude: number,
+): Promise<MapResolvedLocation> =>
+  (await axiosInstance.get<MapResolvedLocation>("/locations/map/reverse-geocode", {
+    params: { latitude, longitude },
+  })).data;
+
+export const confirmMapPin = async (
+  id: ID,
+  latitude: number,
+  longitude: number,
+): Promise<MapPinConfirmationResponse> =>
+  (await axiosInstance.post<MapPinConfirmationResponse>(
+    API_ENDPOINTS.users.confirmMapPin(id),
+    { latitude, longitude },
+  )).data;
+
 export const getWishlist = async (
   params: { page?: number; page_size?: number } = {},
 ): Promise<WishlistProductListResponse> => {
@@ -115,4 +152,8 @@ export const usersApi = {
   addToWishlist,
   removeFromWishlist,
   clearWishlist,
+  searchMapPlaces,
+  getMapPlace,
+  reverseGeocode,
+  confirmMapPin,
 };

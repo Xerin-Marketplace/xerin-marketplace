@@ -7,9 +7,18 @@ export function middleware(request: NextRequest) {
   const authPresent = request.cookies.get("xerin_auth_present")?.value === "1";
   const adminPresent = request.cookies.get("xerin_admin_present")?.value === "1";
   const sellerPresent = request.cookies.get("xerin_seller_present")?.value === "1";
+  const logisticsPresent = request.cookies.get("xerin_logistics_present")?.value === "1";
 
   if (pathname.startsWith("/admin")) {
     if (!adminPresent) {
+      const signinUrl = new URL("/signin", request.url);
+      signinUrl.searchParams.set("redirect", pathname);
+      return NextResponse.redirect(signinUrl);
+    }
+  }
+
+  if (pathname.startsWith("/logistics")) {
+    if (!logisticsPresent) {
       const signinUrl = new URL("/signin", request.url);
       signinUrl.searchParams.set("redirect", pathname);
       return NextResponse.redirect(signinUrl);
@@ -28,5 +37,5 @@ export function middleware(request: NextRequest) {
 }
 
 export const config = {
-  matcher: ["/admin/:path*", "/seller/dashboard/:path*"],
+  matcher: ["/admin/:path*", "/seller/dashboard/:path*", "/logistics/:path*"],
 };

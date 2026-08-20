@@ -78,6 +78,100 @@ export type ShippingOption = {
   promotion_name?: string | null;
 };
 
+export type EligibleLogisticsCompany = {
+  logistics_company_id: string;
+  name: string;
+  code: string;
+  scope: DeliveryMode | "both";
+  supports_cod: boolean;
+  supports_tracking: boolean;
+  supports_webhooks: boolean;
+  seller_count: number;
+  covered_seller_count: number;
+  services: Array<{
+    method_id: string;
+    method_name: string;
+    service_code?: string | null;
+    min_delivery_days: number;
+    max_delivery_days: number;
+    supports_cod: boolean;
+    supports_tracking: boolean;
+  }>;
+};
+
+export type EligibleLogisticsResponse = {
+  address_id: string;
+  delivery_mode: DeliveryMode;
+  seller_count: number;
+  total: number;
+  page: number;
+  page_size: number;
+  total_pages: number;
+  results: EligibleLogisticsCompany[];
+};
+
+export type MultiSellerDeliveryOption = {
+  rate_id: string;
+  method_id: string;
+  method_name: string;
+  service_code?: string | null;
+  logistics_company_id: string;
+  logistics_company_name: string;
+  strategy: "farthest_seller" | "sum_individual" | string;
+  rate_type: string;
+  currency: string;
+  seller_count: number;
+  billable_distance_km: number | string;
+  billable_seller_id?: string | null;
+  delivery_amount: number | string;
+  min_delivery_days: number;
+  max_delivery_days: number;
+  supports_cod: boolean;
+  supports_tracking: boolean;
+  pricing_breakdown: Record<string, number | string | boolean | null>;
+  sellers: Array<{
+    seller_id: string;
+    seller_name: string;
+    pickup_location_id: string;
+    pickup_label: string;
+    distance_km: number | string;
+    duration_minutes: number | string;
+    is_billable_reference: boolean;
+  }>;
+};
+
+export type MultiSellerPricingResponse = {
+  address_id: string;
+  logistics_company_id: string;
+  logistics_company_name: string;
+  delivery_mode: DeliveryMode;
+  strategy: string;
+  seller_count: number;
+  options: MultiSellerDeliveryOption[];
+  note: string;
+};
+
+export type CheckoutDeliveryQuote = {
+  id: string;
+  shipping_address_id: string;
+  logistics_company_id: string;
+  shipping_method_id: string;
+  shipping_rate_id: string;
+  delivery_mode: DeliveryMode;
+  pricing_strategy: string;
+  rate_type: string;
+  currency: string;
+  seller_count: number;
+  billable_distance_km: number | string;
+  product_subtotal: number | string;
+  delivery_amount: number | string;
+  checkout_total_before_discounts: number | string;
+  pricing_breakdown: Record<string, unknown>;
+  seller_routes_snapshot: Array<Record<string, unknown>>;
+  expires_at: string;
+  used_at?: string | null;
+};
+
 export type PaymentOption = {
   id: string;
   label: string;

@@ -30,6 +30,13 @@ export const setupInterceptors = (instance: AxiosInstance) => {
       if (token && config.headers) {
         config.headers.Authorization = `Bearer ${token}`;
       }
+      if (config.headers && !config.headers["X-Request-ID"]) {
+        const requestId =
+          typeof crypto !== "undefined" && "randomUUID" in crypto
+            ? crypto.randomUUID()
+            : `web-${Date.now()}-${Math.random().toString(16).slice(2)}`;
+        config.headers["X-Request-ID"] = requestId;
+      }
       return config;
     },
     (error) => Promise.reject(toApiError(error)),

@@ -25,6 +25,7 @@ export const API_ENDPOINTS = {
     addresses: "/addresses",
     addressById: (id: string | number) => `/addresses/${id}`,
     setDefaultAddress: (id: string | number) => `/addresses/${id}/default`,
+    confirmMapPin: (id: string | number) => `/addresses/${id}/confirm-map-pin`,
   },
 
   sellers: {

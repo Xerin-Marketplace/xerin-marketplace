@@ -1,4 +1,4 @@
-import { isAdminUser, isSellerUser, type GuardUser } from "./permissions";
+import { isAdminUser, isLogisticsUser, isSellerUser, type GuardUser } from "./permissions";
 
 type AuthRoutingUser = GuardUser | Record<string, unknown> | null | undefined;
 
@@ -22,17 +22,22 @@ export const getPostLoginPath = (
 
   if (isSafeInternalPath(requestedPath)) {
     const path = requestedPath as string;
+    if (isLogisticsUser(guardUser)) {
+      return path.startsWith("/logistics/") ? path : "/logistics/dashboard";
+    }
     if (isSellerUser(guardUser)) {
       return path.startsWith("/seller/") ? path : "/seller/dashboard";
     }
     if (isAdminUser(guardUser)) {
       return path.startsWith("/admin/") ? path : "/admin/dashboard";
     }
-    if (path.startsWith("/seller/") || path.startsWith("/admin/")) {
+    if (path.startsWith("/seller/") || path.startsWith("/admin/") || path.startsWith("/logistics/")) {
       return "/account";
     }
     return path;
   }
+
+  if (isLogisticsUser(guardUser)) return "/logistics/dashboard";
 
   if (isAdminUser(guardUser)) {
     return "/admin/dashboard";
@@ -66,7 +71,7 @@ export const getAccountLabel = (
 
   const guardUser = toGuardUser(user);
 
-  if (isAdminUser(guardUser) || isSellerUser(guardUser)) {
+  if (isAdminUser(guardUser) || isSellerUser(guardUser) || isLogisticsUser(guardUser)) {
     return "Dashboard";
   }
 

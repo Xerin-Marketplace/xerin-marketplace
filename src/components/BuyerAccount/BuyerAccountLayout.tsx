@@ -10,6 +10,7 @@ import {
   LogOut,
   MapPin,
   Package,
+  ScanSearch,
   Shield,
   ShoppingCart,
   Star,
@@ -23,6 +24,7 @@ import { useAuth } from "@/hooks/useAuth";
 const nav = [
   ["Dashboard", "/account", LayoutDashboard],
   ["Orders", "/account/orders", Package],
+  ["Pickup verification", "/account/pickup-verification", ScanSearch],
   ["Payments", "/account/payments", CreditCard],
   ["Addresses", "/account/addresses", MapPin],
   ["Cart", "/cart", ShoppingCart],

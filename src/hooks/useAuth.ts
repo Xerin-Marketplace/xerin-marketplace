@@ -14,7 +14,7 @@ import {
 import { useAuthStore } from "@/store/useAuthStore";
 import { authStorage } from "@/lib/auth/storage";
 import { authCookies } from "@/lib/auth/cookies";
-import { isAdminUser, isSellerUser } from "@/guards/permissions";
+import { isAdminUser, isLogisticsUser, isSellerUser } from "@/guards/permissions";
 import type { AuthTokenResponse } from "@/types/api/auth";
 import { useRouter } from "next/navigation";
 import { cartApi } from "@/lib/api/endpoints/commerce";
@@ -49,6 +49,10 @@ export const useAuth = () => {
     } else {
       authCookies.clearSeller();
     }
+
+
+    if (isLogisticsUser(sessionUser)) authCookies.setLogistics();
+    else authCookies.clearLogistics();
   };
 
   const setSession = (session: AuthTokenResponse) => {
@@ -89,13 +93,15 @@ export const useAuth = () => {
     mutationFn: apiLogin,
     onSuccess: async (data) => {
       setSession(data);
-      if (!isAdminUser(data.user) && !isSellerUser(data.user)) {
+      if (!isAdminUser(data.user) && !isSellerUser(data.user) && !isLogisticsUser(data.user)) {
         await mergeGuestCart().catch(() => {
           toast.error("Your guest cart could not be synced. It is still saved on this device.");
         });
       }
       const user = data.user;
-      if (isAdminUser(user)) {
+      if (isLogisticsUser(user)) {
+        router.push("/logistics/dashboard");
+      } else if (isAdminUser(user)) {
         router.push("/admin/dashboard");
       } else if (isSellerUser(user)) {
         router.push("/seller/dashboard");

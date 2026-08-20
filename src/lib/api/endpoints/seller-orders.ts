@@ -8,6 +8,7 @@ import type {
   SellerOrderMessageCreate,
   SellerOrderPackage,
   SellerOrderPackageUpsert,
+  SellerFulfillmentReadiness,
 } from "@/types/api/seller-order";
 const ROOT="/seller/orders";
 export const sellerOrdersApi={
@@ -23,4 +24,5 @@ export const sellerOrdersApi={
  sendMessage:async(id:string,payload:SellerOrderMessageCreate)=>(await axiosInstance.post<SellerOrderMessage>(`/seller/orders/${id}/messages`,payload)).data,
  package:async(id:string)=>(await axiosInstance.get<SellerOrderPackage>(`/seller/orders/${id}/package`)).data,
  savePackage:async(id:string,payload:SellerOrderPackageUpsert)=>(await axiosInstance.put<SellerOrderPackage>(`/seller/orders/${id}/package`,payload)).data,
+ readiness:async(id:string)=>(await axiosInstance.get<SellerFulfillmentReadiness>(`${ROOT}/${id}/fulfillment-readiness`)).data,
 };

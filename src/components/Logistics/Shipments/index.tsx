@@ -1,0 +1,62 @@
+"use client";
+
+import { logisticsApi } from "@/lib/api/endpoints/logistics";
+import type { LogisticsShipment, Paginated, ShipmentStatus } from "@/types/api/logistics";
+import { ChevronLeft, ChevronRight, MapPin, PackagePlus, RefreshCw, Search, Truck } from "lucide-react";
+import { FormEvent, useCallback, useEffect, useState } from "react";
+
+const statuses: Array<ShipmentStatus | ""> = ["", "ready_for_dispatch", "dispatched", "in_transit", "out_for_delivery", "delivery_failed", "returned_to_sender", "cancelled", "delivered"];
+const transitions: Partial<Record<ShipmentStatus, ShipmentStatus[]>> = {
+  ready_for_dispatch: ["dispatched", "cancelled"], dispatched: ["in_transit", "delivery_failed"],
+  in_transit: ["out_for_delivery", "delivery_failed", "returned_to_sender"],
+  out_for_delivery: ["delivery_failed", "returned_to_sender"],
+  delivery_failed: ["out_for_delivery", "returned_to_sender"],
+};
+const label = (value: string) => value.replaceAll("_", " ");
+const date = (value?: string | null) => value ? new Intl.DateTimeFormat(undefined, { dateStyle: "medium", timeStyle: "short" }).format(new Date(value)) : "—";
+const message = (error: unknown) => error instanceof Error ? error.message : "The request could not be completed.";
+
+export default function ShipmentsPage() {
+  const [data, setData] = useState<Paginated<LogisticsShipment> | null>(null);
+  const [page, setPage] = useState(1); const [status, setStatus] = useState<ShipmentStatus | "">("");
+  const [search, setSearch] = useState(""); const [query, setQuery] = useState("");
+  const [loading, setLoading] = useState(true); const [error, setError] = useState("");
+  const [selected, setSelected] = useState<LogisticsShipment | null>(null);
+  const load = useCallback(async () => { setLoading(true); setError(""); try { setData(await logisticsApi.getShipments({ page, page_size: 12, status: status || undefined, search: query || undefined })); } catch (e) { setError(message(e)); } finally { setLoading(false); } }, [page, query, status]);
+  useEffect(() => { void load(); }, [load]);
+  const submitSearch = (event: FormEvent) => { event.preventDefault(); setPage(1); setQuery(search.trim()); };
+
+  return <div className="mx-auto max-w-7xl space-y-4 sm:space-y-6">
+    <header className="flex flex-col gap-3 sm:flex-row sm:items-end sm:justify-between"><div><p className="text-sm font-medium text-blue">Live operations</p><h2 className="text-2xl font-bold text-slate-900 dark:text-white">Company shipments</h2><p className="mt-1 text-sm text-slate-500">Track seller handovers and move shipments through the delivery network.</p></div><button onClick={() => void load()} disabled={loading} className="inline-flex min-h-11 items-center justify-center gap-2 rounded-xl border border-slate-300 bg-white px-4 text-sm font-semibold text-slate-700 disabled:opacity-50 dark:border-slate-700 dark:bg-slate-800 dark:text-slate-100"><RefreshCw size={17} className={loading ? "animate-spin" : ""} />Refresh</button></header>
+    <section className="grid gap-3 rounded-2xl border border-slate-200 bg-white p-3 sm:grid-cols-[1fr_15rem] sm:p-4 dark:border-slate-700 dark:bg-slate-800">
+      <form onSubmit={submitSearch} className="flex min-w-0 gap-2"><label className="relative min-w-0 flex-1"><span className="sr-only">Search shipments</span><Search className="absolute left-3 top-3.5 text-slate-400" size={17} /><input value={search} onChange={(e) => setSearch(e.target.value)} placeholder="Tracking number or carrier" className="min-h-11 w-full rounded-xl border border-slate-300 bg-transparent pl-10 pr-3 text-sm outline-none focus:border-blue dark:border-slate-600" /></label><button className="min-h-11 shrink-0 rounded-xl bg-blue px-4 text-sm font-semibold text-white">Search</button></form>
+      <select aria-label="Filter by status" value={status} onChange={(e) => { setStatus(e.target.value as ShipmentStatus | ""); setPage(1); }} className="min-h-11 rounded-xl border border-slate-300 bg-white px-3 text-sm capitalize dark:border-slate-600 dark:bg-slate-900">{statuses.map((item) => <option key={item || "all"} value={item}>{item ? label(item) : "All statuses"}</option>)}</select>
+    </section>
+    {error && <ErrorBox text={error} retry={load} />}
+    {loading && !data ? <div className="grid gap-3 md:grid-cols-2 xl:grid-cols-3">{Array.from({ length: 6 }).map((_, i) => <div key={i} className="h-52 animate-pulse rounded-2xl bg-slate-200 dark:bg-slate-800" />)}</div> : data?.results.length ? <section className="grid gap-3 md:grid-cols-2 xl:grid-cols-3">{data.results.map((shipment) => <ShipmentCard key={shipment.id} shipment={shipment} open={() => setSelected(shipment)} />)}</section> : !error && <Empty />}
+    {data && data.total_pages > 1 && <Pagination page={page} pages={data.total_pages} total={data.total} setPage={setPage} />}
+    {selected && <ShipmentPanel shipment={selected} close={() => setSelected(null)} changed={() => { setSelected(null); void load(); }} />}
+  </div>;
+}
+
+function ShipmentCard({ shipment, open }: { shipment: LogisticsShipment; open: () => void }) {
+  const quantity = shipment.items.reduce((sum, item) => sum + item.quantity, 0);
+  return <article className="flex flex-col rounded-2xl border border-slate-200 bg-white p-4 shadow-sm dark:border-slate-700 dark:bg-slate-800"><div className="flex items-start justify-between gap-3"><span className="grid h-10 w-10 place-items-center rounded-xl bg-blue/10 text-blue"><Truck size={19} /></span><Status value={shipment.status} /></div><h3 className="mt-4 break-all font-semibold text-slate-900 dark:text-white">{shipment.tracking_number || `Shipment ${shipment.id.slice(0, 8)}`}</h3><p className="mt-1 text-sm text-slate-500">{shipment.carrier_name || "Carrier not set"} · {quantity} item{quantity === 1 ? "" : "s"}</p><dl className="mt-4 grid grid-cols-2 gap-3 text-xs"><div><dt className="text-slate-500">Created</dt><dd className="mt-1 text-slate-800 dark:text-slate-200">{date(shipment.created_at)}</dd></div><div><dt className="text-slate-500">Latest event</dt><dd className="mt-1 text-slate-800 dark:text-slate-200">{shipment.tracking_events.length ? date(shipment.tracking_events.at(-1)?.created_at) : "No events"}</dd></div></dl><button onClick={open} className="mt-4 min-h-11 w-full rounded-xl border border-blue px-3 text-sm font-semibold text-blue hover:bg-blue/5">View & update</button></article>;
+}
+
+function ShipmentPanel({ shipment, close, changed }: { shipment: LogisticsShipment; close: () => void; changed: () => void }) {
+  const allowed = transitions[shipment.status] || []; const [next, setNext] = useState<ShipmentStatus | "">(allowed[0] || "");
+  const [location, setLocation] = useState(""); const [notes, setNotes] = useState(""); const [busy, setBusy] = useState(false); const [error, setError] = useState("");
+  const update = async (e: FormEvent) => { e.preventDefault(); if (!next) return; setBusy(true); setError(""); try { await logisticsApi.updateShipment(shipment.id, { status: next, location: location || undefined, notes: notes || undefined }); changed(); } catch (err) { setError(message(err)); } finally { setBusy(false); } };
+  const createPickup = async () => { setBusy(true); setError(""); try { await logisticsApi.createPickupJob(shipment.id); changed(); } catch (err) { setError(message(err)); } finally { setBusy(false); } };
+  return <div className="fixed inset-0 z-[60] flex items-end justify-center bg-black/55 p-0 sm:items-center sm:p-4" role="dialog" aria-modal="true" aria-label="Shipment details"><div className="max-h-[92vh] w-full max-w-2xl overflow-y-auto rounded-t-2xl bg-white p-4 shadow-2xl sm:rounded-2xl sm:p-6 dark:bg-slate-900"><div className="flex items-start justify-between gap-3"><div><h3 className="break-all text-lg font-bold">{shipment.tracking_number || `Shipment ${shipment.id.slice(0, 8)}`}</h3><p className="mt-1 text-sm text-slate-500">Order {shipment.order_id.slice(0, 8)} · {shipment.items.length} line item(s)</p></div><button onClick={close} className="min-h-11 rounded-xl px-3 text-sm font-semibold">Close</button></div>{error && <p className="mt-4 rounded-xl bg-red-50 p-3 text-sm text-red-700">{error}</p>}
+      {shipment.status === "ready_for_dispatch" && <button onClick={() => void createPickup()} disabled={busy} className="mt-5 inline-flex min-h-11 w-full items-center justify-center gap-2 rounded-xl bg-emerald-700 px-4 text-sm font-semibold text-white disabled:opacity-50"><PackagePlus size={18} />Create pickup job</button>}
+      {allowed.length > 0 && <form onSubmit={update} className="mt-5 space-y-3 rounded-2xl bg-slate-50 p-4 dark:bg-slate-800"><h4 className="font-semibold">Add tracking event</h4><select value={next} onChange={(e) => setNext(e.target.value as ShipmentStatus)} className="min-h-11 w-full rounded-xl border border-slate-300 bg-white px-3 capitalize dark:border-slate-600 dark:bg-slate-900">{allowed.map((item) => <option key={item} value={item}>{label(item)}</option>)}</select><label className="relative block"><MapPin className="absolute left-3 top-3.5 text-slate-400" size={17} /><input value={location} onChange={(e) => setLocation(e.target.value)} placeholder="Current location (optional)" className="min-h-11 w-full rounded-xl border border-slate-300 bg-white pl-10 pr-3 text-sm dark:border-slate-600 dark:bg-slate-900" /></label><textarea value={notes} onChange={(e) => setNotes(e.target.value)} placeholder="Operations note (optional)" className="min-h-24 w-full rounded-xl border border-slate-300 bg-white p-3 text-sm dark:border-slate-600 dark:bg-slate-900" /><button disabled={busy || !next} className="min-h-11 w-full rounded-xl bg-blue px-4 text-sm font-semibold text-white disabled:opacity-50">{busy ? "Saving…" : "Update shipment"}</button></form>}
+      <div className="mt-5"><h4 className="font-semibold">Tracking timeline</h4><div className="mt-3 space-y-3">{shipment.tracking_events.length ? [...shipment.tracking_events].reverse().map((event) => <div key={event.id} className="border-l-2 border-blue pl-3"><div className="flex flex-wrap items-center justify-between gap-2"><span className="text-sm font-semibold capitalize">{label(event.status)}</span><time className="text-xs text-slate-500">{date(event.created_at)}</time></div>{(event.location || event.notes) && <p className="mt-1 text-sm text-slate-600 dark:text-slate-300">{[event.location, event.notes].filter(Boolean).join(" · ")}</p>}</div>) : <p className="text-sm text-slate-500">No tracking events yet.</p>}</div></div>
+    </div></div>;
+}
+
+function Status({ value }: { value: string }) { return <span className="rounded-full bg-slate-100 px-2.5 py-1 text-xs font-semibold capitalize text-slate-700 dark:bg-slate-700 dark:text-slate-100">{label(value)}</span>; }
+function ErrorBox({ text, retry }: { text: string; retry: () => Promise<void> }) { return <div className="rounded-2xl border border-red-200 bg-red-50 p-4"><p className="break-words text-sm text-red-700">{text}</p><button onClick={() => void retry()} className="mt-3 min-h-11 rounded-xl bg-red-700 px-4 text-sm font-semibold text-white">Try again</button></div>; }
+function Empty() { return <div className="rounded-2xl border border-dashed border-slate-300 bg-white p-8 text-center dark:border-slate-700 dark:bg-slate-800"><Truck className="mx-auto text-slate-400" /><h3 className="mt-3 font-semibold">No shipments found</h3><p className="mt-1 text-sm text-slate-500">Try another search or status filter.</p></div>; }
+function Pagination({ page, pages, total, setPage }: { page: number; pages: number; total: number; setPage: (page: number) => void }) { return <nav className="flex flex-wrap items-center justify-between gap-3 rounded-2xl border border-slate-200 bg-white p-3 text-sm dark:border-slate-700 dark:bg-slate-800"><span className="text-slate-500">{total} shipment(s) · Page {page} of {pages}</span><div className="flex gap-2"><button disabled={page <= 1} onClick={() => setPage(page - 1)} className="min-h-11 rounded-xl border px-3 disabled:opacity-40" aria-label="Previous page"><ChevronLeft /></button><button disabled={page >= pages} onClick={() => setPage(page + 1)} className="min-h-11 rounded-xl border px-3 disabled:opacity-40" aria-label="Next page"><ChevronRight /></button></div></nav>; }

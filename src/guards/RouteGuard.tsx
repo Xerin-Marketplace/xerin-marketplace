@@ -9,6 +9,7 @@ import {
   hasAnyPermission,
   hasAnyRole,
   hasSellerStatus,
+  isLogisticsUser,
 } from "./permissions";
 
 type RouteGuardProps = {
@@ -21,6 +22,7 @@ type RouteGuardProps = {
   accountTypes?: string[];
   sellerStatuses?: string[];
   fallbackPath?: string;
+  logisticsOnly?: boolean;
 };
 
 export default function RouteGuard({
@@ -33,6 +35,7 @@ export default function RouteGuard({
   accountTypes = [],
   sellerStatuses = [],
   fallbackPath = "/",
+  logisticsOnly = false,
 }: RouteGuardProps) {
   const router = useRouter();
   const pathname = usePathname();
@@ -52,7 +55,8 @@ export default function RouteGuard({
     hasAnyPermission(user, anyPermissions) &&
     hasAnyRole(user, roles) &&
     hasAnyAccountType(user, accountTypes) &&
-    hasSellerStatus(user, sellerStatuses);
+    hasSellerStatus(user, sellerStatuses) &&
+    (!logisticsOnly || isLogisticsUser(user));
 
   useEffect(() => {
     if (requireAuth && !isAuthenticated) {
