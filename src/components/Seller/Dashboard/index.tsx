@@ -1746,7 +1746,7 @@ function RecentProducts({
   inventory,
 }: {
   products: Product[];
-  inventory: SellerInventory[];
+  inventory: SellerInventoryItem[];
 }) {
   const stockByProduct = useMemo(() => {
     const result = new Map<string, number>();
