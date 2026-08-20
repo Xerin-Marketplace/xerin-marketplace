@@ -23,10 +23,10 @@ export const LOGISTICS_ENDPOINTS = {
   pickupJobs: "/logistics/me/pickup-jobs",
   integration: "/logistics/me/integration",
   webhookEvents: "/logistics/me/webhook-events",
-  wallet: "/logistics-wallets/me",
-  walletTransactions: "/logistics-wallets/me/transactions",
-  payoutAccounts: "/logistics-wallets/me/payout-accounts",
-  payouts: "/logistics-wallets/me/payouts",
+  wallet: "/logistics/wallet/me",
+  walletTransactions: "/logistics/wallet/me/transactions",
+  payoutAccounts: "/logistics/wallet/me/payout-accounts",
+  payouts: "/logistics/wallet/me/payouts",
 } as const;
 
 const getAccount = async (): Promise<LogisticsCompanyAccount> =>

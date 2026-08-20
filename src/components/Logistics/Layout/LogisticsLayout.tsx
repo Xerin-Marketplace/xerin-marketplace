@@ -28,8 +28,8 @@ const nav = [
   { label: "Pickup jobs", href: "/logistics/pickups", icon: PackageCheck },
   { label: "Zones & rates", href: "/logistics/pricing", icon: Boxes },
   { label: "Team", href: "/logistics/team", icon: Users },
-  { label: "Wallet", href: "/logistics/wallet", icon: WalletCards, soon: true },
-  { label: "Integration", href: "/logistics/integration", icon: Webhook, soon: true },
+  { label: "Wallet", href: "/logistics/wallet", icon: WalletCards },
+  { label: "Integration", href: "/logistics/integration", icon: Webhook },
   { label: "Company settings", href: "/logistics/settings", icon: Settings },
 ];
 
