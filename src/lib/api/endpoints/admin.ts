@@ -1444,6 +1444,40 @@ export const createLogisticsCompany = async (payload: Partial<AdminLogisticsComp
 }) =>
   (await axiosInstance.post<AdminLogisticsCompany>("/logistics/companies", payload)).data;
 
+export type LogisticsCompanyOnboardPayload = {
+  company: {
+    name: string;
+    code: string;
+    contact_name?: string | null;
+    contact_email?: string | null;
+    contact_phone?: string | null;
+    scope: AdminLogisticsCompany["scope"];
+    status: "pending";
+    supports_cod: boolean;
+    supports_tracking: boolean;
+    supports_webhooks: boolean;
+    metadata_json: Record<string, unknown>;
+  };
+  administrator: {
+    first_name: string;
+    last_name: string;
+    email: string;
+    phone?: string | null;
+    password: string;
+  };
+};
+
+export type LogisticsCompanyOnboardResponse = {
+  company: AdminLogisticsCompany;
+  administrator_user_id: string;
+  membership_id: string;
+  welcome_email_sent: boolean;
+  warning?: string | null;
+};
+
+export const onboardLogisticsCompany = async (payload: LogisticsCompanyOnboardPayload) =>
+  (await axiosInstance.post<LogisticsCompanyOnboardResponse>("/logistics/companies/onboard", payload)).data;
+
 export const updateLogisticsCompany = async (id: string, payload: Partial<AdminLogisticsCompany>) =>
   (await axiosInstance.patch<AdminLogisticsCompany>(`/logistics/companies/${id}`, payload)).data;
 

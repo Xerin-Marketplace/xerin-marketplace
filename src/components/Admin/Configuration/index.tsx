@@ -16,6 +16,7 @@ import {
   Settings2,
   ShieldCheck,
   Truck,
+  UserPlus,
 } from "lucide-react";
 
 import {
@@ -29,7 +30,7 @@ import {
   type AdminLogisticsZone,
   type AdminMarketplaceSettings,
   createCommissionRule,
-  createLogisticsCompany,
+  onboardLogisticsCompany,
   createLogisticsRate,
   createLogisticsService,
   createLogisticsZone,
@@ -452,9 +453,11 @@ function LogisticsCompanies() {
   type LogisticsCompanyForm = {
     name: string;
     code: string;
-    contact_name: string;
-    contact_email: string;
-    contact_phone: string;
+    admin_first_name: string;
+    admin_last_name: string;
+    admin_email: string;
+    admin_phone: string;
+    temporary_password: string;
     scope: AdminLogisticsCompany["scope"];
     status: AdminLogisticsCompany["status"];
     supports_cod: boolean;
@@ -462,10 +465,12 @@ function LogisticsCompanies() {
     supports_webhooks: boolean;
   };
   const [form, setForm] = useState<LogisticsCompanyForm>({
-    name: "", code: "", contact_name: "", contact_email: "", contact_phone: "",
-    scope: "local", status: "active", supports_cod: false, supports_tracking: true,
+    name: "", code: "", admin_first_name: "", admin_last_name: "", admin_email: "",
+    admin_phone: "", temporary_password: "", scope: "local", status: "pending",
+    supports_cod: false, supports_tracking: true,
     supports_webhooks: false,
   });
+  const [creating, setCreating] = useState(false);
 
   const load = async () => {
     setLoading(true);
@@ -478,22 +483,55 @@ function LogisticsCompanies() {
   useEffect(() => { const t = setTimeout(() => void load(), 250); return () => clearTimeout(t); }, [page, pageSize, search]);
 
   const create = async () => {
+    if (creating) return;
+    if (!form.name.trim() || !form.code.trim() || !form.admin_first_name.trim() ||
+        !form.admin_last_name.trim() || !form.admin_email.trim() || form.temporary_password.length < 8) {
+      toast.error("Complete the company and administrator fields. Password must be at least 8 characters.");
+      return;
+    }
+    setCreating(true);
     try {
-      await createLogisticsCompany({ ...form, metadata_json: {} });
-      toast.success("Logistics company registered.");
-      setForm((x) => ({ ...x, name: "", code: "", contact_name: "", contact_email: "", contact_phone: "" }));
+      const result = await onboardLogisticsCompany({
+        company: {
+          name: form.name.trim(), code: form.code.trim(),
+          contact_name: `${form.admin_first_name} ${form.admin_last_name}`.trim(),
+          contact_email: form.admin_email.trim(), contact_phone: form.admin_phone.trim() || null,
+          scope: form.scope, status: "pending", supports_cod: form.supports_cod,
+          supports_tracking: form.supports_tracking, supports_webhooks: form.supports_webhooks,
+          metadata_json: {},
+        },
+        administrator: {
+          first_name: form.admin_first_name.trim(), last_name: form.admin_last_name.trim(),
+          email: form.admin_email.trim(), phone: form.admin_phone.trim() || null,
+          password: form.temporary_password,
+        },
+      });
+      if (result.welcome_email_sent) toast.success("Company administrator created and welcome email sent.");
+      else toast.error(result.warning || "Account created, but the welcome email was not sent.");
+      setForm((x) => ({ ...x, name: "", code: "", admin_first_name: "", admin_last_name: "",
+        admin_email: "", admin_phone: "", temporary_password: "" }));
       await load();
     } catch (error) { toast.error(errorMessage(error)); }
+    finally { setCreating(false); }
   };
 
   return (
     <section className="grid gap-5 xl:grid-cols-[390px_1fr]">
       <Card title="Register Logistics Company" icon={Building2}>
-        <Field label="Company name"><input className={inputClass} value={form.name} onChange={(e) => setForm((x) => ({...x, name:e.target.value}))} /></Field>
-        <Field label="Company code"><input className={inputClass} placeholder="e.g. dhl-tanzania" value={form.code} onChange={(e) => setForm((x) => ({...x, code:e.target.value.toLowerCase().replace(/\s+/g,"-")}))} /></Field>
-        <Field label="Contact person"><input className={inputClass} value={form.contact_name} onChange={(e) => setForm((x) => ({...x, contact_name:e.target.value}))} /></Field>
-        <Field label="Contact email"><input type="email" className={inputClass} value={form.contact_email} onChange={(e) => setForm((x) => ({...x, contact_email:e.target.value}))} /></Field>
-        <Field label="Contact phone"><input className={inputClass} value={form.contact_phone} onChange={(e) => setForm((x) => ({...x, contact_phone:e.target.value}))} /></Field>
+        <div className="mb-4 rounded-xl border border-blue-100 bg-blue-50 p-3 text-xs leading-5 text-blue-800">
+          This creates the company and its primary administrator. The company starts pending and receives onboarding instructions by email.
+        </div>
+        <Field label="Company name"><input required className={inputClass} value={form.name} onChange={(e) => setForm((x) => ({...x, name:e.target.value}))} /></Field>
+        <Field label="Company code"><input required className={inputClass} placeholder="e.g. dhl-tanzania" value={form.code} onChange={(e) => setForm((x) => ({...x, code:e.target.value.toLowerCase().replace(/[^a-z0-9_-]+/g,"-").replace(/^-+|-+$/g,"")}))} /></Field>
+        <div className="my-4 flex items-center gap-2 border-t pt-4 text-sm font-bold text-slate-800"><UserPlus size={17}/>Primary company administrator</div>
+        <div className="grid gap-3 sm:grid-cols-2">
+          <Field label="First name"><input required className={inputClass} value={form.admin_first_name} onChange={(e) => setForm((x) => ({...x, admin_first_name:e.target.value}))} /></Field>
+          <Field label="Last name"><input required className={inputClass} value={form.admin_last_name} onChange={(e) => setForm((x) => ({...x, admin_last_name:e.target.value}))} /></Field>
+        </div>
+        <Field label="Login email"><input required type="email" autoComplete="off" className={inputClass} value={form.admin_email} onChange={(e) => setForm((x) => ({...x, admin_email:e.target.value}))} /></Field>
+        <Field label="Phone (optional)"><input type="tel" className={inputClass} value={form.admin_phone} onChange={(e) => setForm((x) => ({...x, admin_phone:e.target.value}))} /></Field>
+        <Field label="Temporary password"><input required type="password" minLength={8} maxLength={72} autoComplete="new-password" className={inputClass} value={form.temporary_password} onChange={(e) => setForm((x) => ({...x, temporary_password:e.target.value}))} /></Field>
+        <p className="-mt-2 mb-3 text-xs leading-5 text-slate-500">Share the temporary password securely. It is never included in the welcome email.</p>
         <Field label="Delivery scope">
           <select className={inputClass} value={form.scope} onChange={(e) => setForm((x) => ({...x, scope:e.target.value as AdminLogisticsCompany["scope"]}))}>
             <option value="local">Tanzania / Local</option>
@@ -504,7 +542,7 @@ function LogisticsCompanies() {
         <Toggle label="Supports COD" checked={form.supports_cod} onChange={(v) => setForm((x) => ({...x, supports_cod:v}))} />
         <Toggle label="Supports Tracking" checked={form.supports_tracking} onChange={(v) => setForm((x) => ({...x, supports_tracking:v}))} />
         <Toggle label="Webhook Integration" checked={form.supports_webhooks} onChange={(v) => setForm((x) => ({...x, supports_webhooks:v}))} />
-        <button onClick={() => void create()} className="w-full rounded-xl bg-[#f47524] py-3 text-sm font-semibold text-white">Register Company</button>
+        <button disabled={creating} onClick={() => void create()} className="inline-flex w-full items-center justify-center gap-2 rounded-xl bg-[#f47524] py-3 text-sm font-semibold text-white disabled:cursor-not-allowed disabled:opacity-60">{creating && <RefreshCw className="animate-spin" size={16}/>} {creating ? "Creating company…" : "Create Company & Administrator"}</button>
       </Card>
 
       <TableCard title="Registered logistics companies" search={search} setSearch={(v) => {setSearch(v);setPage(1);}}>
