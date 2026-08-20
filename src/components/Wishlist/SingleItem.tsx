@@ -77,7 +77,7 @@ const SingleItem = ({ item }: { item: WishListItem }) => {
       </div>
 
       <div className="min-w-[205px]">
-        <p className="text-dark dark:text-darkTheme-body-color">{formatCurrency(item.discountedPrice, item.currency)}</p>
+        <p className="text-dark dark:text-darkTheme-body-color">{formatCurrency(item.discountedPrice, item.currency || "TZS")}</p>
       </div>
 
       <div className="min-w-[265px]">

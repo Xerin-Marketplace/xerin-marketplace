@@ -6,6 +6,7 @@ export type WishListItem = {
   title: string;
   price: number;
   discountedPrice: number;
+  currency?: string;
   quantity: number;
   status?: string;
   imgs?: {

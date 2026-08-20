@@ -12,6 +12,10 @@ import type {
   MapResolvedLocation,
 } from "@/types/api/user";
 import type { Product } from "@/types/product";
+import type {
+  WishlistMutationResponse,
+  WishlistProductListResponse,
+} from "@/types/api/discovery";
 
 export const getMe = async (): Promise<User> => {
   const res = await axiosInstance.get<User>(API_ENDPOINTS.users.me);

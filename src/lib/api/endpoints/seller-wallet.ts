@@ -33,16 +33,6 @@ export const getSellerWalletTransactions = async (
   return res.data;
 };
 
-export const sellerWalletApi = {
-  earningsSummary: getSellerEarningsSummary,
-  wallet: getSellerWallet,
-  transactions: getSellerWalletTransactions,
-  payouts: getSellerPayouts,
-  requestPayout: requestSellerPayout,
-  cancelPayout: cancelSellerPayout,
-};
-
-
 export const getSellerPayouts = async (
   params: SellerPayoutListParams = {},
 ): Promise<PaginatedSellerPayoutResponse> => {
@@ -70,4 +60,13 @@ export const cancelSellerPayout = async (
     `/wallet/me/payouts/${payoutId}/cancel`,
   );
   return res.data;
+};
+
+export const sellerWalletApi = {
+  earningsSummary: getSellerEarningsSummary,
+  wallet: getSellerWallet,
+  transactions: getSellerWalletTransactions,
+  payouts: getSellerPayouts,
+  requestPayout: requestSellerPayout,
+  cancelPayout: cancelSellerPayout,
 };

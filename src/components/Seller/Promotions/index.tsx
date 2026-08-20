@@ -318,7 +318,7 @@ export default function SellerPromotions() {
   };
 
   const togglePromotion = async (promotion: SellerPromotion) => {
-    setBusy(promotion.id);
+    setBusy(String(promotion.id));
     try {
       await sellerPromotionsApi.update(promotion.id, {
         is_active: !promotion.is_active,
@@ -341,7 +341,7 @@ export default function SellerPromotions() {
 
     if (!window.confirm(message)) return;
 
-    setBusy(promotion.id);
+    setBusy(String(promotion.id));
     try {
       await sellerPromotionsApi.delete(promotion.id);
       toast.success(
@@ -1018,12 +1018,13 @@ function PromotionEditor({
               ) : (
                 <div className="mt-4 grid max-h-[340px] gap-2 overflow-y-auto sm:grid-cols-2">
                   {products.map((product) => {
-                    const selected = form.product_ids.includes(product.id);
+                    const productId = String(product.id);
+                    const selected = form.product_ids.includes(productId);
                     return (
                       <button
                         type="button"
                         key={product.id}
-                        onClick={() => toggleProduct(product.id)}
+                        onClick={() => toggleProduct(productId)}
                         className={`flex items-start gap-3 rounded-xl border p-3 text-left transition ${
                           selected
                             ? "border-orange-300 bg-orange-50"

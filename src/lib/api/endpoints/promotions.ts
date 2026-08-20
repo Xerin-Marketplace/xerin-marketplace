@@ -7,6 +7,7 @@ import type {
   SellerPromotionUpdateRequest,
   CustomerPromotionOffer,
 } from "@/types/api/promotion";
+import type { ID } from "@/types/api/common";
 
 const SELLER_PROMOTIONS = "/seller/promotions";
 
@@ -31,7 +32,7 @@ export const createSellerPromotion = async (
 };
 
 export const updateSellerPromotion = async (
-  promotionId: string,
+  promotionId: ID,
   payload: SellerPromotionUpdateRequest,
 ): Promise<SellerPromotion> => {
   const res = await axiosInstance.patch<SellerPromotion>(
@@ -42,7 +43,7 @@ export const updateSellerPromotion = async (
 };
 
 export const deleteSellerPromotion = async (
-  promotionId: string,
+  promotionId: ID,
 ): Promise<void> => {
   await axiosInstance.delete(`${SELLER_PROMOTIONS}/${promotionId}`);
 };
