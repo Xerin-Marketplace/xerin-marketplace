@@ -27,10 +27,10 @@ const nav = [
   { label: "Shipments", href: "/logistics/shipments", icon: Truck },
   { label: "Pickup jobs", href: "/logistics/pickups", icon: PackageCheck },
   { label: "Zones & rates", href: "/logistics/pricing", icon: Boxes },
-  { label: "Team", href: "/logistics/team", icon: Users, soon: true },
+  { label: "Team", href: "/logistics/team", icon: Users },
   { label: "Wallet", href: "/logistics/wallet", icon: WalletCards, soon: true },
   { label: "Integration", href: "/logistics/integration", icon: Webhook, soon: true },
-  { label: "Company settings", href: "/logistics/settings", icon: Settings, soon: true },
+  { label: "Company settings", href: "/logistics/settings", icon: Settings },
 ];
 
 function Workspace({ children }: { children: React.ReactNode }) {
