@@ -448,7 +448,19 @@ function LogisticsCompanies() {
   const [pageSize, setPageSize] = useState(10);
   const [meta, setMeta] = useState({ total: 0, total_pages: 0 });
   const [loading, setLoading] = useState(true);
-  const [form, setForm] = useState({
+  type LogisticsCompanyForm = {
+    name: string;
+    code: string;
+    contact_name: string;
+    contact_email: string;
+    contact_phone: string;
+    scope: AdminLogisticsCompany["scope"];
+    status: AdminLogisticsCompany["status"];
+    supports_cod: boolean;
+    supports_tracking: boolean;
+    supports_webhooks: boolean;
+  };
+  const [form, setForm] = useState<LogisticsCompanyForm>({
     name: "", code: "", contact_name: "", contact_email: "", contact_phone: "",
     scope: "local", status: "active", supports_cod: false, supports_tracking: true,
     supports_webhooks: false,
@@ -482,7 +494,7 @@ function LogisticsCompanies() {
         <Field label="Contact email"><input type="email" className={inputClass} value={form.contact_email} onChange={(e) => setForm((x) => ({...x, contact_email:e.target.value}))} /></Field>
         <Field label="Contact phone"><input className={inputClass} value={form.contact_phone} onChange={(e) => setForm((x) => ({...x, contact_phone:e.target.value}))} /></Field>
         <Field label="Delivery scope">
-          <select className={inputClass} value={form.scope} onChange={(e) => setForm((x) => ({...x, scope:e.target.value}))}>
+          <select className={inputClass} value={form.scope} onChange={(e) => setForm((x) => ({...x, scope:e.target.value as AdminLogisticsCompany["scope"]}))}>
             <option value="local">Tanzania / Local</option>
             <option value="international">International</option>
             <option value="both">Local + International</option>
