@@ -1,6 +1,14 @@
 import { NextResponse } from "next/server";
 import type { NextRequest } from "next/server";
 
+const withBrowserPermissions = (response: NextResponse) => {
+  response.headers.set(
+    "Permissions-Policy",
+    "geolocation=(self), camera=(), microphone=()",
+  );
+  return response;
+};
+
 export function middleware(request: NextRequest) {
   const { pathname } = request.nextUrl;
 
@@ -13,7 +21,7 @@ export function middleware(request: NextRequest) {
     if (!adminPresent) {
       const signinUrl = new URL("/signin", request.url);
       signinUrl.searchParams.set("redirect", pathname);
-      return NextResponse.redirect(signinUrl);
+      return withBrowserPermissions(NextResponse.redirect(signinUrl));
     }
   }
 
@@ -21,7 +29,7 @@ export function middleware(request: NextRequest) {
     if (!logisticsPresent) {
       const signinUrl = new URL("/signin", request.url);
       signinUrl.searchParams.set("redirect", pathname);
-      return NextResponse.redirect(signinUrl);
+      return withBrowserPermissions(NextResponse.redirect(signinUrl));
     }
   }
 
@@ -29,13 +37,13 @@ export function middleware(request: NextRequest) {
     if (!sellerPresent && !adminPresent) {
       const signinUrl = new URL("/signin", request.url);
       signinUrl.searchParams.set("redirect", pathname);
-      return NextResponse.redirect(signinUrl);
+      return withBrowserPermissions(NextResponse.redirect(signinUrl));
     }
   }
 
-  return NextResponse.next();
+  return withBrowserPermissions(NextResponse.next());
 }
 
 export const config = {
-  matcher: ["/admin/:path*", "/seller/dashboard/:path*", "/logistics/:path*"],
+  matcher: ["/((?!api|_next/static|_next/image|favicon.ico|.*\\..*).*)"],
 };

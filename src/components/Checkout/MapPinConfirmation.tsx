@@ -17,6 +17,7 @@ export default function MapPinConfirmation({
   const [search, setSearch] = useState("");
   const [location, setLocation] = useState<MapResolvedLocation | null>(null);
   const [locating, setLocating] = useState(false);
+  const [locationError, setLocationError] = useState("");
   const [confirming, setConfirming] = useState(false);
   const countryCode = ["tanzania", "united republic of tanzania", "tz"].includes(address.country.trim().toLowerCase()) ? "TZ" : undefined;
 
@@ -47,19 +48,32 @@ export default function MapPinConfirmation({
 
   const useMyLocation = () => {
     if (!navigator.geolocation) {
-      toast.error("Location access is not supported by this browser");
+      const message = "Location access is not supported by this browser. Search for the delivery point instead.";
+      setLocationError(message);
+      toast.error(message);
       return;
     }
+    setLocationError("");
     setLocating(true);
     navigator.geolocation.getCurrentPosition(
       async ({ coords }) => {
         try {
           setLocation(await usersApi.reverseGeocode(coords.latitude, coords.longitude));
+          setLocationError("");
         } catch (error) {
           toast.error(error instanceof Error ? error.message : "Unable to identify your location");
         } finally { setLocating(false); }
       },
-      () => { setLocating(false); toast.error("Allow location access, or search for the delivery point"); },
+      (error) => {
+        setLocating(false);
+        const message = error.code === 1
+          ? "Location is blocked. Open this site’s browser permissions, set Location to Allow, then try again—or search for the delivery point."
+          : error.code === 2
+            ? "Your device could not determine its location. Turn on GPS or search for the delivery point."
+            : "Finding your location took too long. Try again outdoors or search for the delivery point.";
+        setLocationError(message);
+        toast.error(message);
+      },
       { enableHighAccuracy: true, timeout: 15_000 },
     );
   };
@@ -92,6 +106,7 @@ export default function MapPinConfirmation({
       {suggestions.data && search.trim().length >= 3 && !location && <div className="absolute z-20 mt-1 max-h-56 w-full overflow-y-auto rounded-xl border bg-white p-1 shadow-xl">{suggestions.data.map((item) => <button type="button" key={item.place_id} onClick={() => void choosePlace(item.place_id)} className="block min-h-11 w-full rounded-lg px-3 py-2 text-left text-sm hover:bg-slate-50"><b className="block text-slate-800">{item.main_text || item.description}</b>{item.secondary_text && <span className="text-xs text-slate-500">{item.secondary_text}</span>}</button>)}</div>}
     </div>
     <button type="button" onClick={useMyLocation} disabled={locating} className="mt-3 inline-flex min-h-11 w-full items-center justify-center gap-2 rounded-xl border border-amber-300 bg-white px-4 text-sm font-semibold text-amber-900 sm:w-auto"><Crosshair size={17} />{locating ? "Finding location…" : "Use my current location"}</button>
+    {locationError && <p role="alert" className="mt-3 rounded-lg border border-red-200 bg-red-50 p-3 text-xs leading-5 text-red-700">{locationError}</p>}
     {location && <div className="mt-3 rounded-xl bg-white p-3"><p className="break-words text-sm font-medium text-slate-800">{location.formatted_address}</p><p className="mt-1 text-xs text-slate-500">Pin: {Number(location.latitude).toFixed(6)}, {Number(location.longitude).toFixed(6)}</p><button type="button" onClick={() => void confirm()} disabled={confirming} className="mt-3 inline-flex min-h-11 w-full items-center justify-center gap-2 rounded-xl bg-orange px-4 text-sm font-bold text-white sm:w-auto">{confirming ? <Loader2 className="animate-spin" size={17} /> : <CheckCircle2 size={17} />}{confirming ? "Confirming…" : "Confirm this delivery pin"}</button></div>}
   </div>;
 }
