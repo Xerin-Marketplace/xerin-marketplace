@@ -100,7 +100,7 @@ export const useAuth = () => {
       }
       const user = data.user;
       if (isLogisticsUser(user)) {
-        router.push("/logistics/dashboard");
+        router.push("/logistics/onboarding");
       } else if (isAdminUser(user)) {
         router.push("/admin/dashboard");
       } else if (isSellerUser(user)) {

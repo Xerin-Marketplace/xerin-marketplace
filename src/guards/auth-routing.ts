@@ -23,7 +23,7 @@ export const getPostLoginPath = (
   if (isSafeInternalPath(requestedPath)) {
     const path = requestedPath as string;
     if (isLogisticsUser(guardUser)) {
-      return path.startsWith("/logistics/") ? path : "/logistics/dashboard";
+      return path.startsWith("/logistics/") ? path : "/logistics/onboarding";
     }
     if (isSellerUser(guardUser)) {
       return path.startsWith("/seller/") ? path : "/seller/dashboard";
@@ -37,7 +37,7 @@ export const getPostLoginPath = (
     return path;
   }
 
-  if (isLogisticsUser(guardUser)) return "/logistics/dashboard";
+  if (isLogisticsUser(guardUser)) return "/logistics/onboarding";
 
   if (isAdminUser(guardUser)) {
     return "/admin/dashboard";

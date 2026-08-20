@@ -17,6 +17,7 @@ import {
   Users,
   WalletCards,
   Webhook,
+  ListChecks,
   X,
 } from "lucide-react";
 import type { LucideIcon } from "lucide-react";
@@ -32,6 +33,7 @@ type LogisticsNavItem = {
 };
 
 const nav: LogisticsNavItem[] = [
+  { label: "Setup checklist", href: "/logistics/onboarding", icon: ListChecks },
   { label: "Dashboard", href: "/logistics/dashboard", icon: LayoutDashboard },
   { label: "Shipments", href: "/logistics/shipments", icon: Truck },
   { label: "Pickup jobs", href: "/logistics/pickups", icon: PackageCheck },
