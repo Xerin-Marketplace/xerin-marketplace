@@ -150,7 +150,9 @@ export default function SellerPayouts() {
             account.verification_status === "verified",
         );
 
-      setAccountId((current) => current || verifiedDefault?.id || "");
+      setAccountId((current) =>
+        current || (verifiedDefault ? String(verifiedDefault.id) : ""),
+      );
     } catch (error) {
       toast.error(errorMessage(error));
     } finally {
@@ -196,7 +198,7 @@ export default function SellerPayouts() {
   );
 
   const selectedAccount = verifiedAccounts.find(
-    (account) => account.id === accountId,
+    (account) => String(account.id) === accountId,
   );
 
   // Current backend payout history endpoint provides pagination only.
@@ -210,7 +212,7 @@ export default function SellerPayouts() {
       if (!term) return true;
 
       const account = accounts.find(
-        (candidate) => candidate.id === row.payout_account_id,
+        (candidate) => String(candidate.id) === row.payout_account_id,
       );
 
       return [
@@ -261,7 +263,7 @@ export default function SellerPayouts() {
     setSubmitting(true);
     try {
       await sellerWalletApi.requestPayout({
-        payout_account_id: selectedAccount.id,
+        payout_account_id: String(selectedAccount.id),
         amount: numericAmount,
         note: note.trim() || null,
       });
