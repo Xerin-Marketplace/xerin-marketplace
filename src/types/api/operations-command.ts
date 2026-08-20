@@ -1,0 +1,6 @@
+export type OperationsException = { type: string; severity: "warning" | "critical"; resource_id: string; title: string; age_minutes: number; action_url?: string | null };
+export type OperationsOverview = { generated_at: string; open_support_tickets: number; unassigned_support_tickets: number; breached_support_tickets: number; urgent_support_tickets: number; failed_notification_deliveries: number; stale_notification_deliveries: number; unresolved_security_events: number; failed_payments: number; pending_refunds: number; failed_deliveries: number; exceptions: OperationsException[] };
+export type SystemAlert = { id: string; type: string; severity: string; title: string; message: string; resolved: boolean; created_at: string };
+export type ActivityLog = { id: string; admin_user_id?: string | null; action: string; resource_type: string; resource_id?: string | null; details?: Record<string, unknown> | null; created_at: string };
+export type SupportTicketSummary = { id: string; ticket_number: string; customer_name?: string | null; subject: string; priority: string; status: string; assigned_to_id?: string | null; assigned_to_name?: string | null; created_at: string; updated_at?: string | null };
+export type Page<T> = { total: number; page: number; page_size: number; total_pages: number; results: T[] };

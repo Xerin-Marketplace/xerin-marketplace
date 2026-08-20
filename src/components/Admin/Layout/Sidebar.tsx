@@ -91,6 +91,8 @@ const sidebarGroups: SidebarGroup[] = [
     items: [
       { label: "Fulfilment Workflow", href: "/admin/operations/workflow", icon: PackageCheck },
       { label: "Financial Flow", href: "/admin/operations/finance-flow", icon: WalletCards },
+      { label: "Command Center", href: "/admin/operations/command-center", icon: ShieldCheck },
+      { label: "End-to-End QA", href: "/admin/operations/qa", icon: FileCheck2 },
     ],
   },
   {

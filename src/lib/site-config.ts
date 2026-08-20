@@ -1,3 +1,5 @@
+import { API_BASE_URL, API_DOCS_URL } from "@/lib/api/endpoints";
+
 export const siteConfig = {
   name: "Xerin Market",
   shortName: "Xerin",
@@ -34,8 +36,8 @@ export const siteConfig = {
     linkedin: "https://linkedin.com/company/xerinmarket",
   },
   api: {
-    baseUrl: process.env.NEXT_PUBLIC_API_BASE_URL || "http://localhost:8000",
-    docsUrl: process.env.NEXT_PUBLIC_API_DOCS_URL || "http://localhost:8000/docs",
+    baseUrl: API_BASE_URL,
+    docsUrl: API_DOCS_URL,
   },
   navigation: {
     primary: [

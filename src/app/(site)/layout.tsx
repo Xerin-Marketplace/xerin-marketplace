@@ -21,6 +21,7 @@ import ChatBot from "@/components/Common/ChatBot";
 import PreLoader from "@/components/Common/PreLoader";
 import BuyerAccountFooter from "@/components/BuyerAccount/BuyerAccountFooter";
 import MobileBottomNav from "@/components/Header/MobileBottomNav";
+import RuntimeStatus from "@/components/Common/RuntimeStatus";
 
 export default function RootLayout({
   children,
@@ -50,6 +51,7 @@ export default function RootLayout({
   return (
     <ThemeProvider>
       <NotificationProvider>
+        <RuntimeStatus />
         <QueryProvider>
           <AuthProvider>
             <CartModalProvider>

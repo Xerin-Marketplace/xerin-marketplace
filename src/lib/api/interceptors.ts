@@ -2,12 +2,18 @@ import axios, { AxiosError, AxiosInstance, InternalAxiosRequestConfig } from "ax
 import { toApiError } from "./errors";
 import { useAuthStore } from "@/store/useAuthStore";
 import { API_BASE_URL } from "./endpoints";
+import { announceSessionExpired } from "@/lib/reliability/runtime-events";
 
 let isRefreshing = false;
 type RefreshQueueItem = { resolve: (token: string | null) => void; reject: (error: unknown) => void };
 type RetryConfig = InternalAxiosRequestConfig & { _retry?: boolean };
 let failedQueue: RefreshQueueItem[] = [];
 let axiosInstance: AxiosInstance;
+
+const expireSession = () => {
+  useAuthStore.getState().clearSession();
+  announceSessionExpired();
+};
 
 const processQueue = (error: unknown, token: string | null = null) => {
   failedQueue.forEach((prom) => {
@@ -54,7 +60,7 @@ export const setupInterceptors = (instance: AxiosInstance) => {
 
       if (status === 401 && !originalRequest._retry) {
         if (originalRequest.url === "/auth/refresh-token" || originalRequest.url?.includes("/auth/login")) {
-          useAuthStore.getState().clearSession();
+          expireSession();
           return Promise.reject(apiError);
         }
 
@@ -74,8 +80,11 @@ export const setupInterceptors = (instance: AxiosInstance) => {
 
         const refreshToken = useAuthStore.getState().refreshToken;
         if (!refreshToken) {
-          useAuthStore.getState().clearSession();
+          expireSession();
           isRefreshing = false;
+          if (typeof window !== "undefined" && window.location.pathname !== "/signin") {
+            window.location.assign("/signin");
+          }
           return Promise.reject(apiError);
         }
 
@@ -99,7 +108,7 @@ export const setupInterceptors = (instance: AxiosInstance) => {
           return axiosInstance(originalRequest);
         } catch (refreshError) {
           processQueue(refreshError, null);
-          useAuthStore.getState().clearSession();
+          expireSession();
           isRefreshing = false;
           if (typeof window !== "undefined") {
             window.location.href = "/signin";

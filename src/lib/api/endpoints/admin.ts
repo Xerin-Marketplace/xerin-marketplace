@@ -1003,7 +1003,7 @@ export const listAccessSessions = async () =>
   ).data;
 export const revokeAccessSession = async (id: string) => (await axiosInstance.delete(`/admin/active-sessions/${id}`)).data;
 export const getAdminReport = async (type: string, params: {date_from?:string;date_to?:string}={}) => (await axiosInstance.get<AdminReport>(`/admin/reports/${type}`,{params})).data;
-export const listAuditLogs=async()=>(await axiosInstance.get<AuditLog[]>("/system/audit-logs")).data;
+export const listAuditLogs=async()=>(await axiosInstance.get<AuditLog[]>("/audit-logs")).data;
 export const listSystemEvents=async()=>(await axiosInstance.get<SystemEvent[]>("/system/events")).data;
 export const acknowledgeSystemEvent=async(id:string)=>(await axiosInstance.post<SystemEvent>(`/system/events/${id}/acknowledge`)).data;
 export const listBackgroundJobs=async()=>(await axiosInstance.get<BackgroundJob[]>("/system/jobs")).data;

@@ -92,9 +92,8 @@ export default function AdminPayments({view}:{view:PaymentView}) {
         setRows([...c.results,...fx.results]);setTotal(c.total+fx.total);setTotalPages(1);
       }else{setBackendPending(true);setRows([]);setTotal(0);setTotalPages(0);}
     }catch(e){
-      if(["providers","payouts","pending-payouts","disputes","risk","reconciliation","currencies","countries","fees","dashboard","reports","audit"].includes(view)){
-        setBackendPending(true);setRows([]);setTotal(0);setTotalPages(0);
-      }else setError(e instanceof Error?e.message:"Unable to load payment data");
+      if(["reports","audit"].includes(view)){setBackendPending(true);setRows([]);setTotal(0);setTotalPages(0);}
+      else setError(e instanceof Error?e.message:"Unable to load payment data");
     }finally{setLoading(false)}
   };
 
@@ -116,11 +115,11 @@ export default function AdminPayments({view}:{view:PaymentView}) {
       </div>
     </section>
 
-    {view==="dashboard"?<DashboardView data={dashboard} loading={loading} pending={backendPending}/>
+    {error&&<div className="rounded-xl border border-red-200 bg-red-50 p-4 text-sm text-red-700">{error}</div>}
+    {view==="dashboard"?<DashboardView data={dashboard} loading={loading} pending={backendPending} failed={Boolean(error)}/>
     :view==="methods"?<MethodsView methods={methods} loading={loading}/>
     :<>
       {view==="currencies"&&<section className="rounded-2xl border border-slate-200 bg-white p-5 shadow-sm"><div className="flex gap-3"><span className="flex h-10 w-10 items-center justify-center rounded-xl bg-orange-50 text-[#f47524]"><Globe2 size={18}/></span><div><h3 className="font-bold text-slate-900">TZS ↔ USD architecture</h3><p className="mt-1 text-sm leading-6 text-slate-500">No exchange rate is hardcoded in the frontend. TZS/USD currencies and conversion rates are expected from backend currency and FX tables so the same rate can later be reused by product display, checkout, reports and seller settlement.</p></div></div></section>}
-      {error&&<div className="rounded-xl border border-red-200 bg-red-50 p-4 text-sm text-red-700">{error}</div>}
       {backendPending?<PendingNotice title={title}/>:<section className="overflow-hidden rounded-2xl border border-slate-200 bg-white shadow-sm">
         <div className="flex flex-col gap-3 border-b border-slate-100 p-5 md:flex-row">
           <div className="relative flex-1"><Search size={16} className="absolute left-3.5 top-1/2 -translate-y-1/2 text-slate-400"/><input value={query} onChange={e=>setQuery(e.target.value)} placeholder={`Search ${title.toLowerCase()}...`} className="h-11 w-full rounded-xl border border-slate-200 bg-slate-50 pl-10 pr-4 text-sm outline-none focus:border-orange-300"/></div>
@@ -135,8 +134,9 @@ export default function AdminPayments({view}:{view:PaymentView}) {
   </div>;
 }
 
-function DashboardView({data,loading,pending}:{data:AdminPaymentDashboard|null;loading:boolean;pending:boolean}) {
+function DashboardView({data,loading,pending,failed}:{data:AdminPaymentDashboard|null;loading:boolean;pending:boolean;failed:boolean}) {
   if(loading)return <Loading text="Loading payment dashboard..."/>;
+  if(failed)return null;
   if(pending||!data)return <PendingNotice title="Payments Dashboard"/>;
   const cards:[[string,string|number,any],...Array<[string,string|number,any]>]=[
     ["Processed volume",money(data.processed_volume,data.currency),CircleDollarSign],
