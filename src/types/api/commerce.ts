@@ -312,6 +312,24 @@ export type Payment = TimestampFields & {
 export type PaginatedOrders = PaginatedResults<Order>;
 export type PaginatedPayments = PaginatedResults<Payment>;
 
+export type OrderWorkflowStage = {
+  name: "checkout" | "payment" | "seller_fulfillment" | "logistics" | "pickup" | "delivery";
+  status: "complete" | "in_progress" | "waiting" | "blocked";
+  detail: string;
+};
+export type OrderShipmentWorkflow = {
+  shipment_id: string; seller_id: string; seller_order_id?: string | null;
+  seller_order_status?: string | null; shipment_status: string; logistics_company_id?: string | null;
+  pickup_job_status?: string | null; handover_status?: string | null; pickup_proof_status?: string | null;
+  latest_tracking_status?: string | null; tracking_event_count: number;
+};
+export type OrderWorkflow = {
+  order_id: string; order_status: string; overall_status: "in_progress" | "action_required" | "complete" | "terminal";
+  delivery_quote_id?: string | null; payment_ready: boolean; seller_order_count: number; shipment_count: number;
+  delivered_shipment_count: number; stages: OrderWorkflowStage[]; shipments: OrderShipmentWorkflow[];
+  blockers: string[]; reconciliation_actions: string[];
+};
+
 
 export type ShipmentTrackingEvent = {
   id: string;

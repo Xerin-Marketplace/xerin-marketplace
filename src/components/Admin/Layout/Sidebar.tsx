@@ -20,6 +20,7 @@ import {
   Menu,
   Moon,
   Package,
+  PackageCheck,
   PanelLeftClose,
   PanelLeftOpen,
   Search,
@@ -83,6 +84,15 @@ export type SidebarGroup = {
 };
 
 const sidebarGroups: SidebarGroup[] = [
+  {
+    title: "Marketplace Operations",
+    key: "orders",
+    icon: Truck,
+    items: [
+      { label: "Fulfilment Workflow", href: "/admin/operations/workflow", icon: PackageCheck },
+      { label: "Financial Flow", href: "/admin/operations/finance-flow", icon: WalletCards },
+    ],
+  },
   {
     title: "Catalog",
     key: "products",

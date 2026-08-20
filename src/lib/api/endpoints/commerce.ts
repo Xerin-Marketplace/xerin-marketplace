@@ -18,6 +18,7 @@ import type {
   EligibleLogisticsResponse,
   MultiSellerPricingResponse,
   CheckoutDeliveryQuote,
+  OrderWorkflow,
 } from "@/types/api/commerce";
 
 export const cartApi = {
@@ -262,6 +263,10 @@ export const ordersApi = {
         signal,
       })
     ).data,
+  workflow: async (id: string) =>
+    (await axiosInstance.get<OrderWorkflow>(`/orders/${id}/workflow`)).data,
+  reconcileWorkflow: async (id: string) =>
+    (await axiosInstance.post<OrderWorkflow>(`/orders/${id}/workflow/reconcile`)).data,
 };
 
 export const paymentsApi = {
