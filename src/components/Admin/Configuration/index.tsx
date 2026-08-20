@@ -23,6 +23,7 @@ import {
   type AdminEscrowHold,
   type AdminFinanceSettings,
   type AdminLogisticsCompany,
+  type AdminLogisticsIntegration,
   type AdminLogisticsRate,
   type AdminLogisticsService,
   type AdminLogisticsZone,
@@ -544,7 +545,13 @@ function LogisticsServices() {
   const [page, setPage] = useState(1);
   const [pageSize, setPageSize] = useState(10);
   const [meta, setMeta] = useState({ total: 0, total_pages: 0 });
-  const [form, setForm] = useState({
+  type LogisticsServiceForm = {
+    logistics_company_id: string; name: string; service_code: string;
+    scope: AdminLogisticsService["scope"];
+    supports_cod: boolean; supports_tracking: boolean;
+    min_delivery_days: number; max_delivery_days: number;
+  };
+  const [form, setForm] = useState<LogisticsServiceForm>({
     logistics_company_id: "", name: "", service_code: "", scope: "local",
     supports_cod:false, supports_tracking:true, min_delivery_days:1, max_delivery_days:3,
   });
@@ -564,7 +571,7 @@ function LogisticsServices() {
       <Field label="Logistics company"><select className={inputClass} value={form.logistics_company_id} onChange={(e)=>setForm(x=>({...x,logistics_company_id:e.target.value}))}><option value="">Select company</option>{companies.map(c=><option key={c.id} value={c.id}>{c.name}</option>)}</select></Field>
       <Field label="Service name"><input className={inputClass} placeholder="Express Delivery" value={form.name} onChange={(e)=>setForm(x=>({...x,name:e.target.value}))}/></Field>
       <Field label="Service code"><input className={inputClass} placeholder="EXPRESS-TZ" value={form.service_code} onChange={(e)=>setForm(x=>({...x,service_code:e.target.value}))}/></Field>
-      <Field label="Scope"><select className={inputClass} value={form.scope} onChange={(e)=>setForm(x=>({...x,scope:e.target.value}))}><option value="local">Local</option><option value="international">International</option><option value="both">Both</option></select></Field>
+      <Field label="Scope"><select className={inputClass} value={form.scope} onChange={(e)=>setForm(x=>({...x,scope:e.target.value as AdminLogisticsService["scope"]}))}><option value="local">Local</option><option value="international">International</option><option value="both">Both</option></select></Field>
       <div className="grid grid-cols-2 gap-3"><Field label="Min days"><input type="number" min={0} className={inputClass} value={form.min_delivery_days} onChange={(e)=>setForm(x=>({...x,min_delivery_days:Number(e.target.value)}))}/></Field><Field label="Max days"><input type="number" min={0} className={inputClass} value={form.max_delivery_days} onChange={(e)=>setForm(x=>({...x,max_delivery_days:Number(e.target.value)}))}/></Field></div>
       <Toggle label="Supports COD" checked={form.supports_cod} onChange={(v)=>setForm(x=>({...x,supports_cod:v}))}/>
       <Toggle label="Supports Tracking" checked={form.supports_tracking} onChange={(v)=>setForm(x=>({...x,supports_tracking:v}))}/>
@@ -581,17 +588,17 @@ function LogisticsZones() {
   const [rows,setRows]=useState<AdminLogisticsZone[]>([]);
   const [search,setSearch]=useState(""); const [page,setPage]=useState(1); const [pageSize,setPageSize]=useState(10);
   const [meta,setMeta]=useState({total:0,total_pages:0});
-  const [form,setForm]=useState({name:"",country:"Tanzania",scope:"local",regions:"",cities:""});
+  const [form,setForm]=useState<{name:string;country:string;scope:AdminLogisticsZone["scope"];regions:string;cities:string}>({name:"",country:"Tanzania",scope:"local",regions:"",cities:""});
   const load=async()=>{try{const r=await listLogisticsZones({page,page_size:pageSize,search:search||undefined});setRows(r.results);setMeta({total:r.total,total_pages:r.total_pages});}catch(e){toast.error(errorMessage(e));}};
   useEffect(()=>{const t=setTimeout(()=>void load(),250);return()=>clearTimeout(t)},[page,pageSize,search]);
   const split=(v:string)=>v.split(",").map(x=>x.trim()).filter(Boolean);
   return <section className="grid gap-5 xl:grid-cols-[390px_1fr]"><Card title="Create Shipping Zone" icon={Globe2}>
     <Field label="Zone name"><input className={inputClass} value={form.name} onChange={e=>setForm(x=>({...x,name:e.target.value}))}/></Field>
     <Field label="Country"><input className={inputClass} value={form.country} onChange={e=>setForm(x=>({...x,country:e.target.value}))}/></Field>
-    <Field label="Scope"><select className={inputClass} value={form.scope} onChange={e=>setForm(x=>({...x,scope:e.target.value}))}><option value="local">Local</option><option value="international">International</option><option value="both">Both</option></select></Field>
+    <Field label="Scope"><select className={inputClass} value={form.scope} onChange={e=>setForm(x=>({...x,scope:e.target.value as AdminLogisticsZone["scope"]}))}><option value="local">Local</option><option value="international">International</option><option value="both">Both</option></select></Field>
     <Field label="Regions (comma-separated)"><textarea className={textareaClass} value={form.regions} onChange={e=>setForm(x=>({...x,regions:e.target.value}))}/></Field>
     <Field label="Cities (comma-separated)"><textarea className={textareaClass} value={form.cities} onChange={e=>setForm(x=>({...x,cities:e.target.value}))}/></Field>
-    <button className="w-full rounded-xl bg-[#f47524] py-3 text-sm font-semibold text-white" onClick={async()=>{try{await createLogisticsZone({name:form.name,country:form.country,scope:form.scope as any,regions:split(form.regions),cities:split(form.cities),is_active:true});toast.success("Zone created.");await load();}catch(e){toast.error(errorMessage(e));}}}>Create Zone</button>
+    <button className="w-full rounded-xl bg-[#f47524] py-3 text-sm font-semibold text-white" onClick={async()=>{try{await createLogisticsZone({name:form.name,country:form.country,scope:form.scope,regions:split(form.regions),cities:split(form.cities),is_active:true});toast.success("Zone created.");await load();}catch(e){toast.error(errorMessage(e));}}}>Create Zone</button>
   </Card><TableCard title="Shipping zones" search={search} setSearch={v=>{setSearch(v);setPage(1);}}>
     <div className="overflow-x-auto"><table className="w-full min-w-[850px] text-left text-sm"><TableHead headers={["Zone","Country","Scope","Regions","Cities","Status","Action"]}/><tbody className="divide-y">{rows.map(r=><tr key={r.id}><td className="px-5 py-4 font-semibold">{r.name}</td><td className="px-5 py-4">{r.country}</td><td className="px-5 py-4">{pretty(r.scope)}</td><td className="px-5 py-4">{r.regions.join(", ")||"All"}</td><td className="px-5 py-4">{r.cities.join(", ")||"All"}</td><td className="px-5 py-4"><Status value={r.is_active?"active":"inactive"}/></td><td className="px-5 py-4"><button className="text-xs font-semibold text-red-600" onClick={async()=>{await deactivateLogisticsZone(r.id);await load();}}>Deactivate</button></td></tr>)}{!rows.length&&<EmptyRow colSpan={7} text="No shipping zones found."/>}</tbody></table></div>
     <Pagination page={page} pageSize={pageSize} total={meta.total} totalPages={meta.total_pages} setPage={setPage} setPageSize={setPageSize}/>
@@ -605,13 +612,13 @@ function LogisticsRates() {
   const [rows,setRows]=useState<AdminLogisticsRate[]>([]);
   const [search,setSearch]=useState(""); const [page,setPage]=useState(1); const [pageSize,setPageSize]=useState(10);
   const [meta,setMeta]=useState({total:0,total_pages:0});
-  const [form,setForm]=useState({zone_id:"",method_id:"",rate_type:"flat",currency:"TZS",base_amount:0,amount_per_kg:0,min_weight_kg:"",max_weight_kg:"",free_shipping_threshold:""});
+  const [form,setForm]=useState<{zone_id:string;method_id:string;rate_type:AdminLogisticsRate["rate_type"];currency:string;base_amount:number;amount_per_kg:number;min_weight_kg:string;max_weight_kg:string;free_shipping_threshold:string}>({zone_id:"",method_id:"",rate_type:"flat",currency:"TZS",base_amount:0,amount_per_kg:0,min_weight_kg:"",max_weight_kg:"",free_shipping_threshold:""});
   const load=async()=>{try{const [c,s,z,r]=await Promise.all([listLogisticsCompanies({page:1,page_size:100,status:"active"}),listLogisticsServices({page:1,page_size:100,active:true}),listLogisticsZones({page:1,page_size:100,active:true}),listLogisticsRates({page,page_size:pageSize,search:search||undefined})]);setCompanies(c.results);setServices(s.results);setZones(z.results);setRows(r.results);setMeta({total:r.total,total_pages:r.total_pages});}catch(e){toast.error(errorMessage(e));}};
   useEffect(()=>{const t=setTimeout(()=>void load(),250);return()=>clearTimeout(t)},[page,pageSize,search]);
   return <section className="grid gap-5 xl:grid-cols-[390px_1fr]"><Card title="Create Shipping Rate" icon={Banknote}>
     <Field label="Shipping zone"><select className={inputClass} value={form.zone_id} onChange={e=>setForm(x=>({...x,zone_id:e.target.value}))}><option value="">Select zone</option>{zones.map(z=><option key={z.id} value={z.id}>{z.name}</option>)}</select></Field>
     <Field label="Delivery service"><select className={inputClass} value={form.method_id} onChange={e=>setForm(x=>({...x,method_id:e.target.value}))}><option value="">Select service</option>{services.map(s=><option key={s.id} value={s.id}>{s.name}</option>)}</select></Field>
-    <div className="grid grid-cols-2 gap-3"><Field label="Rate type"><select className={inputClass} value={form.rate_type} onChange={e=>setForm(x=>({...x,rate_type:e.target.value}))}><option value="flat">Flat</option><option value="weight_based">Weight based</option><option value="free">Free</option></select></Field><Field label="Currency"><select className={inputClass} value={form.currency} onChange={e=>setForm(x=>({...x,currency:e.target.value}))}><option>TZS</option><option>USD</option></select></Field></div>
+    <div className="grid grid-cols-2 gap-3"><Field label="Rate type"><select className={inputClass} value={form.rate_type} onChange={e=>setForm(x=>({...x,rate_type:e.target.value as AdminLogisticsRate["rate_type"]}))}><option value="flat">Flat</option><option value="weight_based">Weight based</option><option value="free">Free</option></select></Field><Field label="Currency"><select className={inputClass} value={form.currency} onChange={e=>setForm(x=>({...x,currency:e.target.value}))}><option>TZS</option><option>USD</option></select></Field></div>
     <div className="grid grid-cols-2 gap-3"><Field label="Base amount"><input type="number" min={0} className={inputClass} value={form.base_amount} onChange={e=>setForm(x=>({...x,base_amount:Number(e.target.value)}))}/></Field><Field label="Per KG"><input type="number" min={0} className={inputClass} value={form.amount_per_kg} onChange={e=>setForm(x=>({...x,amount_per_kg:Number(e.target.value)}))}/></Field></div>
     <Field label="Free shipping threshold"><input type="number" min={0} className={inputClass} value={form.free_shipping_threshold} onChange={e=>setForm(x=>({...x,free_shipping_threshold:e.target.value}))}/></Field>
     <button className="w-full rounded-xl bg-[#f47524] py-3 text-sm font-semibold text-white" onClick={async()=>{try{await createLogisticsRate({zone_id:form.zone_id,method_id:form.method_id,rate_type:form.rate_type,currency:form.currency,base_amount:form.base_amount,amount_per_kg:form.amount_per_kg,free_shipping_threshold:form.free_shipping_threshold?Number(form.free_shipping_threshold):null,is_active:true});toast.success("Shipping rate created.");await load();}catch(e){toast.error(errorMessage(e));}}}>Create Rate</button>
@@ -624,13 +631,13 @@ function LogisticsRates() {
 function LogisticsIntegration() {
   const [companies,setCompanies]=useState<AdminLogisticsCompany[]>([]);
   const [companyId,setCompanyId]=useState("");
-  const [form,setForm]=useState({api_base_url:"",outbound_webhook_url:"",auth_type:"none",credential_reference:"",webhook_secret_reference:"",api_key_header:"",is_active:false});
+  const [form,setForm]=useState<{api_base_url:string;outbound_webhook_url:string;auth_type:AdminLogisticsIntegration["auth_type"];credential_reference:string;webhook_secret_reference:string;api_key_header:string;is_active:boolean}>({api_base_url:"",outbound_webhook_url:"",auth_type:"none",credential_reference:"",webhook_secret_reference:"",api_key_header:"",is_active:false});
   useEffect(()=>{void listLogisticsCompanies({page:1,page_size:100}).then(r=>{setCompanies(r.results);if(r.results[0])setCompanyId(r.results[0].id);}).catch(e=>toast.error(errorMessage(e)))},[]);
   useEffect(()=>{if(!companyId)return;void getLogisticsIntegration(companyId).then(r=>setForm({api_base_url:r.api_base_url||"",outbound_webhook_url:r.outbound_webhook_url||"",auth_type:r.auth_type,credential_reference:r.credential_reference||"",webhook_secret_reference:r.webhook_secret_reference||"",api_key_header:r.api_key_header||"",is_active:r.is_active})).catch(()=>setForm({api_base_url:"",outbound_webhook_url:"",auth_type:"none",credential_reference:"",webhook_secret_reference:"",api_key_header:"",is_active:false}))},[companyId]);
   return <section className="grid gap-5 lg:grid-cols-[300px_1fr]"><Card title="Logistics Company" icon={Building2}><Field label="Company"><select className={inputClass} value={companyId} onChange={e=>setCompanyId(e.target.value)}>{companies.map(c=><option key={c.id} value={c.id}>{c.name}</option>)}</select></Field><p className="text-xs leading-5 text-slate-500">Credentials are stored as environment/secret references. Do not paste raw API secrets into these fields.</p></Card><Card title="API / Webhook Configuration" icon={Settings2}>
     <Field label="API base URL"><input className={inputClass} placeholder="https://provider.example/api" value={form.api_base_url} onChange={e=>setForm(x=>({...x,api_base_url:e.target.value}))}/></Field>
     <Field label="Outbound webhook URL"><input className={inputClass} placeholder="https://provider.example/webhooks/xerin" value={form.outbound_webhook_url} onChange={e=>setForm(x=>({...x,outbound_webhook_url:e.target.value}))}/></Field>
-    <Field label="Authentication"><select className={inputClass} value={form.auth_type} onChange={e=>setForm(x=>({...x,auth_type:e.target.value}))}><option value="none">None</option><option value="api_key">API Key</option><option value="bearer">Bearer</option><option value="basic">Basic</option><option value="oauth2">OAuth2</option><option value="custom">Custom</option></select></Field>
+    <Field label="Authentication"><select className={inputClass} value={form.auth_type} onChange={e=>setForm(x=>({...x,auth_type:e.target.value as AdminLogisticsIntegration["auth_type"]}))}><option value="none">None</option><option value="api_key">API Key</option><option value="bearer">Bearer</option><option value="basic">Basic</option><option value="oauth2">OAuth2</option><option value="custom">Custom</option></select></Field>
     <Field label="Credential environment reference"><input className={inputClass} placeholder="DHL_API_KEY" value={form.credential_reference} onChange={e=>setForm(x=>({...x,credential_reference:e.target.value}))}/></Field>
     <Field label="Webhook secret reference"><input className={inputClass} placeholder="DHL_WEBHOOK_SECRET" value={form.webhook_secret_reference} onChange={e=>setForm(x=>({...x,webhook_secret_reference:e.target.value}))}/></Field>
     <Field label="API-key header"><input className={inputClass} placeholder="X-API-Key" value={form.api_key_header} onChange={e=>setForm(x=>({...x,api_key_header:e.target.value}))}/></Field>
