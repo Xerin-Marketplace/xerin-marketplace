@@ -275,6 +275,8 @@ export type Order = TimestampFields & {
     status?: string | null;
     amount?: number | string;
     currency?: string;
+    provider?: string | null;
+    provider_transaction_id?: string | null;
     transaction_reference?: string | null;
     paid_at?: string | null;
   }>;
@@ -406,7 +408,7 @@ export type CustomerOrderAddressSummary = {
   postal_code?: string | null;
 };
 
-export type CustomerOrderDetail = Order & {
+export type CustomerOrderDetail = Omit<Order, "payments"> & {
   payment_status?: string | null;
   payments: CustomerOrderPaymentSummary[];
   shipping_address?: CustomerOrderAddressSummary | null;
