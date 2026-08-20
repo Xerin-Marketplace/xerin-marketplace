@@ -71,7 +71,7 @@ const statusClasses: Record<AdvertisementEffectiveStatus, string> = {
 const effectiveFilterForView = (
   view: AdvertisementView,
 ): AdvertisementEffectiveStatus | undefined => {
-  if (view === "all" || view === "create") return undefined;
+  if (view === "all" || view === "create" || view === "analytics") return undefined;
   return view;
 };
 
