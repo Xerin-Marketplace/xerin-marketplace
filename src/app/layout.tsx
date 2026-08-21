@@ -1,5 +1,7 @@
 import type { Metadata, Viewport } from "next";
 import { siteConfig } from "@/lib/site-config";
+import "./css/euclid-circular-a-font.css";
+import "./css/style.css";
 
 export const metadata: Metadata = {
   metadataBase: new URL(siteConfig.url),

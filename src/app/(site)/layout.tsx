@@ -1,8 +1,6 @@
 "use client";
 import { useState, useEffect } from "react";
 import { usePathname } from "next/navigation";
-import "../css/euclid-circular-a-font.css";
-import "../css/style.css";
 import Header from "../../components/Header";
 import Footer from "../../components/Footer";
 
