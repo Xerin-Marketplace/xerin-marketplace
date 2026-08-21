@@ -421,6 +421,7 @@ const sidebarGroups: SidebarGroup[] = [
       { label: "Profile", href: "?tab=overview&menu=account&item=profile" },
       { label: "Security", href: "?tab=overview&menu=account&item=security" },
       { label: "Logout", href: "?tab=overview&menu=account&item=logout" },
+      
     ],
   },
 ];
