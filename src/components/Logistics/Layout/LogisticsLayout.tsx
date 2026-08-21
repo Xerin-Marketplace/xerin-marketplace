@@ -86,16 +86,16 @@ function Workspace({ children }: { children: React.ReactNode }) {
   );
 
   return (
-    <div className="min-h-screen bg-slate-50 dark:bg-slate-900">
+    <div className="min-h-dvh bg-slate-50 dark:bg-slate-900">
       <aside className="fixed inset-y-0 left-0 z-40 hidden w-64 lg:block">{sidebar}</aside>
       {mobileOpen && <div className="fixed inset-0 z-50 lg:hidden"><button className="absolute inset-0 bg-black/55" onClick={() => setMobileOpen(false)} aria-label="Close navigation overlay" /><aside className="relative h-full w-[min(85vw,20rem)] shadow-2xl">{sidebar}</aside></div>}
-      <div className="lg:pl-64">
+      <div className="min-h-dvh lg:pl-64">
         <header className="sticky top-0 z-30 flex min-h-16 items-center gap-3 border-b border-slate-200 bg-white/95 px-3 backdrop-blur sm:px-5 dark:border-slate-700 dark:bg-slate-900/95">
           <button onClick={() => setMobileOpen(true)} className="rounded-lg border border-slate-200 p-2.5 lg:hidden dark:border-slate-700" aria-label="Open navigation"><Menu size={20} /></button>
           <div className="min-w-0 flex-1"><h1 className="truncate text-base font-semibold text-slate-900 sm:text-lg dark:text-white">{title}</h1></div>
           <div className="hidden min-w-0 text-right sm:block"><p className="max-w-48 truncate text-sm font-medium text-slate-800 dark:text-slate-100">{name}</p><p className="text-xs text-slate-500">Logistics team</p></div>
         </header>
-        <main className="p-3 sm:p-5 xl:p-7">{children}</main>
+        <main className="min-h-[calc(100dvh-4rem)] p-3 sm:p-5 xl:p-7">{children}</main>
       </div>
     </div>
   );

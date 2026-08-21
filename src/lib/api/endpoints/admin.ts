@@ -1463,7 +1463,6 @@ export type LogisticsCompanyOnboardPayload = {
     last_name: string;
     email: string;
     phone?: string | null;
-    password: string;
   };
 };
 
@@ -1477,6 +1476,9 @@ export type LogisticsCompanyOnboardResponse = {
 
 export const onboardLogisticsCompany = async (payload: LogisticsCompanyOnboardPayload) =>
   (await axiosInstance.post<LogisticsCompanyOnboardResponse>("/logistics/companies/onboard", payload)).data;
+
+export const resendLogisticsAdministratorCredentials = async (id: string) =>
+  (await axiosInstance.post<{ company_id: string; administrator_user_id: string; email: string; credentials_email_sent: boolean; message: string }>(`/logistics/companies/${id}/administrator/resend-credentials`)).data;
 
 export const updateLogisticsCompany = async (id: string, payload: Partial<AdminLogisticsCompany>) =>
   (await axiosInstance.patch<AdminLogisticsCompany>(`/logistics/companies/${id}`, payload)).data;

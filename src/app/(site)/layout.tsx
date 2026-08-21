@@ -29,17 +29,21 @@ export default function RootLayout({
   const [loading, setLoading] = useState<boolean>(true);
   const pathname = usePathname();
 
+  const isWorkspaceRoute =
+    pathname === "/seller" ||
+    pathname.startsWith("/seller/") ||
+    pathname === "/admin" ||
+    pathname.startsWith("/admin/") ||
+    pathname === "/logistics" ||
+    pathname.startsWith("/logistics/");
+
   const hideStorefrontChrome =
     pathname === "/signin" ||
     pathname === "/signup" ||
-    pathname === "/seller/register" ||
     pathname === "/forgot-password" ||
     pathname === "/reset-password" ||
     pathname === "/verify-otp" ||
-    pathname.startsWith("/seller/") ||
-    pathname === "/admin/login" ||
-    pathname === "/admin" ||
-    pathname.startsWith("/admin/");
+    isWorkspaceRoute;
   const isBuyerAccount = pathname === "/account" || pathname.startsWith("/account/") || pathname === "/my-account";
 
   useEffect(() => {
@@ -76,7 +80,7 @@ export default function RootLayout({
         </QueryProvider>
       </NotificationProvider>
       {/* <ScrollToTop /> */}
-      <ChatBot />
+      {!isWorkspaceRoute ? <ChatBot /> : null}
     </ThemeProvider>
   );
 }
