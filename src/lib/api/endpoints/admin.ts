@@ -1474,8 +1474,29 @@ export type LogisticsCompanyOnboardResponse = {
   warning?: string | null;
 };
 
+export type AdminLogisticsOnboarding = {
+  company_id: string;
+  company_name: string;
+  company_status: AdminLogisticsCompany["status"];
+  state: "invited" | "in_progress" | "ready_for_review" | "submitted" | "changes_requested" | "approved";
+  required_completed: number;
+  required_total: number;
+  progress_percent: number;
+  ready_for_review: boolean;
+  steps: Array<{ key: string; label: string; description: string; completed: boolean; required: boolean; href: string }>;
+  submitted_at?: string | null;
+  reviewed_at?: string | null;
+  review_note?: string | null;
+};
+
 export const onboardLogisticsCompany = async (payload: LogisticsCompanyOnboardPayload) =>
   (await axiosInstance.post<LogisticsCompanyOnboardResponse>("/logistics/companies/onboard", payload)).data;
+
+export const listLogisticsOnboardingQueue = async (params: { page?: number; page_size?: number; search?: string; state?: string } = {}) =>
+  (await axiosInstance.get<AdminPaged<AdminLogisticsOnboarding>>("/logistics/onboarding/review-queue", { params })).data;
+
+export const reviewLogisticsOnboarding = async (companyId: string, payload: { decision: "approve" | "changes_requested"; note?: string }) =>
+  (await axiosInstance.post<AdminLogisticsOnboarding>(`/logistics/companies/${companyId}/onboarding/review`, payload)).data;
 
 export const resendLogisticsAdministratorCredentials = async (id: string) =>
   (await axiosInstance.post<{ company_id: string; administrator_user_id: string; email: string; credentials_email_sent: boolean; message: string }>(`/logistics/companies/${id}/administrator/resend-credentials`)).data;

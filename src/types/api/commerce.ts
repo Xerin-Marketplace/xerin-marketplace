@@ -108,6 +108,14 @@ export type EligibleLogisticsResponse = {
   page_size: number;
   total_pages: number;
   results: EligibleLogisticsCompany[];
+  excluded_companies: Array<{
+    logistics_company_id: string;
+    name: string;
+    code: string;
+    reason_codes: string[];
+    reasons: string[];
+    uncovered_sellers: string[];
+  }>;
 };
 
 export type MultiSellerDeliveryOption = {

@@ -21,9 +21,10 @@ export type LogisticsOnboardingStep = {
 };
 export type LogisticsOnboardingStatus = {
   company_id: string; company_name: string; company_status: string;
-  state: "invited" | "in_progress" | "ready_for_review" | "approved";
+  state: "invited" | "in_progress" | "ready_for_review" | "submitted" | "changes_requested" | "approved";
   required_completed: number; required_total: number; progress_percent: number;
   ready_for_review: boolean; steps: LogisticsOnboardingStep[]; next_step?: LogisticsOnboardingStep | null;
+  submitted_at?: string | null; reviewed_at?: string | null; review_note?: string | null;
 };
 export type LogisticsTeamMember = {
   id: string; logistics_company_id: string; user_id: string; title?: string | null; member_role: LogisticsRole;

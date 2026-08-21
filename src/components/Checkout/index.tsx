@@ -763,6 +763,7 @@ const Checkout = () => {
 
                 <ShippingMethod
                   companies={eligibleLogistics.data?.results ?? []}
+                  excludedCompanies={eligibleLogistics.data?.excluded_companies ?? []}
                   options={deliveryPricing.data?.options ?? []}
                   selected={form.shippingMethod}
                   onChange={(value) =>
@@ -771,6 +772,8 @@ const Checkout = () => {
                   selectedCompanyId={selectedCompanyId}
                   onCompanyChange={changeCompany}
                   deliveryMode={deliveryMode}
+                  hasSelectedAddress={Boolean(selectedAddressId)}
+                  addressReady={Boolean(selectedAddress?.delivery_ready)}
                   isLoadingCompanies={eligibleLogistics.isLoading || eligibleLogistics.isFetching}
                   isLoadingPricing={deliveryPricing.isLoading || deliveryPricing.isFetching}
                 />

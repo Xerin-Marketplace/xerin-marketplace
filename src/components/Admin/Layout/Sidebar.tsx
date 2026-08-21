@@ -256,6 +256,7 @@ const sidebarGroups: SidebarGroup[] = [
     key: "overview",
     icon: Truck,
     items: [
+      { label: "Company Approvals", href: "/admin/logistics/approvals", icon: FileCheck2 },
       { label: "Logistics Companies", href: "/admin/dashboard?tab=overview&menu=logistics&item=logistics-companies", icon: Store },
       { label: "Delivery Services", href: "/admin/dashboard?tab=overview&menu=logistics&item=delivery-services", icon: Truck },
       { label: "Shipping Zones", href: "/admin/dashboard?tab=overview&menu=logistics&item=shipping-zones", icon: Globe2 },

@@ -288,6 +288,9 @@ export const ADMIN_ITEM_PERMISSIONS: Record<string, string[]> = {
   "Background Jobs": ["admin_system_alerts:manage"],
   "Application Settings": ["admin_system_alerts:manage"],
 
+  // Logistics onboarding
+  "Company Approvals": ["logistics_companies:read", "logistics_companies:manage"],
+
   // Account items are always available inside the staff shell.
   Profile: [],
   Security: [],
