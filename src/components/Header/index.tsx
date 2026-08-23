@@ -231,14 +231,19 @@ const Header = () => {
                 />
               </svg>
 
-              <div>
-                <span className="block text-2xs text-dark-4 uppercase">
-                  SUPPORT CENTER
-                </span>
+              <Link
+                href="/contact"
+                className="flex items-center gap-3 rounded-lg border border-gray-3 bg-gray-1/60 px-3 py-2 text-left transition hover:border-primary hover:bg-primary/5 dark:border-darkTheme-border-color dark:bg-darkTheme-secondary-bg dark:hover:border-primary"
+                >
+                <div>
+                <span className="block text-2xs uppercase text-dark-4">
+                Apply partnership
+              </span>
                 <p className="font-medium text-custom-sm text-dark dark:text-darkTheme-body-color">
-                  Help & Order Support
-                </p>
-              </div>
+              Logistics partnership
+              </p>
+            </div>
+            </Link>
             </div>
 
             {/* <!-- divider --> */}

@@ -67,7 +67,7 @@ export default function PolicyPage({ policy }: PolicyPageProps) {
               href="mailto:support@xerin.co.tz"
               className="font-semibold text-[#e85d24] hover:underline"
             >
-              support@xerin.co.tz
+              info@xerinmarketplace.com
             </a>
             .
           </p>
