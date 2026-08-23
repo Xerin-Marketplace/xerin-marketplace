@@ -1,7 +1,50 @@
-import React from "react";
+"use client";
+
+import React, { useState } from "react";
 import Breadcrumb from "../Common/Breadcrumb";
 
+type InquiryType = "logistics_partnership" | "general_query" | "newsletter";
+
 const Contact = () => {
+  const [inquiryType, setInquiryType] = useState<InquiryType>("logistics_partnership");
+
+  const [formData, setFormData] = useState({
+    firstName: "",
+    lastName: "",
+    email: "",
+    phone: "",
+    subject: "",
+    message: "",
+    companyName: "",
+    businessLocation: "",
+    isRegistered: "",
+    companyPhone: "",
+    companyEmail: "",
+    logisticsDetails: "",
+  });
+
+  const isPartnership = inquiryType === "logistics_partnership";
+
+  const handleChange = (
+    e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement | HTMLSelectElement>
+  ) => {
+    const { name, value } = e.target;
+    setFormData((prev) => ({
+      ...prev,
+      [name]: value,
+    }));
+  };
+
+  const handleSubmit = (e: React.FormEvent) => {
+    e.preventDefault();
+
+    // TODO: connect to backend / API here
+    console.log("Contact form submitted:", {
+      inquiryType,
+      ...formData,
+    });
+  };
+
   return (
     <>
       <Breadcrumb title={"Contact"} pages={["contact"]} />
@@ -54,12 +97,6 @@ const Contact = () => {
                         d="M12.3633 4.88547C12.4677 4.52039 12.8482 4.30899 13.2133 4.4133L13.0244 5.07434C13.2133 4.4133 13.2133 4.4133 13.2133 4.4133L13.2146 4.41368L13.216 4.41408L13.219 4.41497L13.2261 4.41709L13.2443 4.42275C13.2581 4.42716 13.2754 4.43292 13.2959 4.44022C13.3371 4.45483 13.3915 4.47561 13.4583 4.50421C13.5918 4.56144 13.7743 4.64983 13.9984 4.78248C14.4471 5.04802 15.0596 5.4891 15.7792 6.20866C16.4987 6.92822 16.9398 7.54072 17.2053 7.9894C17.338 8.21353 17.4264 8.39601 17.4836 8.52955C17.5122 8.59629 17.533 8.65071 17.5476 8.69187C17.5549 8.71245 17.5607 8.72971 17.5651 8.74354L17.5707 8.76167L17.5728 8.76878L17.5737 8.77184L17.5741 8.77324C17.5741 8.77324 17.5745 8.77456 16.9135 8.96343L17.5745 8.77456C17.6788 9.13965 17.4674 9.52017 17.1023 9.62448C16.7404 9.7279 16.3632 9.52096 16.2551 9.16157L16.2518 9.15169C16.2469 9.13791 16.2368 9.1108 16.2198 9.07119C16.1859 8.99205 16.1244 8.86259 16.022 8.68971C15.8177 8.34437 15.4485 7.82256 14.8069 7.18093C14.1653 6.53931 13.6435 6.17016 13.2981 5.96577C13.1252 5.86346 12.9958 5.80195 12.9166 5.76804C12.877 5.75106 12.8499 5.74095 12.8361 5.73606L12.8263 5.73267C12.4669 5.62462 12.2599 5.24746 12.3633 4.88547Z"
                         fill="#ff6c2f"
                       />
-                      <path
-                        fillRule="evenodd"
-                        clipRule="evenodd"
-                        d="M4.59146 4.03966C6.13153 2.4996 8.73041 2.61667 9.80274 4.53812L10.3977 5.60414C11.0979 6.85889 10.7995 8.44205 9.77441 9.47969C9.76075 9.49839 9.6884 9.60375 9.67938 9.78783C9.66788 10.0228 9.75133 10.5662 10.5932 11.4081C11.4348 12.2497 11.9781 12.3333 12.2132 12.3219C12.3974 12.3129 12.5029 12.2405 12.5216 12.2269C13.5592 11.2018 15.1424 10.9034 16.3971 11.6036L17.4632 12.1985C19.3846 13.2709 19.5017 15.8698 17.9616 17.4098C17.1378 18.2336 16.0425 18.9655 14.7553 19.0143C12.8478 19.0867 9.6805 18.594 6.54387 15.4574C3.40724 12.3208 2.91463 9.15348 2.98694 7.24596C3.03574 5.95877 3.76769 4.86343 4.59146 4.03966ZM8.60206 5.2082C8.05297 4.2243 6.57741 3.99826 5.56374 5.01193C4.853 5.72267 4.39094 6.50717 4.36096 7.29804C4.30065 8.88877 4.69339 11.6624 7.51614 14.4851C10.3389 17.3079 13.1125 17.7006 14.7032 17.6403C15.4941 17.6103 16.2786 17.1483 16.9893 16.4375C18.003 15.4239 17.777 13.9483 16.7931 13.3992L15.7271 12.8043C15.0639 12.4342 14.1325 12.5604 13.4786 13.2143C13.4144 13.2785 13.0055 13.66 12.28 13.6953C11.5373 13.7314 10.6383 13.3977 9.62095 12.3803C8.60326 11.3626 8.26966 10.4634 8.30603 9.72058C8.34155 8.99503 8.72309 8.58656 8.78693 8.52271C9.4408 7.86884 9.56708 6.93735 9.19699 6.27422L8.60206 5.2082Z"
-                        fill="#ff6c2f"
-                      />
                     </svg>
                     Phone: +255 700 000 000
                   </p>
@@ -87,86 +124,268 @@ const Contact = () => {
             </div>
 
             <div className="xl:max-w-[770px] w-full bg-white dark:bg-darkTheme-card rounded-xl shadow-1 p-4 sm:p-7.5 xl:p-10">
-              <form>
-                <div className="flex flex-col lg:flex-row gap-5 sm:gap-8 mb-5">
-                  <div className="w-full">
-                    <label htmlFor="firstName" className="block mb-2.5 dark:text-darkTheme-body-color">
-                      First Name <span className="text-red">*</span>
-                    </label>
-
-                    <input
-                      type="text"
-                      name="firstName"
-                      id="firstName"
-                      placeholder="Adam"
-                      className="rounded-md border border-gray-3 dark:border-darkTheme-border-color bg-gray-1 dark:bg-darkTheme-secondary-bg dark:text-darkTheme-body-color placeholder:text-dark-4 dark:placeholder:text-darkTheme-secondary-muted w-full py-2.5 px-5 outline-none duration-200 focus:border-transparent focus:shadow-input focus:ring-2 focus:ring-blue/20"
-                    />
-                  </div>
-
-                  <div className="w-full">
-                    <label htmlFor="lastName" className="block mb-2.5 dark:text-darkTheme-body-color">
-                      Last Name <span className="text-red">*</span>
-                    </label>
-
-                    <input
-                      type="text"
-                      name="lastName"
-                      id="lastName"
-                      placeholder="Deo"
-                      className="rounded-md border border-gray-3 dark:border-darkTheme-border-color bg-gray-1 dark:bg-darkTheme-secondary-bg dark:text-darkTheme-body-color placeholder:text-dark-4 dark:placeholder:text-darkTheme-secondary-muted w-full py-2.5 px-5 outline-none duration-200 focus:border-transparent focus:shadow-input focus:ring-2 focus:ring-blue/20"
-                    />
-                  </div>
-                </div>
-
-                <div className="flex flex-col lg:flex-row gap-5 sm:gap-8 mb-5">
-                  <div className="w-full">
-                    <label htmlFor="subject" className="block mb-2.5 dark:text-darkTheme-body-color">
-                      Subject
-                    </label>
-
-                    <input
-                      type="text"
-                      name="subject"
-                      id="subject"
-                      placeholder="Type your subject"
-                      className="rounded-md border border-gray-3 dark:border-darkTheme-border-color bg-gray-1 dark:bg-darkTheme-secondary-bg dark:text-darkTheme-body-color placeholder:text-dark-4 dark:placeholder:text-darkTheme-secondary-muted w-full py-2.5 px-5 outline-none duration-200 focus:border-transparent focus:shadow-input focus:ring-2 focus:ring-blue/20"
-                    />
-                  </div>
-
-                  <div className="w-full">
-                    <label htmlFor="phone" className="block mb-2.5 dark:text-darkTheme-body-color">
-                      Phone
-                    </label>
-
-                    <input
-                      type="text"
-                      name="phone"
-                      id="phone"
-                      placeholder="Enter your phone"
-                      className="rounded-md border border-gray-3 dark:border-darkTheme-border-color bg-gray-1 dark:bg-darkTheme-secondary-bg dark:text-darkTheme-body-color placeholder:text-dark-4 dark:placeholder:text-darkTheme-secondary-muted w-full py-2.5 px-5 outline-none duration-200 focus:border-transparent focus:shadow-input focus:ring-2 focus:ring-blue/20"
-                    />
-                  </div>
-                </div>
-
-                <div className="mb-7.5">
-                  <label htmlFor="message" className="block mb-2.5 dark:text-darkTheme-body-color">
-                    Message
+              <form onSubmit={handleSubmit}>
+                <div className="mb-5">
+                  <label
+                    htmlFor="inquiryType"
+                    className="block mb-2.5 dark:text-darkTheme-body-color"
+                  >
+                    Inquiry Type (select a drop down below to shoose your inquiry type) <span className="text-red">*</span>
                   </label>
 
-                  <textarea
-                    name="message"
-                    id="message"
-                    rows={5}
-                    placeholder="Type your message"
-                    className="rounded-md border border-gray-3 dark:border-darkTheme-border-color bg-gray-1 dark:bg-darkTheme-secondary-bg dark:text-darkTheme-body-color placeholder:text-dark-4 dark:placeholder:text-darkTheme-secondary-muted w-full p-5 outline-none duration-200 focus:border-transparent focus:shadow-input focus:ring-2 focus:ring-blue/20"
-                  ></textarea>
+                  <select
+                    name="inquiryType"
+                    id="inquiryType"
+                    value={inquiryType}
+                    onChange={(e) =>
+                      setInquiryType(e.target.value as InquiryType)
+                    }
+                    className="rounded-md border border-gray-3 dark:border-darkTheme-border-color bg-gray-1 dark:bg-darkTheme-secondary-bg dark:text-darkTheme-body-color w-full py-2.5 px-5 outline-none duration-200 focus:border-transparent focus:shadow-input focus:ring-2 focus:ring-blue/20"
+                  >
+                    <option value="logistics_partnership">Logistics Partnership</option>
+                    <option value="general_query">General Query</option>
+                    <option value="newsletter">Newsletter / Updates</option>
+                  </select>
                 </div>
+
+                {isPartnership ? (
+                  <>
+                    <div className="flex flex-col lg:flex-row gap-5 sm:gap-8 mb-5">
+                      <div className="w-full">
+                        <label
+                          htmlFor="companyName"
+                          className="block mb-2.5 dark:text-darkTheme-body-color"
+                        >
+                          Company Name <span className="text-red">*</span>
+                        </label>
+                        <input
+                          type="text"
+                          name="companyName"
+                          id="companyName"
+                          value={formData.companyName}
+                          onChange={handleChange}
+                          placeholder="Enter company name"
+                          className="rounded-md border border-gray-3 dark:border-darkTheme-border-color bg-gray-1 dark:bg-darkTheme-secondary-bg dark:text-darkTheme-body-color placeholder:text-dark-4 dark:placeholder:text-darkTheme-secondary-muted w-full py-2.5 px-5 outline-none duration-200 focus:border-transparent focus:shadow-input focus:ring-2 focus:ring-blue/20"
+                        />
+                      </div>
+
+                      <div className="w-full">
+                        <label
+                          htmlFor="businessLocation"
+                          className="block mb-2.5 dark:text-darkTheme-body-color"
+                        >
+                          Business Location <span className="text-red">*</span>
+                        </label>
+                        <input
+                          type="text"
+                          name="businessLocation"
+                          id="businessLocation"
+                          value={formData.businessLocation}
+                          onChange={handleChange}
+                          placeholder="e.g. Dar es Salaam, Tanzania"
+                          className="rounded-md border border-gray-3 dark:border-darkTheme-border-color bg-gray-1 dark:bg-darkTheme-secondary-bg dark:text-darkTheme-body-color placeholder:text-dark-4 dark:placeholder:text-darkTheme-secondary-muted w-full py-2.5 px-5 outline-none duration-200 focus:border-transparent focus:shadow-input focus:ring-2 focus:ring-blue/20"
+                        />
+                      </div>
+                    </div>
+
+                    <div className="flex flex-col lg:flex-row gap-5 sm:gap-8 mb-5">
+                      <div className="w-full">
+                        <label
+                          htmlFor="isRegistered"
+                          className="block mb-2.5 dark:text-darkTheme-body-color"
+                        >
+                          Is your business registered? <span className="text-red">*</span>
+                        </label>
+                        <select
+                          name="isRegistered"
+                          id="isRegistered"
+                          value={formData.isRegistered}
+                          onChange={handleChange}
+                          className="rounded-md border border-gray-3 dark:border-darkTheme-border-color bg-gray-1 dark:bg-darkTheme-secondary-bg dark:text-darkTheme-body-color w-full py-2.5 px-5 outline-none duration-200 focus:border-transparent focus:shadow-input focus:ring-2 focus:ring-blue/20"
+                        >
+                          <option value="">Select</option>
+                          <option value="yes">Yes</option>
+                          <option value="no">No</option>
+                          <option value="planning">Planning to register</option>
+                        </select>
+                      </div>
+
+                      <div className="w-full">
+                        <label
+                          htmlFor="companyPhone"
+                          className="block mb-2.5 dark:text-darkTheme-body-color"
+                        >
+                          Company Phone <span className="text-red">*</span>
+                        </label>
+                        <input
+                          type="tel"
+                          name="companyPhone"
+                          id="companyPhone"
+                          value={formData.companyPhone}
+                          onChange={handleChange}
+                          placeholder="+255 700 000 000"
+                          className="rounded-md border border-gray-3 dark:border-darkTheme-border-color bg-gray-1 dark:bg-darkTheme-secondary-bg dark:text-darkTheme-body-color placeholder:text-dark-4 dark:placeholder:text-darkTheme-secondary-muted w-full py-2.5 px-5 outline-none duration-200 focus:border-transparent focus:shadow-input focus:ring-2 focus:ring-blue/20"
+                        />
+                      </div>
+                    </div>
+
+                    <div className="mb-5">
+                      <label
+                        htmlFor="companyEmail"
+                        className="block mb-2.5 dark:text-darkTheme-body-color"
+                      >
+                        Company Email <span className="text-red">*</span>
+                      </label>
+                      <input
+                        type="email"
+                        name="companyEmail"
+                        id="companyEmail"
+                        value={formData.companyEmail}
+                        onChange={handleChange}
+                        placeholder="hello@company.com"
+                        className="rounded-md border border-gray-3 dark:border-darkTheme-border-color bg-gray-1 dark:bg-darkTheme-secondary-bg dark:text-darkTheme-body-color placeholder:text-dark-4 dark:placeholder:text-darkTheme-secondary-muted w-full py-2.5 px-5 outline-none duration-200 focus:border-transparent focus:shadow-input focus:ring-2 focus:ring-blue/20"
+                      />
+                    </div>
+
+                    <div className="mb-7.5">
+                      <label
+                        htmlFor="logisticsDetails"
+                        className="block mb-2.5 dark:text-darkTheme-body-color"
+                      >
+                        Logistics Partnership Details <span className="text-red">*</span>
+                      </label>
+                      <textarea
+                        name="logisticsDetails"
+                        id="logisticsDetails"
+                        rows={5}
+                        value={formData.logisticsDetails}
+                        onChange={handleChange}
+                        placeholder="Tell us about your logistics operations, coverage area, fleet details, service model, and how you would like to partner with Xerin."
+                        className="rounded-md border border-gray-3 dark:border-darkTheme-border-color bg-gray-1 dark:bg-darkTheme-secondary-bg dark:text-darkTheme-body-color placeholder:text-dark-4 dark:placeholder:text-darkTheme-secondary-muted w-full p-5 outline-none duration-200 focus:border-transparent focus:shadow-input focus:ring-2 focus:ring-blue/20"
+                      ></textarea>
+                    </div>
+                  </>
+                ) : (
+                  <>
+                    <div className="flex flex-col lg:flex-row gap-5 sm:gap-8 mb-5">
+                      <div className="w-full">
+                        <label
+                          htmlFor="firstName"
+                          className="block mb-2.5 dark:text-darkTheme-body-color"
+                        >
+                          First Name <span className="text-red">*</span>
+                        </label>
+                        <input
+                          type="text"
+                          name="firstName"
+                          id="firstName"
+                          value={formData.firstName}
+                          onChange={handleChange}
+                          placeholder="Adam"
+                          className="rounded-md border border-gray-3 dark:border-darkTheme-border-color bg-gray-1 dark:bg-darkTheme-secondary-bg dark:text-darkTheme-body-color placeholder:text-dark-4 dark:placeholder:text-darkTheme-secondary-muted w-full py-2.5 px-5 outline-none duration-200 focus:border-transparent focus:shadow-input focus:ring-2 focus:ring-blue/20"
+                        />
+                      </div>
+
+                      <div className="w-full">
+                        <label
+                          htmlFor="lastName"
+                          className="block mb-2.5 dark:text-darkTheme-body-color"
+                        >
+                          Last Name <span className="text-red">*</span>
+                        </label>
+                        <input
+                          type="text"
+                          name="lastName"
+                          id="lastName"
+                          value={formData.lastName}
+                          onChange={handleChange}
+                          placeholder="Deo"
+                          className="rounded-md border border-gray-3 dark:border-darkTheme-border-color bg-gray-1 dark:bg-darkTheme-secondary-bg dark:text-darkTheme-body-color placeholder:text-dark-4 dark:placeholder:text-darkTheme-secondary-muted w-full py-2.5 px-5 outline-none duration-200 focus:border-transparent focus:shadow-input focus:ring-2 focus:ring-blue/20"
+                        />
+                      </div>
+                    </div>
+
+                    <div className="flex flex-col lg:flex-row gap-5 sm:gap-8 mb-5">
+                      <div className="w-full">
+                        <label
+                          htmlFor="email"
+                          className="block mb-2.5 dark:text-darkTheme-body-color"
+                        >
+                          Email <span className="text-red">*</span>
+                        </label>
+                        <input
+                          type="email"
+                          name="email"
+                          id="email"
+                          value={formData.email}
+                          onChange={handleChange}
+                          placeholder="you@example.com"
+                          className="rounded-md border border-gray-3 dark:border-darkTheme-border-color bg-gray-1 dark:bg-darkTheme-secondary-bg dark:text-darkTheme-body-color placeholder:text-dark-4 dark:placeholder:text-darkTheme-secondary-muted w-full py-2.5 px-5 outline-none duration-200 focus:border-transparent focus:shadow-input focus:ring-2 focus:ring-blue/20"
+                        />
+                      </div>
+
+                      <div className="w-full">
+                        <label
+                          htmlFor="phone"
+                          className="block mb-2.5 dark:text-darkTheme-body-color"
+                        >
+                          Phone
+                        </label>
+                        <input
+                          type="text"
+                          name="phone"
+                          id="phone"
+                          value={formData.phone}
+                          onChange={handleChange}
+                          placeholder="+255 700 000 000"
+                          className="rounded-md border border-gray-3 dark:border-darkTheme-border-color bg-gray-1 dark:bg-darkTheme-secondary-bg dark:text-darkTheme-body-color placeholder:text-dark-4 dark:placeholder:text-darkTheme-secondary-muted w-full py-2.5 px-5 outline-none duration-200 focus:border-transparent focus:shadow-input focus:ring-2 focus:ring-blue/20"
+                        />
+                      </div>
+                    </div>
+
+                    <div className="mb-5">
+                      <label
+                        htmlFor="subject"
+                        className="block mb-2.5 dark:text-darkTheme-body-color"
+                      >
+                        Subject
+                      </label>
+                      <input
+                        type="text"
+                        name="subject"
+                        id="subject"
+                        value={formData.subject}
+                        onChange={handleChange}
+                        placeholder="Type your subject"
+                        className="rounded-md border border-gray-3 dark:border-darkTheme-border-color bg-gray-1 dark:bg-darkTheme-secondary-bg dark:text-darkTheme-body-color placeholder:text-dark-4 dark:placeholder:text-darkTheme-secondary-muted w-full py-2.5 px-5 outline-none duration-200 focus:border-transparent focus:shadow-input focus:ring-2 focus:ring-blue/20"
+                      />
+                    </div>
+
+                    <div className="mb-7.5">
+                      <label
+                        htmlFor="message"
+                        className="block mb-2.5 dark:text-darkTheme-body-color"
+                      >
+                        Message <span className="text-red">*</span>
+                      </label>
+                      <textarea
+                        name="message"
+                        id="message"
+                        rows={5}
+                        value={formData.message}
+                        onChange={handleChange}
+                        placeholder="Type your message"
+                        className="rounded-md border border-gray-3 dark:border-darkTheme-border-color bg-gray-1 dark:bg-darkTheme-secondary-bg dark:text-darkTheme-body-color placeholder:text-dark-4 dark:placeholder:text-darkTheme-secondary-muted w-full p-5 outline-none duration-200 focus:border-transparent focus:shadow-input focus:ring-2 focus:ring-blue/20"
+                      ></textarea>
+                    </div>
+                  </>
+                )}
 
                 <button
                   type="submit"
                   className="inline-flex font-medium text-white bg-blue py-3 px-7 rounded-md ease-out duration-200 hover:bg-blue-dark"
                 >
-                  Send Message
+                  {isPartnership ? "Submit Partnership Request" : "Send Message"}
                 </button>
               </form>
             </div>
