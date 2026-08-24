@@ -9,7 +9,7 @@ import { useAddCartItem, addProductToCartPayload } from "@/hooks/useCartActions"
 import { useAddToWishlist } from "@/hooks/useWishlist";
 import StarRating from "@/components/Common/StarRating";
 import Link from "next/link";
-import { formatCurrency } from "@/lib/formatCurrency";
+import PriceDisplay from "@/components/shared/PriceDisplay";
 
 const ProductItem = ({ item }: { item: Product }) => {
   const { openModal } = useModalContext();
@@ -149,10 +149,10 @@ const ProductItem = ({ item }: { item: Product }) => {
             </span>
             <span className="flex min-w-0 flex-wrap items-baseline gap-1 text-sm font-extrabold sm:gap-2 sm:text-lg sm:font-semibold">
               <span className="text-[#ef4444] dark:text-white sm:text-dark">
-                {formatCurrency(item.discountedPrice)}
+                <PriceDisplay amount={item.discountedPrice} sourceCurrency={item.currency} />
               </span>
               <span className="text-[10px] text-dark-4 line-through dark:text-darkTheme-secondary-muted sm:text-sm">
-                {formatCurrency(item.price)}
+                <PriceDisplay amount={item.price} sourceCurrency={item.currency} />
               </span>
             </span>
           </div>

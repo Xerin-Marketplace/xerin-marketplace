@@ -9,7 +9,7 @@ import {
   useUpdateCartItem,
   useValidateCart,
 } from "@/hooks/useCartActions";
-import { formatCurrency } from "@/lib/formatCurrency";
+import PriceDisplay from "@/components/shared/PriceDisplay";
 import Link from "next/link";
 import {
   CircleAlert,
@@ -255,7 +255,7 @@ export default function Cart() {
                   <div className="mt-6 space-y-3 text-sm">
                     <Row
                       label="Product subtotal"
-                      value={formatCurrency(cart.subtotal, cart.currency)}
+                      value={<PriceDisplay amount={cart.subtotal} sourceCurrency="TZS" />}
                     />
 
                     {cart.promotionDiscountAmount > 0 && (
@@ -291,7 +291,7 @@ export default function Cart() {
                     <div className="border-t border-gray-3 pt-4 dark:border-white/10">
                       <Row
                         label="Cart total"
-                        value={formatCurrency(cart.total, cart.currency)}
+                        value={<PriceDisplay amount={cart.total} sourceCurrency="TZS" />}
                         strong
                       />
                     </div>
@@ -341,7 +341,7 @@ function Row({
   strong = false,
 }: {
   label: string;
-  value: string;
+  value: React.ReactNode;
   saving?: boolean;
   strong?: boolean;
 }) {

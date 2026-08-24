@@ -9,7 +9,7 @@ import {
   useRemoveCoupon,
   useRemovePromotion,
 } from "@/hooks/useCartActions";
-import { formatCurrency } from "@/lib/formatCurrency";
+import PriceDisplay from "@/components/shared/PriceDisplay";
 
 const pretty = (value: string) =>
   value.replaceAll("_", " ").replace(/\b\w/g, (letter) => letter.toUpperCase());
@@ -68,17 +68,11 @@ export default function Discount() {
                   {pretty(cart.promotion.promotion_type)}
                   {" · "}
                   Eligible subtotal{" "}
-                  {formatCurrency(
-                    Number(cart.promotion.eligible_subtotal),
-                    cart.currency,
-                  )}
+                  <PriceDisplay amount={Number(cart.promotion.eligible_subtotal)} sourceCurrency="TZS" />
                 </p>
                 <p className="mt-1 text-xs font-semibold text-emerald-800">
                   Seller promotion discount:{" "}
-                  {formatCurrency(
-                    Number(cart.promotion.discount_amount),
-                    cart.currency,
-                  )}
+                  <PriceDisplay amount={Number(cart.promotion.discount_amount)} sourceCurrency="TZS" />
                 </p>
                 {cart.promotion.promotion_type === "free_shipping" && (
                   <p className="mt-1 text-xs text-emerald-700">
@@ -156,12 +150,11 @@ export default function Discount() {
                       </div>
 
                       <p className="mt-3 text-sm font-bold text-emerald-700">
-                        {offer.promotion_type === "free_shipping"
-                          ? "Free shipping benefit"
-                          : `Save ${formatCurrency(
-                              Number(offer.discount_amount),
-                              "TZS",
-                            )}`}
+                        {offer.promotion_type === "free_shipping" ? (
+                          "Free shipping benefit"
+                        ) : (
+                          <>Save <PriceDisplay amount={Number(offer.discount_amount)} sourceCurrency="TZS" /></>
+                        )}
                       </p>
 
                       {!offer.stackable && cart.couponCode && (
@@ -194,7 +187,7 @@ export default function Discount() {
               </p>
               <p className="mt-1 text-xs text-blue-700">
                 Coupon discount:{" "}
-                {formatCurrency(cart.couponDiscountAmount, cart.currency)}
+                <PriceDisplay amount={cart.couponDiscountAmount} sourceCurrency="TZS" />
               </p>
             </div>
             <button

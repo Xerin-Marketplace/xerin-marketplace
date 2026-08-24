@@ -10,7 +10,8 @@ import { useTheme } from "@/app/context/ThemeContext";
 import { useAuth } from "@/hooks/useAuth";
 import { getAccountHref, getAccountLabel } from "@/guards/auth-routing";
 import Image from "next/image";
-import { formatCurrency } from "@/lib/formatCurrency";
+import PriceDisplay from "@/components/shared/PriceDisplay";
+import CurrencySelector from "./CurrencySelector";
 import { useAuthStore } from "@/store/useAuthStore";
 import { useRouter } from "next/navigation";
 import { useCategories } from "@/hooks/useProducts";
@@ -371,7 +372,7 @@ const Header = () => {
                       cart
                     </span>
                     <p className="font-medium text-custom-sm text-dark dark:text-darkTheme-body-color">
-                      {formatCurrency(totalPrice)}
+                      <PriceDisplay amount={totalPrice} sourceCurrency="TZS" />
                     </p>
                   </div>
                 </button>

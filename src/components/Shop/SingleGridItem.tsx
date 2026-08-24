@@ -7,7 +7,7 @@ import { useWishlistStore } from "@/store/useWishlistStore";
 import { useAddCartItem, addProductToCartPayload } from "@/hooks/useCartActions";
 import { useAddToWishlist } from "@/hooks/useWishlist";
 import StarRating from "@/components/Common/StarRating";
-import { formatCurrency } from "@/lib/formatCurrency";
+import PriceDisplay from "@/components/shared/PriceDisplay";
 import Link from "next/link";
 import Image from "next/image";
 
@@ -119,8 +119,8 @@ const SingleGridItem = ({ item }: { item: Product }) => {
       </h3>
 
       <span className="flex items-center gap-2 font-medium text-lg">
-        <span className="text-dark">{formatCurrency(item.discountedPrice)}</span>
-        <span className="text-dark-4 line-through">{formatCurrency(item.price)}</span>
+        <span className="text-dark"><PriceDisplay amount={item.discountedPrice} sourceCurrency={item.currency} /></span>
+        <span className="text-dark-4 line-through"><PriceDisplay amount={item.price} sourceCurrency={item.currency} /></span>
       </span>
     </div>
   );

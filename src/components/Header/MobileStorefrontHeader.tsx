@@ -4,6 +4,7 @@ import Image from "next/image";
 import { useRouter } from "next/navigation";
 import { FormEvent, useState } from "react";
 import { useTheme } from "@/app/context/ThemeContext";
+import CurrencySelector from "./CurrencySelector";
 
 export default function MobileStorefrontHeader() {
   const router = useRouter();
@@ -47,6 +48,8 @@ export default function MobileStorefrontHeader() {
               </svg>
               <span className="hidden truncate min-[360px]:inline">Deliver to Tanzania</span>
             </a>
+
+            <CurrencySelector compact />
 
             <button
               type="button"

@@ -5,7 +5,7 @@ import Image from "next/image";
 import Link from "next/link";
 import { useCategories, useProducts } from "@/hooks/useProducts";
 import { mapApiProductToUiProduct } from "@/lib/products/adapters";
-import { formatCurrency } from "@/lib/formatCurrency";
+import PriceDisplay from "@/components/shared/PriceDisplay";
 
 const PAGE_SIZE = 12;
 
@@ -349,11 +349,11 @@ const Categories = () => {
                         <p className="hidden text-xs text-dark-4 dark:text-darkTheme-secondary-muted sm:block">Price</p>
                         <div className="mt-0.5 flex flex-wrap items-center gap-2">
                           <span className="text-[15px] font-extrabold text-[#ef4444] dark:text-white sm:text-lg sm:text-dark">
-                            {formatCurrency(hasDiscount ? salePrice! : regularPrice, product.currency)}
+                            <PriceDisplay amount={hasDiscount ? salePrice! : regularPrice} sourceCurrency={product.currency} />
                           </span>
                           {hasDiscount && (
                             <span className="text-[10px] text-dark-4 line-through sm:text-xs">
-                              {formatCurrency(regularPrice, product.currency)}
+                              <PriceDisplay amount={regularPrice} sourceCurrency={product.currency} />
                             </span>
                           )}
                         </div>

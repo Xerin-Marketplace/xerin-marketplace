@@ -4,7 +4,7 @@ import { useEffect, useState } from "react";
 import Image from "next/image";
 import Link from "next/link";
 import { discoveryApi } from "@/lib/api/endpoints/discovery";
-import { formatCurrency } from "@/lib/formatCurrency";
+import PriceDisplay from "@/components/shared/PriceDisplay";
 import { useAuthStore } from "@/store/useAuthStore";
 import type { SearchProductItem } from "@/types/api/discovery";
 
@@ -90,7 +90,7 @@ function ProductStrip({
               </div>
               <p className="mt-3 line-clamp-2 text-sm font-semibold">{item.name}</p>
               <p className="mt-2 font-bold">
-                {formatCurrency(price, item.currency)}
+                <PriceDisplay amount={price} sourceCurrency={item.currency} />
               </p>
             </Link>
           );

@@ -1,7 +1,7 @@
 import React from "react";
 import { useRemoveCartItem, type CartItemUi } from "@/hooks/useCartActions";
 import Image from "next/image";
-import { formatCurrency } from "@/lib/formatCurrency";
+import PriceDisplay from "@/components/shared/PriceDisplay";
 
 const SingleItem = ({ item }: { item: CartItemUi }) => {
   const removeItem = useRemoveCartItem();
@@ -21,7 +21,7 @@ const SingleItem = ({ item }: { item: CartItemUi }) => {
           <h3 className="mb-1 line-clamp-2 text-sm font-semibold text-dark transition hover:text-blue dark:text-darkTheme-body-color sm:text-base sm:font-medium">
             <a href={`/products/${item.productId}`}> {item.title} </a>
           </h3>
-          <p className="text-custom-sm dark:text-darkTheme-secondary-muted">Price: {formatCurrency(item.discountedPrice)}</p>
+          <p className="text-custom-sm dark:text-darkTheme-secondary-muted">Price: <PriceDisplay amount={item.discountedPrice} sourceCurrency="TZS" /></p>
         </div>
       </div>
 

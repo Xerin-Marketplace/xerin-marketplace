@@ -3,7 +3,7 @@ import { useWishlistStore } from "@/store/useWishlistStore";
 import { useRemoveFromWishlist } from "@/hooks/useWishlist";
 import { useAddCartItem, addProductToCartPayload } from "@/hooks/useCartActions";
 import Image from "next/image";
-import { formatCurrency } from "@/lib/formatCurrency";
+import PriceDisplay from "@/components/shared/PriceDisplay";
 import type { WishListItem } from "@/store/useWishlistStore";
 import { useAuthStore } from "@/store/useAuthStore";
 
@@ -77,7 +77,7 @@ const SingleItem = ({ item }: { item: WishListItem }) => {
       </div>
 
       <div className="min-w-[205px]">
-        <p className="text-dark dark:text-darkTheme-body-color">{formatCurrency(item.discountedPrice, item.currency || "TZS")}</p>
+        <p className="text-dark dark:text-darkTheme-body-color"><PriceDisplay amount={item.discountedPrice} sourceCurrency={item.currency || "TZS"} /></p>
       </div>
 
       <div className="min-w-[265px]">

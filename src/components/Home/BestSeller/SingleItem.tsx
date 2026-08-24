@@ -9,7 +9,7 @@ import StarRating from "@/components/Common/StarRating";
 import Image from "next/image";
 import Link from "next/link";
 import { useWishlistStore } from "@/store/useWishlistStore";
-import { formatCurrency } from "@/lib/formatCurrency";
+import PriceDisplay from "@/components/shared/PriceDisplay";
 
 const SingleItem = ({ item }: { item: Product }) => {
   const { openModal } = useModalContext();
@@ -84,10 +84,10 @@ const SingleItem = ({ item }: { item: Product }) => {
 
           <div className="mt-4 flex items-center justify-center gap-2 font-semibold text-lg">
             <span className="text-dark dark:text-white">
-              {formatCurrency(item.discountedPrice)}
+              <PriceDisplay amount={item.discountedPrice} sourceCurrency={item.currency} />
             </span>
             <span className="text-dark-4 dark:text-darkTheme-secondary-muted line-through">
-              {formatCurrency(item.price)}
+              <PriceDisplay amount={item.price} sourceCurrency={item.currency} />
             </span>
           </div>
         </div>

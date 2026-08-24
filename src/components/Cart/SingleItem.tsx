@@ -2,7 +2,7 @@ import React, { useState } from "react";
 import { useUpdateCartItem, useRemoveCartItem, type CartItemUi } from "@/hooks/useCartActions";
 import Image from "next/image";
 import Link from "next/link";
-import { formatCurrency } from "@/lib/formatCurrency";
+import PriceDisplay from "@/components/shared/PriceDisplay";
 
 const SingleItem = ({ item }: { item: CartItemUi }) => {
   const [quantity, setQuantity] = useState(item.quantity);
@@ -46,7 +46,7 @@ const SingleItem = ({ item }: { item: CartItemUi }) => {
       </div>
 
       <div className="min-w-[180px]">
-        <p className="text-dark dark:text-darkTheme-body-color">{formatCurrency(item.discountedPrice)}</p>
+        <p className="text-dark dark:text-darkTheme-body-color"><PriceDisplay amount={item.discountedPrice} sourceCurrency="TZS" /></p>
       </div>
 
       <div className="min-w-[275px]">
@@ -104,7 +104,7 @@ const SingleItem = ({ item }: { item: CartItemUi }) => {
       </div>
 
       <div className="min-w-[200px]">
-        <p className="text-dark dark:text-darkTheme-body-color">{formatCurrency(item.discountedPrice * quantity)}</p>
+        <p className="text-dark dark:text-darkTheme-body-color"><PriceDisplay amount={item.discountedPrice * quantity} sourceCurrency="TZS" /></p>
       </div>
 
       <div className="min-w-[50px] flex justify-end">

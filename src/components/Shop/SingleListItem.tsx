@@ -10,7 +10,7 @@ import { useAddToWishlist } from "@/hooks/useWishlist";
 import StarRating from "@/components/Common/StarRating";
 import Link from "next/link";
 import Image from "next/image";
-import { formatCurrency } from "@/lib/formatCurrency";
+import PriceDisplay from "@/components/shared/PriceDisplay";
 
 const SingleListItem = ({ item }: { item: Product }) => {
   const { openModal } = useModalContext();
@@ -117,8 +117,8 @@ const SingleListItem = ({ item }: { item: Product }) => {
             </h3>
 
             <span className="flex items-center gap-2 font-medium text-lg">
-              <span className="text-dark">{formatCurrency(item.discountedPrice)}</span>
-              <span className="text-dark-4 line-through">{formatCurrency(item.price)}</span>
+              <span className="text-dark"><PriceDisplay amount={item.discountedPrice} sourceCurrency={item.currency} /></span>
+              <span className="text-dark-4 line-through"><PriceDisplay amount={item.price} sourceCurrency={item.currency} /></span>
             </span>
           </div>
 

@@ -121,6 +121,7 @@ export const mapApiProductToUiProduct = (product: ApiProduct): UiProduct => {
     })),
     price: displayPrice,
     discountedPrice: displayDiscountedPrice,
+    currency: product.currency || "TZS",
     imgs: {
       thumbnails: galleryImages,
       previews: galleryImages,

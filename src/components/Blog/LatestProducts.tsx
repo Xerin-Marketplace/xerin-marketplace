@@ -4,7 +4,7 @@ import React from "react";
 import Image from "next/image";
 import Link from "next/link";
 import { useProducts } from "@/lib/products";
-import { formatCurrency } from "@/lib/formatCurrency";
+import PriceDisplay from "@/components/shared/PriceDisplay";
 
 const LatestProducts = () => {
   const { products, isLoading, error } = useProducts({ limit: 3 });
@@ -34,7 +34,7 @@ const LatestProducts = () => {
                 <h3 className="font-medium text-dark dark:text-darkTheme-body-color mb-1 ease-out duration-200 hover:text-blue">
                   <Link href={`/products/${product.id}`}> {product.title} </Link>
                 </h3>
-                <p className="text-custom-sm dark:text-darkTheme-secondary-muted">Price: {formatCurrency(product.discountedPrice)}</p>
+                <p className="text-custom-sm dark:text-darkTheme-secondary-muted">Price: <PriceDisplay amount={product.discountedPrice} sourceCurrency={product.currency} /></p>
               </div>
             </div>
           ))}

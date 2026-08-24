@@ -20,6 +20,7 @@ import {
 } from "@/lib/api/endpoints/commerce";
 import type { DeliveryMode } from "@/types/api/commerce";
 import { formatCurrency } from "@/lib/formatCurrency";
+import PriceDisplay from "@/components/shared/PriceDisplay";
 import toast from "react-hot-toast";
 import { useAuthStore } from "@/store/useAuthStore";
 import { Globe2, MapPin } from "lucide-react";
@@ -703,19 +704,13 @@ const Checkout = () => {
 
                     <SummaryRow
                       label="Product subtotal"
-                      value={formatCurrency(
-                        Number(cart?.subtotal || 0),
-                        cart?.currency,
-                      )}
+                      value={<PriceDisplay amount={Number(cart?.subtotal || 0)} sourceCurrency="TZS" showSettlementTzs />}
                     />
 
                     {Number(cart?.promotion_discount_amount || 0) > 0 && (
                       <SummaryRow
                         label="Seller promotion"
-                        value={`-${formatCurrency(
-                          Number(cart?.promotion_discount_amount || 0),
-                          cart?.currency,
-                        )}`}
+                        value={<><span>-</span><PriceDisplay amount={Number(cart?.promotion_discount_amount || 0)} sourceCurrency="TZS" /></>}
                         saving
                       />
                     )}
@@ -723,10 +718,7 @@ const Checkout = () => {
                     {Number(cart?.coupon_discount_amount || 0) > 0 && (
                       <SummaryRow
                         label="Platform coupon"
-                        value={`-${formatCurrency(
-                          Number(cart?.coupon_discount_amount || 0),
-                          cart?.currency,
-                        )}`}
+                        value={<><span>-</span><PriceDisplay amount={Number(cart?.coupon_discount_amount || 0)} sourceCurrency="TZS" /></>}
                         saving
                       />
                     )}
@@ -736,7 +728,7 @@ const Checkout = () => {
                       value={
                         shippingAmount === null
                           ? "Select delivery"
-                          : formatCurrency(shippingAmount, selectedShipping?.currency)
+                          : <PriceDisplay amount={shippingAmount} sourceCurrency="TZS" />
                       }
                     />
 
@@ -746,11 +738,7 @@ const Checkout = () => {
                         value={
                           checkoutTotal === null
                             ? "Pending delivery quote"
-                            : formatCurrency(
-                                checkoutTotal,
-                                selectedShipping?.currency ||
-                                  cart?.currency,
-                              )
+                            : <PriceDisplay amount={checkoutTotal} sourceCurrency="TZS" showSettlementTzs />
                         }
                         strong
                       />
@@ -825,8 +813,8 @@ const Checkout = () => {
                 </div>
 
                 <p className="mt-3 text-center text-[11px] leading-5 text-dark-4">
-                  Products + delivery = Grand Total. The backend freezes and
-                  revalidates this quote before creating the order.
+                  Display currency is for convenience only. Your payment is
+                  always settled in TZS using the backend-confirmed Grand Total.
                 </p>
               </aside>
             </div>
@@ -844,7 +832,7 @@ function SummaryRow({
   strong = false,
 }: {
   label: string;
-  value: string;
+  value: React.ReactNode;
   saving?: boolean;
   strong?: boolean;
 }) {

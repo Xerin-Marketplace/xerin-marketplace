@@ -20,6 +20,7 @@ import PreLoader from "@/components/Common/PreLoader";
 import BuyerAccountFooter from "@/components/BuyerAccount/BuyerAccountFooter";
 import MobileBottomNav from "@/components/Header/MobileBottomNav";
 import RuntimeStatus from "@/components/Common/RuntimeStatus";
+import { CurrencyProvider } from "@/app/context/CurrencyContext";
 
 export default function RootLayout({
   children,
@@ -56,6 +57,7 @@ export default function RootLayout({
         <RuntimeStatus />
         <QueryProvider>
           <AuthProvider>
+            <CurrencyProvider>
             <CartModalProvider>
               <ModalProvider>
                 <PreviewSliderProvider>
@@ -76,6 +78,7 @@ export default function RootLayout({
                 </PreviewSliderProvider>
               </ModalProvider>
             </CartModalProvider>
+            </CurrencyProvider>
           </AuthProvider>
         </QueryProvider>
       </NotificationProvider>

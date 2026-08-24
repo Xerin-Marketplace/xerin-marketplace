@@ -7,7 +7,7 @@ import { useRouter, useSearchParams } from "next/navigation";
 import Breadcrumb from "@/components/Common/Breadcrumb";
 import { discoveryApi } from "@/lib/api/endpoints/discovery";
 import { getBrands, getCategories } from "@/lib/api/endpoints/products";
-import { formatCurrency } from "@/lib/formatCurrency";
+import PriceDisplay from "@/components/shared/PriceDisplay";
 import type {
   SearchProductItem,
   SearchSort,
@@ -369,11 +369,11 @@ function SearchCard({ item }: { item: SearchProductItem }) {
           <div>
             <p className="text-xs text-dark-4">Customer price</p>
             <p className="mt-1 text-lg font-bold">
-              {formatCurrency(effective, item.currency)}
+              <PriceDisplay amount={effective} sourceCurrency={item.currency} />
             </p>
             {effective < regular && (
               <p className="text-xs text-dark-4 line-through">
-                {formatCurrency(regular, item.currency)}
+                <PriceDisplay amount={regular} sourceCurrency={item.currency} />
               </p>
             )}
           </div>

@@ -10,7 +10,7 @@ import { useProductDetailsStore } from "@/store/useProductDetailsStore";
 import { useAddCartItem, addProductToCartPayload } from "@/hooks/useCartActions";
 import StarRating from "@/components/Common/StarRating";
 import { useRouter } from "next/navigation";
-import { formatCurrency } from "@/lib/formatCurrency";
+import PriceDisplay from "@/components/shared/PriceDisplay";
 import type { Product } from "@/types/product";
 
 const ShopDetails = ({ product }: { product: Product }) => {
@@ -321,11 +321,11 @@ const ShopDetails = ({ product }: { product: Product }) => {
 
                   <h3 className="font-medium text-base sm:text-custom-1 mb-3 sm:mb-4.5">
                     <span className="text-sm sm:text-base text-dark dark:text-darkTheme-body-color">
-                      Price: {formatCurrency(product.price)}
+                      Price: <PriceDisplay amount={product.price} sourceCurrency={product.currency} />
                     </span>
                     <span className="line-through text-sm sm:text-base">
                       {" "}
-                      {formatCurrency(product.discountedPrice)}{" "}
+                      <PriceDisplay amount={product.discountedPrice} sourceCurrency={product.currency} />{" "}
                     </span>
                   </h3>
 

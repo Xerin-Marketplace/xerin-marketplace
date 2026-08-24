@@ -1,6 +1,6 @@
 import { useCartView } from "@/hooks/useCartActions";
 import React from "react";
-import { formatCurrency } from "@/lib/formatCurrency";
+import PriceDisplay from "@/components/shared/PriceDisplay";
 import Link from "next/link";
 
 const OrderSummary = () => {
@@ -38,7 +38,7 @@ const OrderSummary = () => {
               </div>
               <div>
                 <p className="text-dark dark:text-darkTheme-body-color text-right">
-                  {formatCurrency(item.discountedPrice * item.quantity)}
+                  <PriceDisplay amount={item.discountedPrice * item.quantity} sourceCurrency="TZS" />
                 </p>
               </div>
             </div>
@@ -51,7 +51,7 @@ const OrderSummary = () => {
             </div>
             <div>
               <p className="font-medium text-lg text-dark dark:text-white text-right">
-                {formatCurrency(totalPrice)}
+                <PriceDisplay amount={totalPrice} sourceCurrency="TZS" />
               </p>
             </div>
           </div>
