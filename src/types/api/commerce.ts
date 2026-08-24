@@ -88,6 +88,7 @@ export type EligibleLogisticsCompany = {
   supports_webhooks: boolean;
   seller_count: number;
   covered_seller_count: number;
+  route_types: Array<"domestic" | "cross_border" | string>;
   services: Array<{
     method_id: string;
     method_name: string;
@@ -102,6 +103,7 @@ export type EligibleLogisticsCompany = {
 export type EligibleLogisticsResponse = {
   address_id: string;
   delivery_mode: DeliveryMode;
+  destination_country: string;
   seller_count: number;
   total: number;
   page: number;
@@ -140,6 +142,10 @@ export type MultiSellerDeliveryOption = {
   sellers: Array<{
     seller_id: string;
     seller_name: string;
+    store_id?: string | null;
+    store_name?: string | null;
+    origin_country?: string | null;
+    route_type?: "domestic" | "cross_border" | string | null;
     pickup_location_id: string;
     pickup_label: string;
     distance_km: number | string;

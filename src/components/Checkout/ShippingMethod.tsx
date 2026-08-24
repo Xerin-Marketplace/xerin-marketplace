@@ -2,14 +2,21 @@ import { BadgeCheck, Clock3, PackageCheck, Route, Truck } from "lucide-react";
 import type { DeliveryMode, EligibleLogisticsCompany, MultiSellerDeliveryOption } from "@/types/api/commerce";
 import PriceDisplay from "@/components/shared/PriceDisplay";
 
-export default function ShippingMethod({ companies, excludedCompanies = [], options, selected, onChange, selectedCompanyId, onCompanyChange, deliveryMode, hasSelectedAddress, addressReady, isLoadingCompanies, isLoadingPricing }: {
+export default function ShippingMethod({ companies, excludedCompanies = [], options, selected, onChange, selectedCompanyId, onCompanyChange, deliveryMode, destinationCountry, destinationRegion, destinationCity, hasSelectedAddress, addressReady, isLoadingCompanies, isLoadingPricing }: {
   companies: EligibleLogisticsCompany[]; options: MultiSellerDeliveryOption[]; selected: string;
   excludedCompanies?: Array<{ logistics_company_id: string; name: string; code: string; reasons: string[]; uncovered_sellers: string[] }>;
   onChange: (rateId: string) => void; selectedCompanyId: string; onCompanyChange: (companyId: string) => void;
-  deliveryMode: DeliveryMode; hasSelectedAddress: boolean; addressReady: boolean; isLoadingCompanies?: boolean; isLoadingPricing?: boolean;
+  deliveryMode: DeliveryMode;
+  destinationCountry?: string;
+  destinationRegion?: string;
+  destinationCity?: string;
+  hasSelectedAddress: boolean;
+  addressReady: boolean;
+  isLoadingCompanies?: boolean;
+  isLoadingPricing?: boolean;
 }) {
   return <section className="mt-4 rounded-2xl border border-[#e7ebf0] bg-white shadow-sm dark:border-white/10 dark:bg-darkTheme-card sm:mt-7.5">
-    <div className="border-b border-gray-3 px-4 py-4 dark:border-white/10 sm:px-6 sm:py-5"><div className="flex items-center gap-3"><span className="flex h-9 w-9 shrink-0 items-center justify-center rounded-xl bg-orange/10 text-orange"><Truck size={17} /></span><div><h3 className="font-bold text-dark dark:text-white">Choose Logistics Company</h3><p className="mt-0.5 text-xs text-dark-4">Providers covering every seller in this {deliveryMode} order</p></div></div></div>
+    <div className="border-b border-gray-3 px-4 py-4 dark:border-white/10 sm:px-6 sm:py-5"><div className="flex items-center gap-3"><span className="flex h-9 w-9 shrink-0 items-center justify-center rounded-xl bg-orange/10 text-orange"><Truck size={17} /></span><div><h3 className="font-bold text-dark dark:text-white">Choose Logistics Company</h3><p className="mt-0.5 text-xs text-dark-4">Providers covering every seller for this {deliveryMode} delivery</p>{destinationCountry && <p className="mt-1 text-xs font-semibold text-slate-700 dark:text-white/70">Delivering to: {destinationCountry}{destinationRegion ? ` · ${destinationRegion}` : ""}{destinationCity ? ` · ${destinationCity}` : ""}</p>}</div></div></div>
     <div className="p-4 sm:p-6">
       {!hasSelectedAddress ? <Empty text="Choose a delivery address before selecting a logistics company." /> : !addressReady ? <Empty text="Confirm the exact delivery point above first. We will check available logistics companies immediately after the address is verified." /> : isLoadingCompanies ? <Loading text="Checking seller pickup coverage…" /> : companies.length ? <div className="grid gap-3 sm:grid-cols-2 lg:grid-cols-1 xl:grid-cols-2">{companies.map((company) => {
         const active = company.logistics_company_id === selectedCompanyId;

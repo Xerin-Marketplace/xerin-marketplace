@@ -5,7 +5,9 @@ export type PricingStrategy = "farthest_seller" | "sum_individual";
 export type ShippingZone = {
   id: string; logistics_company_id?: string | null; name: string; country: string; scope: LogisticsScope;
   regions: string[]; cities: string[]; districts: string[]; wards: string[]; postal_codes: string[];
-  coverage_geojson?: Record<string, unknown> | null; covers_entire_country: boolean; is_active: boolean;
+  coverage_geojson?: Record<string, unknown> | null; covers_entire_country: boolean;
+  supports_domestic_delivery: boolean; supports_cross_border_inbound: boolean; supports_cross_border_outbound: boolean;
+  is_active: boolean;
   created_at: string; updated_at?: string | null;
 };
 export type ShippingZonePayload = Omit<ShippingZone, "id" | "logistics_company_id" | "created_at" | "updated_at" | "coverage_geojson">;

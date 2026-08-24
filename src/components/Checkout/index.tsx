@@ -82,10 +82,33 @@ const isTanzania = (country?: string | null) =>
     (country || "").trim().toLowerCase(),
   );
 
+const normalizeCountry = (country?: string | null) =>
+  String(country || "").trim();
+
+const INTERNATIONAL_COUNTRY_OPTIONS = [
+  "United Arab Emirates",
+  "China",
+  "Turkey",
+  "United States",
+  "United Kingdom",
+];
+
+const countryFlag = (country?: string | null) => {
+  const value = normalizeCountry(country).toLowerCase();
+  if (isTanzania(value)) return "🇹🇿";
+  if (["united arab emirates", "uae"].includes(value)) return "🇦🇪";
+  if (["china", "people's republic of china", "prc"].includes(value)) return "🇨🇳";
+  if (["turkey", "türkiye", "turkiye"].includes(value)) return "🇹🇷";
+  if (["united states", "united states of america", "usa", "us"].includes(value)) return "🇺🇸";
+  if (["united kingdom", "uk", "great britain"].includes(value)) return "🇬🇧";
+  return "🌍";
+};
+
 const Checkout = () => {
   const router = useRouter();
   const [form, setForm] = useState<CheckoutForm>(initialForm);
   const [deliveryMode, setDeliveryMode] = useState<DeliveryMode>("local");
+  const [destinationCountry, setDestinationCountry] = useState("Tanzania");
   const [selectedAddressId, setSelectedAddressId] = useState("");
   const [selectedCompanyId, setSelectedCompanyId] = useState("");
   const [paymentProvider, setPaymentProvider] = useState("");
@@ -117,15 +140,60 @@ const Checkout = () => {
     enabled: isAuthenticated,
   });
 
+  const internationalCountryOptions = useMemo(() => {
+    const values = new Set<string>(INTERNATIONAL_COUNTRY_OPTIONS);
+
+    addresses.forEach((address) => {
+      const country = normalizeCountry(address.country);
+      if (country && !isTanzania(country)) {
+        values.add(country);
+      }
+    });
+
+    return Array.from(values).sort((a, b) => a.localeCompare(b));
+  }, [addresses]);
+
   const matchingAddresses = useMemo(
     () =>
-      addresses.filter((address) =>
-        deliveryMode === "local"
-          ? isTanzania(address.country)
-          : !isTanzania(address.country),
-      ),
-    [addresses, deliveryMode],
+      addresses.filter((address) => {
+        if (deliveryMode === "local") {
+          return isTanzania(address.country);
+        }
+
+        if (!destinationCountry) {
+          return false;
+        }
+
+        return (
+          normalizeCountry(address.country).toLowerCase() ===
+          normalizeCountry(destinationCountry).toLowerCase()
+        );
+      }),
+    [addresses, deliveryMode, destinationCountry],
   );
+
+  useEffect(() => {
+    if (deliveryMode === "local") {
+      if (destinationCountry !== "Tanzania") {
+        setDestinationCountry("Tanzania");
+      }
+      return;
+    }
+
+    if (destinationCountry && !isTanzania(destinationCountry)) {
+      return;
+    }
+
+    const preferredInternationalAddress =
+      addresses.find((address) => address.is_default && !isTanzania(address.country)) ||
+      addresses.find((address) => !isTanzania(address.country));
+
+    setDestinationCountry(
+      preferredInternationalAddress
+        ? normalizeCountry(preferredInternationalAddress.country)
+        : "",
+    );
+  }, [addresses, deliveryMode, destinationCountry]);
 
   useEffect(() => {
     const currentStillMatches = matchingAddresses.some(
@@ -287,6 +355,7 @@ const Checkout = () => {
 
   const changeDeliveryMode = (mode: DeliveryMode) => {
     setDeliveryMode(mode);
+    setDestinationCountry(mode === "local" ? "Tanzania" : "");
     setSelectedAddressId("");
     setSelectedCompanyId("");
     setForm((current) => ({
@@ -311,11 +380,16 @@ const Checkout = () => {
       return;
     }
 
+    if (deliveryMode === "international" && !destinationCountry) {
+      toast.error("Choose the international destination country first");
+      return;
+    }
+
     if (!selectedAddressId) {
       toast.error(
         deliveryMode === "local"
           ? "Add or select a Tanzania delivery address"
-          : "Add or select an international delivery address",
+          : `Add or select a delivery address in ${destinationCountry}`,
       );
       return;
     }
@@ -586,11 +660,48 @@ const Checkout = () => {
                       </h2>
                       <p className="mt-1 text-xs leading-5 text-dark-4">
                         {deliveryMode === "local"
-                          ? "Only Tanzania addresses are shown for local delivery."
-                          : "Only non-Tanzania addresses are shown for international delivery."}
+                          ? "Local delivery is fixed to Tanzania. Only Tanzania addresses are shown."
+                          : destinationCountry
+                            ? `Only saved addresses in ${destinationCountry} are shown.`
+                            : "Choose the international destination country first."}
                       </p>
                     </div>
                   </div>
+
+                  {deliveryMode === "international" && (
+                    <div className="mt-4 sm:mt-5">
+                      <label
+                        htmlFor="international-destination-country"
+                        className="mb-2 block text-xs font-bold uppercase tracking-wide text-dark-4"
+                      >
+                        Destination country
+                      </label>
+                      <select
+                        id="international-destination-country"
+                        value={destinationCountry}
+                        onChange={(event) => {
+                          setDestinationCountry(event.target.value);
+                          setSelectedAddressId("");
+                          setSelectedCompanyId("");
+                          setForm((current) => ({
+                            ...current,
+                            shippingMethod: "",
+                          }));
+                        }}
+                        className="h-12 w-full rounded-xl border border-gray-3 bg-white px-3 text-base outline-none focus:border-orange dark:border-white/10 dark:bg-white/5 dark:text-white sm:px-4 sm:text-sm"
+                      >
+                        <option value="">Choose destination country</option>
+                        {internationalCountryOptions.map((country) => (
+                          <option key={country} value={country}>
+                            {countryFlag(country)} {country}
+                          </option>
+                        ))}
+                      </select>
+                      <p className="mt-2 text-xs leading-5 text-dark-4">
+                        Logistics companies will be checked against this country and your exact saved delivery address.
+                      </p>
+                    </div>
+                  )}
 
                   {matchingAddresses.length ? (
                     <>
@@ -635,7 +746,7 @@ const Checkout = () => {
                       You do not have a{" "}
                       {deliveryMode === "local"
                         ? "Tanzania"
-                        : "non-Tanzania"}{" "}
+                        : destinationCountry || "selected international country"}{" "}
                       delivery address yet.
                     </div>
                   )}
@@ -760,6 +871,9 @@ const Checkout = () => {
                   selectedCompanyId={selectedCompanyId}
                   onCompanyChange={changeCompany}
                   deliveryMode={deliveryMode}
+                  destinationCountry={deliveryMode === "local" ? "Tanzania" : destinationCountry}
+                  destinationRegion={selectedAddress?.region || ""}
+                  destinationCity={selectedAddress?.city || selectedAddress?.district || ""}
                   hasSelectedAddress={Boolean(selectedAddressId)}
                   addressReady={Boolean(selectedAddress?.delivery_ready)}
                   isLoadingCompanies={eligibleLogistics.isLoading || eligibleLogistics.isFetching}

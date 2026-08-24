@@ -739,14 +739,33 @@ const SellerProducts = () => {
     }
   }
 
-  function formatPrice(value: number | string | null | undefined) {
+  function formatPrice(
+    value: number | string | null | undefined,
+    currency = "TZS",
+  ) {
     if (value === null || value === undefined) return "—";
 
     const numeric = Number(value);
 
     if (!Number.isFinite(numeric)) return "—";
 
-    return `TZS ${numeric.toLocaleString()}`;
+    const code = String(currency || "TZS").trim().toUpperCase();
+    const fractionDigits = code === "TZS" ? 0 : 3;
+
+    try {
+      return new Intl.NumberFormat("en-TZ", {
+        style: "currency",
+        currency: code,
+        currencyDisplay: code === "TZS" ? "narrowSymbol" : "symbol",
+        minimumFractionDigits: 0,
+        maximumFractionDigits: fractionDigits,
+      }).format(numeric);
+    } catch {
+      return `${code} ${numeric.toLocaleString(undefined, {
+        minimumFractionDigits: 0,
+        maximumFractionDigits: fractionDigits,
+      })}`;
+    }
   }
 
   if (!token || !isSeller) return null;
@@ -978,6 +997,7 @@ const SellerProducts = () => {
                                 product.seller_base_price ||
                                 product.sale_price ||
                                 product.price,
+                              product.currency,
                             )}
                           </p>
                         </div>
@@ -987,7 +1007,10 @@ const SellerProducts = () => {
                             Customer price
                           </p>
                           <p className="mt-1 font-bold text-[#111827]">
-                            {formatPrice(product.sale_price || product.price)}
+                            {formatPrice(
+                              product.sale_price || product.price,
+                              product.currency,
+                            )}
                           </p>
                         </div>
                       </div>
@@ -999,7 +1022,10 @@ const SellerProducts = () => {
                             {Number(product.commission_rate_snapshot).toLocaleString()}%
                           </b>
                           {" · "}
-                          {formatPrice(product.commission_amount_snapshot)}
+                          {formatPrice(
+                            product.commission_amount_snapshot,
+                            product.currency,
+                          )}
                         </p>
                       )}
 
@@ -1612,23 +1638,35 @@ const SellerProducts = () => {
                           <div className="mt-4 grid gap-3 sm:grid-cols-2 xl:grid-cols-4">
                             <PricingStat
                               label="Your base price"
-                              value={formatPrice(pricingPreview.seller_base_price)}
+                              value={formatPrice(
+                                pricingPreview.seller_base_price,
+                                pricingPreview.currency || form.currency,
+                              )}
                             />
                             <PricingStat
                               label="Commission"
                               value={`${Number(pricingPreview.commission_rate).toLocaleString()}%`}
-                              detail={formatPrice(pricingPreview.commission_amount)}
+                              detail={formatPrice(
+                                pricingPreview.commission_amount,
+                                pricingPreview.currency || form.currency,
+                              )}
                             />
                             <PricingStat
                               label="Customer regular price"
-                              value={formatPrice(pricingPreview.customer_price)}
+                              value={formatPrice(
+                                pricingPreview.customer_price,
+                                pricingPreview.currency || form.currency,
+                              )}
                               highlight
                             />
                             <PricingStat
                               label="Customer sale price"
                               value={
                                 pricingPreview.customer_sale_price
-                                  ? formatPrice(pricingPreview.customer_sale_price)
+                                  ? formatPrice(
+                                      pricingPreview.customer_sale_price,
+                                      pricingPreview.currency || form.currency,
+                                    )
                                   : "Not set"
                               }
                             />
