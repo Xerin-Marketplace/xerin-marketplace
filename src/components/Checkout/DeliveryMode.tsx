@@ -27,8 +27,9 @@ export default function DeliveryModeSelector({
         Choose Delivery Type
       </h2>
       <p className="mt-1 text-sm leading-6 text-dark-4">
-        Local delivery is within Tanzania. International delivery uses a
-        non-Tanzania address and is only available when enabled by Xerin.
+        Choose domestic delivery for Tanzania-only routes, or International /
+        Cross-border when a product must move between countries. A cross-border
+        order may still be delivered to a Tanzania address.
       </p>
 
       <div className="mt-5 grid gap-3 sm:grid-cols-2">
@@ -79,15 +80,16 @@ export default function DeliveryModeSelector({
             </span>
             <div>
               <p className="font-bold text-dark dark:text-white">
-                International
+                International / Cross-border
               </p>
               <p className="mt-1 text-xs leading-5 text-dark-4">
-                Deliver outside Tanzania using international-enabled logistics
-                services.
+                Use this when a product ships from another country, including
+                deliveries from UAE, China, Turkey, UK, USA and other countries
+                into Tanzania.
               </p>
               {!internationalAllowed && (
                 <span className="mt-2 inline-block rounded-full bg-slate-100 px-2.5 py-1 text-[10px] font-bold uppercase text-slate-500">
-                  Disabled by marketplace
+                  Cross-border delivery disabled by marketplace
                 </span>
               )}
             </div>

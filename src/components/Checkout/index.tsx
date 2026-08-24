@@ -86,6 +86,7 @@ const normalizeCountry = (country?: string | null) =>
   String(country || "").trim();
 
 const INTERNATIONAL_COUNTRY_OPTIONS = [
+  "Tanzania",
   "United Arab Emirates",
   "China",
   "Turkey",
@@ -145,7 +146,7 @@ const Checkout = () => {
 
     addresses.forEach((address) => {
       const country = normalizeCountry(address.country);
-      if (country && !isTanzania(country)) {
+      if (country) {
         values.add(country);
       }
     });
@@ -180,18 +181,18 @@ const Checkout = () => {
       return;
     }
 
-    if (destinationCountry && !isTanzania(destinationCountry)) {
+    if (destinationCountry) {
       return;
     }
 
-    const preferredInternationalAddress =
-      addresses.find((address) => address.is_default && !isTanzania(address.country)) ||
-      addresses.find((address) => !isTanzania(address.country));
+    const preferredAddress =
+      addresses.find((address) => address.is_default) ||
+      addresses[0];
 
     setDestinationCountry(
-      preferredInternationalAddress
-        ? normalizeCountry(preferredInternationalAddress.country)
-        : "",
+      preferredAddress
+        ? normalizeCountry(preferredAddress.country)
+        : "Tanzania",
     );
   }, [addresses, deliveryMode, destinationCountry]);
 
@@ -357,7 +358,15 @@ const Checkout = () => {
 
   const changeDeliveryMode = (mode: DeliveryMode) => {
     setDeliveryMode(mode);
-    setDestinationCountry(mode === "local" ? "Tanzania" : "");
+    setDestinationCountry(
+      mode === "local"
+        ? "Tanzania"
+        : normalizeCountry(
+            addresses.find((address) => address.is_default)?.country ||
+              addresses[0]?.country ||
+              "Tanzania",
+          ),
+    );
     setSelectedAddressId("");
     setSelectedCompanyId("");
     setForm((current) => ({
@@ -670,8 +679,8 @@ const Checkout = () => {
                         {deliveryMode === "local"
                           ? "Local delivery is fixed to Tanzania. Only Tanzania addresses are shown."
                           : destinationCountry
-                            ? `Only saved addresses in ${destinationCountry} are shown.`
-                            : "Choose the international destination country first."}
+                            ? `Cross-border delivery destination: ${destinationCountry}. Only saved addresses in this country are shown.`
+                            : "Choose the cross-border destination country first."}
                       </p>
                     </div>
                   </div>
@@ -682,7 +691,7 @@ const Checkout = () => {
                         htmlFor="international-destination-country"
                         className="mb-2 block text-xs font-bold uppercase tracking-wide text-dark-4"
                       >
-                        Destination country
+                        Cross-border destination country
                       </label>
                       <select
                         id="international-destination-country"
