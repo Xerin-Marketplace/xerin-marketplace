@@ -180,8 +180,31 @@ export type CheckoutDeliveryQuote = {
   product_subtotal: number | string;
   delivery_amount: number | string;
   checkout_total_before_discounts: number | string;
-  pricing_breakdown: Record<string, unknown>;
-  seller_routes_snapshot: Array<Record<string, unknown>>;
+  pricing_breakdown: Record<string, unknown> & {
+    route_types?: string[];
+    store_count?: number;
+  };
+  seller_routes_snapshot: Array<{
+    seller_id?: string;
+    seller_name?: string;
+    store_id?: string | null;
+    store_name?: string | null;
+    origin_country?: string | null;
+    route_type?: "domestic" | "cross_border" | string | null;
+    pickup_location_id?: string;
+    pickup_label?: string;
+    distance_km?: number | string;
+    duration_minutes?: number | string;
+    is_billable_reference?: boolean;
+  }>;
+  address_snapshot?: {
+    country?: string | null;
+    region?: string | null;
+    city?: string | null;
+    district?: string | null;
+    ward?: string | null;
+    formatted_address?: string | null;
+  };
   expires_at: string;
   used_at?: string | null;
 };
@@ -236,6 +259,7 @@ export type OrderItem = {
   product_id: string;
   variant_id: string | null;
   seller_id: string;
+  store_id: string;
   product_name: string;
   variant_name: string | null;
   quantity: number;
@@ -334,7 +358,7 @@ export type OrderWorkflowStage = {
   detail: string;
 };
 export type OrderShipmentWorkflow = {
-  shipment_id: string; seller_id: string; seller_order_id?: string | null;
+  shipment_id: string; seller_id: string; store_id: string; seller_order_id?: string | null;
   seller_order_status?: string | null; shipment_status: string; logistics_company_id?: string | null;
   pickup_job_status?: string | null; handover_status?: string | null; pickup_proof_status?: string | null;
   latest_tracking_status?: string | null; tracking_event_count: number;
@@ -367,6 +391,7 @@ export type Shipment = {
   id: string;
   order_id: string;
   seller_id: string;
+  store_id: string;
   logistics_company_id?: string | null;
   shipping_method_id?: string | null;
   status: string;
@@ -397,6 +422,7 @@ export type CustomerOrderPaymentSummary = {
 export type CustomerSellerOrderSummary = {
   id: string;
   seller_id: string;
+  store_id: string;
   status: string;
   seller_subtotal: number | string;
   item_count: number;

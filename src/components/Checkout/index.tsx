@@ -339,9 +339,11 @@ const Checkout = () => {
     }
   }, [form.paymentMethod, paymentOptions.data, paymentProvider]);
 
-  const shippingAmount = selectedShipping
-    ? Number(selectedShipping.delivery_amount)
-    : null;
+  const shippingAmount = frozenQuote.data
+    ? Number(frozenQuote.data.delivery_amount)
+    : selectedShipping
+      ? Number(selectedShipping.delivery_amount)
+      : null;
 
   const checkoutTotal =
     shippingAmount === null ? null : cartProductTotal + shippingAmount;
@@ -406,6 +408,12 @@ const Checkout = () => {
 
     if (!frozenQuote.data) {
       toast.error("Wait for the protected delivery quote to finish");
+      return;
+    }
+
+    if (new Date(frozenQuote.data.expires_at).getTime() <= Date.now()) {
+      toast.error("The protected delivery quote has expired. Recalculate delivery before placing the order.");
+      void frozenQuote.refetch();
       return;
     }
 
@@ -879,6 +887,34 @@ const Checkout = () => {
                   isLoadingCompanies={eligibleLogistics.isLoading || eligibleLogistics.isFetching}
                   isLoadingPricing={deliveryPricing.isLoading || deliveryPricing.isFetching}
                 />
+
+                {frozenQuote.data && selectedShipping && (
+                  <section className="mt-4 rounded-2xl border border-emerald-200 bg-emerald-50/70 p-4 dark:border-emerald-500/20 dark:bg-emerald-500/5 sm:mt-6 sm:p-5">
+                    <div className="flex flex-wrap items-start justify-between gap-3">
+                      <div>
+                        <p className="text-sm font-bold text-emerald-900 dark:text-emerald-200">Protected delivery quote</p>
+                        <p className="mt-1 text-xs leading-5 text-emerald-800/80 dark:text-emerald-200/70">Store origin, Google road distance and TZS delivery price are frozen for this checkout.</p>
+                      </div>
+                      <span className="rounded-full bg-white px-3 py-1 text-[10px] font-bold uppercase text-emerald-700 shadow-sm dark:bg-white/10 dark:text-emerald-200">Quote locked</span>
+                    </div>
+                    <div className="mt-4 grid gap-2">
+                      {frozenQuote.data.seller_routes_snapshot.map((route, index) => (
+                        <div key={`${route.store_id || route.pickup_location_id || index}`} className="rounded-xl border border-emerald-100 bg-white/80 p-3 text-xs dark:border-white/10 dark:bg-white/5">
+                          <div className="flex flex-wrap items-center justify-between gap-2">
+                            <b className="text-dark dark:text-white">{route.store_name || route.pickup_label || `Store ${index + 1}`}</b>
+                            <span className="font-bold uppercase text-emerald-700 dark:text-emerald-300">{route.route_type === "cross_border" ? "Cross-border" : "Domestic"}</span>
+                          </div>
+                          <p className="mt-1 text-dark-4">{route.origin_country || "Store origin"} → {frozenQuote.data.address_snapshot?.country || destinationCountry || "Destination"} · {Number(route.distance_km || 0).toFixed(1)} km</p>
+                        </div>
+                      ))}
+                    </div>
+                    <div className="mt-4 flex flex-wrap items-center justify-between gap-3 border-t border-emerald-200 pt-3 text-xs dark:border-emerald-500/20">
+                      <span>Billable distance: <b>{Number(frozenQuote.data.billable_distance_km).toFixed(1)} km</b></span>
+                      <span>Delivery: <b><PriceDisplay amount={Number(frozenQuote.data.delivery_amount)} sourceCurrency="TZS" /></b></span>
+                      <span>Valid until: <b>{new Date(frozenQuote.data.expires_at).toLocaleTimeString([], { hour: "2-digit", minute: "2-digit" })}</b></span>
+                    </div>
+                  </section>
+                )}
 
                 <Coupon />
 
