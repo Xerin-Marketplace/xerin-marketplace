@@ -1,6 +1,41 @@
 import axiosInstance from "../client";
 import type { CreateStorePayload, Store, UpdateStorePayload } from "@/types/api/store";
 
+
+export type PublicStorePage = {
+  total: number;
+  page: number;
+  page_size: number;
+  total_pages: number;
+  results: Store[];
+};
+
+export const listPublicStores = async (): Promise<Store[]> => {
+  const first = await axiosInstance.get<PublicStorePage>("/stores", {
+    params: { page: 1, page_size: 100 },
+  });
+
+  const initial = Array.isArray(first.data?.results) ? first.data.results : [];
+  const totalPages = Math.max(1, Number(first.data?.total_pages || 1));
+
+  if (totalPages <= 1) return initial;
+
+  const remaining = await Promise.all(
+    Array.from({ length: totalPages - 1 }, (_, index) =>
+      axiosInstance.get<PublicStorePage>("/stores", {
+        params: { page: index + 2, page_size: 100 },
+      }),
+    ),
+  );
+
+  return [
+    ...initial,
+    ...remaining.flatMap((response) =>
+      Array.isArray(response.data?.results) ? response.data.results : [],
+    ),
+  ];
+};
+
 export const listMyStores = async (): Promise<Store[]> => {
   try {
     const res = await axiosInstance.get<Store[]>("/stores/mine");
@@ -83,6 +118,7 @@ export const uploadStoreBanner = async (file: File): Promise<Store> => {
 };
 
 export const storeApi = {
+  listPublicStores,
   listMyStores,
   createStore,
   getMyStoreById,
