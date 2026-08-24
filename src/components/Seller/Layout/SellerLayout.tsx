@@ -90,7 +90,7 @@ const approvedGroups: Array<{ label: string; items: NavItem[] }> = [
   {
     label: "Store Operations",
     items: [
-      { label: "Store Profile", href: "/seller/store", icon: Store },
+      { label: "My Stores", href: "/seller/store", icon: Store },
       { label: "Pickup Locations", href: "/seller/pickup-locations", icon: MapPinned },
       { label: "Promotions", href: "/seller/promotions", icon: Tag },
       { label: "Reviews", href: "/seller/reviews", icon: Star },
@@ -189,7 +189,7 @@ export default function SellerLayout({
         : pathname.includes("/account")
           ? "Account Settings"
           : pathname.includes("/store")
-            ? "Store Settings"
+            ? "My Stores"
             : pathname.includes("/support")
               ? "Help & Support"
               : pathname.includes("/products")
@@ -473,7 +473,7 @@ export default function SellerLayout({
                     )}
                     {isApprovedSeller && (
                       <>
-                        <Drop href="/seller/store" icon={Store} label="Store Settings" />
+                        <Drop href="/seller/store" icon={Store} label="My Stores" />
                         <Drop href="/shop-with-sidebar" icon={Store} label="View storefront" />
                       </>
                     )}

@@ -1,27 +1,122 @@
 import type { ID, TimestampFields } from "./common";
 
+export type StoreScope = "local" | "global";
+export type StoreStatus = "draft" | "pending_review" | "active" | "rejected" | "suspended" | "closed";
+
+export type StoreGalleryImage = {
+  id: ID;
+  store_id: ID;
+  image_url: string;
+  alt_text?: string | null;
+  sort_order?: number;
+  is_active?: boolean;
+};
+
+export type StoreOpeningHour = {
+  id: ID;
+  store_id: ID;
+  day_of_week: string;
+  day_position: number;
+  opening_time: string | null;
+  closing_time: string | null;
+  is_closed: boolean;
+};
+
 export type Store = TimestampFields & {
   id: ID;
   seller_id: ID;
-  name: string;
+  store_scope: StoreScope;
+  store_name: string;
   slug: string;
   description: string | null;
+  about: string | null;
   logo_url: string | null;
   banner_url: string | null;
+  theme_color: string;
+  secondary_color: string;
   contact_email: string | null;
   contact_phone: string | null;
-  business_country: string | null;
-  business_region: string | null;
-  business_city: string | null;
-  business_address: string | null;
-  return_policy: string | null;
+  whatsapp_phone: string | null;
+  website_url: string | null;
+  country: string | null;
+  region: string | null;
+  district: string | null;
+  ward: string | null;
+  street: string | null;
+  latitude: number | null;
+  longitude: number | null;
+  opening_time: string | null;
+  closing_time: string | null;
   shipping_policy: string | null;
-  delivery_time_estimate: string | null;
-  is_open: boolean;
-  operating_hours: Record<string, string> | null;
-  social_links: Record<string, string> | null;
+  return_policy: string | null;
+  privacy_policy: string | null;
+  facebook_url: string | null;
+  instagram_url: string | null;
+  twitter_url: string | null;
+  tiktok_url: string | null;
+  youtube_url: string | null;
+  status: StoreStatus | string;
+  is_verified: boolean;
+  is_featured: boolean;
+  rating: number | string;
+  review_count: number;
+  followers_count: number;
+  vacation_mode: boolean;
+  accept_orders: boolean;
+  processing_days: number;
+  seo_title: string | null;
+  seo_description: string | null;
+  gallery_images: StoreGalleryImage[];
+  opening_hours: StoreOpeningHour[];
 };
 
-export type UpdateStorePayload = Partial<
-  Omit<Store, "id" | "seller_id" | "created_at" | "updated_at">
->;
+export type CreateStorePayload = {
+  store_name: string;
+  country: string;
+  description?: string | null;
+  about?: string | null;
+  contact_email?: string | null;
+  contact_phone?: string | null;
+  whatsapp_phone?: string | null;
+  website_url?: string | null;
+  region?: string | null;
+  district?: string | null;
+  ward?: string | null;
+  street?: string | null;
+  latitude?: number | null;
+  longitude?: number | null;
+};
+
+export type UpdateStorePayload = Partial<{
+  store_name: string;
+  description: string | null;
+  about: string | null;
+  theme_color: string;
+  secondary_color: string;
+  contact_email: string | null;
+  contact_phone: string | null;
+  whatsapp_phone: string | null;
+  website_url: string | null;
+  country: string | null;
+  region: string | null;
+  district: string | null;
+  ward: string | null;
+  street: string | null;
+  latitude: number | null;
+  longitude: number | null;
+  opening_time: string | null;
+  closing_time: string | null;
+  shipping_policy: string | null;
+  return_policy: string | null;
+  privacy_policy: string | null;
+  facebook_url: string | null;
+  instagram_url: string | null;
+  twitter_url: string | null;
+  tiktok_url: string | null;
+  youtube_url: string | null;
+  vacation_mode: boolean;
+  accept_orders: boolean;
+  processing_days: number;
+  seo_title: string | null;
+  seo_description: string | null;
+}>;
