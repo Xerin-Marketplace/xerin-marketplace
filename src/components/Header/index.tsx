@@ -252,6 +252,10 @@ const Header = () => {
 
             <div className="flex w-full lg:w-auto justify-end items-center gap-4 sm:gap-5">
               <div className="flex items-center gap-4 sm:gap-5">
+                <div className="hidden lg:block">
+                  <CurrencySelector />
+                </div>
+
                 <button
                   onClick={toggleTheme}
                   className="flex items-center justify-center p-2 rounded-full hover:bg-gray-1 transition-colors"
