@@ -423,7 +423,7 @@ export default function SellerStoreSettings() {
               value={form.country}
               options={STORE_COUNTRIES.map((country) => ({ value: country.value, label: country.label }))}
               onChange={(value) => {
-                setForm({ ...form, country: value, region: "", district: "", ward: "" });
+                setForm((current) => ({ ...current, country: value, region: "", district: "", ward: "" }));
                 setRegionOptions([]);
                 setDistrictOptions([]);
                 setWardOptions([]);
@@ -437,7 +437,7 @@ export default function SellerStoreSettings() {
               loading={locationLoading}
               placeholder={scope === "local" ? "Select or type a region" : "Select or type a state / province"}
               onChange={(value) => {
-                setForm({ ...form, region: value, district: "", ward: "" });
+                setForm((current) => ({ ...current, region: value, district: "", ward: "" }));
                 setDistrictOptions([]);
                 setWardOptions([]);
               }}
@@ -451,20 +451,29 @@ export default function SellerStoreSettings() {
               disabled={!form.region}
               placeholder={scope === "local" ? "Select or type a district" : "Select or type a city"}
               onChange={(value) => {
-                setForm({ ...form, district: value, ward: "" });
+                setForm((current) => ({ ...current, district: value, ward: "" }));
                 setWardOptions([]);
               }}
             />
-            <LocationCombobox
-              id="store-ward"
-              label={scope === "local" ? "Ward" : "Area / Neighborhood"}
-              value={form.ward}
-              options={scope === "local" ? wardOptions : []}
-              loading={scope === "local" && locationLoading}
-              disabled={scope === "local" && !form.district}
-              placeholder={scope === "local" ? "Select or type a ward" : "Type area / neighborhood"}
-              onChange={(value) => setForm({ ...form, ward: value })}
-            />
+            {scope === "local" ? (
+              <LocationCombobox
+                id="store-ward"
+                label="Ward"
+                value={form.ward}
+                options={wardOptions}
+                loading={locationLoading}
+                disabled={!form.district}
+                placeholder="Select or type a ward"
+                onChange={(value) => setForm((current) => ({ ...current, ward: value }))}
+              />
+            ) : (
+              <Field
+                label="Area / Neighborhood"
+                value={form.ward}
+                onChange={(value) => setForm((current) => ({ ...current, ward: value }))}
+                placeholder="Type the full area or neighborhood name"
+              />
+            )}
             <div className="md:col-span-2">
               <Field label="Street / physical address" value={form.street} onChange={(value) => setForm({ ...form, street: value })} placeholder="Building, road, block, shop number..." />
             </div>
