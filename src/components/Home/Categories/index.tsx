@@ -547,9 +547,9 @@ const Categories = () => {
                       );
                     })()}
 
-                    <p className="mt-2 hidden line-clamp-2 min-h-[40px] text-sm leading-5 text-dark-4 dark:text-darkTheme-secondary-muted sm:block">
+                    {/* <p className="mt-2 hidden line-clamp-2 min-h-[40px] text-sm leading-5 text-dark-4 dark:text-darkTheme-secondary-muted sm:block">
                       {product.description || "Seller-listed product available in the marketplace."}
-                    </p>
+                    </p> */}
 
                     <div className="mt-3 hidden items-center justify-between gap-3 text-xs text-dark-4 dark:text-darkTheme-secondary-muted sm:flex">
                       <span className="truncate">SKU: {product.sku}</span>
