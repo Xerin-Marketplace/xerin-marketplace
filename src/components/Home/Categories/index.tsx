@@ -551,13 +551,31 @@ const Categories = () => {
                       {product.description || "Seller-listed product available in the marketplace."}
                     </p> */}
 
-                    <div className="mt-3 hidden items-center justify-between gap-3 text-xs text-dark-4 dark:text-darkTheme-secondary-muted sm:flex">
+                    {/* <div className="mt-3 hidden items-center justify-between gap-3 text-xs text-dark-4 dark:text-darkTheme-secondary-muted sm:flex">
                       <span className="truncate">SKU: {product.sku}</span>
                       {typeof product.review_count === "number" && product.review_count > 0 && (
                         <span>{product.review_count} review{product.review_count === 1 ? "" : "s"}</span>
                       )}
-                    </div>
+                    </div> */}
 
+                    {(() => {
+                      const store = storeById.get(String(product.store_id));
+                      const country = normalizedCountry(store?.country);
+                      const flag = country
+                        ? flagForCountry(country)
+                        : store?.store_scope === "local"
+                          ? "🇹🇿"
+                          : "🌍";
+                      const region = String(store?.region || "").trim();
+
+                      return (
+                        <div className="mt-1.5 hidden min-w-0 items-center gap-1.5 text-xs text-dark-4 dark:text-darkTheme-secondary-muted sm:flex">
+                          {/* <span className="shrink-0" aria-hidden="true">{flag}</span> */}
+                          <span className="shrink-0 font-medium text-dark dark:text-white">Region:</span>
+                          <span className="truncate">{region || "Not configured"}</span>
+                        </div>
+                      );
+                    })()}
                     <div className="mt-2 flex items-end justify-between gap-2 border-t border-gray-3 pt-2 dark:border-darkTheme-border-color sm:mt-4 sm:gap-3 sm:pt-4">
                       <div>
                         <p className="hidden text-xs text-dark-4 dark:text-darkTheme-secondary-muted sm:block">Price</p>
@@ -572,7 +590,6 @@ const Categories = () => {
                           )}
                         </div>
                       </div>
-
                       <Link
                         href={`/products/${product.id}`}
                         className="hidden items-center justify-center rounded-lg bg-dark px-4 py-2.5 text-xs font-semibold text-white transition hover:bg-orange dark:bg-white dark:text-dark dark:hover:bg-orange dark:hover:text-white sm:inline-flex"
