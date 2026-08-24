@@ -208,6 +208,15 @@ function AdvertisementManager({
           >
             + New Advertisement
           </button>
+
+          <button
+            type="button"
+            onClick={() => setEditor("new")}
+            className="inline-flex h-11 items-center justify-center rounded-xl bg-[#111827] px-5 text-sm font-bold text-white transition hover:bg-[#f47524]"
+          >
+            + Logistics Partnership
+          </button>
+          
         </div>
 
         <div className="grid gap-px bg-slate-200 sm:grid-cols-5 dark:bg-white/10">
