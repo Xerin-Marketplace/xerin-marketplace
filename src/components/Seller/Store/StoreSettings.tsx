@@ -24,6 +24,7 @@ import {
   useUploadStoreLogoById,
 } from "@/hooks/useStore";
 import { authStorage } from "@/lib/auth/storage";
+import { API_BASE_URL } from "@/lib/api/endpoints";
 import type { CreateStorePayload, Store } from "@/types/api/store";
 import {
   STORE_COUNTRIES,
@@ -74,6 +75,49 @@ function predictedScope(country: string): "local" | "global" {
   return TANZANIA_NAMES.has(country.trim().toLowerCase()) ? "local" : "global";
 }
 
+
+function resolveStoreMediaUrl(value?: string | null): string {
+  if (!value) return "";
+  if (/^(https?:|data:|blob:)/i.test(value)) {
+    try {
+      const absolute = new URL(value);
+      if (absolute.pathname.startsWith("/api/v1/uploads/")) {
+        absolute.pathname = absolute.pathname.replace("/api/v1/uploads/", "/uploads/");
+        return absolute.toString();
+      }
+    } catch {
+      // Keep the original absolute value if URL parsing fails.
+    }
+    return value;
+  }
+
+  if (API_BASE_URL.startsWith("/")) {
+    if (value.startsWith("/uploads/")) {
+      return value.replace(/^\/uploads\//, "/backend-uploads/");
+    }
+    if (value.startsWith("uploads/")) {
+      return `/backend-uploads/${value.replace(/^uploads\//, "")}`;
+    }
+    return value;
+  }
+
+  try {
+    const api = new URL(API_BASE_URL);
+    const apiOrigin = api.origin;
+
+    if (value.startsWith("/uploads/")) {
+      return `${apiOrigin}${value}`;
+    }
+    if (value.startsWith("uploads/")) {
+      return `${apiOrigin}/${value}`;
+    }
+
+    return `${apiOrigin}/${value.replace(/^\//, "")}`;
+  } catch {
+    return value;
+  }
+}
+
 function formFromStore(store: Store): StoreFormState {
   return {
     store_name: store.store_name || "",
@@ -110,6 +154,7 @@ export default function SellerStoreSettings() {
   const [wardOptions, setWardOptions] = useState<string[]>([]);
   const [locationLoading, setLocationLoading] = useState(false);
   const [locationError, setLocationError] = useState<string | null>(null);
+  const [createLogoFile, setCreateLogoFile] = useState<File | null>(null);
 
   const selectedStore = useMemo(
     () => stores.find((store) => String(store.id) === selectedStoreId) ?? null,
@@ -257,11 +302,13 @@ export default function SellerStoreSettings() {
 
   function openCreate() {
     setSelectedStoreId(null);
+    setCreateLogoFile(null);
     setForm(EMPTY_FORM);
     setMode("create");
   }
 
   function openEdit(store: Store) {
+    setCreateLogoFile(null);
     setSelectedStoreId(String(store.id));
     setForm(formFromStore(store));
     setMode("edit");
@@ -270,6 +317,7 @@ export default function SellerStoreSettings() {
   function backToStores() {
     setMode("list");
     setSelectedStoreId(null);
+    setCreateLogoFile(null);
     setForm(EMPTY_FORM);
   }
 
@@ -301,9 +349,25 @@ export default function SellerStoreSettings() {
           street: form.street.trim() || null,
         };
         const created = await createStore.mutateAsync(payload);
-        toast.success("Store created successfully.");
-        setSelectedStoreId(String(created.id));
-        setMode("edit");
+
+        let logoUploaded = false;
+        if (createLogoFile) {
+          try {
+            await uploadLogo.mutateAsync({ storeId: String(created.id), file: createLogoFile });
+            logoUploaded = true;
+          } catch (logoError) {
+            toast.error(apiErrorMessage(logoError, "Store was created, but the logo could not be uploaded. You can upload it from Manage Store."));
+          }
+        }
+
+        await refetch();
+        setSelectedStoreId(null);
+        setCreateLogoFile(null);
+        setForm(EMPTY_FORM);
+        setMode("list");
+        router.replace("/seller/store");
+        router.refresh();
+        toast.success(logoUploaded ? "Store and logo created successfully." : "Store created successfully.");
         return;
       }
 
@@ -355,7 +419,7 @@ export default function SellerStoreSettings() {
   }
 
   const scope = mode === "edit" && selectedStore ? selectedStore.store_scope : predictedScope(form.country);
-  const saving = createStore.isPending || updateStore.isPending;
+  const saving = createStore.isPending || updateStore.isPending || uploadLogo.isPending;
 
   return (
     <div className="mx-auto max-w-[1280px] space-y-6">
@@ -488,6 +552,12 @@ export default function SellerStoreSettings() {
           </p>
         </Section>
 
+        {mode === "create" && (
+          <Section icon={ImageIcon} title="Store Logo" description="Choose a logo for this store. It will be uploaded automatically after the store is created.">
+            <CreateLogoPicker file={createLogoFile} onSelect={setCreateLogoFile} />
+          </Section>
+        )}
+
         {mode === "edit" && selectedStore && (
           <Section icon={ImageIcon} title="Store Media" description="Upload a logo and banner specifically for this store.">
             <div className="grid gap-6 md:grid-cols-2">
@@ -571,13 +641,13 @@ function StoreCard({ store, onEdit }: { store: Store; onEdit: () => void }) {
   return (
     <article className="overflow-hidden rounded-2xl border border-[#e2e8f0] bg-white shadow-sm dark:border-white/10 dark:bg-[#1f2937]">
       <div className="relative h-28 bg-[#f8fafc] dark:bg-white/5">
-        {store.banner_url ? <img src={store.banner_url} alt="" className="h-full w-full object-cover" /> : <div className="flex h-full items-center justify-center text-[#cbd5e1]"><ImageIcon size={32} /></div>}
+        {store.banner_url ? <img src={resolveStoreMediaUrl(store.banner_url)} alt={`${store.store_name} banner`} className="h-full w-full object-cover" /> : <div className="flex h-full items-center justify-center text-[#cbd5e1]"><ImageIcon size={32} /></div>}
         <div className="absolute right-3 top-3"><ScopeBadge scope={store.store_scope} /></div>
       </div>
       <div className="p-5">
         <div className="flex items-start gap-3">
           <div className="flex h-12 w-12 shrink-0 items-center justify-center overflow-hidden rounded-xl border border-[#e2e8f0] bg-white dark:border-white/10 dark:bg-[#111827]">
-            {store.logo_url ? <img src={store.logo_url} alt={`${store.store_name} logo`} className="h-full w-full object-cover" /> : <StoreIcon size={22} className="text-[#f7941d]" />}
+            {store.logo_url ? <img src={resolveStoreMediaUrl(store.logo_url)} alt={`${store.store_name} logo`} className="h-full w-full object-cover" /> : <StoreIcon size={22} className="text-[#f7941d]" />}
           </div>
           <div className="min-w-0 flex-1">
             <h3 className="truncate font-bold">{store.store_name}</h3>
@@ -696,12 +766,56 @@ function Field({ label, value, onChange, disabled, required, type = "text", plac
   );
 }
 
+function CreateLogoPicker({ file, onSelect }: { file: File | null; onSelect: (file: File | null) => void }) {
+  return (
+    <div>
+      <p className="mb-2 text-sm font-semibold">Store logo</p>
+      <div className="flex h-32 w-32 items-center justify-center overflow-hidden rounded-xl border border-dashed border-[#cbd5e1] bg-[#f8fafc] dark:border-white/15 dark:bg-white/5">
+        <ImageIcon size={32} className="text-[#94a3b8]" />
+      </div>
+
+      {file && (
+        <div className="mt-3 max-w-md rounded-xl border border-emerald-200 bg-emerald-50 px-4 py-3 text-sm dark:border-emerald-500/30 dark:bg-emerald-500/10">
+          <p className="font-semibold text-emerald-800 dark:text-emerald-200">Logo selected</p>
+          <p className="mt-1 truncate text-xs text-emerald-700 dark:text-emerald-300">{file.name}</p>
+        </div>
+      )}
+
+      <div className="mt-3 flex flex-wrap gap-2">
+        <label className="inline-block">
+          <input
+            type="file"
+            accept="image/jpeg,image/png,image/webp"
+            onChange={(event) => onSelect(event.target.files?.[0] ?? null)}
+            className="hidden"
+          />
+          <span className="inline-flex cursor-pointer items-center gap-2 rounded-xl border border-[#e2e8f0] px-4 py-2 text-sm font-semibold dark:border-white/10">
+            {file ? "Change logo" : "Choose logo"}
+          </span>
+        </label>
+
+        {file && (
+          <button
+            type="button"
+            onClick={() => onSelect(null)}
+            className="rounded-xl border border-[#e2e8f0] px-4 py-2 text-sm font-semibold text-[#64748b] dark:border-white/10"
+          >
+            Remove
+          </button>
+        )}
+      </div>
+
+      <p className="mt-2 text-xs text-[#64748b]">Accepted formats: JPG, PNG or WebP. The file uploads after the store is created.</p>
+    </div>
+  );
+}
+
 function FileUploader({ label, currentUrl, onUpload, uploading, ratio }: { label: string; currentUrl: string | null; onUpload: (file: File) => void; uploading: boolean; ratio: "square" | "wide" }) {
   return (
     <div>
       <p className="mb-2 text-sm font-semibold">{label}</p>
       <div className={`flex items-center justify-center overflow-hidden rounded-xl border border-dashed border-[#cbd5e1] bg-[#f8fafc] dark:border-white/15 dark:bg-white/5 ${ratio === "wide" ? "h-32 w-full" : "h-32 w-32"}`}>
-        {currentUrl ? <img src={currentUrl} alt={label} className="h-full w-full object-cover" /> : <ImageIcon size={32} className="text-[#94a3b8]" />}
+        {currentUrl ? <img src={resolveStoreMediaUrl(currentUrl)} alt={label} className="h-full w-full object-cover" /> : <ImageIcon size={32} className="text-[#94a3b8]" />}
       </div>
       <label className="mt-2 inline-block">
         <input type="file" accept="image/jpeg,image/png,image/webp" disabled={uploading} onChange={(event) => event.target.files?.[0] && onUpload(event.target.files[0])} className="hidden" />
