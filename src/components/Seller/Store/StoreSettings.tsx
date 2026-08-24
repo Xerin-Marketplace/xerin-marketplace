@@ -635,23 +635,37 @@ function SelectField({ label, value, options, onChange, required }: { label: str
 
 function LocationCombobox({ id, label, value, options, onChange, placeholder, disabled, loading }: { id: string; label: string; value: string; options: string[]; onChange: (value: string) => void; placeholder?: string; disabled?: boolean; loading?: boolean }) {
   const values = value && !options.includes(value) ? [value, ...options] : options;
+  const hasDropdownOptions = values.length > 0;
+
   return (
-    <label className="block text-sm font-semibold">
+    <label className="block text-sm font-semibold" htmlFor={id}>
       {label}
       <div className="relative mt-2">
-        <input
-          list={`${id}-options`}
-          value={value}
-          disabled={disabled}
-          placeholder={loading ? "Loading locations..." : placeholder}
-          onChange={(event) => onChange(event.target.value)}
-          className="w-full rounded-xl border border-[#e2e8f0] bg-[#f8fafc] px-4 py-3 pr-10 font-normal outline-none focus:border-[#f7941d] disabled:cursor-not-allowed disabled:opacity-60 dark:border-white/10 dark:bg-white/5"
-        />
-        {loading && <Loader2 size={16} className="absolute right-3 top-3.5 animate-spin text-[#f7941d]" />}
+        {hasDropdownOptions ? (
+          <select
+            id={id}
+            value={value}
+            disabled={disabled || loading}
+            onChange={(event) => onChange(event.target.value)}
+            className="w-full appearance-auto rounded-xl border border-[#e2e8f0] bg-[#f8fafc] px-4 py-3 pr-10 font-normal outline-none focus:border-[#f7941d] disabled:cursor-not-allowed disabled:opacity-60 dark:border-white/10 dark:bg-white/5"
+          >
+            <option value="">{loading ? "Loading locations..." : placeholder || "Select location"}</option>
+            {values.map((option) => (
+              <option key={option} value={option}>{option}</option>
+            ))}
+          </select>
+        ) : (
+          <input
+            id={id}
+            value={value}
+            disabled={disabled}
+            placeholder={loading ? "Loading locations..." : placeholder}
+            onChange={(event) => onChange(event.target.value)}
+            className="w-full rounded-xl border border-[#e2e8f0] bg-[#f8fafc] px-4 py-3 pr-10 font-normal outline-none focus:border-[#f7941d] disabled:cursor-not-allowed disabled:opacity-60 dark:border-white/10 dark:bg-white/5"
+          />
+        )}
+        {loading && <Loader2 size={16} className="pointer-events-none absolute right-3 top-3.5 animate-spin text-[#f7941d]" />}
       </div>
-      <datalist id={`${id}-options`}>
-        {values.map((option) => <option key={option} value={option} />)}
-      </datalist>
     </label>
   );
 }

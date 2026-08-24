@@ -14,68 +14,59 @@ export const STORE_COUNTRIES: StoreCountryOption[] = [
   { value: "United Kingdom", label: "United Kingdom", scope: "global", apiCountry: "United Kingdom" },
 ];
 
-const TZ_GEO_BASE = "https://tzgeodata.vercel.app/api/v1";
-const COUNTRIES_NOW_BASE = "https://countriesnow.space/api/v0.1/countries";
+// The browser only talks to our own Next.js route. This avoids CORS/browser
+// restrictions from third-party geography services.
+const LOCATION_PROXY = "/api/store-locations";
 
-async function getJson<T>(url: string): Promise<T> {
-  const response = await fetch(url, { headers: { Accept: "application/json" } });
-  if (!response.ok) throw new Error(`Location service returned ${response.status}`);
-  return response.json() as Promise<T>;
+async function getProxyLocations(params: Record<string, string>): Promise<string[]> {
+  const query = new URLSearchParams(params);
+  const response = await fetch(`${LOCATION_PROXY}?${query.toString()}`, {
+    method: "GET",
+    headers: { Accept: "application/json" },
+    cache: "no-store",
+  });
+
+  if (!response.ok) {
+    let detail = `Location service returned ${response.status}`;
+    try {
+      const body = await response.json();
+      if (body?.detail) detail = body.detail;
+    } catch {
+      // keep default message
+    }
+    throw new Error(detail);
+  }
+
+  const body = (await response.json()) as { locations?: string[] };
+  return normalize(body.locations ?? []);
 }
 
 export async function getTanzaniaRegions(): Promise<string[]> {
-  const payload = await getJson<{ regions?: string[] }>(`${TZ_GEO_BASE}/regions/`);
-  return normalize(payload.regions ?? []);
+  return getProxyLocations({ scope: "local", level: "regions" });
 }
 
 export async function getTanzaniaDistricts(region: string): Promise<string[]> {
   if (!region) return [];
-  const payload = await getJson<{ districts?: string[] }>(
-    `${TZ_GEO_BASE}/regions/${encodeURIComponent(region)}/districts/`,
-  );
-  return normalize(payload.districts ?? []);
+  return getProxyLocations({ scope: "local", level: "districts", region });
 }
 
 export async function getTanzaniaWards(district: string): Promise<string[]> {
   if (!district) return [];
-  const payload = await getJson<{ wards?: string[] }>(
-    `${TZ_GEO_BASE}/districts/${encodeURIComponent(district)}/wards/`,
-  );
-  return normalize(payload.wards ?? []);
+  return getProxyLocations({ scope: "local", level: "wards", district });
 }
-
-type CountriesNowStatesResponse = {
-  error?: boolean;
-  data?: {
-    states?: Array<{ name?: string }>;
-  };
-};
-
-type CountriesNowCitiesResponse = {
-  error?: boolean;
-  data?: string[];
-};
 
 export async function getGlobalStates(country: string): Promise<string[]> {
   if (!country) return [];
   const option = STORE_COUNTRIES.find((item) => item.value === country);
   const apiCountry = option?.apiCountry ?? country;
-  const payload = await getJson<CountriesNowStatesResponse>(
-    `${COUNTRIES_NOW_BASE}/states/q?country=${encodeURIComponent(apiCountry)}`,
-  );
-  if (payload.error) return [];
-  return normalize((payload.data?.states ?? []).map((item) => item.name ?? ""));
+  return getProxyLocations({ scope: "global", level: "states", country: apiCountry });
 }
 
 export async function getGlobalCities(country: string, state: string): Promise<string[]> {
   if (!country || !state) return [];
   const option = STORE_COUNTRIES.find((item) => item.value === country);
   const apiCountry = option?.apiCountry ?? country;
-  const payload = await getJson<CountriesNowCitiesResponse>(
-    `${COUNTRIES_NOW_BASE}/state/cities/q?country=${encodeURIComponent(apiCountry)}&state=${encodeURIComponent(state)}`,
-  );
-  if (payload.error) return [];
-  return normalize(payload.data ?? []);
+  return getProxyLocations({ scope: "global", level: "cities", country: apiCountry, state });
 }
 
 function normalize(values: string[]) {
