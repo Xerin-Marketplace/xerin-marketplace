@@ -32,6 +32,7 @@ export default function CurrencyFxManagement() {
   const [editingCurrencyId, setEditingCurrencyId] = useState<string | null>(null);
   const [currencyForm, setCurrencyForm] = useState({ code: "", name: "", symbol: "", decimal_places: 2 });
   const [rateForm, setRateForm] = useState({ base_currency: "USD", rate: "", source: "Admin configured" });
+  const [replacingRateId, setReplacingRateId] = useState<string | null>(null);
 
   const load = useCallback(async () => {
     setLoading(true);
@@ -139,6 +140,27 @@ export default function CurrencyFxManagement() {
     }
   }
 
+  function startNewRate() {
+    setReplacingRateId(null);
+    setRateForm((current) => ({ ...current, rate: "", source: "Admin configured" }));
+    setShowRateForm(true);
+  }
+
+  function startChangeRate(rate: AdminFxRate) {
+    setReplacingRateId(rate.id);
+    setRateForm({
+      base_currency: rate.base_currency,
+      rate: String(rate.rate),
+      source: rate.source || "Admin configured",
+    });
+    setShowRateForm(true);
+    setError("");
+    setMessage("");
+    window.setTimeout(() => {
+      document.getElementById("fx-rate-form")?.scrollIntoView({ behavior: "smooth", block: "center" });
+    }, 0);
+  }
+
   async function submitRate(event: FormEvent) {
     event.preventDefault();
     const rate = Number(rateForm.rate);
@@ -154,9 +176,15 @@ export default function CurrencyFxManagement() {
         source: rateForm.source.trim() || "Admin configured",
         is_active: true,
       });
+      const wasReplacing = Boolean(replacingRateId);
       setRateForm((current) => ({ ...current, rate: "" }));
+      setReplacingRateId(null);
       setShowRateForm(false);
-      setMessage(`New ${rateForm.base_currency}/TZS rate activated successfully.`);
+      setMessage(
+        wasReplacing
+          ? `${rateForm.base_currency}/TZS rate changed successfully. The previous rate was kept as historical.`
+          : `New ${rateForm.base_currency}/TZS rate activated successfully.`,
+      );
       await load();
     } catch (error) {
       setError(errorMessage(error));
@@ -321,16 +349,21 @@ export default function CurrencyFxManagement() {
             <div className="flex items-center gap-2"><CircleDollarSign size={18} className="text-[#f47524]" /><h3 className="font-bold text-slate-900">Exchange rates to TZS</h3></div>
             <p className="mt-1 text-sm text-slate-500">Enter rates as “1 listing currency = X TZS”. Saving a new active rate automatically retires the previous active rate for that currency.</p>
           </div>
-          <button disabled={!activeListingCurrencies.length} onClick={() => setShowRateForm((value) => !value)} className="inline-flex h-10 items-center gap-2 rounded-xl bg-[#f47524] px-4 text-sm font-semibold text-white disabled:opacity-40"><Plus size={14}/> Set FX rate</button>
+          <button disabled={!activeListingCurrencies.length} onClick={startNewRate} className="inline-flex h-10 items-center gap-2 rounded-xl bg-[#f47524] px-4 text-sm font-semibold text-white disabled:opacity-40"><Plus size={14}/> Set FX rate</button>
         </div>
 
         {showRateForm && (
-          <form onSubmit={submitRate} className="mt-5 grid gap-3 rounded-xl border border-orange-100 bg-orange-50/40 p-4 sm:grid-cols-2 xl:grid-cols-5">
+          <form id="fx-rate-form" onSubmit={submitRate} className="mt-5 grid gap-3 rounded-xl border border-orange-100 bg-orange-50/40 p-4 sm:grid-cols-2 xl:grid-cols-5">
+            {replacingRateId && (
+              <div className="sm:col-span-2 xl:col-span-5 rounded-lg border border-blue-200 bg-blue-50 px-3 py-2 text-sm text-blue-800">
+                Change the amount below and save. The current rate will automatically become historical, and this new rate will become active.
+              </div>
+            )}
             <Field label="Listing currency"><select value={rateForm.base_currency} onChange={(e) => setRateForm((v) => ({ ...v, base_currency: e.target.value }))} className="field">{activeListingCurrencies.map((currency) => <option key={currency.id} value={currency.code}>{currency.code} — {currency.name}</option>)}</select></Field>
             <Field label="Settlement currency"><input value="TZS" disabled className="field bg-slate-100" /></Field>
             <Field label={`1 ${rateForm.base_currency || "currency"} equals`}><input type="number" min="0.00000001" step="0.00000001" value={rateForm.rate} onChange={(e) => setRateForm((v) => ({ ...v, rate: e.target.value }))} placeholder="2600" required className="field" /></Field>
             <Field label="Source / note"><input value={rateForm.source} onChange={(e) => setRateForm((v) => ({ ...v, source: e.target.value }))} placeholder="Admin configured" className="field" /></Field>
-            <div className="flex items-end"><button disabled={saving || !activeListingCurrencies.length} className="h-11 w-full rounded-xl bg-slate-900 px-4 text-sm font-semibold text-black disabled:opacity-50">{saving ? "Saving..." : "Activate rate"}</button></div>
+            <div className="flex items-end"><button disabled={saving || !activeListingCurrencies.length} className="h-11 w-full rounded-xl bg-slate-900 px-4 text-sm font-semibold text-black disabled:opacity-50">{saving ? "Saving..." : replacingRateId ? "Save new rate" : "Activate rate"}</button></div>
           </form>
         )}
 
@@ -354,6 +387,9 @@ export default function CurrencyFxManagement() {
                   <td className="px-4 py-4"><Badge active={rate.is_active}>{rate.is_active ? "Active" : "Historical"}</Badge></td>
                   <td className="px-4 py-4">
                     <div className="flex items-center gap-3">
+                      {rate.is_active && (
+                        <button disabled={saving} onClick={() => startChangeRate(rate)} className="text-sm font-semibold text-blue-700 disabled:opacity-50">Change rate</button>
+                      )}
                       <button disabled={saving} onClick={() => void toggleRate(rate)} className="text-sm font-semibold text-[#f47524] disabled:opacity-50">{rate.is_active ? "Deactivate" : "Activate"}</button>
                       <button disabled={saving || rate.is_active} onClick={() => void removeRate(rate)} title={rate.is_active ? "Deactivate before deleting" : "Delete historical rate"} className="inline-flex items-center gap-1 text-sm font-semibold text-red-600 disabled:cursor-not-allowed disabled:opacity-40"><Trash2 size={14}/> Delete</button>
                     </div>
