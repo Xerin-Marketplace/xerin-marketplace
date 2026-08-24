@@ -323,12 +323,21 @@ const ShopDetails = ({ product }: { product: Product }) => {
 
                   <h3 className="font-medium text-base sm:text-custom-1 mb-3 sm:mb-4.5">
                     <span className="text-sm sm:text-base text-dark dark:text-darkTheme-body-color">
-                      Price: <PriceDisplay amount={product.price} sourceCurrency={product.currency} />
+                      Price:{" "}
+                      <PriceDisplay
+                        amount={product.discountedPrice}
+                        sourceCurrency={product.currency}
+                      />
                     </span>
-                    <span className="line-through text-sm sm:text-base">
-                      {" "}
-                      <PriceDisplay amount={product.discountedPrice} sourceCurrency={product.currency} />{" "}
-                    </span>
+
+                    {product.price > product.discountedPrice && (
+                      <span className="ml-2 line-through text-sm sm:text-base text-gray-500">
+                        <PriceDisplay
+                          amount={product.price}
+                          sourceCurrency={product.currency}
+                        />
+                      </span>
+                    )}
                   </h3>
 
                   <ul className="flex flex-col gap-1.5 sm:gap-2">
