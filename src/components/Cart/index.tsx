@@ -1,5 +1,7 @@
 "use client";
 
+import { formatCurrency } from "@/lib/formatCurrency";
+
 import Breadcrumb from "@/components/Common/Breadcrumb";
 import Discount from "@/components/Cart/Discount";
 import {
