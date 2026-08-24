@@ -70,7 +70,7 @@ const Categories = () => {
   const [locationFilter, setLocationFilter] = useState<LocationFilter>("all");
   const [page, setPage] = useState(1);
 
-  const { data: publicStores = [] } = useQuery({
+  const { data: publicStores = [] } = useQuery<Store[]>({
     queryKey: ["public-stores", "landing-location-filter"],
     queryFn: listPublicStores,
     staleTime: 60_000,
@@ -100,8 +100,8 @@ const Categories = () => {
 
   const { data: categories = [] } = useCategories();
 
-  const storeById = useMemo(
-    () => new Map(publicStores.map((store) => [String(store.id), store] as const)),
+  const storeById = useMemo<Map<string, Store>>(
+    () => new Map<string, Store>(publicStores.map((store) => [String(store.id), store])),
     [publicStores],
   );
 
