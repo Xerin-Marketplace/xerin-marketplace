@@ -70,7 +70,7 @@ export async function getGlobalCities(country: string, state: string): Promise<s
 }
 
 function normalize(values: string[]) {
-  return [...new Set(values.map((value) => value.trim()).filter(Boolean))].sort((a, b) =>
+  return Array.from(new Set(values.map((value) => value.trim()).filter(Boolean))).sort((a, b) =>
     a.localeCompare(b),
   );
 }

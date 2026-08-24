@@ -91,7 +91,7 @@ const DISTRICT_ALIASES: Record<string, string[]> = {
 
 
 function normalize(values: string[]) {
-  return [...new Set(values.map((value) => String(value ?? "").trim()).filter(Boolean))]
+  return Array.from(new Set(values.map((value) => String(value ?? "").trim()).filter(Boolean)))
     .sort((a, b) => a.localeCompare(b));
 }
 
