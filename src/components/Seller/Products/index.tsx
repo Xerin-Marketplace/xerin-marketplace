@@ -4,6 +4,7 @@ import { ApiError } from "@/lib/api/client";
 import { API_BASE_URL } from "@/lib/api/endpoints";
 import { productsApi } from "@/lib/api/endpoints/products";
 import { sellersApi } from "@/lib/api/endpoints/sellers";
+import { storeApi } from "@/lib/api/endpoints/store";
 import { sellerInventoryApi } from "@/lib/api/endpoints/seller-inventory";
 import { authStorage } from "@/lib/auth/storage";
 import type {
@@ -13,6 +14,7 @@ import type {
   ProductImage,
   ProductRequest,
 } from "@/types/api/product";
+import type { Store } from "@/types/api/store";
 import type { SellerPricingPreviewResponse } from "@/types/api/seller";
 import {
   AlertCircle,
@@ -35,6 +37,7 @@ import {
   Send,
   ShoppingBag,
   Tag,
+  Store as StoreIcon,
   Trash2,
   UploadCloud,
   Warehouse,
@@ -93,6 +96,7 @@ const MAX_IMAGE_SIZE_BYTES = 5 * 1024 * 1024;
 const ALLOWED_IMAGE_TYPES = ["image/jpeg", "image/png", "image/webp"];
 
 const INITIAL_FORM: ProductRequest = {
+  store_id: "",
   category_id: "",
   brand_id: null,
   sku: "",
@@ -162,10 +166,12 @@ const SellerProducts = () => {
   const [products, setProducts] = useState<Product[]>([]);
   const [categories, setCategories] = useState<Category[]>([]);
   const [brands, setBrands] = useState<Brand[]>([]);
+  const [stores, setStores] = useState<Store[]>([]);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState("");
   const [search, setSearch] = useState("");
   const [statusFilter, setStatusFilter] = useState("all");
+  const [storeFilter, setStoreFilter] = useState("all");
 
   const [editorOpen, setEditorOpen] = useState(false);
   const [editingProduct, setEditingProduct] = useState<Product | null>(null);
@@ -195,15 +201,17 @@ const SellerProducts = () => {
     setError("");
 
     try {
-      const [items, categoryList, brandList] = await Promise.all([
+      const [items, categoryList, brandList, storeList] = await Promise.all([
         productsApi.getMyProducts(),
         productsApi.getCategories(),
         productsApi.getBrands(),
+        storeApi.listMyStores(),
       ]);
 
       setProducts(items);
       setCategories(categoryList);
       setBrands(brandList);
+      setStores(storeList);
     } catch (cause) {
       const message =
         cause instanceof ApiError
@@ -311,14 +319,18 @@ const SellerProducts = () => {
 
   const filteredProducts = useMemo(() => {
     return products.filter((product) => {
-      const category = categories.find((item) => item.id === product.category_id);
-      const brand = brands.find((item) => item.id === product.brand_id);
+      const category = categories.find((item) => String(item.id) === String(product.category_id));
+      const brand = brands.find((item) => String(item.id) === String(product.brand_id));
+      const store = stores.find((item) => String(item.id) === String(product.store_id));
       const haystack = [
         product.name,
         product.sku,
         product.status,
         category?.name,
         brand?.name,
+        store?.store_name,
+        store?.country,
+        store?.store_scope,
       ]
         .filter(Boolean)
         .join(" ")
@@ -328,10 +340,12 @@ const SellerProducts = () => {
         !search.trim() || haystack.includes(search.trim().toLowerCase());
       const matchesStatus =
         statusFilter === "all" || product.status === statusFilter;
+      const matchesStore =
+        storeFilter === "all" || String(product.store_id) === storeFilter;
 
-      return matchesSearch && matchesStatus;
+      return matchesSearch && matchesStatus && matchesStore;
     });
-  }, [brands, categories, products, search, statusFilter]);
+  }, [brands, categories, products, search, statusFilter, storeFilter, stores]);
 
   const counts = useMemo(
     () => ({
@@ -358,7 +372,10 @@ const SellerProducts = () => {
     clearSelectedImages();
     setEditorOpen(false);
     setEditingProduct(null);
-    setForm(INITIAL_FORM);
+    setForm({
+      ...INITIAL_FORM,
+      store_id: stores.length === 1 ? stores[0].id : "",
+    });
     setStockForm(INITIAL_STOCK_FORM);
     setPricingPreview(null);
     setPricingPreviewError("");
@@ -373,10 +390,19 @@ const SellerProducts = () => {
       return;
     }
 
+    if (!stores.length) {
+      toast.error("Create a store before adding a product.");
+      router.push("/seller/store");
+      return;
+    }
+
     clearSelectedImages();
     setEditingProduct(null);
     setExistingImages([]);
-    setForm(INITIAL_FORM);
+    setForm({
+      ...INITIAL_FORM,
+      store_id: stores.length === 1 ? stores[0].id : "",
+    });
     setStockForm(INITIAL_STOCK_FORM);
     setImageError("");
     setSubmitIntent("draft");
@@ -392,6 +418,7 @@ const SellerProducts = () => {
     clearSelectedImages();
     setEditingProduct(product);
     setForm({
+      store_id: product.store_id ?? "",
       category_id: product.category_id ?? "",
       brand_id: product.brand_id ?? null,
       sku: product.sku ?? "",
@@ -519,6 +546,10 @@ const SellerProducts = () => {
   }
 
   function validateForm() {
+    if (!form.store_id) return "Select the store this product belongs to.";
+    if (!stores.some((store) => String(store.id) === String(form.store_id))) {
+      return "Select one of your valid stores.";
+    }
     if (!form.category_id) return "Select a product category.";
     if (!form.name.trim()) return "Enter the product name.";
     if (!form.sku.trim()) return "Enter the product SKU.";
@@ -581,6 +612,7 @@ const SellerProducts = () => {
 
     const payload: ProductRequest = {
       ...form,
+      store_id: form.store_id,
       category_id: form.category_id,
       brand_id: form.brand_id || null,
       sku: form.sku.trim(),
@@ -706,6 +738,21 @@ const SellerProducts = () => {
   return (
     <>
       <div className="mx-auto max-w-[1500px] space-y-5">
+        {sellerApproved && stores.length === 0 && !loading && (
+          <div className="flex items-start justify-between gap-4 rounded-2xl border border-amber-200 bg-amber-50 p-5 text-amber-800">
+            <div className="flex items-start gap-3">
+              <StoreIcon size={20} className="mt-0.5 shrink-0" />
+              <div>
+                <p className="font-semibold">Create a store before listing products</p>
+                <p className="mt-1 text-sm leading-6">Every product must now belong to one of your stores.</p>
+              </div>
+            </div>
+            <button type="button" onClick={() => router.push("/seller/store")} className="shrink-0 rounded-xl bg-[#f7941d] px-4 py-2 text-sm font-semibold text-white">
+              My Stores
+            </button>
+          </div>
+        )}
+
         {!sellerApproved && (
           <div className="flex items-start gap-3 rounded-2xl border border-amber-200 bg-amber-50 p-5 text-amber-800">
             <AlertCircle size={20} className="mt-0.5 shrink-0" />
@@ -736,7 +783,7 @@ const SellerProducts = () => {
 
             <button
               type="button"
-              disabled={!sellerApproved}
+              disabled={!sellerApproved || stores.length === 0}
               onClick={openCreate}
               className="inline-flex h-11 items-center justify-center gap-2 rounded-xl bg-[#f7941d] px-5 text-sm font-semibold text-white shadow-[0_8px_20px_rgba(247,148,29,0.18)] transition hover:bg-[#e98716] disabled:cursor-not-allowed disabled:opacity-50"
             >
@@ -770,6 +817,19 @@ const SellerProducts = () => {
             </div>
 
             <div className="flex gap-2">
+              <select
+                value={storeFilter}
+                onChange={(event) => setStoreFilter(event.target.value)}
+                className="h-11 rounded-xl border border-[#e1e6ec] bg-white px-4 text-sm outline-none"
+              >
+                <option value="all">All stores</option>
+                {stores.map((store) => (
+                  <option key={String(store.id)} value={String(store.id)}>
+                    {store.store_name}
+                  </option>
+                ))}
+              </select>
+
               <select
                 value={statusFilter}
                 onChange={(event) => setStatusFilter(event.target.value)}
@@ -831,7 +891,10 @@ const SellerProducts = () => {
                   (item) => item.id === product.category_id,
                 );
                 const brand = brands.find(
-                  (item) => item.id === product.brand_id,
+                  (item) => String(item.id) === String(product.brand_id),
+                );
+                const productStore = stores.find(
+                  (item) => String(item.id) === String(product.store_id),
                 );
                 const editable = product.status !== "pending_review";
 
@@ -875,6 +938,18 @@ const SellerProducts = () => {
                         SKU: {product.sku}
                         {brand?.name ? ` · ${brand.name}` : ""}
                       </p>
+
+                      <div className="mt-3 flex items-center gap-2 rounded-xl border border-[#edf0f4] bg-slate-50 px-3 py-2 text-xs text-[#475569]">
+                        <StoreIcon size={14} className="shrink-0 text-[#f7941d]" />
+                        <span className="min-w-0 truncate font-semibold">
+                          {productStore?.store_name || "Assigned store"}
+                        </span>
+                        {productStore?.store_scope && (
+                          <span className="ml-auto rounded-full bg-white px-2 py-0.5 text-[9px] font-bold uppercase tracking-wide text-[#64748b]">
+                            {productStore.store_scope}
+                          </span>
+                        )}
+                      </div>
 
                       <div className="mt-4 grid grid-cols-2 gap-3">
                         <div className="rounded-xl bg-slate-50 p-3">
@@ -1026,6 +1101,33 @@ const SellerProducts = () => {
                   description="Choose the marketplace category and provide the basic product information."
                 >
                   <div className="grid gap-4 md:grid-cols-2">
+                    <div className="md:col-span-2">
+                      <Field
+                        label="Store"
+                        required
+                        hint="Choose the physical/source store where this product is listed and fulfilled from."
+                      >
+                        <select
+                          value={String(form.store_id || "")}
+                          onChange={(event) =>
+                            setForm((current) => ({
+                              ...current,
+                              store_id: event.target.value,
+                            }))
+                          }
+                          disabled={isSubmitting}
+                          className="input"
+                        >
+                          <option value="">Select store</option>
+                          {stores.map((store) => (
+                            <option key={String(store.id)} value={String(store.id)}>
+                              {store.store_name} — {store.district || store.region || store.country || "Location not set"} — {store.store_scope.toUpperCase()}
+                            </option>
+                          ))}
+                        </select>
+                      </Field>
+                    </div>
+
                     <Field label="Product category" required>
                       <select
                         value={String(form.category_id || "")}

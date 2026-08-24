@@ -2,8 +2,22 @@ import axiosInstance from "../client";
 import type { CreateStorePayload, Store, UpdateStorePayload } from "@/types/api/store";
 
 export const listMyStores = async (): Promise<Store[]> => {
-  const res = await axiosInstance.get<Store[]>("/stores/mine");
-  return res.data;
+  try {
+    const res = await axiosInstance.get<Store[]>("/stores/mine");
+    return Array.isArray(res.data) ? res.data : [];
+  } catch (error: any) {
+    const status = error?.response?.status;
+    const detail = String(error?.response?.data?.detail ?? error?.message ?? "").toLowerCase();
+
+    // Some deployed backend versions return 404 "Store not found" when an
+    // approved seller has not created a store yet. For the multi-store UI this
+    // is an empty collection, not a fatal page error.
+    if (status === 404 && detail.includes("store not found")) {
+      return [];
+    }
+
+    throw error;
+  }
 };
 
 export const createStore = async (payload: CreateStorePayload): Promise<Store> => {

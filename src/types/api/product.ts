@@ -64,6 +64,7 @@ export type ProductTag = {
 export type Product = TimestampFields & {
   id: ID;
   seller_id: ID;
+  store_id: ID;
   category_id: ID;
   brand_id: ID | null;
   sku: string;
@@ -102,6 +103,7 @@ export type Product = TimestampFields & {
 
 export type ProductListQuery = {
   search?: string;
+  store_id?: ID;
   category_id?: ID;
   brand_id?: ID;
   seller_id?: ID;
@@ -110,6 +112,7 @@ export type ProductListQuery = {
 };
 
 export type ProductRequest = {
+  store_id: ID;
   category_id: ID;
   brand_id?: ID | null;
   sku: string;
