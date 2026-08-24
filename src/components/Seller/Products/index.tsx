@@ -372,9 +372,15 @@ const SellerProducts = () => {
     clearSelectedImages();
     setEditorOpen(false);
     setEditingProduct(null);
+    const defaultCurrency =
+      listingCurrencies.find((currency) => currency.code === "TZS")?.code ??
+      listingCurrencies[0]?.code ??
+      "TZS";
+
     setForm({
       ...INITIAL_FORM,
       store_id: stores.length === 1 ? stores[0].id : "",
+      currency: defaultCurrency,
     });
     setStockForm(INITIAL_STOCK_FORM);
     setPricingPreview(null);
@@ -399,9 +405,15 @@ const SellerProducts = () => {
     clearSelectedImages();
     setEditingProduct(null);
     setExistingImages([]);
+    const defaultCurrency =
+      listingCurrencies.find((currency) => currency.code === "TZS")?.code ??
+      listingCurrencies[0]?.code ??
+      "TZS";
+
     setForm({
       ...INITIAL_FORM,
       store_id: stores.length === 1 ? stores[0].id : "",
+      currency: defaultCurrency,
     });
     setStockForm(INITIAL_STOCK_FORM);
     setImageError("");
@@ -1390,11 +1402,15 @@ const SellerProducts = () => {
                             currency: event.target.value,
                           }))
                         }
-                        disabled={isSubmitting}
+                        disabled={isSubmitting || listingCurrencies.length === 0}
                         className="input"
                       >
-                        <option value="TZS">TZS — Tanzanian Shilling</option>
-                        <option value="USD">USD — US Dollar</option>
+                        {listingCurrencies.length === 0 && <option value="">No active currencies configured</option>}
+                        {listingCurrencies.map((currency) => (
+                          <option key={currency.id} value={currency.code}>
+                            {currency.code} — {currency.name}
+                          </option>
+                        ))}
                       </select>
                     </Field>
 

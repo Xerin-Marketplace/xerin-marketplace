@@ -1,5 +1,15 @@
 import type { ID, TimestampFields } from "./common";
 
+
+export type ListingCurrency = {
+  id: string;
+  code: string;
+  name: string;
+  symbol: string;
+  decimal_places: number;
+  is_base: boolean;
+};
+
 export type ProductStatus =
   | "draft"
   | "pending_review"

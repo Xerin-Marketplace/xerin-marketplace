@@ -7,6 +7,7 @@ import type {
   Product,
   ProductImage,
   ProductImageRequest,
+  ListingCurrency,
   ProductListQuery,
   ProductRequest,
   ProductTag,
@@ -54,6 +55,12 @@ export const getMyProducts = async (query?: ProductListQuery | string | null): P
       images: await getMyProductImages(product.id).catch(() => []),
     })),
   );
+};
+
+
+export const getListingCurrencies = async (): Promise<ListingCurrency[]> => {
+  const res = await axiosInstance.get<ListingCurrency[]>("/products/listing-currencies");
+  return res.data;
 };
 
 export const getCategories = async (): Promise<Category[]> => {
@@ -213,6 +220,7 @@ export const productsApi = {
   getMyProducts,
   getCategories,
   getBrands,
+  getListingCurrencies,
   create: createProduct,
   update: updateProduct,
   delete: deleteProduct,

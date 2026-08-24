@@ -99,6 +99,20 @@ export type AdminFxRate = {
   source?:string|null; effective_at:string; is_active:boolean;
 };
 
+export type AdminCurrencyCreate = {
+  code:string; name:string; symbol:string; is_active?:boolean; decimal_places?:number;
+};
+
+export type AdminCurrencyUpdate = {
+  name?:string; symbol?:string; is_active?:boolean; decimal_places?:number;
+};
+
+export type AdminFxRateCreate = {
+  base_currency:string; quote_currency:"TZS"; rate:number; source?:string; is_active?:boolean;
+};
+
+export type AdminFxRateUpdate = { source?:string|null; is_active?:boolean };
+
 export type AdminCountry = {
   id:string; code:string; name:string; currency_code:string;
   is_active:boolean; payments_enabled:boolean; payouts_enabled:boolean;
@@ -830,6 +844,12 @@ export const listAdminRiskEvents = async (params:PaymentAdminParams={}) => listP
 export const listAdminReconciliation = async (params:PaymentAdminParams={}) => listPaymentResource<AdminReconciliation>("/admin/reconciliation",params);
 export const listAdminCurrencies = async (params:PaymentAdminParams={}) => listPaymentResource<AdminCurrency>("/admin/currencies",params);
 export const listAdminFxRates = async (params:PaymentAdminParams={}) => listPaymentResource<AdminFxRate>("/admin/fx-rates",params);
+export const createAdminCurrency = async (payload:AdminCurrencyCreate) => (await axiosInstance.post<AdminCurrency>("/admin/currencies",payload)).data;
+export const updateAdminCurrency = async (id:string,payload:AdminCurrencyUpdate) => (await axiosInstance.patch<AdminCurrency>(`/admin/currencies/${id}`,payload)).data;
+export const deleteAdminCurrency = async (id:string) => (await axiosInstance.delete<{message:string}>(`/admin/currencies/${id}`)).data;
+export const createAdminFxRate = async (payload:AdminFxRateCreate) => (await axiosInstance.post<AdminFxRate>("/admin/fx-rates",payload)).data;
+export const updateAdminFxRate = async (id:string,payload:AdminFxRateUpdate) => (await axiosInstance.patch<AdminFxRate>(`/admin/fx-rates/${id}`,payload)).data;
+export const deleteAdminFxRate = async (id:string) => (await axiosInstance.delete<{message:string}>(`/admin/fx-rates/${id}`)).data;
 export const listAdminCountries = async (params:PaymentAdminParams={}) => listPaymentResource<AdminCountry>("/admin/payment-countries",params);
 export const listAdminFeesCommissions = async (params:PaymentAdminParams={}) => listPaymentResource<AdminFeeCommission>("/admin/fees-commissions",params);
 export const refundAdminPayment = async (paymentId:string,reason:string) => (await axiosInstance.post<AdminPayment>(`/admin/payments/${paymentId}/refund`,{reason})).data;

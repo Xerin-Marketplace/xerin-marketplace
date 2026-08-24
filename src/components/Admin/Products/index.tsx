@@ -120,8 +120,8 @@ export default function AdminProducts(){
 <div className="border-t bg-white p-5">
 <p className="mb-3 text-xs text-gray-500">Approve only when the listing is complete and acceptable.</p>
 <div className="grid gap-3 sm:grid-cols-2">
-<button disabled={busy||detailLoading} onClick={()=>void approve()} className="rounded-xl bg-emerald-600 py-3 text-sm font-semibold text-white disabled:opacity-50">Approve Product</button>
-<button disabled={busy||detailLoading} onClick={()=>setRejectOpen(true)} className="rounded-xl bg-red-600 py-3 text-sm font-semibold text-white disabled:opacity-50">Reject Product</button>
+<button disabled={busy||detailLoading} onClick={()=>void approve()} className="rounded-xl bg-emerald-600 py-3 text-sm font-semibold text-black disabled:opacity-50">Approve Product</button>
+<button disabled={busy||detailLoading} onClick={()=>setRejectOpen(true)} className="rounded-xl bg-red-600 py-3 text-sm font-semibold text-black disabled:opacity-50">Reject Product</button>
 </div>
 </div>
 </aside>

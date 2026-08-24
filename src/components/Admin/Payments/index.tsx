@@ -3,15 +3,16 @@
 import { useEffect, useState } from "react";
 import {
   AlertTriangle, Banknote, BarChart3, ChevronLeft, ChevronRight,
-  CircleDollarSign, CreditCard, FileClock, Globe2, Landmark,
+  CircleDollarSign, CreditCard, FileClock, Landmark,
   RefreshCw, RotateCcw, Search, ShieldAlert, SlidersHorizontal,
   WalletCards,
 } from "lucide-react";
+import CurrencyFxManagement from "./CurrencyFxManagement";
 import {
-  type AdminCurrency, type AdminFxRate, type AdminPayment,
+  type AdminPayment,
   type AdminPaymentDashboard, type AdminPaymentMethod,
-  getAdminPaymentDashboard, listAdminCountries, listAdminCurrencies,
-  listAdminFailedPayments, listAdminFeesCommissions, listAdminFxRates,
+  getAdminPaymentDashboard, listAdminCountries,
+  listAdminFailedPayments, listAdminFeesCommissions,
   listAdminPaymentDisputes, listAdminPaymentMethods, listAdminPaymentProviders,
   listAdminPayments, listAdminPayouts, listAdminReconciliation,
   listAdminRefunds, listAdminRiskEvents, refundAdminPayment,
@@ -37,7 +38,7 @@ const titles: Record<PaymentView, [string,string,string]> = {
   failed:["Payment exceptions","Failed Payments","Investigate failed attempts and provider failure reasons."],
   risk:["Risk & compliance","Fraud & Risk","Review suspicious activity and payment risk events requiring attention."],
   reconciliation:["Financial control","Reconciliation","Compare Xerin records against provider amounts and references."],
-  currencies:["Currency management","Currencies & FX","Manage supported currencies and exchange rates for TZS and USD display."],
+  currencies:["Currency management","Currencies & FX","Manage listing currencies and administrator-controlled exchange rates while all settlement remains in TZS."],
   countries:["Market configuration","Countries","Control countries, currencies, collections and payouts enabled by the platform."],
   fees:["Marketplace economics","Fees & Commissions","Review gateway fees, marketplace commissions and seller deductions."],
   reports:["Financial intelligence","Payment Reports","Reporting workspace for collections, refunds, payouts and provider performance."],
@@ -87,10 +88,8 @@ export default function AdminPayments({view}:{view:PaymentView}) {
       else if(view==="reconciliation"){const r=await listAdminReconciliation(params);setRows(r.results);setTotal(r.total);setTotalPages(r.total_pages??Math.ceil(r.total/pageSize));}
       else if(view==="countries"){const r=await listAdminCountries(params);setRows(r.results);setTotal(r.total);setTotalPages(r.total_pages??Math.ceil(r.total/pageSize));}
       else if(view==="fees"){const r=await listAdminFeesCommissions(params);setRows(r.results);setTotal(r.total);setTotalPages(r.total_pages??Math.ceil(r.total/pageSize));}
-      else if(view==="currencies"){
-        const [c,fx]=await Promise.all([listAdminCurrencies({page:1,page_size:100,search:debounced||undefined}),listAdminFxRates({page:1,page_size:100,search:debounced||undefined})]);
-        setRows([...c.results,...fx.results]);setTotal(c.total+fx.total);setTotalPages(1);
-      }else{setBackendPending(true);setRows([]);setTotal(0);setTotalPages(0);}
+      else if(view==="currencies"){setRows([]);setTotal(0);setTotalPages(0);}
+      else{setBackendPending(true);setRows([]);setTotal(0);setTotalPages(0);}
     }catch(e){
       if(["reports","audit"].includes(view)){setBackendPending(true);setRows([]);setTotal(0);setTotalPages(0);}
       else setError(e instanceof Error?e.message:"Unable to load payment data");
@@ -118,15 +117,15 @@ export default function AdminPayments({view}:{view:PaymentView}) {
     {error&&<div className="rounded-xl border border-red-200 bg-red-50 p-4 text-sm text-red-700">{error}</div>}
     {view==="dashboard"?<DashboardView data={dashboard} loading={loading} pending={backendPending} failed={Boolean(error)}/>
     :view==="methods"?<MethodsView methods={methods} loading={loading}/>
+    :view==="currencies"?<CurrencyFxManagement/>
     :<>
-      {view==="currencies"&&<section className="rounded-2xl border border-slate-200 bg-white p-5 shadow-sm"><div className="flex gap-3"><span className="flex h-10 w-10 items-center justify-center rounded-xl bg-orange-50 text-[#f47524]"><Globe2 size={18}/></span><div><h3 className="font-bold text-slate-900">TZS ↔ USD architecture</h3><p className="mt-1 text-sm leading-6 text-slate-500">No exchange rate is hardcoded in the frontend. TZS/USD currencies and conversion rates are expected from backend currency and FX tables so the same rate can later be reused by product display, checkout, reports and seller settlement.</p></div></div></section>}
       {backendPending?<PendingNotice title={title}/>:<section className="overflow-hidden rounded-2xl border border-slate-200 bg-white shadow-sm">
         <div className="flex flex-col gap-3 border-b border-slate-100 p-5 md:flex-row">
           <div className="relative flex-1"><Search size={16} className="absolute left-3.5 top-1/2 -translate-y-1/2 text-slate-400"/><input value={query} onChange={e=>setQuery(e.target.value)} placeholder={`Search ${title.toLowerCase()}...`} className="h-11 w-full rounded-xl border border-slate-200 bg-slate-50 pl-10 pr-4 text-sm outline-none focus:border-orange-300"/></div>
-          {view!=="currencies"&&<select value={status} onChange={e=>{setStatus(e.target.value);setPage(1)}} className="h-11 rounded-xl border border-slate-200 bg-white px-4 text-sm"><option value="all">All statuses</option>{["pending","processing","completed","active","inactive","failed","refunded","resolved","closed"].map(v=><option key={v} value={v}>{pretty(v)}</option>)}</select>}
+          <select value={status} onChange={e=>{setStatus(e.target.value);setPage(1)}} className="h-11 rounded-xl border border-slate-200 bg-white px-4 text-sm"><option value="all">All statuses</option>{["pending","processing","completed","active","inactive","failed","refunded","resolved","closed"].map(v=><option key={v} value={v}>{pretty(v)}</option>)}</select>
         </div>
         <DataTable view={view} rows={rows} loading={loading} onReview={setSelected}/>
-        {!loading&&total>0&&view!=="currencies"&&<Pagination page={page} pageSize={pageSize} total={total} totalPages={totalPages} onPage={setPage} onPageSize={s=>{setPageSize(s);setPage(1)}}/>}
+        {!loading&&total>0&&<Pagination page={page} pageSize={pageSize} total={total} totalPages={totalPages} onPage={setPage} onPageSize={s=>{setPageSize(s);setPage(1)}}/>}
       </section>}
     </>}
 
@@ -160,12 +159,6 @@ function MethodsView({methods,loading}:{methods:AdminPaymentMethod[];loading:boo
 function DataTable({view,rows,loading,onReview}:{view:PaymentView;rows:GenericRow[];loading:boolean;onReview:(p:AdminPayment)=>void}) {
   if(loading)return <Loading text={`Loading ${titles[view][1].toLowerCase()}...`}/>;
   if(!rows.length)return <Empty text={`No ${titles[view][1].toLowerCase()} records found.`}/>;
-
-  if(view==="currencies"){
-    const currencies=rows.filter(r=>"is_base" in r) as AdminCurrency[];
-    const fx=rows.filter(r=>"base_currency" in r) as AdminFxRate[];
-    return <div className="p-5 space-y-6"><SimpleTable headers={["Currency","Symbol","Base","Status"]} rows={currencies.map(c=>[`${c.code} · ${c.name}`,c.symbol,c.is_base?"Base":"Quote",c.is_active?"Active":"Inactive"])}/><div><h3 className="font-bold">Exchange rate table</h3><p className="mt-1 text-xs text-slate-500">Rates come from backend configuration, not from hardcoded frontend values.</p><div className="mt-3"><SimpleTable headers={["Base","Quote","Rate","Source","Effective","Status"]} rows={fx.map(r=>[r.base_currency,r.quote_currency,String(r.rate),r.source||"Configured",new Date(r.effective_at).toLocaleString(),r.is_active?"Active":"Inactive"])}/></div></div></div>;
-  }
 
   if(["transactions","refunds","failed"].includes(view)){
     return <div className="overflow-x-auto"><table className="w-full min-w-[950px] text-left text-sm"><thead className="bg-slate-50 text-xs uppercase text-slate-500"><tr>{["Reference / Order","Customer","Method / Provider","Amount","Status","Created","Action"].map(h=><th key={h} className="px-5 py-3">{h}</th>)}</tr></thead><tbody className="divide-y">{(rows as AdminPayment[]).map(p=><tr key={p.id}><td className="px-5 py-4"><p className="font-semibold">{p.reference||`PAY-${p.id.slice(0,8)}`}</p><p className="text-xs text-slate-500">Order {p.order_number}</p></td><td className="px-5 py-4">{p.customer_name}<p className="text-xs text-slate-500">{p.customer_email}</p></td><td className="px-5 py-4">{pretty(p.method)}<p className="text-xs text-slate-500">{p.provider||"Direct"}</p></td><td className="px-5 py-4 font-semibold">{money(p.amount,p.currency)}</td><td className="px-5 py-4"><Status value={p.status}/></td><td className="px-5 py-4 text-slate-500">{new Date(p.created_at).toLocaleString()}</td><td className="px-5 py-4"><button onClick={()=>onReview(p)} className="font-semibold text-[#f47524]">Review</button></td></tr>)}</tbody></table></div>;
