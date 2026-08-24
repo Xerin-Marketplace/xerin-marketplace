@@ -13,6 +13,7 @@ import type {
   Product,
   ProductImage,
   ProductRequest,
+  ListingCurrency,
 } from "@/types/api/product";
 import type { Store } from "@/types/api/store";
 import type { SellerPricingPreviewResponse } from "@/types/api/seller";
@@ -167,6 +168,7 @@ const SellerProducts = () => {
   const [categories, setCategories] = useState<Category[]>([]);
   const [brands, setBrands] = useState<Brand[]>([]);
   const [stores, setStores] = useState<Store[]>([]);
+  const [listingCurrencies, setListingCurrencies] = useState<ListingCurrency[]>([]);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState("");
   const [search, setSearch] = useState("");
@@ -201,17 +203,19 @@ const SellerProducts = () => {
     setError("");
 
     try {
-      const [items, categoryList, brandList, storeList] = await Promise.all([
+      const [items, categoryList, brandList, storeList, currencyList] = await Promise.all([
         productsApi.getMyProducts(),
         productsApi.getCategories(),
         productsApi.getBrands(),
         storeApi.listMyStores(),
+        productsApi.getListingCurrencies(),
       ]);
 
       setProducts(items);
       setCategories(categoryList);
       setBrands(brandList);
       setStores(storeList);
+      setListingCurrencies(currencyList);
     } catch (cause) {
       const message =
         cause instanceof ApiError
