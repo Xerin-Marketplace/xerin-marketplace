@@ -3,6 +3,7 @@ import { toApiError } from "./errors";
 import { useAuthStore } from "@/store/useAuthStore";
 import { API_BASE_URL } from "./endpoints";
 import { announceSessionExpired } from "@/lib/reliability/runtime-events";
+import { authStorage } from "@/lib/auth/storage";
 
 let isRefreshing = false;
 type RefreshQueueItem = { resolve: (token: string | null) => void; reject: (error: unknown) => void };
@@ -11,8 +12,32 @@ let failedQueue: RefreshQueueItem[] = [];
 let axiosInstance: AxiosInstance;
 
 const expireSession = () => {
+  // Keep both auth persistence layers in sync. Some legacy dashboard code still
+  // reads authStorage directly while newer code reads the Zustand auth store.
+  authStorage.clearSession();
   useAuthStore.getState().clearSession();
   announceSessionExpired();
+};
+
+const persistRefreshedTokens = (accessToken: string, refreshToken?: string) => {
+  const state = useAuthStore.getState();
+  const nextRefreshToken = refreshToken || state.refreshToken || authStorage.getRefreshToken() || undefined;
+
+  state.setTokens({
+    access_token: accessToken,
+    refresh_token: nextRefreshToken,
+  });
+
+  // Preserve the currently cached user while replacing the tokens used by
+  // components that still call authStorage.getAccessToken()/getSession().
+  const storedSession = authStorage.getSession();
+  const user = state.user ?? storedSession?.user ?? authStorage.getUser();
+  authStorage.setSession({
+    access_token: accessToken,
+    refresh_token: nextRefreshToken,
+    token_type: "bearer",
+    ...(user ? { user } : {}),
+  });
 };
 
 const processQueue = (error: unknown, token: string | null = null) => {
@@ -69,7 +94,10 @@ export const setupInterceptors = (instance: AxiosInstance) => {
             failedQueue.push({ resolve, reject });
           })
             .then((token) => {
-              originalRequest.headers.Authorization = `Bearer ${token}`;
+              if (token) {
+                originalRequest.headers = originalRequest.headers ?? {};
+                originalRequest.headers.Authorization = `Bearer ${token}`;
+              }
               return axiosInstance(originalRequest);
             })
             .catch((err) => Promise.reject(err));
@@ -96,14 +124,16 @@ export const setupInterceptors = (instance: AxiosInstance) => {
           });
 
           const { access_token, refresh_token } = res.data;
-          useAuthStore.getState().setTokens({
-            access_token,
-            refresh_token,
-          });
+          if (!access_token) {
+            throw new Error("Refresh response did not include an access token");
+          }
+
+          persistRefreshedTokens(access_token, refresh_token);
 
           processQueue(null, access_token);
           isRefreshing = false;
 
+          originalRequest.headers = originalRequest.headers ?? {};
           originalRequest.headers.Authorization = `Bearer ${access_token}`;
           return axiosInstance(originalRequest);
         } catch (refreshError) {
