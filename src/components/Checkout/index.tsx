@@ -630,29 +630,81 @@ const Checkout = () => {
         `/order-success/${order.id}?payment_id=${payment.id}&payment=${payment.status}`,
       );
     } catch (error: unknown) {
+      type PendingOrderDetail = {
+        code?: string;
+        message?: string;
+        order_id?: string;
+        payment_id?: string;
+        retryable?: boolean;
+        payment_due_at?: string;
+        remaining_seconds?: number;
+        redirect_to?: string;
+      };
+
+      // `axiosInstance` response interceptor converts Axios errors into
+      // ApiError. ApiError exposes `status` and `data`; it no longer has
+      // `response.status` / `response.data`. Keep the Axios fallback as well so
+      // this checkout remains resilient if it is ever called without the
+      // interceptor.
       const candidate = error as {
+        status?: number;
+        data?: {
+          detail?: string | PendingOrderDetail;
+          message?: string;
+        };
         response?: {
           status?: number;
           data?: {
-            detail?:
-              | string
-              | {
-                  code?: string;
-                  message?: string;
-                  order_id?: string;
-                  payment_id?: string;
-                  retryable?: boolean;
-                };
+            detail?: string | PendingOrderDetail;
+            message?: string;
           };
         };
         message?: string;
       };
 
-      const detail = candidate.response?.data?.detail;
+      const status =
+        candidate.status ??
+        candidate.response?.status ??
+        0;
+
+      const errorData =
+        candidate.data ??
+        candidate.response?.data;
+
+      const detail = errorData?.detail;
       const detailMessage =
         typeof detail === "string"
           ? detail
           : detail?.message;
+
+      if (
+        status === 409 &&
+        typeof detail === "object" &&
+        detail?.code === "pending_order_exists" &&
+        detail?.order_id
+      ) {
+        const destination =
+          detail.redirect_to ||
+          `/order-success/${detail.order_id}`;
+
+        const seconds =
+          typeof detail.remaining_seconds === "number"
+            ? Math.max(0, Math.ceil(detail.remaining_seconds))
+            : null;
+
+        toast(
+          seconds !== null
+            ? `${
+                detailMessage ||
+                "You already have an active pending order for these items."
+              } Opening it now…`
+            : detailMessage ||
+                "You already have an active pending order for these items. Opening it now…",
+        );
+
+        router.replace(destination);
+        return;
+      }
 
       if (createdOrderId) {
         const retryable =

@@ -282,7 +282,7 @@ export default function PaymentFailedPage() {
                 View Order
               </Link>
               <Link
-                href="/shop-with-sidebar"
+                href="/"
                 className="inline-flex min-h-12 items-center justify-center rounded-xl border border-slate-200 px-4 font-semibold text-slate-700 dark:border-white/10 dark:text-white"
               >
                 {timedOut ? "Shop Again" : "Continue Shopping"}

@@ -319,4 +319,10 @@ export const paymentsApi = {
         { signal },
       )
     ).data,
+  verifyStatus: async (paymentId: string) =>
+    (
+      await axiosInstance.post<Payment>(
+        `/payments/${paymentId}/verify-status`,
+      )
+    ).data,
 };

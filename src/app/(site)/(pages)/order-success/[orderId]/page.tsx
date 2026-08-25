@@ -73,7 +73,25 @@ export default function OrderSuccessPage() {
     if (!quiet) setStatusLoading(true);
     setStatusError("");
     try {
-      const next = await paymentsApi.orderState(orderId);
+      let next = await paymentsApi.orderState(orderId);
+
+      // ZenoPay MNO is asynchronous. While an attempt is pending/processing,
+      // periodically ask Xerin backend to verify the provider's authoritative
+      // status as a fallback in case the webhook is delayed.
+      if (
+        next.latest_payment?.id &&
+        (next.latest_payment.provider || "").toLowerCase() === "zenopay" &&
+        ["pending", "processing"].includes(next.payment_status)
+      ) {
+        try {
+          await paymentsApi.verifyStatus(next.latest_payment.id);
+          next = await paymentsApi.orderState(orderId);
+        } catch {
+          // A delayed/unavailable status API must not turn an in-progress
+          // payment into a frontend failure. Keep the last known state.
+        }
+      }
+
       setPaymentState(next);
 
       if (next.payment_status === "completed") {
