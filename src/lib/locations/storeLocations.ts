@@ -3,15 +3,16 @@ export type StoreCountryOption = {
   label: string;
   scope: "local" | "global";
   apiCountry?: string;
+  countryCode: string;
 };
 
 export const STORE_COUNTRIES: StoreCountryOption[] = [
-  { value: "Tanzania", label: "Tanzania", scope: "local" },
-  { value: "United Arab Emirates", label: "United Arab Emirates (Dubai / UAE)", scope: "global", apiCountry: "United Arab Emirates" },
-  { value: "China", label: "China", scope: "global", apiCountry: "China" },
-  { value: "Turkey", label: "Turkey", scope: "global", apiCountry: "Turkey" },
-  { value: "United States", label: "United States of America", scope: "global", apiCountry: "United States" },
-  { value: "United Kingdom", label: "United Kingdom", scope: "global", apiCountry: "United Kingdom" },
+  { value: "Tanzania", label: "Tanzania", scope: "local", countryCode: "TZ" },
+  { value: "United Arab Emirates", label: "United Arab Emirates (Dubai / UAE)", scope: "global", apiCountry: "United Arab Emirates", countryCode: "AE" },
+  { value: "China", label: "China", scope: "global", apiCountry: "China", countryCode: "CN" },
+  { value: "Turkey", label: "Turkey", scope: "global", apiCountry: "Turkey", countryCode: "TR" },
+  { value: "United States", label: "United States of America", scope: "global", apiCountry: "United States", countryCode: "US" },
+  { value: "United Kingdom", label: "United Kingdom", scope: "global", apiCountry: "United Kingdom", countryCode: "GB" },
 ];
 
 // The browser only talks to our own Next.js route. This avoids CORS/browser

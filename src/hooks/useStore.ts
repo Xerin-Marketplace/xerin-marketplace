@@ -31,8 +31,19 @@ export const useUpdateStore = () => {
     mutationFn: ({ storeId, payload }: { storeId: string; payload: UpdateStorePayload }) =>
       storeApi.updateMyStoreById(storeId, payload),
     onSuccess: (store) => {
-      queryClient.invalidateQueries({ queryKey: MY_STORES_QUERY_KEY });
+      // Replace the edited store immediately in the My Stores collection so
+      // the list cannot briefly render stale address/GPS data after PATCH.
+      queryClient.setQueryData(
+        MY_STORES_QUERY_KEY,
+        (current: unknown) =>
+          Array.isArray(current)
+            ? current.map((item: any) =>
+                String(item?.id) === String(store.id) ? store : item,
+              )
+            : current,
+      );
       queryClient.setQueryData(["stores", "mine", store.id], store);
+      queryClient.invalidateQueries({ queryKey: MY_STORES_QUERY_KEY });
     },
   });
 };

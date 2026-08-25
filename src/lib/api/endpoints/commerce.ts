@@ -13,6 +13,7 @@ import type {
   ShippingOption,
   DeliveryCheckoutConfig,
   DeliveryMode,
+  DetectedDeliveryMode,
   CustomerOrderDetail,
   CustomerEscrowSummary,
   EligibleLogisticsResponse,
@@ -58,6 +59,13 @@ export const checkoutApi = {
         "/shipping/checkout-config",
       )
     ).data,
+
+  detectDeliveryMode: async (addressId: string, signal?: AbortSignal): Promise<DetectedDeliveryMode> =>
+    (await axiosInstance.post<DetectedDeliveryMode>(
+      "/shipping/detect-delivery-mode",
+      { address_id: addressId },
+      { signal },
+    )).data,
 
   eligibleLogistics: async (
     payload: { address_id: string; delivery_mode: DeliveryMode },

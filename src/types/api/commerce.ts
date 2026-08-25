@@ -49,6 +49,21 @@ export type GuestCartMergeResult = {
 
 export type DeliveryMode = "local" | "international";
 
+export type DetectedDeliveryMode = {
+  address_id: string;
+  destination_country: string;
+  delivery_mode: DeliveryMode;
+  route_types: Array<"domestic" | "cross_border" | string>;
+  international_delivery_allowed: boolean;
+  origins: Array<{
+    store_id: string;
+    store_name: string;
+    origin_country: string;
+    destination_country: string;
+    route_type: "domestic" | "cross_border";
+  }>;
+};
+
 export type DeliveryCheckoutConfig = {
   default_country: string;
   local_delivery_allowed: boolean;

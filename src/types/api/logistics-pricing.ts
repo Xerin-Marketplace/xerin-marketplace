@@ -1,3 +1,4 @@
+export type CountryOption = { code: string; name: string };
 export type LogisticsScope = "local" | "international" | "both";
 export type ShippingRateType = "flat" | "weight_based" | "free" | "per_km" | "base_plus_per_km" | "provider_quote";
 export type PricingStrategy = "farthest_seller" | "sum_individual";

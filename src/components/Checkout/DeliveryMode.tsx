@@ -1,100 +1,59 @@
 "use client";
 
-import { Globe2, MapPin, ShieldCheck } from "lucide-react";
-import type {
-  DeliveryCheckoutConfig,
-  DeliveryMode,
-} from "@/types/api/commerce";
+import { Globe2, Loader2, MapPin, ShieldCheck } from "lucide-react";
+import type { DeliveryCheckoutConfig, DetectedDeliveryMode, DeliveryMode } from "@/types/api/commerce";
 
 export default function DeliveryModeSelector({
   value,
-  onChange,
   config,
+  detected,
+  loading,
 }: {
   value: DeliveryMode;
-  onChange: (mode: DeliveryMode) => void;
   config?: DeliveryCheckoutConfig;
+  detected?: DetectedDeliveryMode;
+  loading?: boolean;
 }) {
-  const internationalAllowed =
-    Boolean(config?.international_delivery_allowed);
-
+  const crossBorder = value === "international";
   return (
     <section className="rounded-2xl border border-[#e7ebf0] bg-white p-5 shadow-sm dark:border-white/10 dark:bg-darkTheme-card sm:p-6">
-      <p className="text-xs font-bold uppercase tracking-[.14em] text-orange">
-        Customer Phase 4
-      </p>
-      <h2 className="mt-1 text-xl font-bold text-dark dark:text-white">
-        Choose Delivery Type
-      </h2>
+      <p className="text-xs font-bold uppercase tracking-[.14em] text-orange">Automatic delivery route</p>
+      <h2 className="mt-1 text-xl font-bold text-dark dark:text-white">Delivery Type</h2>
       <p className="mt-1 text-sm leading-6 text-dark-4">
-        Choose domestic delivery for Tanzania-only routes, or International /
-        Cross-border when a product must move between countries. A cross-border
-        order may still be delivered to a Tanzania address.
+        Xerin detects this automatically from the product store country and your selected delivery address.
       </p>
-
-      <div className="mt-5 grid gap-3 sm:grid-cols-2">
-        <button
-          type="button"
-          onClick={() => onChange("local")}
-          className={`rounded-2xl border p-4 text-left transition ${
-            value === "local"
-              ? "border-orange bg-orange/5 ring-2 ring-orange/10"
-              : "border-gray-3 dark:border-white/10"
-          }`}
-        >
+      <div className="mt-5 rounded-2xl border border-orange bg-orange/5 p-4 ring-2 ring-orange/10">
+        {loading ? (
+          <div className="flex items-center gap-2 text-sm font-semibold"><Loader2 className="animate-spin" size={17} /> Detecting delivery route…</div>
+        ) : (
           <div className="flex items-start gap-3">
-            <span className="flex h-10 w-10 items-center justify-center rounded-xl bg-orange/10 text-orange">
-              <MapPin size={18} />
+            <span className={`flex h-10 w-10 items-center justify-center rounded-xl ${crossBorder ? "bg-blue-50 text-blue-600" : "bg-orange/10 text-orange"}`}>
+              {crossBorder ? <Globe2 size={18} /> : <MapPin size={18} />}
             </span>
-            <div>
-              <p className="font-bold text-dark dark:text-white">
-                Local — Tanzania
-              </p>
+            <div className="min-w-0">
+              <p className="font-bold text-dark dark:text-white">{crossBorder ? "International / Cross-border" : "Domestic / Local"}</p>
               <p className="mt-1 text-xs leading-5 text-dark-4">
-                Choose an approved local logistics company and its delivery
-                service.
+                {crossBorder
+                  ? "At least one product store is in a different country from the delivery destination."
+                  : "All product stores are in the same country as the delivery destination."}
               </p>
-              {config?.cod_allowed && (
-                <span className="mt-2 inline-flex items-center gap-1 rounded-full bg-emerald-50 px-2.5 py-1 text-[10px] font-bold uppercase text-emerald-700">
-                  <ShieldCheck size={11} />
-                  COD may be available
+              {detected?.origins?.length ? (
+                <div className="mt-3 flex flex-wrap gap-2">
+                  {detected.origins.map((origin) => (
+                    <span key={origin.store_id} className="rounded-full bg-white px-2.5 py-1 text-[10px] font-bold text-slate-600 shadow-sm dark:bg-white/10 dark:text-white/70">
+                      {origin.store_name}: {origin.origin_country} → {origin.destination_country}
+                    </span>
+                  ))}
+                </div>
+              ) : null}
+              {!crossBorder && config?.cod_allowed && (
+                <span className="mt-3 inline-flex items-center gap-1 rounded-full bg-emerald-50 px-2.5 py-1 text-[10px] font-bold uppercase text-emerald-700">
+                  <ShieldCheck size={11} /> COD may be available
                 </span>
               )}
             </div>
           </div>
-        </button>
-
-        <button
-          type="button"
-          disabled={!internationalAllowed}
-          onClick={() => internationalAllowed && onChange("international")}
-          className={`rounded-2xl border p-4 text-left transition disabled:cursor-not-allowed disabled:opacity-50 ${
-            value === "international"
-              ? "border-orange bg-orange/5 ring-2 ring-orange/10"
-              : "border-gray-3 dark:border-white/10"
-          }`}
-        >
-          <div className="flex items-start gap-3">
-            <span className="flex h-10 w-10 items-center justify-center rounded-xl bg-blue-50 text-blue-600">
-              <Globe2 size={18} />
-            </span>
-            <div>
-              <p className="font-bold text-dark dark:text-white">
-                International / Cross-border
-              </p>
-              <p className="mt-1 text-xs leading-5 text-dark-4">
-                Use this when a product ships from another country, including
-                deliveries from UAE, China, Turkey, UK, USA and other countries
-                into Tanzania.
-              </p>
-              {!internationalAllowed && (
-                <span className="mt-2 inline-block rounded-full bg-slate-100 px-2.5 py-1 text-[10px] font-bold uppercase text-slate-500">
-                  Cross-border delivery disabled by marketplace
-                </span>
-              )}
-            </div>
-          </div>
-        </button>
+        )}
       </div>
     </section>
   );

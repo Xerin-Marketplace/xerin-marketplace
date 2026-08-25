@@ -109,7 +109,7 @@ const Checkout = () => {
   const router = useRouter();
   const [form, setForm] = useState<CheckoutForm>(initialForm);
   const [deliveryMode, setDeliveryMode] = useState<DeliveryMode>("local");
-  const [destinationCountry, setDestinationCountry] = useState("Tanzania");
+  const [destinationCountry, setDestinationCountry] = useState("");
   const [selectedAddressId, setSelectedAddressId] = useState("");
   const [selectedCompanyId, setSelectedCompanyId] = useState("");
   const [paymentProvider, setPaymentProvider] = useState("");
@@ -156,45 +156,22 @@ const Checkout = () => {
 
   const matchingAddresses = useMemo(
     () =>
-      addresses.filter((address) => {
-        if (deliveryMode === "local") {
-          return isTanzania(address.country);
-        }
-
-        if (!destinationCountry) {
-          return false;
-        }
-
-        return (
-          normalizeCountry(address.country).toLowerCase() ===
-          normalizeCountry(destinationCountry).toLowerCase()
-        );
-      }),
-    [addresses, deliveryMode, destinationCountry],
+      destinationCountry
+        ? addresses.filter(
+            (address) =>
+              normalizeCountry(address.country).toLowerCase() ===
+              normalizeCountry(destinationCountry).toLowerCase(),
+          )
+        : [],
+    [addresses, destinationCountry],
   );
 
   useEffect(() => {
-    if (deliveryMode === "local") {
-      if (destinationCountry !== "Tanzania") {
-        setDestinationCountry("Tanzania");
-      }
-      return;
-    }
-
-    if (destinationCountry) {
-      return;
-    }
-
+    if (destinationCountry || !addresses.length) return;
     const preferredAddress =
-      addresses.find((address) => address.is_default) ||
-      addresses[0];
-
-    setDestinationCountry(
-      preferredAddress
-        ? normalizeCountry(preferredAddress.country)
-        : "Tanzania",
-    );
-  }, [addresses, deliveryMode, destinationCountry]);
+      addresses.find((address) => address.is_default) || addresses[0];
+    setDestinationCountry(normalizeCountry(preferredAddress.country));
+  }, [addresses, destinationCountry]);
 
   useEffect(() => {
     const currentStillMatches = matchingAddresses.some(
@@ -224,6 +201,21 @@ const Checkout = () => {
     (address) => String(address.id) === selectedAddressId,
   );
 
+  const detectedDelivery = useQuery({
+    queryKey: ["checkout", "detected-delivery-mode", selectedAddressId, cart?.total],
+    queryFn: ({ signal }) => checkoutApi.detectDeliveryMode(selectedAddressId, signal),
+    enabled: Boolean(selectedAddressId && isAuthenticated && cartItems.length),
+    retry: false,
+  });
+
+  useEffect(() => {
+    const detected = detectedDelivery.data?.delivery_mode;
+    if (!detected || detected === deliveryMode) return;
+    setDeliveryMode(detected);
+    setSelectedCompanyId("");
+    setForm((current) => ({ ...current, shippingMethod: "" }));
+  }, [detectedDelivery.data, deliveryMode]);
+
   const eligibleLogistics = useQuery({
     queryKey: [
       "checkout",
@@ -239,7 +231,14 @@ const Checkout = () => {
         },
         signal,
       ),
-    enabled: Boolean(selectedAddressId && selectedAddress?.delivery_ready && isAuthenticated && cartItems.length),
+    enabled: Boolean(
+      selectedAddressId &&
+      selectedAddress?.delivery_ready &&
+      detectedDelivery.data &&
+      detectedDelivery.data.delivery_mode === deliveryMode &&
+      isAuthenticated &&
+      cartItems.length
+    ),
     retry: false,
   });
 
@@ -250,7 +249,12 @@ const Checkout = () => {
       logistics_company_id: selectedCompanyId,
       delivery_mode: deliveryMode,
     }, signal),
-    enabled: Boolean(selectedAddress?.delivery_ready && selectedCompanyId && cartItems.length),
+    enabled: Boolean(
+      selectedAddress?.delivery_ready &&
+      detectedDelivery.data?.delivery_mode === deliveryMode &&
+      selectedCompanyId &&
+      cartItems.length
+    ),
     retry: false,
   });
 
@@ -266,7 +270,12 @@ const Checkout = () => {
       rate_id: form.shippingMethod,
       delivery_mode: deliveryMode,
     }),
-    enabled: Boolean(selectedAddress?.delivery_ready && selectedCompanyId && form.shippingMethod),
+    enabled: Boolean(
+      selectedAddress?.delivery_ready &&
+      detectedDelivery.data?.delivery_mode === deliveryMode &&
+      selectedCompanyId &&
+      form.shippingMethod
+    ),
     retry: false,
     staleTime: 10 * 60 * 1000,
     refetchOnWindowFocus: false,
@@ -356,25 +365,6 @@ const Checkout = () => {
     setForm((prev) => ({ ...prev, [field]: value }));
   };
 
-  const changeDeliveryMode = (mode: DeliveryMode) => {
-    setDeliveryMode(mode);
-    setDestinationCountry(
-      mode === "local"
-        ? "Tanzania"
-        : normalizeCountry(
-            addresses.find((address) => address.is_default)?.country ||
-              addresses[0]?.country ||
-              "Tanzania",
-          ),
-    );
-    setSelectedAddressId("");
-    setSelectedCompanyId("");
-    setForm((current) => ({
-      ...current,
-      shippingMethod: "",
-    }));
-  };
-
   const changeCompany = (companyId: string) => {
     setSelectedCompanyId(companyId);
     setForm((current) => ({
@@ -391,16 +381,14 @@ const Checkout = () => {
       return;
     }
 
-    if (deliveryMode === "international" && !destinationCountry) {
-      toast.error("Choose the international destination country first");
+    if (!destinationCountry) {
+      toast.error("Choose the delivery destination country first");
       return;
     }
 
     if (!selectedAddressId) {
       toast.error(
-        deliveryMode === "local"
-          ? "Add or select a Tanzania delivery address"
-          : `Add or select a delivery address in ${destinationCountry}`,
+        `Add or select a delivery address in ${destinationCountry}`,
       );
       return;
     }
@@ -658,40 +646,34 @@ const Checkout = () => {
               <div className="min-w-0 space-y-4 sm:space-y-6">
                 <DeliveryModeSelector
                   value={deliveryMode}
-                  onChange={changeDeliveryMode}
                   config={deliveryConfig.data}
+                  detected={detectedDelivery.data}
+                  loading={detectedDelivery.isLoading || detectedDelivery.isFetching}
                 />
 
                 <section className="rounded-2xl border border-[#e7ebf0] bg-white p-4 shadow-sm dark:border-white/10 dark:bg-darkTheme-card sm:p-6">
                   <div className="flex items-start gap-3">
                     <span className="flex h-10 w-10 items-center justify-center rounded-xl bg-slate-100 text-slate-600">
-                      {deliveryMode === "local" ? (
-                        <MapPin size={18} />
-                      ) : (
-                        <Globe2 size={18} />
-                      )}
+                      <MapPin size={18} />
                     </span>
                     <div>
                       <h2 className="font-bold text-dark dark:text-white">
                         Delivery Address
                       </h2>
                       <p className="mt-1 text-xs leading-5 text-dark-4">
-                        {deliveryMode === "local"
-                          ? "Local delivery is fixed to Tanzania. Only Tanzania addresses are shown."
-                          : destinationCountry
-                            ? `Cross-border delivery destination: ${destinationCountry}. Only saved addresses in this country are shown.`
-                            : "Choose the cross-border destination country first."}
+                        {destinationCountry
+                          ? `Delivery destination: ${destinationCountry}. Xerin will detect domestic or cross-border automatically.`
+                          : "Choose the delivery destination country first."}
                       </p>
                     </div>
                   </div>
 
-                  {deliveryMode === "international" && (
-                    <div className="mt-4 sm:mt-5">
+                  <div className="mt-4 sm:mt-5">
                       <label
                         htmlFor="international-destination-country"
                         className="mb-2 block text-xs font-bold uppercase tracking-wide text-dark-4"
                       >
-                        Cross-border destination country
+                        Delivery destination country
                       </label>
                       <select
                         id="international-destination-country"
@@ -718,7 +700,6 @@ const Checkout = () => {
                         Logistics companies will be checked against this country and your exact saved delivery address.
                       </p>
                     </div>
-                  )}
 
                   {matchingAddresses.length ? (
                     <>
@@ -761,9 +742,7 @@ const Checkout = () => {
                   ) : (
                     <div className="mt-5 rounded-xl border border-amber-200 bg-amber-50 p-4 text-sm leading-6 text-amber-800">
                       You do not have a{" "}
-                      {deliveryMode === "local"
-                        ? "Tanzania"
-                        : destinationCountry || "selected international country"}{" "}
+                      {destinationCountry || "selected country"}{" "}
                       delivery address yet.
                     </div>
                   )}
@@ -888,7 +867,7 @@ const Checkout = () => {
                   selectedCompanyId={selectedCompanyId}
                   onCompanyChange={changeCompany}
                   deliveryMode={deliveryMode}
-                  destinationCountry={deliveryMode === "local" ? "Tanzania" : destinationCountry}
+                  destinationCountry={destinationCountry}
                   destinationRegion={selectedAddress?.region || ""}
                   destinationCity={selectedAddress?.city || selectedAddress?.district || ""}
                   hasSelectedAddress={Boolean(selectedAddressId)}

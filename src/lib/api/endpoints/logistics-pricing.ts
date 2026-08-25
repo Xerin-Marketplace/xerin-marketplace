@@ -1,8 +1,9 @@
 import axiosInstance from "../client";
-import type { PricingPage, PricingSettings, PricingStrategy, ShippingRate, ShippingRatePayload, ShippingService, ShippingServicePayload, ShippingZone, ShippingZonePayload } from "@/types/api/logistics-pricing";
+import type { CountryOption, PricingPage, PricingSettings, PricingStrategy, ShippingRate, ShippingRatePayload, ShippingService, ShippingServicePayload, ShippingZone, ShippingZonePayload } from "@/types/api/logistics-pricing";
 
 const ROOT = "/logistics/me";
 export const logisticsPricingApi = {
+  countryOptions: async () => (await axiosInstance.get<CountryOption[]>("/logistics/country-options")).data,
   zones: async () => (await axiosInstance.get<PricingPage<ShippingZone>>(`${ROOT}/zones`, { params: { page: 1, page_size: 100 } })).data,
   createZone: async (payload: ShippingZonePayload) => (await axiosInstance.post<ShippingZone>(`${ROOT}/zones`, payload)).data,
   updateZone: async (id: string, payload: Partial<ShippingZonePayload>) => (await axiosInstance.patch<ShippingZone>(`${ROOT}/zones/${id}`, payload)).data,
