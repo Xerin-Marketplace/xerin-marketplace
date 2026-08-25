@@ -587,7 +587,7 @@ const Checkout = () => {
       }
 
       const successUrl = `${window.location.origin}/order-success/${order.id}?payment=success`;
-      const failureUrl = `${window.location.origin}/order-success/${order.id}?payment=failed&retryable=1`;
+      const failureUrl = `${window.location.origin}/payment-failed/${order.id}`;
 
       const isCod = form.paymentMethod === "cash_on_delivery";
 

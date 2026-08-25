@@ -84,8 +84,10 @@ export default function OrderSuccessPage() {
         ["pending", "processing"].includes(next.payment_status)
       ) {
         try {
-          await paymentsApi.verifyStatus(next.latest_payment.id);
-          next = await paymentsApi.orderState(orderId);
+          const verifiedPayment = await paymentsApi.verifyStatus(next.latest_payment.id);
+          if (["completed", "failed", "cancelled"].includes(verifiedPayment.status)) {
+            next = await paymentsApi.orderState(orderId);
+          }
         } catch {
           // A delayed/unavailable status API must not turn an in-progress
           // payment into a frontend failure. Keep the last known state.
@@ -143,7 +145,7 @@ export default function OrderSuccessPage() {
 
     const interval = window.setInterval(() => {
       void refreshPaymentState(true);
-    }, Math.max(3000, (paymentState?.poll_after_seconds || 4) * 1000));
+    }, Math.max(5000, (paymentState?.poll_after_seconds || 5) * 1000));
 
     return () => window.clearInterval(interval);
   }, [paymentState?.payment_status, paymentState?.poll_after_seconds, orderId]);
@@ -212,7 +214,7 @@ export default function OrderSuccessPage() {
     setRetrying(true);
     try {
       const successUrl = `${window.location.origin}/order-success/${orderId}`;
-      const failureUrl = `${window.location.origin}/order-success/${orderId}`;
+      const failureUrl = `${window.location.origin}/payment-failed/${orderId}`;
 
       const nextPayment = await paymentsApi.retry(payment.id, {
         provider:

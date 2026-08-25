@@ -78,6 +78,19 @@ export default function PaymentFailedPage() {
   }, [orderId]);
 
   const payment = state?.latest_payment ?? null;
+
+  useEffect(() => {
+    if (!payment || payment.method !== "mobile_money") return;
+    const saved = readRetryContext(orderId);
+    if (!provider && saved.provider) setProvider(saved.provider);
+    if (!phone && saved.phone_number) setPhone(saved.phone_number);
+  }, [payment?.id, orderId]);
+
+  const failureReason =
+    payment?.failure_reason?.trim() ||
+    state?.message?.trim() ||
+    "The payment provider did not complete this payment.";
+
   const timedOut =
     state?.order_status === "cancelled" &&
     order.data?.cancellation_reason === "payment_confirmation_timeout";
@@ -125,8 +138,12 @@ export default function PaymentFailedPage() {
         return;
       }
 
-      toast.success("A new payment attempt has been started.");
-      router.replace(`/order-success/${orderId}`);
+      toast.success(
+        payment.method === "mobile_money"
+          ? "A new payment request has been sent. Check your phone and complete the authorization."
+          : "A new payment attempt has been started.",
+      );
+      router.replace(`/order-success/${orderId}?payment_id=${next.id}&payment=${next.status}`);
     } catch (cause: unknown) {
       const error = cause as {
         response?: { data?: { detail?: string | PaymentProviderErrorDetail } };
@@ -204,7 +221,7 @@ export default function PaymentFailedPage() {
                   : "The payment attempt failed"}
             </h1>
             <p className="mx-auto mt-2 max-w-lg text-sm leading-6 text-slate-600 dark:text-white/60">
-              {state.message}
+              {failureReason}
             </p>
           </div>
 
@@ -215,6 +232,20 @@ export default function PaymentFailedPage() {
               <Info label="Order status" value={state.order_status.replaceAll("_", " ")} capitalize />
               <Info label="Payment status" value={state.payment_status.replaceAll("_", " ")} capitalize />
             </dl>
+
+            {!timedOut && (failed || providerCancelled) && (
+              <div className="mt-6 rounded-2xl border border-red-200 bg-red-50 p-4 dark:border-red-500/20 dark:bg-red-500/10">
+                <p className="text-xs font-bold uppercase tracking-wide text-red-700 dark:text-red-300">
+                  Provider result
+                </p>
+                <p className="mt-1 text-sm font-semibold leading-6 text-red-900 dark:text-red-100">
+                  {failureReason}
+                </p>
+                <p className="mt-1 text-xs leading-5 text-red-700/80 dark:text-red-200/70">
+                  Your order remains active only while the backend says it is retryable. Retry creates a new payment attempt for this same order.
+                </p>
+              </div>
+            )}
 
             {timedOut ? (
               <div className="mt-6 rounded-2xl border border-amber-200 bg-amber-50 p-4 text-sm leading-6 text-amber-900">
