@@ -176,13 +176,13 @@ export const checkoutApi = {
     const methods: PaymentOption[] = [
       {
         id: "mobile_money",
-        label: "AzamPay Mobile Money",
+        label: "Mobile Payment",
         requires_phone: true,
-        providers: ["Airtel", "Tigo", "Halopesa", "Azampesa", "Mpesa"],
+        providers: ["M-Pesa", "Airtel Money", "Mixx by Yas", "HaloPesa"],
       },
       {
         id: "card",
-        label: "AzamPay Card",
+        label: "Card Payment",
         requires_phone: false,
         providers: ["azampay"],
       },
@@ -220,6 +220,18 @@ export const ordersApi = {
     ).data,
   get: async (id: string, signal?: AbortSignal) =>
     (await axiosInstance.get<Order>(`/orders/${id}`, { signal })).data,
+  invoice: async (id: string) =>
+    (
+      await axiosInstance.get<Blob>(`/orders/${id}/invoice.pdf`, {
+        responseType: "blob",
+      })
+    ).data,
+  receipt: async (id: string) =>
+    (
+      await axiosInstance.get<Blob>(`/orders/${id}/receipt.pdf`, {
+        responseType: "blob",
+      })
+    ).data,
   customerDetail: async (id: string, signal?: AbortSignal) =>
     (
       await axiosInstance.get<CustomerOrderDetail>(

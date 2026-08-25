@@ -1,7 +1,7 @@
 "use client";
 
 import Link from "next/link";
-import { useParams } from "next/navigation";
+import { useParams, useRouter } from "next/navigation";
 import { useEffect, useMemo, useState } from "react";
 import toast from "react-hot-toast";
 import {
@@ -9,12 +9,13 @@ import {
   CheckCircle2,
   Clock3,
   CreditCard,
+  Download,
   LoaderCircle,
   RefreshCw,
   Smartphone,
 } from "lucide-react";
 import { useOrder } from "@/hooks/useCommerce";
-import { paymentsApi } from "@/lib/api/endpoints/commerce";
+import { ordersApi, paymentsApi } from "@/lib/api/endpoints/commerce";
 import { formatCurrency } from "@/lib/formatCurrency";
 import type {
   OrderPaymentState,
@@ -45,6 +46,7 @@ const readRetryContext = (orderId: string): RetryContext => {
 
 export default function OrderSuccessPage() {
   const params = useParams<{ orderId: string }>();
+  const router = useRouter();
   const orderId = params.orderId;
   const order = useOrder(orderId);
 
@@ -53,6 +55,7 @@ export default function OrderSuccessPage() {
   const [statusLoading, setStatusLoading] = useState(true);
   const [statusError, setStatusError] = useState("");
   const [retrying, setRetrying] = useState(false);
+  const [downloadingInvoice, setDownloadingInvoice] = useState(false);
   const [retryContext, setRetryContext] = useState<RetryContext>(() =>
     readRetryContext(orderId),
   );
@@ -100,6 +103,20 @@ export default function OrderSuccessPage() {
   }, [orderId]);
 
   useEffect(() => {
+    if (paymentState?.payment_status === "completed") {
+      router.replace(`/payment-success/${orderId}`);
+      return;
+    }
+
+    if (
+      paymentState &&
+      ["failed", "cancelled"].includes(paymentState.payment_status)
+    ) {
+      router.replace(`/payment-failed/${orderId}`);
+    }
+  }, [paymentState?.payment_status, paymentState?.order_status, orderId, router]);
+
+  useEffect(() => {
     const shouldPoll =
       paymentState?.payment_status === "pending" ||
       paymentState?.payment_status === "processing";
@@ -131,6 +148,10 @@ export default function OrderSuccessPage() {
   const isCompleted = displayStatus === "completed";
   const isFailed = ["failed", "cancelled"].includes(displayStatus);
   const isCod = payment?.method === "cash_on_delivery";
+  const isTimedOut =
+    paymentState?.order_status === "cancelled" &&
+    (order.data?.cancellation_reason === "payment_confirmation_timeout" ||
+      displayStatus === "cancelled");
 
   const canRetry = useMemo(() => {
     if (!paymentState?.retryable || !payment) return false;
@@ -139,6 +160,25 @@ export default function OrderSuccessPage() {
     }
     return payment.method === "card";
   }, [paymentState?.retryable, payment, provider, phone]);
+
+  const downloadInvoice = async () => {
+    setDownloadingInvoice(true);
+    try {
+      const blob = await ordersApi.invoice(orderId);
+      const url = URL.createObjectURL(blob);
+      const anchor = document.createElement("a");
+      anchor.href = url;
+      anchor.download = `Xerin-Invoice-${orderId.slice(0, 8).toUpperCase()}.pdf`;
+      document.body.appendChild(anchor);
+      anchor.click();
+      anchor.remove();
+      window.setTimeout(() => URL.revokeObjectURL(url), 1000);
+    } catch {
+      toast.error("Unable to download the invoice. Please try again.");
+    } finally {
+      setDownloadingInvoice(false);
+    }
+  };
 
   const retryPayment = async () => {
     if (!payment) {
@@ -199,7 +239,7 @@ export default function OrderSuccessPage() {
       }
 
       toast.success(
-        "Payment request sent. Xerin will update this page when AzamPay confirms the result.",
+        "Payment request sent. Xerin will update this page when the provider confirms the result.",
       );
       await refreshPaymentState(true);
     } catch (error: unknown) {
@@ -251,6 +291,12 @@ export default function OrderSuccessPage() {
   return (
     <section className="bg-gray-2 pb-8 pt-5 dark:bg-darkTheme-bg sm:py-12 lg:py-16">
       <div className="mx-auto max-w-2xl space-y-4 px-3 sm:space-y-5 sm:px-4">
+        <div className="flex items-center justify-between gap-3 px-1 py-1">
+          <Link href="/" className="inline-flex items-center">
+            <img src="/images/logo/logo.png" alt="Xerin Marketplace" className="h-9 w-auto sm:h-11" />
+          </Link>
+          <span className="rounded-full bg-white px-3 py-1.5 text-[10px] font-bold uppercase tracking-wide text-slate-500 shadow-sm dark:bg-darkTheme-card">Secure order</span>
+        </div>
         <div className="rounded-2xl bg-white p-4 shadow-sm dark:bg-darkTheme-card sm:p-8 sm:shadow-1">
           <p className="font-semibold text-green">Order received</p>
           <h1 className="mt-1.5 text-2xl font-bold leading-tight text-dark dark:text-white sm:mt-2 sm:text-3xl sm:font-semibold">
@@ -283,7 +329,7 @@ export default function OrderSuccessPage() {
           </dl>
         </div>
 
-        {isProcessing && !isCod && (
+        {isProcessing && !isCod && !isTimedOut && (
           <div className="rounded-2xl border border-blue-200 bg-blue-50 p-4 sm:p-5 text-blue-900">
             <div className="flex items-start gap-3">
               <LoaderCircle size={20} className="mt-0.5 shrink-0 animate-spin" />
@@ -293,12 +339,30 @@ export default function OrderSuccessPage() {
                 </h2>
                 <p className="mt-1 text-sm leading-6">
                   {paymentState?.message ||
-                    "Complete the payment authorization with your provider. This page checks automatically for AzamPay confirmation."}
+                    "Complete the payment authorization with your provider. This page checks automatically for verified payment confirmation."}
                 </p>
                 <p className="mt-2 text-xs text-blue-700">
                   You may keep this page open or return to your order later.
-                  Xerin trusts the verified AzamPay callback, not the browser,
+                  Xerin trusts the verified payment callback, not the browser,
                   before marking payment successful.
+                </p>
+              </div>
+            </div>
+          </div>
+        )}
+
+        {isTimedOut && (
+          <div className="rounded-2xl border border-amber-200 bg-amber-50 p-4 text-amber-900 sm:p-5">
+            <div className="flex items-start gap-3">
+              <Clock3 size={20} className="mt-0.5 shrink-0" />
+              <div>
+                <h2 className="font-bold">Order cancelled — payment window expired</h2>
+                <p className="mt-1 text-sm leading-6">
+                  {paymentState?.message ||
+                    "Payment was not confirmed before the checkout deadline, so this order was cancelled and its reserved stock was released."}
+                </p>
+                <p className="mt-2 text-xs text-amber-700">
+                  If you still want these products, return to the marketplace and place a new order.
                 </p>
               </div>
             </div>
@@ -319,7 +383,7 @@ export default function OrderSuccessPage() {
           </div>
         )}
 
-        {isFailed && !isCompleted && (
+        {isFailed && !isCompleted && !isTimedOut && (
           <div className="rounded-2xl border border-amber-200 bg-amber-50 p-4 sm:p-5 text-amber-900">
             <div className="flex items-start gap-3">
               <AlertTriangle size={20} className="mt-0.5 shrink-0" />
@@ -362,7 +426,7 @@ export default function OrderSuccessPage() {
                 {payment?.method === "card" && (
                   <div className="mt-4 flex items-center gap-2 rounded-xl bg-white/70 p-3 text-sm font-semibold">
                     <CreditCard size={15} />
-                    AzamPay card payment
+                    Secure card payment
                   </div>
                 )}
 
@@ -411,14 +475,25 @@ export default function OrderSuccessPage() {
 
         <div className="rounded-2xl bg-white p-4 shadow-sm dark:bg-darkTheme-card sm:p-6 sm:shadow-1">
           <div className="grid gap-2 sm:flex sm:flex-wrap sm:gap-3">
+            {!isTimedOut && (
+              <button
+                type="button"
+                onClick={() => void refreshPaymentState()}
+                disabled={statusLoading}
+                className="inline-flex h-12 w-full items-center justify-center gap-2 rounded-xl border border-gray-3 px-4 font-semibold disabled:opacity-50 sm:h-auto sm:w-auto sm:rounded-lg sm:px-5 sm:py-3 sm:font-medium"
+              >
+                <RefreshCw size={14} className={statusLoading ? "animate-spin" : ""} />
+                Refresh Payment
+              </button>
+            )}
             <button
               type="button"
-              onClick={() => void refreshPaymentState()}
-              disabled={statusLoading}
+              onClick={() => void downloadInvoice()}
+              disabled={downloadingInvoice}
               className="inline-flex h-12 w-full items-center justify-center gap-2 rounded-xl border border-gray-3 px-4 font-semibold disabled:opacity-50 sm:h-auto sm:w-auto sm:rounded-lg sm:px-5 sm:py-3 sm:font-medium"
             >
-              <RefreshCw size={14} className={statusLoading ? "animate-spin" : ""} />
-              Refresh Payment
+              <Download size={14} />
+              {downloadingInvoice ? "Preparing invoice..." : "Download Invoice"}
             </button>
             <Link
               href={`/account/orders/${data.id}`}

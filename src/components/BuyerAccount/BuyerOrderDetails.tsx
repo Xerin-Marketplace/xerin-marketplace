@@ -13,6 +13,7 @@ import {
   CalendarClock,
   CircleDollarSign,
   Clock3,
+  Download,
   MapPin,
   PackageCheck,
   RefreshCw,
@@ -49,6 +50,8 @@ export default function BuyerOrderDetails({ orderId }: { orderId: string }) {
   const [approvingReceipt, setApprovingReceipt] = useState(false);
   const [escrowMessage, setEscrowMessage] = useState("");
   const [receiptDialogOpen, setReceiptDialogOpen] = useState(false);
+  const [downloadingInvoice, setDownloadingInvoice] = useState(false);
+  const [downloadingPaymentReceipt, setDownloadingPaymentReceipt] = useState(false);
 
   const load = async () => {
     setLoading(true);
@@ -72,6 +75,45 @@ export default function BuyerOrderDetails({ orderId }: { orderId: string }) {
       );
     } finally {
       setLoading(false);
+    }
+  };
+
+  const downloadInvoice = async () => {
+    setDownloadingInvoice(true);
+    try {
+      const blob = await ordersApi.invoice(orderId);
+      const url = URL.createObjectURL(blob);
+      const anchor = document.createElement("a");
+      anchor.href = url;
+      anchor.download = `Xerin-Invoice-${orderId.slice(0, 8).toUpperCase()}.pdf`;
+      document.body.appendChild(anchor);
+      anchor.click();
+      anchor.remove();
+      window.setTimeout(() => URL.revokeObjectURL(url), 1000);
+    } catch {
+      setError("Unable to download the invoice. Please try again.");
+    } finally {
+      setDownloadingInvoice(false);
+    }
+  };
+
+  const downloadPaymentReceipt = async () => {
+    setDownloadingPaymentReceipt(true);
+    setError("");
+    try {
+      const blob = await ordersApi.receipt(orderId);
+      const url = URL.createObjectURL(blob);
+      const anchor = document.createElement("a");
+      anchor.href = url;
+      anchor.download = `Xerin-Receipt-${orderId.slice(0, 8).toUpperCase()}.pdf`;
+      document.body.appendChild(anchor);
+      anchor.click();
+      anchor.remove();
+      window.setTimeout(() => URL.revokeObjectURL(url), 1000);
+    } catch {
+      setError("Payment receipt is available only after a verified successful payment.");
+    } finally {
+      setDownloadingPaymentReceipt(false);
     }
   };
 
@@ -546,12 +588,34 @@ export default function BuyerOrderDetails({ orderId }: { orderId: string }) {
         </aside>
       </section>
 
-      <Link
-        href="/account/orders"
-        className="inline-block font-semibold text-[#f7941d]"
-      >
-        ← Back to orders
-      </Link>
+      <div className="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
+        <Link
+          href="/account/orders"
+          className="inline-block font-semibold text-[#f7941d]"
+        >
+          ← Back to orders
+        </Link>
+        {order.payment_status === "completed" && (
+          <button
+            type="button"
+            onClick={() => void downloadPaymentReceipt()}
+            disabled={downloadingPaymentReceipt}
+            className="inline-flex min-h-11 items-center justify-center gap-2 rounded-xl bg-[#f7941d] px-4 text-sm font-bold text-white shadow-sm disabled:opacity-60"
+          >
+            <Download size={16} />
+            {downloadingPaymentReceipt ? "Preparing receipt..." : "Download Receipt"}
+          </button>
+        )}
+        <button
+          type="button"
+          onClick={() => void downloadInvoice()}
+          disabled={downloadingInvoice}
+          className="inline-flex min-h-11 items-center justify-center gap-2 rounded-xl border border-[#e2e8f0] bg-white px-4 text-sm font-bold text-slate-800 shadow-sm disabled:opacity-60 dark:border-white/10 dark:bg-white/5 dark:text-white"
+        >
+          <Download size={16} />
+          {downloadingInvoice ? "Preparing invoice..." : "Download Invoice"}
+        </button>
+      </div>
 
       {receiptDialogOpen && (
         <div className="fixed inset-0 z-[150] flex items-end justify-center bg-black/60 sm:items-center sm:p-4">

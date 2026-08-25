@@ -431,6 +431,7 @@ export type CustomerOrderPaymentSummary = {
   status: string;
   provider_transaction_id?: string | null;
   paid_at?: string | null;
+  finalized_at?: string | null;
   created_at: string;
 };
 

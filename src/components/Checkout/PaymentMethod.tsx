@@ -42,8 +42,8 @@ const PaymentMethod = ({
           Payment Method
         </h3>
         <p className="mt-1 text-xs leading-5 text-dark-4">
-          Online payments are processed by AzamPay. Cash on Delivery only appears
-          when the selected local logistics service is eligible.
+          Choose Mobile Payment or Card Payment. Cash on Delivery only appears
+          when the selected logistics service is eligible.
         </p>
       </div>
 
@@ -81,8 +81,8 @@ const PaymentMethod = ({
                       {method.id === "cash_on_delivery"
                         ? "Pay when the logistics company delivers your local order."
                         : method.id === "mobile_money"
-                          ? "Secure mobile-money checkout through AzamPay."
-                          : "Secure card checkout through AzamPay."}
+                          ? "Pay securely using your preferred mobile network."
+                          : "Pay securely using Visa or Mastercard through the protected card checkout."}
                     </span>
                   </span>
                 </label>
@@ -110,7 +110,7 @@ const PaymentMethod = ({
                 </label>
 
                 <label className="text-sm font-medium text-dark dark:text-white">
-                  Payment phone
+                  Mobile number
                   <input
                     type="tel"
                     value={phoneNumber}
@@ -121,6 +121,22 @@ const PaymentMethod = ({
                     className="mt-2 h-12 w-full rounded-xl border border-gray-3 bg-white px-3 text-base dark:border-white/10 dark:bg-white/5 sm:text-sm"
                   />
                 </label>
+              </div>
+            )}
+
+            {selected === "card" && (
+              <div className="mt-4 rounded-xl border border-blue-200 bg-blue-50 p-4 text-sm text-blue-900 dark:border-blue-500/30 dark:bg-blue-500/10 dark:text-blue-100">
+                <div className="flex items-center gap-2 font-semibold">
+                  <ShieldCheck size={16} />
+                  Secure Card Payment
+                </div>
+                <div className="mt-3 flex flex-wrap gap-2">
+                  <span className="rounded-lg border border-blue-200 bg-white px-3 py-2 font-bold tracking-wide text-blue-900 dark:border-white/10 dark:bg-white/5 dark:text-white">VISA</span>
+                  <span className="rounded-lg border border-blue-200 bg-white px-3 py-2 font-bold tracking-wide text-blue-900 dark:border-white/10 dark:bg-white/5 dark:text-white">Mastercard</span>
+                </div>
+                <p className="mt-3 text-xs leading-5">
+                  After you place the order, Xerin opens the secure card checkout. Card number and CVV are not stored by Xerin.
+                </p>
               </div>
             )}
 

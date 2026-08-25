@@ -44,6 +44,9 @@ export default function RootLayout({
     pathname === "/forgot-password" ||
     pathname === "/reset-password" ||
     pathname === "/verify-otp" ||
+    pathname.startsWith("/order-success/") ||
+    pathname.startsWith("/payment-success/") ||
+    pathname.startsWith("/payment-failed/") ||
     isWorkspaceRoute;
   const isBuyerAccount = pathname === "/account" || pathname.startsWith("/account/") || pathname === "/my-account";
 
@@ -83,7 +86,10 @@ export default function RootLayout({
         </QueryProvider>
       </NotificationProvider>
       {/* <ScrollToTop /> */}
-      {!isWorkspaceRoute ? <ChatBot /> : null}
+      {!isWorkspaceRoute &&
+      !pathname.startsWith("/order-success/") &&
+      !pathname.startsWith("/payment-success/") &&
+      !pathname.startsWith("/payment-failed/") ? <ChatBot /> : null}
     </ThemeProvider>
   );
 }

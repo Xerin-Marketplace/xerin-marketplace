@@ -1,171 +1,112 @@
 import React from "react";
-import type { CheckoutForm } from "./index";
+import type { Address, User } from "@/types/api/user";
+import { Mail, MapPin, Phone, UserRound } from "lucide-react";
 
-interface BillingProps {
-  form: CheckoutForm;
-  updateField: (field: keyof CheckoutForm, value: string | boolean) => void;
-}
+type CustomerDetailsProps = {
+  profile?: User;
+  selectedAddress?: Address;
+  isLoading?: boolean;
+};
 
-const Billing = ({ form, updateField }: BillingProps) => {
+const CustomerDetails = ({
+  profile,
+  selectedAddress,
+  isLoading = false,
+}: CustomerDetailsProps) => {
+  const customerName =
+    profile?.full_name?.trim() ||
+    [profile?.first_name, profile?.last_name].filter(Boolean).join(" ") ||
+    selectedAddress?.recipient_name ||
+    "Customer";
+
+  const phone = profile?.phone || selectedAddress?.recipient_phone || "Not configured";
+  const email = profile?.email || "Not configured";
+
   return (
-    <div className="mt-5 sm:mt-9">
-      <h2 className="mb-3 text-lg font-bold text-dark dark:text-white sm:mb-5.5 sm:text-2xl sm:font-medium">
-        Delivery details
-      </h2>
-
-      <div className="rounded-2xl border border-[#e7ebf0] bg-white p-4 shadow-sm dark:border-white/10 dark:bg-darkTheme-card sm:p-6 lg:p-8.5">
-        <div className="mb-4 grid grid-cols-1 gap-4 sm:mb-5 sm:grid-cols-2 sm:gap-5">
-          <div className="w-full">
-            <label htmlFor="firstName" className="mb-2 block text-sm font-medium dark:text-darkTheme-body-color">
-              First Name <span className="text-red">*</span>
-            </label>
-            <input
-              type="text"
-              id="firstName"
-              value={form.firstName}
-              onChange={(e) => updateField("firstName", e.target.value)}
-              placeholder="Xerin"
-              className="h-12 w-full rounded-xl border border-gray-3 bg-gray-1 px-4 text-base outline-none duration-200 placeholder:text-dark-4 focus:border-transparent focus:ring-2 focus:ring-orange/25 dark:border-darkTheme-border-color dark:bg-darkTheme-secondary-bg dark:text-darkTheme-body-color dark:placeholder:text-darkTheme-secondary-muted sm:text-sm"
-            />
-          </div>
-
-          <div className="w-full">
-            <label htmlFor="lastName" className="mb-2 block text-sm font-medium dark:text-darkTheme-body-color">
-              Last Name <span className="text-red">*</span>
-            </label>
-            <input
-              type="text"
-              id="lastName"
-              value={form.lastName}
-              onChange={(e) => updateField("lastName", e.target.value)}
-              placeholder="Market"
-              className="h-12 w-full rounded-xl border border-gray-3 bg-gray-1 px-4 text-base outline-none duration-200 placeholder:text-dark-4 focus:border-transparent focus:ring-2 focus:ring-orange/25 dark:border-darkTheme-border-color dark:bg-darkTheme-secondary-bg dark:text-darkTheme-body-color dark:placeholder:text-darkTheme-secondary-muted sm:text-sm"
-            />
-          </div>
+    <section className="mt-5 sm:mt-9">
+      <div className="mb-3 flex items-center justify-between gap-3 sm:mb-5.5">
+        <div>
+          <p className="text-xs font-bold uppercase tracking-[0.16em] text-orange">
+            Customer
+          </p>
+          <h2 className="mt-1 text-lg font-bold text-dark dark:text-white sm:text-2xl sm:font-medium">
+            Customer details
+          </h2>
         </div>
+        <a
+          href="/account"
+          className="text-xs font-semibold text-orange hover:underline"
+        >
+          Edit profile
+        </a>
+      </div>
 
-        <div className="mb-4 sm:mb-5">
-          <label htmlFor="companyName" className="mb-2 block text-sm font-medium dark:text-darkTheme-body-color">
-            Business Name (optional)
-          </label>
-          <input
-            type="text"
-            id="companyName"
-            value={form.companyName}
-            onChange={(e) => updateField("companyName", e.target.value)}
-            className="h-12 w-full rounded-xl border border-gray-3 bg-gray-1 px-4 text-base outline-none duration-200 placeholder:text-dark-4 focus:border-transparent focus:ring-2 focus:ring-orange/25 dark:border-darkTheme-border-color dark:bg-darkTheme-secondary-bg dark:text-darkTheme-body-color dark:placeholder:text-darkTheme-secondary-muted sm:text-sm"
-          />
-        </div>
-
-        <div className="mb-4 sm:mb-5">
-          <label htmlFor="country" className="mb-2 block text-sm font-medium dark:text-darkTheme-body-color">
-            Country <span className="text-red">*</span>
-          </label>
-          <input
-            type="text"
-            id="country"
-            value={form.country}
-            onChange={(e) => updateField("country", e.target.value)}
-            placeholder="Country"
-            className="h-12 w-full rounded-xl border border-gray-3 bg-gray-1 px-4 text-base outline-none duration-200 placeholder:text-dark-4 focus:border-transparent focus:ring-2 focus:ring-orange/25 dark:border-darkTheme-border-color dark:bg-darkTheme-secondary-bg dark:text-darkTheme-body-color dark:placeholder:text-darkTheme-secondary-muted sm:text-sm"
-          />
-        </div>
-
-        <div className="mb-4 sm:mb-5">
-          <label htmlFor="street" className="mb-2 block text-sm font-medium dark:text-darkTheme-body-color">
-            Delivery Address <span className="text-red">*</span>
-          </label>
-          <input
-            type="text"
-            id="street"
-            value={form.street}
-            onChange={(e) => updateField("street", e.target.value)}
-            placeholder="House number and street name"
-            className="h-12 w-full rounded-xl border border-gray-3 bg-gray-1 px-4 text-base outline-none duration-200 placeholder:text-dark-4 focus:border-transparent focus:ring-2 focus:ring-orange/25 dark:border-darkTheme-border-color dark:bg-darkTheme-secondary-bg dark:text-darkTheme-body-color dark:placeholder:text-darkTheme-secondary-muted sm:text-sm"
-          />
-          <div className="mt-3 sm:mt-5">
-            <input
-              type="text"
-              id="street2"
-              value={form.street2}
-              onChange={(e) => updateField("street2", e.target.value)}
-              placeholder="Apartment, suite, unit, etc. (optional)"
-              className="h-12 w-full rounded-xl border border-gray-3 bg-gray-1 px-4 text-base outline-none duration-200 placeholder:text-dark-4 focus:border-transparent focus:ring-2 focus:ring-orange/25 dark:border-darkTheme-border-color dark:bg-darkTheme-secondary-bg dark:text-darkTheme-body-color dark:placeholder:text-darkTheme-secondary-muted sm:text-sm"
+      <div className="rounded-2xl border border-[#e7ebf0] bg-white p-4 shadow-sm dark:border-white/10 dark:bg-darkTheme-card sm:p-6">
+        {isLoading ? (
+          <div className="grid gap-3 sm:grid-cols-2">
+            <div className="h-14 animate-pulse rounded-xl bg-slate-100 dark:bg-white/5" />
+            <div className="h-14 animate-pulse rounded-xl bg-slate-100 dark:bg-white/5" />
+          </div>
+        ) : (
+          <div className="grid gap-3 sm:grid-cols-2">
+            <Detail icon={<UserRound size={16} />} label="Customer" value={customerName} />
+            <Detail icon={<Mail size={16} />} label="Email" value={email} />
+            <Detail icon={<Phone size={16} />} label="Phone" value={phone} />
+            <Detail
+              icon={<MapPin size={16} />}
+              label="Delivery address"
+              value={
+                selectedAddress
+                  ? selectedAddress.formatted_address ||
+                    [
+                      selectedAddress.street,
+                      selectedAddress.city,
+                      selectedAddress.region,
+                      selectedAddress.country,
+                    ]
+                      .filter(Boolean)
+                      .join(", ")
+                  : "Select a delivery address above"
+              }
             />
           </div>
-        </div>
+        )}
 
-        <div className="mb-4 grid grid-cols-1 gap-4 sm:mb-5 sm:grid-cols-2 sm:gap-5">
-          <div className="w-full">
-            <label htmlFor="city" className="mb-2 block text-sm font-medium dark:text-darkTheme-body-color">
-              City <span className="text-red">*</span>
-            </label>
-            <input
-              type="text"
-              id="city"
-              value={form.city}
-              onChange={(e) => updateField("city", e.target.value)}
-              className="h-12 w-full rounded-xl border border-gray-3 bg-gray-1 px-4 text-base outline-none duration-200 placeholder:text-dark-4 focus:border-transparent focus:ring-2 focus:ring-orange/25 dark:border-darkTheme-border-color dark:bg-darkTheme-secondary-bg dark:text-darkTheme-body-color dark:placeholder:text-darkTheme-secondary-muted sm:text-sm"
-            />
-          </div>
+        <p className="mt-4 rounded-xl bg-slate-50 px-3 py-2.5 text-xs leading-5 text-slate-500 dark:bg-white/5 dark:text-white/60">
+          Customer identity is loaded from your Xerin profile. Delivery country,
+          city, region, street, postal information and Google coordinates come
+          from the confirmed saved address selected above, so you do not need to
+          enter them again during checkout.
+        </p>
+      </div>
+    </section>
+  );
+};
 
-          <div className="w-full">
-            <label htmlFor="region" className="mb-2 block text-sm font-medium dark:text-darkTheme-body-color">
-              Region/State <span className="text-red">*</span>
-            </label>
-            <input
-              type="text"
-              id="region"
-              value={form.region}
-              onChange={(e) => updateField("region", e.target.value)}
-              className="h-12 w-full rounded-xl border border-gray-3 bg-gray-1 px-4 text-base outline-none duration-200 placeholder:text-dark-4 focus:border-transparent focus:ring-2 focus:ring-orange/25 dark:border-darkTheme-border-color dark:bg-darkTheme-secondary-bg dark:text-darkTheme-body-color dark:placeholder:text-darkTheme-secondary-muted sm:text-sm"
-            />
-          </div>
-        </div>
-
-        <div className="mb-4 sm:mb-5">
-          <label htmlFor="postalCode" className="mb-2 block text-sm font-medium dark:text-darkTheme-body-color">
-            Postal Code
-          </label>
-          <input
-            type="text"
-            id="postalCode"
-            value={form.postalCode}
-            onChange={(e) => updateField("postalCode", e.target.value)}
-            className="h-12 w-full rounded-xl border border-gray-3 bg-gray-1 px-4 text-base outline-none duration-200 placeholder:text-dark-4 focus:border-transparent focus:ring-2 focus:ring-orange/25 dark:border-darkTheme-border-color dark:bg-darkTheme-secondary-bg dark:text-darkTheme-body-color dark:placeholder:text-darkTheme-secondary-muted sm:text-sm"
-          />
-        </div>
-
-        <div className="mb-4 grid grid-cols-1 gap-4 sm:mb-5 sm:grid-cols-2 sm:gap-5">
-          <div className="w-full">
-            <label htmlFor="phone" className="mb-2 block text-sm font-medium dark:text-darkTheme-body-color">
-              Phone Number <span className="text-red">*</span>
-            </label>
-            <input
-              type="text"
-              id="phone"
-              value={form.phone}
-              onChange={(e) => updateField("phone", e.target.value)}
-              className="h-12 w-full rounded-xl border border-gray-3 bg-gray-1 px-4 text-base outline-none duration-200 placeholder:text-dark-4 focus:border-transparent focus:ring-2 focus:ring-orange/25 dark:border-darkTheme-border-color dark:bg-darkTheme-secondary-bg dark:text-darkTheme-body-color dark:placeholder:text-darkTheme-secondary-muted sm:text-sm"
-            />
-          </div>
-
-          <div className="w-full">
-            <label htmlFor="email" className="mb-2 block text-sm font-medium dark:text-darkTheme-body-color">
-              Email Address <span className="text-red">*</span>
-            </label>
-            <input
-              type="email"
-              id="email"
-              value={form.email}
-              onChange={(e) => updateField("email", e.target.value)}
-              className="h-12 w-full rounded-xl border border-gray-3 bg-gray-1 px-4 text-base outline-none duration-200 placeholder:text-dark-4 focus:border-transparent focus:ring-2 focus:ring-orange/25 dark:border-darkTheme-border-color dark:bg-darkTheme-secondary-bg dark:text-darkTheme-body-color dark:placeholder:text-darkTheme-secondary-muted sm:text-sm"
-            />
-          </div>
+function Detail({
+  icon,
+  label,
+  value,
+}: {
+  icon: React.ReactNode;
+  label: string;
+  value: string;
+}) {
+  return (
+    <div className="min-w-0 rounded-xl border border-slate-200 p-3 dark:border-white/10">
+      <div className="flex items-start gap-2.5">
+        <span className="mt-0.5 text-orange">{icon}</span>
+        <div className="min-w-0">
+          <p className="text-[10px] font-bold uppercase tracking-wide text-slate-400">
+            {label}
+          </p>
+          <p className="mt-1 break-words text-sm font-semibold text-dark dark:text-white">
+            {value}
+          </p>
         </div>
       </div>
     </div>
   );
-};
+}
 
-export default Billing;
+export default CustomerDetails;

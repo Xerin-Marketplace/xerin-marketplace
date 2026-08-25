@@ -5,7 +5,6 @@ import { useRouter } from "next/navigation";
 import { useQuery } from "@tanstack/react-query";
 import Breadcrumb from "../Common/Breadcrumb";
 import Billing from "./Billing";
-import Shipping from "./Shipping";
 import ShippingMethod from "./ShippingMethod";
 import MapPinConfirmation from "./MapPinConfirmation";
 import DeliveryModeSelector from "./DeliveryMode";
@@ -14,6 +13,7 @@ import Coupon from "./Coupon";
 import { useBackendCart, mapBackendCartToUi } from "@/hooks/useCartActions";
 import { useCreateOrder } from "@/hooks/useCommerce";
 import { useAddresses } from "@/hooks/useAddresses";
+import { useUserProfile } from "@/hooks/useUserProfile";
 import {
   checkoutApi,
   paymentsApi,
@@ -23,7 +23,7 @@ import { formatCurrency } from "@/lib/formatCurrency";
 import PriceDisplay from "@/components/shared/PriceDisplay";
 import toast from "react-hot-toast";
 import { useAuthStore } from "@/store/useAuthStore";
-import { Globe2, MapPin } from "lucide-react";
+import { Check, ChevronLeft, ChevronRight, Globe2, MapPin } from "lucide-react";
 
 export type CheckoutForm = {
   firstName: string;
@@ -105,6 +105,16 @@ const countryFlag = (country?: string | null) => {
   return "🌍";
 };
 
+
+type CheckoutStep = 1 | 2 | 3 | 4;
+
+const CHECKOUT_STEPS: Array<{ id: CheckoutStep; label: string; shortLabel: string }> = [
+  { id: 1, label: "Delivery", shortLabel: "Delivery" },
+  { id: 2, label: "Logistics", shortLabel: "Logistics" },
+  { id: 3, label: "Review", shortLabel: "Review" },
+  { id: 4, label: "Payment", shortLabel: "Payment" },
+];
+
 const Checkout = () => {
   const router = useRouter();
   const [form, setForm] = useState<CheckoutForm>(initialForm);
@@ -114,6 +124,8 @@ const Checkout = () => {
   const [selectedCompanyId, setSelectedCompanyId] = useState("");
   const [paymentProvider, setPaymentProvider] = useState("");
   const [paymentPhone, setPaymentPhone] = useState("");
+  const [currentStep, setCurrentStep] = useState<CheckoutStep>(1);
+  const [maxReachedStep, setMaxReachedStep] = useState<CheckoutStep>(1);
 
   const isAuthenticated = useAuthStore((state) => state.isAuthenticated);
   const hasHydrated = useAuthStore((state) => state.hasHydrated);
@@ -130,6 +142,8 @@ const Checkout = () => {
     isLoadingAddresses,
     refetchAddresses,
   } = useAddresses(isAuthenticated);
+
+  const { profile, isLoadingProfile } = useUserProfile();
 
   const createOrder = useCreateOrder();
   const cartItems = cart ? mapBackendCartToUi(cart) : [];
@@ -200,6 +214,23 @@ const Checkout = () => {
   const selectedAddress = matchingAddresses.find(
     (address) => String(address.id) === selectedAddressId,
   );
+
+  useEffect(() => {
+    if (!profile && !selectedAddress) return;
+
+    setForm((current) => ({
+      ...current,
+      firstName: profile?.first_name || current.firstName,
+      lastName: profile?.last_name || current.lastName,
+      phone: profile?.phone || selectedAddress?.recipient_phone || current.phone,
+      email: profile?.email || current.email,
+      country: selectedAddress?.country || current.country,
+      street: selectedAddress?.street || current.street,
+      city: selectedAddress?.city || current.city,
+      region: selectedAddress?.region || current.region,
+      postalCode: selectedAddress?.postal_code || current.postalCode,
+    }));
+  }, [profile, selectedAddress]);
 
   const detectedDelivery = useQuery({
     queryKey: ["checkout", "detected-delivery-mode", selectedAddressId, cart?.total],
@@ -358,6 +389,83 @@ const Checkout = () => {
   const checkoutTotal =
     shippingAmount === null ? null : cartProductTotal + shippingAmount;
 
+
+  const step1Ready = Boolean(
+    destinationCountry &&
+      selectedAddressId &&
+      selectedAddress?.delivery_ready &&
+      detectedDelivery.data?.delivery_mode === deliveryMode,
+  );
+
+  const step2Ready = Boolean(
+    selectedCompanyId &&
+      form.shippingMethod &&
+      selectedShipping &&
+      frozenQuote.data &&
+      new Date(frozenQuote.data.expires_at).getTime() > Date.now(),
+  );
+
+  const goToStep = (step: CheckoutStep) => {
+    if (step > maxReachedStep + 1) {
+      toast.error("Complete the current checkout step first.");
+      return;
+    }
+    if (step > 1 && !step1Ready) {
+      toast.error("Confirm your delivery address before continuing.");
+      setCurrentStep(1);
+      return;
+    }
+    if (step > 2 && !step2Ready) {
+      toast.error("Select a logistics service and wait for the protected quote.");
+      setCurrentStep(2);
+      return;
+    }
+    setCurrentStep(step);
+    setMaxReachedStep((current) =>
+      Math.max(current, step) as CheckoutStep,
+    );
+    if (typeof window !== "undefined") {
+      window.scrollTo({ top: 0, behavior: "smooth" });
+    }
+  };
+
+  const continueFromDelivery = () => {
+    if (!destinationCountry) {
+      toast.error("Choose the delivery destination country.");
+      return;
+    }
+    if (!selectedAddressId) {
+      toast.error("Select a delivery address.");
+      return;
+    }
+    if (!selectedAddress?.delivery_ready) {
+      toast.error("Confirm the exact Google delivery point before continuing.");
+      return;
+    }
+    if (!detectedDelivery.data || detectedDelivery.data.delivery_mode !== deliveryMode) {
+      toast.error("Wait for Xerin to detect the delivery route.");
+      return;
+    }
+    goToStep(2);
+  };
+
+  const continueFromLogistics = () => {
+    if (!selectedCompanyId || !selectedShipping) {
+      toast.error("Select a logistics company and delivery price option.");
+      return;
+    }
+    if (!frozenQuote.data) {
+      toast.error("Wait for the protected delivery quote.");
+      return;
+    }
+    if (new Date(frozenQuote.data.expires_at).getTime() <= Date.now()) {
+      toast.error("The delivery quote expired. Recalculate delivery.");
+      void frozenQuote.refetch();
+      return;
+    }
+    goToStep(3);
+  };
+
   const updateField = (
     field: keyof CheckoutForm,
     value: string | boolean,
@@ -414,26 +522,6 @@ const Checkout = () => {
       return;
     }
 
-    const required = [
-      "firstName",
-      "lastName",
-      "country",
-      "street",
-      "city",
-      "region",
-      "phone",
-      "email",
-    ] as const;
-
-    for (const key of required) {
-      if (!form[key]) {
-        toast.error(
-          `Please fill in ${key.replace(/([A-Z])/g, " $1").trim()}`,
-        );
-        return;
-      }
-    }
-
     let createdOrderId: string | null = null;
 
     try {
@@ -441,14 +529,15 @@ const Checkout = () => {
         (option) => option.id === form.paymentMethod,
       );
 
-      const phoneNumber = paymentPhone.trim() || form.phone.trim();
+      const phoneNumber =
+        paymentPhone.trim() || profile?.phone?.trim() || form.phone.trim();
 
       if (
         selectedPayment?.requires_phone &&
         (!paymentProvider || !phoneNumber)
       ) {
         throw new Error(
-          "Select a mobile network and enter the AzamPay payment phone number",
+          "Select a mobile network and enter the mobile payment number",
         );
       }
 
@@ -534,7 +623,7 @@ const Checkout = () => {
 
       toast.success(
         payment.status === "processing"
-          ? "Payment request sent to AzamPay. Complete the payment on your phone."
+          ? "Payment request sent. Complete the payment on your phone."
           : "Order placed successfully",
       );
       router.push(
@@ -642,319 +731,381 @@ const Checkout = () => {
       <section className="overflow-hidden bg-gray-2 pb-8 pt-5 dark:bg-darkTheme-bg sm:py-12 lg:py-16">
         <div className="mx-auto w-full max-w-[1220px] px-3 sm:px-6 lg:px-8">
           <form onSubmit={handleSubmit}>
-            <div className="grid gap-5 sm:gap-7 lg:grid-cols-[minmax(0,1fr)_420px] xl:grid-cols-[minmax(0,1fr)_440px]">
-              <div className="min-w-0 space-y-4 sm:space-y-6">
-                <DeliveryModeSelector
-                  value={deliveryMode}
-                  config={deliveryConfig.data}
-                  detected={detectedDelivery.data}
-                  loading={detectedDelivery.isLoading || detectedDelivery.isFetching}
-                />
+            <CheckoutStepper
+              currentStep={currentStep}
+              onStepClick={goToStep}
+              step1Ready={step1Ready}
+              step2Ready={step2Ready}
+              maxReachedStep={maxReachedStep}
+            />
 
-                <section className="rounded-2xl border border-[#e7ebf0] bg-white p-4 shadow-sm dark:border-white/10 dark:bg-darkTheme-card sm:p-6">
-                  <div className="flex items-start gap-3">
-                    <span className="flex h-10 w-10 items-center justify-center rounded-xl bg-slate-100 text-slate-600">
-                      <MapPin size={18} />
-                    </span>
-                    <div>
-                      <h2 className="font-bold text-dark dark:text-white">
-                        Delivery Address
-                      </h2>
-                      <p className="mt-1 text-xs leading-5 text-dark-4">
-                        {destinationCountry
-                          ? `Delivery destination: ${destinationCountry}. Xerin will detect domestic or cross-border automatically.`
-                          : "Choose the delivery destination country first."}
-                      </p>
-                    </div>
-                  </div>
-
-                  <div className="mt-4 sm:mt-5">
-                      <label
-                        htmlFor="international-destination-country"
-                        className="mb-2 block text-xs font-bold uppercase tracking-wide text-dark-4"
-                      >
-                        Delivery destination country
-                      </label>
-                      <select
-                        id="international-destination-country"
-                        value={destinationCountry}
-                        onChange={(event) => {
-                          setDestinationCountry(event.target.value);
-                          setSelectedAddressId("");
-                          setSelectedCompanyId("");
-                          setForm((current) => ({
-                            ...current,
-                            shippingMethod: "",
-                          }));
-                        }}
-                        className="h-12 w-full rounded-xl border border-gray-3 bg-white px-3 text-base outline-none focus:border-orange dark:border-white/10 dark:bg-white/5 dark:text-white sm:px-4 sm:text-sm"
-                      >
-                        <option value="">Choose destination country</option>
-                        {internationalCountryOptions.map((country) => (
-                          <option key={country} value={country}>
-                            {countryFlag(country)} {country}
-                          </option>
-                        ))}
-                      </select>
-                      <p className="mt-2 text-xs leading-5 text-dark-4">
-                        Logistics companies will be checked against this country and your exact saved delivery address.
-                      </p>
-                    </div>
-
-                  {matchingAddresses.length ? (
-                    <>
-                      <select
-                        value={selectedAddressId}
-                        onChange={(event) =>
-                          setSelectedAddressId(event.target.value)
-                        }
-                        className="mt-4 h-12 w-full rounded-xl border border-gray-3 bg-white px-3 text-base outline-none focus:border-orange dark:border-white/10 dark:bg-white/5 dark:text-white sm:mt-5 sm:px-4 sm:text-sm"
-                      >
-                        {matchingAddresses.map((address) => (
-                          <option
-                            key={String(address.id)}
-                            value={String(address.id)}
-                          >
-                            {address.label
-                              ? `${address.label} · `
-                              : ""}
-                            {address.street}, {address.city},{" "}
-                            {address.region}, {address.country}
-                          </option>
-                        ))}
-                      </select>
-
-                      {selectedAddress && (
-                        <><div className="mt-3 break-words rounded-xl bg-slate-50 p-3 text-xs leading-5 text-slate-600 dark:bg-white/5 dark:text-white/60">
-                          {selectedAddress.recipient_name && (
-                            <b>{selectedAddress.recipient_name} · </b>
-                          )}
-                          {selectedAddress.street},{" "}
-                          {selectedAddress.city},{" "}
-                          {selectedAddress.region},{" "}
-                          {selectedAddress.country}
-                          {selectedAddress.recipient_phone
-                            ? ` · ${selectedAddress.recipient_phone}`
-                            : ""}
-                        </div><MapPinConfirmation address={selectedAddress} onConfirmed={() => { void refetchAddresses(); }} /></>
-                      )}
-                    </>
-                  ) : (
-                    <div className="mt-5 rounded-xl border border-amber-200 bg-amber-50 p-4 text-sm leading-6 text-amber-800">
-                      You do not have a{" "}
-                      {destinationCountry || "selected country"}{" "}
-                      delivery address yet.
-                    </div>
-                  )}
-
-                  <a
-                    href="/account/addresses"
-                    className="mt-4 inline-block text-sm font-semibold text-orange"
-                  >
-                    Manage delivery addresses
-                  </a>
-                </section>
-
-                <Billing form={form} updateField={updateField} />
-                <Shipping form={form} updateField={updateField} />
-
-                <div className="rounded-2xl border border-[#e7ebf0] bg-white p-4 shadow-sm dark:border-white/10 dark:bg-darkTheme-card sm:p-6">
-                  <label
-                    htmlFor="notes"
-                    className="mb-2.5 block font-semibold dark:text-darkTheme-body-color"
-                  >
-                    Delivery / Order Notes (optional)
-                  </label>
-                  <textarea
-                    id="notes"
-                    rows={5}
-                    value={form.notes}
-                    onChange={(event) =>
-                      updateField("notes", event.target.value)
-                    }
-                    placeholder="Building access, delivery instructions, package notes..."
-                    className="w-full rounded-xl border border-gray-3 bg-gray-1 p-3 text-base outline-none focus:border-orange dark:border-white/10 dark:bg-white/5 dark:text-white sm:p-4 sm:text-sm"
-                  />
-                </div>
-              </div>
-
-              <aside className="min-w-0">
-                <div className="rounded-2xl border border-[#e7ebf0] bg-white shadow-sm dark:border-white/10 dark:bg-darkTheme-card">
-                  <div className="border-b border-gray-3 px-4 py-4 dark:border-white/10 sm:px-5 sm:py-5">
-                    <h3 className="text-lg font-bold text-dark dark:text-white sm:text-xl">
-                      Your Order
-                    </h3>
-                  </div>
-
-                  <div className="px-4 pb-4 pt-1 sm:px-5 sm:pb-6 sm:pt-2">
-                    {cartItems.map((item) => (
-                      <div
-                        key={item.cartItemId}
-                        className="flex items-start justify-between gap-3 border-b border-gray-3 py-3 dark:border-white/10 sm:items-center sm:gap-4 sm:py-4"
-                      >
-                        <div className="min-w-0">
-                          <p className="truncate text-sm font-medium">
-                            {item.title}
-                          </p>
-                          <p className="text-xs text-dark-4">
-                            Qty {item.quantity}
-                          </p>
-                        </div>
-                        <p className="shrink-0 text-sm font-semibold">
-                          {formatCurrency(
-                            item.discountedPrice * item.quantity,
-                            cart?.currency,
-                          )}
-                        </p>
-                      </div>
-                    ))}
-
-                    <SummaryRow
-                      label="Product subtotal"
-                      value={<PriceDisplay amount={Number(cart?.subtotal || 0)} sourceCurrency="TZS" showSettlementTzs />}
+            <div className="mt-5 sm:mt-7">
+              <div className="min-w-0">
+                {currentStep === 1 && (
+                  <div className="space-y-4 sm:space-y-6">
+                    <StepHeading
+                      step="1"
+                      title="Delivery"
+                      description="Confirm where the order should go. Xerin automatically detects whether the route is domestic or cross-border."
                     />
 
-                    {Number(cart?.promotion_discount_amount || 0) > 0 && (
-                      <SummaryRow
-                        label="Seller promotion"
-                        value={<><span>-</span><PriceDisplay amount={Number(cart?.promotion_discount_amount || 0)} sourceCurrency="TZS" /></>}
-                        saving
-                      />
-                    )}
+                    <div className="grid items-start gap-5 lg:grid-cols-2 lg:gap-6">
+                      <div className="space-y-5">
+                        <DeliveryModeSelector
+                          value={deliveryMode}
+                          config={deliveryConfig.data}
+                          detected={detectedDelivery.data}
+                          loading={detectedDelivery.isLoading || detectedDelivery.isFetching}
+                        />
 
-                    {Number(cart?.coupon_discount_amount || 0) > 0 && (
-                      <SummaryRow
-                        label="Platform coupon"
-                        value={<><span>-</span><PriceDisplay amount={Number(cart?.coupon_discount_amount || 0)} sourceCurrency="TZS" /></>}
-                        saving
-                      />
-                    )}
-
-                    <SummaryRow
-                      label="Delivery"
-                      value={
-                        shippingAmount === null
-                          ? "Select delivery"
-                          : <PriceDisplay amount={shippingAmount} sourceCurrency="TZS" />
-                      }
-                    />
-
-                    <div className="mt-2 border-t border-gray-3 pt-2 dark:border-white/10">
-                      <SummaryRow
-                        label="Grand Total"
-                        value={
-                          checkoutTotal === null
-                            ? "Pending delivery quote"
-                            : <PriceDisplay amount={checkoutTotal} sourceCurrency="TZS" showSettlementTzs />
-                        }
-                        strong
-                      />
-                      {frozenQuote.data && <p className="pb-2 text-right text-[10px] leading-4 text-emerald-700">Protected quote ready · expires {new Date(frozenQuote.data.expires_at).toLocaleTimeString([], { hour: "2-digit", minute: "2-digit" })}</p>}
-                    </div>
-                  </div>
-                </div>
-
-                {(eligibleLogistics.error || deliveryPricing.error || frozenQuote.error) && <div className="mt-4 rounded-xl border border-red-200 bg-red-50 p-3 text-xs leading-5 text-red-700">{errorText(eligibleLogistics.error || deliveryPricing.error || frozenQuote.error)}</div>}
-
-                <ShippingMethod
-                  companies={eligibleLogistics.data?.results ?? []}
-                  excludedCompanies={eligibleLogistics.data?.excluded_companies ?? []}
-                  options={deliveryPricing.data?.options ?? []}
-                  selected={form.shippingMethod}
-                  onChange={(value) =>
-                    updateField("shippingMethod", value)
-                  }
-                  selectedCompanyId={selectedCompanyId}
-                  onCompanyChange={changeCompany}
-                  deliveryMode={deliveryMode}
-                  destinationCountry={destinationCountry}
-                  destinationRegion={selectedAddress?.region || ""}
-                  destinationCity={selectedAddress?.city || selectedAddress?.district || ""}
-                  hasSelectedAddress={Boolean(selectedAddressId)}
-                  addressReady={Boolean(selectedAddress?.delivery_ready)}
-                  isLoadingCompanies={eligibleLogistics.isLoading || eligibleLogistics.isFetching}
-                  isLoadingPricing={deliveryPricing.isLoading || deliveryPricing.isFetching}
-                />
-
-                {frozenQuote.data && selectedShipping && (
-                  <section className="mt-4 rounded-2xl border border-emerald-200 bg-emerald-50/70 p-4 dark:border-emerald-500/20 dark:bg-emerald-500/5 sm:mt-6 sm:p-5">
-                    <div className="flex flex-wrap items-start justify-between gap-3">
-                      <div>
-                        <p className="text-sm font-bold text-emerald-900 dark:text-emerald-200">Protected delivery quote</p>
-                        <p className="mt-1 text-xs leading-5 text-emerald-800/80 dark:text-emerald-200/70">Store origin, Google road distance and TZS delivery price are frozen for this checkout.</p>
-                      </div>
-                      <span className="rounded-full bg-white px-3 py-1 text-[10px] font-bold uppercase text-emerald-700 shadow-sm dark:bg-white/10 dark:text-emerald-200">Quote locked</span>
-                    </div>
-                    <div className="mt-4 grid gap-2">
-                      {frozenQuote.data.seller_routes_snapshot.map((route, index) => (
-                        <div key={`${route.store_id || route.pickup_location_id || index}`} className="rounded-xl border border-emerald-100 bg-white/80 p-3 text-xs dark:border-white/10 dark:bg-white/5">
-                          <div className="flex flex-wrap items-center justify-between gap-2">
-                            <b className="text-dark dark:text-white">{route.store_name || route.pickup_label || `Store ${index + 1}`}</b>
-                            <span className="font-bold uppercase text-emerald-700 dark:text-emerald-300">{route.route_type === "cross_border" ? "Cross-border" : "Domestic"}</span>
+                        <section className="rounded-2xl border border-[#e7ebf0] bg-white p-4 shadow-sm dark:border-white/10 dark:bg-darkTheme-card sm:p-6">
+                          <div className="flex items-start gap-3">
+                            <span className="flex h-10 w-10 items-center justify-center rounded-xl bg-slate-100 text-slate-600">
+                              <MapPin size={18} />
+                            </span>
+                            <div>
+                              <h2 className="font-bold text-dark dark:text-white">Delivery Address</h2>
+                              <p className="mt-1 text-xs leading-5 text-dark-4">
+                                {destinationCountry
+                                  ? `Delivery destination: ${destinationCountry}.`
+                                  : "Choose the delivery destination country first."}
+                              </p>
+                            </div>
                           </div>
-                          <p className="mt-1 text-dark-4">{route.origin_country || "Store origin"} → {frozenQuote.data.address_snapshot?.country || destinationCountry || "Destination"} · {Number(route.distance_km || 0).toFixed(1)} km</p>
-                        </div>
-                      ))}
+
+                          <div className="mt-4 sm:mt-5">
+                            <label htmlFor="delivery-destination-country" className="mb-2 block text-xs font-bold uppercase tracking-wide text-dark-4">
+                              Delivery destination country
+                            </label>
+                            <select
+                              id="delivery-destination-country"
+                              value={destinationCountry}
+                              onChange={(event) => {
+                                setDestinationCountry(event.target.value);
+                                setSelectedAddressId("");
+                                setSelectedCompanyId("");
+                                setForm((current) => ({ ...current, shippingMethod: "" }));
+                              }}
+                              className="h-12 w-full rounded-xl border border-gray-3 bg-white px-3 text-base outline-none focus:border-orange dark:border-white/10 dark:bg-white/5 dark:text-white sm:px-4 sm:text-sm"
+                            >
+                              <option value="">Choose destination country</option>
+                              {internationalCountryOptions.map((country) => (
+                                <option key={country} value={country}>
+                                  {countryFlag(country)} {country}
+                                </option>
+                              ))}
+                            </select>
+                          </div>
+
+                          {matchingAddresses.length ? (
+                            <>
+                              <select
+                                value={selectedAddressId}
+                                onChange={(event) => setSelectedAddressId(event.target.value)}
+                                className="mt-4 h-12 w-full rounded-xl border border-gray-3 bg-white px-3 text-base outline-none focus:border-orange dark:border-white/10 dark:bg-white/5 dark:text-white sm:mt-5 sm:px-4 sm:text-sm"
+                              >
+                                {matchingAddresses.map((address) => (
+                                  <option key={String(address.id)} value={String(address.id)}>
+                                    {address.label ? `${address.label} · ` : ""}
+                                    {address.street}, {address.city}, {address.region}, {address.country}
+                                  </option>
+                                ))}
+                              </select>
+
+                              {selectedAddress && (
+                                <>
+                                  <div className="mt-3 break-words rounded-xl bg-slate-50 p-3 text-xs leading-5 text-slate-600 dark:bg-white/5 dark:text-white/60">
+                                    {selectedAddress.recipient_name && <b>{selectedAddress.recipient_name} · </b>}
+                                    {selectedAddress.street}, {selectedAddress.city}, {selectedAddress.region}, {selectedAddress.country}
+                                    {selectedAddress.recipient_phone ? ` · ${selectedAddress.recipient_phone}` : ""}
+                                  </div>
+                                  <MapPinConfirmation
+                                    address={selectedAddress}
+                                    onConfirmed={() => { void refetchAddresses(); }}
+                                  />
+                                </>
+                              )}
+                            </>
+                          ) : (
+                            <div className="mt-5 rounded-xl border border-amber-200 bg-amber-50 p-4 text-sm leading-6 text-amber-800">
+                              You do not have a {destinationCountry || "selected country"} delivery address yet.
+                            </div>
+                          )}
+
+                          <a href="/account/addresses" className="mt-4 inline-block text-sm font-semibold text-orange">
+                            Manage delivery addresses
+                          </a>
+                        </section>
+                      </div>
+
+                      <div className="space-y-5">
+                        <Billing
+                          profile={profile}
+                          selectedAddress={selectedAddress}
+                          isLoading={isLoadingProfile}
+                        />
+
+                        <section className="rounded-2xl border border-[#e7ebf0] bg-white p-4 shadow-sm dark:border-white/10 dark:bg-darkTheme-card sm:p-6">
+                          <label htmlFor="notes" className="mb-2.5 block font-semibold dark:text-darkTheme-body-color">
+                            Delivery / Order Notes <span className="font-normal text-dark-4">(optional)</span>
+                          </label>
+                          <textarea
+                            id="notes"
+                            rows={5}
+                            value={form.notes}
+                            onChange={(event) => updateField("notes", event.target.value)}
+                            placeholder="Building access, delivery instructions, package notes..."
+                            className="w-full rounded-xl border border-gray-3 bg-gray-1 p-3 text-base outline-none focus:border-orange dark:border-white/10 dark:bg-white/5 dark:text-white sm:p-4 sm:text-sm"
+                          />
+                        </section>
+
+                        <section className="rounded-2xl border border-orange/20 bg-orange/5 p-4 text-xs leading-5 text-dark-4 sm:p-5">
+                          <b className="text-dark dark:text-white">Ready for logistics?</b>
+                          <p className="mt-1">Verify the detected delivery type, address and customer details, then continue.</p>
+                        </section>
+                      </div>
                     </div>
-                    <div className="mt-4 flex flex-wrap items-center justify-between gap-3 border-t border-emerald-200 pt-3 text-xs dark:border-emerald-500/20">
-                      <span>Billable distance: <b>{Number(frozenQuote.data.billable_distance_km).toFixed(1)} km</b></span>
-                      <span>Delivery: <b><PriceDisplay amount={Number(frozenQuote.data.delivery_amount)} sourceCurrency="TZS" /></b></span>
-                      <span>Valid until: <b>{new Date(frozenQuote.data.expires_at).toLocaleTimeString([], { hour: "2-digit", minute: "2-digit" })}</b></span>
-                    </div>
-                  </section>
+
+                    <StepActions
+                      nextLabel="Continue to Logistics"
+                      onNext={continueFromDelivery}
+                      nextDisabled={!step1Ready}
+                    />
+                  </div>
                 )}
 
-                <Coupon />
+                {currentStep === 2 && (
+                  <div className="space-y-4 sm:space-y-6">
+                    <StepHeading
+                      step="2"
+                      title="Choose Logistics"
+                      description="Choose a company and service that covers every store-to-customer route in this order."
+                    />
 
-                <PaymentMethod
-                  options={paymentOptions.data ?? []}
-                  selected={form.paymentMethod}
-                  onChange={(value) =>
-                    updateField("paymentMethod", value)
-                  }
-                  isLoading={paymentOptions.isLoading}
-                  provider={paymentProvider}
-                  phoneNumber={paymentPhone}
-                  onProviderChange={setPaymentProvider}
-                  onPhoneNumberChange={setPaymentPhone}
-                />
+                    {(eligibleLogistics.error || deliveryPricing.error || frozenQuote.error) && (
+                      <div className="rounded-xl border border-red-200 bg-red-50 p-3 text-xs leading-5 text-red-700">
+                        {errorText(eligibleLogistics.error || deliveryPricing.error || frozenQuote.error)}
+                      </div>
+                    )}
 
-                <div className="mt-4 rounded-xl border border-blue-200 bg-blue-50 p-3 text-[11px] leading-5 text-blue-800 sm:mt-7.5 sm:p-4 sm:text-xs">
-                  <b>Final checkout protection:</b> when you place the order, the
-                  backend rechecks the current product prices, stock, seller
-                  promotion, platform coupon, delivery address, logistics scope,
-                  shipment weight and selected shipping rate. The amount stored on
-                  the Order becomes the payment source of truth.
-                </div>
+                    <div className="grid items-start gap-5 lg:grid-cols-[minmax(0,1.15fr)_minmax(340px,.85fr)] lg:gap-6">
+                      <ShippingMethod
+                        companies={eligibleLogistics.data?.results ?? []}
+                        excludedCompanies={eligibleLogistics.data?.excluded_companies ?? []}
+                        options={deliveryPricing.data?.options ?? []}
+                        selected={form.shippingMethod}
+                        onChange={(value) => updateField("shippingMethod", value)}
+                        selectedCompanyId={selectedCompanyId}
+                        onCompanyChange={changeCompany}
+                        deliveryMode={deliveryMode}
+                        destinationCountry={destinationCountry}
+                        destinationRegion={selectedAddress?.region || ""}
+                        destinationCity={selectedAddress?.city || selectedAddress?.district || ""}
+                        hasSelectedAddress={Boolean(selectedAddressId)}
+                        addressReady={Boolean(selectedAddress?.delivery_ready)}
+                        isLoadingCompanies={eligibleLogistics.isLoading || eligibleLogistics.isFetching}
+                        isLoadingPricing={deliveryPricing.isLoading || deliveryPricing.isFetching}
+                      />
 
-                <div className="xerin-checkout-mobile-cta mt-4 sm:mt-7.5">
-                <button
-                  type="submit"
-                  disabled={
-                    createOrder.isPending ||
-                    isCreatingAddress ||
-                    eligibleLogistics.isFetching ||
-                    deliveryPricing.isFetching ||
-                    frozenQuote.isFetching ||
-                    !selectedAddressId ||
-                    !selectedAddress?.delivery_ready ||
-                    !form.paymentMethod ||
-                    !form.shippingMethod ||
-                    !frozenQuote.data
-                  }
-                  className="flex h-12 w-full items-center justify-center rounded-xl bg-orange px-5 text-base font-semibold text-white shadow-sm transition hover:bg-orange-dark disabled:cursor-not-allowed disabled:opacity-50 sm:text-sm"
-                >
-                  {createOrder.isPending || isCreatingAddress
-                    ? "Processing..."
-                    : "Place Order & Continue to Payment"}
-                </button>
-                </div>
+                      <section className="rounded-2xl border border-[#e7ebf0] bg-white p-4 shadow-sm dark:border-white/10 dark:bg-darkTheme-card sm:p-5">
+                        <h3 className="font-bold text-dark dark:text-white">Delivery quote</h3>
+                        {!frozenQuote.data || !selectedShipping ? (
+                          <p className="mt-3 text-sm leading-6 text-dark-4">
+                            Select a logistics company and delivery service to generate the protected quote.
+                          </p>
+                        ) : (
+                          <>
+                            <div className="mt-4 space-y-2">
+                              {frozenQuote.data.seller_routes_snapshot.map((route, index) => (
+                                <div key={`${route.store_id || route.pickup_location_id || index}`} className="rounded-xl bg-slate-50 p-3 text-xs dark:bg-white/5">
+                                  <div className="flex flex-wrap items-center justify-between gap-2">
+                                    <b className="text-dark dark:text-white">{route.store_name || route.pickup_label || `Store ${index + 1}`}</b>
+                                    <span className="font-bold uppercase text-emerald-700 dark:text-emerald-300">
+                                      {route.route_type === "cross_border" ? "Cross-border" : "Domestic"}
+                                    </span>
+                                  </div>
+                                  <p className="mt-1 text-dark-4">
+                                    {route.origin_country || "Store origin"} → {frozenQuote.data.address_snapshot?.country || destinationCountry || "Destination"} · {Number(route.distance_km || 0).toFixed(1)} km
+                                  </p>
+                                </div>
+                              ))}
+                            </div>
+                            <div className="mt-4 border-t border-gray-3 pt-3 dark:border-white/10">
+                              <SummaryRow label="Billable distance" value={`${Number(frozenQuote.data.billable_distance_km).toFixed(1)} km`} />
+                              <SummaryRow label="Delivery" value={<PriceDisplay amount={Number(frozenQuote.data.delivery_amount)} sourceCurrency="TZS" />} strong />
+                              <p className="mt-1 text-right text-[10px] text-emerald-700">
+                                Quote locked until {new Date(frozenQuote.data.expires_at).toLocaleTimeString([], { hour: "2-digit", minute: "2-digit" })}
+                              </p>
+                            </div>
+                          </>
+                        )}
+                      </section>
+                    </div>
 
-                <p className="mt-3 text-center text-[11px] leading-5 text-dark-4">
-                  Display currency is for convenience only. Your payment is
-                  always settled in TZS using the backend-confirmed Grand Total.
-                </p>
-              </aside>
+                    <StepActions
+                      onBack={() => goToStep(1)}
+                      nextLabel="Continue to Review"
+                      onNext={continueFromLogistics}
+                      nextDisabled={!step2Ready}
+                    />
+                  </div>
+                )}
+
+                {currentStep === 3 && (
+                  <div className="space-y-4 sm:space-y-6">
+                    <StepHeading
+                      step="3"
+                      title="Review Order"
+                      description="Review products, delivery charge and any coupon before choosing payment."
+                    />
+
+                    <div className="grid items-start gap-5 lg:grid-cols-2 lg:gap-6">
+                      <div className="space-y-5">
+                        <Coupon />
+
+                        {selectedAddress && (
+                          <section className="rounded-2xl border border-[#e7ebf0] bg-white p-4 text-sm shadow-sm dark:border-white/10 dark:bg-darkTheme-card sm:p-6">
+                            <h3 className="font-bold text-dark dark:text-white">Delivery summary</h3>
+                            <p className="mt-3 text-dark-4">
+                              <b className="text-dark dark:text-white">{selectedAddress.recipient_name || profile?.full_name || "Customer"}</b><br />
+                              {selectedAddress.street}, {selectedAddress.city}, {selectedAddress.region}, {selectedAddress.country}
+                            </p>
+                            {selectedShipping && (
+                              <p className="mt-3 text-dark-4">
+                                Logistics: <b className="text-dark dark:text-white">{eligibleLogistics.data?.results.find((company) => company.logistics_company_id === selectedCompanyId)?.name || "Selected provider"}</b><br />
+                                Service: {selectedShipping.method_name} · {deliveryMode === "international" ? "Cross-border" : "Domestic"}
+                              </p>
+                            )}
+                          </section>
+                        )}
+                      </div>
+
+                      <section className="rounded-2xl border border-[#e7ebf0] bg-white shadow-sm dark:border-white/10 dark:bg-darkTheme-card">
+                        <div className="border-b border-gray-3 px-4 py-4 dark:border-white/10 sm:px-6">
+                          <div className="flex items-center justify-between gap-3">
+                            <h3 className="font-bold text-dark dark:text-white">Order review</h3>
+                            <span className="rounded-full bg-slate-100 px-2.5 py-1 text-[10px] font-bold text-slate-600">
+                              {cartItems.length} item{cartItems.length === 1 ? "" : "s"}
+                            </span>
+                          </div>
+                        </div>
+                        <div className="p-4 sm:p-6">
+                          {cartItems.map((item) => (
+                            <div key={item.cartItemId} className="flex items-start justify-between gap-3 border-b border-gray-3 py-3 dark:border-white/10">
+                              <div className="min-w-0">
+                                <p className="truncate text-sm font-semibold text-dark dark:text-white">{item.title}</p>
+                                <p className="mt-1 text-xs text-dark-4">Qty {item.quantity}</p>
+                              </div>
+                              <p className="shrink-0 text-sm font-bold">
+                                {formatCurrency(item.discountedPrice * item.quantity, cart?.currency)}
+                              </p>
+                            </div>
+                          ))}
+                          <SummaryRow label="Product subtotal" value={<PriceDisplay amount={Number(cart?.subtotal || 0)} sourceCurrency="TZS" showSettlementTzs />} />
+                          {Number(cart?.promotion_discount_amount || 0) > 0 && (
+                            <SummaryRow label="Seller promotion" value={<><span>-</span><PriceDisplay amount={Number(cart?.promotion_discount_amount || 0)} sourceCurrency="TZS" /></>} saving />
+                          )}
+                          {Number(cart?.coupon_discount_amount || 0) > 0 && (
+                            <SummaryRow label="Platform coupon" value={<><span>-</span><PriceDisplay amount={Number(cart?.coupon_discount_amount || 0)} sourceCurrency="TZS" /></>} saving />
+                          )}
+                          <SummaryRow label="Delivery" value={shippingAmount === null ? "Pending quote" : <PriceDisplay amount={shippingAmount} sourceCurrency="TZS" />} />
+                          <div className="mt-2 border-t border-gray-3 pt-2 dark:border-white/10">
+                            <SummaryRow label="Grand Total" value={checkoutTotal === null ? "Pending delivery quote" : <PriceDisplay amount={checkoutTotal} sourceCurrency="TZS" showSettlementTzs />} strong />
+                          </div>
+                        </div>
+                      </section>
+                    </div>
+
+                    <StepActions
+                      onBack={() => goToStep(2)}
+                      nextLabel="Continue to Payment"
+                      onNext={() => goToStep(4)}
+                      nextDisabled={!step2Ready}
+                    />
+                  </div>
+                )}
+
+                {currentStep === 4 && (
+                  <div className="space-y-4 sm:space-y-6">
+                    <StepHeading
+                      step="4"
+                      title="Payment"
+                      description="Choose Mobile Payment or Card Payment for the backend-confirmed TZS total."
+                    />
+
+                    <div className="grid items-start gap-5 lg:grid-cols-[minmax(0,1.15fr)_minmax(340px,.85fr)] lg:gap-6">
+                      <PaymentMethod
+                        options={paymentOptions.data ?? []}
+                        selected={form.paymentMethod}
+                        onChange={(value) => updateField("paymentMethod", value)}
+                        isLoading={paymentOptions.isLoading}
+                        provider={paymentProvider}
+                        phoneNumber={paymentPhone}
+                        onProviderChange={setPaymentProvider}
+                        onPhoneNumberChange={setPaymentPhone}
+                      />
+
+                      <section className="rounded-2xl border border-[#e7ebf0] bg-white p-4 shadow-sm dark:border-white/10 dark:bg-darkTheme-card sm:p-6">
+                        <h3 className="font-bold text-dark dark:text-white">Final total</h3>
+                        <div className="mt-3">
+                          <SummaryRow label="Product subtotal" value={<PriceDisplay amount={Number(cart?.subtotal || 0)} sourceCurrency="TZS" showSettlementTzs />} />
+                          {Number(cart?.coupon_discount_amount || 0) > 0 && (
+                            <SummaryRow label="Coupon" value={<><span>-</span><PriceDisplay amount={Number(cart?.coupon_discount_amount || 0)} sourceCurrency="TZS" /></>} saving />
+                          )}
+                          <SummaryRow label="Delivery" value={shippingAmount === null ? "Pending" : <PriceDisplay amount={shippingAmount} sourceCurrency="TZS" />} />
+                          <div className="mt-2 border-t border-gray-3 pt-2 dark:border-white/10">
+                            <SummaryRow label="Grand Total" value={checkoutTotal === null ? "Pending quote" : <PriceDisplay amount={checkoutTotal} sourceCurrency="TZS" showSettlementTzs />} strong />
+                          </div>
+                        </div>
+                        {selectedAddress && (
+                          <div className="mt-4 rounded-xl bg-slate-50 p-3 text-xs leading-5 text-dark-4 dark:bg-white/5">
+                            <b className="text-dark dark:text-white">Deliver to</b><br />
+                            {selectedAddress.street}, {selectedAddress.city}, {selectedAddress.country}
+                          </div>
+                        )}
+                        <div className="mt-4 rounded-xl border border-blue-200 bg-blue-50 p-3 text-[11px] leading-5 text-blue-800 sm:text-xs">
+                          <b>Final checkout protection:</b> Xerin rechecks prices, stock, address, logistics and the protected shipping rate before creating the order.
+                        </div>
+                      </section>
+                    </div>
+
+                    <div className="mt-5 flex flex-col-reverse gap-3 sm:flex-row sm:items-center sm:justify-between">
+                      <button
+                        type="button"
+                        onClick={() => goToStep(3)}
+                        className="inline-flex h-12 items-center justify-center gap-2 rounded-xl border border-gray-3 bg-white px-5 font-semibold text-dark hover:border-orange dark:border-white/10 dark:bg-white/5 dark:text-white"
+                      >
+                        <ChevronLeft size={17} /> Back to Review
+                      </button>
+                      <button
+                        type="submit"
+                        disabled={
+                          createOrder.isPending ||
+                          isCreatingAddress ||
+                          eligibleLogistics.isFetching ||
+                          deliveryPricing.isFetching ||
+                          frozenQuote.isFetching ||
+                          !selectedAddressId ||
+                          !selectedAddress?.delivery_ready ||
+                          !form.paymentMethod ||
+                          !form.shippingMethod ||
+                          !frozenQuote.data
+                        }
+                        className="inline-flex h-12 items-center justify-center rounded-xl bg-orange px-6 text-base font-semibold text-white shadow-sm transition hover:bg-orange-dark disabled:cursor-not-allowed disabled:opacity-50 sm:text-sm"
+                      >
+                        {createOrder.isPending || isCreatingAddress ? "Processing..." : "Pay Securely"}
+                      </button>
+                    </div>
+
+                    <p className="text-center text-[11px] leading-5 text-dark-4">
+                      Display currency is for convenience only. Payment is settled in TZS using the backend-confirmed Grand Total.
+                    </p>
+                  </div>
+                )}
+
+                              </div>
+
+
             </div>
           </form>
         </div>
@@ -962,6 +1113,143 @@ const Checkout = () => {
     </>
   );
 };
+
+function CheckoutStepper({
+  currentStep,
+  onStepClick,
+  step1Ready,
+  step2Ready,
+  maxReachedStep,
+}: {
+  currentStep: CheckoutStep;
+  onStepClick: (step: CheckoutStep) => void;
+  step1Ready: boolean;
+  step2Ready: boolean;
+  maxReachedStep: CheckoutStep;
+}) {
+  const completed = (step: CheckoutStep) =>
+    step === 1 ? step1Ready && currentStep > 1 :
+    step === 2 ? step2Ready && currentStep > 2 :
+    currentStep > step;
+
+  const unlocked = (step: CheckoutStep) => {
+    if (step === 1) return true;
+    if (step > maxReachedStep + 1) return false;
+    if (step === 2) return step1Ready;
+    return step1Ready && step2Ready;
+  };
+
+  return (
+    <nav aria-label="Checkout progress" className="rounded-2xl border border-[#e7ebf0] bg-white p-3 shadow-sm dark:border-white/10 dark:bg-darkTheme-card sm:p-4">
+      <ol className="grid grid-cols-4 gap-1 sm:gap-3">
+        {CHECKOUT_STEPS.map((step, index) => {
+          const active = currentStep === step.id;
+          const done = completed(step.id);
+          const enabled = unlocked(step.id);
+          return (
+            <li key={step.id} className="relative min-w-0">
+              <button
+                type="button"
+                disabled={!enabled}
+                onClick={() => onStepClick(step.id)}
+                className={`group flex w-full flex-col items-center gap-2 rounded-xl px-1 py-2 text-center transition sm:flex-row sm:px-3 sm:text-left ${
+                  active
+                    ? "bg-orange/10 text-orange"
+                    : done
+                      ? "text-emerald-700"
+                      : enabled
+                        ? "text-slate-600 hover:bg-slate-50"
+                        : "cursor-not-allowed text-slate-300"
+                }`}
+              >
+                <span className={`flex h-8 w-8 shrink-0 items-center justify-center rounded-full text-xs font-bold ${
+                  active
+                    ? "bg-orange text-white"
+                    : done
+                      ? "bg-emerald-600 text-white"
+                      : "bg-slate-100 text-slate-500"
+                }`}>
+                  {done ? <Check size={15} /> : step.id}
+                </span>
+                <span className="min-w-0">
+                  <span className="hidden text-[10px] font-bold uppercase tracking-wide text-slate-400 sm:block">
+                    Step {step.id}
+                  </span>
+                  <span className="block truncate text-[11px] font-bold sm:text-sm">
+                    {step.shortLabel}
+                  </span>
+                </span>
+              </button>
+              {index < CHECKOUT_STEPS.length - 1 && (
+                <span className="absolute -right-1 top-6 hidden h-px w-2 bg-slate-200 sm:block" aria-hidden="true" />
+              )}
+            </li>
+          );
+        })}
+      </ol>
+    </nav>
+  );
+}
+
+function StepHeading({
+  step,
+  title,
+  description,
+}: {
+  step: string;
+  title: string;
+  description: string;
+}) {
+  return (
+    <div className="mb-4 sm:mb-6">
+      <p className="text-xs font-bold uppercase tracking-[0.16em] text-orange">
+        Step {step} of 4
+      </p>
+      <h1 className="mt-1 text-xl font-bold text-dark dark:text-white sm:text-2xl">
+        {title}
+      </h1>
+      <p className="mt-1 max-w-2xl text-sm leading-6 text-dark-4">
+        {description}
+      </p>
+    </div>
+  );
+}
+
+function StepActions({
+  onBack,
+  onNext,
+  nextLabel,
+  nextDisabled = false,
+}: {
+  onBack?: () => void;
+  onNext: () => void;
+  nextLabel: string;
+  nextDisabled?: boolean;
+}) {
+  return (
+    <div className="mt-5 flex flex-col-reverse gap-3 sm:flex-row sm:items-center sm:justify-between">
+      {onBack ? (
+        <button
+          type="button"
+          onClick={onBack}
+          className="inline-flex h-12 items-center justify-center gap-2 rounded-xl border border-gray-3 bg-white px-5 font-semibold text-dark hover:border-orange dark:border-white/10 dark:bg-white/5 dark:text-white"
+        >
+          <ChevronLeft size={17} /> Back
+        </button>
+      ) : (
+        <span />
+      )}
+      <button
+        type="button"
+        onClick={onNext}
+        disabled={nextDisabled}
+        className="inline-flex h-12 items-center justify-center gap-2 rounded-xl bg-orange px-6 font-semibold text-white hover:bg-orange-dark disabled:cursor-not-allowed disabled:opacity-50"
+      >
+        {nextLabel} <ChevronRight size={17} />
+      </button>
+    </div>
+  );
+}
 
 function SummaryRow({
   label,
