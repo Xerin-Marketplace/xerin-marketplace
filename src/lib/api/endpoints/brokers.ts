@@ -1,3 +1,4 @@
+import type { BrokerAnalyticsOverview, PaginatedBrokerCampaignAnalytics } from "@/types/api/broker";
 import axiosInstance from "../client";
 import type { Broker, BrokerKycDocument, BrokerKycStatus, PaginatedBrokers, BrokerProduct, BrokerProductCreate, BrokerProductUpdate, BrokerOpportunity, BrokerOfferAcceptance, BrokerReferralLink, PaginatedBrokerCommissions, BrokerCommissionSummary, BrokerWallet, PaginatedBrokerWalletTransactions, BrokerPayoutAccount, BrokerPayoutAccountCreate, BrokerPayoutRequest, PaginatedBrokerPayouts } from "@/types/api/broker";
 export const brokersApi = {
@@ -41,4 +42,7 @@ export const brokersApi = {
   adminVerifyPayoutAccount: async (id:string,status:"verified"|"rejected",note?:string) => (await axiosInstance.patch<BrokerPayoutAccount>(`/brokers/admin/payout-accounts/${id}/verification`,{status,note:note||null})).data,
   adminPayouts: async (params?:Record<string,string|number>) => (await axiosInstance.get<PaginatedBrokerPayouts>("/brokers/admin/payouts",{params})).data,
   adminUpdatePayout: async (id:string,payload:{status:string;provider_reference?:string|null;note?:string|null}) => (await axiosInstance.patch<BrokerPayoutRequest>(`/brokers/admin/payouts/${id}`,payload)).data,
+  trackReferralClick: async (referralCode:string,payload:{product_id:string;visitor_key:string;source?:string|null}) => (await axiosInstance.post(`/brokers/referrals/${encodeURIComponent(referralCode)}/click`,payload)).data,
+  analyticsOverview: async (days=30) => (await axiosInstance.get<BrokerAnalyticsOverview>("/brokers/analytics/overview",{params:{days}})).data,
+  campaignAnalytics: async (params?:Record<string,string|number>) => (await axiosInstance.get<PaginatedBrokerCampaignAnalytics>("/brokers/analytics/campaigns",{params})).data,
 };

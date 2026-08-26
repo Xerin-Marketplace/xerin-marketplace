@@ -62,3 +62,16 @@ export type BrokerPayoutRequest = {
   provider_reference?:string|null; broker_note?:string|null; admin_note?:string|null; requested_at:string; processed_at?:string|null; completed_at?:string|null;
 };
 export type PaginatedBrokerPayouts = { total:number; page:number; page_size:number; total_pages:number; results:BrokerPayoutRequest[]; };
+
+export type BrokerAnalyticsOverview = {
+  currency:string; period_days:number; total_clicks:number; unique_visitors:number; attributed_customers:number;
+  attributed_orders:number; successful_sales:number; refunded_sales:number; conversion_rate:string;
+  pending_earnings:string; available_earnings:string; lifetime_earnings:string; wallet_available:string; wallet_pending:string; wallet_paid_out:string;
+  currently_promoting:number; available_opportunities:number; own_products_active:number; own_products_expired:number; own_products_draft:number;
+};
+export type BrokerCampaignAnalytics = {
+  offer_id:string; product_id:string; product_name:string; referral_code?:string|null; is_active:boolean; accepted_at:string;
+  clicks:number; unique_visitors:number; attributed_customers:number; attributed_orders:number; successful_sales:number;
+  conversion_rate:string; gross_commission:string; reversed_commission:string; net_commission:string;
+};
+export type PaginatedBrokerCampaignAnalytics = { total:number; page:number; page_size:number; total_pages:number; results:BrokerCampaignAnalytics[]; };
