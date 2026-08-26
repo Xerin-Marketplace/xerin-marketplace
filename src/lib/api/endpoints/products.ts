@@ -75,9 +75,10 @@ export const getBrands = async (): Promise<Brand[]> => {
   return res.data;
 };
 
-export const createProduct = async (payload: ProductRequest,
-  BrokerOffer,
-  BrokerOfferRequest, _token?: string | null): Promise<Product> => {
+export const createProduct = async (
+  payload: ProductRequest,
+  _token?: string | null
+): Promise<Product> => {
   const res = await axiosInstance.post<Product>(API_ENDPOINTS.products.list, payload);
   return res.data;
 };
