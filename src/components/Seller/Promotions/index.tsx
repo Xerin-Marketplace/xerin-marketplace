@@ -374,9 +374,6 @@ export default function SellerPromotions() {
                 <TicketPercent size={21} />
               </span>
               <div>
-                <p className="text-xs font-bold uppercase tracking-[0.14em] text-[#f7941d]">
-                  Seller Phase 3
-                </p>
                 <h1 className="mt-0.5 text-2xl font-bold tracking-[-0.02em] text-[#111827] dark:text-white">
                   Promotions & Promo Codes
                 </h1>

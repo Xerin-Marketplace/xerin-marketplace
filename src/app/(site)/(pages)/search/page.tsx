@@ -126,9 +126,7 @@ export default function SearchPage() {
       <section className="bg-gray-2 py-12 dark:bg-darkTheme-bg">
         <div className="mx-auto max-w-[1280px] px-4 sm:px-8">
           <div className="rounded-2xl border border-gray-3 bg-white p-5 shadow-sm dark:border-white/10 dark:bg-darkTheme-card">
-            <p className="text-xs font-bold uppercase tracking-[.14em] text-orange">
-              Customer Phase 2
-            </p>
+
             <h1 className="mt-1 text-2xl font-bold text-dark dark:text-white">
               Product Discovery
             </h1>

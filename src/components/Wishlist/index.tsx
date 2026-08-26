@@ -44,9 +44,7 @@ export const Wishlist = () => {
         <div className="mx-auto w-full max-w-[1170px] px-4 sm:px-8 xl:px-0">
           <div className="mb-7 flex flex-wrap items-end justify-between gap-5">
             <div>
-              <p className="text-xs font-bold uppercase tracking-[.14em] text-orange">
-                Customer Phase 2
-              </p>
+
               <h2 className="mt-1 text-2xl font-semibold text-dark dark:text-white">
                 Your Wishlist
               </h2>

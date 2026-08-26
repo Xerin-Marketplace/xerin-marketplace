@@ -45,9 +45,6 @@ export default function Discount() {
   return (
     <div className="w-full space-y-5">
       <section className="rounded-2xl border border-[#e7ebf0] bg-white p-5 shadow-sm dark:border-white/10 dark:bg-darkTheme-card">
-        <p className="text-xs font-bold uppercase tracking-[.14em] text-orange">
-          Customer Phase 3
-        </p>
         <h3 className="mt-1 text-lg font-bold text-dark dark:text-white">
           Seller Promotions
         </h3>

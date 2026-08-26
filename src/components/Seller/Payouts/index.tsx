@@ -306,9 +306,6 @@ export default function SellerPayouts() {
       <section className="rounded-2xl border border-slate-200 bg-white p-5 shadow-sm dark:border-white/10 dark:bg-[#1f2937] sm:p-6">
         <div className="flex flex-col gap-5 xl:flex-row xl:items-start xl:justify-between">
           <div className="max-w-3xl">
-            <p className="text-xs font-bold uppercase tracking-[0.14em] text-[#f7941d]">
-              Seller Phase 8
-            </p>
             <h1 className="mt-1 text-2xl font-bold tracking-[-0.02em] text-slate-900 dark:text-white">
               Payout Requests
             </h1>

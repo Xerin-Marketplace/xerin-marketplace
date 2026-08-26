@@ -838,9 +838,6 @@ export default function SellerOrderDetail({ orderId }: { orderId: string }) {
           <div className="flex max-h-[94vh] w-full max-w-3xl flex-col overflow-hidden rounded-2xl bg-white shadow-2xl dark:bg-[#1f2937]">
             <div className="flex items-center justify-between border-b border-slate-200 px-5 py-4 dark:border-white/10">
               <div>
-                <p className="text-xs font-bold uppercase tracking-[0.14em] text-[#f7941d]">
-                  Seller Phase 6
-                </p>
                 <h2 className="mt-0.5 text-xl font-bold dark:text-white">
                   Prepare Package
                 </h2>

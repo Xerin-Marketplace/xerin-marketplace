@@ -79,9 +79,6 @@ export default function Cart() {
             <>
               <div className="mb-6 flex flex-col gap-4 lg:flex-row lg:items-end lg:justify-between">
                 <div>
-                  <p className="text-xs font-bold uppercase tracking-[.14em] text-orange">
-                    Customer Phase 3
-                  </p>
                   <h1 className="mt-1 text-2xl font-bold text-dark dark:text-white">
                     Cart & Promotions
                   </h1>

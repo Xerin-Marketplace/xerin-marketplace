@@ -16,7 +16,7 @@ export default function SellerOrders(){
  const pages=Math.max(1,Math.ceil(total/size));
  return <div className="space-y-5">
   <section className="rounded-2xl border border-[#e7ebf0] bg-white p-6 shadow-sm dark:border-white/10 dark:bg-[#1f2937]">
-   <div className="flex items-center gap-3"><span className="flex h-11 w-11 items-center justify-center rounded-xl bg-orange-50 text-[#f7941d]"><ClipboardList size={21}/></span><div><p className="text-xs font-bold uppercase tracking-[.14em] text-[#f7941d]">Seller Phase 4</p><h1 className="text-2xl font-bold dark:text-white">Orders & Fulfilment</h1></div></div>
+   <div className="flex items-center gap-3"><span className="flex h-11 w-11 items-center justify-center rounded-xl bg-orange-50 text-[#f7941d]"><ClipboardList size={21}/></span><div><p className="text-xs font-bold uppercase tracking-[.14em] text-[#f7941d]">Seller</p><h1 className="text-2xl font-bold dark:text-white">Orders & Fulfilment</h1></div></div>
    <p className="mt-3 text-sm text-slate-500">Accept customer orders, process and prepare packages, then dispatch them with tracking. Every order shown here is seller-scoped by the backend.</p>
    <div className="mt-5 grid gap-3 sm:grid-cols-2 xl:grid-cols-4"><Card icon={ClipboardList} label="Total orders" value={summary?.total_orders||0}/><Card icon={Clock3} label="New orders" value={summary?.new_orders||0}/><Card icon={PackageCheck} label="Ready to ship" value={summary?.ready_to_ship_orders||0}/><Card icon={Truck} label="Gross sales" value={money(summary?.gross_sales||0)}/></div>
   </section>

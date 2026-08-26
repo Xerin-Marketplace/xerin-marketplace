@@ -196,9 +196,6 @@ export default function BuyerOrderDetails({ orderId }: { orderId: string }) {
     <div className="space-y-5">
       <div className="flex flex-col gap-4 sm:flex-row sm:items-start sm:justify-between">
         <div>
-          <p className="text-xs font-bold uppercase tracking-[.14em] text-[#f7941d]">
-            Customer Phase 7
-          </p>
           <h1 className="mt-1 text-2xl font-bold">
             Order {order.id.slice(0, 8).toUpperCase()}
           </h1>

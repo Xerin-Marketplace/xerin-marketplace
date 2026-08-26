@@ -120,9 +120,6 @@ export default function SellerReviews() {
       <section className="rounded-2xl border border-slate-200 bg-white p-5 shadow-sm dark:border-white/10 dark:bg-[#1f2937] sm:p-6">
         <div className="flex flex-col gap-4 lg:flex-row lg:items-start lg:justify-between">
           <div>
-            <p className="text-xs font-bold uppercase tracking-[.14em] text-[#f7941d]">
-              Seller Phase 9
-            </p>
             <h1 className="mt-1 text-2xl font-bold text-slate-900 dark:text-white">
               Customer Reviews
             </h1>
