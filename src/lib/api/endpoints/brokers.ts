@@ -1,6 +1,6 @@
 import type { BrokerAnalyticsOverview, PaginatedBrokerCampaignAnalytics } from "@/types/api/broker";
 import axiosInstance from "../client";
-import type { Broker, BrokerKycDocument, BrokerKycStatus, PaginatedBrokers, BrokerProduct, BrokerProductCreate, BrokerProductUpdate, BrokerOpportunity, BrokerOfferAcceptance, BrokerReferralLink, PaginatedBrokerCommissions, BrokerCommissionSummary, BrokerWallet, PaginatedBrokerWalletTransactions, BrokerPayoutAccount, BrokerPayoutAccountCreate, BrokerPayoutRequest, PaginatedBrokerPayouts } from "@/types/api/broker";
+import type { Broker, BrokerKycDocument, BrokerKycStatus, PaginatedBrokers, BrokerProduct, BrokerProductCreate, BrokerProductUpdate, BrokerOpportunity, BrokerOfferAcceptance, BrokerReferralLink, PaginatedBrokerCommissions, BrokerCommissionSummary, BrokerWallet, PaginatedBrokerWalletTransactions, BrokerPayoutAccount, BrokerPayoutAccountCreate, BrokerPayoutRequest, PaginatedBrokerPayouts, PaginatedBrokerRiskEvents, BrokerRiskEvent } from "@/types/api/broker";
 export const brokersApi = {
   me: async () => (await axiosInstance.get<Broker>("/brokers/me")).data,
   updateMe: async (payload: Partial<Pick<Broker,"country"|"region"|"city"|"nida_number">>) => (await axiosInstance.patch<Broker>("/brokers/me", payload)).data,
@@ -35,7 +35,7 @@ export const brokersApi = {
   payoutAccounts: async () => (await axiosInstance.get<BrokerPayoutAccount[]>("/brokers/payout-accounts")).data,
   createPayoutAccount: async (payload:BrokerPayoutAccountCreate) => (await axiosInstance.post<BrokerPayoutAccount>("/brokers/payout-accounts",payload)).data,
   updatePayoutAccount: async (id:string,payload:Partial<BrokerPayoutAccountCreate & {is_active:boolean}>) => (await axiosInstance.patch<BrokerPayoutAccount>(`/brokers/payout-accounts/${id}`,payload)).data,
-  requestPayout: async (payload:{payout_account_id:string;amount:string|number;note?:string}) => (await axiosInstance.post<BrokerPayoutRequest>("/brokers/payouts",payload)).data,
+  requestPayout: async (payload:{payout_account_id:string;amount:string|number;note?:string}) => { const key=(globalThis.crypto?.randomUUID?.() || `payout-${Date.now()}-${Math.random()}`); return (await axiosInstance.post<BrokerPayoutRequest>("/brokers/payouts",payload,{headers:{"Idempotency-Key":key}})).data; },
   payouts: async (params?:Record<string,string|number>) => (await axiosInstance.get<PaginatedBrokerPayouts>("/brokers/payouts",{params})).data,
   cancelPayout: async (id:string) => (await axiosInstance.post<BrokerPayoutRequest>(`/brokers/payouts/${id}/cancel`)).data,
   adminPayoutAccounts: async () => (await axiosInstance.get<BrokerPayoutAccount[]>("/brokers/admin/payout-accounts")).data,
@@ -45,4 +45,7 @@ export const brokersApi = {
   trackReferralClick: async (referralCode:string,payload:{product_id:string;visitor_key:string;source?:string|null}) => (await axiosInstance.post(`/brokers/referrals/${encodeURIComponent(referralCode)}/click`,payload)).data,
   analyticsOverview: async (days=30) => (await axiosInstance.get<BrokerAnalyticsOverview>("/brokers/analytics/overview",{params:{days}})).data,
   campaignAnalytics: async (params?:Record<string,string|number>) => (await axiosInstance.get<PaginatedBrokerCampaignAnalytics>("/brokers/analytics/campaigns",{params})).data,
+  adminRiskEvents: async (params?:Record<string,string|number>) => (await axiosInstance.get<PaginatedBrokerRiskEvents>("/brokers/admin/security/risk-events",{params})).data,
+  adminResolveRisk: async (id:string,note?:string) => (await axiosInstance.patch<BrokerRiskEvent>(`/brokers/admin/security/risk-events/${id}/resolve`,{note:note||null})).data,
+  adminFreezeWallet: async (brokerId:string,frozen:boolean,reason:string) => (await axiosInstance.patch<BrokerWallet|undefined>(`/brokers/admin/${brokerId}/security/wallet-freeze`,{frozen,reason})).data,
 };

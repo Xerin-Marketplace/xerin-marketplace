@@ -75,3 +75,11 @@ export type BrokerCampaignAnalytics = {
   conversion_rate:string; gross_commission:string; reversed_commission:string; net_commission:string;
 };
 export type PaginatedBrokerCampaignAnalytics = { total:number; page:number; page_size:number; total_pages:number; results:BrokerCampaignAnalytics[]; };
+
+export type BrokerRiskEvent = {
+  id:string; broker_id?:string|null; user_id?:string|null; event_type:string;
+  severity:"info"|"warning"|"high"|"critical"; status:"open"|"resolved";
+  resource_type?:string|null; resource_id?:string|null; details?:Record<string,unknown>|null;
+  resolved_by_id?:string|null; resolved_at?:string|null; created_at:string;
+};
+export type PaginatedBrokerRiskEvents = { total:number; page:number; page_size:number; total_pages:number; results:BrokerRiskEvent[]; };
