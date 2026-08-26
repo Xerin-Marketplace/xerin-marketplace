@@ -1,2 +1,13 @@
 import AdminBrokerPayouts from "@/components/Admin/BrokerPayouts";
-export default function Page(){return <AdminBrokerPayouts/>;}
+import AdminSidebar from "@/components/Admin/Layout/Sidebar";
+
+export default function Page() {
+  return (
+    <AdminSidebar
+      title="Broker Wallet Payouts"
+      breadcrumb="Admin / Brokers / Wallet Payouts"
+    >
+      <AdminBrokerPayouts />
+    </AdminSidebar>
+  );
+}

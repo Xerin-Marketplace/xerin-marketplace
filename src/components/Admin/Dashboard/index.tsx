@@ -240,6 +240,16 @@ const sidebarGroups: SidebarGroup[] = [
     ],
   },
   {
+    title: "Brokers",
+    key: "brokers",
+    icon: Users,
+    items: [
+      { label: "Brokers & KYC Review", href: "/admin/brokers" },
+      { label: "Broker Security & Risk", href: "/admin/brokers/security" },
+      { label: "Broker Wallet Payouts", href: "/admin/brokers/payouts" },
+    ],
+  },
+  {
     title: "Payments",
     key: "finance",
     icon: CreditCard,

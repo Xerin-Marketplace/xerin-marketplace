@@ -153,6 +153,16 @@ const sidebarGroups: SidebarGroup[] = [
     ],
   },
   {
+    title: "Brokers",
+    key: "brokers",
+    icon: Users,
+    items: [
+      { label: "Brokers & KYC Review", href: "/admin/brokers", icon: ShieldCheck },
+      { label: "Broker Security & Risk", href: "/admin/brokers/security", icon: LockKeyhole },
+      { label: "Broker Wallet Payouts", href: "/admin/brokers/payouts", icon: WalletCards },
+    ],
+  },
+  {
     title: "Payments",
     key: "finance",
     icon: CreditCard,

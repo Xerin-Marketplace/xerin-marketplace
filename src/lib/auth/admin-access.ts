@@ -84,6 +84,13 @@ export const ADMIN_SECTION_PERMISSIONS: Record<string, string[]> = {
     "can_approve_sellers",
     "can_reject_sellers",
   ],
+  Brokers: [
+    "can_view_users",
+    "view_all_users",
+    "payouts:read",
+    "payouts:approve",
+    "admin_dashboard_security:read",
+  ],
   Payments: [
     "payments:dashboard", "payments:read", "payment_methods:read",
     "payment_providers:read", "refunds:read", "refunds:review",
@@ -225,6 +232,11 @@ export const ADMIN_ITEM_PERMISSIONS: Record<string, string[]> = {
   "Seller Products": ["can_view_products", "manage_products"],
   "Seller Orders": ["orders:read", "seller_orders:read"],
   "Seller Performance": ["analytics:admin_read", "can_view_sellers"],
+
+  // Brokers
+  "Brokers & KYC Review": ["can_view_users", "view_all_users"],
+  "Broker Security & Risk": ["admin_dashboard_security:read", "fraud_risk:read"],
+  "Broker Wallet Payouts": ["payouts:read", "payouts:approve"],
 
   // Payments / Finance
   "Payments Dashboard": ["payments:dashboard", "payments:read"],
