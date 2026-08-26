@@ -10,6 +10,8 @@ import type {
   ListingCurrency,
   ProductListQuery,
   ProductRequest,
+  BrokerOffer,
+  BrokerOfferRequest,
   ProductTag,
   ProductTagRequest,
   ProductUpdateRequest,
@@ -73,7 +75,9 @@ export const getBrands = async (): Promise<Brand[]> => {
   return res.data;
 };
 
-export const createProduct = async (payload: ProductRequest, _token?: string | null): Promise<Product> => {
+export const createProduct = async (payload: ProductRequest,
+  BrokerOffer,
+  BrokerOfferRequest, _token?: string | null): Promise<Product> => {
   const res = await axiosInstance.post<Product>(API_ENDPOINTS.products.list, payload);
   return res.data;
 };
@@ -214,6 +218,10 @@ export const getProductTags = async (productId: ID): Promise<ProductTag[]> => {
   return res.data;
 };
 
+export const getBrokerOffer = async (productId: ID): Promise<BrokerOffer> => (await axiosInstance.get<BrokerOffer>(`/products/${productId}/broker-offer`)).data;
+export const saveBrokerOffer = async (productId: ID, payload: BrokerOfferRequest): Promise<BrokerOffer> => (await axiosInstance.put<BrokerOffer>(`/products/${productId}/broker-offer`, payload)).data;
+export const disableBrokerOffer = async (productId: ID): Promise<void> => { await axiosInstance.delete(`/products/${productId}/broker-offer`); };
+
 export const productsApi = {
   list: getProducts,
   getById: getProduct,
@@ -235,4 +243,7 @@ export const productsApi = {
   getVariants: getProductVariants,
   addTag: addProductTag,
   getTags: getProductTags,
+  getBrokerOffer,
+  saveBrokerOffer,
+  disableBrokerOffer,
 };

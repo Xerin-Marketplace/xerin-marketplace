@@ -62,12 +62,13 @@ interface BusinessCategory {
   name: string;
 }
 
-type AuthTab = "signin" | "signup" | "seller";
+type AuthTab = "signin" | "signup" | "seller" | "broker";
 
 const AUTH_TABS: { key: AuthTab; label: string }[] = [
   { key: "signin", label: "Sign In" },
   { key: "signup", label: "Sign Up" },
   { key: "seller", label: "Seller" },
+  { key: "broker", label: "Broker" },
 ];
 
 const MailIcon = () => (
@@ -637,6 +638,13 @@ const SignUpPanel = ({ onSwitchTab }: { onSwitchTab: (tab: AuthTab) => void }) =
         <span className="text-dark-4 dark:text-darkTheme-secondary-muted">Want to sell on Xerin? </span>
         <button type="button" onClick={() => onSwitchTab("seller")} className="font-medium text-orange hover:underline">
           Register as Seller
+        </button>
+      </p>
+
+      <p className="text-center mt-2 text-sm">
+        <span className="text-dark-4 dark:text-darkTheme-secondary-muted">Want to promote and earn? </span>
+        <button type="button" onClick={() => onSwitchTab("broker")} className="font-medium text-orange hover:underline">
+          Register as Broker
         </button>
       </p>
     </form>
@@ -1226,17 +1234,221 @@ const SellerPanel = ({ onSwitchTab }: { onSwitchTab: (tab: AuthTab) => void }) =
   );
 };
 
+
+// Broker Sign Up panel
+
+interface BrokerFormState {
+  firstName: string;
+  lastName: string;
+  email: string;
+  phone: string;
+  password: string;
+  confirmPassword: string;
+  country: string;
+  region: string;
+  city: string;
+}
+
+const BROKER_INITIAL_STATE: BrokerFormState = {
+  firstName: "",
+  lastName: "",
+  email: "",
+  phone: "",
+  password: "",
+  confirmPassword: "",
+  country: "Tanzania",
+  region: "",
+  city: "",
+};
+
+const BrokerPanel = ({ onSwitchTab }: { onSwitchTab: (tab: AuthTab) => void }) => {
+  const router = useRouter();
+  const [form, setForm] = useState<BrokerFormState>(BROKER_INITIAL_STATE);
+  const [showPassword, setShowPassword] = useState(false);
+  const [showConfirmPassword, setShowConfirmPassword] = useState(false);
+  const [isSubmitting, setIsSubmitting] = useState(false);
+
+  const updateField = <K extends keyof BrokerFormState>(key: K, value: BrokerFormState[K]) => {
+    setForm((prev) => ({ ...prev, [key]: value }));
+  };
+
+  const isPasswordMismatch = useMemo(
+    () => Boolean(form.confirmPassword) && form.password !== form.confirmPassword,
+    [form.password, form.confirmPassword],
+  );
+  const isPasswordStrong = useMemo(
+    () => PASSWORD_RULES.every((rule) => rule.test(form.password)),
+    [form.password],
+  );
+  const isPhoneValid = useMemo(() => !form.phone || isValidLocalPhone(form.phone), [form.phone]);
+
+  const handleSubmit = async (event: FormEvent<HTMLFormElement>) => {
+    event.preventDefault();
+
+    if (
+      !form.firstName.trim() ||
+      !form.lastName.trim() ||
+      !form.email.trim() ||
+      !form.phone ||
+      !form.password ||
+      !form.confirmPassword ||
+      !form.country.trim() ||
+      !form.region.trim() ||
+      !form.city.trim()
+    ) {
+      toast.error("Please fill in all required fields.");
+      return;
+    }
+
+    if (!isValidLocalPhone(form.phone)) {
+      toast.error("Enter a valid phone number, e.g. 712 345 678.");
+      return;
+    }
+
+    if (!isPasswordStrong) {
+      toast.error("Please choose a stronger password that meets all requirements.");
+      return;
+    }
+
+    if (form.password !== form.confirmPassword) {
+      toast.error("Passwords do not match.");
+      return;
+    }
+
+    setIsSubmitting(true);
+
+    try {
+      const submittedPhone = `${COUNTRY_CODE}${form.phone}`;
+      const submittedEmail = form.email.trim().toLowerCase();
+
+      const response = await authApi.registerBroker({
+        first_name: form.firstName.trim(),
+        last_name: form.lastName.trim(),
+        email: submittedEmail,
+        phone: submittedPhone,
+        password: form.password,
+        country: form.country.trim(),
+        region: form.region.trim(),
+        city: form.city.trim(),
+      });
+
+      toast.success(response.message || "Broker account created. Verification code sent.");
+
+      const params = new URLSearchParams({
+        phone: response.phone || submittedPhone,
+        email: response.email || submittedEmail,
+        purpose: response.verification_purpose || "register_broker",
+        next: "/signin",
+      });
+
+      router.push(`/verify-otp?${params.toString()}`);
+    } catch (error) {
+      if (error instanceof ApiError) toast.error(error.message);
+      else toast.error("Unable to create broker account. Please try again.");
+    } finally {
+      setIsSubmitting(false);
+    }
+  };
+
+  return (
+    <form onSubmit={handleSubmit}>
+      <div className="mb-5 rounded-xl border border-orange/20 bg-orange/5 p-4 dark:border-orange/30 dark:bg-orange/10">
+        <p className="text-sm font-semibold text-dark dark:text-white">Broker registration</p>
+        <p className="mt-1 text-sm text-dark-4 dark:text-darkTheme-secondary-muted">
+          Create your Broker account here. After verification and sign in, complete KYC from the Broker dashboard before promotion and product features are unlocked.
+        </p>
+      </div>
+
+      <div className="grid gap-5 sm:grid-cols-2 mb-5">
+        <div>
+          <FieldLabel htmlFor="broker-first-name" required>First Name</FieldLabel>
+          <TextInput id="broker-first-name" type="text" value={form.firstName} onChange={(e) => updateField("firstName", e.target.value)} placeholder="e.g. Adam" autoComplete="given-name" disabled={isSubmitting} />
+        </div>
+        <div>
+          <FieldLabel htmlFor="broker-last-name" required>Last Name</FieldLabel>
+          <TextInput id="broker-last-name" type="text" value={form.lastName} onChange={(e) => updateField("lastName", e.target.value)} placeholder="e.g. Mussa" autoComplete="family-name" disabled={isSubmitting} />
+        </div>
+      </div>
+
+      <div className="grid gap-5 sm:grid-cols-2 mb-5">
+        <div>
+          <FieldLabel htmlFor="broker-email" required>Email Address</FieldLabel>
+          <TextInput id="broker-email" type="email" value={form.email} onChange={(e) => updateField("email", e.target.value)} placeholder="you@example.com" autoComplete="email" disabled={isSubmitting} />
+        </div>
+        <div>
+          <FieldLabel htmlFor="broker-phone" required>Mobile Number</FieldLabel>
+          <PhoneInput id="broker-phone" value={form.phone} onChange={(value) => updateField("phone", value)} disabled={isSubmitting} invalid={Boolean(form.phone) && !isPhoneValid} />
+          {form.phone && !isPhoneValid && <p className="mt-2 text-sm text-red">Enter a valid number without the leading 0, e.g. 712345678.</p>}
+        </div>
+      </div>
+
+      <div className="grid gap-5 sm:grid-cols-3 mb-5">
+        <div>
+          <FieldLabel htmlFor="broker-country" required>Country</FieldLabel>
+          <TextInput id="broker-country" type="text" value={form.country} onChange={(e) => updateField("country", e.target.value)} placeholder="Tanzania" disabled={isSubmitting} />
+        </div>
+        <div>
+          <FieldLabel htmlFor="broker-region" required>Region</FieldLabel>
+          <TextInput id="broker-region" type="text" value={form.region} onChange={(e) => updateField("region", e.target.value)} placeholder="Dar es Salaam" disabled={isSubmitting} />
+        </div>
+        <div>
+          <FieldLabel htmlFor="broker-city" required>City</FieldLabel>
+          <TextInput id="broker-city" type="text" value={form.city} onChange={(e) => updateField("city", e.target.value)} placeholder="Kinondoni" disabled={isSubmitting} />
+        </div>
+      </div>
+
+      <div className="grid gap-5 sm:grid-cols-2 mb-5">
+        <div>
+          <FieldLabel htmlFor="broker-password" required>Password</FieldLabel>
+          <PasswordInput id="broker-password" value={form.password} onChange={(value) => updateField("password", value)} show={showPassword} onToggleShow={() => setShowPassword((prev) => !prev)} placeholder="Create a password" autoComplete="new-password" disabled={isSubmitting} />
+        </div>
+        <div>
+          <FieldLabel htmlFor="broker-confirm-password" required>Re-type Password</FieldLabel>
+          <PasswordInput id="broker-confirm-password" value={form.confirmPassword} onChange={(value) => updateField("confirmPassword", value)} show={showConfirmPassword} onToggleShow={() => setShowConfirmPassword((prev) => !prev)} placeholder="Re-type your password" autoComplete="new-password" disabled={isSubmitting} />
+        </div>
+      </div>
+
+      <div className="-mt-3 mb-6">
+        <PasswordChecklist password={form.password} />
+        {isPasswordMismatch && <p className="mt-2 text-sm text-red">Passwords do not match.</p>}
+      </div>
+
+      <button type="submit" disabled={isSubmitting} className="w-full flex justify-center font-medium text-white bg-orange py-3 px-6 rounded-lg ease-out duration-200 hover:bg-orange-dark disabled:cursor-not-allowed disabled:opacity-70">
+        {isSubmitting ? "Creating broker account..." : "Create Broker Account"}
+      </button>
+
+      <p className="text-center mt-6 text-sm">
+        <span className="text-dark-4 dark:text-darkTheme-secondary-muted">Already have an account? </span>
+        <button type="button" onClick={() => onSwitchTab("signin")} className="font-medium text-orange hover:underline">Sign in</button>
+      </p>
+    </form>
+  );
+};
+
      
 // Page shell
      
 
 const AuthPage = ({ initialTab = "signup" }: { initialTab?: AuthTab }) => {
-  const [activeTab, setActiveTab] = useState<AuthTab>(initialTab);
+  const searchParams = useSearchParams();
+  const requestedTab = searchParams.get("tab");
+  const resolvedInitialTab: AuthTab =
+    requestedTab === "signin" || requestedTab === "signup" || requestedTab === "seller" || requestedTab === "broker"
+      ? requestedTab
+      : initialTab;
+  const [activeTab, setActiveTab] = useState<AuthTab>(resolvedInitialTab);
+
+  useEffect(() => {
+    if (requestedTab === "signin" || requestedTab === "signup" || requestedTab === "seller" || requestedTab === "broker") {
+      setActiveTab(requestedTab);
+    }
+  }, [requestedTab]);
 
   const headings: Record<AuthTab, { title: string; subtitle: string }> = {
     signin: { title: "Welcome back", subtitle: "Sign in to continue to XerinMarket" },
     signup: { title: "Create an account", subtitle: "Join XerinMarket to start buying" },
     seller: { title: "Become a seller", subtitle: "Tell us about your business to get started" },
+    broker: { title: "Become a broker", subtitle: "Register, verify your identity, and start earning through XerinMarket" },
   };
 
   return (
@@ -1253,8 +1465,8 @@ const AuthPage = ({ initialTab = "signup" }: { initialTab?: AuthTab }) => {
           </Link>
         </div>
 
-        <div className={`flex flex-1 ${activeTab === "seller" ? "items-start" : "items-center"} justify-center py-5 sm:py-10`}>
-          <div className={`w-full ${activeTab === "seller" ? "max-w-[640px]" : "max-w-[420px]"}`}>
+        <div className={`flex flex-1 ${activeTab === "seller" || activeTab === "broker" ? "items-start" : "items-center"} justify-center py-5 sm:py-10`}>
+          <div className={`w-full ${activeTab === "seller" || activeTab === "broker" ? "max-w-[640px]" : "max-w-[420px]"}`}>
             <div className="mb-5 text-center sm:mb-7">
               <Image
                 src="/images/logo/logo.png"
@@ -1268,7 +1480,7 @@ const AuthPage = ({ initialTab = "signup" }: { initialTab?: AuthTab }) => {
             </div>
 
             {/* Tab switcher */}
-            <div className="mb-5 grid grid-cols-3 gap-1 rounded-xl border border-gray-3 bg-gray-1 p-1 dark:border-darkTheme-border-color dark:bg-darkTheme-secondary-bg sm:mb-6">
+            <div className="mb-5 grid grid-cols-2 sm:grid-cols-4 gap-1 rounded-xl border border-gray-3 bg-gray-1 p-1 dark:border-darkTheme-border-color dark:bg-darkTheme-secondary-bg sm:mb-6">
               {AUTH_TABS.map((tab) => {
                 const isActive = tab.key === activeTab;
                 return (
@@ -1291,6 +1503,7 @@ const AuthPage = ({ initialTab = "signup" }: { initialTab?: AuthTab }) => {
             {activeTab === "signin" && <SignInPanel onSwitchTab={setActiveTab} />}
             {activeTab === "signup" && <SignUpPanel onSwitchTab={setActiveTab} />}
             {activeTab === "seller" && <SellerPanel onSwitchTab={setActiveTab} />}
+            {activeTab === "broker" && <BrokerPanel onSwitchTab={setActiveTab} />}
           </div>
         </div>
 

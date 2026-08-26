@@ -25,7 +25,7 @@ import type {
 export const cartApi = {
   get: async (signal?: AbortSignal) =>
     (await axiosInstance.get<Cart>("/cart", { signal })).data,
-  addItem: async (payload: { product_id: string; variant_id?: string | null; quantity: number }) =>
+  addItem: async (payload: { product_id: string; variant_id?: string | null; quantity: number; broker_referral_code?: string | null }) =>
     (await axiosInstance.post<Cart>("/cart/items", payload)).data,
   updateItem: async (itemId: string, quantity: number) =>
     (await axiosInstance.put<Cart>(`/cart/items/${itemId}`, { quantity })).data,

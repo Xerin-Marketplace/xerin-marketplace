@@ -4,6 +4,9 @@ export type GuardUser = {
   permissions?: string[];
   is_seller?: boolean;
   seller_status?: string | null;
+  is_broker?: boolean;
+  broker_status?: string | null;
+  role?: string;
 };
 
 const LOGISTICS_ACCOUNT_TYPES = ["logistics", "logistics_company"];
@@ -103,7 +106,7 @@ export const isAdminUser = (user?: GuardUser | null): boolean => {
   // Logistics members have custom role names, but are not marketplace admins.
   if (isLogisticsUser(user)) return false;
 
-  const basicRoles = new Set(["buyer", "customer", "seller"]);
+  const basicRoles = new Set(["buyer", "customer", "seller", "broker"]);
   const roles = getUserRoles(user).map((role) => role.toLowerCase());
 
   // A custom non-marketplace role is a staff role. The backend still decides
@@ -128,3 +131,10 @@ export function isLogisticsUser(user?: GuardUser | null): boolean {
     LOGISTICS_PERMISSIONS.includes(permission.toLowerCase()),
   );
 }
+
+
+export const isBrokerUser = (user?: GuardUser | null) => {
+  if (!user) return false;
+  const roles = Array.isArray(user.roles) ? user.roles : [];
+  return Boolean(user.is_broker) || user.account_type === "broker" || roles.includes("broker") || user.role === "broker";
+};

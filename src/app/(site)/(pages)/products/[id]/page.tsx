@@ -17,6 +17,13 @@ export default function ProductDetailsPage() {
   const { data: apiProduct, isLoading, error } = useProduct(id);
 
   useEffect(() => {
+    const ref = searchParams.get("ref")?.trim();
+    if (id && ref && typeof window !== "undefined") {
+      window.localStorage.setItem(`xerin_broker_ref_${id}`, ref);
+    }
+  }, [id, searchParams]);
+
+  useEffect(() => {
     if (!id || !isAuthenticated) return;
 
     void discoveryApi.recordView(id, {

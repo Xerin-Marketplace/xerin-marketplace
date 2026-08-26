@@ -17,6 +17,9 @@ export type User = TimestampFields & {
   is_verified?: boolean;
   is_seller?: boolean;
   seller_status?: string | null;
+  is_broker?: boolean;
+  broker_status?: string | null;
+  broker_code?: string | null;
   roles?: string[];
   permissions?: string[];
 };

@@ -30,6 +30,26 @@ export type RegisterSellerRequest = RegisterBuyerRequest & {
   agreement_accepted: boolean;
 };
 
+export type RegisterBrokerRequest = RegisterBuyerRequest & {
+  country: string;
+  region: string;
+  city: string;
+};
+
+export type BrokerRegistrationResponse = {
+  message: string;
+  user_id: string;
+  broker_id: string;
+  broker_code: string;
+  email: string;
+  phone: string;
+  broker_status: string;
+  verification_required: true;
+  verification_purpose: "register_broker";
+  otp_expires_in_seconds: number;
+  resumed_registration: boolean;
+};
+
 export type RegistrationResponse = {
   message: string;
   user_id: string;
@@ -66,7 +86,7 @@ export type RefreshTokenRequest = {
   refresh_token: string;
 };
 
-export type OtpPurpose = "generic" | "register" | "register_seller" | "password_reset";
+export type OtpPurpose = "generic" | "register" | "register_seller" | "register_broker" | "password_reset";
 
 export type SendOtpRequest = {
   phone: string;

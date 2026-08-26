@@ -9,6 +9,7 @@ export const API_ENDPOINTS = {
     login: "/auth/login",
     register: "/auth/register",
     registerSeller: "/auth/register-seller",
+    registerBroker: "/auth/register-broker",
     logout: "/auth/logout",
     refreshToken: "/auth/refresh-token",
     sendOtp: "/auth/send-otp",
@@ -37,6 +38,14 @@ export const API_ENDPOINTS = {
     kycStatus: "/sellers/kyc-status",
     payoutAccounts: "/sellers/payout-accounts",
     payoutAccountById: (id: string | number) => `/sellers/payout-accounts/${id}`,
+  },
+
+  brokers: {
+    me: "/brokers/me",
+    kycStatus: "/brokers/kyc-status",
+    kycDocuments: "/brokers/kyc-documents",
+    submitKyc: "/brokers/submit-kyc",
+    admin: "/brokers/admin",
   },
 
   products: {

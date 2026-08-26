@@ -12,6 +12,8 @@ export const routeConfig: Record<string, AppRouteMeta> = {
   resetPassword: { path: "/reset-password" },
   verifyOtp: { path: "/verify-otp" },
   sellerRegister: { path: "/seller/register" },
+  brokerRegister: { path: "/broker/register" },
+  brokerDashboard: { path: "/broker/dashboard", auth: true, roles: ["broker"] },
   sellerDashboard: { path: "/seller/dashboard", auth: true, roles: ["seller"] },
   adminDashboard: { path: "/admin/dashboard", auth: true, roles: ["admin", "super_admin"] },
 };

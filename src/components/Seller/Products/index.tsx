@@ -14,6 +14,7 @@ import type {
   ProductImage,
   ProductRequest,
   ListingCurrency,
+  BrokerOfferRequest,
 } from "@/types/api/product";
 import type { Store } from "@/types/api/store";
 import type { SellerPricingPreviewResponse } from "@/types/api/seller";
@@ -82,6 +83,9 @@ const INITIAL_STOCK_FORM: InitialStockForm = {
   warehouse_location: "",
   restock_date: "",
 };
+
+type BrokerOfferForm = { enabled:boolean; commission_type:"fixed"|"percentage"; commission_value:string; max_attributed_sales:string; starts_at:string; ends_at:string; };
+const INITIAL_BROKER_OFFER: BrokerOfferForm = { enabled:false, commission_type:"fixed", commission_value:"", max_attributed_sales:"", starts_at:"", ends_at:"" };
 
 const STATUS_OPTIONS = [
   "all",
@@ -180,6 +184,7 @@ const SellerProducts = () => {
   const [form, setForm] = useState<ProductRequest>(INITIAL_FORM);
   const [stockForm, setStockForm] =
     useState<InitialStockForm>(INITIAL_STOCK_FORM);
+  const [brokerOfferForm, setBrokerOfferForm] = useState<BrokerOfferForm>(INITIAL_BROKER_OFFER);
   const [existingImages, setExistingImages] = useState<ProductImage[]>([]);
   const [selectedImages, setSelectedImages] = useState<SelectedImage[]>([]);
   const [imagesLoading, setImagesLoading] = useState(false);
@@ -387,6 +392,7 @@ const SellerProducts = () => {
       currency: defaultCurrency,
     });
     setStockForm(INITIAL_STOCK_FORM);
+    setBrokerOfferForm(INITIAL_BROKER_OFFER);
     setPricingPreview(null);
     setPricingPreviewError("");
     setExistingImages([]);
@@ -420,6 +426,7 @@ const SellerProducts = () => {
       currency: defaultCurrency,
     });
     setStockForm(INITIAL_STOCK_FORM);
+    setBrokerOfferForm(INITIAL_BROKER_OFFER);
     setImageError("");
     setSubmitIntent("draft");
     setEditorOpen(true);
@@ -455,7 +462,13 @@ const SellerProducts = () => {
     setImagesLoading(true);
 
     try {
-      setExistingImages(await productsApi.getMyImages(product.id));
+      const [images, offer] = await Promise.all([
+        productsApi.getMyImages(product.id),
+        productsApi.getBrokerOffer(product.id).catch(() => null),
+      ]);
+      setExistingImages(images);
+      if (offer) setBrokerOfferForm({ enabled:true, commission_type:offer.commission_type, commission_value:String(offer.commission_value), max_attributed_sales:offer.max_attributed_sales ? String(offer.max_attributed_sales) : "", starts_at:offer.starts_at ? offer.starts_at.slice(0,16) : "", ends_at:offer.ends_at ? offer.ends_at.slice(0,16) : "" });
+      else setBrokerOfferForm(INITIAL_BROKER_OFFER);
     } catch (cause) {
       toast.error(
         cause instanceof ApiError
@@ -602,6 +615,15 @@ const SellerProducts = () => {
       }
     }
 
+    if (brokerOfferForm.enabled) {
+      const reward = Number(brokerOfferForm.commission_value);
+      if (!Number.isFinite(reward) || reward <= 0) return "Enter a valid Broker reward.";
+      if (brokerOfferForm.commission_type === "percentage" && reward > 100) return "Broker percentage cannot exceed 100%.";
+      const maxSales = brokerOfferForm.max_attributed_sales ? Number(brokerOfferForm.max_attributed_sales) : null;
+      if (maxSales !== null && (!Number.isInteger(maxSales) || maxSales <= 0)) return "Maximum broker-attributed sales must be a positive whole number.";
+      if (brokerOfferForm.starts_at && brokerOfferForm.ends_at && new Date(brokerOfferForm.ends_at) <= new Date(brokerOfferForm.starts_at)) return "Broker promotion end must be after its start.";
+    }
+
     const totalImages = existingImages.length + selectedImages.length;
 
     if (totalImages < 1) {
@@ -674,6 +696,19 @@ const SellerProducts = () => {
           selectedImages.map((item) => item.file),
           payload.name,
         );
+      }
+
+      if (brokerOfferForm.enabled) {
+        const offerPayload: BrokerOfferRequest = {
+          commission_type: brokerOfferForm.commission_type,
+          commission_value: Number(brokerOfferForm.commission_value),
+          max_attributed_sales: brokerOfferForm.max_attributed_sales ? Number(brokerOfferForm.max_attributed_sales) : null,
+          starts_at: brokerOfferForm.starts_at ? new Date(brokerOfferForm.starts_at).toISOString() : null,
+          ends_at: brokerOfferForm.ends_at ? new Date(brokerOfferForm.ends_at).toISOString() : null,
+        };
+        await productsApi.saveBrokerOffer(product.id, offerPayload);
+      } else if (editingProduct) {
+        await productsApi.disableBrokerOffer(product.id).catch(() => undefined);
       }
 
       if (submitIntent === "review") {
@@ -1699,6 +1734,19 @@ const SellerProducts = () => {
                     </div>
                   </div>
 </FormSection>
+
+                <FormSection icon={CircleDollarSign} title="Broker promotion" description="Allow approved Xerin Brokers to promote this product. Referral links and order attribution will be added in B4.">
+                  <div className="rounded-2xl border border-orange-200 bg-orange-50/60 p-4">
+                    <label className="flex items-center justify-between gap-4"><div><p className="text-sm font-bold text-slate-900">Allow Brokers to promote this product?</p><p className="mt-1 text-xs text-slate-600">The opportunity becomes visible only when the product is approved, active and in stock.</p></div><input type="checkbox" checked={brokerOfferForm.enabled} onChange={e=>setBrokerOfferForm(v=>({...v,enabled:e.target.checked}))} className="h-5 w-5 accent-orange-500" /></label>
+                    {brokerOfferForm.enabled && <div className="mt-4 grid gap-4 sm:grid-cols-2 lg:grid-cols-5">
+                      <Field label="Reward type" required><select value={brokerOfferForm.commission_type} onChange={e=>setBrokerOfferForm(v=>({...v,commission_type:e.target.value as "fixed"|"percentage"}))} className="input"><option value="fixed">Fixed amount</option><option value="percentage">Percentage</option></select></Field>
+                      <Field label={brokerOfferForm.commission_type==="fixed"?"Reward per successful unit":"Reward percentage"} required><input type="number" min="0" step="0.01" value={brokerOfferForm.commission_value} onChange={e=>setBrokerOfferForm(v=>({...v,commission_value:e.target.value}))} className="input" placeholder={brokerOfferForm.commission_type==="fixed"?"10000":"10"}/></Field>
+                      <Field label="Maximum attributed sales"><input type="number" min="1" step="1" value={brokerOfferForm.max_attributed_sales} onChange={e=>setBrokerOfferForm(v=>({...v,max_attributed_sales:e.target.value}))} className="input" placeholder="Optional"/></Field>
+                      <Field label="Start"><input type="datetime-local" value={brokerOfferForm.starts_at} onChange={e=>setBrokerOfferForm(v=>({...v,starts_at:e.target.value}))} className="input"/></Field>
+                      <Field label="End"><input type="datetime-local" value={brokerOfferForm.ends_at} onChange={e=>setBrokerOfferForm(v=>({...v,ends_at:e.target.value}))} className="input"/></Field>
+                    </div>}
+                  </div>
+                </FormSection>
 
                 <div className="rounded-2xl border border-blue-200 bg-blue-50 p-4">
                   <div className="flex items-start gap-3">

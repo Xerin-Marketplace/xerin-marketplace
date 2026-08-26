@@ -217,6 +217,25 @@ const Signup = () => {
             </div>
           </div>
 
+          {/* Broker Registration Notice */}
+          <div className="mb-5 rounded-xl border border-orange-200 bg-orange-50 p-3 dark:border-orange-900 dark:bg-orange-950/30 sm:mb-8 sm:p-4">
+            <div className="flex items-start gap-3">
+              <div className="text-xl sm:text-2xl">🤝</div>
+              <div className="text-left">
+                <h3 className="mb-0.5 text-sm font-semibold text-dark dark:text-white sm:mb-1 sm:text-base">Want to earn as a Broker?</h3>
+                <p className="text-xs leading-5 text-dark-4 dark:text-darkTheme-secondary-muted sm:text-sm sm:leading-relaxed">
+                  Register as a Xerin Broker to sell your own short-lived listings and promote approved seller products after KYC approval.
+                </p>
+                <Link
+                  href="/broker/register"
+                  className="mt-2 inline-flex min-h-10 items-center text-sm font-semibold text-orange hover:underline sm:mt-3"
+                >
+                  Register as Broker →
+                </Link>
+              </div>
+            </div>
+          </div>
+
           <div className="mt-4 sm:mt-5.5">
             <form onSubmit={handleSubmit}>
               <div className="mb-4 sm:mb-5">

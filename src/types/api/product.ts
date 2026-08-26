@@ -73,8 +73,13 @@ export type ProductTag = {
 
 export type Product = TimestampFields & {
   id: ID;
-  seller_id: ID;
-  store_id: ID;
+  seller_id: ID | null;
+  store_id: ID | null;
+  broker_id?: ID | null;
+  listing_owner_type?: "seller" | "broker" | string;
+  listing_expires_at?: string | null;
+  listing_expired_at?: string | null;
+  fulfillment_location?: string | null;
   category_id: ID;
   brand_id: ID | null;
   sku: string;
@@ -160,3 +165,6 @@ export type ProductVariantRequest = {
 export type ProductTagRequest = {
   tag: string;
 };
+
+export type BrokerOffer = { id:string; product_id:string; seller_id:string; commission_type:"fixed"|"percentage"; commission_value:string; max_attributed_sales?:number|null; attributed_sales_count:number; starts_at:string; ends_at?:string|null; is_active:boolean; created_at:string; accepted_brokers_count:number; estimated_reward_per_unit:string; estimated_seller_net_per_unit:string; };
+export type BrokerOfferRequest = { commission_type:"fixed"|"percentage"; commission_value:number|string; max_attributed_sales?:number|null; starts_at?:string|null; ends_at?:string|null; };

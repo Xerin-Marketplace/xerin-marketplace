@@ -5,6 +5,8 @@ import type {
   ForgotPasswordRequest,
   LoginRequest,
   RegisterBuyerRequest,
+  RegisterBrokerRequest,
+  BrokerRegistrationResponse,
   RegistrationResponse,
   RegisterSellerRequest,
   SellerRegistrationResponse,
@@ -25,6 +27,11 @@ export const login = async (payload: LoginRequest): Promise<AuthTokenResponse> =
 
 export const registerBuyer = async (payload: RegisterBuyerRequest): Promise<RegistrationResponse> => {
   const res = await axiosInstance.post<RegistrationResponse>(API_ENDPOINTS.auth.register, payload);
+  return res.data;
+};
+
+export const registerBroker = async (payload: RegisterBrokerRequest): Promise<BrokerRegistrationResponse> => {
+  const res = await axiosInstance.post<BrokerRegistrationResponse>(API_ENDPOINTS.auth.registerBroker, payload);
   return res.data;
 };
 
@@ -93,6 +100,7 @@ export const authApi = {
   login,
   registerBuyer,
   registerSeller,
+  registerBroker,
   logout,
   sendOtp,
   verifyOtp,

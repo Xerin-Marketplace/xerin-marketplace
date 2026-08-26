@@ -66,6 +66,7 @@ const VerifyOtp = () => {
     if (
       purposeParam === "register" ||
       purposeParam === "register_seller" ||
+      purposeParam === "register_broker" ||
       purposeParam === "password_reset"
     ) {
       return purposeParam;
@@ -118,6 +119,8 @@ const VerifyOtp = () => {
     ? "Verify your account"
     : purpose === "register_seller"
       ? "Verify your seller account"
+      : purpose === "register_broker"
+        ? "Verify your broker account"
       : purpose === "register"
         ? "Verify your account"
         : "Account verification";
@@ -126,6 +129,8 @@ const VerifyOtp = () => {
     ? "Your account is registered but not verified. Enter your OTP below, or use your registered email or phone number to request a fresh code."
     : purpose === "register_seller"
       ? "Enter the verification code sent after seller registration."
+      : purpose === "register_broker"
+        ? "Enter the verification code sent after broker registration."
       : "Enter the verification code sent after registration.";
 
   const redirectAfterSuccess = () => {

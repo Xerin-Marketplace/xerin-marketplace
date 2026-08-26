@@ -103,10 +103,12 @@ export const useAddCartItem = () => {
         useCartStore.getState().addItemToCart(payload.guest_item);
         return null;
       }
+      const brokerRef = typeof window !== "undefined" ? window.localStorage.getItem(`xerin_broker_ref_${payload.product_id}`) : null;
       return cartApi.addItem({
         product_id: payload.product_id,
         variant_id: payload.variant_id,
         quantity: payload.quantity,
+        broker_referral_code: brokerRef || null,
       });
     },
     onSuccess: (cart) => {
