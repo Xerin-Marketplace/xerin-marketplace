@@ -14,7 +14,64 @@ import { getPostLoginPath } from "@/guards/auth-routing";
 import { useCartModalContext } from "@/app/context/CartSidebarModalContext";
 import type { AuthTokenResponse } from "@/types/api/auth";
 
-const COUNTRY_CODE = "255";
+const DEFAULT_DIAL_CODE = "255";
+
+const PHONE_COUNTRIES = [
+  { name: "Tanzania", code: "255", flag: "🇹🇿" },
+  { name: "Kenya", code: "254", flag: "🇰🇪" },
+  { name: "Uganda", code: "256", flag: "🇺🇬" },
+  { name: "Rwanda", code: "250", flag: "🇷🇼" },
+  { name: "Burundi", code: "257", flag: "🇧🇮" },
+  { name: "DR Congo", code: "243", flag: "🇨🇩" },
+  { name: "Zambia", code: "260", flag: "🇿🇲" },
+  { name: "Malawi", code: "265", flag: "🇲🇼" },
+  { name: "Mozambique", code: "258", flag: "🇲🇿" },
+  { name: "South Africa", code: "27", flag: "🇿🇦" },
+  { name: "Zimbabwe", code: "263", flag: "🇿🇼" },
+  { name: "Botswana", code: "267", flag: "🇧🇼" },
+  { name: "Namibia", code: "264", flag: "🇳🇦" },
+  { name: "Ghana", code: "233", flag: "🇬🇭" },
+  { name: "Nigeria", code: "234", flag: "🇳🇬" },
+  { name: "Ethiopia", code: "251", flag: "🇪🇹" },
+  { name: "Somalia", code: "252", flag: "🇸🇴" },
+  { name: "Egypt", code: "20", flag: "🇪🇬" },
+  { name: "Morocco", code: "212", flag: "🇲🇦" },
+  { name: "Algeria", code: "213", flag: "🇩🇿" },
+  { name: "Tunisia", code: "216", flag: "🇹🇳" },
+  { name: "Saudi Arabia", code: "966", flag: "🇸🇦" },
+  { name: "United Arab Emirates", code: "971", flag: "🇦🇪" },
+  { name: "Qatar", code: "974", flag: "🇶🇦" },
+  { name: "Kuwait", code: "965", flag: "🇰🇼" },
+  { name: "Oman", code: "968", flag: "🇴🇲" },
+  { name: "Bahrain", code: "973", flag: "🇧🇭" },
+  { name: "India", code: "91", flag: "🇮🇳" },
+  { name: "Pakistan", code: "92", flag: "🇵🇰" },
+  { name: "Bangladesh", code: "880", flag: "🇧🇩" },
+  { name: "China", code: "86", flag: "🇨🇳" },
+  { name: "Japan", code: "81", flag: "🇯🇵" },
+  { name: "South Korea", code: "82", flag: "🇰🇷" },
+  { name: "Singapore", code: "65", flag: "🇸🇬" },
+  { name: "Malaysia", code: "60", flag: "🇲🇾" },
+  { name: "Indonesia", code: "62", flag: "🇮🇩" },
+  { name: "Philippines", code: "63", flag: "🇵🇭" },
+  { name: "Australia", code: "61", flag: "🇦🇺" },
+  { name: "New Zealand", code: "64", flag: "🇳🇿" },
+  { name: "United Kingdom", code: "44", flag: "🇬🇧" },
+  { name: "Germany", code: "49", flag: "🇩🇪" },
+  { name: "France", code: "33", flag: "🇫🇷" },
+  { name: "Italy", code: "39", flag: "🇮🇹" },
+  { name: "Spain", code: "34", flag: "🇪🇸" },
+  { name: "Netherlands", code: "31", flag: "🇳🇱" },
+  { name: "Belgium", code: "32", flag: "🇧🇪" },
+  { name: "Sweden", code: "46", flag: "🇸🇪" },
+  { name: "Norway", code: "47", flag: "🇳🇴" },
+  { name: "Switzerland", code: "41", flag: "🇨🇭" },
+  { name: "Turkey", code: "90", flag: "🇹🇷" },
+  { name: "United States / Canada", code: "1", flag: "🇺🇸" },
+  { name: "Mexico", code: "52", flag: "🇲🇽" },
+  { name: "Brazil", code: "55", flag: "🇧🇷" },
+  { name: "Argentina", code: "54", flag: "🇦🇷" },
+] as const;
 
 const splitFullName = (fullName: string) => {
   const parts = fullName.trim().split(/\s+/).filter(Boolean);
@@ -32,8 +89,18 @@ const hasAuthToken = (response: unknown): response is AuthTokenResponse => {
   );
 };
 
-// Tanzanian mobile numbers: 9 digits after +255, local part starts with 6 or 7
-const isValidLocalPhone = (localDigits: string) => /^[67]\d{8}$/.test(localDigits);
+const cleanDialCode = (value: string) => value.replace(/\D/g, "").slice(0, 4);
+const cleanLocalPhone = (value: string) => value.replace(/\D/g, "").replace(/^0+/, "").slice(0, 14);
+
+const isValidInternationalPhone = (localDigits: string, dialCode: string) => {
+  const code = cleanDialCode(dialCode);
+  const local = cleanLocalPhone(localDigits);
+  const totalDigits = `${code}${local}`;
+  return code.length >= 1 && local.length >= 4 && totalDigits.length >= 7 && totalDigits.length <= 15;
+};
+
+const buildInternationalPhone = (localDigits: string, dialCode: string) =>
+  `+${cleanDialCode(dialCode)}${cleanLocalPhone(localDigits)}`;
 
 const isValidUrl = (value: string) => {
   try {
@@ -204,44 +271,84 @@ const PhoneInput = ({
   id,
   value,
   onChange,
+  dialCode,
+  onDialCodeChange,
   disabled,
   invalid,
-  placeholder = "712 345 678",
+  placeholder = "Phone number",
 }: {
   id: string;
   value: string;
   onChange: (digits: string) => void;
+  dialCode: string;
+  onDialCodeChange: (code: string) => void;
   disabled?: boolean;
   invalid?: boolean;
   placeholder?: string;
-}) => (
-  <div
-    className={`flex items-stretch rounded-lg border bg-gray-1 dark:bg-darkTheme-secondary-bg overflow-hidden focus-within:ring-2 focus-within:ring-orange/30 ${
-      invalid ? "border-red" : "border-gray-3 dark:border-darkTheme-border-color"
-    }`}
-  >
-    <span className="flex items-center gap-1 px-4 text-dark-4 dark:text-darkTheme-secondary-muted bg-gray-2 dark:bg-darkTheme-bg border-r border-gray-3 dark:border-darkTheme-border-color select-none">
-      🇹🇿 +{COUNTRY_CODE}
-    </span>
-    <input
-      type="tel"
-      inputMode="numeric"
-      id={id}
-      name={id}
-      placeholder={placeholder}
-      value={value}
-      onChange={(event) => {
-        let digits = event.target.value.replace(/\D/g, "");
-        if (digits.startsWith("0")) digits = digits.slice(1);
-        digits = digits.slice(0, 9);
-        onChange(digits);
-      }}
-      autoComplete="tel-national"
-      disabled={disabled}
-      className="flex-1 min-w-0 py-3 px-4 bg-transparent outline-none dark:text-darkTheme-body-color placeholder:text-dark-4 dark:placeholder:text-darkTheme-secondary-muted disabled:cursor-not-allowed disabled:opacity-70"
-    />
-  </div>
-);
+}) => {
+  const isKnownCode = PHONE_COUNTRIES.some((country) => country.code === dialCode);
+  const selection = isKnownCode ? dialCode : "custom";
+
+  return (
+    <div>
+      <div
+        className={`flex flex-col sm:flex-row rounded-lg border bg-gray-1 dark:bg-darkTheme-secondary-bg overflow-hidden focus-within:ring-2 focus-within:ring-orange/30 ${
+          invalid ? "border-red" : "border-gray-3 dark:border-darkTheme-border-color"
+        }`}
+      >
+        <select
+          aria-label="Country calling code"
+          value={selection}
+          disabled={disabled}
+          onChange={(event) => {
+            const next = event.target.value;
+            onDialCodeChange(next === "custom" ? "" : next);
+          }}
+          className="h-12 sm:w-[190px] px-3 bg-gray-2 dark:bg-darkTheme-bg text-sm text-dark dark:text-white border-b sm:border-b-0 sm:border-r border-gray-3 dark:border-darkTheme-border-color outline-none"
+        >
+          {PHONE_COUNTRIES.map((country) => (
+            <option key={`${country.name}-${country.code}`} value={country.code}>
+              {country.flag} {country.name} (+{country.code})
+            </option>
+          ))}
+          <option value="custom">Other / Custom code</option>
+        </select>
+
+        {selection === "custom" && (
+          <div className="flex h-12 items-center border-b sm:border-b-0 sm:border-r border-gray-3 dark:border-darkTheme-border-color bg-gray-2 dark:bg-darkTheme-bg">
+            <span className="pl-3 text-dark-4 dark:text-darkTheme-secondary-muted">+</span>
+            <input
+              type="text"
+              inputMode="numeric"
+              aria-label="Custom country calling code"
+              placeholder="Code"
+              value={dialCode}
+              onChange={(event) => onDialCodeChange(cleanDialCode(event.target.value))}
+              disabled={disabled}
+              className="h-12 w-20 bg-transparent px-2 outline-none dark:text-white"
+            />
+          </div>
+        )}
+
+        <input
+          type="tel"
+          inputMode="tel"
+          id={id}
+          name={id}
+          placeholder={placeholder}
+          value={value}
+          onChange={(event) => onChange(cleanLocalPhone(event.target.value))}
+          autoComplete="tel-national"
+          disabled={disabled}
+          className="h-12 flex-1 min-w-0 px-4 bg-transparent outline-none dark:text-darkTheme-body-color placeholder:text-dark-4 dark:placeholder:text-darkTheme-secondary-muted disabled:cursor-not-allowed disabled:opacity-70"
+        />
+      </div>
+      <p className="mt-1.5 text-xs text-dark-4 dark:text-darkTheme-secondary-muted">
+        Select your country calling code. If it is not listed, choose Other / Custom code. Enter the local number without the leading 0.
+      </p>
+    </div>
+  );
+};
 
 const PasswordInput = ({
   id,
@@ -486,6 +593,7 @@ const SignUpPanel = ({ onSwitchTab }: { onSwitchTab: (tab: AuthTab) => void }) =
   const [fullName, setFullName] = useState("");
   const [email, setEmail] = useState("");
   const [phone, setPhone] = useState("");
+  const [phoneDialCode, setPhoneDialCode] = useState(DEFAULT_DIAL_CODE);
   const [password, setPassword] = useState("");
   const [confirmPassword, setConfirmPassword] = useState("");
   const [showPassword, setShowPassword] = useState(false);
@@ -497,7 +605,7 @@ const SignUpPanel = ({ onSwitchTab }: { onSwitchTab: (tab: AuthTab) => void }) =
     [password, confirmPassword]
   );
   const isPasswordStrong = useMemo(() => PASSWORD_RULES.every((rule) => rule.test(password)), [password]);
-  const isPhoneValid = useMemo(() => !phone || isValidLocalPhone(phone), [phone]);
+  const isPhoneValid = useMemo(() => !phone || isValidInternationalPhone(phone, phoneDialCode), [phone, phoneDialCode]);
 
   const handleSubmit = async (event: FormEvent<HTMLFormElement>) => {
     event.preventDefault();
@@ -506,8 +614,8 @@ const SignUpPanel = ({ onSwitchTab }: { onSwitchTab: (tab: AuthTab) => void }) =
       toast.error("Please fill in all required fields.");
       return;
     }
-    if (!isValidLocalPhone(phone)) {
-      toast.error("Enter a valid phone number, e.g. 712 345 678.");
+    if (!isValidInternationalPhone(phone, phoneDialCode)) {
+      toast.error("Enter a valid international phone number and country calling code.");
       return;
     }
     if (!isPasswordStrong) {
@@ -523,7 +631,7 @@ const SignUpPanel = ({ onSwitchTab }: { onSwitchTab: (tab: AuthTab) => void }) =
 
     try {
       const nameParts = splitFullName(fullName);
-      const submittedPhone = `${COUNTRY_CODE}${phone}`;
+      const submittedPhone = buildInternationalPhone(phone, phoneDialCode);
       const submittedEmail = email.trim().toLowerCase();
 
       const response = await authApi.registerBuyer({
@@ -582,10 +690,10 @@ const SignUpPanel = ({ onSwitchTab }: { onSwitchTab: (tab: AuthTab) => void }) =
       </div>
 
       <div className="mb-5">
-        <FieldLabel htmlFor="signup-phone" optional>Phone Number</FieldLabel>
-        <PhoneInput id="signup-phone" value={phone} onChange={setPhone} disabled={isSubmitting} invalid={Boolean(phone) && !isPhoneValid} />
+        <FieldLabel htmlFor="signup-phone" required>Phone Number</FieldLabel>
+        <PhoneInput id="signup-phone" value={phone} onChange={setPhone} dialCode={phoneDialCode} onDialCodeChange={setPhoneDialCode} disabled={isSubmitting} invalid={Boolean(phone) && !isPhoneValid} />
         {phone && !isPhoneValid && (
-          <p className="mt-2 text-sm text-red">Enter a valid number without the leading 0, e.g. 712345678.</p>
+          <p className="mt-2 text-sm text-red">Enter a valid international phone number.</p>
         )}
       </div>
 
@@ -707,6 +815,8 @@ const SellerPanel = ({ onSwitchTab }: { onSwitchTab: (tab: AuthTab) => void }) =
   const [showConfirmPassword, setShowConfirmPassword] = useState(false);
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [useAccountContact, setUseAccountContact] = useState(true);
+  const [phoneDialCode, setPhoneDialCode] = useState(DEFAULT_DIAL_CODE);
+  const [contactPhoneDialCode, setContactPhoneDialCode] = useState(DEFAULT_DIAL_CODE);
 
   const [categories, setCategories] = useState<BusinessCategory[]>([]);
   const [selectedCategoryIds, setSelectedCategoryIds] = useState<string[]>([]);
@@ -749,10 +859,10 @@ const SellerPanel = ({ onSwitchTab }: { onSwitchTab: (tab: AuthTab) => void }) =
     [form.password, form.confirmPassword]
   );
   const isPasswordStrong = useMemo(() => PASSWORD_RULES.every((rule) => rule.test(form.password)), [form.password]);
-  const isPhoneValid = useMemo(() => !form.phone || isValidLocalPhone(form.phone), [form.phone]);
+  const isPhoneValid = useMemo(() => !form.phone || isValidInternationalPhone(form.phone, phoneDialCode), [form.phone, phoneDialCode]);
   const isContactPhoneValid = useMemo(
-    () => !form.contactPhone || isValidLocalPhone(form.contactPhone),
-    [form.contactPhone]
+    () => !form.contactPhone || isValidInternationalPhone(form.contactPhone, contactPhoneDialCode),
+    [form.contactPhone, contactPhoneDialCode]
   );
 
   const handleSubmit = async (event: FormEvent<HTMLFormElement>) => {
@@ -775,13 +885,13 @@ const SellerPanel = ({ onSwitchTab }: { onSwitchTab: (tab: AuthTab) => void }) =
       return;
     }
 
-    if (!isValidLocalPhone(form.phone)) {
-      toast.error("Enter a valid phone number, e.g. 712 345 678.");
+    if (!isValidInternationalPhone(form.phone, phoneDialCode)) {
+      toast.error("Enter a valid international phone number and country calling code.");
       return;
     }
 
-    if (!useAccountContact && !isValidLocalPhone(form.contactPhone)) {
-      toast.error("Enter a valid contact phone number, e.g. 712 345 678.");
+    if (!useAccountContact && !isValidInternationalPhone(form.contactPhone, contactPhoneDialCode)) {
+      toast.error("Enter a valid international contact phone number and country calling code.");
       return;
     }
 
@@ -817,7 +927,7 @@ const SellerPanel = ({ onSwitchTab }: { onSwitchTab: (tab: AuthTab) => void }) =
         first_name: form.firstName.trim(),
         last_name: form.lastName.trim(),
         email: form.email.trim(),
-        phone: `${COUNTRY_CODE}${form.phone}`,
+        phone: buildInternationalPhone(form.phone, phoneDialCode),
         password: form.password,
         business_name: form.businessName.trim(),
         business_category_ids: selectedCategoryIds,
@@ -832,8 +942,8 @@ const SellerPanel = ({ onSwitchTab }: { onSwitchTab: (tab: AuthTab) => void }) =
         website_url: form.websiteUrl.trim() || undefined,
         contact_email: useAccountContact ? form.email.trim() : form.contactEmail.trim(),
         contact_phone: useAccountContact
-          ? `${COUNTRY_CODE}${form.phone}`
-          : `${COUNTRY_CODE}${form.contactPhone}`,
+          ? buildInternationalPhone(form.phone, phoneDialCode)
+          : buildInternationalPhone(form.contactPhone, contactPhoneDialCode),
         agreement_accepted: form.agreementAccepted,
       };
 
@@ -841,7 +951,7 @@ const SellerPanel = ({ onSwitchTab }: { onSwitchTab: (tab: AuthTab) => void }) =
 
       toast.success(response.message || "Verification code sent.");
 
-      const submittedPhone = `${COUNTRY_CODE}${form.phone}`;
+      const submittedPhone = buildInternationalPhone(form.phone, phoneDialCode);
       const submittedEmail = form.email.trim().toLowerCase();
 
       const params = new URLSearchParams({
@@ -912,6 +1022,8 @@ const SellerPanel = ({ onSwitchTab }: { onSwitchTab: (tab: AuthTab) => void }) =
             id="seller-phone"
             value={form.phone}
             onChange={(value) => updateField("phone", value)}
+            dialCode={phoneDialCode}
+            onDialCodeChange={setPhoneDialCode}
             disabled={isSubmitting}
             invalid={Boolean(form.phone) && !isPhoneValid}
           />
@@ -1173,6 +1285,8 @@ const SellerPanel = ({ onSwitchTab }: { onSwitchTab: (tab: AuthTab) => void }) =
             id="seller-contact-phone"
             value={useAccountContact ? form.phone : form.contactPhone}
             onChange={(value) => updateField("contactPhone", value)}
+            dialCode={useAccountContact ? phoneDialCode : contactPhoneDialCode}
+            onDialCodeChange={useAccountContact ? setPhoneDialCode : setContactPhoneDialCode}
             disabled={isSubmitting || useAccountContact}
             invalid={!useAccountContact && Boolean(form.contactPhone) && !isContactPhoneValid}
           />
@@ -1264,6 +1378,7 @@ const BROKER_INITIAL_STATE: BrokerFormState = {
 const BrokerPanel = ({ onSwitchTab }: { onSwitchTab: (tab: AuthTab) => void }) => {
   const router = useRouter();
   const [form, setForm] = useState<BrokerFormState>(BROKER_INITIAL_STATE);
+  const [phoneDialCode, setPhoneDialCode] = useState(DEFAULT_DIAL_CODE);
   const [showPassword, setShowPassword] = useState(false);
   const [showConfirmPassword, setShowConfirmPassword] = useState(false);
   const [isSubmitting, setIsSubmitting] = useState(false);
@@ -1280,7 +1395,7 @@ const BrokerPanel = ({ onSwitchTab }: { onSwitchTab: (tab: AuthTab) => void }) =
     () => PASSWORD_RULES.every((rule) => rule.test(form.password)),
     [form.password],
   );
-  const isPhoneValid = useMemo(() => !form.phone || isValidLocalPhone(form.phone), [form.phone]);
+  const isPhoneValid = useMemo(() => !form.phone || isValidInternationalPhone(form.phone, phoneDialCode), [form.phone, phoneDialCode]);
 
   const handleSubmit = async (event: FormEvent<HTMLFormElement>) => {
     event.preventDefault();
@@ -1300,8 +1415,8 @@ const BrokerPanel = ({ onSwitchTab }: { onSwitchTab: (tab: AuthTab) => void }) =
       return;
     }
 
-    if (!isValidLocalPhone(form.phone)) {
-      toast.error("Enter a valid phone number, e.g. 712 345 678.");
+    if (!isValidInternationalPhone(form.phone, phoneDialCode)) {
+      toast.error("Enter a valid international phone number and country calling code.");
       return;
     }
 
@@ -1318,7 +1433,7 @@ const BrokerPanel = ({ onSwitchTab }: { onSwitchTab: (tab: AuthTab) => void }) =
     setIsSubmitting(true);
 
     try {
-      const submittedPhone = `${COUNTRY_CODE}${form.phone}`;
+      const submittedPhone = buildInternationalPhone(form.phone, phoneDialCode);
       const submittedEmail = form.email.trim().toLowerCase();
 
       const response = await authApi.registerBroker({
@@ -1377,8 +1492,8 @@ const BrokerPanel = ({ onSwitchTab }: { onSwitchTab: (tab: AuthTab) => void }) =
         </div>
         <div>
           <FieldLabel htmlFor="broker-phone" required>Mobile Number</FieldLabel>
-          <PhoneInput id="broker-phone" value={form.phone} onChange={(value) => updateField("phone", value)} disabled={isSubmitting} invalid={Boolean(form.phone) && !isPhoneValid} />
-          {form.phone && !isPhoneValid && <p className="mt-2 text-sm text-red">Enter a valid number without the leading 0, e.g. 712345678.</p>}
+          <PhoneInput id="broker-phone" value={form.phone} onChange={(value) => updateField("phone", value)} dialCode={phoneDialCode} onDialCodeChange={setPhoneDialCode} disabled={isSubmitting} invalid={Boolean(form.phone) && !isPhoneValid} />
+          {form.phone && !isPhoneValid && <p className="mt-2 text-sm text-red">Enter a valid international phone number.</p>}
         </div>
       </div>
 
