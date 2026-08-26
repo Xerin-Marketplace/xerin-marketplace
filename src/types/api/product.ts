@@ -96,6 +96,10 @@ export type Product = TimestampFields & {
   status: ProductStatus;
   rejection_reason: string | null;
   is_active: boolean;
+  submitted_at?: string | null;
+  approved_at?: string | null;
+  approved_by_user_id?: ID | null;
+  approval_method?: "automatic" | "manual" | string | null;
 
   // Optional frontend-enriched fields when fetched separately.
   images?: ProductImage[];

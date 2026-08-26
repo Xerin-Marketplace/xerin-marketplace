@@ -16,12 +16,12 @@ export type LogisticsAccount = {
   effective_permissions: LogisticsPermission[]; is_primary_contact: boolean; can_manage_profile: boolean;
 };
 export type LogisticsOnboardingStep = {
-  key: "company_profile" | "zones" | "services" | "rates" | "payout_account" | "webhook";
+  key: "company_profile" | "company_documents" | "zones" | "services" | "rates" | "payout_account" | "webhook";
   label: string; description: string; completed: boolean; required: boolean; href: string;
 };
 export type LogisticsOnboardingStatus = {
   company_id: string; company_name: string; company_status: string;
-  state: "invited" | "in_progress" | "ready_for_review" | "submitted" | "changes_requested" | "approved";
+  state: "invited" | "in_progress" | "ready_for_review" | "submitted" | "under_review" | "changes_requested" | "rejected" | "approved";
   required_completed: number; required_total: number; progress_percent: number;
   ready_for_review: boolean; steps: LogisticsOnboardingStep[]; next_step?: LogisticsOnboardingStep | null;
   submitted_at?: string | null; reviewed_at?: string | null; review_note?: string | null;

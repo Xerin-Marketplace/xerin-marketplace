@@ -72,7 +72,7 @@ const titles: Record<AdminConfigurationView, [string, string, string]> = {
   marketplace: [
     "Marketplace governance",
     "Marketplace Settings",
-    "Control escrow timing, dispute window, cash-on-delivery and international delivery from one backend-backed configuration.",
+    "Control escrow timing, dispute window, checkout rules and product moderation from one backend-backed configuration.",
   ],
   commissions: [
     "Marketplace economics",
@@ -175,6 +175,7 @@ function MarketplaceSettings() {
     dispute_period_hours: 48,
     cod_allowed: false,
     international_delivery_allowed: false,
+    auto_approve_products: false,
   });
   const [loading, setLoading] = useState(true);
   const [saving, setSaving] = useState(false);
@@ -191,6 +192,7 @@ function MarketplaceSettings() {
           dispute_period_hours: data.dispute_period_hours ?? 48,
           cod_allowed: Boolean(data.cod_allowed),
           international_delivery_allowed: Boolean(data.international_delivery_allowed),
+          auto_approve_products: Boolean(data.auto_approve_products),
         });
       }
     } catch (error) {
@@ -270,6 +272,20 @@ function MarketplaceSettings() {
               setForm((x) => ({ ...x, international_delivery_allowed: value }))
             }
           />
+        </Card>
+
+        <Card title="Catalog Moderation" icon={PackageCheck}>
+          <Toggle
+            label="Automatic Product Approval"
+            hint="When enabled, valid new seller product submissions are approved and published automatically. When disabled, new submissions wait for an authorized product approver."
+            checked={form.auto_approve_products}
+            onChange={(value) =>
+              setForm((x) => ({ ...x, auto_approve_products: value }))
+            }
+          />
+          <div className="rounded-xl border border-slate-200 bg-slate-50 p-4 text-xs leading-5 text-slate-600">
+            This rule applies to <b>new submissions only</b>. Products already waiting for review remain in the moderation queue when automatic approval is enabled.
+          </div>
         </Card>
       </section>
 

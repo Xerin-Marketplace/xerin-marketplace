@@ -677,9 +677,11 @@ const SellerProducts = () => {
       }
 
       if (submitIntent === "review") {
-        await productsApi.submitForReview(product.id);
+        const submitted = await productsApi.submitForReview(product.id);
         toast.success(
-          "Product submitted successfully and is now waiting for Admin review.",
+          submitted.status === "approved"
+            ? "Product approved automatically and is now available to customers."
+            : "Product submitted successfully and is now waiting for review.",
         );
       } else {
         toast.success(
@@ -706,8 +708,12 @@ const SellerProducts = () => {
     setSubmittingProductId(String(product.id));
 
     try {
-      await productsApi.submitForReview(product.id);
-      toast.success("Product submitted for Admin review.");
+      const submitted = await productsApi.submitForReview(product.id);
+      toast.success(
+        submitted.status === "approved"
+          ? "Product approved automatically and is now available to customers."
+          : "Product submitted for review.",
+      );
       await loadData();
     } catch (cause) {
       toast.error(
@@ -958,6 +964,13 @@ const SellerProducts = () => {
                       >
                         {statusLabel(product.status)}
                       </span>
+                      {product.status === "approved" && product.approval_method && (
+                        <span className="absolute right-3 top-3 rounded-full border border-white/70 bg-white/90 px-2.5 py-1 text-[9px] font-bold uppercase tracking-wide text-[#475569] shadow-sm">
+                          {product.approval_method === "automatic"
+                            ? "Auto approved"
+                            : "Manual approval"}
+                        </span>
+                      )}
                     </div>
 
                     <div className="p-4">

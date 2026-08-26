@@ -127,7 +127,7 @@ const approvedGroups: Array<{ label: string; items: NavItem[] }> = [
         href: "/seller/account/security",
         icon: CircleUserRound,
       },
-      { label: "Help & Support", href: "/seller/support", icon: LifeBuoy },
+      { label: "Home", href: "/", icon: LifeBuoy },
     ],
   },
 ];
@@ -150,7 +150,7 @@ const activationGroups: Array<{ label: string; items: NavItem[] }> = [
         href: "/seller/account/security",
         icon: CircleUserRound,
       },
-      { label: "Help & Support", href: "/seller/support", icon: LifeBuoy },
+      { label: "Home", href: "/", icon: LifeBuoy },
     ],
   },
 ];
@@ -162,7 +162,7 @@ const pendingAllowedPaths = [
   "/seller/account",
   "/seller/account/profile",
   "/seller/account/security",
-  "/seller/support",
+  "/",
 ];
 
 export default function SellerLayout({
@@ -190,8 +190,8 @@ export default function SellerLayout({
           ? "Account Settings"
           : pathname.includes("/store")
             ? "My Stores"
-            : pathname.includes("/support")
-              ? "Help & Support"
+            : pathname.includes("/")
+              ? "Home"
               : pathname.includes("/products")
                 ? "Products"
                 : pathname.includes("/inventory")
@@ -419,7 +419,7 @@ export default function SellerLayout({
                 </label>
               )}
               <Link
-                href="/seller/support"
+                href="/"
                 aria-label="Help"
                 className="rounded-xl p-2.5 hover:bg-slate-100 dark:hover:bg-slate-100 dark:hover:bg-white/10"
               >
@@ -478,7 +478,7 @@ export default function SellerLayout({
                       </>
                     )}
                     <Drop href="/seller/account/security" icon={ShieldCheck} label="Security" />
-                    <Drop href="/seller/support" icon={LifeBuoy} label="Help & Support" />
+                    <Drop href="/" icon={LifeBuoy} label="Home" />
                     <button
                       onClick={() => void signOut()}
                       className="flex w-full items-center gap-2 rounded-lg px-3 py-2 text-sm text-red-600 hover:bg-red-50"
@@ -511,7 +511,7 @@ export default function SellerLayout({
           <div className="flex gap-4">
             <Link href="/privacy-policy">Privacy Policy</Link>
             <Link href="/terms">Terms</Link>
-            <Link href="/seller/support">Support</Link>
+            <Link href="/">Home</Link>
           </div>
         </footer>
       </div>

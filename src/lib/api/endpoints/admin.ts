@@ -427,6 +427,8 @@ export type AdminProduct = {
   is_active: boolean;
   submitted_at?: string | null;
   approved_at?: string | null;
+  approved_by_user_id?: string | null;
+  approval_method?: "automatic" | "manual" | string | null;
   created_at: string;
   images?: Array<{ id:string; product_id:string; image_url:string; thumbnail_url?:string|null; alt_text?:string|null; is_primary:boolean; display_order?:number; }>;
   seller_business_name?: string | null;
@@ -1252,6 +1254,7 @@ export type AdminMarketplaceSettings = {
   dispute_period_hours: number | null;
   cod_allowed: boolean | null;
   international_delivery_allowed: boolean | null;
+  auto_approve_products: boolean | null;
   configured: boolean;
   updated_by_id?: string | null;
   created_at?: string | null;
@@ -1415,6 +1418,7 @@ export const saveMarketplaceSettings = async (payload: {
   dispute_period_hours: number;
   cod_allowed: boolean;
   international_delivery_allowed: boolean;
+  auto_approve_products: boolean;
 }) =>
   (await axiosInstance.put<AdminMarketplaceSettings>("/admin/marketplace-settings", payload)).data;
 
@@ -1498,7 +1502,7 @@ export type AdminLogisticsOnboarding = {
   company_id: string;
   company_name: string;
   company_status: AdminLogisticsCompany["status"];
-  state: "invited" | "in_progress" | "ready_for_review" | "submitted" | "changes_requested" | "approved";
+  state: "invited" | "in_progress" | "ready_for_review" | "submitted" | "under_review" | "changes_requested" | "rejected" | "approved";
   required_completed: number;
   required_total: number;
   progress_percent: number;
@@ -1515,8 +1519,72 @@ export const onboardLogisticsCompany = async (payload: LogisticsCompanyOnboardPa
 export const listLogisticsOnboardingQueue = async (params: { page?: number; page_size?: number; search?: string; state?: string } = {}) =>
   (await axiosInstance.get<AdminPaged<AdminLogisticsOnboarding>>("/logistics/onboarding/review-queue", { params })).data;
 
-export const reviewLogisticsOnboarding = async (companyId: string, payload: { decision: "approve" | "changes_requested"; note?: string }) =>
+export const reviewLogisticsOnboarding = async (companyId: string, payload: { decision: "approve" | "changes_requested" | "rejected"; note?: string }) =>
   (await axiosInstance.post<AdminLogisticsOnboarding>(`/logistics/companies/${companyId}/onboarding/review`, payload)).data;
+
+
+export type AdminLogisticsDocumentStatus =
+  | "pending_review"
+  | "under_review"
+  | "approved"
+  | "changes_requested"
+  | "rejected";
+
+export type AdminLogisticsDocument = {
+  id: string;
+  logistics_company_id: string;
+  document_type: string;
+  document_name: string;
+  original_filename: string;
+  mime_type: string;
+  file_size: number;
+  version: number;
+  is_current: boolean;
+  status: AdminLogisticsDocumentStatus;
+  review_comment?: string | null;
+  uploaded_by_user_id?: string | null;
+  reviewed_by_user_id?: string | null;
+  reviewed_at?: string | null;
+  created_at: string;
+  updated_at?: string | null;
+  can_edit: boolean;
+  can_delete: boolean;
+};
+
+export const listAdminLogisticsDocuments = async (companyId: string, includeHistory = false) =>
+  (
+    await axiosInstance.get<AdminPaged<AdminLogisticsDocument>>(
+      `/logistics/companies/${companyId}/documents`,
+      { params: { page: 1, page_size: 100, include_history: includeHistory } },
+    )
+  ).data;
+
+export const startAdminLogisticsDocumentReview = async (companyId: string) =>
+  (
+    await axiosInstance.post<AdminLogisticsOnboarding>(
+      `/logistics/companies/${companyId}/documents/review/start`,
+    )
+  ).data;
+
+export const reviewAdminLogisticsDocument = async (
+  companyId: string,
+  documentId: string,
+  payload: { decision: "approve" | "changes_requested" | "rejected"; comment?: string },
+) =>
+  (
+    await axiosInstance.post<AdminLogisticsDocument>(
+      `/logistics/companies/${companyId}/documents/${documentId}/review`,
+      payload,
+    )
+  ).data;
+
+export const viewAdminLogisticsDocument = async (companyId: string, documentId: string) =>
+  (
+    await axiosInstance.get<Blob>(
+      `/logistics/companies/${companyId}/documents/${documentId}/view`,
+      { responseType: "blob" },
+    )
+  ).data;
 
 export const resendLogisticsAdministratorCredentials = async (id: string) =>
   (await axiosInstance.post<{ company_id: string; administrator_user_id: string; email: string; credentials_email_sent: boolean; message: string }>(`/logistics/companies/${id}/administrator/resend-credentials`)).data;

@@ -34,8 +34,23 @@ export default function LogisticsDashboardPage() {
   ];
 
   return <div className="mx-auto max-w-7xl space-y-4 sm:space-y-6">
-    <section className="rounded-2xl bg-gradient-to-r from-slate-950 to-blue p-4 text-white sm:p-6"><p className="text-sm text-blue-100">Operations overview</p><h2 className="mt-1 break-words text-xl font-bold sm:text-2xl">{account.company.name}</h2><div className="mt-3 flex flex-wrap gap-2 text-xs"><span className="rounded-full bg-white/15 px-3 py-1.5 capitalize">{account.member_role.replaceAll("_", " ")}</span><span className="rounded-full bg-white/15 px-3 py-1.5">{account.company.status ?? "Active company"}</span></div></section>
-    <section className="grid grid-cols-1 gap-3 sm:grid-cols-2 xl:grid-cols-4">{cards.map(({ label, value, icon: Icon }) => <article key={label} className="rounded-2xl border border-slate-200 bg-white p-4 shadow-sm dark:border-slate-700 dark:bg-slate-800"><div className="flex items-center justify-between gap-3"><div><p className="text-sm text-slate-500 dark:text-slate-400">{label}</p><p className="mt-2 text-2xl font-bold text-slate-900 dark:text-white">{value.toLocaleString()}</p></div><span className="grid h-11 w-11 place-items-center rounded-xl bg-blue/10 text-blue"><Icon size={21} /></span></div></article>)}</section>
+    <section className="overflow-hidden rounded-2xl border border-[#242424] bg-[#111111] p-4 shadow-sm sm:p-6">
+      <div className="flex flex-col gap-4 sm:flex-row sm:items-end sm:justify-between">
+        <div>
+          <p className="text-sm font-semibold text-[#ff8a00]">Operations overview</p>
+          <h2 className="mt-1 break-words text-xl font-bold text-white sm:text-2xl">{account.company.name}</h2>
+        </div>
+        <div className="flex flex-wrap gap-2 text-xs font-semibold">
+          <span className="rounded-full bg-[#ff8a00] px-3 py-1.5 text-[#111111] capitalize">
+            {account.member_role.replaceAll("_", " ")}
+          </span>
+          <span className="rounded-full border border-[#3b3b3b] bg-[#222222] px-3 py-1.5 text-white">
+            {account.company.status ?? "Active company"}
+          </span>
+        </div>
+      </div>
+    </section>
+    <section className="grid grid-cols-1 gap-3 sm:grid-cols-2 xl:grid-cols-4">{cards.map(({ label, value, icon: Icon }) => <article key={label} className="rounded-2xl border border-slate-200 bg-white p-4 shadow-sm dark:border-slate-700 dark:bg-slate-800"><div className="flex items-center justify-between gap-3"><div><p className="text-sm text-slate-500 dark:text-slate-400">{label}</p><p className="mt-2 text-2xl font-bold text-slate-900 dark:text-white">{value.toLocaleString()}</p></div><span className="grid h-11 w-11 place-items-center rounded-xl bg-[#fff3e0] text-[#d96f00] dark:bg-[#2a2118] dark:text-[#ff9b24]"><Icon size={21} /></span></div></article>)}</section>
     <section className="grid gap-4 xl:grid-cols-2">
       <StatusPanel title="Shipments by status" icon={Truck} values={dashboard.shipments_by_status} />
       <StatusPanel title="Pickup jobs by status" icon={PackageCheck} values={dashboard.pickup_jobs_by_status} />
@@ -46,9 +61,9 @@ export default function LogisticsDashboardPage() {
 
 function StatusPanel({ title, icon: Icon, values }: { title: string; icon: typeof Truck; values: Record<string, number> }) {
   const entries = Object.entries(values);
-  return <article className="rounded-2xl border border-slate-200 bg-white p-4 sm:p-5 dark:border-slate-700 dark:bg-slate-800"><h3 className="flex items-center gap-2 font-semibold text-slate-900 dark:text-white"><Icon size={18} />{title}</h3><div className="mt-4 space-y-2">{entries.length ? entries.map(([status, count]) => <div key={status} className="flex items-center justify-between gap-4 rounded-xl bg-slate-50 px-3 py-2.5 text-sm dark:bg-slate-900"><span className="min-w-0 break-words capitalize text-slate-600 dark:text-slate-300">{status.replaceAll("_", " ")}</span><strong className="shrink-0 text-slate-900 dark:text-white">{count}</strong></div>) : <p className="py-4 text-sm text-slate-500">No activity yet.</p>}</div></article>;
+  return <article className="rounded-2xl border border-[#e5e5e5] bg-white p-4 sm:p-5 dark:border-[#333333] dark:bg-[#1b1b1b]"><h3 className="flex items-center gap-2 font-semibold text-slate-900 dark:text-white"><Icon size={18} />{title}</h3><div className="mt-4 space-y-2">{entries.length ? entries.map(([status, count]) => <div key={status} className="flex items-center justify-between gap-4 rounded-xl bg-slate-50 px-3 py-2.5 text-sm dark:bg-slate-900"><span className="min-w-0 break-words capitalize text-slate-600 dark:text-slate-300">{status.replaceAll("_", " ")}</span><strong className="shrink-0 text-slate-900 dark:text-white">{count}</strong></div>) : <p className="py-4 text-sm text-slate-500">No activity yet.</p>}</div></article>;
 }
 
 function Signal({ label, value, icon: Icon, warning = false }: { label: string; value: number; icon: typeof Activity; warning?: boolean }) {
-  return <article className="flex items-center gap-3 rounded-2xl border border-slate-200 bg-white p-4 dark:border-slate-700 dark:bg-slate-800"><span className={`grid h-10 w-10 shrink-0 place-items-center rounded-xl ${warning ? "bg-red-100 text-red-700" : "bg-emerald-100 text-emerald-700"}`}><Icon size={19} /></span><div className="min-w-0"><p className="break-words text-xs text-slate-500">{label}</p><p className="text-lg font-bold text-slate-900 dark:text-white">{value.toLocaleString()}</p></div></article>;
+  return <article className="flex items-center gap-3 rounded-2xl border border-[#e5e5e5] bg-white p-4 dark:border-[#333333] dark:bg-[#1b1b1b]"><span className={`grid h-10 w-10 shrink-0 place-items-center rounded-xl ${warning ? "bg-red-100 text-red-700" : "bg-[#fff3e0] text-[#d96f00] dark:bg-[#2a2118] dark:text-[#ff9b24]"}`}><Icon size={19} /></span><div className="min-w-0"><p className="break-words text-xs text-slate-500">{label}</p><p className="text-lg font-bold text-slate-900 dark:text-white">{value.toLocaleString()}</p></div></article>;
 }
