@@ -36,7 +36,9 @@ export default function RootLayout({
     pathname === "/admin" ||
     pathname.startsWith("/admin/") ||
     pathname === "/logistics" ||
-    pathname.startsWith("/logistics/");
+    pathname.startsWith("/logistics/") ||
+    pathname === "/broker" ||
+    pathname.startsWith("/broker/");
 
   const hideStorefrontChrome =
     pathname === "/signin" ||
