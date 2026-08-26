@@ -1,4 +1,4 @@
-import axios, { AxiosError, AxiosInstance, InternalAxiosRequestConfig } from "axios";
+import axios, { AxiosError, AxiosHeaders, AxiosInstance, InternalAxiosRequestConfig } from "axios";
 import { toApiError } from "./errors";
 import { useAuthStore } from "@/store/useAuthStore";
 import { API_BASE_URL } from "./endpoints";
@@ -95,8 +95,8 @@ export const setupInterceptors = (instance: AxiosInstance) => {
           })
             .then((token) => {
               if (token) {
-                originalRequest.headers = originalRequest.headers ?? {};
-                originalRequest.headers.Authorization = `Bearer ${token}`;
+                originalRequest.headers = AxiosHeaders.from(originalRequest.headers);
+                originalRequest.headers.set("Authorization", `Bearer ${token}`);
               }
               return axiosInstance(originalRequest);
             })
@@ -133,8 +133,8 @@ export const setupInterceptors = (instance: AxiosInstance) => {
           processQueue(null, access_token);
           isRefreshing = false;
 
-          originalRequest.headers = originalRequest.headers ?? {};
-          originalRequest.headers.Authorization = `Bearer ${access_token}`;
+          originalRequest.headers = AxiosHeaders.from(originalRequest.headers);
+          originalRequest.headers.set("Authorization", `Bearer ${access_token}`);
           return axiosInstance(originalRequest);
         } catch (refreshError) {
           processQueue(refreshError, null);
