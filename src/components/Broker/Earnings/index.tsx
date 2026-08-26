@@ -77,12 +77,12 @@ export default function BrokerEarnings() {
 
   return (
     <div className="space-y-5">
-      <section className="rounded-3xl bg-slate-950 p-6 text-white sm:p-8">
+      <section className="rounded-3xl bg-slate-950 p-6 text-black sm:p-8">
         <p className="text-xs font-bold uppercase tracking-widest text-orange-300">
           Broker Finance · B5
         </p>
         <h1 className="mt-2 text-3xl font-black">Commission & Escrow</h1>
-        <p className="mt-2 max-w-2xl text-sm text-white/65">
+        <p className="mt-2 max-w-2xl text-sm text-black/65">
           Commission is created only after a successful attributed payment. It stays
           pending while funds are held and becomes available only after Xerin&apos;s
           trusted escrow release milestone. Wallet withdrawal starts in B6.
