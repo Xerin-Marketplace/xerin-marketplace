@@ -22,6 +22,7 @@ import {
 import {
   type AdminCommissionRule,
   type AdminEscrowHold,
+  type AdminSettlementProtectionClaim,
   type AdminFinanceSettings,
   type AdminLogisticsCompany,
   type AdminLogisticsIntegration,
@@ -29,7 +30,9 @@ import {
   type AdminLogisticsService,
   type AdminLogisticsZone,
   type AdminMarketplaceSettings,
+  type AdminDomesticServiceStandard,
   createCommissionRule,
+  createDomesticServiceStandard,
   onboardLogisticsCompany,
   createLogisticsRate,
   createLogisticsService,
@@ -44,7 +47,10 @@ import {
   getLogisticsIntegration,
   getMarketplaceSettings,
   listCommissionRules,
+  listDomesticServiceStandards,
   listEscrowHolds,
+  listProtectionClaims,
+  resolveProtectionClaim,
   listLogisticsCompanies,
   listLogisticsRates,
   listLogisticsServices,
@@ -54,6 +60,7 @@ import {
   saveLogisticsIntegration,
   saveMarketplaceSettings,
   updateCommissionRule,
+  updateDomesticServiceStandard,
   updateFinanceSettings,
 } from "@/lib/api/endpoints/admin";
 
@@ -173,6 +180,8 @@ function MarketplaceSettings() {
   const [form, setForm] = useState({
     escrow_release_hours: 48,
     dispute_period_hours: 48,
+    seller_release_grace_hours: 144,
+    allow_customer_early_acceptance: true,
     cod_allowed: false,
     international_delivery_allowed: false,
     auto_approve_products: false,
@@ -180,16 +189,22 @@ function MarketplaceSettings() {
   const [loading, setLoading] = useState(true);
   const [saving, setSaving] = useState(false);
   const [configured, setConfigured] = useState(false);
+  const [standards, setStandards] = useState<AdminDomesticServiceStandard[]>([]);
+  const [standardForm, setStandardForm] = useState({ origin_region: "Dar es Salaam", destination_region: "Dar es Salaam", tier: "express" as "standard" | "express", max_delivery_minutes: 240, is_active: true });
+  const [savingStandard, setSavingStandard] = useState(false);
 
   const load = async () => {
     setLoading(true);
     try {
-      const data = await getMarketplaceSettings();
+      const [data, domesticStandards] = await Promise.all([getMarketplaceSettings(), listDomesticServiceStandards()]);
+      setStandards(domesticStandards);
       setConfigured(data.configured);
       if (data.configured) {
         setForm({
           escrow_release_hours: data.escrow_release_hours ?? 48,
           dispute_period_hours: data.dispute_period_hours ?? 48,
+          seller_release_grace_hours: data.seller_release_grace_hours ?? 144,
+          allow_customer_early_acceptance: data.allow_customer_early_acceptance !== false,
           cod_allowed: Boolean(data.cod_allowed),
           international_delivery_allowed: Boolean(data.international_delivery_allowed),
           auto_approve_products: Boolean(data.auto_approve_products),
@@ -219,6 +234,15 @@ function MarketplaceSettings() {
     }
   };
 
+  const addStandard = async () => {
+    setSavingStandard(true);
+    try { await createDomesticServiceStandard(standardForm); setStandards(await listDomesticServiceStandards()); toast.success("Xerin Express service standard saved."); }
+    catch (error) { toast.error(errorMessage(error)); } finally { setSavingStandard(false); }
+  };
+  const toggleStandard = async (row: AdminDomesticServiceStandard) => {
+    try { await updateDomesticServiceStandard(row.id, { origin_region: row.origin_region, destination_region: row.destination_region, tier: row.tier, max_delivery_minutes: row.max_delivery_minutes, is_active: !row.is_active }); setStandards(await listDomesticServiceStandards()); } catch(error){ toast.error(errorMessage(error)); }
+  };
+
   if (loading) return <Loading label="Loading marketplace settings..." />;
 
   return (
@@ -230,31 +254,35 @@ function MarketplaceSettings() {
         </div>
       )}
       <section className="grid gap-4 lg:grid-cols-2">
-        <Card title="Escrow & Disputes" icon={ShieldCheck}>
-          <Field label="Escrow release period (hours)">
+        <Card title="Escrow & Customer Protection" icon={ShieldCheck}>
+          <Field label="Seller release grace period after verified delivery (hours)">
             <input
               type="number"
               min={1}
               max={720}
               className={inputClass}
-              value={form.escrow_release_hours}
-              onChange={(e) =>
-                setForm((x) => ({ ...x, escrow_release_hours: Number(e.target.value) }))
-              }
+              value={form.seller_release_grace_hours}
+              onChange={(e) => setForm((x) => ({ ...x, seller_release_grace_hours: Number(e.target.value) }))}
             />
           </Field>
-          <Field label="Dispute period (hours)">
+          <p className="rounded-xl bg-orange-50 p-3 text-xs leading-5 text-orange-900">Example: 144 hours = 6 days. The clock starts only after recipient-verified delivery, never at payment or pickup.</p>
+          <Toggle
+            label="Allow customer early acceptance"
+            hint="When enabled, a satisfied customer can release the delivered product/order before the grace period expires."
+            checked={form.allow_customer_early_acceptance}
+            onChange={(value) => setForm((x) => ({ ...x, allow_customer_early_acceptance: value }))}
+          />
+          <Field label="Dispute / support period (hours)">
             <input
               type="number"
               min={1}
               max={720}
               className={inputClass}
               value={form.dispute_period_hours}
-              onChange={(e) =>
-                setForm((x) => ({ ...x, dispute_period_hours: Number(e.target.value) }))
-              }
+              onChange={(e) => setForm((x) => ({ ...x, dispute_period_hours: Number(e.target.value) }))}
             />
           </Field>
+          <input type="hidden" value={form.escrow_release_hours} readOnly />
         </Card>
 
         <Card title="Checkout Rules" icon={Settings2}>
@@ -286,6 +314,13 @@ function MarketplaceSettings() {
           <div className="rounded-xl border border-slate-200 bg-slate-50 p-4 text-xs leading-5 text-slate-600">
             This rule applies to <b>new submissions only</b>. Products already waiting for review remain in the moderation queue when automatic approval is enabled.
           </div>
+        </Card>
+
+        <Card title="Xerin Express Domestic Standards" icon={Truck}>
+          <p className="text-xs leading-5 text-slate-500">Admin defines what Standard and Express mean for each domestic region route. Logistics companies set their own price and promised time; checkout only accepts services that meet this SLA.</p>
+          <div className="grid gap-2 sm:grid-cols-2"><Field label="Origin region"><input className={inputClass} value={standardForm.origin_region} onChange={(e)=>setStandardForm(x=>({...x,origin_region:e.target.value}))}/></Field><Field label="Destination region"><input className={inputClass} value={standardForm.destination_region} onChange={(e)=>setStandardForm(x=>({...x,destination_region:e.target.value}))}/></Field><Field label="Tier"><select className={inputClass} value={standardForm.tier} onChange={(e)=>setStandardForm(x=>({...x,tier:e.target.value as "standard"|"express"}))}><option value="express">Express</option><option value="standard">Standard</option></select></Field><Field label="Maximum delivery minutes"><input type="number" min={1} className={inputClass} value={standardForm.max_delivery_minutes} onChange={(e)=>setStandardForm(x=>({...x,max_delivery_minutes:Number(e.target.value)}))}/></Field></div>
+          <button type="button" disabled={savingStandard} onClick={()=>void addStandard()} className="rounded-xl bg-black px-4 py-2.5 text-sm font-semibold text-white">{savingStandard?"Saving…":"Add service standard"}</button>
+          <div className="space-y-2">{standards.map(row=><div key={row.id} className="flex items-center justify-between gap-3 rounded-xl border border-slate-200 p-3 text-xs"><div><b>{row.origin_region} → {row.destination_region}</b><p className="mt-1 uppercase text-[#f47524]">{row.tier} · max {row.max_delivery_minutes} min</p></div><button type="button" onClick={()=>void toggleStandard(row)} className={`rounded-lg px-3 py-2 font-semibold ${row.is_active?"bg-emerald-50 text-emerald-700":"bg-slate-100 text-slate-600"}`}>{row.is_active?"Active":"Inactive"}</button></div>)}</div>
         </Card>
       </section>
 
@@ -726,14 +761,26 @@ function FinanceSettings() {
 }
 
 function EscrowHolds() {
-  const [rows,setRows]=useState<AdminEscrowHold[]>([]); const [search,setSearch]=useState(""); const [status,setStatus]=useState("all");
-  const [page,setPage]=useState(1); const [pageSize,setPageSize]=useState(10); const [meta,setMeta]=useState({total:0,total_pages:0}); const [loading,setLoading]=useState(true);
-  const load=async()=>{setLoading(true);try{const r=await listEscrowHolds({page,page_size:pageSize,search:search||undefined,status:status==="all"?undefined:status});setRows(r.results);setMeta({total:r.total,total_pages:r.total_pages});}catch(e){toast.error(errorMessage(e));}finally{setLoading(false)}};
+  const [rows,setRows]=useState<AdminEscrowHold[]>([]);
+  const [claims,setClaims]=useState<AdminSettlementProtectionClaim[]>([]);
+  const [search,setSearch]=useState(""); const [status,setStatus]=useState("all");
+  const [page,setPage]=useState(1); const [pageSize,setPageSize]=useState(10);
+  const [meta,setMeta]=useState({total:0,total_pages:0}); const [loading,setLoading]=useState(true);
+  const load=async()=>{setLoading(true);try{const [r,c]=await Promise.all([listEscrowHolds({page,page_size:pageSize,search:search||undefined,status:status==="all"?undefined:status}),listProtectionClaims({page:1,page_size:20})]);setRows(r.results);setMeta({total:r.total,total_pages:r.total_pages});setClaims(c.results);}catch(e){toast.error(errorMessage(e));}finally{setLoading(false)}};
   useEffect(()=>{const t=setTimeout(()=>void load(),250);return()=>clearTimeout(t)},[page,pageSize,search,status]);
-  return <TableCard title="Escrow ledger" search={search} setSearch={v=>{setSearch(v);setPage(1);}} filter={<select className={inputClass} value={status} onChange={e=>{setStatus(e.target.value);setPage(1);}}><option value="all">All statuses</option><option value="held">Held</option><option value="release_pending">Release pending</option><option value="disputed">Disputed</option><option value="released">Released</option><option value="refunded">Refunded</option></select>}>
-    {loading?<Loading label="Loading escrow holds..."/>:<><div className="overflow-x-auto"><table className="w-full min-w-[1000px] text-left text-sm"><TableHead headers={["Reference","Order","Seller","Gross","Seller","Commission","Released","Status","Actions"]}/><tbody className="divide-y">{rows.map(r=><tr key={r.id}><td className="px-5 py-4 font-mono text-xs">{r.reference}</td><td className="px-5 py-4 font-mono text-xs">{r.order_id.slice(0,8)}…</td><td className="px-5 py-4 font-mono text-xs">{r.seller_id?r.seller_id.slice(0,8)+"…":"—"}</td><td className="px-5 py-4 font-semibold">{r.gross_amount.toLocaleString()} {r.currency}</td><td className="px-5 py-4">{r.seller_amount.toLocaleString()}</td><td className="px-5 py-4">{r.commission_amount.toLocaleString()}</td><td className="px-5 py-4">{r.released_amount.toLocaleString()}</td><td className="px-5 py-4"><Status value={r.status}/></td><td className="px-5 py-4"><div className="flex gap-2">{["held","release_pending"].includes(r.status)&&<><button className="text-xs font-semibold text-emerald-700" onClick={async()=>{const amountText=prompt("Release amount (leave empty for full remaining amount):");const note=prompt("Release note (optional):")||undefined;try{await releaseEscrowHold(r.id,amountText?Number(amountText):undefined,note);toast.success("Escrow release recorded.");await load();}catch(e){toast.error(errorMessage(e));}}}>Release</button><button className="text-xs font-semibold text-red-600" onClick={async()=>{const note=prompt("Dispute reason:");if(!note)return;try{await disputeEscrowHold(r.id,note);toast.success("Escrow marked disputed.");await load();}catch(e){toast.error(errorMessage(e));}}}>Dispute</button></>}</div></td></tr>)}{!rows.length&&<EmptyRow colSpan={9} text="No escrow holds found yet. Holds will populate after Customer payment allocation is connected."/>}</tbody></table></div><Pagination page={page} pageSize={pageSize} total={meta.total} totalPages={meta.total_pages} setPage={setPage} setPageSize={setPageSize}/></>}
-  </TableCard>;
+  const resolve=async(claim:AdminSettlementProtectionClaim,action:"release_seller"|"keep_held"|"reject_claim")=>{const responsibility=(prompt("Responsibility: seller, logistics, customer, platform, or shared",claim.likely_responsibility||"seller")||"").trim() as "seller"|"logistics"|"customer"|"platform"|"shared";if(!["seller","logistics","customer","platform","shared"].includes(responsibility))return toast.error("Enter a valid responsibility.");const note=prompt("Resolution note:")?.trim();if(!note)return;try{await resolveProtectionClaim(claim.id,{responsibility,action,note});toast.success("Protection claim updated.");await load();}catch(e){toast.error(errorMessage(e));}};
+  return <div className="space-y-5">
+    <TableCard title="Escrow ledger" search={search} setSearch={v=>{setSearch(v);setPage(1);}} filter={<select className={inputClass} value={status} onChange={e=>{setStatus(e.target.value);setPage(1);}}><option value="all">All statuses</option><option value="held">Held</option><option value="release_pending">Release pending</option><option value="disputed">Disputed</option><option value="released">Released</option><option value="refunded">Refunded</option></select>}>
+      {loading?<Loading label="Loading escrow holds..."/>:<><div className="overflow-x-auto"><table className="w-full min-w-[1000px] text-left text-sm"><TableHead headers={["Reference","Order","Seller","Gross","Seller","Commission","Released","Status","Actions"]}/><tbody className="divide-y">{rows.map(r=><tr key={r.id}><td className="px-5 py-4 font-mono text-xs">{r.reference}</td><td className="px-5 py-4 font-mono text-xs">{r.order_id.slice(0,8)}…</td><td className="px-5 py-4 font-mono text-xs">{r.seller_id?r.seller_id.slice(0,8)+"…":"—"}</td><td className="px-5 py-4 font-semibold">{r.gross_amount.toLocaleString()} {r.currency}</td><td className="px-5 py-4">{r.seller_amount.toLocaleString()}</td><td className="px-5 py-4">{r.commission_amount.toLocaleString()}</td><td className="px-5 py-4">{r.released_amount.toLocaleString()}</td><td className="px-5 py-4"><Status value={r.status}/>{r.release_after&&<p className="mt-1 text-[10px] text-slate-400">Auto {new Date(r.release_after).toLocaleString()}</p>}</td><td className="px-5 py-4"><div className="flex gap-2">{["held","release_pending"].includes(r.status)&&<><button className="text-xs font-semibold text-emerald-700" onClick={async()=>{const amountText=prompt("Release amount (leave empty for full remaining amount):");const note=prompt("Release note (optional):")||undefined;try{await releaseEscrowHold(r.id,amountText?Number(amountText):undefined,note);toast.success("Escrow release recorded.");await load();}catch(e){toast.error(errorMessage(e));}}}>Release</button><button className="text-xs font-semibold text-red-600" onClick={async()=>{const note=prompt("Dispute reason:");if(!note)return;try{await disputeEscrowHold(r.id,note);toast.success("Escrow marked disputed.");await load();}catch(e){toast.error(errorMessage(e));}}}>Dispute</button></>}</div></td></tr>)}{!rows.length&&<EmptyRow colSpan={9} text="No escrow holds found yet."/>}</tbody></table></div><Pagination page={page} pageSize={pageSize} total={meta.total} totalPages={meta.total_pages} setPage={setPage} setPageSize={setPageSize}/></>}
+    </TableCard>
+
+    <section className="overflow-hidden rounded-2xl border border-slate-200 bg-white shadow-sm">
+      <div className="border-b border-slate-100 p-5"><h3 className="font-bold text-slate-900">Customer protection claims</h3><p className="mt-1 text-xs text-slate-500">Item-level and order-level F6 claims. A seller hold is automatic only for eligible seller/undetermined reasons.</p></div>
+      <div className="overflow-x-auto"><table className="w-full min-w-[1100px] text-left text-sm"><TableHead headers={["Created","Order / Item","Reason","Responsibility","Seller hold","Status","Notes","Actions"]}/><tbody className="divide-y">{claims.map(c=><tr key={c.id}><td className="px-5 py-4 text-xs">{new Date(c.created_at).toLocaleString()}</td><td className="px-5 py-4 font-mono text-xs">{c.order_id.slice(0,8)}…<br/>{c.order_item_id?`Item ${c.order_item_id.slice(0,8)}…`:"Overall order"}</td><td className="px-5 py-4 font-semibold">{pretty(c.reason)}</td><td className="px-5 py-4"><Status value={c.likely_responsibility}/></td><td className="px-5 py-4">{c.hold_applied?<span className="font-semibold text-red-600">Affected escrow held</span>:<span className="text-slate-500">No automatic seller hold</span>}</td><td className="px-5 py-4"><Status value={c.status}/></td><td className="max-w-xs px-5 py-4 text-xs text-slate-500">{c.notes||"—"}</td><td className="px-5 py-4"><div className="flex flex-wrap gap-2">{!["resolved","rejected","seller_liable","logistics_liable","customer_liable"].includes(c.status)&&<><button onClick={()=>void resolve(c,"release_seller")} className="text-xs font-semibold text-emerald-700">Release seller</button><button onClick={()=>void resolve(c,"keep_held")} className="text-xs font-semibold text-amber-700">Keep held</button><button onClick={()=>void resolve(c,"reject_claim")} className="text-xs font-semibold text-slate-600">Reject claim</button></>}</div></td></tr>)}{!claims.length&&<EmptyRow colSpan={8} text="No customer protection claims have been submitted."/>}</tbody></table></div>
+    </section>
+  </div>;
 }
+
 
 function Card({title,icon:Icon,children}:{title:string;icon:any;children:React.ReactNode}) {
   return <section className="rounded-2xl border border-slate-200 bg-white p-5 shadow-sm"><div className="mb-4 flex items-center gap-3"><span className="flex h-9 w-9 items-center justify-center rounded-xl bg-orange-50 text-[#f47524]"><Icon size={17}/></span><h3 className="font-bold text-slate-900">{title}</h3></div><div className="space-y-4">{children}</div></section>;

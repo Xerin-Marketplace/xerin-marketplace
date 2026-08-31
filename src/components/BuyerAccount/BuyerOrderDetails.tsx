@@ -6,6 +6,7 @@ import type { SellerOrderMessage } from "@/types/api/seller-order";
 import type {
   CustomerEscrowSummary,
   CustomerOrderDetail,
+  SettlementProtectionClaimReason,
   Shipment,
 } from "@/types/api/commerce";
 import {
@@ -53,6 +54,14 @@ export default function BuyerOrderDetails({ orderId }: { orderId: string }) {
   const [approvingReceipt, setApprovingReceipt] = useState(false);
   const [escrowMessage, setEscrowMessage] = useState("");
   const [receiptDialogOpen, setReceiptDialogOpen] = useState(false);
+  const [claimDialog, setClaimDialog] = useState<{ scope: "item" | "order"; itemId?: string } | null>(null);
+  const [claimReason, setClaimReason] = useState<SettlementProtectionClaimReason>("damaged_on_arrival");
+  const [claimNotes, setClaimNotes] = useState("");
+  const [claimWhen, setClaimWhen] = useState<"before_acceptance" | "on_opening" | "after_initial_use" | "later_after_delivery">("on_opening");
+  const [packageDamaged, setPackageDamaged] = useState(false);
+  const [productUsed, setProductUsed] = useState(false);
+  const [submittingClaim, setSubmittingClaim] = useState(false);
+  const [acceptingItemId, setAcceptingItemId] = useState<string | null>(null);
   const [downloadingInvoice, setDownloadingInvoice] = useState(false);
   const [downloadingPaymentReceipt, setDownloadingPaymentReceipt] = useState(false);
 
@@ -147,6 +156,53 @@ export default function BuyerOrderDetails({ orderId }: { orderId: string }) {
       );
     } finally {
       setApprovingReceipt(false);
+    }
+  };
+
+  const acceptItem = async (itemId: string) => {
+    if (acceptingItemId) return;
+    setAcceptingItemId(itemId);
+    setEscrowMessage("");
+    try {
+      const updated = await ordersApi.acceptEscrowItem(orderId, itemId, "Customer accepted this delivered product");
+      setEscrow(updated);
+      setEscrowMessage("Product accepted. Its eligible seller funds were released from Xerin escrow.");
+    } catch (cause) {
+      const err = cause as { response?: { data?: { detail?: string } }; message?: string };
+      setEscrowMessage(err.response?.data?.detail || err.message || "Unable to accept this product.");
+    } finally {
+      setAcceptingItemId(null);
+    }
+  };
+
+  const submitProtectionClaim = async () => {
+    if (!claimDialog || claimNotes.trim().length < 5 || submittingClaim) return;
+    setSubmittingClaim(true);
+    setEscrowMessage("");
+    try {
+      const claim = await ordersApi.createProtectionClaim(orderId, {
+        scope: claimDialog.scope,
+        order_item_id: claimDialog.scope === "item" ? claimDialog.itemId : undefined,
+        reason: claimReason,
+        notes: claimNotes.trim(),
+        when_noticed: claimWhen,
+        package_damaged: packageDamaged,
+        product_used: productUsed,
+      });
+      setEscrowMessage(
+        claim.hold_applied
+          ? "Problem reported. Xerin protected only the affected seller escrow while the claim is reviewed."
+          : "Problem recorded. This reason does not automatically freeze seller escrow; Xerin will route it to the appropriate support/responsibility flow.",
+      );
+      setClaimDialog(null);
+      setClaimNotes("");
+      await load();
+    } catch (cause) {
+      const err = cause as { response?: { data?: { detail?: string | { message?: string } } }; message?: string };
+      const detail = err.response?.data?.detail;
+      setEscrowMessage((typeof detail === "string" ? detail : detail?.message) || err.message || "Unable to submit the protection claim.");
+    } finally {
+      setSubmittingClaim(false);
     }
   };
 
@@ -467,10 +523,53 @@ export default function BuyerOrderDetails({ orderId }: { orderId: string }) {
 
                 {escrow.status === "held" && !escrow.can_customer_approve && (
                   <p className="text-xs leading-5 text-[#64748b]">
-                    Xerin is holding the seller funds until delivery is completed,
-                    you approve receipt, or the configured escrow release period
-                    is reached.
+                    Seller funds remain protected. The release clock starts only after recipient-verified delivery. Once delivery is verified, you may accept early or Xerin will auto-release after the Admin-configured protection period if no eligible claim is holding the affected item.
                   </p>
+                )}
+
+                {escrow.delivery_verified_at && (
+                  <div className="rounded-xl border border-orange-200 bg-orange-50 p-3 text-xs leading-5 text-orange-900">
+                    <b>Delivery verified:</b> {new Date(escrow.delivery_verified_at).toLocaleString()}
+                    {escrow.release_after && <><br /><b>Automatic seller release:</b> {new Date(escrow.release_after).toLocaleString()}</>}
+                    {escrow.seller_release_grace_hours && <><br />Protection window: {Math.round(escrow.seller_release_grace_hours / 24 * 10) / 10} days</>}
+                  </div>
+                )}
+
+                {escrow.items?.length > 0 && (
+                  <div className="space-y-2">
+                    <p className="text-xs font-bold uppercase tracking-wide text-slate-500">Product protection</p>
+                    {escrow.items.map((protectedItem) => {
+                      const item = order.items.find((row) => row.id === protectedItem.order_item_id);
+                      return (
+                        <div key={protectedItem.order_item_id} className="rounded-xl border border-slate-200 p-3 dark:border-white/10">
+                          <div className="flex items-start justify-between gap-3">
+                            <div>
+                              <p className="text-sm font-bold text-slate-900 dark:text-white">{item?.product_name || "Order item"}</p>
+                              <p className="mt-1 text-xs text-slate-500">{pretty(protectedItem.status)} · Seller entitlement {formatCurrency(protectedItem.seller_amount, escrow.currency)}</p>
+                            </div>
+                            {protectedItem.release_after && <p className="text-[10px] text-slate-500">Auto {new Date(protectedItem.release_after).toLocaleDateString()}</p>}
+                          </div>
+                          <div className="mt-3 flex flex-wrap gap-2">
+                            {protectedItem.can_customer_accept && (
+                              <button type="button" disabled={acceptingItemId === protectedItem.order_item_id} onClick={() => void acceptItem(protectedItem.order_item_id)} className="rounded-lg bg-emerald-600 px-3 py-2 text-xs font-bold text-white disabled:opacity-60">
+                                {acceptingItemId === protectedItem.order_item_id ? "Releasing..." : "Everything is OK — Accept item"}
+                              </button>
+                            )}
+                            {protectedItem.can_report_problem && (
+                              <button type="button" onClick={() => setClaimDialog({ scope: "item", itemId: protectedItem.order_item_id })} className="rounded-lg border border-red-200 px-3 py-2 text-xs font-bold text-red-700">
+                                Report product problem
+                              </button>
+                            )}
+                          </div>
+                        </div>
+                      );
+                    })}
+                    {escrow.can_report_problem && (
+                      <button type="button" onClick={() => setClaimDialog({ scope: "order" })} className="w-full rounded-xl border border-slate-300 px-3 py-2.5 text-xs font-bold text-slate-700 dark:border-white/10 dark:text-white">
+                        Report an overall delivery/order problem
+                      </button>
+                    )}
+                  </div>
                 )}
 
                 {escrow.can_customer_approve && (
@@ -482,7 +581,7 @@ export default function BuyerOrderDetails({ orderId }: { orderId: string }) {
                   >
                     {approvingReceipt
                       ? "Releasing Escrow..."
-                      : "Approve Receipt & Release Seller Funds"}
+                      : "Everything is OK — Accept Complete Order"}
                   </button>
                 )}
 
@@ -617,6 +716,55 @@ export default function BuyerOrderDetails({ orderId }: { orderId: string }) {
           {downloadingInvoice ? "Preparing invoice..." : "Download Invoice"}
         </button>
       </div>
+
+      {claimDialog && (
+        <div className="fixed inset-0 z-[155] flex items-end justify-center bg-black/60 sm:items-center sm:p-4">
+          <div role="dialog" aria-modal="true" className="max-h-[90vh] w-full max-w-lg overflow-y-auto rounded-t-2xl bg-white p-5 shadow-2xl dark:bg-darkTheme-card sm:rounded-2xl sm:p-6">
+            <div className="flex items-start justify-between gap-4">
+              <div>
+                <h2 className="font-bold text-slate-900 dark:text-white">Report {claimDialog.scope === "item" ? "a product" : "an order/delivery"} problem</h2>
+                <p className="mt-1 text-xs leading-5 text-slate-500">Choose the closest reason. Xerin freezes seller escrow only when the reason can reasonably be seller-related or remains genuinely undetermined.</p>
+              </div>
+              <button onClick={() => setClaimDialog(null)} className="text-sm font-bold text-slate-500">Close</button>
+            </div>
+            <div className="mt-5 space-y-4">
+              <label className="block text-sm font-semibold">What is wrong?
+                <select value={claimReason} onChange={(e) => setClaimReason(e.target.value as SettlementProtectionClaimReason)} className="mt-2 w-full rounded-xl border border-slate-200 bg-white px-3 py-3 text-sm dark:border-white/10 dark:bg-white/5">
+                  <option value="wrong_product">Wrong product received</option>
+                  <option value="not_as_described">Product not as described</option>
+                  <option value="missing_item">Item missing</option>
+                  <option value="defective_on_arrival">Defective on arrival</option>
+                  <option value="damaged_on_arrival">Damaged on arrival</option>
+                  <option value="package_damaged">Package damaged during delivery</option>
+                  <option value="package_tampered">Package tampered during delivery</option>
+                  <option value="wrong_delivery_recipient">Delivered to wrong person/location</option>
+                  <option value="entire_delivery_missing">Entire delivery missing</option>
+                  <option value="late_delivery">Late delivery</option>
+                  <option value="customer_accidental_damage">I accidentally damaged it after delivery</option>
+                  <option value="change_of_mind">Changed my mind</option>
+                  <option value="other">Other</option>
+                </select>
+              </label>
+              <label className="block text-sm font-semibold">When did you first notice it?
+                <select value={claimWhen} onChange={(e) => setClaimWhen(e.target.value as typeof claimWhen)} className="mt-2 w-full rounded-xl border border-slate-200 bg-white px-3 py-3 text-sm dark:border-white/10 dark:bg-white/5">
+                  <option value="before_acceptance">Before accepting delivery</option>
+                  <option value="on_opening">Immediately after opening</option>
+                  <option value="after_initial_use">After initial use</option>
+                  <option value="later_after_delivery">Later after delivery</option>
+                </select>
+              </label>
+              <div className="grid gap-3 sm:grid-cols-2">
+                <label className="flex items-center gap-2 rounded-xl border border-slate-200 p-3 text-sm dark:border-white/10"><input type="checkbox" checked={packageDamaged} onChange={(e) => setPackageDamaged(e.target.checked)} /> External package was damaged</label>
+                <label className="flex items-center gap-2 rounded-xl border border-slate-200 p-3 text-sm dark:border-white/10"><input type="checkbox" checked={productUsed} onChange={(e) => setProductUsed(e.target.checked)} /> Product has been used</label>
+              </div>
+              <label className="block text-sm font-semibold">Explain what happened
+                <textarea value={claimNotes} onChange={(e) => setClaimNotes(e.target.value)} rows={4} className="mt-2 w-full rounded-xl border border-slate-200 bg-white px-3 py-3 text-sm dark:border-white/10 dark:bg-white/5" placeholder="Be specific about the product condition and what you observed." />
+              </label>
+              <button type="button" disabled={claimNotes.trim().length < 5 || submittingClaim} onClick={() => void submitProtectionClaim()} className="w-full rounded-xl bg-[#f7941d] px-4 py-3 text-sm font-bold text-white disabled:opacity-50">{submittingClaim ? "Submitting..." : "Submit protection claim"}</button>
+            </div>
+          </div>
+        </div>
+      )}
 
       {receiptDialogOpen && (
         <div className="fixed inset-0 z-[150] flex items-end justify-center bg-black/60 sm:items-center sm:p-4">

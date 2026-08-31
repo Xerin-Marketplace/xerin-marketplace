@@ -1252,6 +1252,8 @@ export type AdminMarketplaceSettings = {
   id?: string | null;
   escrow_release_hours: number | null;
   dispute_period_hours: number | null;
+  seller_release_grace_hours: number | null;
+  allow_customer_early_acceptance: boolean;
   cod_allowed: boolean | null;
   international_delivery_allowed: boolean | null;
   auto_approve_products: boolean | null;
@@ -1402,6 +1404,26 @@ export type AdminEscrowHold = {
   updated_at?: string | null;
 };
 
+export type AdminSettlementProtectionClaim = {
+  id: string;
+  order_id: string;
+  customer_id: string;
+  order_item_id?: string | null;
+  scope: "item" | "order";
+  reason: string;
+  notes?: string | null;
+  when_noticed?: string | null;
+  package_damaged?: boolean | null;
+  product_used?: boolean | null;
+  evidence_urls: string[];
+  likely_responsibility: string;
+  status: string;
+  hold_applied: boolean;
+  admin_resolution_note?: string | null;
+  resolved_at?: string | null;
+  created_at: string;
+};
+
 export type AdminPaged<T> = {
   total: number;
   page: number;
@@ -1416,11 +1438,18 @@ export const getMarketplaceSettings = async () =>
 export const saveMarketplaceSettings = async (payload: {
   escrow_release_hours: number;
   dispute_period_hours: number;
+  seller_release_grace_hours: number;
+  allow_customer_early_acceptance: boolean;
   cod_allowed: boolean;
   international_delivery_allowed: boolean;
   auto_approve_products: boolean;
 }) =>
   (await axiosInstance.put<AdminMarketplaceSettings>("/admin/marketplace-settings", payload)).data;
+
+export type AdminDomesticServiceStandard = { id: string; origin_region: string; destination_region: string; tier: "standard" | "express"; max_delivery_minutes: number; is_active: boolean; created_at: string; updated_at?: string | null };
+export const listDomesticServiceStandards = async () => (await axiosInstance.get<AdminDomesticServiceStandard[]>("/admin/marketplace-settings/domestic-service-standards")).data;
+export const createDomesticServiceStandard = async (payload: Omit<AdminDomesticServiceStandard, "id" | "created_at" | "updated_at">) => (await axiosInstance.post<AdminDomesticServiceStandard>("/admin/marketplace-settings/domestic-service-standards", payload)).data;
+export const updateDomesticServiceStandard = async (id: string, payload: Omit<AdminDomesticServiceStandard, "id" | "created_at" | "updated_at">) => (await axiosInstance.patch<AdminDomesticServiceStandard>(`/admin/marketplace-settings/domestic-service-standards/${id}`, payload)).data;
 
 export const listCommissionRules = async (params: {
   page?: number; page_size?: number; search?: string; scope?: string; active?: boolean;
@@ -1668,6 +1697,17 @@ export const getFinanceSettings = async () =>
 
 export const updateFinanceSettings = async (payload: Partial<AdminFinanceSettings>) =>
   (await axiosInstance.patch<AdminFinanceSettings>("/admin/finance/settings", payload)).data;
+
+export const listProtectionClaims = async (params: {
+  page?: number; page_size?: number; status?: string; responsibility?: string;
+} = {}) =>
+  (await axiosInstance.get<AdminPaged<AdminSettlementProtectionClaim>>("/admin/finance/protection-claims", { params })).data;
+
+export const resolveProtectionClaim = async (
+  id: string,
+  payload: { responsibility: "seller" | "logistics" | "customer" | "platform" | "shared"; action: "release_seller" | "keep_held" | "reject_claim"; note: string },
+) =>
+  (await axiosInstance.post<AdminSettlementProtectionClaim>(`/admin/finance/protection-claims/${id}/resolve`, payload)).data;
 
 export const listEscrowHolds = async (params: {
   page?: number; page_size?: number; search?: string; status?: string; currency?: string;

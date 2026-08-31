@@ -17,6 +17,8 @@ import type {
   DetectedDeliveryMode,
   CustomerOrderDetail,
   CustomerEscrowSummary,
+  SettlementProtectionClaim,
+  SettlementProtectionClaimReason,
   EligibleLogisticsResponse,
   MultiSellerPricingResponse,
   CheckoutDeliveryQuote,
@@ -76,6 +78,13 @@ export const checkoutApi = {
       "/shipping/eligible-logistics",
       payload,
       { params: { page: 1, page_size: 100 }, signal },
+    )).data,
+
+  xerinExpressOptions: async (addressId: string, signal?: AbortSignal): Promise<import("@/types/api/commerce").XerinExpressOption[]> =>
+    (await axiosInstance.post<import("@/types/api/commerce").XerinExpressOption[]>(
+      "/shipping/xerin-express-options",
+      { address_id: addressId, delivery_mode: "local" },
+      { signal },
     )).data,
 
   multiSellerPricing: async (
@@ -266,6 +275,29 @@ export const ordersApi = {
         { note: note || undefined },
       )
     ).data,
+  acceptEscrowItem: async (orderId: string, orderItemId: string, note?: string) =>
+    (
+      await axiosInstance.post<CustomerEscrowSummary>(
+        `/orders/${orderId}/accept-items/${orderItemId}`,
+        { note: note || undefined },
+      )
+    ).data,
+  protectionClaims: async (orderId: string) =>
+    (await axiosInstance.get<SettlementProtectionClaim[]>(`/orders/${orderId}/protection-claims`)).data,
+  createProtectionClaim: async (
+    orderId: string,
+    payload: {
+      scope: "item" | "order";
+      order_item_id?: string;
+      reason: SettlementProtectionClaimReason;
+      notes: string;
+      when_noticed?: "before_acceptance" | "on_opening" | "after_initial_use" | "later_after_delivery";
+      package_damaged?: boolean;
+      product_used?: boolean;
+      evidence_urls?: string[];
+    },
+  ) =>
+    (await axiosInstance.post<SettlementProtectionClaim>(`/orders/${orderId}/protection-claims`, payload)).data,
   sellerMessages: async (orderId: string, sellerOrderId: string, signal?: AbortSignal) =>
     (
       await axiosInstance.get<SellerOrderMessage[]>(

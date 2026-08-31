@@ -16,6 +16,7 @@ export type ShippingZonePayload = Omit<ShippingZone, "id" | "logistics_company_i
 export type ShippingService = {
   id: string; logistics_company_id?: string | null; name: string; service_code?: string | null; description?: string | null;
   carrier_name?: string | null; scope: LogisticsScope; supports_cod: boolean; supports_tracking: boolean;
+  xerin_delivery_tier?: "standard" | "express" | null; promised_delivery_minutes?: number | null;
   min_delivery_days: number; max_delivery_days: number; is_active: boolean; created_at: string; updated_at?: string | null;
 };
 export type ShippingServicePayload = Omit<ShippingService, "id" | "logistics_company_id" | "created_at" | "updated_at">;

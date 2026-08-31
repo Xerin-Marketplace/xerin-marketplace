@@ -169,6 +169,12 @@ export type MultiSellerDeliveryOption = {
   }>;
 };
 
+export type XerinExpressOption = {
+  tier: "standard" | "express"; label: string; delivery_amount: number | string; currency: string;
+  promised_delivery_minutes: number; logistics_company_id: string; logistics_company_name: string;
+  rate_id: string; method_id: string; supports_cod: boolean; supports_tracking: boolean;
+};
+
 export type MultiSellerPricingResponse = {
   address_id: string;
   logistics_company_id: string;
@@ -473,6 +479,18 @@ export type CustomerOrderDetail = Omit<Order, "payments"> & {
 };
 
 
+export type CustomerEscrowItemSummary = {
+  order_item_id: string;
+  seller_id?: string | null;
+  status: string;
+  seller_amount: number | string;
+  released_amount: number | string;
+  remaining_amount: number | string;
+  release_after?: string | null;
+  can_customer_accept: boolean;
+  can_report_problem: boolean;
+};
+
 export type CustomerEscrowSummary = {
   order_id: string;
   currency: string;
@@ -480,6 +498,9 @@ export type CustomerEscrowSummary = {
     | "not_applicable"
     | "held"
     | "partially_released"
+    | "partially_refunded"
+    | "settled_with_refunds"
+    | "refunded"
     | "released"
     | "disputed";
   hold_count: number;
@@ -489,7 +510,47 @@ export type CustomerEscrowSummary = {
   released_amount: number | string;
   remaining_amount: number | string;
   release_after?: string | null;
+  delivery_verified_at?: string | null;
+  seller_release_grace_hours?: number | null;
+  allow_customer_early_acceptance: boolean;
   can_customer_approve: boolean;
+  can_report_problem: boolean;
+  items: CustomerEscrowItemSummary[];
+};
+
+export type SettlementProtectionClaimReason =
+  | "wrong_product"
+  | "not_as_described"
+  | "missing_item"
+  | "defective_on_arrival"
+  | "damaged_on_arrival"
+  | "package_damaged"
+  | "package_tampered"
+  | "wrong_delivery_recipient"
+  | "entire_delivery_missing"
+  | "late_delivery"
+  | "customer_accidental_damage"
+  | "change_of_mind"
+  | "other";
+
+export type SettlementProtectionClaim = {
+  id: string;
+  order_id: string;
+  customer_id: string;
+  order_item_id?: string | null;
+  scope: "item" | "order";
+  reason: SettlementProtectionClaimReason;
+  notes?: string | null;
+  when_noticed?: string | null;
+  package_damaged?: boolean | null;
+  product_used?: boolean | null;
+  evidence_urls: string[];
+  likely_responsibility: string;
+  status: string;
+  hold_applied: boolean;
+  admin_resolution_note?: string | null;
+  resolved_at?: string | null;
+  created_at: string;
 };
 
 

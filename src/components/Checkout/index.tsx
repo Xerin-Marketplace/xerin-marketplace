@@ -6,6 +6,7 @@ import { useQuery } from "@tanstack/react-query";
 import Breadcrumb from "../Common/Breadcrumb";
 import Billing from "./Billing";
 import ShippingMethod from "./ShippingMethod";
+import XerinExpress from "./XerinExpress";
 import MapPinConfirmation from "./MapPinConfirmation";
 import DeliveryModeSelector from "./DeliveryMode";
 import PaymentMethod from "./PaymentMethod";
@@ -247,6 +248,13 @@ const Checkout = () => {
     setForm((current) => ({ ...current, shippingMethod: "" }));
   }, [detectedDelivery.data, deliveryMode]);
 
+  const xerinExpress = useQuery({
+    queryKey: ["checkout", "xerin-express", selectedAddressId, cart?.total],
+    queryFn: ({ signal }) => checkoutApi.xerinExpressOptions(selectedAddressId, signal),
+    enabled: Boolean(deliveryMode === "local" && selectedAddressId && selectedAddress?.delivery_ready && cartItems.length),
+    retry: false,
+  });
+
   const eligibleLogistics = useQuery({
     queryKey: [
       "checkout",
@@ -268,7 +276,7 @@ const Checkout = () => {
       detectedDelivery.data &&
       detectedDelivery.data.delivery_mode === deliveryMode &&
       isAuthenticated &&
-      cartItems.length
+      cartItems.length && deliveryMode === "international"
     ),
     retry: false,
   });
@@ -284,14 +292,14 @@ const Checkout = () => {
       selectedAddress?.delivery_ready &&
       detectedDelivery.data?.delivery_mode === deliveryMode &&
       selectedCompanyId &&
-      cartItems.length
+      cartItems.length && deliveryMode === "international"
     ),
     retry: false,
   });
 
-  const selectedShipping = deliveryPricing.data?.options.find(
-    (option) => option.rate_id === form.shippingMethod,
-  );
+  const selectedShipping = deliveryMode === "local"
+    ? xerinExpress.data?.find((option) => option.rate_id === form.shippingMethod)
+    : deliveryPricing.data?.options.find((option) => option.rate_id === form.shippingMethod);
 
   const frozenQuote = useQuery({
     queryKey: ["checkout", "frozen-delivery-quote", selectedAddressId, selectedCompanyId, form.shippingMethod, deliveryMode, cart?.total, cart?.coupon_code, cart?.promotion_code],
@@ -312,6 +320,15 @@ const Checkout = () => {
     refetchOnWindowFocus: false,
   });
 
+  useEffect(() => {
+    if (deliveryMode !== "local") return;
+    const options = xerinExpress.data ?? [];
+    if (!options.length) { setSelectedCompanyId(""); setForm(c => ({...c, shippingMethod:""})); return; }
+    const selected = options.find(o => o.rate_id === form.shippingMethod) || options[0];
+    if (selected.rate_id !== form.shippingMethod) setForm(c => ({...c, shippingMethod:selected.rate_id}));
+    if (selected.logistics_company_id !== selectedCompanyId) setSelectedCompanyId(selected.logistics_company_id);
+  }, [deliveryMode, xerinExpress.data, form.shippingMethod, selectedCompanyId]);
+
   const paymentOptions = useQuery({
     queryKey: [
       "checkout",
@@ -324,6 +341,7 @@ const Checkout = () => {
   });
 
   useEffect(() => {
+    if (deliveryMode === "local") return;
     const companies = eligibleLogistics.data?.results ?? [];
     if (!companies.length) {
       setSelectedCompanyId("");
@@ -334,9 +352,10 @@ const Checkout = () => {
       setSelectedCompanyId(companies[0].logistics_company_id);
       setForm((current) => ({ ...current, shippingMethod: "" }));
     }
-  }, [eligibleLogistics.data, selectedCompanyId]);
+  }, [eligibleLogistics.data, selectedCompanyId, deliveryMode]);
 
   useEffect(() => {
+    if (deliveryMode === "local") return;
     const options = deliveryPricing.data?.options ?? [];
     if (!options.length) {
       setForm((current) => current.shippingMethod ? { ...current, shippingMethod: "" } : current);
@@ -345,7 +364,7 @@ const Checkout = () => {
     if (!options.some((option) => option.rate_id === form.shippingMethod)) {
       setForm((current) => ({ ...current, shippingMethod: options[0].rate_id }));
     }
-  }, [deliveryPricing.data, form.shippingMethod]);
+  }, [deliveryPricing.data, form.shippingMethod, deliveryMode]);
 
   useEffect(() => {
     const options = paymentOptions.data ?? [];
@@ -471,6 +490,11 @@ const Checkout = () => {
     value: string | boolean,
   ) => {
     setForm((prev) => ({ ...prev, [field]: value }));
+  };
+
+  const selectXerinExpress = (option: import("@/types/api/commerce").XerinExpressOption) => {
+    setSelectedCompanyId(option.logistics_company_id);
+    setForm((current) => ({ ...current, shippingMethod: option.rate_id }));
   };
 
   const changeCompany = (companyId: string) => {
@@ -930,17 +954,20 @@ const Checkout = () => {
                   <div className="space-y-4 sm:space-y-6">
                     <StepHeading
                       step="2"
-                      title="Choose Logistics"
-                      description="Choose a company and service that covers every store-to-customer route in this order."
+                      title={deliveryMode === "local" ? "Choose Xerin Express" : "Choose Logistics"}
+                      description={deliveryMode === "local" ? "Choose Standard or Express. Xerin automatically assigns the best qualified domestic delivery partner." : "Choose a company and service that covers every store-to-customer route in this order."}
                     />
 
-                    {(eligibleLogistics.error || deliveryPricing.error || frozenQuote.error) && (
+                    {(xerinExpress.error || eligibleLogistics.error || deliveryPricing.error || frozenQuote.error) && (
                       <div className="rounded-xl border border-red-200 bg-red-50 p-3 text-xs leading-5 text-red-700">
-                        {errorText(eligibleLogistics.error || deliveryPricing.error || frozenQuote.error)}
+                        {errorText(xerinExpress.error || eligibleLogistics.error || deliveryPricing.error || frozenQuote.error)}
                       </div>
                     )}
 
                     <div className="grid items-start gap-5 lg:grid-cols-[minmax(0,1.15fr)_minmax(340px,.85fr)] lg:gap-6">
+                      {deliveryMode === "local" ? (
+                        <XerinExpress options={xerinExpress.data ?? []} selected={form.shippingMethod} onSelect={selectXerinExpress} loading={xerinExpress.isLoading || xerinExpress.isFetching} />
+                      ) : (
                       <ShippingMethod
                         companies={eligibleLogistics.data?.results ?? []}
                         excludedCompanies={eligibleLogistics.data?.excluded_companies ?? []}
@@ -958,12 +985,13 @@ const Checkout = () => {
                         isLoadingCompanies={eligibleLogistics.isLoading || eligibleLogistics.isFetching}
                         isLoadingPricing={deliveryPricing.isLoading || deliveryPricing.isFetching}
                       />
+                      )}
 
                       <section className="rounded-2xl border border-[#e7ebf0] bg-white p-4 shadow-sm dark:border-white/10 dark:bg-darkTheme-card sm:p-5">
                         <h3 className="font-bold text-dark dark:text-white">Delivery quote</h3>
                         {!frozenQuote.data || !selectedShipping ? (
                           <p className="mt-3 text-sm leading-6 text-dark-4">
-                            Select a logistics company and delivery service to generate the protected quote.
+                            Select a delivery option to generate the protected quote.
                           </p>
                         ) : (
                           <>
@@ -1024,8 +1052,7 @@ const Checkout = () => {
                             </p>
                             {selectedShipping && (
                               <p className="mt-3 text-dark-4">
-                                Logistics: <b className="text-dark dark:text-white">{eligibleLogistics.data?.results.find((company) => company.logistics_company_id === selectedCompanyId)?.name || "Selected provider"}</b><br />
-                                Service: {selectedShipping.method_name} · {deliveryMode === "international" ? "Cross-border" : "Domestic"}
+                                {deliveryMode === "local" ? <>Delivery: <b className="text-dark dark:text-white">Xerin Express — {("tier" in selectedShipping ? selectedShipping.label : "Domestic")}</b><br />Partner assigned automatically</> : <>Logistics: <b className="text-dark dark:text-white">{eligibleLogistics.data?.results.find((company) => company.logistics_company_id === selectedCompanyId)?.name || "Selected provider"}</b><br />Service: {"method_name" in selectedShipping ? selectedShipping.method_name : "International"} · Cross-border</>}
                               </p>
                             )}
                           </section>
