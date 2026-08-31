@@ -26,6 +26,7 @@ import {
 import Link from "next/link";
 import { FormEvent, useEffect, useState } from "react";
 import toast from "react-hot-toast";
+import NotificationCenter from "@/components/Notifications/NotificationCenter";
 
 export type SellerAccountView =
   | "overview"
@@ -599,16 +600,10 @@ function Notifications() {
     <div className="space-y-6">
       <PageIntro
         title="Notifications"
-        text="Choose which seller events should notify you."
+        text="Review seller workflow alerts and actions that need your attention."
       />
       <AccountNav />
-      <Section
-        icon={Bell}
-        title="Seller Notifications"
-        description="Notification preferences require a persisted backend contract."
-      >
-        <div className="rounded-xl border border-dashed border-[#cbd5e1] bg-[#f8fafc] p-5 text-sm text-[#64748b] dark:border-white/15 dark:bg-white/5">Seller notifications, unread counts and preferences are not available in the current backend. No local preferences or fake unread values are displayed.</div>
-      </Section>
+      <NotificationCenter />
     </div>
   );
 }

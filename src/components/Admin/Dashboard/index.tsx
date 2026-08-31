@@ -260,6 +260,7 @@ const sidebarGroups: SidebarGroup[] = [
       { label: "Payment Providers", href: "?tab=finance&menu=payments&item=payment-providers" },
       { label: "Refunds", href: "?tab=finance&menu=payments&item=refunds" },
       { label: "Disputes & Chargebacks", href: "?tab=finance&menu=payments&item=disputes-chargebacks" },
+      { label: "Seller Payout Accounts", href: "?tab=finance&menu=payments&item=seller-payout-accounts" },
       { label: "Seller Payouts", href: "?tab=finance&menu=payments&item=seller-payouts" },
       { label: "Pending Payouts", href: "?tab=finance&menu=payments&item=pending-payouts" },
       { label: "Failed Payments", href: "?tab=finance&menu=payments&item=failed-payments" },
@@ -700,6 +701,7 @@ export default function AdminDashboard() {
     : activeSidebarItem === "Payments:Payment Providers" ? "providers"
     : activeSidebarItem === "Payments:Refunds" ? "refunds"
     : activeSidebarItem === "Payments:Disputes & Chargebacks" ? "disputes"
+    : activeSidebarItem === "Payments:Seller Payout Accounts" ? "seller-payout-accounts"
     : activeSidebarItem === "Payments:Seller Payouts" ? "payouts"
     : activeSidebarItem === "Payments:Pending Payouts" ? "pending-payouts"
     : activeSidebarItem === "Payments:Failed Payments" ? "failed"

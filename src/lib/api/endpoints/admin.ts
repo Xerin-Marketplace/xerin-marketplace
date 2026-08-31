@@ -1787,3 +1787,51 @@ export const getAdvertisementAnalytics = async (
       },
     )
   ).data;
+
+
+export type AdminSellerPayoutAccount = {
+  id: string;
+  seller_id: string;
+  seller_name: string;
+  business_name: string;
+  seller_email: string;
+  account_type: string;
+  provider: string;
+  account_name: string;
+  account_number: string;
+  currency: string;
+  is_default: boolean;
+  is_active: boolean;
+  verification_status: "pending" | "verified" | "rejected";
+  provider_reference: string | null;
+  verified_at: string | null;
+  created_at: string;
+};
+
+export type PaginatedAdminSellerPayoutAccounts = {
+  total: number;
+  page: number;
+  page_size: number;
+  total_pages: number;
+  results: AdminSellerPayoutAccount[];
+};
+
+export const listAdminSellerPayoutAccounts = async (params: {
+  page?: number; page_size?: number; search?: string; status?: string;
+} = {}) => {
+  const res = await axiosInstance.get<PaginatedAdminSellerPayoutAccounts>("/seller/admin/payout-accounts", { params });
+  return res.data;
+};
+
+export const verifyAdminSellerPayoutAccount = async (
+  accountId: string,
+  statusValue: "pending" | "verified" | "rejected",
+  providerReference?: string,
+) => {
+  const res = await axiosInstance.patch<{ id: string; verification_status: string; verified_at: string | null }>(
+    `/seller/admin/payout-accounts/${accountId}/verification`,
+    null,
+    { params: { status_value: statusValue, provider_reference: providerReference || undefined } },
+  );
+  return res.data;
+};

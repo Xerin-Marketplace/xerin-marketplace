@@ -22,6 +22,7 @@ import Link from "next/link";
 import { FormEvent, useEffect, useState } from "react";
 import toast from "react-hot-toast";
 import AddressBookSection from "@/components/MyAccount/AddressBookSection";
+import NotificationCenter from "@/components/Notifications/NotificationCenter";
 type View =
   | "orders"
   | "payments"
@@ -283,6 +284,8 @@ export default function BuyerModulePage({ view }: { view: View }) {
             setPasswords={setPasswords}
             submit={changePassword}
           />
+        ) : view === "notifications" ? (
+          <NotificationCenter />
         ) : (
           <Unavailable view={view} />
         )}

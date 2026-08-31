@@ -95,7 +95,7 @@ export const ADMIN_SECTION_PERMISSIONS: Record<string, string[]> = {
     "payments:dashboard", "payments:read", "payment_methods:read",
     "payment_providers:read", "refunds:read", "refunds:review",
     "refunds:process", "payment_disputes:read", "payouts:read",
-    "payouts:approve", "fraud_risk:read", "reconciliation:read",
+    "payouts:approve", "seller_payout_accounts:verify", "fraud_risk:read", "reconciliation:read",
     "currencies:read", "countries:read", "commissions:read",
     "finance_reports:read", "payment_audit:read",
   ],

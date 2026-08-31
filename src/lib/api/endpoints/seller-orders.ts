@@ -9,6 +9,8 @@ import type {
   SellerOrderPackage,
   SellerOrderPackageUpsert,
   SellerFulfillmentReadiness,
+  ShipmentHandover,
+  SellerHandoverConfirmationRequest,
 } from "@/types/api/seller-order";
 const ROOT="/seller/orders";
 export const sellerOrdersApi={
@@ -25,4 +27,6 @@ export const sellerOrdersApi={
  package:async(id:string)=>(await axiosInstance.get<SellerOrderPackage>(`/seller/orders/${id}/package`)).data,
  savePackage:async(id:string,payload:SellerOrderPackageUpsert)=>(await axiosInstance.put<SellerOrderPackage>(`/seller/orders/${id}/package`,payload)).data,
  readiness:async(id:string)=>(await axiosInstance.get<SellerFulfillmentReadiness>(`${ROOT}/${id}/fulfillment-readiness`)).data,
+ handover:async(id:string)=>(await axiosInstance.get<ShipmentHandover>(`${ROOT}/${id}/handover`)).data,
+ confirmHandover:async(id:string,payload:SellerHandoverConfirmationRequest={})=>(await axiosInstance.post<ShipmentHandover>(`${ROOT}/${id}/handover/confirm`,payload)).data,
 };

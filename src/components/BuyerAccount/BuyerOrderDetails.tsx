@@ -2,6 +2,7 @@
 
 import { ordersApi } from "@/lib/api/endpoints/commerce";
 import { formatCurrency } from "@/lib/formatCurrency";
+import type { SellerOrderMessage } from "@/types/api/seller-order";
 import type {
   CustomerEscrowSummary,
   CustomerOrderDetail,
@@ -19,6 +20,8 @@ import {
   RefreshCw,
   ShieldCheck,
   Truck,
+  MessageSquareText,
+  Send,
 } from "lucide-react";
 import Link from "next/link";
 import { useEffect, useMemo, useState } from "react";
@@ -303,6 +306,7 @@ export default function BuyerOrderDetails({ orderId }: { orderId: string }) {
                         order.currency,
                       )}
                     </p>
+                    <CustomerSellerChat orderId={order.id} sellerOrderId={sellerOrder.id} />
                   </div>
                 ))}
               </div>
@@ -687,6 +691,15 @@ function ShipmentCard({
       </div>
     </div>
   );
+}
+
+
+function CustomerSellerChat({ orderId, sellerOrderId }: { orderId: string; sellerOrderId: string }) {
+  const [open,setOpen]=useState(false); const [messages,setMessages]=useState<SellerOrderMessage[]>([]); const [text,setText]=useState(""); const [loading,setLoading]=useState(false); const [sending,setSending]=useState(false); const [error,setError]=useState("");
+  const load=async()=>{setLoading(true);setError("");try{setMessages(await ordersApi.sellerMessages(orderId,sellerOrderId));}catch(e){const x=e as {response?:{data?:{detail?:string}};message?:string};setError(x.response?.data?.detail||x.message||"Unable to load messages.");}finally{setLoading(false);}};
+  useEffect(()=>{if(!open)return;void load();const t=window.setInterval(()=>void load(),15000);return()=>window.clearInterval(t);},[open,orderId,sellerOrderId]);
+  const send=async()=>{if(!text.trim())return;setSending(true);try{const row=await ordersApi.sendSellerMessage(orderId,sellerOrderId,{message:text.trim(),is_internal:false});setMessages(v=>[...v,row]);setText("");}catch(e){const x=e as {response?:{data?:{detail?:string}};message?:string};setError(x.response?.data?.detail||x.message||"Unable to send message.");}finally{setSending(false);}};
+  return <div className="mt-4 border-t border-[#e2e8f0] pt-3 dark:border-white/10"><button onClick={()=>setOpen(v=>!v)} className="inline-flex min-h-10 items-center gap-2 rounded-xl border border-[#f7941d] px-3 text-xs font-bold text-[#b85f00]"><MessageSquareText size={15}/>{open?"Close chat":"Message seller / logistics"}</button>{open&&<div className="mt-3 overflow-hidden rounded-xl border border-[#e2e8f0] dark:border-white/10"><div className="max-h-64 space-y-2 overflow-y-auto bg-slate-50 p-3 dark:bg-white/5">{loading&&!messages.length?<p className="text-xs text-[#64748b]">Loading…</p>:messages.length?messages.map(m=><div key={m.id} className={`flex ${(m.sender_role_label||"").toLowerCase()==="customer"?"justify-end":"justify-start"}`}><div className={`max-w-[85%] rounded-xl px-3 py-2 text-xs ${(m.sender_role_label||"").toLowerCase()==="customer"?"bg-[#f7941d] text-black":"bg-white text-slate-900 shadow-sm dark:bg-slate-800 dark:text-white"}`}><p className="mb-1 text-[10px] font-bold uppercase opacity-60">{m.sender_role_label||"participant"}</p><p className="whitespace-pre-wrap">{m.message}</p></div></div>):<p className="text-xs text-[#64748b]">No messages yet.</p>}{error&&<p className="text-xs text-red-600">{error}</p>}</div><div className="flex gap-2 border-t border-[#e2e8f0] p-2 dark:border-white/10"><input value={text} onChange={e=>setText(e.target.value)} onKeyDown={e=>{if(e.key==="Enter"&&!e.shiftKey){e.preventDefault();void send();}}} placeholder="Write an order message…" className="min-h-10 flex-1 rounded-lg border border-[#e2e8f0] bg-transparent px-3 text-xs dark:border-white/10"/><button onClick={()=>void send()} disabled={sending||!text.trim()} className="grid h-10 w-10 place-items-center rounded-lg bg-[#f7941d] text-black disabled:opacity-50"><Send size={15}/></button></div></div>}</div>;
 }
 
 function Card({

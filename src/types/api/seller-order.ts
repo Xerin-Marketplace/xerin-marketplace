@@ -6,6 +6,34 @@ export type SellerOrderSummary={total_orders:number;new_orders:number;accepted_o
 export type SellerOrderQuery={page?:number;page_size?:number;search?:string;status?:SellerOrderStatus;date_from?:string;date_to?:string};
 
 
+export type ShipmentHandoverStatus = "awaiting_courier" | "courier_arrived" | "seller_confirmed";
+
+export type ShipmentHandover = {
+  id: string;
+  shipment_id: string;
+  seller_order_id: string;
+  seller_id: string;
+  logistics_company_id?: string | null;
+  status: ShipmentHandoverStatus;
+  courier_arrived_at?: string | null;
+  courier_arrived_by_id?: string | null;
+  courier_arrival_latitude?: number | string | null;
+  courier_arrival_longitude?: number | string | null;
+  courier_arrival_notes?: string | null;
+  seller_confirmed_at?: string | null;
+  seller_confirmed_by_id?: string | null;
+  seller_confirmation_notes?: string | null;
+  pickup_snapshot: Record<string, unknown>;
+  package_snapshot: Record<string, unknown>[];
+  created_at: string;
+  updated_at?: string | null;
+};
+
+export type SellerHandoverConfirmationRequest = {
+  notes?: string | null;
+};
+
+
 export type SellerOrderMessageAttachment = {
   id: string;
   file_url: string;

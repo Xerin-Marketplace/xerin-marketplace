@@ -8,6 +8,7 @@ import {
   WalletCards,
 } from "lucide-react";
 import CurrencyFxManagement from "./CurrencyFxManagement";
+import SellerPayoutAccounts from "./SellerPayoutAccounts";
 import {
   type AdminPayment,
   type AdminPaymentDashboard, type AdminPaymentMethod,
@@ -20,7 +21,7 @@ import {
 
 export type PaymentView =
   | "dashboard" | "transactions" | "methods" | "providers" | "refunds"
-  | "disputes" | "payouts" | "pending-payouts" | "failed" | "risk"
+  | "disputes" | "seller-payout-accounts" | "payouts" | "pending-payouts" | "failed" | "risk"
   | "reconciliation" | "currencies" | "countries" | "fees"
   | "reports" | "audit";
 
@@ -33,6 +34,7 @@ const titles: Record<PaymentView, [string,string,string]> = {
   providers:["Payment infrastructure","Payment Providers","See the gateways/providers configured for Xerin, their supported methods, currencies and status."],
   refunds:["Payment exceptions","Refunds","Review refunded and refundable payments with full audit context."],
   disputes:["Payment exceptions","Disputes & Chargebacks","Track disputed transactions from opening through investigation and resolution."],
+  "seller-payout-accounts":["Seller settlement","Seller Payout Accounts","Verify seller bank and mobile-money destinations before withdrawals are allowed."],
   payouts:["Seller settlement","Seller Payouts","Monitor seller payout requests and completed settlement transfers."],
   "pending-payouts":["Seller settlement","Pending Payouts","Focus on payouts awaiting approval or provider processing."],
   failed:["Payment exceptions","Failed Payments","Investigate failed attempts and provider failure reasons."],
@@ -115,7 +117,8 @@ export default function AdminPayments({view}:{view:PaymentView}) {
     </section>
 
     {error&&<div className="rounded-xl border border-red-200 bg-red-50 p-4 text-sm text-red-700">{error}</div>}
-    {view==="dashboard"?<DashboardView data={dashboard} loading={loading} pending={backendPending} failed={Boolean(error)}/>
+    {view==="seller-payout-accounts"?<SellerPayoutAccounts/>
+    :view==="dashboard"?<DashboardView data={dashboard} loading={loading} pending={backendPending} failed={Boolean(error)}/>
     :view==="methods"?<MethodsView methods={methods} loading={loading}/>
     :view==="currencies"?<CurrencyFxManagement/>
     :<>

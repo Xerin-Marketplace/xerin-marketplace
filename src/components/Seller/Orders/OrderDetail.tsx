@@ -7,6 +7,7 @@ import {
   Box,
   CheckCircle2,
   ImagePlus,
+  ImageIcon,
   MapPin,
   Ruler,
   Scale,
@@ -23,11 +24,13 @@ import {
 import toast from "react-hot-toast";
 
 import { sellerOrdersApi } from "@/lib/api/endpoints/seller-orders";
+import { getMyProductImages } from "@/lib/api/endpoints/products";
 import type {
   SellerOrder,
   SellerOrderMessage,
   SellerOrderPackage,
   SellerFulfillmentReadiness,
+  ShipmentHandover,
 } from "@/types/api/seller-order";
 import { Badge } from "./index";
 
@@ -49,6 +52,7 @@ const errorMessage = (error: unknown) => {
 
 export default function SellerOrderDetail({ orderId }: { orderId: string }) {
   const [order, setOrder] = useState<SellerOrder | null>(null);
+  const [productImages, setProductImages] = useState<Record<string, string>>({});
   const [loading, setLoading] = useState(true);
   const [busy, setBusy] = useState(false);
   const [notes, setNotes] = useState("");
@@ -71,6 +75,11 @@ export default function SellerOrderDetail({ orderId }: { orderId: string }) {
   const [readiness, setReadiness] = useState<SellerFulfillmentReadiness | null>(null);
   const [readinessLoading, setReadinessLoading] = useState(true);
   const [readinessError, setReadinessError] = useState("");
+  const [handover, setHandover] = useState<ShipmentHandover | null>(null);
+  const [handoverLoading, setHandoverLoading] = useState(false);
+  const [handoverError, setHandoverError] = useState("");
+  const [handoverNotes, setHandoverNotes] = useState("");
+  const [confirmingHandover, setConfirmingHandover] = useState(false);
 
   const [messages, setMessages] = useState<SellerOrderMessage[]>([]);
   const [messagesLoading, setMessagesLoading] = useState(true);
@@ -79,10 +88,28 @@ export default function SellerOrderDetail({ orderId }: { orderId: string }) {
   const [attachmentUrls, setAttachmentUrls] = useState<string[]>([]);
   const [attachmentDraft, setAttachmentDraft] = useState("");
 
+  const loadOrderImages = async (value: SellerOrder) => {
+    const ids = Array.from(new Set(value.items.map((item) => item.product_id)));
+    const entries = await Promise.all(
+      ids.map(async (productId) => {
+        try {
+          const images = await getMyProductImages(productId);
+          const primary = images.find((image) => image.is_primary) || images[0];
+          return [productId, primary?.image_url || primary?.thumbnail_url || ""] as const;
+        } catch {
+          return [productId, ""] as const;
+        }
+      }),
+    );
+    setProductImages(Object.fromEntries(entries));
+  };
+
   const load = async () => {
     setLoading(true);
     try {
-      setOrder(await sellerOrdersApi.get(orderId));
+      const value = await sellerOrdersApi.get(orderId);
+      setOrder(value);
+      void loadOrderImages(value);
     } catch (error) {
       toast.error(errorMessage(error));
     } finally {
@@ -131,6 +158,46 @@ export default function SellerOrderDetail({ orderId }: { orderId: string }) {
       setReadinessError(errorMessage(error));
     } finally {
       setReadinessLoading(false);
+    }
+  };
+
+  const loadHandover = async (silent = false) => {
+    if (!silent) setHandoverLoading(true);
+    setHandoverError("");
+    try {
+      setHandover(await sellerOrdersApi.handover(orderId));
+    } catch (error) {
+      const candidate = error as { response?: { status?: number } };
+      if (candidate.response?.status === 404 || candidate.response?.status === 409) {
+        setHandover(null);
+      } else {
+        setHandoverError(errorMessage(error));
+      }
+    } finally {
+      if (!silent) setHandoverLoading(false);
+    }
+  };
+
+  const confirmHandover = async () => {
+    if (handover?.status !== "courier_arrived") {
+      toast.error("Wait until the assigned logistics company confirms the courier has arrived.");
+      return;
+    }
+
+    setConfirmingHandover(true);
+    try {
+      const confirmed = await sellerOrdersApi.confirmHandover(orderId, {
+        notes: handoverNotes.trim() || null,
+      });
+      setHandover(confirmed);
+      setHandoverNotes("");
+      toast.success("Physical product handover confirmed. Logistics can now record pickup proof.");
+      void load();
+    } catch (error) {
+      toast.error(errorMessage(error));
+      void loadHandover(true);
+    } finally {
+      setConfirmingHandover(false);
     }
   };
 
@@ -235,6 +302,7 @@ export default function SellerOrderDetail({ orderId }: { orderId: string }) {
     void loadMessages();
     void loadPackage();
     void loadReadiness();
+    void loadHandover();
   }, [orderId]);
 
   const run = async (fn: () => Promise<SellerOrder>, message: string) => {
@@ -242,6 +310,7 @@ export default function SellerOrderDetail({ orderId }: { orderId: string }) {
     try {
       setOrder(await fn());
       void loadReadiness();
+      void loadHandover(true);
       toast.success(message);
     } catch (error) {
       toast.error(errorMessage(error));
@@ -319,6 +388,16 @@ export default function SellerOrderDetail({ orderId }: { orderId: string }) {
     }
   };
 
+  useEffect(() => {
+    if (order?.seller_status !== "ready_to_ship" || handover?.status !== "awaiting_courier") return;
+
+    const timer = window.setInterval(() => {
+      void loadHandover(true);
+    }, 15000);
+
+    return () => window.clearInterval(timer);
+  }, [order?.seller_status, handover?.status, orderId]);
+
   const orderedMessages = useMemo(
     () =>
       [...messages].sort(
@@ -376,25 +455,62 @@ export default function SellerOrderDetail({ orderId }: { orderId: string }) {
         </div>
       </div>
 
+      {order.order_status === "paid" && (
+        <section className="rounded-2xl border border-emerald-200 bg-emerald-50 p-5 text-emerald-900 shadow-sm">
+          <div className="flex items-start gap-3">
+            <span className="mt-0.5 flex h-10 w-10 shrink-0 items-center justify-center rounded-xl bg-emerald-100 text-emerald-700">
+              <CheckCircle2 size={21} />
+            </span>
+            <div>
+              <p className="font-bold">Customer payment confirmed — review the products before packaging</p>
+              <p className="mt-1 text-sm leading-6 text-emerald-800/80">
+                Verify the product image, variant and quantity below. Accept the order only when the paid items match what you will prepare for pickup.
+              </p>
+            </div>
+          </div>
+        </section>
+      )}
+
       <div className="grid gap-5 xl:grid-cols-[1.4fr_.8fr]">
         <div className="space-y-5">
-          <section className="rounded-2xl border bg-white p-5 dark:border-white/10 dark:bg-[#1f2937]">
-            <h2 className="font-bold dark:text-white">Items to fulfil</h2>
+          <section className="rounded-2xl border bg-white p-5 shadow-sm dark:border-white/10 dark:bg-[#1f2937]">
+            <div className="flex flex-col gap-2 sm:flex-row sm:items-end sm:justify-between">
+              <div>
+                <p className="text-[10px] font-bold uppercase tracking-[.14em] text-[#f7941d]">Paid product review</p>
+                <h2 className="mt-1 text-lg font-bold text-slate-950 dark:text-white">Items to fulfil</h2>
+                <p className="mt-1 text-xs leading-5 text-slate-400">Check the image, variant and quantity before accepting and packaging this order.</p>
+              </div>
+              <span className="rounded-full bg-slate-100 px-3 py-1.5 text-xs font-semibold text-slate-600 dark:bg-white/5 dark:text-white/60">
+                {order.item_count} unit{order.item_count === 1 ? "" : "s"}
+              </span>
+            </div>
 
-            <div className="mt-4 divide-y dark:divide-white/10">
+            <div className="mt-4 space-y-3">
               {order.items.map((item) => (
                 <div
                   key={item.id}
-                  className="flex justify-between gap-4 py-4"
+                  className="flex flex-col gap-4 rounded-2xl border border-slate-200 bg-slate-50/60 p-4 sm:flex-row sm:items-center sm:justify-between dark:border-white/10 dark:bg-white/[0.025]"
                 >
-                  <div>
-                    <b className="dark:text-white">{item.product_name}</b>
-                    <p className="text-xs text-slate-400">
-                      {item.variant_name || "Standard"} · Qty {item.quantity}
-                    </p>
+                  <div className="flex min-w-0 items-center gap-4">
+                    <OrderProductImage src={productImages[item.product_id]} alt={item.product_name} />
+                    <div className="min-w-0">
+                      <p className="truncate text-base font-bold text-slate-950 dark:text-white">{item.product_name}</p>
+                      <div className="mt-1 flex flex-wrap gap-2 text-xs">
+                        <span className="rounded-lg bg-white px-2 py-1 font-semibold text-slate-600 shadow-sm dark:bg-white/5 dark:text-white/60">
+                          Variant: {item.variant_name || "Standard"}
+                        </span>
+                        <span className="rounded-lg bg-orange-50 px-2 py-1 font-bold text-orange-700">
+                          Qty {item.quantity}
+                        </span>
+                      </div>
+                      <p className="mt-2 text-xs text-slate-400">Unit price: {money(item.unit_price, order.currency)}</p>
+                    </div>
                   </div>
 
-                  <b>{money(item.total_price, order.currency)}</b>
+                  <div className="shrink-0 text-left sm:text-right">
+                    <p className="text-[10px] font-bold uppercase tracking-wide text-slate-400">Line total</p>
+                    <p className="mt-1 text-lg font-bold text-slate-950 dark:text-white">{money(item.total_price, order.currency)}</p>
+                  </div>
                 </div>
               ))}
             </div>
@@ -665,6 +781,99 @@ export default function SellerOrderDetail({ orderId }: { orderId: string }) {
               )}
             </div>
           </section>
+
+          {status === "ready_to_ship" && (
+            <section className="rounded-2xl border bg-white p-5 shadow-sm dark:border-white/10 dark:bg-[#1f2937]">
+              <div className="flex flex-col gap-3 sm:flex-row sm:items-start sm:justify-between">
+                <div>
+                  <h2 className="flex items-center gap-2 text-base font-bold text-slate-900 dark:text-white">
+                    <Truck size={19} className="text-orange-500" />
+                    Logistics Handover
+                  </h2>
+                  <p className="mt-1 max-w-2xl text-xs leading-5 text-slate-500 dark:text-white/55">
+                    Confirm the physical handover only after the assigned courier is present and you have given the prepared package to them.
+                  </p>
+                </div>
+                <button
+                  type="button"
+                  onClick={() => void loadHandover()}
+                  disabled={handoverLoading}
+                  className="inline-flex items-center gap-2 rounded-xl border px-3 py-2 text-xs font-semibold text-slate-600 disabled:opacity-50 dark:border-white/10 dark:text-white/70"
+                >
+                  <RefreshCw size={13} className={handoverLoading ? "animate-spin" : ""} />
+                  Refresh handover
+                </button>
+              </div>
+
+              {handoverLoading && !handover ? (
+                <div className="mt-4 rounded-xl border border-slate-200 bg-slate-50 p-4 text-sm text-slate-500 dark:border-white/10 dark:bg-white/5 dark:text-white/60">
+                  Checking courier handover status...
+                </div>
+              ) : handoverError ? (
+                <div className="mt-4 rounded-xl border border-red-200 bg-red-50 p-4 text-sm text-red-700">
+                  {handoverError}
+                </div>
+              ) : !handover ? (
+                <div className="mt-4 rounded-xl border border-amber-200 bg-amber-50 p-4 text-sm text-amber-800">
+                  The handover record is not available yet. Make sure this order has a shipment and an assigned logistics company.
+                </div>
+              ) : handover.status === "awaiting_courier" ? (
+                <div className="mt-4 rounded-xl border border-amber-200 bg-amber-50 p-4 text-amber-900">
+                  <p className="font-bold">Waiting for courier arrival</p>
+                  <p className="mt-1 text-xs leading-5">
+                    The package is ready. The assigned logistics company must first mark the courier as arrived. This status refreshes automatically every 15 seconds.
+                  </p>
+                </div>
+              ) : handover.status === "courier_arrived" ? (
+                <div className="mt-4 space-y-4">
+                  <div className="rounded-xl border border-orange-200 bg-orange-50 p-4 text-slate-900">
+                    <p className="font-bold">Courier has arrived — seller confirmation required</p>
+                    <p className="mt-1 text-xs leading-5 text-slate-700">
+                      Arrival recorded {handover.courier_arrived_at ? new Date(handover.courier_arrived_at).toLocaleString() : "by the logistics company"}. Verify the courier and package before confirming physical handover.
+                    </p>
+                    {handover.courier_arrival_notes && (
+                      <p className="mt-2 rounded-lg bg-white/80 px-3 py-2 text-xs text-slate-600">
+                        Logistics note: {handover.courier_arrival_notes}
+                      </p>
+                    )}
+                  </div>
+
+                  <textarea
+                    value={handoverNotes}
+                    onChange={(event) => setHandoverNotes(event.target.value)}
+                    maxLength={1000}
+                    placeholder="Optional handover note, e.g. 2 sealed packages handed to courier..."
+                    className="min-h-24 w-full rounded-xl border border-slate-200 p-3 text-sm text-slate-900 outline-none focus:border-orange-400 dark:border-white/10 dark:bg-white/5 dark:text-white"
+                  />
+
+                  <button
+                    type="button"
+                    onClick={() => void confirmHandover()}
+                    disabled={confirmingHandover}
+                    className="inline-flex items-center gap-2 rounded-xl bg-orange-500 px-4 py-2.5 text-sm font-bold text-white shadow-sm transition hover:bg-orange-600 disabled:cursor-not-allowed disabled:opacity-60"
+                  >
+                    {confirmingHandover ? <RefreshCw size={16} className="animate-spin" /> : <PackageCheck size={16} />}
+                    {confirmingHandover ? "Confirming..." : "Confirm Product Handover"}
+                  </button>
+                </div>
+              ) : (
+                <div className="mt-4 rounded-xl border border-emerald-200 bg-emerald-50 p-4 text-emerald-900">
+                  <div className="flex items-start gap-3">
+                    <CheckCircle2 size={20} className="mt-0.5 shrink-0 text-emerald-600" />
+                    <div>
+                      <p className="font-bold">Product handover confirmed</p>
+                      <p className="mt-1 text-xs leading-5">
+                        Confirmed {handover.seller_confirmed_at ? new Date(handover.seller_confirmed_at).toLocaleString() : "successfully"}. Logistics can now capture/upload the pickup proof photo for customer verification.
+                      </p>
+                      {handover.seller_confirmation_notes && (
+                        <p className="mt-2 text-xs">Seller note: {handover.seller_confirmation_notes}</p>
+                      )}
+                    </div>
+                  </div>
+                </div>
+              )}
+            </section>
+          )}
 
           <section className="overflow-hidden rounded-2xl border bg-white dark:border-white/10 dark:bg-[#1f2937]">
             <div className="flex flex-col gap-3 border-b px-5 py-4 dark:border-white/10 sm:flex-row sm:items-center sm:justify-between">
@@ -1162,6 +1371,19 @@ function MessageBubble({ message }: { message: SellerOrderMessage }) {
           {new Date(message.created_at).toLocaleString()}
         </p>
       </div>
+    </div>
+  );
+}
+
+function OrderProductImage({ src, alt }: { src?: string; alt: string }) {
+  const [failed, setFailed] = useState(false);
+  return (
+    <div className="flex h-24 w-24 shrink-0 items-center justify-center overflow-hidden rounded-2xl border border-slate-200 bg-white shadow-sm dark:border-white/10 dark:bg-white/5">
+      {src && !failed ? (
+        <img src={src} alt={alt} className="h-full w-full object-cover" onError={() => setFailed(true)} />
+      ) : (
+        <ImageIcon size={28} className="text-slate-300" />
+      )}
     </div>
   );
 }

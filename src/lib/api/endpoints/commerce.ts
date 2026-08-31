@@ -1,4 +1,5 @@
 import axiosInstance from "../client";
+import type { SellerOrderMessage, SellerOrderMessageCreate } from "@/types/api/seller-order";
 import type {
   Cart,
   GuestCartMergeResult,
@@ -263,6 +264,20 @@ export const ordersApi = {
       await axiosInstance.post<CustomerEscrowSummary>(
         `/orders/${id}/approve-receipt`,
         { note: note || undefined },
+      )
+    ).data,
+  sellerMessages: async (orderId: string, sellerOrderId: string, signal?: AbortSignal) =>
+    (
+      await axiosInstance.get<SellerOrderMessage[]>(
+        `/orders/${orderId}/seller-orders/${sellerOrderId}/messages`,
+        { signal },
+      )
+    ).data,
+  sendSellerMessage: async (orderId: string, sellerOrderId: string, payload: SellerOrderMessageCreate) =>
+    (
+      await axiosInstance.post<SellerOrderMessage>(
+        `/orders/${orderId}/seller-orders/${sellerOrderId}/messages`,
+        { ...payload, is_internal: false },
       )
     ).data,
   adminList: async (

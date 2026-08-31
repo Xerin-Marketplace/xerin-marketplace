@@ -1,15 +1,33 @@
 "use client";
 
-import { MessageSquare } from "lucide-react";
-import SellerUnavailableModule from "@/components/Seller/shared/SellerUnavailableModule";
+import { sellerOrdersApi } from "@/lib/api/endpoints/seller-orders";
+import type { SellerOrder, SellerOrderMessage } from "@/types/api/seller-order";
+import { MessageSquareText, RefreshCw, Search, Send } from "lucide-react";
+import { FormEvent, useCallback, useEffect, useMemo, useState } from "react";
+import toast from "react-hot-toast";
+
+const date = (value?: string | null) => value ? new Intl.DateTimeFormat(undefined, { dateStyle: "medium", timeStyle: "short" }).format(new Date(value)) : "—";
+const err = (error: unknown) => { const e=error as {response?:{data?:{detail?:string}};message?:string}; return e.response?.data?.detail || e.message || "Request failed."; };
 
 export default function SellerMessages() {
-  return (
-    <SellerUnavailableModule
-      title="Messages"
-      description="Communicate with customers and receive marketplace notifications in one inbox."
-      icon={MessageSquare}
-      action="Seller messaging is not available yet. A seller messaging and notifications API is required."
-    />
-  );
+  const [orders,setOrders]=useState<SellerOrder[]>([]); const [selected,setSelected]=useState<SellerOrder|null>(null);
+  const [messages,setMessages]=useState<SellerOrderMessage[]>([]); const [loading,setLoading]=useState(true); const [chatLoading,setChatLoading]=useState(false);
+  const [search,setSearch]=useState(""); const [text,setText]=useState(""); const [sending,setSending]=useState(false);
+
+  const loadOrders=useCallback(async()=>{setLoading(true);try{const data=await sellerOrdersApi.list({page:1,page_size:100});setOrders(data.results);setSelected(current=>current || data.results[0] || null);}catch(e){toast.error(err(e));}finally{setLoading(false);}},[]);
+  const loadMessages=useCallback(async(id:string)=>{setChatLoading(true);try{setMessages(await sellerOrdersApi.messages(id));}catch(e){toast.error(err(e));}finally{setChatLoading(false);}},[]);
+  useEffect(()=>{void loadOrders();},[loadOrders]);
+  useEffect(()=>{if(!selected){setMessages([]);return;} void loadMessages(selected.id); const timer=window.setInterval(()=>void loadMessages(selected.id),15000); return()=>window.clearInterval(timer);},[selected,loadMessages]);
+  const filtered=useMemo(()=>{const q=search.trim().toLowerCase();if(!q)return orders;return orders.filter(o=>[o.id,o.order_id,o.store_name,o.customer_name,o.seller_status].some(v=>String(v||"").toLowerCase().includes(q)));},[orders,search]);
+  const send=async(e:FormEvent)=>{e.preventDefault();if(!selected||!text.trim())return;setSending(true);try{const row=await sellerOrdersApi.sendMessage(selected.id,{message:text.trim(),is_internal:false});setMessages(v=>[...v,row]);setText("");}catch(x){toast.error(err(x));}finally{setSending(false);}};
+
+  return <div className="space-y-5">
+    <header className="flex flex-col gap-3 sm:flex-row sm:items-end sm:justify-between"><div><p className="text-sm font-semibold text-[#f7941d]">Seller Center</p><h1 className="text-2xl font-bold text-slate-950 dark:text-white">Order Messages</h1><p className="mt-1 text-sm text-slate-500">Talk with the customer and assigned logistics team inside each order.</p></div><button onClick={()=>void loadOrders()} className="inline-flex min-h-11 items-center justify-center gap-2 rounded-xl border border-slate-300 px-4 text-sm font-semibold dark:border-slate-700"><RefreshCw size={16}/>Refresh</button></header>
+    <div className="grid min-h-[620px] overflow-hidden rounded-2xl border border-slate-200 bg-white lg:grid-cols-[340px_1fr] dark:border-slate-700 dark:bg-slate-900">
+      <aside className="border-b border-slate-200 lg:border-b-0 lg:border-r dark:border-slate-700"><div className="p-3"><label className="relative block"><Search size={16} className="absolute left-3 top-3.5 text-slate-400"/><input value={search} onChange={e=>setSearch(e.target.value)} placeholder="Search orders or customers" className="min-h-11 w-full rounded-xl border border-slate-300 bg-transparent pl-9 pr-3 text-sm dark:border-slate-700"/></label></div><div className="max-h-[560px] overflow-y-auto">{loading?<p className="p-5 text-sm text-slate-500">Loading conversations…</p>:filtered.length?filtered.map(o=><button key={o.id} onClick={()=>setSelected(o)} className={`w-full border-t border-slate-100 p-4 text-left dark:border-slate-800 ${selected?.id===o.id?"bg-orange-50 dark:bg-orange-950/20":"hover:bg-slate-50 dark:hover:bg-slate-800/60"}`}><div className="flex items-center justify-between gap-2"><span className="font-bold text-slate-900 dark:text-white">{o.store_name||`Order ${o.order_id.slice(0,8)}`}</span><span className="text-[11px] capitalize text-slate-500">{o.seller_status.replaceAll("_"," ")}</span></div><p className="mt-1 text-sm text-slate-600 dark:text-slate-300">{o.customer_name||"Customer"}</p><p className="mt-1 text-xs text-slate-400">#{o.order_id.slice(0,8)} · {o.item_count} item{o.item_count===1?"":"s"}</p></button>):<p className="p-5 text-sm text-slate-500">No seller orders found.</p>}</div></aside>
+      <section className="flex min-h-[620px] flex-col">{selected?<><div className="border-b border-slate-200 p-4 dark:border-slate-700"><h2 className="font-bold text-slate-900 dark:text-white">{selected.customer_name||"Customer"}</h2><p className="text-xs text-slate-500">Order #{selected.order_id.slice(0,8)} · {selected.store_name||"Store"}</p></div><div className="flex-1 space-y-3 overflow-y-auto bg-slate-50/60 p-4 dark:bg-slate-950/30">{chatLoading&&!messages.length?<p className="text-sm text-slate-500">Loading messages…</p>:messages.length?messages.map(m=><Bubble key={m.id} message={m}/>):<div className="grid h-full place-items-center text-center text-slate-500"><div><MessageSquareText className="mx-auto"/><p className="mt-2 font-semibold">No messages yet</p><p className="text-sm">Send the first public order message.</p></div></div>}</div><form onSubmit={send} className="border-t border-slate-200 p-3 dark:border-slate-700"><div className="flex gap-2"><textarea value={text} onChange={e=>setText(e.target.value)} maxLength={5000} placeholder="Write to the customer/logistics team…" className="min-h-12 flex-1 resize-none rounded-xl border border-slate-300 bg-transparent p-3 text-sm dark:border-slate-700"/><button disabled={sending||!text.trim()} className="inline-flex min-h-12 items-center justify-center gap-2 rounded-xl bg-[#f7941d] px-4 font-bold text-black disabled:opacity-50"><Send size={17}/>{sending?"Sending":"Send"}</button></div></form></>:<div className="grid flex-1 place-items-center text-slate-500"><p>Select an order conversation.</p></div>}</section>
+    </div>
+  </div>;
 }
+
+function Bubble({message}:{message:SellerOrderMessage}){const own=(message.sender_role_label||"").toLowerCase()==="seller";return <div className={`flex ${own?"justify-end":"justify-start"}`}><div className={`max-w-[85%] rounded-2xl px-4 py-3 ${own?"bg-[#f7941d] text-black":"border border-slate-200 bg-white text-slate-900 dark:border-slate-700 dark:bg-slate-800 dark:text-white"}`}><div className="mb-1 flex items-center gap-2 text-[11px] font-bold uppercase tracking-wide opacity-70"><span>{message.sender_role_label||"participant"}</span>{message.is_internal&&<span>Internal</span>}</div><p className="whitespace-pre-wrap break-words text-sm">{message.message}</p><time className="mt-2 block text-[11px] opacity-60">{date(message.created_at)}</time></div></div>}

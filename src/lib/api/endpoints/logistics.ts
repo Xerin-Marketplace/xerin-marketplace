@@ -1,4 +1,5 @@
 import axiosInstance from "../client";
+import type { SellerOrderMessage, SellerOrderMessageCreate } from "@/types/api/seller-order";
 import type {
   LogisticsCompanyAccount,
   LogisticsDashboard,
@@ -66,7 +67,14 @@ const updatePickupJobStatus = async (jobId: string, data: {
 const getMembers = async (): Promise<LogisticsMember[]> =>
   (await axiosInstance.get<LogisticsMember[]>(LOGISTICS_ENDPOINTS.users)).data;
 
+const getShipmentMessages = async (shipmentId: string): Promise<SellerOrderMessage[]> =>
+  (await axiosInstance.get<SellerOrderMessage[]>(`${LOGISTICS_ENDPOINTS.shipments}/${shipmentId}/messages`)).data;
+
+const sendShipmentMessage = async (shipmentId: string, payload: SellerOrderMessageCreate): Promise<SellerOrderMessage> =>
+  (await axiosInstance.post<SellerOrderMessage>(`${LOGISTICS_ENDPOINTS.shipments}/${shipmentId}/messages`, { ...payload, is_internal: false })).data;
+
 export const logisticsApi = {
   getAccount, getDashboard, getShipments, updateShipment, createPickupJob,
   getPickupJobs, assignPickupJob, updatePickupJobStatus, getMembers,
+  getShipmentMessages, sendShipmentMessage,
 };

@@ -6,6 +6,7 @@ import { authCookies } from "@/lib/auth/cookies";
 import { authStorage } from "@/lib/auth/storage";
 import { useAuthStore } from "@/store/useAuthStore";
 import {
+  Bell,
   Boxes,
   BadgeCheck,
   LayoutDashboard,
@@ -57,6 +58,11 @@ const nav: LogisticsNavItem[] = [
     label: "Delivery verification",
     href: "/logistics/delivery-verification",
     icon: BadgeCheck,
+  },
+  {
+    label: "Notifications",
+    href: "/logistics/notifications",
+    icon: Bell,
   },
   {
     label: "Zones & rates",
