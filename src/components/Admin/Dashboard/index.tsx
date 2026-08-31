@@ -49,6 +49,7 @@ import AdminSystemManagement, {
 import AdminAccount, { AccountView } from "@/components/Admin/Account";
 import AdminFinance from "@/components/Admin/Finance";
 import AdminAnalytics from "@/components/Admin/Analytics";
+import MarketplaceOverview from "@/components/Admin/Dashboard/MarketplaceOverview";
 import AdminConfiguration, { AdminConfigurationView } from "@/components/Admin/Configuration";
 import { useTheme } from "@/app/context/ThemeContext";
 import { useAuth } from "@/hooks/useAuth";
@@ -1541,7 +1542,11 @@ export default function AdminDashboard() {
               </div>
             ) : null}
 
-            {activeTab === "overview" &&
+            {activeTab === "overview" && !isOverviewHiddenByMenuSelection ? (
+              <MarketplaceOverview />
+            ) : null}
+
+            {false && activeTab === "overview" &&
             !isLoading &&
             !isOverviewHiddenByMenuSelection ? (
               <>
