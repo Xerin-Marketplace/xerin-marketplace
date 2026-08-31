@@ -84,6 +84,23 @@ function predictedScope(country: string): "local" | "global" {
   return TANZANIA_NAMES.has(country.trim().toLowerCase()) ? "local" : "global";
 }
 
+function normalizeLocationName(value: string): string {
+  return value.trim().toLowerCase().replace(/[^a-z0-9]+/g, " ").replace(/\s+/g, " ").trim();
+}
+
+function canonicalOption(value: string | null | undefined, options: string[]): string {
+  const raw = (value || "").trim();
+  if (!raw) return "";
+  const normalized = normalizeLocationName(raw);
+  const aliases: Record<string, string> = {
+    "dar es salam": "dar es salaam",
+    "dar salaam": "dar es salaam",
+    "dar es salaam region": "dar es salaam",
+  };
+  const wanted = aliases[normalized] || normalized;
+  return options.find((option) => normalizeLocationName(option) === wanted) || "";
+}
+
 
 function resolveStoreMediaUrl(value?: string | null): string {
   if (!value) return "";
@@ -344,6 +361,21 @@ export default function SellerStoreSettings() {
       return;
     }
 
+    if (predictedScope(form.country) === "local") {
+      if (!form.region || !regionOptions.includes(form.region)) {
+        toast.error("Select an official Tanzania region from the dropdown.");
+        return;
+      }
+      if (!form.district || !districtOptions.includes(form.district)) {
+        toast.error("Select the store district / municipality from the dropdown.");
+        return;
+      }
+      if (wardOptions.length > 0 && form.ward && !wardOptions.includes(form.ward)) {
+        toast.error("Select the store ward from the dropdown.");
+        return;
+      }
+    }
+
     if (!form.latitude || !form.longitude) {
       toast.error("Set the store pickup latitude and longitude before saving the store.");
       return;
@@ -529,7 +561,8 @@ export default function SellerStoreSettings() {
               value={form.region}
               options={regionOptions}
               loading={locationLoading}
-              placeholder={scope === "local" ? "Select or type a region" : "Select or type a state / province"}
+              placeholder={scope === "local" ? "Select official region" : "Select or type a state / province"}
+              strict={scope === "local"}
               onChange={(value) => {
                 setForm((current) => ({ ...current, region: value, district: "", ward: "" }));
                 setDistrictOptions([]);
@@ -543,7 +576,8 @@ export default function SellerStoreSettings() {
               options={districtOptions}
               loading={locationLoading}
               disabled={!form.region}
-              placeholder={scope === "local" ? "Select or type a district" : "Select or type a city"}
+              placeholder={scope === "local" ? "Select district / municipality" : "Select or type a city"}
+              strict={scope === "local"}
               onChange={(value) => {
                 setForm((current) => ({ ...current, district: value, ward: "" }));
                 setWardOptions([]);
@@ -557,7 +591,8 @@ export default function SellerStoreSettings() {
                 options={wardOptions}
                 loading={locationLoading}
                 disabled={!form.district}
-                placeholder="Select or type a ward"
+                placeholder="Select ward"
+                strict
                 onChange={(value) => setForm((current) => ({ ...current, ward: value }))}
               />
             ) : (
@@ -587,16 +622,26 @@ export default function SellerStoreSettings() {
               }));
             }}
             onResolved={(location) => {
-              setForm((current) => ({
-                ...current,
-                country: location.country || current.country,
-                region: location.region || current.region,
-                district: location.city || location.district || current.district,
-                ward: location.ward || current.ward,
-                street: location.street || location.formatted_address || current.street,
-                latitude: String(location.latitude),
-                longitude: String(location.longitude),
-              }));
+              setForm((current) => {
+                const local = predictedScope(location.country || current.country) === "local";
+                const matchedRegion = local ? canonicalOption(location.region, regionOptions) : (location.region || current.region);
+                const matchedDistrict = local
+                  ? canonicalOption(location.district || location.city, districtOptions)
+                  : (location.city || location.district || current.district);
+                const matchedWard = local ? canonicalOption(location.ward, wardOptions) : (location.ward || current.ward);
+                return {
+                  ...current,
+                  country: location.country || current.country,
+                  // For Tanzanian stores the map may call an area such as POSTA a
+                  // "region". Never replace the official F7 hierarchy with that raw label.
+                  region: matchedRegion || current.region,
+                  district: matchedDistrict || current.district,
+                  ward: matchedWard || current.ward,
+                  street: location.street || location.formatted_address || current.street,
+                  latitude: String(location.latitude),
+                  longitude: String(location.longitude),
+                };
+              });
             }}
           />
           {locationError && (
@@ -605,7 +650,7 @@ export default function SellerStoreSettings() {
             </p>
           )}
           <p className="mt-3 text-xs text-[#64748b]">
-            Start typing to search the dropdown. If a location is not listed, you can type it manually and continue.
+            For Tanzania, Region, District and Ward use official dropdown values so Xerin Express can match the store origin to Admin domestic service standards. The map is used for the exact pickup pin and address only.
           </p>
         </Section>
 
@@ -994,7 +1039,7 @@ function StorePickupPin({
               type="button"
               onClick={useManualCoordinates}
               disabled={busy}
-              className="min-h-11 rounded-xl bg-slate-900 px-4 text-sm font-bold text-white disabled:opacity-60 dark:bg-white dark:text-slate-900"
+              className="min-h-11 rounded-xl bg-slate-900 px-4 text-sm font-bold text-black disabled:opacity-60 dark:bg-white dark:text-slate-900"
             >
               Confirm coordinates
             </button>
@@ -1089,9 +1134,9 @@ function SelectField({ label, value, options, onChange, required }: { label: str
   );
 }
 
-function LocationCombobox({ id, label, value, options, onChange, placeholder, disabled, loading }: { id: string; label: string; value: string; options: string[]; onChange: (value: string) => void; placeholder?: string; disabled?: boolean; loading?: boolean }) {
-  const values = value && !options.includes(value) ? [value, ...options] : options;
-  const hasDropdownOptions = values.length > 0;
+function LocationCombobox({ id, label, value, options, onChange, placeholder, disabled, loading, strict = false }: { id: string; label: string; value: string; options: string[]; onChange: (value: string) => void; placeholder?: string; disabled?: boolean; loading?: boolean; strict?: boolean }) {
+  const values = strict ? options : (value && !options.includes(value) ? [value, ...options] : options);
+  const hasDropdownOptions = strict || values.length > 0;
 
   return (
     <label className="block text-sm font-semibold" htmlFor={id}>

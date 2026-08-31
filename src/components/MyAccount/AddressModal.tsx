@@ -31,6 +31,28 @@ const emptyForm: AddressRequest = {
 const input =
   "mt-1.5 w-full rounded-xl border border-[#e2e8f0] bg-[#f8fafc] px-4 py-3 text-sm outline-none transition focus:border-[#f7941d] focus:ring-4 focus:ring-orange-50 disabled:opacity-60 dark:border-white/10 dark:bg-white/5";
 
+const TANZANIA_REGIONS = [
+  "Arusha", "Dar es Salaam", "Dodoma", "Geita", "Iringa", "Kagera",
+  "Katavi", "Kigoma", "Kilimanjaro", "Lindi", "Manyara", "Mara",
+  "Mbeya", "Morogoro", "Mtwara", "Mwanza", "Njombe", "Pemba North",
+  "Pemba South", "Pwani", "Rukwa", "Ruvuma", "Shinyanga", "Simiyu",
+  "Singida", "Songwe", "Tabora", "Tanga", "Zanzibar North",
+  "Zanzibar South and Central", "Zanzibar West",
+] as const;
+
+const normalizeLocationKey = (value?: string | null) =>
+  (value || "").trim().replace(/\s+/g, " ").toLowerCase();
+
+const isTanzania = (value?: string | null) =>
+  ["tanzania", "united republic of tanzania", "tz"].includes(normalizeLocationKey(value));
+
+const canonicalTanzaniaRegion = (value?: string | null) => {
+  const key = normalizeLocationKey(value);
+  if (!key) return "";
+  if (key === "dar es salam" || key === "dar es salaam") return "Dar es Salaam";
+  return TANZANIA_REGIONS.find((region) => normalizeLocationKey(region) === key) || "";
+};
+
 export default function AddressModal({
   isOpen,
   closeModal,
@@ -47,7 +69,9 @@ export default function AddressModal({
       recipient_name: initialAddress?.recipient_name || "",
       recipient_phone: initialAddress?.recipient_phone || "",
       country: initialAddress?.country || "Tanzania",
-      region: initialAddress?.region || "",
+      region: isTanzania(initialAddress?.country || "Tanzania")
+        ? canonicalTanzaniaRegion(initialAddress?.region)
+        : (initialAddress?.region || ""),
       district: initialAddress?.district || "",
       ward: initialAddress?.ward || "",
       city: initialAddress?.city || "",
@@ -72,7 +96,7 @@ export default function AddressModal({
       recipient_name: form.recipient_name?.trim() || null,
       recipient_phone: form.recipient_phone?.trim() || null,
       country: form.country.trim(),
-      region: form.region.trim(),
+      region: isTanzania(form.country) ? canonicalTanzaniaRegion(form.region) : form.region.trim(),
       district: form.district?.trim() || null,
       ward: form.ward?.trim() || null,
       city: form.city.trim(),
@@ -110,10 +134,42 @@ export default function AddressModal({
               <input value={form.recipient_phone || ""} onChange={(e)=>set("recipient_phone",e.target.value)} className={input} placeholder="+255..." />
             </Field>
             <Field label="Country" required>
-              <input required value={form.country} onChange={(e)=>set("country",e.target.value)} className={input} />
+              <input
+                required
+                value={form.country}
+                onChange={(e) => {
+                  const country = e.target.value;
+                  setForm((current) => ({
+                    ...current,
+                    country,
+                    region: isTanzania(country) ? canonicalTanzaniaRegion(current.region) : current.region,
+                  }));
+                }}
+                className={input}
+              />
             </Field>
-            <Field label="Region" required>
-              <input required value={form.region} onChange={(e)=>set("region",e.target.value)} className={input} placeholder="Dar es Salaam" />
+            <Field label={isTanzania(form.country) ? "Region (official)" : "Region / State / Province"} required>
+              {isTanzania(form.country) ? (
+                <select
+                  required
+                  value={canonicalTanzaniaRegion(form.region)}
+                  onChange={(e) => set("region", e.target.value)}
+                  className={input}
+                >
+                  <option value="">Select official region</option>
+                  {TANZANIA_REGIONS.map((region) => (
+                    <option key={region} value={region}>{region}</option>
+                  ))}
+                </select>
+              ) : (
+                <input
+                  required
+                  value={form.region}
+                  onChange={(e) => set("region", e.target.value)}
+                  className={input}
+                  placeholder="State / province / region"
+                />
+              )}
             </Field>
             <Field label="District">
               <input value={form.district || ""} onChange={(e)=>set("district",e.target.value)} className={input} placeholder="Kinondoni" />
