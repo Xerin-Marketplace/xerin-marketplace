@@ -393,7 +393,7 @@ export default function SellerDashboard() {
         refresh={() => void load(true)}
       />
 
-      <section className="grid gap-4 sm:grid-cols-2 xl:grid-cols-4 2xl:grid-cols-6">
+      <section className="grid grid-cols-1 gap-3 sm:grid-cols-2 lg:grid-cols-4 lg:gap-4 2xl:grid-cols-6">
         <MetricCard
           label="Total Products"
           value={number.format(dashboardProductsTotal)}

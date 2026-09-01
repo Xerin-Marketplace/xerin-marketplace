@@ -1184,12 +1184,12 @@ const SellerProducts = () => {
             >
               <div className="flex-1 space-y-5 overflow-y-auto p-5 sm:p-7">
                 <div className="grid gap-2 sm:grid-cols-4">
-                  {[
+                  {([
                     [Tag, "1", "Identity", "Store & catalogue"],
                     [Camera, "2", "Media", "Buyer-ready photos"],
                     [CircleDollarSign, "3", "Pricing", "Price & commission"],
                     [Warehouse, "4", "Stock", "Opening inventory"],
-                  ].map(([StepIcon, step, title, detail]) => (
+                  ] as const).map(([StepIcon, step, title, detail]) => (
                     <div
                       key={String(step)}
                       className="flex items-center gap-3 rounded-2xl border border-[#e4e9ef] bg-white px-3 py-3 shadow-[0_5px_18px_rgba(15,23,42,.035)]"
