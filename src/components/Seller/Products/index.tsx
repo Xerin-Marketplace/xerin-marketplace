@@ -1142,31 +1142,40 @@ const SellerProducts = () => {
           onMouseDown={closeEditor}
         >
           <aside
-            className="flex h-full w-full max-w-4xl flex-col bg-[#f8fafc] shadow-2xl"
+            className="flex h-full w-full max-w-5xl flex-col bg-[#f4f7fb] shadow-2xl dark:bg-[#111827]"
             onMouseDown={(event) => event.stopPropagation()}
           >
-            <div className="flex shrink-0 items-start justify-between border-b border-[#e7ebf0] bg-white px-5 py-4 sm:px-7">
-              <div>
-                <p className="text-xs font-bold uppercase tracking-[0.14em] text-[#f7941d]">
-                  Seller catalogue
-                </p>
-                <h2 className="mt-1 text-xl font-bold text-[#111827]">
-                  {editingProduct ? "Edit Product" : "Create New Product"}
-                </h2>
-                <p className="mt-1 text-xs text-[#64748b]">
-                  Product ownership is automatically linked to your approved
-                  seller account.
-                </p>
-              </div>
+            <div className="relative shrink-0 overflow-hidden border-b border-black/10 bg-[#111827] px-5 py-5 text-white sm:px-7 sm:py-6">
+              <span className="pointer-events-none absolute -right-16 -top-20 h-48 w-48 rounded-full bg-[#f7941d]/25 blur-3xl" />
+              <span className="pointer-events-none absolute bottom-0 right-40 h-20 w-40 rounded-full bg-white/5 blur-2xl" />
+              <div className="relative flex items-start justify-between gap-5">
+                <div className="flex min-w-0 items-start gap-4">
+                  <span className="grid h-12 w-12 shrink-0 place-items-center rounded-2xl bg-[#f7941d] text-white shadow-[0_10px_25px_rgba(247,148,29,.3)]">
+                    <ShoppingBag size={22} />
+                  </span>
+                  <div>
+                    <p className="text-[10px] font-extrabold uppercase tracking-[0.18em] text-orange-300">
+                      Seller catalogue workspace
+                    </p>
+                    <h2 className="mt-1 text-xl font-extrabold tracking-[-0.025em] sm:text-2xl">
+                      {editingProduct ? "Edit Product" : "Create New Product"}
+                    </h2>
+                    <p className="mt-1 max-w-2xl text-xs leading-5 text-slate-300">
+                      Build a buyer-ready listing with clear identity, strong product images,
+                      pricing and accurate opening stock.
+                    </p>
+                  </div>
+                </div>
 
-              <button
-                type="button"
-                onClick={closeEditor}
-                disabled={isSubmitting}
-                className="flex h-10 w-10 items-center justify-center rounded-xl border border-[#e7ebf0] bg-white text-[#64748b] hover:bg-slate-50"
-              >
-                <X size={18} />
-              </button>
+                <button
+                  type="button"
+                  onClick={closeEditor}
+                  disabled={isSubmitting}
+                  className="grid h-10 w-10 shrink-0 place-items-center rounded-xl border border-white/15 bg-white/10 text-white transition hover:bg-white/20"
+                >
+                  <X size={18} />
+                </button>
+              </div>
             </div>
 
             <form
@@ -1174,6 +1183,31 @@ const SellerProducts = () => {
               className="flex min-h-0 flex-1 flex-col"
             >
               <div className="flex-1 space-y-5 overflow-y-auto p-5 sm:p-7">
+                <div className="grid gap-2 sm:grid-cols-4">
+                  {[
+                    [Tag, "1", "Identity", "Store & catalogue"],
+                    [Camera, "2", "Media", "Buyer-ready photos"],
+                    [CircleDollarSign, "3", "Pricing", "Price & commission"],
+                    [Warehouse, "4", "Stock", "Opening inventory"],
+                  ].map(([StepIcon, step, title, detail]) => (
+                    <div
+                      key={String(step)}
+                      className="flex items-center gap-3 rounded-2xl border border-[#e4e9ef] bg-white px-3 py-3 shadow-[0_5px_18px_rgba(15,23,42,.035)]"
+                    >
+                      <span className="grid h-9 w-9 shrink-0 place-items-center rounded-xl bg-orange-50 text-[#f7941d]">
+                        <StepIcon size={16} />
+                      </span>
+                      <div className="min-w-0">
+                        <p className="text-[9px] font-extrabold uppercase tracking-[.14em] text-[#94a3b8]">
+                          Step {step}
+                        </p>
+                        <p className="truncate text-xs font-bold text-[#111827]">{title}</p>
+                        <p className="truncate text-[10px] text-[#94a3b8]">{detail}</p>
+                      </div>
+                    </div>
+                  ))}
+                </div>
+
                 {editingProduct?.rejection_reason && (
                   <div className="rounded-2xl border border-red-200 bg-red-50 p-4 text-red-700">
                     <p className="text-xs font-bold uppercase tracking-wider">
@@ -1346,13 +1380,19 @@ const SellerProducts = () => {
                   title="Product images"
                   description={`Upload up to ${MAX_PRODUCT_IMAGES} real product images. JPEG, PNG or WEBP only, maximum 5 MB each.`}
                 >
-                  <label className="flex cursor-pointer flex-col items-center justify-center rounded-2xl border-2 border-dashed border-[#d7dee7] bg-[#f8fafc] px-5 py-8 text-center transition hover:border-[#f7941d] hover:bg-orange-50/30">
-                    <UploadCloud size={30} className="text-[#f7941d]" />
-                    <span className="mt-3 text-sm font-semibold text-[#111827]">
-                      Choose product images
+                  <label className="group relative flex cursor-pointer flex-col items-center justify-center overflow-hidden rounded-2xl border-2 border-dashed border-orange-200 bg-gradient-to-br from-orange-50 via-white to-slate-50 px-5 py-10 text-center transition hover:border-[#f7941d] hover:shadow-[0_12px_28px_rgba(247,148,29,.10)]">
+                    <span className="pointer-events-none absolute -right-12 -top-12 h-32 w-32 rounded-full bg-orange-100/70 blur-2xl" />
+                    <span className="relative grid h-14 w-14 place-items-center rounded-2xl bg-[#f7941d] text-white shadow-[0_10px_24px_rgba(247,148,29,.25)] transition group-hover:-translate-y-1">
+                      <UploadCloud size={25} />
                     </span>
-                    <span className="mt-1 text-xs text-[#64748b]">
-                      Select multiple files · JPEG, PNG, WEBP · max 5 MB each
+                    <span className="relative mt-4 text-sm font-bold text-[#111827]">
+                      Drop product images here or browse
+                    </span>
+                    <span className="relative mt-1 text-xs text-[#64748b]">
+                      Add multiple buyer-ready photos · JPEG, PNG, WEBP · max 5 MB each
+                    </span>
+                    <span className="relative mt-3 rounded-full bg-white px-3 py-1 text-[10px] font-bold uppercase tracking-wide text-[#f7941d] shadow-sm">
+                      Up to {MAX_PRODUCT_IMAGES} images
                     </span>
                     <input
                       type="file"
@@ -1769,7 +1809,7 @@ const SellerProducts = () => {
                 </div>
               </div>
 
-              <div className="shrink-0 border-t border-[#e7ebf0] bg-white px-5 py-4 sm:px-7">
+              <div className="shrink-0 border-t border-[#e7ebf0] bg-white/95 px-5 py-4 shadow-[0_-8px_30px_rgba(15,23,42,.04)] backdrop-blur sm:px-7">
                 <div className="flex flex-col-reverse gap-3 sm:flex-row sm:items-center sm:justify-between">
                   <button
                     type="button"
@@ -1785,7 +1825,7 @@ const SellerProducts = () => {
                       type="submit"
                       disabled={isSubmitting}
                       onClick={() => setSubmitIntent("draft")}
-                      className="inline-flex h-11 items-center justify-center gap-2 rounded-xl border border-[#111827] bg-white px-5 text-sm font-semibold text-[#111827] disabled:opacity-50"
+                      className="inline-flex h-11 items-center justify-center gap-2 rounded-xl border border-[#cfd6df] bg-white px-5 text-sm font-bold text-[#334155] shadow-sm transition hover:border-[#111827] hover:bg-slate-50 disabled:opacity-50"
                     >
                       <FileText size={15} />
                       {isSubmitting && submitIntent === "draft"
@@ -1797,7 +1837,7 @@ const SellerProducts = () => {
                       type="submit"
                       disabled={isSubmitting}
                       onClick={() => setSubmitIntent("review")}
-                      className="inline-flex h-11 items-center justify-center gap-2 rounded-xl bg-[#f7941d] px-5 text-sm font-semibold text-white shadow-[0_6px_18px_rgba(247,148,29,0.18)] disabled:opacity-50"
+                      className="inline-flex h-11 items-center justify-center gap-2 rounded-xl bg-[#f7941d] px-5 text-sm font-bold text-white shadow-[0_9px_24px_rgba(247,148,29,0.25)] transition hover:-translate-y-0.5 hover:bg-[#e78315] disabled:opacity-50"
                     >
                       <Send size={15} />
                       {isSubmitting && submitIntent === "review"
@@ -1853,21 +1893,23 @@ const SellerProducts = () => {
         .input {
           width: 100%;
           min-height: 44px;
-          border-radius: 0.75rem;
-          border: 1px solid #e1e6ec;
-          background: #ffffff;
-          padding: 0.7rem 0.9rem;
+          border-radius: 0.85rem;
+          border: 1px solid #dce3ea;
+          background: #fbfdff;
+          padding: 0.76rem 0.95rem;
           font-size: 0.875rem;
           color: #111827;
           outline: none;
           transition:
             border-color 160ms ease,
-            box-shadow 160ms ease;
+            box-shadow 160ms ease,
+            background-color 160ms ease;
         }
 
         .input:focus {
           border-color: #f7941d;
-          box-shadow: 0 0 0 3px rgba(247, 148, 29, 0.09);
+          background: #ffffff;
+          box-shadow: 0 0 0 4px rgba(247, 148, 29, 0.10);
         }
 
         .input:disabled {
@@ -1916,17 +1958,19 @@ function FormSection({
   children: React.ReactNode;
 }) {
   return (
-    <section className="rounded-2xl border border-[#e7ebf0] bg-white p-5 shadow-sm sm:p-6">
-      <div className="mb-5 flex items-start gap-3">
-        <span className="flex h-10 w-10 shrink-0 items-center justify-center rounded-xl bg-orange-50 text-[#f7941d]">
-          <Icon size={18} />
+    <section className="relative overflow-hidden rounded-2xl border border-[#e3e8ee] bg-white p-5 shadow-[0_8px_26px_rgba(15,23,42,.045)] sm:p-6">
+      <span className="absolute inset-y-0 left-0 w-1 bg-gradient-to-b from-[#f7941d] to-orange-300" />
+      <span className="pointer-events-none absolute -right-14 -top-14 h-36 w-36 rounded-full bg-orange-50 blur-2xl" />
+      <div className="relative mb-5 flex items-start gap-3">
+        <span className="grid h-11 w-11 shrink-0 place-items-center rounded-2xl bg-[#111827] text-[#f7941d] shadow-sm">
+          <Icon size={19} />
         </span>
         <div>
-          <h3 className="font-semibold text-[#111827]">{title}</h3>
-          <p className="mt-1 text-xs leading-5 text-[#64748b]">{description}</p>
+          <h3 className="text-base font-extrabold tracking-[-0.015em] text-[#111827]">{title}</h3>
+          <p className="mt-1 max-w-3xl text-xs leading-5 text-[#64748b]">{description}</p>
         </div>
       </div>
-      {children}
+      <div className="relative">{children}</div>
     </section>
   );
 }
