@@ -339,38 +339,84 @@ export default function BuyerOrderDetails({ orderId }: { orderId: string }) {
 
           <Card title="Seller Fulfilment">
             {order.seller_orders.length ? (
-              <div className="grid gap-3 sm:grid-cols-2">
+              <div className="space-y-4">
                 {order.seller_orders.map((sellerOrder, index) => (
                   <div
                     key={sellerOrder.id}
-                    className="rounded-xl border border-[#e2e8f0] p-4 dark:border-white/10"
+                    className="overflow-hidden rounded-2xl border border-[#e2e8f0] bg-white shadow-[0_8px_24px_rgba(15,23,42,0.04)] dark:border-white/10 dark:bg-darkTheme-card"
                   >
-                    <p className="text-xs font-bold uppercase tracking-wide text-[#94a3b8]">
-                      Seller shipment {index + 1}
-                    </p>
-                    <p className="mt-2 text-lg font-bold capitalize">
-                      {pretty(sellerOrder.status)}
-                    </p>
-                    <p className="mt-1 text-xs text-[#64748b]">
-                      {sellerOrder.item_count} item
-                      {sellerOrder.item_count === 1 ? "" : "s"}
-                    </p>
-                    <p className="mt-2 text-xs text-[#64748b]">
-                      Seller portion:{" "}
-                      {formatCurrency(
-                        sellerOrder.seller_subtotal,
-                        order.currency,
-                      )}
-                    </p>
-                    <CustomerSellerChat orderId={order.id} sellerOrderId={sellerOrder.id} />
+                    <div className="border-b border-[#e2e8f0] bg-gradient-to-r from-[#fff8f1] via-white to-white p-4 dark:border-white/10 dark:from-orange-500/10 dark:via-darkTheme-card dark:to-darkTheme-card sm:p-5">
+                      <div className="flex flex-col gap-4 xl:flex-row xl:items-center xl:justify-between">
+                        <div className="flex min-w-0 items-start gap-3">
+                          <span className="grid h-12 w-12 shrink-0 place-items-center rounded-2xl bg-[#f7941d] text-white shadow-sm">
+                            <PackageCheck size={23} />
+                          </span>
+
+                          <div className="min-w-0">
+                            <p className="text-[11px] font-bold uppercase tracking-[0.14em] text-[#94a3b8]">
+                              Seller shipment {index + 1}
+                            </p>
+                            <div className="mt-1.5 flex flex-wrap items-center gap-2">
+                              <h3 className="text-xl font-extrabold text-slate-900 dark:text-white">
+                                {pretty(sellerOrder.status)}
+                              </h3>
+                              <span className="rounded-full bg-orange-50 px-2.5 py-1 text-[10px] font-bold uppercase tracking-wide text-[#d96f00] dark:bg-orange-500/10 dark:text-orange-300">
+                                Fulfilment
+                              </span>
+                            </div>
+                            <p className="mt-1 text-xs leading-5 text-[#64748b]">
+                              Seller is preparing this shipment for the logistics handover.
+                            </p>
+                          </div>
+                        </div>
+
+                        <div className="grid grid-cols-2 gap-2 sm:grid-cols-3 xl:min-w-[330px]">
+                          <div className="rounded-xl border border-[#f1e4d6] bg-white px-3 py-2.5 dark:border-white/10 dark:bg-white/[0.035]">
+                            <p className="text-[10px] font-bold uppercase tracking-wide text-[#94a3b8]">
+                              Items
+                            </p>
+                            <p className="mt-1 text-sm font-bold text-slate-900 dark:text-white">
+                              {sellerOrder.item_count}
+                            </p>
+                          </div>
+
+                          <div className="rounded-xl border border-[#f1e4d6] bg-white px-3 py-2.5 dark:border-white/10 dark:bg-white/[0.035]">
+                            <p className="text-[10px] font-bold uppercase tracking-wide text-[#94a3b8]">
+                              Seller portion
+                            </p>
+                            <p className="mt-1 text-sm font-bold text-slate-900 dark:text-white">
+                              {formatCurrency(
+                                sellerOrder.seller_subtotal,
+                                order.currency,
+                              )}
+                            </p>
+                          </div>
+
+                          <div className="col-span-2 rounded-xl border border-[#f1e4d6] bg-white px-3 py-2.5 dark:border-white/10 dark:bg-white/[0.035] sm:col-span-1">
+                            <p className="text-[10px] font-bold uppercase tracking-wide text-[#94a3b8]">
+                              Next step
+                            </p>
+                            <p className="mt-1 text-sm font-bold text-[#d96f00] dark:text-orange-300">
+                              Logistics pickup
+                            </p>
+                          </div>
+                        </div>
+                      </div>
+                    </div>
+
+                    <div className="p-4 sm:p-5">
+                      <CustomerSellerChat
+                        orderId={order.id}
+                        sellerOrderId={sellerOrder.id}
+                      />
+                    </div>
                   </div>
                 ))}
               </div>
             ) : (
-              <p className="text-sm text-[#64748b]">
-                Seller fulfilment records will appear after the order enters
-                processing.
-              </p>
+              <div className="rounded-xl border border-dashed border-[#cbd5e1] p-5 text-sm text-[#64748b] dark:border-white/10">
+                Seller fulfilment records will appear after the order enters processing.
+              </div>
             )}
           </Card>
 
@@ -393,57 +439,27 @@ export default function BuyerOrderDetails({ orderId }: { orderId: string }) {
             )}
           </Card>
 
-          <Card title="Tracking Timeline">
-            {trackingEvents.length ? (
-              <div className="space-y-0">
-                {trackingEvents.map((event, index) => (
-                  <div
-                    key={event.id}
-                    className="relative flex gap-4 pb-6 last:pb-0"
-                  >
-                    {index < trackingEvents.length - 1 && (
-                      <span className="absolute left-[7px] top-4 h-full w-px bg-[#e2e8f0]" />
-                    )}
-                    <span className="relative mt-1 h-4 w-4 shrink-0 rounded-full border-4 border-orange-100 bg-[#f7941d]" />
-                    <div>
-                      <p className="font-semibold">
-                        {pretty(event.status)}
-                      </p>
-                      <p className="mt-1 text-xs text-[#64748b]">
-                        {new Date(event.created_at).toLocaleString()}
-                        {event.location ? ` · ${event.location}` : ""}
-                      </p>
-                      {event.notes && (
-                        <p className="mt-1 text-sm text-[#64748b]">
-                          {event.notes}
-                        </p>
-                      )}
-                    </div>
-                  </div>
-                ))}
-              </div>
-            ) : (
-              <p className="text-sm text-[#64748b]">
-                Tracking events will appear here as the logistics provider
-                updates the shipment.
-              </p>
-            )}
-          </Card>
+
         </div>
 
         <aside className="space-y-5">
           <Card title="Payment Status">
-            <div className="space-y-3">
-              {order.payments.length ? (
-                order.payments.map((payment) => (
+            {order.payments.length ? (
+              <div className="space-y-3">
+                {order.payments.map((payment) => (
                   <div
                     key={payment.id}
                     className="rounded-xl border border-[#e2e8f0] p-4 dark:border-white/10"
                   >
-                    <div className="flex items-center justify-between gap-3">
-                      <p className="font-semibold capitalize">
-                        {pretty(payment.method)}
-                      </p>
+                    <div className="flex items-start justify-between gap-3">
+                      <div>
+                        <p className="font-semibold capitalize">
+                          {pretty(payment.method)}
+                        </p>
+                        <p className="mt-2 text-xl font-bold">
+                          {formatCurrency(payment.amount, payment.currency)}
+                        </p>
+                      </div>
                       <span
                         className={`rounded-full px-2.5 py-1 text-[10px] font-bold uppercase ${paymentTone(
                           payment.status,
@@ -452,38 +468,148 @@ export default function BuyerOrderDetails({ orderId }: { orderId: string }) {
                         {pretty(payment.status)}
                       </span>
                     </div>
-                    <p className="mt-2 text-lg font-bold">
-                      {formatCurrency(payment.amount, payment.currency)}
-                    </p>
-                    <p className="mt-1 text-xs text-[#64748b]">
-                      {payment.provider || "Cash / marketplace"}
-                    </p>
+
+                    {payment.provider && (
+                      <p className="mt-3 text-xs capitalize text-[#64748b]">
+                        {pretty(payment.provider)}
+                      </p>
+                    )}
                     {payment.provider_transaction_id && (
-                      <p className="mt-1 break-all text-[11px] text-[#94a3b8]">
+                      <p className="mt-1 break-all text-xs text-[#64748b]">
                         Ref: {payment.provider_transaction_id}
                       </p>
                     )}
-                    <p className="mt-2 text-xs text-[#64748b]">
+                    <p className="mt-1 text-xs text-[#64748b]">
                       {payment.paid_at
                         ? `Paid ${new Date(payment.paid_at).toLocaleString()}`
-                        : payment.method === "cash_on_delivery"
-                          ? "Collection due on delivery"
-                          : payment.status === "processing"
-                            ? "Authorization sent — waiting for provider confirmation"
-                            : payment.status === "failed"
-                              ? "Payment failed — retry from the payment confirmation page"
-                              : payment.status === "cancelled"
-                                ? "Payment cancelled — a new attempt can be made"
-                                : "Awaiting payment confirmation"}
+                        : `Created ${new Date(payment.created_at).toLocaleString()}`}
                     </p>
                   </div>
-                ))
-              ) : (
-                <p className="text-sm text-[#64748b]">
-                  No payment record is attached to this order yet.
+                ))}
+              </div>
+            ) : (
+              <div className="rounded-xl border border-dashed border-[#cbd5e1] p-4 text-sm text-[#64748b] dark:border-white/10">
+                Payment information will appear here after checkout.
+              </div>
+            )}
+          </Card>
+
+          <Card title="Tracking Timeline">
+            {trackingEvents.length ? (
+              <div className="relative">
+                {trackingEvents.map((event, index) => {
+                  const status = event.status.toLowerCase();
+                  const active = index === 0;
+
+                  const Icon =
+                    status === "delivered"
+                      ? BadgeCheck
+                      : status === "ready_for_dispatch"
+                        ? PackageCheck
+                        : [
+                            "pending",
+                            "pickup_pending",
+                            "picked_up",
+                            "dispatched",
+                            "in_transit",
+                            "out_for_delivery",
+                          ].includes(status)
+                          ? Truck
+                          : Clock3;
+
+                  const fallbackDescription: Record<string, string> = {
+                    pending:
+                      "Store-origin shipment created after payment confirmation.",
+                    ready_for_dispatch:
+                      "Seller fulfillment validated and order marked ready for dispatch.",
+                    pickup_pending:
+                      "Logistics pickup is pending and the shipment is waiting for collection from the seller.",
+                    picked_up:
+                      "The logistics provider collected the shipment from the seller.",
+                    dispatched:
+                      "The shipment was dispatched from the seller location.",
+                    in_transit:
+                      "The shipment is in transit to the customer delivery destination.",
+                    out_for_delivery:
+                      "The shipment is out for delivery and is approaching the customer.",
+                    delivered:
+                      "The shipment was delivered to the customer.",
+                  };
+
+                  const description =
+                    event.description?.trim() ||
+                    fallbackDescription[status] ||
+                    "Shipment status was updated by the logistics workflow.";
+
+                  return (
+                    <div
+                      key={event.id}
+                      className="relative flex gap-4 pb-7 last:pb-0"
+                    >
+                      {index < trackingEvents.length - 1 && (
+                        <span
+                          aria-hidden="true"
+                          className="absolute left-[21px] top-11 h-[calc(100%-24px)] w-[2px] rounded-full bg-gradient-to-b from-[#f7941d] to-[#fed7aa] dark:to-orange-500/20"
+                        />
+                      )}
+
+                      <div className="relative z-[1] shrink-0">
+                        <span
+                          className={`grid h-11 w-11 place-items-center rounded-full border-2 shadow-sm ${
+                            active
+                              ? "border-[#f7941d] bg-[#fff7ed] text-[#f7941d] dark:bg-orange-500/10"
+                              : "border-[#fdba74] bg-white text-[#f7941d] dark:bg-darkTheme-card"
+                          }`}
+                        >
+                          <Icon size={19} strokeWidth={2} />
+                        </span>
+
+                        {active && (
+                          <span className="absolute -right-1 -top-1 grid h-4 w-4 place-items-center rounded-full border-2 border-white bg-emerald-500 shadow-sm dark:border-darkTheme-card">
+                            <span className="h-1.5 w-1.5 rounded-full bg-white" />
+                          </span>
+                        )}
+                      </div>
+
+                      <div className="min-w-0 flex-1 pt-0.5">
+                        <div className="flex flex-wrap items-center gap-2">
+                          <p className="text-sm font-extrabold text-slate-900 dark:text-white">
+                            {pretty(event.status)}
+                          </p>
+
+                          {active && (
+                            <span className="rounded-full bg-emerald-50 px-2.5 py-1 text-[9px] font-bold uppercase tracking-wide text-emerald-700 dark:bg-emerald-500/10 dark:text-emerald-300">
+                              Latest
+                            </span>
+                          )}
+                        </div>
+
+                        <p className="mt-1.5 text-[11px] font-medium text-[#94a3b8]">
+                          {new Date(event.created_at).toLocaleString()}
+                        </p>
+
+                        <p className="mt-2 max-w-[30rem] text-xs leading-5 text-[#64748b] dark:text-[#cbd5e1]">
+                          {description}
+                        </p>
+                      </div>
+                    </div>
+                  );
+                })}
+              </div>
+            ) : (
+              <div className="rounded-xl border border-dashed border-[#cbd5e1] p-5 text-center dark:border-white/10">
+                <span className="mx-auto grid h-11 w-11 place-items-center rounded-full border-2 border-[#fdba74] bg-[#fff7ed] text-[#f7941d] dark:bg-orange-500/10">
+                  <Truck size={20} />
+                </span>
+                <p className="mt-3 text-sm font-semibold">
+                  Tracking will start soon
                 </p>
-              )}
-            </div>
+                <p className="mt-1 text-xs leading-5 text-[#64748b]">
+                  Updates appear here as the seller and logistics provider move
+                  your shipment.
+                </p>
+              </div>
+            )}
           </Card>
 
           <Card title="Xerin Escrow">
@@ -843,11 +969,194 @@ function ShipmentCard({
 
 
 function CustomerSellerChat({ orderId, sellerOrderId }: { orderId: string; sellerOrderId: string }) {
-  const [open,setOpen]=useState(false); const [messages,setMessages]=useState<SellerOrderMessage[]>([]); const [text,setText]=useState(""); const [loading,setLoading]=useState(false); const [sending,setSending]=useState(false); const [error,setError]=useState("");
-  const load=async()=>{setLoading(true);setError("");try{setMessages(await ordersApi.sellerMessages(orderId,sellerOrderId));}catch(e){const x=e as {response?:{data?:{detail?:string}};message?:string};setError(x.response?.data?.detail||x.message||"Unable to load messages.");}finally{setLoading(false);}};
-  useEffect(()=>{if(!open)return;void load();const t=window.setInterval(()=>void load(),15000);return()=>window.clearInterval(t);},[open,orderId,sellerOrderId]);
-  const send=async()=>{if(!text.trim())return;setSending(true);try{const row=await ordersApi.sendSellerMessage(orderId,sellerOrderId,{message:text.trim(),is_internal:false});setMessages(v=>[...v,row]);setText("");}catch(e){const x=e as {response?:{data?:{detail?:string}};message?:string};setError(x.response?.data?.detail||x.message||"Unable to send message.");}finally{setSending(false);}};
-  return <div className="mt-4 border-t border-[#e2e8f0] pt-3 dark:border-white/10"><button onClick={()=>setOpen(v=>!v)} className="inline-flex min-h-10 items-center gap-2 rounded-xl border border-[#f7941d] px-3 text-xs font-bold text-[#b85f00]"><MessageSquareText size={15}/>{open?"Close chat":"Message seller / logistics"}</button>{open&&<div className="mt-3 overflow-hidden rounded-xl border border-[#e2e8f0] dark:border-white/10"><div className="max-h-64 space-y-2 overflow-y-auto bg-slate-50 p-3 dark:bg-white/5">{loading&&!messages.length?<p className="text-xs text-[#64748b]">Loading…</p>:messages.length?messages.map(m=><div key={m.id} className={`flex ${(m.sender_role_label||"").toLowerCase()==="customer"?"justify-end":"justify-start"}`}><div className={`max-w-[85%] rounded-xl px-3 py-2 text-xs ${(m.sender_role_label||"").toLowerCase()==="customer"?"bg-[#f7941d] text-black":"bg-white text-slate-900 shadow-sm dark:bg-slate-800 dark:text-white"}`}><p className="mb-1 text-[10px] font-bold uppercase opacity-60">{m.sender_role_label||"participant"}</p><p className="whitespace-pre-wrap">{m.message}</p></div></div>):<p className="text-xs text-[#64748b]">No messages yet.</p>}{error&&<p className="text-xs text-red-600">{error}</p>}</div><div className="flex gap-2 border-t border-[#e2e8f0] p-2 dark:border-white/10"><input value={text} onChange={e=>setText(e.target.value)} onKeyDown={e=>{if(e.key==="Enter"&&!e.shiftKey){e.preventDefault();void send();}}} placeholder="Write an order message…" className="min-h-10 flex-1 rounded-lg border border-[#e2e8f0] bg-transparent px-3 text-xs dark:border-white/10"/><button onClick={()=>void send()} disabled={sending||!text.trim()} className="grid h-10 w-10 place-items-center rounded-lg bg-[#f7941d] text-black disabled:opacity-50"><Send size={15}/></button></div></div>}</div>;
+  const [open, setOpen] = useState(false);
+  const [messages, setMessages] = useState<SellerOrderMessage[]>([]);
+  const [text, setText] = useState("");
+  const [loading, setLoading] = useState(false);
+  const [sending, setSending] = useState(false);
+  const [error, setError] = useState("");
+
+  const load = async () => {
+    setLoading(true);
+    setError("");
+    try {
+      setMessages(await ordersApi.sellerMessages(orderId, sellerOrderId));
+    } catch (e) {
+      const x = e as { response?: { data?: { detail?: string } }; message?: string };
+      setError(x.response?.data?.detail || x.message || "Unable to load messages.");
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  useEffect(() => {
+    if (!open) return;
+    void load();
+    const timer = window.setInterval(() => void load(), 15000);
+    return () => window.clearInterval(timer);
+  }, [open, orderId, sellerOrderId]);
+
+  const send = async () => {
+    if (!text.trim()) return;
+    setSending(true);
+    try {
+      const row = await ordersApi.sendSellerMessage(orderId, sellerOrderId, {
+        message: text.trim(),
+        is_internal: false,
+      });
+      setMessages((current) => [...current, row]);
+      setText("");
+    } catch (e) {
+      const x = e as { response?: { data?: { detail?: string } }; message?: string };
+      setError(x.response?.data?.detail || x.message || "Unable to send message.");
+    } finally {
+      setSending(false);
+    }
+  };
+
+  return (
+    <div className="min-w-0">
+      <div className="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
+        <div>
+          <div className="flex items-center gap-2">
+            <span className="grid h-9 w-9 place-items-center rounded-xl bg-orange-50 text-[#f7941d] dark:bg-orange-500/10">
+              <MessageSquareText size={18} />
+            </span>
+            <div>
+              <p className="font-bold">Order conversation</p>
+              <p className="text-xs text-[#64748b]">
+                Message the seller and logistics team about this shipment.
+              </p>
+            </div>
+          </div>
+        </div>
+
+        <button
+          onClick={() => setOpen((value) => !value)}
+          className="inline-flex min-h-11 items-center justify-center gap-2 rounded-xl border border-[#f7941d] bg-white px-4 text-sm font-bold text-[#d96f00] transition hover:bg-[#f7941d] hover:text-white dark:bg-transparent"
+        >
+          <MessageSquareText size={17} />
+          {open ? "Close conversation" : "Open conversation"}
+        </button>
+      </div>
+
+      {/* {!open && (
+        <div className="mt-4 rounded-xl border border-dashed border-[#cbd5e1] bg-white/70 px-4 py-6 text-center dark:border-white/10 dark:bg-white/[0.025]">
+          <p className="text-sm font-semibold text-slate-800 dark:text-white">
+            Keep all order communication in one place
+          </p>
+          <p className="mt-1 text-xs leading-5 text-[#64748b]">
+            Ask about packaging, pickup, dispatch, or delivery without leaving the order page.
+          </p>
+        </div>
+      )} */}
+
+      {open && (
+        <div className="mt-4 overflow-hidden rounded-2xl border border-[#e2e8f0] bg-white shadow-sm dark:border-white/10 dark:bg-darkTheme-card">
+          <div className="flex items-center justify-between border-b border-[#e2e8f0] bg-white px-4 py-3 dark:border-white/10 dark:bg-darkTheme-card">
+            {/* <div>
+              <p className="text-sm font-bold">Live order conversation</p>
+              <p className="mt-0.5 text-[11px] text-[#64748b]">
+                Updates automatically refresh every 15 seconds.
+              </p>
+            </div> */}
+            <span className="inline-flex items-center gap-1.5 rounded-full bg-emerald-50 px-2.5 py-1 text-[10px] font-bold uppercase text-emerald-700 dark:bg-emerald-500/10 dark:text-emerald-300">
+              <span className="h-1.5 w-1.5 rounded-full bg-emerald-500" />
+              Active
+            </span>
+          </div>
+
+          <div className="min-h-[320px] max-h-[430px] space-y-4 overflow-y-auto bg-[#f8fafc] p-4 sm:p-5 dark:bg-white/[0.035]">
+            {loading && !messages.length ? (
+              <p className="text-sm text-[#64748b]">Loading conversation…</p>
+            ) : messages.length ? (
+              messages.map((message) => {
+                const isCustomer =
+                  (message.sender_role_label || "").toLowerCase() === "customer";
+                return (
+                  <div
+                    key={message.id}
+                    className={`flex ${isCustomer ? "justify-end" : "justify-start"}`}
+                  >
+                    <div className="flex max-w-[88%] items-end gap-2 sm:max-w-[76%]">
+                      {!isCustomer && (
+                        <span className="grid h-8 w-8 shrink-0 place-items-center rounded-full bg-[#f7941d] text-xs font-bold text-white">
+                          {(message.sender_role_label || "P").slice(0, 1).toUpperCase()}
+                        </span>
+                      )}
+                      <div
+                        className={`rounded-2xl px-4 py-3 text-sm ${
+                          isCustomer
+                            ? "rounded-br-md bg-[#fff3e8] text-slate-900 ring-1 ring-orange-100 dark:bg-orange-500/10 dark:text-white dark:ring-orange-500/20"
+                            : "rounded-bl-md bg-white text-slate-900 shadow-sm ring-1 ring-slate-100 dark:bg-slate-800 dark:text-white dark:ring-white/5"
+                        }`}
+                      >
+                        <p className="mb-1 text-[10px] font-bold uppercase tracking-wide text-[#64748b]">
+                          {isCustomer ? "You" : message.sender_role_label || "Participant"}
+                        </p>
+                        <p className="whitespace-pre-wrap leading-5">
+                          {message.message}
+                        </p>
+                        {message.created_at && (
+                          <p className="mt-2 text-[10px] text-[#94a3b8]">
+                            {new Date(message.created_at).toLocaleString()}
+                          </p>
+                        )}
+                      </div>
+                    </div>
+                  </div>
+                );
+              })
+            ) : (
+              <div className="grid min-h-[260px] place-items-center text-center">
+                <div>
+                  <MessageSquareText
+                    size={30}
+                    className="mx-auto mb-3 text-[#f7941d]"
+                  />
+                  <p className="text-sm font-semibold">No messages yet</p>
+                  <p className="mt-1 text-xs text-[#64748b]">
+                    Start a conversation about this shipment.
+                  </p>
+                </div>
+              </div>
+            )}
+
+            {error && (
+              <p className="rounded-lg bg-red-50 p-2 text-xs text-red-600">
+                {error}
+              </p>
+            )}
+          </div>
+
+          <div className="border-t border-[#e2e8f0] bg-white p-3 dark:border-white/10 dark:bg-darkTheme-card sm:p-4">
+            <div className="flex items-center gap-2 rounded-xl border border-[#e2e8f0] bg-white p-1.5 focus-within:border-[#f7941d] dark:border-white/10 dark:bg-white/5">
+              <input
+                value={text}
+                onChange={(e) => setText(e.target.value)}
+                onKeyDown={(e) => {
+                  if (e.key === "Enter" && !e.shiftKey) {
+                    e.preventDefault();
+                    void send();
+                  }
+                }}
+                placeholder="Write a message about your order…"
+                className="min-h-11 min-w-0 flex-1 bg-transparent px-3 text-sm outline-none"
+              />
+              <button
+                onClick={() => void send()}
+                disabled={sending || !text.trim()}
+                className="inline-flex h-11 shrink-0 items-center justify-center gap-2 rounded-lg bg-[#f7941d] px-4 text-sm font-bold text-white disabled:opacity-50"
+              >
+                <Send size={17} />
+                <span className="hidden sm:inline">{sending ? "Sending..." : "Send"}</span>
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
+    </div>
+  );
 }
 
 function Card({

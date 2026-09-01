@@ -23,6 +23,7 @@ import { FormEvent, useEffect, useState } from "react";
 import toast from "react-hot-toast";
 import AddressBookSection from "@/components/MyAccount/AddressBookSection";
 import NotificationCenter from "@/components/Notifications/NotificationCenter";
+import CustomerReviews from "@/components/BuyerAccount/CustomerReviews";
 type View =
   | "orders"
   | "payments"
@@ -286,6 +287,8 @@ export default function BuyerModulePage({ view }: { view: View }) {
           />
         ) : view === "notifications" ? (
           <NotificationCenter />
+        ) : view === "reviews" ? (
+          <CustomerReviews />
         ) : (
           <Unavailable view={view} />
         )}
@@ -314,136 +317,98 @@ function Payments({
   onStatusFilter: (value: string) => void;
   onPage: (value: number) => void;
 }) {
-  return (
-    <div>
-      <div className="mb-5 flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
-        <div>
-          <p className="text-sm font-semibold">Payment History</p>
-          <p className="mt-1 text-xs text-[#64748b]">
-            {total} payment record{total === 1 ? "" : "s"}
-          </p>
-        </div>
+  const completed = items.filter((p) => ["completed", "paid", "succeeded", "success"].includes(p.status.toLowerCase())).length;
+  const pending = items.filter((p) => ["pending", "processing", "initiated"].includes(p.status.toLowerCase())).length;
+  const attention = items.filter((p) => ["failed", "cancelled"].includes(p.status.toLowerCase())).length;
 
+  const statusClass = (status: string) => {
+    const value = status.toLowerCase();
+    if (["completed", "paid", "succeeded", "success"].includes(value)) return "bg-emerald-50 text-emerald-700 dark:bg-emerald-500/10 dark:text-emerald-300";
+    if (["failed", "cancelled"].includes(value)) return "bg-red-50 text-red-700 dark:bg-red-500/10 dark:text-red-300";
+    if (value === "refunded") return "bg-violet-50 text-violet-700 dark:bg-violet-500/10 dark:text-violet-300";
+    return "bg-amber-50 text-amber-700 dark:bg-amber-500/10 dark:text-amber-300";
+  };
+
+  return (
+    <div className="space-y-5">
+      <div className="grid gap-3 sm:grid-cols-3">
+        <div className="rounded-2xl border border-[#e2e8f0] bg-[#f8fafc] p-4 dark:border-white/10 dark:bg-white/5">
+          <p className="text-xs font-bold uppercase tracking-wide text-[#64748b]">Visible records</p>
+          <p className="mt-1 text-2xl font-bold">{items.length}</p>
+        </div>
+        <div className="rounded-2xl border border-[#e2e8f0] bg-[#f8fafc] p-4 dark:border-white/10 dark:bg-white/5">
+          <p className="text-xs font-bold uppercase tracking-wide text-[#64748b]">Completed</p>
+          <p className="mt-1 text-2xl font-bold text-emerald-600">{completed}</p>
+        </div>
+        <div className="rounded-2xl border border-[#e2e8f0] bg-[#f8fafc] p-4 dark:border-white/10 dark:bg-white/5">
+          <p className="text-xs font-bold uppercase tracking-wide text-[#64748b]">Needs attention</p>
+          <p className="mt-1 text-2xl font-bold text-red-600">{attention}</p>
+        </div>
+      </div>
+
+      <div className="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
+        <div>
+          <p className="font-semibold">Payment History</p>
+          <p className="mt-1 text-xs text-[#64748b]">{total} payment record{total === 1 ? "" : "s"} · {pending} pending on this page</p>
+        </div>
         <div className="flex flex-col gap-2 sm:flex-row">
-          <input
-            value={search}
-            onChange={(event) => onSearch(event.target.value)}
-            placeholder="Search payment or order..."
-            className="h-10 rounded-xl border border-[#e2e8f0] px-3 text-sm outline-none dark:border-white/10 dark:bg-white/5"
-          />
-          <select
-            value={statusFilter}
-            onChange={(event) => onStatusFilter(event.target.value)}
-            className="h-10 rounded-xl border border-[#e2e8f0] bg-white px-3 text-sm dark:border-white/10 dark:bg-white/5"
-          >
-            <option value="all">All statuses</option>
-            <option value="pending">Pending</option>
-            <option value="processing">Processing</option>
-            <option value="completed">Completed</option>
-            <option value="failed">Failed</option>
-            <option value="cancelled">Cancelled</option>
-            <option value="refunded">Refunded</option>
+          <input value={search} onChange={(e) => onSearch(e.target.value)} placeholder="Search payment or order..." className="h-10 rounded-xl border border-[#e2e8f0] px-3 text-sm outline-none focus:border-[#f7941d] dark:border-white/10 dark:bg-white/5" />
+          <select value={statusFilter} onChange={(e) => onStatusFilter(e.target.value)} className="h-10 rounded-xl border border-[#e2e8f0] bg-white px-3 text-sm dark:border-white/10 dark:bg-darkTheme-card">
+            <option value="all">All statuses</option><option value="pending">Pending</option><option value="processing">Processing</option><option value="completed">Completed</option><option value="failed">Failed</option><option value="cancelled">Cancelled</option><option value="refunded">Refunded</option>
           </select>
         </div>
       </div>
 
       {!items.length ? (
-        <Empty
-          title="No payments found"
-          text="Payment records will appear here after checkout."
-          action="Start Shopping"
-          href="/search"
-        />
+        <Empty title="No payments found" text="Payment records will appear here after checkout." action="Start Shopping" href="/search" />
       ) : (
-        <div className="overflow-x-auto">
-          <table className="w-full min-w-[850px] text-left text-sm">
-            <thead className="bg-[#f8fafc] dark:bg-white/5">
-              <tr>
-                {[
-                  "Reference",
-                  "Order",
-                  "Amount",
-                  "Method",
-                  "Provider",
-                  "Status",
-                  "Paid",
-                  "Date",
-                ].map((x) => (
-                  <th key={x} className="p-3">
-                    {x}
-                  </th>
-                ))}
-              </tr>
-            </thead>
-            <tbody>
-              {items.map((p) => (
-                <tr
-                  key={p.id}
-                  className="border-t border-[#e2e8f0] dark:border-white/10"
-                >
-                  <td className="p-3 font-semibold">
-                    {p.provider_transaction_id || p.id.slice(0, 8)}
-                  </td>
-                  <td className="p-3">
-                    <Link
-                      href={`/account/orders/${p.order_id}`}
-                      className="font-semibold text-[#f7941d]"
-                    >
-                      {p.order_id.slice(0, 8)}
+        <div className="space-y-3">
+          {items.map((p) => {
+            const requiresAction = ["pending", "processing", "initiated", "failed", "cancelled"].includes(p.status.toLowerCase()) && p.method !== "cash_on_delivery";
+            return (
+              <article key={p.id} className="rounded-2xl border border-[#e2e8f0] bg-white p-4 dark:border-white/10 dark:bg-darkTheme-card sm:p-5">
+                <div className="flex flex-col gap-4 sm:flex-row sm:items-start sm:justify-between">
+                  <div className="min-w-0">
+                    <div className="flex flex-wrap items-center gap-2">
+                      <p className="font-bold">{formatCurrency(p.amount, p.currency)}</p>
+                      <span className={`rounded-full px-2.5 py-1 text-xs font-bold capitalize ${statusClass(p.status)}`}>{p.status.replaceAll("_", " ")}</span>
+                    </div>
+                    <p className="mt-2 break-all text-xs text-[#64748b]">Reference: {p.provider_transaction_id || p.id}</p>
+                    <p className="mt-1 text-xs text-[#64748b]">Created {new Date(p.created_at).toLocaleString()}</p>
+                  </div>
+                  <div className="text-sm sm:text-right">
+                    <p className="font-semibold capitalize">{p.method.replaceAll("_", " ")}</p>
+                    <p className="mt-1 text-xs capitalize text-[#64748b]">{(p.provider || "Xerin payment").replaceAll("_", " ")}</p>
+                  </div>
+                </div>
+
+                {p.failure_reason && <div className="mt-4 rounded-xl bg-red-50 p-3 text-sm text-red-700 dark:bg-red-500/10 dark:text-red-300"><b>Payment issue:</b> {p.failure_reason}</div>}
+                {p.method === "cash_on_delivery" && !p.paid_at && <div className="mt-4 rounded-xl bg-amber-50 p-3 text-sm text-amber-800 dark:bg-amber-500/10 dark:text-amber-300">Cash on delivery — payment is collected when your order is delivered.</div>}
+
+                <div className="mt-4 flex flex-wrap items-center gap-2 border-t border-[#e2e8f0] pt-4 dark:border-white/10">
+                  <Link href={`/account/orders/${p.order_id}`} className="inline-flex min-h-10 items-center justify-center rounded-xl bg-[#0f172a] px-4 text-sm font-bold text-white dark:bg-white dark:text-[#0f172a]">
+                    View Order & Tracking
+                  </Link>
+                  {requiresAction && (
+                    <Link href={`/account/orders/${p.order_id}`} className="inline-flex min-h-10 items-center justify-center rounded-xl bg-[#f7941d] px-4 text-sm font-bold text-white">
+                      Review Payment
                     </Link>
-                  </td>
-                  <td className="p-3">
-                    {formatCurrency(p.amount, p.currency)}
-                  </td>
-                  <td className="p-3 capitalize">
-                    {p.method.replaceAll("_", " ")}
-                  </td>
-                  <td className="p-3 capitalize">
-                    {(p.provider || "—").replaceAll("_", " ")}
-                  </td>
-                  <td className="p-3">
-                    <span className="rounded-full bg-slate-100 px-2.5 py-1 text-xs font-semibold capitalize">
-                      {p.status}
-                    </span>
-                  </td>
-                  <td className="p-3">
-                    {p.paid_at
-                      ? new Date(p.paid_at).toLocaleString()
-                      : p.method === "cash_on_delivery"
-                        ? "On delivery"
-                        : "—"}
-                  </td>
-                  <td className="p-3">
-                    {new Date(p.created_at).toLocaleString()}
-                  </td>
-                </tr>
-              ))}
-            </tbody>
-          </table>
+                  )}
+                  <span className="ml-auto text-xs text-[#64748b]">
+                    {p.paid_at ? `Paid ${new Date(p.paid_at).toLocaleString()}` : "Not marked paid"}
+                  </span>
+                </div>
+              </article>
+            );
+          })}
         </div>
       )}
 
-      {totalPages > 1 && (
-        <div className="mt-5 flex items-center justify-end gap-3">
-          <button
-            disabled={page <= 1}
-            onClick={() => onPage(page - 1)}
-            className="rounded-lg border border-[#e2e8f0] px-3 py-2 text-sm font-semibold disabled:opacity-40"
-          >
-            Previous
-          </button>
-          <span className="text-xs text-[#64748b]">
-            Page {page} of {Math.max(totalPages, 1)}
-          </span>
-          <button
-            disabled={page >= totalPages}
-            onClick={() => onPage(page + 1)}
-            className="rounded-lg border border-[#e2e8f0] px-3 py-2 text-sm font-semibold disabled:opacity-40"
-          >
-            Next
-          </button>
-        </div>
-      )}
+      {totalPages > 1 && <div className="flex items-center justify-end gap-3">
+        <button disabled={page <= 1} onClick={() => onPage(page - 1)} className="rounded-lg border border-[#e2e8f0] px-3 py-2 text-sm font-semibold disabled:opacity-40">Previous</button>
+        <span className="text-xs text-[#64748b]">Page {page} of {Math.max(totalPages, 1)}</span>
+        <button disabled={page >= totalPages} onClick={() => onPage(page + 1)} className="rounded-lg border border-[#e2e8f0] px-3 py-2 text-sm font-semibold disabled:opacity-40">Next</button>
+      </div>}
     </div>
   );
 }
