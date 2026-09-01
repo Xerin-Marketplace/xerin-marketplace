@@ -1,17 +1,5 @@
-import type { Metadata } from "next";
-import SellerSignup from "@/components/Auth/SellerSignup";
+import { redirect } from "next/navigation";
 
-export const metadata: Metadata = {
-  title: "Seller Registration | Xerin Market",
-  description: "Create a seller account, submit KYC, and start selling on Xerin Market.",
-};
-
-const SellerRegisterPage = () => {
-  return (
-    <main>
-      <SellerSignup />
-    </main>
-  );
-};
-
-export default SellerRegisterPage;
+export default function SellerRegisterPage() {
+  redirect("/signup");
+}

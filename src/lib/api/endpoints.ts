@@ -10,6 +10,8 @@ export const API_ENDPOINTS = {
     register: "/auth/register",
     registerSeller: "/auth/register-seller",
     registerBroker: "/auth/register-broker",
+    onboardSeller: "/auth/onboard-seller",
+    onboardBroker: "/auth/onboard-broker",
     logout: "/auth/logout",
     refreshToken: "/auth/refresh-token",
     sendOtp: "/auth/send-otp",

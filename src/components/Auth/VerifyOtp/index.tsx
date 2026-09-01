@@ -41,6 +41,7 @@ const VerifyOtp = () => {
     isVerifyingOtp,
     isResendingVerification,
     isVerifyingAccountOtp,
+    setSession,
   } = useAuth();
 
   const router = useRouter();
@@ -184,11 +185,22 @@ const VerifyOtp = () => {
 
     try {
       if (registrationContext && phone) {
-        await verifyOtp({
+        const verification = await verifyOtp({
           phone,
           otp_code: cleanOtp,
           purpose,
         });
+        if (
+          purpose === "register" &&
+          verification &&
+          typeof verification === "object" &&
+          "access_token" in verification
+        ) {
+          setSession(verification as import("@/types/api/auth").AuthTokenResponse);
+          setSuccessMessage("Account verified. Choose how you would like to use Xerin Market...");
+          window.setTimeout(() => router.push("/choose-role"), 500);
+          return;
+        }
       } else {
         if (!cleanIdentifier) {
           setErrorMessage("Enter your registered email address or phone number.");

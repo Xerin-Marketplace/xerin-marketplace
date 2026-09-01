@@ -454,7 +454,7 @@ const SignInPanel = ({ onSwitchTab }: { onSwitchTab: (tab: AuthTab) => void }) =
     event.preventDefault();
 
     if (!email.trim() || !password) {
-      toast.error("Please enter your email and password.");
+      toast.error("Please enter your email/phone number and password.");
       return;
     }
 
@@ -509,19 +509,19 @@ const SignInPanel = ({ onSwitchTab }: { onSwitchTab: (tab: AuthTab) => void }) =
       )}
 
       <div className="mb-4 sm:mb-5">
-        <FieldLabel htmlFor="signin-email">Email</FieldLabel>
+        <FieldLabel htmlFor="signin-email">Email / Phone Number</FieldLabel>
         <div className="relative">
           <span className="absolute inset-y-0 left-0 flex items-center pl-4 text-dark-4 dark:text-darkTheme-secondary-muted">
             <MailIcon />
           </span>
           <TextInput
-            type="email"
+            type="text"
             id="signin-email"
             name="email"
-            placeholder="Enter your email"
+            placeholder="Enter your email or phone number"
             value={email}
             onChange={(event) => setEmail(event.target.value)}
-            autoComplete="email"
+            autoComplete="username"
             disabled={isSubmitting}
             className="pl-11"
           />
@@ -534,7 +534,7 @@ const SignInPanel = ({ onSwitchTab }: { onSwitchTab: (tab: AuthTab) => void }) =
             Password
           </label>
           <Link href="/forgot-password" className="text-sm text-orange hover:underline">
-            Forgot?
+            Forgot Password
           </Link>
         </div>
         <PasswordInput
@@ -550,20 +550,6 @@ const SignInPanel = ({ onSwitchTab }: { onSwitchTab: (tab: AuthTab) => void }) =
         />
       </div>
 
-      <label htmlFor="remember" className="flex items-center gap-2.5 mb-6 cursor-pointer select-none w-fit">
-        <input
-          type="checkbox"
-          id="remember"
-          checked={rememberMe}
-          onChange={(event) => setRememberMe(event.target.checked)}
-          className="peer sr-only"
-        />
-        <span className="flex items-center justify-center w-4.5 h-4.5 rounded border border-gray-3 dark:border-darkTheme-border-color peer-checked:bg-orange peer-checked:border-orange text-white transition-colors">
-          {rememberMe && <CheckIcon />}
-        </span>
-        <span className="px-4 text-sm text-dark-4 dark:text-darkTheme-secondary-muted">Remember me for 30 days</span>
-      </label>
-
       <button
         type="submit"
         disabled={isSubmitting}
@@ -574,9 +560,7 @@ const SignInPanel = ({ onSwitchTab }: { onSwitchTab: (tab: AuthTab) => void }) =
 
       <p className="mt-5 text-center text-sm sm:mt-6">
         <span className="text-dark-4 dark:text-darkTheme-secondary-muted">Don&apos;t have an account? </span>
-        <button type="button" onClick={() => onSwitchTab("signup")} className="font-medium text-orange hover:underline">
-          Sign up
-        </button>
+<Link href="/signup" className="font-medium text-orange hover:underline">Sign Up</Link>
       </p>
     </form>
   );
@@ -647,7 +631,7 @@ const SignUpPanel = ({ onSwitchTab }: { onSwitchTab: (tab: AuthTab) => void }) =
         phone: response.phone || submittedPhone,
         email: response.email || submittedEmail,
         purpose: response.verification_purpose || "register",
-        next: "/signin",
+        next: "/choose-role",
       });
 
       router.push(`/verify-otp?${params.toString()}`);
@@ -737,24 +721,9 @@ const SignUpPanel = ({ onSwitchTab }: { onSwitchTab: (tab: AuthTab) => void }) =
 
       <p className="text-center mt-6 text-sm">
         <span className="text-dark-4 dark:text-darkTheme-secondary-muted">Already have an account? </span>
-        <button type="button" onClick={() => onSwitchTab("signin")} className="font-medium text-orange hover:underline">
-          Sign in
-        </button>
+<Link href="/signin" className="font-medium text-orange hover:underline">Sign In</Link>
       </p>
 
-      <p className="text-center mt-2 text-sm">
-        <span className="text-dark-4 dark:text-darkTheme-secondary-muted">Want to sell on Xerin? </span>
-        <button type="button" onClick={() => onSwitchTab("seller")} className="font-medium text-orange hover:underline">
-          Register as Seller
-        </button>
-      </p>
-
-      <p className="text-center mt-2 text-sm">
-        <span className="text-dark-4 dark:text-darkTheme-secondary-muted">Want to promote and earn? </span>
-        <button type="button" onClick={() => onSwitchTab("broker")} className="font-medium text-orange hover:underline">
-          Register as Broker
-        </button>
-      </p>
     </form>
   );
 };
@@ -1548,20 +1517,16 @@ const AuthPage = ({ initialTab = "signup" }: { initialTab?: AuthTab }) => {
   const searchParams = useSearchParams();
   const requestedTab = searchParams.get("tab");
   const resolvedInitialTab: AuthTab =
-    requestedTab === "signin" || requestedTab === "signup" || requestedTab === "seller" || requestedTab === "broker"
-      ? requestedTab
-      : initialTab;
+    requestedTab === "signup" ? "signup" : initialTab === "signup" ? "signup" : "signin";
   const [activeTab, setActiveTab] = useState<AuthTab>(resolvedInitialTab);
 
   useEffect(() => {
-    if (requestedTab === "signin" || requestedTab === "signup" || requestedTab === "seller" || requestedTab === "broker") {
-      setActiveTab(requestedTab);
-    }
+    if (requestedTab === "signup") setActiveTab("signup");
   }, [requestedTab]);
 
   const headings: Record<AuthTab, { title: string; subtitle: string }> = {
     signin: { title: "Welcome back", subtitle: "Sign in to continue to XerinMarket" },
-    signup: { title: "Create an account", subtitle: "Join XerinMarket to start buying" },
+    signup: { title: "Create an account", subtitle: "Create your Xerin Market account" },
     seller: { title: "Become a seller", subtitle: "Tell us about your business to get started" },
     broker: { title: "Become a broker", subtitle: "Register, verify your identity, and start earning through XerinMarket" },
   };
@@ -1594,31 +1559,8 @@ const AuthPage = ({ initialTab = "signup" }: { initialTab?: AuthTab }) => {
               <p className="text-sm text-dark-4 dark:text-darkTheme-secondary-muted">{headings[activeTab].subtitle}</p>
             </div>
 
-            {/* Tab switcher */}
-            <div className="mb-5 grid grid-cols-2 sm:grid-cols-4 gap-1 rounded-xl border border-gray-3 bg-gray-1 p-1 dark:border-darkTheme-border-color dark:bg-darkTheme-secondary-bg sm:mb-6">
-              {AUTH_TABS.map((tab) => {
-                const isActive = tab.key === activeTab;
-                return (
-                  <button
-                    key={tab.key}
-                    type="button"
-                    onClick={() => setActiveTab(tab.key)}
-                    className={`min-h-10 rounded-lg px-2 text-center text-sm font-semibold transition-colors ${
-                      isActive
-                        ? "bg-white dark:bg-darkTheme-card text-dark dark:text-white shadow-sm"
-                        : "text-dark-4 dark:text-darkTheme-secondary-muted hover:text-dark dark:hover:text-white"
-                    }`}
-                  >
-                    {tab.label}
-                  </button>
-                );
-              })}
-            </div>
-
             {activeTab === "signin" && <SignInPanel onSwitchTab={setActiveTab} />}
             {activeTab === "signup" && <SignUpPanel onSwitchTab={setActiveTab} />}
-            {activeTab === "seller" && <SellerPanel onSwitchTab={setActiveTab} />}
-            {activeTab === "broker" && <BrokerPanel onSwitchTab={setActiveTab} />}
           </div>
         </div>
 
@@ -1685,6 +1627,7 @@ const AuthPage = ({ initialTab = "signup" }: { initialTab?: AuthTab }) => {
   );
 };
 
+export const SignupAuth = () => <AuthPage initialTab="signup" />;
 const Signin = () => <AuthPage initialTab="signin" />;
 
 export default Signin;

@@ -17,6 +17,9 @@ import type {
   ResendVerificationRequest,
   VerifyAccountOtpRequest,
   ChangePasswordRequest,
+  SellerOnboardingRequest,
+  BrokerOnboardingRequest,
+  RoleOnboardingResponse,
 } from "@/types/api/auth";
 import type { ApiMessageResponse } from "@/types/api/common";
 
@@ -40,6 +43,17 @@ export const registerSeller = async (payload: RegisterSellerRequest): Promise<Se
   return res.data;
 };
 
+
+export const onboardSeller = async (payload: SellerOnboardingRequest): Promise<RoleOnboardingResponse> => {
+  const res = await axiosInstance.post<RoleOnboardingResponse>(API_ENDPOINTS.auth.onboardSeller, payload);
+  return res.data;
+};
+
+export const onboardBroker = async (payload: BrokerOnboardingRequest): Promise<RoleOnboardingResponse> => {
+  const res = await axiosInstance.post<RoleOnboardingResponse>(API_ENDPOINTS.auth.onboardBroker, payload);
+  return res.data;
+};
+
 export const logout = async (payload: RefreshTokenRequest): Promise<ApiMessageResponse> => {
   const res = await axiosInstance.post<ApiMessageResponse>(API_ENDPOINTS.auth.logout, payload);
   return res.data;
@@ -50,8 +64,8 @@ export const sendOtp = async (payload: SendOtpRequest): Promise<ApiMessageRespon
   return res.data;
 };
 
-export const verifyOtp = async (payload: VerifyOtpRequest): Promise<ApiMessageResponse> => {
-  const res = await axiosInstance.post<ApiMessageResponse>(API_ENDPOINTS.auth.verifyOtp, payload);
+export const verifyOtp = async (payload: VerifyOtpRequest): Promise<ApiMessageResponse | AuthTokenResponse> => {
+  const res = await axiosInstance.post<ApiMessageResponse | AuthTokenResponse>(API_ENDPOINTS.auth.verifyOtp, payload);
   return res.data;
 };
 
@@ -101,6 +115,8 @@ export const authApi = {
   registerBuyer,
   registerSeller,
   registerBroker,
+  onboardSeller,
+  onboardBroker,
   logout,
   sendOtp,
   verifyOtp,
