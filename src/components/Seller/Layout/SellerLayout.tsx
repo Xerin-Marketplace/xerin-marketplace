@@ -188,30 +188,28 @@ export default function SellerLayout({
         ? "Seller Profile"
         : pathname.includes("/account")
           ? "Account Settings"
-          : pathname.includes("/store")
-            ? "My Stores"
-            : pathname.includes("/")
-              ? "Home"
-              : pathname.includes("/products")
-                ? "Products"
-                : pathname.includes("/inventory")
-                  ? "Inventory"
-                  : pathname.includes("/documents")
-                    ? "Business Documents"
-                    : pathname.includes("/kyc")
-                      ? "KYC Verification"
-                    : pathname.includes("/orders/")
-                      ? "Order Details"
-                      : pathname.includes("/orders")
-                        ? "Orders"
-                        : pathname.includes("/returns")
-                          ? "Returns"
-                          : pathname.includes("/cancellations")
-                            ? "Cancellations"
-                            : pathname.includes("/promotions")
-                              ? "Promotions"
-                              : pathname.includes("/reviews")
-                                ? "Reviews"
+          : pathname.includes("/products")
+            ? "Products"
+            : pathname.includes("/inventory")
+              ? "Inventory"
+              : pathname.includes("/documents")
+                ? "Business Documents"
+                : pathname.includes("/kyc")
+                  ? "KYC Verification"
+                  : pathname.includes("/orders/")
+                    ? "Order Details"
+                    : pathname.includes("/orders")
+                      ? "Orders"
+                      : pathname.includes("/returns")
+                        ? "Returns"
+                        : pathname.includes("/cancellations")
+                          ? "Cancellations"
+                          : pathname.includes("/promotions")
+                            ? "Promotions"
+                            : pathname.includes("/reviews")
+                              ? "Reviews"
+                              : pathname.includes("/questions")
+                                ? "Product Q&A"
                                 : pathname.includes("/messages")
                                   ? "Messages"
                                   : pathname.includes("/payouts")
@@ -219,8 +217,14 @@ export default function SellerLayout({
                                     : pathname.includes("/earnings")
                                       ? "Wallet & Earnings"
                                       : pathname.includes("/transactions")
-                                      ? "Transactions"
-                                      : "Seller Dashboard";
+                                        ? "Transactions"
+                                        : pathname.includes("/pickup-locations")
+                                          ? "Pickup Locations"
+                                          : pathname.includes("/store")
+                                            ? "My Stores"
+                                            : pathname === "/seller/dashboard"
+                                              ? "Dashboard"
+                                              : "Seller Center";
   const crumbs = useMemo(
     () =>
       pathname.includes("/account/")
@@ -474,7 +478,7 @@ export default function SellerLayout({
                     {isApprovedSeller && (
                       <>
                         <Drop href="/seller/store" icon={Store} label="My Stores" />
-                        <Drop href="/shop-with-sidebar" icon={Store} label="View storefront" />
+                        <Drop href="/seller/store" icon={Store} label="Manage storefronts" />
                       </>
                     )}
                     <Drop href="/seller/account/security" icon={ShieldCheck} label="Security" />

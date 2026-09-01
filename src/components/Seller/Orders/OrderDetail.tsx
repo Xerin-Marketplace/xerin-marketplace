@@ -8,6 +8,10 @@ import {
   CheckCircle2,
   ImagePlus,
   ImageIcon,
+  Eye,
+  Layers3,
+  ShoppingBag,
+  Sparkles,
   MapPin,
   Ruler,
   Scale,
@@ -23,8 +27,10 @@ import {
 } from "lucide-react";
 import toast from "react-hot-toast";
 
+import { API_BASE_URL } from "@/lib/api/endpoints";
 import { sellerOrdersApi } from "@/lib/api/endpoints/seller-orders";
-import { getMyProductImages } from "@/lib/api/endpoints/products";
+import { getMyProductImages, getProduct, getProductVariants } from "@/lib/api/endpoints/products";
+import type { Product, ProductVariant } from "@/types/api/product";
 import type {
   SellerOrder,
   SellerOrderMessage,
@@ -41,6 +47,67 @@ const money = (value: number | string, currency = "TZS") =>
     maximumFractionDigits: 0,
   }).format(Number(value || 0));
 
+
+const resolveProductImageUrl = (imageUrl?: string | null) => {
+  if (!imageUrl) return "";
+
+  if (
+    imageUrl.startsWith("data:") ||
+    imageUrl.startsWith("blob:")
+  ) {
+    return imageUrl;
+  }
+
+  // When using the same-origin Next.js API proxy, mirror the existing
+  // storefront behavior for backend product uploads.
+  if (API_BASE_URL.startsWith("/")) {
+    if (imageUrl.startsWith("/uploads/")) {
+      return imageUrl.replace(/^\/uploads\//, "/backend-uploads/");
+    }
+
+    if (imageUrl.startsWith("uploads/")) {
+      return `/backend-uploads/${imageUrl.replace(/^uploads\//, "")}`;
+    }
+
+    return imageUrl;
+  }
+
+  try {
+    const apiUrl = new URL(API_BASE_URL);
+    const apiOrigin = apiUrl.origin;
+
+    // Product images are served from the API host root, not /api/v1.
+    if (imageUrl.startsWith("/uploads/")) {
+      return `${apiOrigin}${imageUrl}`;
+    }
+
+    if (imageUrl.startsWith("uploads/")) {
+      return `${apiOrigin}/${imageUrl}`;
+    }
+
+    // Repair older absolute URLs that contain /api/v1/uploads/.
+    if (
+      imageUrl.startsWith("http://") ||
+      imageUrl.startsWith("https://")
+    ) {
+      const absolute = new URL(imageUrl);
+
+      if (absolute.pathname.startsWith("/api/v1/uploads/")) {
+        absolute.pathname = absolute.pathname.replace(
+          /^\/api\/v1\/uploads\//,
+          "/uploads/",
+        );
+      }
+
+      return absolute.toString();
+    }
+
+    return `${apiOrigin}/${imageUrl.replace(/^\//, "")}`;
+  } catch {
+    return imageUrl;
+  }
+};
+
 const errorMessage = (error: unknown) => {
   const candidate = error as {
     response?: { data?: { detail?: string | { message?: string; blockers?: string[] } } };
@@ -53,6 +120,9 @@ const errorMessage = (error: unknown) => {
 export default function SellerOrderDetail({ orderId }: { orderId: string }) {
   const [order, setOrder] = useState<SellerOrder | null>(null);
   const [productImages, setProductImages] = useState<Record<string, string>>({});
+  const [productDetails, setProductDetails] = useState<Record<string, Product>>({});
+  const [productVariants, setProductVariants] = useState<Record<string, ProductVariant[]>>({});
+  const [productDetailItemId, setProductDetailItemId] = useState<string | null>(null);
   const [loading, setLoading] = useState(true);
   const [busy, setBusy] = useState(false);
   const [notes, setNotes] = useState("");
@@ -90,18 +160,61 @@ export default function SellerOrderDetail({ orderId }: { orderId: string }) {
 
   const loadOrderImages = async (value: SellerOrder) => {
     const ids = Array.from(new Set(value.items.map((item) => item.product_id)));
-    const entries = await Promise.all(
+
+    const rows = await Promise.all(
       ids.map(async (productId) => {
+        let product: Product | null = null;
+        let variants: ProductVariant[] = [];
+        let imageUrl = "";
+
         try {
-          const images = await getMyProductImages(productId);
-          const primary = images.find((image) => image.is_primary) || images[0];
-          return [productId, primary?.image_url || primary?.thumbnail_url || ""] as const;
+          product = await getProduct(productId);
+          const primary =
+            product.images?.find((image) => image.is_primary) ||
+            product.images?.[0];
+          imageUrl = resolveProductImageUrl(
+            primary?.image_url || primary?.thumbnail_url || "",
+          );
         } catch {
-          return [productId, ""] as const;
+          // The seller-owned image endpoint below is the fallback source.
         }
+
+        try {
+          const sellerImages = await getMyProductImages(productId);
+          const primary =
+            sellerImages.find((image) => image.is_primary) || sellerImages[0];
+          imageUrl =
+            imageUrl ||
+            resolveProductImageUrl(
+              primary?.image_url || primary?.thumbnail_url || "",
+            );
+        } catch {
+          // Keep the public product image if available.
+        }
+
+        try {
+          variants = await getProductVariants(productId);
+        } catch {
+          variants = [];
+        }
+
+        return { productId, product, variants, imageUrl };
       }),
     );
-    setProductImages(Object.fromEntries(entries));
+
+    setProductImages(
+      Object.fromEntries(rows.map((row) => [row.productId, row.imageUrl])),
+    );
+    setProductDetails(
+      Object.fromEntries(
+        rows
+          .filter((row) => row.product)
+          .map((row) => [row.productId, row.product as Product]),
+      ),
+    );
+    setProductVariants(
+      Object.fromEntries(rows.map((row) => [row.productId, row.variants])),
+    );
   };
 
   const load = async () => {
@@ -319,27 +432,6 @@ export default function SellerOrderDetail({ orderId }: { orderId: string }) {
     }
   };
 
-  const dispatch = async () => {
-    const carrier = prompt(
-      "Carrier / logistics company name:",
-      order?.shipping_carrier || "",
-    );
-    if (!carrier) return;
-
-    const tracking = prompt("Tracking number:");
-    if (!tracking) return;
-
-    await run(
-      () =>
-        sellerOrdersApi.dispatch(orderId, {
-          carrier_name: carrier,
-          tracking_number: tracking,
-          notes: notes || null,
-        }),
-      "Order dispatched",
-    );
-  };
-
   const cancel = async () => {
     const reason = prompt("Reason for cancellation request:");
     if (!reason) return;
@@ -407,6 +499,17 @@ export default function SellerOrderDetail({ orderId }: { orderId: string }) {
     [messages],
   );
 
+  const productDetailItem =
+    order?.items.find((item) => item.id === productDetailItemId) || null;
+  const productDetailProduct = productDetailItem
+    ? productDetails[productDetailItem.product_id]
+    : undefined;
+  const productDetailVariant = productDetailItem
+    ? (productVariants[productDetailItem.product_id] || []).find(
+        (variant) => variant.id === productDetailItem.variant_id,
+      )
+    : undefined;
+
   if (loading) {
     return (
       <div className="p-14 text-center text-slate-500">
@@ -473,46 +576,167 @@ export default function SellerOrderDetail({ orderId }: { orderId: string }) {
 
       <div className="grid gap-5 xl:grid-cols-[1.4fr_.8fr]">
         <div className="space-y-5">
-          <section className="rounded-2xl border bg-white p-5 shadow-sm dark:border-white/10 dark:bg-[#1f2937]">
-            <div className="flex flex-col gap-2 sm:flex-row sm:items-end sm:justify-between">
-              <div>
-                <p className="text-[10px] font-bold uppercase tracking-[.14em] text-[#f7941d]">Paid product review</p>
-                <h2 className="mt-1 text-lg font-bold text-slate-950 dark:text-white">Items to fulfil</h2>
-                <p className="mt-1 text-xs leading-5 text-slate-400">Check the image, variant and quantity before accepting and packaging this order.</p>
-              </div>
-              <span className="rounded-full bg-slate-100 px-3 py-1.5 text-xs font-semibold text-slate-600 dark:bg-white/5 dark:text-white/60">
-                {order.item_count} unit{order.item_count === 1 ? "" : "s"}
-              </span>
-            </div>
-
-            <div className="mt-4 space-y-3">
-              {order.items.map((item) => (
-                <div
-                  key={item.id}
-                  className="flex flex-col gap-4 rounded-2xl border border-slate-200 bg-slate-50/60 p-4 sm:flex-row sm:items-center sm:justify-between dark:border-white/10 dark:bg-white/[0.025]"
-                >
-                  <div className="flex min-w-0 items-center gap-4">
-                    <OrderProductImage src={productImages[item.product_id]} alt={item.product_name} />
-                    <div className="min-w-0">
-                      <p className="truncate text-base font-bold text-slate-950 dark:text-white">{item.product_name}</p>
-                      <div className="mt-1 flex flex-wrap gap-2 text-xs">
-                        <span className="rounded-lg bg-white px-2 py-1 font-semibold text-slate-600 shadow-sm dark:bg-white/5 dark:text-white/60">
-                          Variant: {item.variant_name || "Standard"}
+          <section className="overflow-hidden rounded-3xl border border-slate-200 bg-white shadow-[0_18px_50px_rgba(15,23,42,0.07)] dark:border-white/10 dark:bg-[#1f2937]">
+            <div className="border-b border-orange-100 bg-gradient-to-r from-[#fff7ed] via-white to-[#fffaf5] px-5 py-5 dark:border-orange-500/20 dark:from-orange-500/10 dark:via-[#1f2937] dark:to-[#1f2937] sm:px-6">
+              <div className="flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
+                <div className="flex items-start gap-3">
+                  <span className="grid h-12 w-12 shrink-0 place-items-center rounded-2xl bg-[#f7941d] text-white shadow-[0_8px_20px_rgba(247,148,29,.25)]">
+                    <ShoppingBag size={22} />
+                  </span>
+                  <div>
+                    <div className="flex flex-wrap items-center gap-2">
+                      <p className="text-[10px] font-extrabold uppercase tracking-[.16em] text-[#f7941d]">
+                        Paid product review
+                      </p>
+                      {order.order_status === "paid" && (
+                        <span className="rounded-full bg-emerald-100 px-2.5 py-1 text-[9px] font-extrabold uppercase tracking-wide text-emerald-700">
+                          Payment verified
                         </span>
-                        <span className="rounded-lg bg-orange-50 px-2 py-1 font-bold text-orange-700">
-                          Qty {item.quantity}
-                        </span>
-                      </div>
-                      <p className="mt-2 text-xs text-slate-400">Unit price: {money(item.unit_price, order.currency)}</p>
+                      )}
                     </div>
-                  </div>
-
-                  <div className="shrink-0 text-left sm:text-right">
-                    <p className="text-[10px] font-bold uppercase tracking-wide text-slate-400">Line total</p>
-                    <p className="mt-1 text-lg font-bold text-slate-950 dark:text-white">{money(item.total_price, order.currency)}</p>
+                    <h2 className="mt-1 text-xl font-extrabold text-slate-950 dark:text-white">
+                      Products the customer bought
+                    </h2>
+                    <p className="mt-1 max-w-2xl text-xs leading-5 text-slate-500 dark:text-white/55">
+                      Verify the exact product, selected variant and quantity before accepting, packaging or handing the order to logistics.
+                    </p>
                   </div>
                 </div>
-              ))}
+
+                <div className="flex items-center gap-2 rounded-2xl border border-orange-100 bg-white px-4 py-3 shadow-sm dark:border-white/10 dark:bg-white/5">
+                  <Layers3 size={17} className="text-[#f7941d]" />
+                  <div>
+                    <p className="text-[9px] font-bold uppercase tracking-wide text-slate-400">Total units</p>
+                    <p className="text-base font-extrabold text-slate-900 dark:text-white">
+                      {order.item_count}
+                    </p>
+                  </div>
+                </div>
+              </div>
+            </div>
+
+            <div className="space-y-4 p-5 sm:p-6">
+              {order.items.map((item) => {
+                const product = productDetails[item.product_id];
+                const variant = (productVariants[item.product_id] || []).find(
+                  (row) => row.id === item.variant_id,
+                );
+                const attributes = variant?.attributes
+                  ? Object.entries(variant.attributes).filter(
+                      ([, value]) => value !== null && value !== undefined && String(value).trim() !== "",
+                    )
+                  : [];
+
+                return (
+                  <article
+                    key={item.id}
+                    className="group overflow-hidden rounded-3xl border border-slate-200 bg-gradient-to-br from-white via-white to-slate-50 transition hover:border-orange-200 hover:shadow-[0_16px_38px_rgba(15,23,42,.08)] dark:border-white/10 dark:from-white/[0.035] dark:via-white/[0.02] dark:to-transparent"
+                  >
+                    <div className="grid min-w-0 gap-0 md:grid-cols-[190px_minmax(0,1fr)]">
+                      <div className="relative min-h-[190px] border-b border-slate-200 bg-[#f8fafc] p-4 dark:border-white/10 dark:bg-black/10 md:border-b-0 md:border-r">
+                        <OrderProductImage
+                          src={productImages[item.product_id]}
+                          alt={item.product_name}
+                          large
+                        />
+                        <span className="absolute left-5 top-5 rounded-full bg-white/95 px-2.5 py-1 text-[9px] font-extrabold uppercase tracking-wide text-emerald-700 shadow-sm backdrop-blur dark:bg-slate-900/90">
+                          Paid item
+                        </span>
+                      </div>
+
+                      <div className="min-w-0 p-5">
+                        <div className="flex flex-col gap-4 xl:flex-row xl:items-start xl:justify-between">
+                          <div className="min-w-0">
+                            <p className="text-[10px] font-bold uppercase tracking-[.14em] text-slate-400">
+                              Customer selected
+                            </p>
+                            <h3 className="mt-1 text-xl font-extrabold leading-tight text-slate-950 dark:text-white">
+                              {item.product_name}
+                            </h3>
+
+                            <div className="mt-3 flex flex-wrap gap-2">
+                              <span className="inline-flex items-center gap-1.5 rounded-xl bg-[#fff4e8] px-3 py-2 text-xs font-bold text-[#c66c0b] dark:bg-orange-500/10 dark:text-orange-300">
+                                <Sparkles size={13} />
+                                {item.variant_name || variant?.variant_name || "Standard"}
+                              </span>
+                              <span className="rounded-xl bg-slate-100 px-3 py-2 text-xs font-bold text-slate-700 dark:bg-white/5 dark:text-white/70">
+                                Qty {item.quantity}
+                              </span>
+                              {(variant?.sku || product?.sku) && (
+                                <span className="rounded-xl border border-slate-200 px-3 py-2 text-xs font-semibold text-slate-500 dark:border-white/10 dark:text-white/50">
+                                  SKU {variant?.sku || product?.sku}
+                                </span>
+                              )}
+                            </div>
+
+                            {attributes.length > 0 && (
+                              <div className="mt-3 flex flex-wrap gap-2">
+                                {attributes.slice(0, 4).map(([key, value]) => (
+                                  <span
+                                    key={key}
+                                    className="rounded-lg border border-blue-100 bg-blue-50/70 px-2.5 py-1.5 text-[11px] font-semibold text-blue-700 dark:border-blue-500/20 dark:bg-blue-500/10 dark:text-blue-300"
+                                  >
+                                    {prettyLabel(key)}: {formatAttributeValue(value)}
+                                  </span>
+                                ))}
+                              </div>
+                            )}
+
+                            <p className="mt-4 line-clamp-2 max-w-2xl text-xs leading-5 text-slate-500 dark:text-white/50">
+                              {product?.description ||
+                                "Open Product Details to review the complete product listing and selected configuration before packing."}
+                            </p>
+                          </div>
+
+                          <div className="grid shrink-0 grid-cols-2 gap-2 xl:w-[250px]">
+                            <div className="rounded-2xl bg-slate-50 p-3 dark:bg-white/5">
+                              <p className="text-[9px] font-bold uppercase tracking-wide text-slate-400">
+                                Unit price
+                              </p>
+                              <p className="mt-1 text-sm font-extrabold text-slate-900 dark:text-white">
+                                {money(item.unit_price, order.currency)}
+                              </p>
+                            </div>
+                            <div className="rounded-2xl bg-[#fff7ed] p-3 dark:bg-orange-500/10">
+                              <p className="text-[9px] font-bold uppercase tracking-wide text-[#d97706]">
+                                Line total
+                              </p>
+                              <p className="mt-1 text-sm font-extrabold text-[#c66c0b] dark:text-orange-300">
+                                {money(item.total_price, order.currency)}
+                              </p>
+                            </div>
+                          </div>
+                        </div>
+
+                        <div className="mt-5 flex flex-wrap items-center gap-2 border-t border-slate-100 pt-4 dark:border-white/10">
+                          <button
+                            type="button"
+                            onClick={() => {
+                              setProductDetailItemId(item.id);
+                            }}
+                            className="inline-flex min-h-11 items-center justify-center gap-2 rounded-xl bg-slate-950 px-4 text-sm font-bold text-black shadow-sm transition hover:bg-[#f7941d] dark:bg-white dark:text-slate-950 dark:hover:bg-[#f7941d] dark:hover:text-white"
+                          >
+                            <Eye size={17} />
+                            View Product Details
+                          </button>
+
+                          <Link
+                            href={`/products/${item.product_id}`}
+                            target="_blank"
+                            className="inline-flex min-h-11 items-center justify-center rounded-xl border border-slate-200 px-4 text-sm font-semibold text-slate-600 transition hover:border-orange-200 hover:text-[#f7941d] dark:border-white/10 dark:text-white/60"
+                          >
+                            Open marketplace listing
+                          </Link>
+
+                          <span className="ml-auto hidden text-[11px] font-medium text-slate-400 lg:inline">
+                            Verify variant before packaging
+                          </span>
+                        </div>
+                      </div>
+                    </div>
+                  </article>
+                );
+              })}
             </div>
           </section>
 
@@ -535,18 +759,23 @@ export default function SellerOrderDetail({ orderId }: { orderId: string }) {
             </> : null}
           </section>
 
-          <section className="rounded-2xl border bg-white p-5 dark:border-white/10 dark:bg-[#1f2937]">
-            <div className="flex flex-col gap-3 sm:flex-row sm:items-start sm:justify-between">
-              <div>
-                <h2 className="flex items-center gap-2 font-bold dark:text-white">
-                  <PackageOpen size={18} />
-                  Packaging & Ready for Pickup
-                </h2>
-                <p className="mt-1 text-xs leading-5 text-slate-400">
-                  Record package weight, dimensions and packaging evidence before
-                  marking this seller order Ready to Ship.
-                </p>
-              </div>
+          <section className="overflow-hidden rounded-3xl border border-slate-200 bg-white shadow-[0_18px_45px_rgba(15,23,42,.055)] dark:border-white/10 dark:bg-[#1f2937]">
+            <div className="border-b border-slate-100 bg-gradient-to-r from-slate-950 via-slate-900 to-[#2b1b0d] p-5 text-white dark:border-white/10 sm:p-6">
+              <div className="flex flex-col gap-3 sm:flex-row sm:items-start sm:justify-between">
+                <div className="flex items-start gap-3">
+                  <span className="grid h-11 w-11 shrink-0 place-items-center rounded-2xl bg-[#f7941d] text-white shadow-lg shadow-orange-950/20">
+                    <PackageOpen size={21} />
+                  </span>
+                  <div>
+                    <p className="text-[9px] font-extrabold uppercase tracking-[.18em] text-orange-300">Fulfilment workspace</p>
+                    <h2 className="mt-1 text-lg font-extrabold">
+                      Packaging & Ready for Pickup
+                    </h2>
+                    <p className="mt-1 max-w-2xl text-xs leading-5 text-white/60">
+                      Record the physical package details and evidence that logistics will use during pickup and handover.
+                    </p>
+                  </div>
+                </div>
 
               {!["shipped", "delivered", "cancelled"].includes(status) && (
                 <button
@@ -559,8 +788,10 @@ export default function SellerOrderDetail({ orderId }: { orderId: string }) {
                   {packageInfo ? "Edit Package" : "Prepare Package"}
                 </button>
               )}
+              </div>
             </div>
 
+            <div className="p-5 sm:p-6">
             {packageLoading ? (
               <div className="mt-5 rounded-xl border border-dashed p-7 text-center text-sm text-slate-500 dark:border-white/10">
                 <RefreshCw size={18} className="mx-auto animate-spin" />
@@ -689,6 +920,7 @@ export default function SellerOrderDetail({ orderId }: { orderId: string }) {
                 </p>
               </div>
             )}
+            </div>
           </section>
 
           <section className="rounded-2xl border bg-white p-5 dark:border-white/10 dark:bg-[#1f2937]">
@@ -756,12 +988,12 @@ export default function SellerOrderDetail({ orderId }: { orderId: string }) {
               )}
 
               {status === "ready_to_ship" && (
-                <Action
-                  icon={Truck}
-                  label="Dispatch"
-                  busy={busy}
-                  onClick={dispatch}
-                />
+                <div className="inline-flex max-w-xl items-start gap-2 rounded-xl border border-orange-200 bg-orange-50 px-4 py-3 text-xs leading-5 text-orange-900 dark:border-orange-500/30 dark:bg-orange-500/10 dark:text-orange-200">
+                  <Truck size={17} className="mt-0.5 shrink-0" />
+                  <span>
+                    <b>Ready for logistics pickup.</b> Do not dispatch this order manually. The assigned logistics company will update shipment movement after physical handover and pickup proof are completed.
+                  </span>
+                </div>
               )}
 
               {![
@@ -1041,6 +1273,138 @@ export default function SellerOrderDetail({ orderId }: { orderId: string }) {
           )}
         </div>
       </div>
+
+      {productDetailItem && (
+        <div className="fixed inset-0 z-[145] flex items-center justify-center bg-slate-950/70 p-3 backdrop-blur-sm sm:p-5">
+          <div className="max-h-[94vh] w-full max-w-5xl overflow-hidden rounded-3xl bg-white shadow-2xl dark:bg-[#1f2937]">
+            <div className="flex items-center justify-between border-b border-slate-200 px-5 py-4 dark:border-white/10 sm:px-6">
+              <div>
+                <p className="text-[9px] font-extrabold uppercase tracking-[.16em] text-[#f7941d]">
+                  Paid order product
+                </p>
+                <h2 className="mt-1 text-xl font-extrabold text-slate-950 dark:text-white">
+                  {productDetailItem.product_name}
+                </h2>
+              </div>
+              <button
+                type="button"
+                onClick={() => setProductDetailItemId(null)}
+                className="grid h-10 w-10 place-items-center rounded-xl border border-slate-200 text-slate-500 transition hover:bg-slate-50 dark:border-white/10 dark:hover:bg-white/5"
+                aria-label="Close product details"
+              >
+                <XCircle size={18} />
+              </button>
+            </div>
+
+            <div className="max-h-[calc(94vh-78px)] overflow-y-auto p-5 sm:p-6">
+              <div className="grid gap-6 lg:grid-cols-[360px_minmax(0,1fr)]">
+                <div>
+                  <div className="overflow-hidden rounded-3xl border border-slate-200 bg-[#f8fafc] p-4 dark:border-white/10 dark:bg-black/10">
+                    <OrderProductImage
+                      src={productImages[productDetailItem.product_id]}
+                      alt={productDetailItem.product_name}
+                      modal
+                    />
+                  </div>
+
+                  <div className="mt-3 grid grid-cols-2 gap-3">
+                    <DetailMetric
+                      label="Quantity"
+                      value={String(productDetailItem.quantity)}
+                    />
+                    <DetailMetric
+                      label="Line total"
+                      value={money(productDetailItem.total_price, order.currency)}
+                      orange
+                    />
+                  </div>
+                </div>
+
+                <div className="min-w-0">
+                  <div className="rounded-2xl border border-orange-100 bg-[#fff8f1] p-4 dark:border-orange-500/20 dark:bg-orange-500/10">
+                    <p className="text-[10px] font-bold uppercase tracking-wide text-[#d97706]">
+                      Exact configuration customer purchased
+                    </p>
+                    <p className="mt-2 text-lg font-extrabold text-slate-950 dark:text-white">
+                      {productDetailItem.variant_name ||
+                        productDetailVariant?.variant_name ||
+                        "Standard"}
+                    </p>
+
+                    {productDetailVariant?.attributes &&
+                      Object.keys(productDetailVariant.attributes).length > 0 && (
+                        <div className="mt-3 grid gap-2 sm:grid-cols-2">
+                          {Object.entries(productDetailVariant.attributes).map(
+                            ([key, value]) => (
+                              <div
+                                key={key}
+                                className="rounded-xl border border-orange-100 bg-white/80 px-3 py-2.5 dark:border-orange-500/20 dark:bg-white/5"
+                              >
+                                <p className="text-[9px] font-bold uppercase tracking-wide text-slate-400">
+                                  {prettyLabel(key)}
+                                </p>
+                                <p className="mt-1 text-sm font-bold text-slate-800 dark:text-white">
+                                  {formatAttributeValue(value)}
+                                </p>
+                              </div>
+                            ),
+                          )}
+                        </div>
+                      )}
+                  </div>
+
+                  <div className="mt-4 grid gap-3 sm:grid-cols-3">
+                    <DetailMetric
+                      label="Product SKU"
+                      value={
+                        productDetailVariant?.sku ||
+                        productDetailProduct?.sku ||
+                        "Not available"
+                      }
+                    />
+                    <DetailMetric
+                      label="Unit price"
+                      value={money(productDetailItem.unit_price, order.currency)}
+                    />
+                    <DetailMetric
+                      label="Store"
+                      value={order.store_name || "Seller store"}
+                    />
+                  </div>
+
+                  <div className="mt-4 rounded-2xl border border-slate-200 p-4 dark:border-white/10">
+                    <p className="text-[10px] font-bold uppercase tracking-wide text-slate-400">
+                      Product description
+                    </p>
+                    <p className="mt-2 whitespace-pre-wrap text-sm leading-6 text-slate-600 dark:text-white/65">
+                      {productDetailProduct?.description ||
+                        "No product description was returned by the product endpoint."}
+                    </p>
+                  </div>
+
+                  <div className="mt-5 flex flex-wrap gap-2">
+                    <Link
+                      href={`/products/${productDetailItem.product_id}`}
+                      target="_blank"
+                      className="inline-flex min-h-11 items-center justify-center gap-2 rounded-xl bg-[#f7941d] px-4 text-sm font-bold text-white"
+                    >
+                      <Eye size={16} />
+                      Open marketplace listing
+                    </Link>
+                    <button
+                      type="button"
+                      onClick={() => setProductDetailItemId(null)}
+                      className="min-h-11 rounded-xl border border-slate-200 px-4 text-sm font-semibold text-slate-600 dark:border-white/10 dark:text-white/60"
+                    >
+                      Close
+                    </button>
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+      )}
 
       {packageEditorOpen && (
         <div className="fixed inset-0 z-[130] flex items-center justify-center bg-black/55 p-4 backdrop-blur-sm">
@@ -1375,15 +1739,90 @@ function MessageBubble({ message }: { message: SellerOrderMessage }) {
   );
 }
 
-function OrderProductImage({ src, alt }: { src?: string; alt: string }) {
+function OrderProductImage({
+  src,
+  alt,
+  large = false,
+  modal = false,
+}: {
+  src?: string;
+  alt: string;
+  large?: boolean;
+  modal?: boolean;
+}) {
   const [failed, setFailed] = useState(false);
+  const sizeClass = modal
+    ? "h-[320px] w-full"
+    : large
+      ? "h-[170px] w-full"
+      : "h-24 w-24";
+
   return (
-    <div className="flex h-24 w-24 shrink-0 items-center justify-center overflow-hidden rounded-2xl border border-slate-200 bg-white shadow-sm dark:border-white/10 dark:bg-white/5">
+    <div
+      className={`flex shrink-0 items-center justify-center overflow-hidden rounded-2xl border border-slate-200 bg-white shadow-sm dark:border-white/10 dark:bg-white/5 ${sizeClass}`}
+    >
       {src && !failed ? (
-        <img src={src} alt={alt} className="h-full w-full object-cover" onError={() => setFailed(true)} />
+        <img
+          src={src}
+          alt={alt}
+          className="h-full w-full object-contain p-2 transition duration-300 group-hover:scale-[1.02]"
+          onError={() => setFailed(true)}
+        />
       ) : (
-        <ImageIcon size={28} className="text-slate-300" />
+        <div className="text-center">
+          <ImageIcon size={large || modal ? 36 : 28} className="mx-auto text-slate-300" />
+          {(large || modal) && (
+            <p className="mt-2 text-[10px] font-semibold text-slate-400">
+              Product image unavailable
+            </p>
+          )}
+        </div>
       )}
+    </div>
+  );
+}
+
+const prettyLabel = (value: string) =>
+  value
+    .replaceAll("_", " ")
+    .replaceAll("-", " ")
+    .replace(/\b\w/g, (letter) => letter.toUpperCase());
+
+const formatAttributeValue = (value: unknown) => {
+  if (Array.isArray(value)) return value.join(", ");
+  if (typeof value === "object" && value !== null) return JSON.stringify(value);
+  return String(value);
+};
+
+function DetailMetric({
+  label,
+  value,
+  orange = false,
+}: {
+  label: string;
+  value: string;
+  orange?: boolean;
+}) {
+  return (
+    <div
+      className={`rounded-2xl border p-3.5 ${
+        orange
+          ? "border-orange-100 bg-[#fff7ed] dark:border-orange-500/20 dark:bg-orange-500/10"
+          : "border-slate-200 bg-slate-50 dark:border-white/10 dark:bg-white/5"
+      }`}
+    >
+      <p className="text-[9px] font-bold uppercase tracking-wide text-slate-400">
+        {label}
+      </p>
+      <p
+        className={`mt-1 break-words text-sm font-extrabold ${
+          orange
+            ? "text-[#c66c0b] dark:text-orange-300"
+            : "text-slate-800 dark:text-white"
+        }`}
+      >
+        {value}
+      </p>
     </div>
   );
 }

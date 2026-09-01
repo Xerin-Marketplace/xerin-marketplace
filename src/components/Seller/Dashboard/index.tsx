@@ -6,7 +6,8 @@ import { sellersApi } from "@/lib/api/endpoints/sellers";
 import {
   sellerInventoryApi,
   type SellerInventoryItem,
-} 
+  type SellerInventorySummary,
+}
 from "@/lib/api/endpoints/seller-inventory";
 import { authStorage } from "@/lib/auth/storage";
 import type { Product } from "@/types/api/product";
@@ -27,7 +28,6 @@ import {
   CheckCircle2,
   CircleDashed,
   Clock3,
-  ExternalLink,
   FileWarning,
   ImageIcon,
   PackageCheck,
@@ -94,6 +94,7 @@ export default function SellerDashboard() {
 
   const [products, setProducts] = useState<Product[]>([]);
   const [inventory, setInventory] = useState<SellerInventoryItem[]>([]);
+  const [inventorySummary, setInventorySummary] = useState<SellerInventorySummary | null>(null);
   const [kyc, setKyc] = useState<SellerKycStatus | null>(null);
   const [documents, setDocuments] = useState<SellerKycDocument[]>([]);
   const [payouts, setPayouts] = useState<PayoutAccount[]>([]);
@@ -144,32 +145,36 @@ export default function SellerDashboard() {
       setProfile(profileData);
 
       if (sellerData.status === "approved") {
-        const [productData, inventoryData, payoutList, performanceData] =
-  await Promise.all([
-    productsApi.getMyProducts({ skip: 0, limit: 100 }),
-    sellerInventoryApi.list().catch(() => ({
-      total: 0,
-      page: 1,
-      page_size: 0,
-      results: [],
-    })),
-    sellersApi.getPayoutAccounts(token),
-    sellersApi.getDashboardPerformance(),
-  ]);
+        const [
+          productData,
+          inventoryData,
+          inventorySummaryData,
+          payoutList,
+          performanceData,
+        ] = await Promise.all([
+          productsApi.getMyProducts({ skip: 0, limit: 100 }),
+          sellerInventoryApi.list({ page: 1, page_size: 100 }).catch(() => ({
+            total: 0,
+            page: 1,
+            page_size: 0,
+            results: [],
+          })),
+          sellerInventoryApi.summary().catch(() => null),
+          sellersApi.getPayoutAccounts(token),
+          sellersApi.getDashboardPerformance(),
+        ]);
 
-setProducts(productData);
-
-setInventory(
-  Array.isArray(inventoryData?.results)
-    ? inventoryData.results
-    : [],
-);
-
-setPayouts(payoutList);
-setPerformance(performanceData);
+        setProducts(productData);
+        setInventory(
+          Array.isArray(inventoryData?.results) ? inventoryData.results : [],
+        );
+        setInventorySummary(inventorySummaryData);
+        setPayouts(payoutList);
+        setPerformance(performanceData);
       } else {
         setProducts([]);
         setInventory([]);
+        setInventorySummary(null);
         setPayouts([]);
         setPerformance(null);
       }
@@ -240,21 +245,20 @@ setPerformance(performanceData);
     products.length - approvedProducts - pendingProducts - rejectedProducts,
   );
 
-  const availableUnits = inventory.reduce(
-    (sum, row) => sum + Math.max(0, row.available_quantity || 0),
-    0,
-  );
-  const lowStockRows = inventory.filter(
+  const fallbackLowStockRows = inventory.filter(
     (row) =>
       row.available_quantity > 0 &&
       row.available_quantity <= (row.low_stock_threshold ?? 0),
   );
-  const outOfStockRows = inventory.filter(
+  const fallbackOutOfStockRows = inventory.filter(
     (row) => row.available_quantity <= 0,
   );
+  const inventoryHealthTotal = inventorySummary?.total_variants ?? inventory.length;
+  const inventoryLow = inventorySummary?.low_stock_variants ?? fallbackLowStockRows.length;
+  const inventoryOut = inventorySummary?.out_of_stock_variants ?? fallbackOutOfStockRows.length;
   const healthyInventoryRows = Math.max(
     0,
-    inventory.length - lowStockRows.length - outOfStockRows.length,
+    inventoryHealthTotal - inventoryLow - inventoryOut,
   );
 
   const dashboardProductsTotal = performance?.products_total ?? products.length;
@@ -396,6 +400,8 @@ setPerformance(performanceData);
           helper={`${number.format(dashboardProductsApproved)} approved`}
           icon={ShoppingBag}
           tone="orange"
+          progress={dashboardProductsTotal ? Math.round((dashboardProductsApproved / dashboardProductsTotal) * 100) : 0}
+          graphLabel="approved"
         />
         <MetricCard
           label="Pending Review"
@@ -403,6 +409,8 @@ setPerformance(performanceData);
           helper="Awaiting catalog approval"
           icon={Clock3}
           tone="amber"
+          progress={dashboardProductsTotal ? Math.min(100, Math.round((dashboardProductsPending / dashboardProductsTotal) * 100)) : 0}
+          graphLabel="pending"
         />
         <MetricCard
           label="Total Orders"
@@ -410,6 +418,8 @@ setPerformance(performanceData);
           helper={`${number.format(ordersNew)} new`}
           icon={PackageCheck}
           tone="blue"
+          progress={ordersTotal ? Math.min(100, Math.round(((ordersProcessing + ordersReady) / ordersTotal) * 100)) : 0}
+          graphLabel="active"
         />
         <MetricCard
           label="Available Balance"
@@ -417,6 +427,8 @@ setPerformance(performanceData);
           helper={`${number.format(pendingPayouts)} pending payout${pendingPayouts === 1 ? "" : "s"}`}
           icon={WalletCards}
           tone="green"
+          progress={(walletAvailable + walletPending + walletReserved) > 0 ? Math.round((walletAvailable / (walletAvailable + walletPending + walletReserved)) * 100) : 0}
+          graphLabel="available"
         />
         <MetricCard
           label="Average Rating"
@@ -424,6 +436,8 @@ setPerformance(performanceData);
           helper={`${number.format(reviewCount)} review${reviewCount === 1 ? "" : "s"}`}
           icon={Star}
           tone="amber"
+          progress={Math.round((averageRating / 5) * 100)}
+          graphLabel="rating"
         />
         <MetricCard
           label="Unanswered Q&A"
@@ -431,7 +445,62 @@ setPerformance(performanceData);
           helper="Customer questions"
           icon={MessageCircleQuestion}
           tone={unansweredQuestions ? "red" : "green"}
+          progress={unansweredQuestions ? 100 : 0}
+          graphLabel={unansweredQuestions ? "needs reply" : "clear"}
         />
+      </section>
+
+      <section className="grid gap-5 xl:grid-cols-2 2xl:grid-cols-4">
+        <SellerChartCard
+          eyebrow="Orders"
+          title="Fulfilment workload"
+          description="Current seller-order workload by fulfilment stage."
+        >
+          <OrderPipelineChart
+            newOrders={ordersNew}
+            processing={ordersProcessing}
+            ready={ordersReady}
+            total={ordersTotal}
+          />
+        </SellerChartCard>
+
+        <SellerChartCard
+          eyebrow="Catalog"
+          title="Product approval mix"
+          description="How your current catalog is distributed across approval states."
+        >
+          <CatalogMixChart
+            approved={approvedProducts}
+            pending={pendingProducts}
+            rejected={rejectedProducts}
+            draft={draftProducts}
+          />
+        </SellerChartCard>
+
+        <SellerChartCard
+          eyebrow="Inventory"
+          title="Stock health"
+          description="Live inventory condition from your inventory summary endpoint."
+        >
+          <InventoryMixChart
+            healthy={healthyInventoryRows}
+            low={inventoryLow}
+            out={inventoryOut}
+          />
+        </SellerChartCard>
+
+        <SellerChartCard
+          eyebrow="Finance"
+          title="Wallet composition"
+          description="Pending, available and reserved seller funds."
+        >
+          <WalletCompositionChart
+            pending={walletPending}
+            available={walletAvailable}
+            reserved={walletReserved}
+            currency={walletCurrency}
+          />
+        </SellerChartCard>
       </section>
 
       <section className="grid gap-5 2xl:grid-cols-[1.45fr_.85fr]">
@@ -466,9 +535,9 @@ setPerformance(performanceData);
 
         <InventoryHealth
           healthy={healthyInventoryRows}
-          low={lowStockRows.length}
-          out={outOfStockRows.length}
-          total={inventory.length}
+          low={inventoryLow}
+          out={inventoryOut}
+          total={inventoryHealthTotal}
         />
       </section>
 
@@ -685,6 +754,252 @@ setPerformance(performanceData);
   );
 }
 
+
+function SellerChartCard({
+  eyebrow,
+  title,
+  description,
+  children,
+}: {
+  eyebrow: string;
+  title: string;
+  description: string;
+  children: React.ReactNode;
+}) {
+  return (
+    <section className="relative overflow-hidden rounded-2xl border border-[#e7ebf0] bg-white p-5 shadow-[0_10px_30px_rgba(15,23,42,0.05)] dark:border-white/10 dark:bg-darkTheme-card">
+      <span className="pointer-events-none absolute -right-10 -top-10 h-28 w-28 rounded-full bg-orange-100/60 blur-2xl dark:bg-orange-500/10" />
+      <div className="relative">
+        <p className="text-[10px] font-extrabold uppercase tracking-[0.16em] text-[#f7941d]">
+          {eyebrow}
+        </p>
+        <h3 className="mt-1 text-lg font-extrabold tracking-[-0.025em] text-slate-900 dark:text-white">
+          {title}
+        </h3>
+        <p className="mt-1 min-h-10 text-xs leading-5 text-[#64748b]">
+          {description}
+        </p>
+        <div className="mt-5">{children}</div>
+      </div>
+    </section>
+  );
+}
+
+function OrderPipelineChart({
+  newOrders,
+  processing,
+  ready,
+  total,
+}: {
+  newOrders: number;
+  processing: number;
+  ready: number;
+  total: number;
+}) {
+  const rows = [
+    { label: "New", value: newOrders, className: "bg-blue-500" },
+    { label: "Processing", value: processing, className: "bg-[#f7941d]" },
+    { label: "Ready", value: ready, className: "bg-emerald-500" },
+  ];
+  const max = Math.max(1, ...rows.map((row) => row.value));
+
+  return (
+    <div>
+      <div className="flex h-40 items-end justify-around gap-3 rounded-2xl bg-slate-50 px-3 pb-3 pt-5 dark:bg-white/[0.035]">
+        {rows.map((row) => {
+          const height = row.value === 0 ? 6 : Math.max(14, (row.value / max) * 112);
+          return (
+            <div key={row.label} className="flex h-full min-w-0 flex-1 flex-col items-center justify-end">
+              <span className="mb-2 text-xs font-extrabold text-slate-800 dark:text-white">
+                {number.format(row.value)}
+              </span>
+              <div className="flex h-[112px] w-full max-w-12 items-end overflow-hidden rounded-t-xl bg-slate-200/70 dark:bg-white/10">
+                <div
+                  className={`w-full rounded-t-xl transition-all ${row.className}`}
+                  style={{ height: `${height}px` }}
+                />
+              </div>
+              <span className="mt-2 truncate text-[10px] font-semibold text-[#64748b]">
+                {row.label}
+              </span>
+            </div>
+          );
+        })}
+      </div>
+      <div className="mt-3 flex items-center justify-between rounded-xl border border-[#edf0f3] px-3 py-2 text-xs dark:border-white/10">
+        <span className="text-[#64748b]">All seller orders</span>
+        <span className="font-extrabold">{number.format(total)}</span>
+      </div>
+    </div>
+  );
+}
+
+function CatalogMixChart({
+  approved,
+  pending,
+  rejected,
+  draft,
+}: {
+  approved: number;
+  pending: number;
+  rejected: number;
+  draft: number;
+}) {
+  const total = approved + pending + rejected + draft;
+  const safe = Math.max(total, 1);
+  const approvedEnd = (approved / safe) * 100;
+  const pendingEnd = approvedEnd + (pending / safe) * 100;
+  const rejectedEnd = pendingEnd + (rejected / safe) * 100;
+  const gradient = total
+    ? `conic-gradient(#10b981 0 ${approvedEnd}%, #f59e0b ${approvedEnd}% ${pendingEnd}%, #ef4444 ${pendingEnd}% ${rejectedEnd}%, #94a3b8 ${rejectedEnd}% 100%)`
+    : "conic-gradient(#e2e8f0 0 100%)";
+
+  const items = [
+    ["Approved", approved, "bg-emerald-500"],
+    ["Pending", pending, "bg-amber-500"],
+    ["Rejected", rejected, "bg-red-500"],
+    ["Draft", draft, "bg-slate-400"],
+  ] as const;
+
+  return (
+    <div className="grid grid-cols-[132px_minmax(0,1fr)] items-center gap-4">
+      <div className="relative mx-auto h-32 w-32 rounded-full" style={{ background: gradient }}>
+        <div className="absolute inset-[15px] grid place-items-center rounded-full bg-white text-center dark:bg-darkTheme-card">
+          <div>
+            <p className="text-2xl font-extrabold tracking-[-0.04em]">{number.format(total)}</p>
+            <p className="text-[10px] font-semibold uppercase tracking-wide text-[#94a3b8]">Products</p>
+          </div>
+        </div>
+      </div>
+      <div className="space-y-2.5">
+        {items.map(([label, value, color]) => (
+          <div key={label} className="flex items-center justify-between gap-3 text-xs">
+            <span className="flex min-w-0 items-center gap-2 text-[#64748b]">
+              <span className={`h-2.5 w-2.5 shrink-0 rounded-full ${color}`} />
+              <span>{label}</span>
+            </span>
+            <span className="font-extrabold text-slate-900 dark:text-white">{number.format(value)}</span>
+          </div>
+        ))}
+      </div>
+    </div>
+  );
+}
+
+function InventoryMixChart({
+  healthy,
+  low,
+  out,
+}: {
+  healthy: number;
+  low: number;
+  out: number;
+}) {
+  const total = healthy + low + out;
+  const safe = Math.max(total, 1);
+  const healthyEnd = (healthy / safe) * 100;
+  const lowEnd = healthyEnd + (low / safe) * 100;
+  const gradient = total
+    ? `conic-gradient(#10b981 0 ${healthyEnd}%, #f59e0b ${healthyEnd}% ${lowEnd}%, #ef4444 ${lowEnd}% 100%)`
+    : "conic-gradient(#e2e8f0 0 100%)";
+
+  return (
+    <div>
+      <div className="flex items-center justify-center gap-5">
+        <div className="relative h-32 w-32 shrink-0 rounded-full" style={{ background: gradient }}>
+          <div className="absolute inset-[15px] grid place-items-center rounded-full bg-white text-center dark:bg-darkTheme-card">
+            <div>
+              <p className="text-2xl font-extrabold tracking-[-0.04em]">{number.format(healthy)}</p>
+              <p className="text-[10px] font-semibold uppercase text-emerald-600">Healthy</p>
+            </div>
+          </div>
+        </div>
+        <div className="space-y-3 text-xs">
+          <ChartLegendDot label="Healthy" value={healthy} className="bg-emerald-500" />
+          <ChartLegendDot label="Low stock" value={low} className="bg-amber-500" />
+          <ChartLegendDot label="Out" value={out} className="bg-red-500" />
+        </div>
+      </div>
+      <p className="mt-4 text-center text-[11px] text-[#94a3b8]">
+        {number.format(total)} tracked inventory variant{total === 1 ? "" : "s"}
+      </p>
+    </div>
+  );
+}
+
+function ChartLegendDot({
+  label,
+  value,
+  className,
+}: {
+  label: string;
+  value: number;
+  className: string;
+}) {
+  return (
+    <div className="flex items-center justify-between gap-5">
+      <span className="flex items-center gap-2 text-[#64748b]">
+        <span className={`h-2.5 w-2.5 rounded-full ${className}`} />
+        {label}
+      </span>
+      <span className="font-extrabold text-slate-900 dark:text-white">{number.format(value)}</span>
+    </div>
+  );
+}
+
+function WalletCompositionChart({
+  pending,
+  available,
+  reserved,
+  currency,
+}: {
+  pending: number;
+  available: number;
+  reserved: number;
+  currency: string;
+}) {
+  const total = Math.max(0, pending) + Math.max(0, available) + Math.max(0, reserved);
+  const safe = Math.max(total, 1);
+  const values = [
+    { label: "Available", value: Math.max(0, available), className: "bg-emerald-500" },
+    { label: "Pending", value: Math.max(0, pending), className: "bg-[#f7941d]" },
+    { label: "Reserved", value: Math.max(0, reserved), className: "bg-slate-700 dark:bg-slate-300" },
+  ];
+
+  return (
+    <div>
+      <div className="rounded-2xl bg-slate-50 p-4 dark:bg-white/[0.035]">
+        <p className="text-[10px] font-bold uppercase tracking-wide text-[#94a3b8]">Total wallet position</p>
+        <p className="mt-1 text-2xl font-extrabold tracking-[-0.04em] text-slate-900 dark:text-white">
+          {formatMoney(total, currency)}
+        </p>
+        <div className="mt-5 flex h-4 overflow-hidden rounded-full bg-slate-200 dark:bg-white/10">
+          {values.map((item) => (
+            <div
+              key={item.label}
+              className={item.className}
+              style={{ width: `${total ? (item.value / safe) * 100 : item.label === "Available" ? 100 : 0}%` }}
+              title={`${item.label}: ${formatMoney(item.value, currency)}`}
+            />
+          ))}
+        </div>
+      </div>
+      <div className="mt-4 space-y-2.5">
+        {values.map((item) => (
+          <div key={item.label} className="flex items-center justify-between gap-3 text-xs">
+            <span className="flex items-center gap-2 text-[#64748b]">
+              <span className={`h-2.5 w-2.5 rounded-full ${item.className}`} />
+              {item.label}
+            </span>
+            <span className="font-extrabold text-slate-900 dark:text-white">
+              {formatMoney(item.value, currency)}
+            </span>
+          </div>
+        ))}
+      </div>
+    </div>
+  );
+}
 
 function PipelineStat({
   label,
@@ -1198,11 +1513,11 @@ function Hero({
               Add Product
             </Link>
             <Link
-              href="/shop-with-sidebar"
+              href="/seller/store"
               className="inline-flex items-center gap-2 rounded-xl border border-[#dfe4ea] bg-white/70 px-4 py-2.5 text-sm font-semibold text-[#334155] transition hover:bg-white dark:border-white/15 dark:bg-white/5 dark:text-white dark:hover:bg-white/10"
             >
-              <ExternalLink size={16} />
-              View Store
+              <Store size={16} />
+              My Stores
             </Link>
             <button
               onClick={refresh}
@@ -1218,30 +1533,59 @@ function Hero({
           </div>
         </div>
 
-        <div className="w-full rounded-2xl border border-[#e7ebf0] bg-white/75 p-5 shadow-sm xl:max-w-[320px] dark:border-white/10 dark:bg-white/[0.06]">
-          <div className="flex items-center justify-between">
+        <div className="w-full overflow-hidden rounded-2xl border border-[#e7ebf0] bg-white/80 p-5 shadow-sm xl:max-w-[360px] dark:border-white/10 dark:bg-white/[0.06]">
+          <div className="flex items-center justify-between gap-4">
             <div>
-              <p className="text-xs font-medium uppercase tracking-[0.14em] text-[#94a3b8] dark:text-white/45">
+              <p className="text-xs font-bold uppercase tracking-[0.14em] text-[#94a3b8] dark:text-white/45">
                 Store readiness
               </p>
-              <p className="mt-1 text-2xl font-bold">{setupProgress}%</p>
+              <p className="mt-1 text-sm font-semibold text-slate-700 dark:text-white/80">
+                Seller setup health
+              </p>
             </div>
-            <div className="flex h-11 w-11 items-center justify-center rounded-xl bg-[#f7941d]/15 text-[#f7941d]">
-              <Store size={21} />
+            <div className="flex h-10 w-10 items-center justify-center rounded-xl bg-[#f7941d]/15 text-[#f7941d]">
+              <Store size={19} />
             </div>
           </div>
 
-          <div className="mt-4 h-2 overflow-hidden rounded-full bg-white/10">
+          <div className="mt-5 flex items-center gap-5">
             <div
-              className="h-full rounded-full bg-[#f7941d] transition-all"
-              style={{ width: `${setupProgress}%` }}
-            />
-          </div>
+              className="relative grid h-28 w-28 shrink-0 place-items-center rounded-full"
+              style={{
+                background: `conic-gradient(#f7941d ${setupProgress * 3.6}deg, #eef2f6 0deg)`,
+              }}
+            >
+              <div className="grid h-[82px] w-[82px] place-items-center rounded-full bg-white text-center dark:bg-[#1f2937]">
+                <div>
+                  <p className="text-2xl font-extrabold tracking-[-0.04em]">
+                    {setupProgress}%
+                  </p>
+                  <p className="text-[9px] font-bold uppercase tracking-wide text-[#94a3b8]">
+                    ready
+                  </p>
+                </div>
+              </div>
+            </div>
 
-          <p className="mt-3 text-xs leading-5 text-[#64748b] dark:text-white/55">
-            Complete profile, verification, payout setup and your first catalog
-            item.
-          </p>
+            <div className="min-w-0 flex-1">
+              <p className="text-sm font-bold text-slate-900 dark:text-white">
+                {setupProgress === 100 ? "Store fully ready" : "Keep completing setup"}
+              </p>
+              <p className="mt-1 text-xs leading-5 text-[#64748b] dark:text-white/55">
+                Profile, verification, payout setup and your first catalog item.
+              </p>
+              <div className="mt-3 grid grid-cols-4 gap-1.5">
+                {[25, 50, 75, 100].map((step) => (
+                  <span
+                    key={step}
+                    className={`h-2 rounded-full ${
+                      setupProgress >= step ? "bg-[#f7941d]" : "bg-slate-200 dark:bg-white/10"
+                    }`}
+                  />
+                ))}
+              </div>
+            </div>
+          </div>
         </div>
       </div>
     </section>
@@ -1254,38 +1598,104 @@ function MetricCard({
   helper,
   icon: Icon,
   tone,
+  progress = 0,
+  graphLabel,
 }: {
   label: string;
   value: string;
   helper: string;
   icon: typeof Box;
   tone: "orange" | "green" | "amber" | "blue" | "red";
+  progress?: number;
+  graphLabel?: string;
 }) {
+  const safeProgress = Math.min(100, Math.max(0, progress));
+
   const tones = {
-    orange: "bg-orange-50 text-[#f7941d] dark:bg-orange-500/10",
-    green: "bg-emerald-50 text-emerald-600 dark:bg-emerald-500/10",
-    amber: "bg-amber-50 text-amber-600 dark:bg-amber-500/10",
-    blue: "bg-blue-50 text-blue-600 dark:bg-blue-500/10",
-    red: "bg-rose-50 text-rose-600 dark:bg-rose-500/10",
+    orange: {
+      icon: "bg-orange-50 text-[#f7941d] dark:bg-orange-500/10",
+      bar: "bg-[#f7941d]",
+      soft: "bg-orange-50/70 dark:bg-orange-500/5",
+      text: "text-[#d96f00]",
+    },
+    green: {
+      icon: "bg-emerald-50 text-emerald-600 dark:bg-emerald-500/10",
+      bar: "bg-emerald-500",
+      soft: "bg-emerald-50/70 dark:bg-emerald-500/5",
+      text: "text-emerald-600",
+    },
+    amber: {
+      icon: "bg-amber-50 text-amber-600 dark:bg-amber-500/10",
+      bar: "bg-amber-500",
+      soft: "bg-amber-50/70 dark:bg-amber-500/5",
+      text: "text-amber-600",
+    },
+    blue: {
+      icon: "bg-blue-50 text-blue-600 dark:bg-blue-500/10",
+      bar: "bg-blue-500",
+      soft: "bg-blue-50/70 dark:bg-blue-500/5",
+      text: "text-blue-600",
+    },
+    red: {
+      icon: "bg-rose-50 text-rose-600 dark:bg-rose-500/10",
+      bar: "bg-rose-500",
+      soft: "bg-rose-50/70 dark:bg-rose-500/5",
+      text: "text-rose-600",
+    },
   };
 
+  const visual = tones[tone];
+
   return (
-    <div className="rounded-2xl border border-[#e7ebf0] bg-white p-5 shadow-[0_1px_2px_rgba(15,23,42,0.03)] transition hover:-translate-y-0.5 hover:shadow-md dark:border-white/10 dark:bg-[#1f2937]">
-      <div className="flex items-start justify-between gap-4">
-        <div className={`flex h-10 w-10 items-center justify-center rounded-xl ${tones[tone]}`}>
-          <Icon size={19} />
+    <div className="group relative overflow-hidden rounded-2xl border border-[#e7ebf0] bg-white p-5 shadow-[0_6px_20px_rgba(15,23,42,0.04)] transition duration-200 hover:-translate-y-0.5 hover:border-orange-200 hover:shadow-lg dark:border-white/10 dark:bg-[#1f2937]">
+      <div className={`pointer-events-none absolute -right-7 -top-8 h-24 w-24 rounded-full ${visual.soft} blur-xl`} />
+
+      <div className="relative">
+        <div className="flex items-start justify-between gap-3">
+          <div className={`flex h-10 w-10 items-center justify-center rounded-xl ${visual.icon}`}>
+            <Icon size={19} />
+          </div>
+
+          <div className="relative grid h-12 w-12 place-items-center rounded-full bg-slate-100 dark:bg-white/10">
+            <div
+              className="absolute inset-0 rounded-full"
+              style={{
+                background: `conic-gradient(currentColor ${safeProgress * 3.6}deg, transparent 0deg)`,
+              }}
+            />
+            <div className={`z-[1] grid h-9 w-9 place-items-center rounded-full bg-white text-[9px] font-extrabold dark:bg-[#1f2937] ${visual.text}`}>
+              {safeProgress}%
+            </div>
+          </div>
+        </div>
+
+        <p className="mt-4 text-[11px] font-bold uppercase tracking-[0.1em] text-[#94a3b8]">
+          {label}
+        </p>
+        <p className="mt-1 text-[27px] font-extrabold tracking-[-0.04em] text-[#111827] dark:text-white">
+          {value}
+        </p>
+
+        <div className="mt-4">
+          <div className="flex items-center justify-between gap-3 text-[10px]">
+            <span className="truncate font-semibold text-[#64748b]">{helper}</span>
+            {graphLabel && (
+              <span className={`shrink-0 font-bold uppercase tracking-wide ${visual.text}`}>
+                {graphLabel}
+              </span>
+            )}
+          </div>
+          <div className="mt-2 h-1.5 overflow-hidden rounded-full bg-slate-100 dark:bg-white/10">
+            <div
+              className={`h-full rounded-full transition-all duration-500 ${visual.bar}`}
+              style={{ width: `${safeProgress}%` }}
+            />
+          </div>
         </div>
       </div>
-
-      <p className="mt-5 text-[13px] font-medium text-[#64748b]">{label}</p>
-      <p className="mt-1 text-[28px] font-bold tracking-[-0.035em] text-[#111827] dark:text-white">
-        {value}
-      </p>
-      <p className="mt-1 text-xs text-[#94a3b8]">{helper}</p>
     </div>
   );
 }
-
 function SectionHeading({
   eyebrow,
   title,
@@ -1610,22 +2020,60 @@ function StoreReadiness({
         icon={Store}
       />
 
-      <div className="mt-5 flex items-center gap-5 rounded-2xl bg-[#25292d] p-5 text-white">
-        <div>
-          <p className="text-3xl font-bold tracking-[-0.04em]">{progress}%</p>
-          <p className="mt-1 text-xs text-white/55">setup complete</p>
-        </div>
-        <div className="h-10 w-px bg-white/10" />
-        <div className="flex-1">
-          <div className="h-2 rounded-full bg-white/10">
-            <div
-              className="h-2 rounded-full bg-[#f7941d]"
-              style={{ width: `${progress}%` }}
-            />
+      <div className="mt-5 overflow-hidden rounded-2xl bg-[#25292d] p-5 text-white">
+        <div className="flex flex-col gap-5 sm:flex-row sm:items-center">
+          <div
+            className="relative grid h-32 w-32 shrink-0 place-items-center rounded-full"
+            style={{
+              background: `conic-gradient(#f7941d ${progress * 3.6}deg, rgba(255,255,255,.10) 0deg)`,
+            }}
+          >
+            <div className="grid h-[94px] w-[94px] place-items-center rounded-full bg-[#25292d] text-center">
+              <div>
+                <p className="text-3xl font-extrabold tracking-[-0.05em]">{progress}%</p>
+                <p className="text-[9px] font-bold uppercase tracking-[0.12em] text-white/45">
+                  complete
+                </p>
+              </div>
+            </div>
           </div>
-          <p className="mt-2 text-xs text-white/55">
-            Finish the remaining items to prepare your store for selling.
-          </p>
+
+          <div className="min-w-0 flex-1">
+            <p className="text-lg font-bold">
+              {progress === 100 ? "Your selling setup is complete" : "Finish your seller setup"}
+            </p>
+            <p className="mt-1 text-xs leading-5 text-white/55">
+              Complete all four checkpoints to keep your store ready for selling and settlement.
+            </p>
+
+            <div className="mt-4 grid grid-cols-2 gap-2">
+              {items.map((item) => (
+                <div
+                  key={`readiness-${item.label}`}
+                  className={`rounded-xl border px-3 py-2 ${
+                    item.complete
+                      ? "border-emerald-400/20 bg-emerald-400/10"
+                      : "border-white/10 bg-white/5"
+                  }`}
+                >
+                  <div className="flex items-center gap-2">
+                    <span
+                      className={`grid h-5 w-5 place-items-center rounded-full ${
+                        item.complete
+                          ? "bg-emerald-400 text-[#123228]"
+                          : "bg-white/10 text-white/50"
+                      }`}
+                    >
+                      {item.complete ? <Check size={12} /> : <CircleDashed size={12} />}
+                    </span>
+                    <span className="truncate text-[10px] font-semibold text-white/75">
+                      {item.label}
+                    </span>
+                  </div>
+                </div>
+              ))}
+            </div>
+          </div>
         </div>
       </div>
 
