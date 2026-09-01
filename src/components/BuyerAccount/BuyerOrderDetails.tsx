@@ -537,7 +537,7 @@ export default function BuyerOrderDetails({ orderId }: { orderId: string }) {
                   };
 
                   const description =
-                    event.description?.trim() ||
+                    event.notes?.trim() ||
                     fallbackDescription[status] ||
                     "Shipment status was updated by the logistics workflow.";
 
