@@ -8,6 +8,7 @@ import { useAddCartItem, addProductToCartPayload } from "@/hooks/useCartActions"
 import StarRating from "@/components/Common/StarRating";
 import Image from "next/image";
 import { usePreviewSlider } from "@/app/context/PreviewSliderContext";
+import PriceDisplay from "@/components/shared/PriceDisplay";
 
 const QuickViewModal = () => {
   const { isModalOpen, closeModal } = useModalContext();
@@ -208,12 +209,18 @@ const QuickViewModal = () => {
                   </h4>
 
                   <span className="flex items-center gap-2">
-                    <span className="font-semibold text-dark dark:text-white text-xl xl:text-heading-4">
-                      ${product.discountedPrice}
-                    </span>
-                    <span className="font-medium text-dark-4 text-lg xl:text-2xl line-through">
-                      ${product.price}
-                    </span>
+                    <PriceDisplay
+                      amount={product.discountedPrice}
+                      sourceCurrency={product.currency}
+                      className="font-semibold text-dark dark:text-white text-xl xl:text-heading-4"
+                    />
+                    {product.price > product.discountedPrice ? (
+                      <PriceDisplay
+                        amount={product.price}
+                        sourceCurrency={product.currency}
+                        className="font-medium text-dark-4 text-lg xl:text-2xl line-through"
+                      />
+                    ) : null}
                   </span>
                 </div>
 
