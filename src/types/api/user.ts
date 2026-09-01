@@ -15,6 +15,8 @@ export type User = TimestampFields & {
   account_type?: string;
   is_active?: boolean;
   is_verified?: boolean;
+  initial_role_choice?: "customer" | "seller" | "broker" | null;
+  initial_role_choice_completed?: boolean;
   is_seller?: boolean;
   seller_status?: string | null;
   is_broker?: boolean;

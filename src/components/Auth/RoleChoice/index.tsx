@@ -1,9 +1,12 @@
 "use client";
 
 import Image from "next/image";
-import { useEffect } from "react";
+import { useEffect, useState } from "react";
 import { useRouter } from "next/navigation";
 import { useAuth } from "@/hooks/useAuth";
+import { authApi } from "@/lib/api/endpoints/auth";
+import { authStorage } from "@/lib/auth/storage";
+import toast from "react-hot-toast";
 
 const cards = [
   {
@@ -40,11 +43,30 @@ const cards = [
 
 export default function RoleChoice() {
   const router = useRouter();
-  const { isAuthenticated, user } = useAuth();
+  const { isAuthenticated, user, setSession } = useAuth();
+  const [busyRole, setBusyRole] = useState<string | null>(null);
 
   useEffect(() => {
     if (!isAuthenticated) router.replace("/signin?redirect=/choose-role");
   }, [isAuthenticated, router]);
+
+  const chooseRole = async (role: "customer" | "seller" | "broker", href: string) => {
+    if (busyRole) return;
+    setBusyRole(role);
+    try {
+      const result = await authApi.selectInitialRole(role);
+      // Keep the in-memory/local session user synchronized with the persisted state.
+      const current = authStorage.getSession();
+      if (current) {
+        setSession({ ...current, user: result.user });
+      }
+      router.push(href);
+    } catch (error: any) {
+      toast.error(error?.message || "Unable to save your role choice. Please try again.");
+    } finally {
+      setBusyRole(null);
+    }
+  };
 
   if (!isAuthenticated) return null;
 
@@ -86,7 +108,8 @@ export default function RoleChoice() {
             <button
               key={card.key}
               type="button"
-              onClick={() => router.push(card.href)}
+              onClick={() => void chooseRole(card.key === "winga" ? "broker" : card.key, card.href)}
+              disabled={Boolean(busyRole)}
               className="group flex min-h-[390px] flex-col rounded-[24px] border border-[#e1e7ef] bg-white p-6 text-left shadow-[0_12px_35px_rgba(15,23,42,0.06)] transition duration-300 hover:-translate-y-1.5 hover:border-orange/50 hover:shadow-[0_18px_45px_rgba(15,23,42,0.10)] focus:outline-none focus:ring-2 focus:ring-orange/30 dark:border-darkTheme-border-color dark:bg-darkTheme-card sm:p-7"
             >
               <div className={`mb-5 flex h-20 w-20 items-center justify-center rounded-full ${card.tone} text-4xl transition duration-300 group-hover:scale-105`}>

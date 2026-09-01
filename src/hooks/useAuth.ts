@@ -15,6 +15,7 @@ import { useAuthStore } from "@/store/useAuthStore";
 import { authStorage } from "@/lib/auth/storage";
 import { authCookies } from "@/lib/auth/cookies";
 import { isAdminUser, isLogisticsUser, isSellerUser } from "@/guards/permissions";
+import { getPostLoginPath } from "@/guards/auth-routing";
 import type { AuthTokenResponse } from "@/types/api/auth";
 import { useRouter } from "next/navigation";
 import { cartApi } from "@/lib/api/endpoints/commerce";
@@ -99,15 +100,7 @@ export const useAuth = () => {
         });
       }
       const user = data.user;
-      if (isLogisticsUser(user)) {
-        router.push("/logistics/onboarding");
-      } else if (isAdminUser(user)) {
-        router.push("/admin/dashboard");
-      } else if (isSellerUser(user)) {
-        router.push("/seller/dashboard");
-      } else {
-        router.push("/account");
-      }
+      router.push(getPostLoginPath(null, user));
     },
   });
 

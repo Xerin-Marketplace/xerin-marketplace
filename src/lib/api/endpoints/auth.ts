@@ -20,6 +20,8 @@ import type {
   SellerOnboardingRequest,
   BrokerOnboardingRequest,
   RoleOnboardingResponse,
+  InitialRoleChoice,
+  InitialRoleChoiceResponse,
 } from "@/types/api/auth";
 import type { ApiMessageResponse } from "@/types/api/common";
 
@@ -43,6 +45,12 @@ export const registerSeller = async (payload: RegisterSellerRequest): Promise<Se
   return res.data;
 };
 
+
+
+export const selectInitialRole = async (role: InitialRoleChoice): Promise<InitialRoleChoiceResponse> => {
+  const res = await axiosInstance.post<InitialRoleChoiceResponse>(API_ENDPOINTS.auth.selectInitialRole, { role });
+  return res.data;
+};
 
 export const onboardSeller = async (payload: SellerOnboardingRequest): Promise<RoleOnboardingResponse> => {
   const res = await axiosInstance.post<RoleOnboardingResponse>(API_ENDPOINTS.auth.onboardSeller, payload);
@@ -117,6 +125,7 @@ export const authApi = {
   registerBroker,
   onboardSeller,
   onboardBroker,
+  selectInitialRole,
   logout,
   sendOtp,
   verifyOtp,

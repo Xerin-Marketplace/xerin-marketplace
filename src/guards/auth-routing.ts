@@ -20,6 +20,16 @@ export const getPostLoginPath = (
 ) => {
   const guardUser = toGuardUser(user);
 
+  // F9 onboarding continuity takes priority over normal dashboard routing.
+  // If power/browser loss happens before the user finishes initial onboarding,
+  // sign-in resumes exactly where they left off.
+  if (guardUser && (guardUser as Record<string, unknown>).initial_role_choice_completed === false) {
+    const selected = (guardUser as Record<string, unknown>).initial_role_choice;
+    if (selected === "seller") return "/onboarding/seller";
+    if (selected === "broker") return "/onboarding/winga";
+    return "/choose-role";
+  }
+
   if (isSafeInternalPath(requestedPath)) {
     const path = requestedPath as string;
     if (isLogisticsUser(guardUser)) {

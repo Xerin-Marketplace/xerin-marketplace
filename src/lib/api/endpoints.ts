@@ -12,6 +12,7 @@ export const API_ENDPOINTS = {
     registerBroker: "/auth/register-broker",
     onboardSeller: "/auth/onboard-seller",
     onboardBroker: "/auth/onboard-broker",
+    selectInitialRole: "/auth/select-initial-role",
     logout: "/auth/logout",
     refreshToken: "/auth/refresh-token",
     sendOtp: "/auth/send-otp",

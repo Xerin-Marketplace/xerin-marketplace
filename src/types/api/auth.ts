@@ -162,3 +162,12 @@ export type RoleOnboardingResponse = {
   broker_status?: string;
   user: User;
 };
+
+export type InitialRoleChoice = "customer" | "seller" | "broker";
+
+export type InitialRoleChoiceResponse = {
+  message: string;
+  selected_role?: InitialRoleChoice | null;
+  completed: boolean;
+  user: User;
+};
