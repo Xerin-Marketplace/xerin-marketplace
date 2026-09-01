@@ -21,6 +21,8 @@ export type RegisterSellerRequest = RegisterBuyerRequest & {
   business_country?: string;
   business_region?: string;
   business_city?: string;
+  business_district?: string;
+  business_ward?: string;
   business_address?: string;
   product_description?: string;
   years_in_business?: string;
@@ -132,6 +134,8 @@ export type SellerOnboardingRequest = {
   business_country?: string;
   business_region?: string;
   business_city?: string;
+  business_district?: string;
+  business_ward?: string;
   business_address?: string;
   product_description?: string;
   years_in_business?: string;
@@ -145,6 +149,8 @@ export type BrokerOnboardingRequest = {
   country: string;
   region: string;
   city: string;
+  district?: string;
+  ward?: string;
 };
 
 export type RoleOnboardingResponse = {
