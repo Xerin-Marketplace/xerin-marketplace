@@ -108,6 +108,7 @@ const SellerKyc = () => {
   const [currency, setCurrency] = useState("TZS");
   const [isDefault, setIsDefault] = useState(false);
   const [isAddingAccount, setIsAddingAccount] = useState(false);
+  const [editingPayoutAccount, setEditingPayoutAccount] = useState<PayoutAccount | null>(null);
   const [deleteTarget, setDeleteTarget] = useState<PayoutAccount | null>(null);
   const [isDeleting, setIsDeleting] = useState(false);
 
@@ -191,6 +192,21 @@ const SellerKyc = () => {
     }
   }
 
+  function startEditPayoutAccount(account: PayoutAccount) {
+    setEditingPayoutAccount(account);
+    setAccountType(account.account_type === "mobile_money" ? "mobile_money" : "bank");
+    setProvider(account.provider || "");
+    setAccountName(account.account_name || "");
+    setAccountNumber(account.account_number || "");
+    setCurrency(account.currency || "TZS");
+    setIsDefault(Boolean(account.is_default));
+  }
+
+  function cancelEditPayoutAccount() {
+    setEditingPayoutAccount(null);
+    setAccountType("bank"); setProvider(""); setAccountName(""); setAccountNumber(""); setCurrency("TZS"); setIsDefault(false);
+  }
+
   async function handleAddAccount(event: FormEvent<HTMLFormElement>) {
     event.preventDefault();
     if (!token) return;
@@ -202,25 +218,24 @@ const SellerKyc = () => {
 
     setIsAddingAccount(true);
     try {
-      await sellersApi.createPayoutAccount(
-        {
-          account_type: accountType,
-          provider: provider.trim(),
-          account_name: accountName.trim(),
-          account_number: accountNumber.trim(),
-          currency: currency.trim(),
-          is_default: isDefault,
-        },
-        token
-      );
+      const payoutPayload = {
+        account_type: accountType, provider: provider.trim(), account_name: accountName.trim(),
+        account_number: accountNumber.trim(), currency: currency.trim(), is_default: isDefault,
+      };
+      if (editingPayoutAccount) {
+        await sellersApi.updatePayoutAccount(editingPayoutAccount.id, payoutPayload, token);
+      } else {
+        await sellersApi.createPayoutAccount(payoutPayload, token);
+      }
       toast.success(
-        "Payout account added. It must be verified before it can receive seller payouts.",
+        editingPayoutAccount ? "Payout account updated." : "Payout account added.",
       );
       setProvider("");
       setAccountName("");
       setAccountNumber("");
       setCurrency("TZS");
       setIsDefault(false);
+      setEditingPayoutAccount(null);
       await loadData();
     } catch (error) {
       if (error instanceof ApiError) {
@@ -675,6 +690,9 @@ const SellerKyc = () => {
                                   </span>
                                 )}
 
+                                <button type="button" onClick={() => startEditPayoutAccount(account)} className="mt-1 inline-flex items-center gap-1.5 rounded-lg border border-orange-200 bg-orange-50 px-3 py-1.5 text-xs font-semibold text-[#c66c0b] transition hover:bg-orange-100">
+                                  <Pencil size={13} /> Edit
+                                </button>
                                 <button
                                   type="button"
                                   onClick={() => setDeleteTarget(account)}
@@ -717,7 +735,7 @@ const SellerKyc = () => {
                     </span>
                     <div>
                       <h3 className="font-bold text-dark dark:text-white">
-                        Add payout account
+                        {editingPayoutAccount ? "Edit payout account" : "Add payout account"}
                       </h3>
                       <p className="mt-0.5 text-xs text-dark-4 dark:text-darkTheme-body-color">
                         Settlement destination for released seller earnings.
@@ -885,15 +903,15 @@ const SellerKyc = () => {
                       className="w-full rounded-xl bg-[#f7941d] px-5 py-3 text-sm font-semibold text-white transition hover:bg-[#e88312] disabled:cursor-not-allowed disabled:opacity-50"
                     >
                       {isAddingAccount
-                        ? "Adding payout account..."
-                        : "Add Payout Account"}
+                        ? editingPayoutAccount ? "Saving changes..." : "Adding payout account..."
+                        : editingPayoutAccount ? "Save Payout Account" : "Add Payout Account"}
                     </button>
 
+                    {editingPayoutAccount && (
+                      <button type="button" onClick={cancelEditPayoutAccount} disabled={isAddingAccount} className="w-full rounded-xl border border-slate-200 px-5 py-3 text-sm font-semibold text-slate-600 hover:bg-slate-50 disabled:opacity-50">Cancel editing</button>
+                    )}
                     <p className="text-xs leading-5 text-[#64748b] dark:text-white/55">
-                      For your security, payout-account verification and status
-                      changes are controlled by authorized Xerin staff. Seller-side
-                      editing is not enabled in the current backend; add a corrected
-                      account if details are wrong.
+                      Payout verification follows the Admin policy. In Automatic mode, new or materially edited accounts are verified automatically; in Manual mode they wait for Admin review.
                     </p>
                   </form>
                 </div>

@@ -185,6 +185,7 @@ function MarketplaceSettings() {
     cod_allowed: false,
     international_delivery_allowed: false,
     auto_approve_products: false,
+    auto_verify_seller_payout_accounts: false,
   });
   const [loading, setLoading] = useState(true);
   const [saving, setSaving] = useState(false);
@@ -208,6 +209,7 @@ function MarketplaceSettings() {
           cod_allowed: Boolean(data.cod_allowed),
           international_delivery_allowed: Boolean(data.international_delivery_allowed),
           auto_approve_products: Boolean(data.auto_approve_products),
+          auto_verify_seller_payout_accounts: Boolean(data.auto_verify_seller_payout_accounts),
         });
       }
     } catch (error) {
@@ -300,6 +302,24 @@ function MarketplaceSettings() {
               setForm((x) => ({ ...x, international_delivery_allowed: value }))
             }
           />
+        </Card>
+
+        <Card title="Seller Payout Verification" icon={ShieldCheck}>
+          <Toggle
+            label="Automatic payout-account verification"
+            hint="When enabled, new or edited seller bank/mobile-money destinations are verified automatically. When disabled, they wait for Admin review."
+            checked={form.auto_verify_seller_payout_accounts}
+            onChange={(value) =>
+              setForm((x) => ({ ...x, auto_verify_seller_payout_accounts: value }))
+            }
+          />
+          <div className={`rounded-xl border p-4 text-xs leading-5 ${form.auto_verify_seller_payout_accounts ? "border-emerald-200 bg-emerald-50 text-emerald-800" : "border-amber-200 bg-amber-50 text-amber-800"}`}>
+            <b>{form.auto_verify_seller_payout_accounts ? "Automatic mode" : "Manual mode"}</b><br />
+            {form.auto_verify_seller_payout_accounts
+              ? "New and materially edited payout accounts become eligible for payouts immediately after normal field validation."
+              : "New and materially edited payout accounts remain Pending Verification until an authorized Admin approves them."}
+            <br />Existing pending accounts are not changed when this setting is switched.
+          </div>
         </Card>
 
         <Card title="Catalog Moderation" icon={PackageCheck}>

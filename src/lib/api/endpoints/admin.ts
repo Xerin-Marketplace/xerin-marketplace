@@ -1257,6 +1257,7 @@ export type AdminMarketplaceSettings = {
   cod_allowed: boolean | null;
   international_delivery_allowed: boolean | null;
   auto_approve_products: boolean | null;
+  auto_verify_seller_payout_accounts: boolean;
   configured: boolean;
   updated_by_id?: string | null;
   created_at?: string | null;
@@ -1443,6 +1444,7 @@ export const saveMarketplaceSettings = async (payload: {
   cod_allowed: boolean;
   international_delivery_allowed: boolean;
   auto_approve_products: boolean;
+  auto_verify_seller_payout_accounts: boolean;
 }) =>
   (await axiosInstance.put<AdminMarketplaceSettings>("/admin/marketplace-settings", payload)).data;
 

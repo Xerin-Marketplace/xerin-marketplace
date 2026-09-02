@@ -146,7 +146,7 @@ export default function PaymentSuccessPage() {
                 className="inline-flex min-h-12 items-center justify-center gap-2 rounded-xl bg-[#f7941d] px-4 font-bold text-white disabled:opacity-60"
               >
                 <ReceiptText size={17} />
-                {downloading === "receipt" ? "Preparing receipt..." : "Download Receipt"}
+                {downloading === "receipt" ? "Preparing receipt..." : "Download Payment Details"}
               </button>
               <button
                 type="button"

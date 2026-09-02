@@ -141,6 +141,15 @@ export const createPayoutAccount = async (
   return res.data;
 };
 
+export const updatePayoutAccount = async (
+  id: ID,
+  payload: PayoutAccountRequest,
+  token?: string | null
+): Promise<PayoutAccount> => {
+  const res = await axiosInstance.put<PayoutAccount>(API_ENDPOINTS.sellers.payoutAccountById(id), payload);
+  return res.data;
+};
+
 export const deletePayoutAccount = async (id: ID, token?: string | null): Promise<ApiMessageResponse> => {
   const res = await axiosInstance.delete<ApiMessageResponse>(API_ENDPOINTS.sellers.payoutAccountById(id));
   return res.data;
@@ -182,6 +191,7 @@ export const sellersApi = {
   getKycDocumentViewUrl,
   getPayoutAccounts,
   createPayoutAccount,
+  updatePayoutAccount,
   deletePayoutAccount,
   previewPricing: previewSellerPricing,
   getDashboardPerformance: getSellerDashboardPerformance,
