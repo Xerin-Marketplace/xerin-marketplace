@@ -74,5 +74,5 @@ function DeliveryFlow({ shipment, close, complete }: { shipment: LogisticsShipme
   <p className="mt-2 text-[11px] text-slate-400">
     Resending creates a fresh code and invalidates the previous one.
   </p>
-</div><button disabled={busy || resending || otp.length !== 6} className="min-h-12 w-full rounded-xl bg-emerald-700 px-4 text-sm font-bold text-white disabled:opacity-50">{busy ? "Verifying…" : "Verify OTP and complete delivery"}</button></form>}</div></div></div>;
+</div><button disabled={busy || resending || otp.length !== 6} className="min-h-12 w-full rounded-xl bg-emerald-700 px-4 text-sm font-bold text-black disabled:opacity-50">{busy ? "Verifying…" : "Verify OTP and complete delivery"}</button></form>}</div></div></div>;
 }

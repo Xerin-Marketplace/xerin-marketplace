@@ -1,3 +1,4 @@
+import type { CustomerPickupProof } from "@/types/api/pickup-verification";
 import axiosInstance from "../client";
 import type { SellerOrderMessage, SellerOrderMessageCreate } from "@/types/api/seller-order";
 import type {
@@ -51,6 +52,34 @@ const createPickupJob = async (shipmentId: string, data: {
 } = {}): Promise<LogisticsPickupJob> =>
   (await axiosInstance.post<LogisticsPickupJob>(`${LOGISTICS_ENDPOINTS.shipments}/${shipmentId}/pickup-job`, data)).data;
 
+const getPickupProof = async (shipmentId: string): Promise<CustomerPickupProof> =>
+  (await axiosInstance.get<CustomerPickupProof>(`${LOGISTICS_ENDPOINTS.shipments}/${shipmentId}/pickup-proof`)).data;
+
+const uploadPickupProof = async (
+  shipmentId: string,
+  data: {
+    photo: File;
+    latitude: string | number;
+    longitude: string | number;
+    courier_reference?: string;
+    notes?: string;
+  },
+): Promise<CustomerPickupProof> => {
+  const form = new FormData();
+  form.append("photo", data.photo);
+  form.append("latitude", String(data.latitude));
+  form.append("longitude", String(data.longitude));
+  if (data.courier_reference?.trim()) form.append("courier_reference", data.courier_reference.trim());
+  if (data.notes?.trim()) form.append("notes", data.notes.trim());
+  return (
+    await axiosInstance.post<CustomerPickupProof>(
+      `${LOGISTICS_ENDPOINTS.shipments}/${shipmentId}/pickup-proof`,
+      form,
+      { headers: { "Content-Type": "multipart/form-data" } },
+    )
+  ).data;
+};
+
 const getPickupJobs = async (params: PageParams<PickupJobStatus> & { assigned_to_me?: boolean } = {}): Promise<Paginated<LogisticsPickupJob>> =>
   (await axiosInstance.get<Paginated<LogisticsPickupJob>>(LOGISTICS_ENDPOINTS.pickupJobs, { params })).data;
 
@@ -75,6 +104,7 @@ const sendShipmentMessage = async (shipmentId: string, payload: SellerOrderMessa
 
 export const logisticsApi = {
   getAccount, getDashboard, getShipments, updateShipment, createPickupJob,
+  getPickupProof, uploadPickupProof,
   getPickupJobs, assignPickupJob, updatePickupJobStatus, getMembers,
   getShipmentMessages, sendShipmentMessage,
 };

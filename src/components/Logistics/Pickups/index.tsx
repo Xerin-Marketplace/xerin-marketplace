@@ -2,7 +2,8 @@
 
 import { logisticsApi } from "@/lib/api/endpoints/logistics";
 import type { LogisticsMember, LogisticsPickupJob, Paginated, PickupJobStatus } from "@/types/api/logistics";
-import { ChevronLeft, ChevronRight, PackageCheck, RefreshCw, UserRoundCheck } from "lucide-react";
+import type { CustomerPickupProof } from "@/types/api/pickup-verification";
+import { Camera, ChevronLeft, ChevronRight, LocateFixed, PackageCheck, RefreshCw, ShieldCheck, UserRoundCheck } from "lucide-react";
 import { FormEvent, useCallback, useEffect, useMemo, useState } from "react";
 
 const statuses: Array<PickupJobStatus | ""> = ["", "scheduled", "assigned", "en_route", "arrived", "completed", "failed", "cancelled"];
@@ -40,11 +41,91 @@ function JobCard({ job, assignee, open }: { job: LogisticsPickupJob; assignee?: 
 function JobPanel({ job, members, close, changed }: { job: LogisticsPickupJob; members: LogisticsMember[]; close: () => void; changed: () => void }) {
   const allowed = transitions[job.status] || []; const [memberId, setMemberId] = useState(job.assigned_membership_id || ""); const [scheduled, setScheduled] = useState(job.scheduled_for ? job.scheduled_for.slice(0, 16) : "");
   const [next, setNext] = useState<PickupJobStatus | "">(allowed[0] || ""); const [notes, setNotes] = useState(""); const [failure, setFailure] = useState(""); const [busy, setBusy] = useState(false); const [error, setError] = useState("");
+  const [pickupProof, setPickupProof] = useState<CustomerPickupProof | null>(null);
+  const [proofLoading, setProofLoading] = useState(job.status === "arrived");
+  const [proofUploading, setProofUploading] = useState(false);
+  const [proofPhoto, setProofPhoto] = useState<File | null>(null);
+  const [proofLat, setProofLat] = useState("");
+  const [proofLng, setProofLng] = useState("");
+  const [proofNotes, setProofNotes] = useState("");
+  const [locating, setLocating] = useState(false);
   const assign = async (e: FormEvent) => { e.preventDefault(); if (!memberId) return; setBusy(true); setError(""); try { await logisticsApi.assignPickupJob(job.id, { assigned_membership_id: memberId, scheduled_for: scheduled ? new Date(scheduled).toISOString() : undefined }); changed(); } catch (err) { setError(errorMessage(err)); } finally { setBusy(false); } };
   const update = async (e: FormEvent) => { e.preventDefault(); if (!next) return; if (next === "failed" && !failure.trim()) { setError("Failure reason is required when a pickup fails."); return; } setBusy(true); setError(""); try { await logisticsApi.updatePickupJobStatus(job.id, { status: next, notes: notes || undefined, failure_reason: failure || undefined }); changed(); } catch (err) { setError(errorMessage(err)); } finally { setBusy(false); } };
-  return <div className="fixed inset-0 z-[60] flex items-end justify-center bg-black/55 sm:items-center sm:p-4" role="dialog" aria-modal="true" aria-label="Manage pickup job"><div className="max-h-[92vh] w-full max-w-xl overflow-y-auto rounded-t-2xl bg-white p-4 shadow-2xl sm:rounded-2xl sm:p-6 dark:bg-slate-900"><div className="flex items-start justify-between gap-3"><div><h3 className="text-lg font-bold">{job.pickup_reference}</h3><p className="mt-1 text-sm capitalize text-slate-500">Current status: {label(job.status)}</p></div><button onClick={close} className="min-h-11 rounded-xl px-3 text-sm font-semibold">Close</button></div>{error && <p className="mt-4 rounded-xl bg-red-50 p-3 text-sm text-red-700">{error}</p>}{job.status === "arrived" && <div className="mt-4 rounded-2xl border border-orange-200 bg-orange-50 p-4 text-sm text-slate-800"><p className="font-semibold text-slate-950">Seller handover confirmation required</p><p className="mt-1">Courier arrival has been recorded. Wait for the seller to confirm the physical handover, then upload the pickup-proof photo before completing this pickup job.</p><a href="/logistics/shipments" className="mt-3 inline-flex min-h-10 items-center rounded-xl bg-orange-500 px-4 font-semibold text-white hover:bg-orange-600">Open Shipments</a></div>}
+  useEffect(() => {
+    if (job.status !== "arrived") return;
+    let active = true;
+    setProofLoading(true);
+    logisticsApi.getPickupProof(job.shipment_id)
+      .then((proof) => { if (active) setPickupProof(proof); })
+      .catch(() => { if (active) setPickupProof(null); })
+      .finally(() => { if (active) setProofLoading(false); });
+    return () => { active = false; };
+  }, [job.shipment_id, job.status]);
+
+  const locatePickup = () => {
+    if (!navigator.geolocation) {
+      setError("GPS location is not supported by this browser.");
+      return;
+    }
+    setLocating(true); setError("");
+    navigator.geolocation.getCurrentPosition(
+      (position) => {
+        setProofLat(String(position.coords.latitude));
+        setProofLng(String(position.coords.longitude));
+        setLocating(false);
+      },
+      () => {
+        setError("Unable to read the courier GPS location. Allow location access and try again.");
+        setLocating(false);
+      },
+      { enableHighAccuracy: true, timeout: 15000, maximumAge: 0 },
+    );
+  };
+
+  const uploadProof = async (event: FormEvent) => {
+    event.preventDefault();
+    if (!proofPhoto || !proofLat.trim() || !proofLng.trim()) {
+      setError("Pickup photo and current GPS coordinates are required.");
+      return;
+    }
+    setProofUploading(true); setError("");
+    try {
+      const proof = await logisticsApi.uploadPickupProof(job.shipment_id, {
+        photo: proofPhoto,
+        latitude: proofLat,
+        longitude: proofLng,
+        courier_reference: job.pickup_reference,
+        notes: proofNotes || undefined,
+      });
+      setPickupProof(proof);
+      setProofPhoto(null);
+    } catch (err) {
+      setError(errorMessage(err));
+    } finally {
+      setProofUploading(false);
+    }
+  };
+  return <div className="fixed inset-0 z-[60] flex items-end justify-center bg-black/55 sm:items-center sm:p-4" role="dialog" aria-modal="true" aria-label="Manage pickup job"><div className="max-h-[92vh] w-full max-w-xl overflow-y-auto rounded-t-2xl bg-white p-4 shadow-2xl sm:rounded-2xl sm:p-6 dark:bg-slate-900"><div className="flex items-start justify-between gap-3"><div><h3 className="text-lg font-bold">{job.pickup_reference}</h3><p className="mt-1 text-sm capitalize text-slate-500">Current status: {label(job.status)}</p></div><button onClick={close} className="min-h-11 rounded-xl px-3 text-sm font-semibold">Close</button></div>{error && <p className="mt-4 rounded-xl bg-red-50 p-3 text-sm text-red-700">{error}</p>}{job.status === "arrived" && <div className="mt-4 space-y-4">
+        <div className="rounded-2xl border border-orange-200 bg-orange-50 p-4 text-sm text-slate-800">
+          <p className="flex items-center gap-2 font-semibold text-slate-950"><ShieldCheck size={17} />Seller handover + pickup proof</p>
+          <p className="mt-1 leading-6">Courier arrival is recorded. The seller must confirm the physical handover. Then capture the package photo and GPS below. Xerin automatically moves the shipment to <b>Dispatched</b> after valid proof is stored.</p>
+        </div>
+
+        {proofLoading ? <div className="rounded-2xl border border-slate-200 p-4 text-sm text-slate-500">Checking pickup evidence…</div> : pickupProof ? <div className="rounded-2xl border border-emerald-200 bg-emerald-50 p-4">
+          <div className="flex items-start gap-3"><span className="grid h-10 w-10 shrink-0 place-items-center rounded-xl bg-emerald-600 text-white"><PackageCheck size={18} /></span><div><p className="font-bold text-emerald-950">Pickup proof captured</p><p className="mt-1 text-sm text-emerald-800">Status: {label(pickupProof.status)}. The shipment custody chain is recorded. You can now complete this pickup job.</p></div></div>
+        </div> : <form onSubmit={uploadProof} className="space-y-3 rounded-2xl border border-slate-200 bg-white p-4 dark:border-slate-700 dark:bg-slate-800">
+          <div><h4 className="flex items-center gap-2 font-semibold"><Camera size={18} />Capture pickup evidence</h4><p className="mt-1 text-xs leading-5 text-slate-500">Take or choose a clear photo of the package after the seller physically hands it to the courier.</p></div>
+          <label className="block text-sm font-semibold">Pickup photo<input required type="file" accept="image/jpeg,image/png,image/webp" capture="environment" onChange={(event) => setProofPhoto(event.target.files?.[0] || null)} className="mt-1.5 block min-h-11 w-full rounded-xl border border-slate-300 p-2 text-sm dark:border-slate-600" /></label>
+          {proofPhoto && <div className="flex items-center gap-2 rounded-xl bg-slate-50 p-3 text-sm dark:bg-slate-900"><Camera size={16} /><span className="min-w-0 truncate">{proofPhoto.name}</span></div>}
+          <div className="grid gap-3 sm:grid-cols-2"><label className="text-sm font-semibold">Latitude<input required inputMode="decimal" value={proofLat} onChange={(event) => setProofLat(event.target.value)} className="mt-1.5 min-h-11 w-full rounded-xl border border-slate-300 bg-transparent px-3 dark:border-slate-600" /></label><label className="text-sm font-semibold">Longitude<input required inputMode="decimal" value={proofLng} onChange={(event) => setProofLng(event.target.value)} className="mt-1.5 min-h-11 w-full rounded-xl border border-slate-300 bg-transparent px-3 dark:border-slate-600" /></label></div>
+          <button type="button" onClick={locatePickup} disabled={locating || proofUploading} className="inline-flex min-h-11 w-full items-center justify-center gap-2 rounded-xl border border-blue text-sm font-semibold text-blue disabled:opacity-50"><LocateFixed size={17} />{locating ? "Finding pickup location…" : "Use current GPS location"}</button>
+          <textarea value={proofNotes} onChange={(event) => setProofNotes(event.target.value)} placeholder="Pickup condition or courier note (optional)" maxLength={2000} className="min-h-20 w-full rounded-xl border border-slate-300 bg-transparent p-3 text-sm dark:border-slate-600" />
+          <button disabled={proofUploading || !proofPhoto || !proofLat.trim() || !proofLng.trim()} className="min-h-11 w-full rounded-xl bg-emerald-700 px-4 text-sm font-semibold text-white disabled:opacity-50">{proofUploading ? "Uploading pickup proof…" : "Capture pickup proof"}</button>
+          <p className="text-xs leading-5 text-slate-500">If the seller has not confirmed handover yet, Xerin will safely block this upload and ask you to wait for seller confirmation.</p>
+        </form>}
+      </div>}
       {!(["completed", "cancelled"] as PickupJobStatus[]).includes(job.status) && <form onSubmit={assign} className="mt-5 space-y-3 rounded-2xl bg-slate-50 p-4 dark:bg-slate-800"><h4 className="flex items-center gap-2 font-semibold"><UserRoundCheck size={18} />Assign or reschedule</h4><select required value={memberId} onChange={(e) => setMemberId(e.target.value)} className="min-h-11 w-full rounded-xl border border-slate-300 bg-white px-3 dark:border-slate-600 dark:bg-slate-900"><option value="">Select an active team member</option>{members.map((member) => <option key={member.id} value={member.id}>{memberName(member)} · {label(member.member_role)}</option>)}</select><input type="datetime-local" value={scheduled} onChange={(e) => setScheduled(e.target.value)} className="min-h-11 w-full rounded-xl border border-slate-300 bg-white px-3 dark:border-slate-600 dark:bg-slate-900" /><button disabled={busy || !memberId} className="min-h-11 w-full rounded-xl border border-blue px-4 text-sm font-semibold text-blue disabled:opacity-50">{busy ? "Saving…" : "Save assignment"}</button></form>}
-      {allowed.length > 0 && <form onSubmit={update} className="mt-4 space-y-3 rounded-2xl bg-slate-50 p-4 dark:bg-slate-800"><h4 className="font-semibold">Update pickup status</h4><select value={next} onChange={(e) => setNext(e.target.value as PickupJobStatus)} className="min-h-11 w-full rounded-xl border border-slate-300 bg-white px-3 capitalize dark:border-slate-600 dark:bg-slate-900">{allowed.map((item) => <option key={item} value={item}>{label(item)}</option>)}</select><textarea value={notes} onChange={(e) => setNotes(e.target.value)} placeholder="Courier note (optional)" className="min-h-24 w-full rounded-xl border border-slate-300 bg-white p-3 text-sm dark:border-slate-600 dark:bg-slate-900" />{next === "failed" && <input required value={failure} onChange={(e) => setFailure(e.target.value)} placeholder="Failure reason" className="min-h-11 w-full rounded-xl border border-red-300 bg-white px-3 text-sm dark:bg-slate-900" />}<button disabled={busy || !next} className="min-h-11 w-full rounded-xl bg-blue px-4 text-sm font-semibold text-white disabled:opacity-50">{busy ? "Saving…" : `Mark ${next ? label(next) : "status"}`}</button>{next === "completed" && <p className="text-xs text-slate-500">Completion succeeds after the seller confirms shipment handover.</p>}</form>}
+      {allowed.length > 0 && <form onSubmit={update} className="mt-4 space-y-3 rounded-2xl bg-slate-50 p-4 dark:bg-slate-800"><h4 className="font-semibold">Update pickup status</h4><select value={next} onChange={(e) => setNext(e.target.value as PickupJobStatus)} className="min-h-11 w-full rounded-xl border border-slate-300 bg-white px-3 capitalize dark:border-slate-600 dark:bg-slate-900">{allowed.map((item) => <option key={item} value={item}>{label(item)}</option>)}</select><textarea value={notes} onChange={(e) => setNotes(e.target.value)} placeholder="Courier note (optional)" className="min-h-24 w-full rounded-xl border border-slate-300 bg-white p-3 text-sm dark:border-slate-600 dark:bg-slate-900" />{next === "failed" && <input required value={failure} onChange={(e) => setFailure(e.target.value)} placeholder="Failure reason" className="min-h-11 w-full rounded-xl border border-red-300 bg-white px-3 text-sm dark:bg-slate-900" />}<button disabled={busy || !next || (next === "completed" && !pickupProof)} className="min-h-11 w-full rounded-xl bg-blue px-4 text-sm font-semibold text-white disabled:opacity-50">{busy ? "Saving…" : `Mark ${next ? label(next) : "status"}`}</button>{next === "completed" && <p className="text-xs text-slate-500">{pickupProof ? "Seller handover and pickup evidence are recorded. Complete the pickup to continue delivery." : "Capture the pickup-proof photo above before completing this job."}</p>}</form>}
       {(job.dispatcher_notes || job.courier_notes || job.failure_reason) && <div className="mt-4 space-y-2 rounded-2xl border border-slate-200 p-4 text-sm dark:border-slate-700"><h4 className="font-semibold">Job notes</h4>{job.dispatcher_notes && <p><span className="text-slate-500">Dispatcher:</span> {job.dispatcher_notes}</p>}{job.courier_notes && <p><span className="text-slate-500">Courier:</span> {job.courier_notes}</p>}{job.failure_reason && <p className="text-red-700"><span className="font-medium">Failure:</span> {job.failure_reason}</p>}</div>}
     </div></div>;
 }
