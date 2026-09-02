@@ -13,6 +13,12 @@ import type {
   SellerHandoverConfirmationRequest,
 } from "@/types/api/seller-order";
 const ROOT="/seller/orders";
+
+export type PackageEvidenceUploadResponse = {
+  file_url: string;
+  file_name: string;
+  mime_type: string;
+};
 export const sellerOrdersApi={
  summary:async()=>(await axiosInstance.get<SellerOrderSummary>(`${ROOT}/summary`)).data,
  list:async(params:SellerOrderQuery={})=>(await axiosInstance.get<SellerOrderList>(ROOT,{params})).data,
@@ -25,6 +31,15 @@ export const sellerOrdersApi={
  messages:async(id:string)=>(await axiosInstance.get<SellerOrderMessage[]>(`/seller/orders/${id}/messages`)).data,
  sendMessage:async(id:string,payload:SellerOrderMessageCreate)=>(await axiosInstance.post<SellerOrderMessage>(`/seller/orders/${id}/messages`,payload)).data,
  package:async(id:string)=>(await axiosInstance.get<SellerOrderPackage>(`/seller/orders/${id}/package`)).data,
+ uploadPackageEvidence:async(id:string,file:File)=>{
+  const formData=new FormData();
+  formData.append("file",file);
+  return (await axiosInstance.post<PackageEvidenceUploadResponse>(
+    `/seller/orders/${id}/package/evidence-upload`,
+    formData,
+    {headers:{"Content-Type":"multipart/form-data"}},
+  )).data;
+ },
  savePackage:async(id:string,payload:SellerOrderPackageUpsert)=>(await axiosInstance.put<SellerOrderPackage>(`/seller/orders/${id}/package`,payload)).data,
  readiness:async(id:string)=>(await axiosInstance.get<SellerFulfillmentReadiness>(`${ROOT}/${id}/fulfillment-readiness`)).data,
  handover:async(id:string)=>(await axiosInstance.get<ShipmentHandover>(`${ROOT}/${id}/handover`)).data,

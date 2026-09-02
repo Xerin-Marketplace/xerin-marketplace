@@ -141,7 +141,7 @@ export default function SellerOrderDetail({ orderId }: { orderId: string }) {
     is_ready: false,
     attachment_urls: [] as string[],
   });
-  const [packageAttachmentDraft, setPackageAttachmentDraft] = useState("");
+  const [packageEvidenceUploading, setPackageEvidenceUploading] = useState(false);
   const [readiness, setReadiness] = useState<SellerFulfillmentReadiness | null>(null);
   const [readinessLoading, setReadinessLoading] = useState(true);
   const [readinessError, setReadinessError] = useState("");
@@ -316,29 +316,47 @@ export default function SellerOrderDetail({ orderId }: { orderId: string }) {
 
   const openPackageEditor = () => {
     syncPackageForm(packageInfo);
-    setPackageAttachmentDraft("");
     setPackageEditorOpen(true);
   };
 
-  const addPackageAttachment = () => {
-    const value = packageAttachmentDraft.trim();
-    if (!value) return;
+  const uploadPackageEvidence = async (files: FileList | null) => {
+    if (!files?.length) return;
 
-    if (packageForm.attachment_urls.length >= 10) {
-      toast.error("A maximum of 10 packaging evidence URLs is allowed.");
+    const remaining = Math.max(0, 10 - packageForm.attachment_urls.length);
+    if (remaining === 0) {
+      toast.error("A maximum of 10 packaging evidence photos is allowed.");
       return;
     }
 
-    if (packageForm.attachment_urls.includes(value)) {
-      toast.error("This attachment URL is already added.");
+    const selected = Array.from(files).slice(0, remaining);
+    const allowedTypes = new Set(["image/jpeg", "image/png", "image/webp"]);
+    const invalid = selected.find(
+      (file) => !allowedTypes.has(file.type) || file.size > 10 * 1024 * 1024,
+    );
+    if (invalid) {
+      toast.error("Evidence photos must be JPG, PNG or WEBP and no larger than 10 MB each.");
       return;
     }
 
-    setPackageForm((current) => ({
-      ...current,
-      attachment_urls: [...current.attachment_urls, value],
-    }));
-    setPackageAttachmentDraft("");
+    setPackageEvidenceUploading(true);
+    try {
+      const uploadedUrls: string[] = [];
+      for (const file of selected) {
+        const uploaded = await sellerOrdersApi.uploadPackageEvidence(orderId, file);
+        uploadedUrls.push(uploaded.file_url);
+      }
+      setPackageForm((current) => ({
+        ...current,
+        attachment_urls: [...current.attachment_urls, ...uploadedUrls],
+      }));
+      toast.success(
+        `${uploadedUrls.length} packaging evidence photo${uploadedUrls.length === 1 ? "" : "s"} uploaded.`,
+      );
+    } catch (error) {
+      toast.error(errorMessage(error));
+    } finally {
+      setPackageEvidenceUploading(false);
+    }
   };
 
   const savePackage = async () => {
@@ -1542,75 +1560,104 @@ export default function SellerOrderDetail({ orderId }: { orderId: string }) {
                 </PackageField>
               </div>
 
-              <div className="mt-4 rounded-xl border border-slate-200 p-4 dark:border-white/10">
-                <div className="flex items-start gap-3">
-                  <ImagePlus size={18} className="mt-0.5 text-slate-400" />
-                  <div>
-                    <p className="text-sm font-semibold dark:text-white">
-                      Packaging evidence
-                    </p>
-                    <p className="mt-0.5 text-xs leading-5 text-slate-400">
-                      The current backend accepts stored attachment URLs. A shared
-                      order-media upload endpoint will be connected later for direct
-                      image upload.
-                    </p>
+              <div className="mt-4 overflow-hidden rounded-2xl border border-orange-200 bg-gradient-to-br from-orange-50 via-white to-slate-50 dark:border-orange-500/20 dark:from-orange-500/10 dark:via-[#1f2937] dark:to-[#1f2937]">
+                <div className="p-4 sm:p-5">
+                  <div className="flex items-start gap-3">
+                    <span className="grid h-10 w-10 shrink-0 place-items-center rounded-xl bg-[#f7941d] text-white shadow-sm">
+                      <ImagePlus size={18} />
+                    </span>
+                    <div>
+                      <p className="text-sm font-bold text-slate-900 dark:text-white">
+                        Packaging evidence
+                      </p>
+                      <p className="mt-1 text-xs leading-5 text-slate-500 dark:text-white/55">
+                        Upload clear photos showing the actual product after packaging.
+                        These photos document the condition handed to logistics.
+                      </p>
+                    </div>
                   </div>
-                </div>
 
-                <div className="mt-3 flex flex-col gap-2 sm:flex-row">
-                  <input
-                    type="url"
-                    value={packageAttachmentDraft}
-                    onChange={(event) =>
-                      setPackageAttachmentDraft(event.target.value)
-                    }
-                    onKeyDown={(event) => {
-                      if (event.key === "Enter") {
-                        event.preventDefault();
-                        addPackageAttachment();
-                      }
-                    }}
-                    className={`${packageInputClass} flex-1`}
-                    placeholder="https://.../packaged-order.jpg"
-                  />
-                  <button
-                    type="button"
-                    onClick={addPackageAttachment}
-                    className="rounded-xl border border-slate-200 px-4 py-2.5 text-xs font-semibold text-slate-600 dark:border-white/10 dark:text-white/60"
+                  <label
+                    className={`mt-4 flex min-h-32 cursor-pointer flex-col items-center justify-center rounded-2xl border-2 border-dashed px-5 py-6 text-center transition ${
+                      packageEvidenceUploading
+                        ? "cursor-wait border-orange-300 bg-orange-50/70 opacity-70"
+                        : "border-orange-200 bg-white/80 hover:border-[#f7941d] hover:bg-orange-50/50 dark:bg-white/[0.025]"
+                    }`}
                   >
-                    Add Evidence
-                  </button>
-                </div>
+                    {packageEvidenceUploading ? (
+                      <RefreshCw size={26} className="animate-spin text-[#f7941d]" />
+                    ) : (
+                      <ImageIcon size={28} className="text-[#f7941d]" />
+                    )}
+                    <span className="mt-3 text-sm font-bold text-slate-800 dark:text-white">
+                      {packageEvidenceUploading ? "Uploading evidence..." : "Choose packaging photos"}
+                    </span>
+                    <span className="mt-1 text-[11px] leading-5 text-slate-400">
+                      JPG, PNG or WEBP · max 10 MB each · up to 10 photos
+                    </span>
+                    <span className="mt-3 rounded-full bg-[#111827] px-3 py-1 text-[10px] font-bold uppercase tracking-wide text-white">
+                      Browse from computer
+                    </span>
+                    <input
+                      type="file"
+                      accept="image/jpeg,image/png,image/webp"
+                      multiple
+                      disabled={packageEvidenceUploading}
+                      onChange={(event) => {
+                        void uploadPackageEvidence(event.target.files);
+                        event.currentTarget.value = "";
+                      }}
+                      className="sr-only"
+                    />
+                  </label>
 
-                {packageForm.attachment_urls.length > 0 && (
-                  <div className="mt-3 space-y-2">
-                    {packageForm.attachment_urls.map((url) => (
-                      <div
-                        key={url}
-                        className="flex items-center justify-between gap-3 rounded-lg bg-slate-50 px-3 py-2 dark:bg-white/5"
-                      >
-                        <span className="min-w-0 flex-1 truncate text-xs text-slate-600 dark:text-white/60">
-                          {url}
+                  {packageForm.attachment_urls.length > 0 && (
+                    <div className="mt-4">
+                      <div className="mb-2 flex items-center justify-between">
+                        <p className="text-xs font-bold text-slate-600 dark:text-white/65">
+                          Uploaded evidence
+                        </p>
+                        <span className="text-[10px] font-semibold text-slate-400">
+                          {packageForm.attachment_urls.length}/10 photos
                         </span>
-                        <button
-                          type="button"
-                          onClick={() =>
-                            setPackageForm((current) => ({
-                              ...current,
-                              attachment_urls: current.attachment_urls.filter(
-                                (item) => item !== url,
-                              ),
-                            }))
-                          }
-                          className="text-red-500"
-                          title="Remove packaging evidence"
-                        >
-                          <Trash2 size={14} />
-                        </button>
                       </div>
-                    ))}
-                  </div>
-                )}
+                      <div className="grid grid-cols-2 gap-3 sm:grid-cols-3">
+                        {packageForm.attachment_urls.map((url, index) => (
+                          <div
+                            key={url}
+                            className="group relative aspect-[4/3] overflow-hidden rounded-xl border border-slate-200 bg-slate-100 dark:border-white/10 dark:bg-white/5"
+                          >
+                            <img
+                              src={resolveProductImageUrl(url)}
+                              alt={`Packaging evidence ${index + 1}`}
+                              className="h-full w-full object-cover"
+                            />
+                            <div className="absolute inset-x-0 bottom-0 flex items-center justify-between gap-2 bg-gradient-to-t from-black/75 to-transparent px-2.5 pb-2 pt-6">
+                              <span className="text-[10px] font-bold text-white">
+                                Photo {index + 1}
+                              </span>
+                              <button
+                                type="button"
+                                onClick={() =>
+                                  setPackageForm((current) => ({
+                                    ...current,
+                                    attachment_urls: current.attachment_urls.filter(
+                                      (item) => item !== url,
+                                    ),
+                                  }))
+                                }
+                                className="grid h-7 w-7 place-items-center rounded-lg bg-white/90 text-red-500 shadow-sm transition hover:bg-white"
+                                title="Remove packaging evidence"
+                              >
+                                <Trash2 size={13} />
+                              </button>
+                            </div>
+                          </div>
+                        ))}
+                      </div>
+                    </div>
+                  )}
+                </div>
               </div>
 
               <label
@@ -1666,7 +1713,7 @@ export default function SellerOrderDetail({ orderId }: { orderId: string }) {
               </button>
               <button
                 type="button"
-                disabled={packageSaving}
+                disabled={packageSaving || packageEvidenceUploading}
                 onClick={() => void savePackage()}
                 className="inline-flex items-center justify-center gap-2 rounded-xl bg-[#f7941d] px-5 py-2.5 text-sm font-semibold text-white disabled:opacity-50"
               >
