@@ -91,8 +91,8 @@ export default function BuyerDashboard() {
     if (notificationResult.status === "fulfilled") setNotifications({ state: "ready", data: notificationResult.value });
     else setNotifications({ state: "error", data: null });
   }
-
-  async function loadProtection(items: Order[]) {
+   
+   async function loadProtection(items: Order[]) {
     const candidates = items
       .filter((order) => order.status === "delivered" || Boolean(order.delivered_at))
       .slice(0, 10);
@@ -136,7 +136,7 @@ export default function BuyerDashboard() {
     const delivered = allOrders.filter((order) => order.status === "delivered").length;
     return { unpaid, preparing, transit, delivered };
   }, [allOrders]);
-
+ 
   const hasLoadError = [profile.state, addresses.state, orders.state, cart.state, wishlist.state, notifications.state].includes("error");
   const attentionCount = orderCounts.unpaid + protection.actionable + (notifications.data?.unread ?? 0);
 
@@ -163,7 +163,6 @@ export default function BuyerDashboard() {
           </div>
         </div>
       </section>
-
       <section className="rounded-2xl border border-[#e2e8f0] bg-white p-5 shadow-sm dark:border-white/10 dark:bg-darkTheme-card">
         <div className="flex flex-col gap-2 sm:flex-row sm:items-center sm:justify-between">
           <div>
@@ -251,7 +250,7 @@ export default function BuyerDashboard() {
           )}
         </Card>
 
-        <div className="space-y-6">
+       <div className="space-y-6">
           <Card title="Quick actions">
             <div className="grid gap-3 sm:grid-cols-2 xl:grid-cols-1">
               <Action href={cartCount ? "/cart" : "/shop-with-sidebar"} icon={ShoppingBag} label={cartCount ? "Continue Checkout" : "Browse Products"} />
@@ -334,7 +333,7 @@ function ReadinessRow({ label, ready }: { label: string; ready: boolean }) {
     </div>
   );
 }
-
+ 
 function EmptyOrders() {
   return (
     <div className="rounded-xl border border-dashed border-[#cbd5e1] p-7 text-center dark:border-white/10">
@@ -353,3 +352,5 @@ function Loading() {
 function ErrorText() {
   return <p className="text-sm text-red-600">We could not load this account information.</p>;
 }
+
+

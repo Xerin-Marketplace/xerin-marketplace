@@ -320,9 +320,9 @@ export default function MarketplaceOverview() {
               <tbody className="divide-y divide-[#f0f1f3] dark:divide-white/10">
                 {recentOrders.map((order) => (
                   <tr key={order.id} className="transition hover:bg-[#fff8f3] dark:hover:bg-white/[.03]">
-                    <td className="px-5 py-4"><Link href={`/admin/orders/${order.id}`} className="font-black text-[#111827] hover:text-[#f47524] dark:text-white">#{order.order_number}</Link><div className="mt-0.5 text-[10px] text-[#98a2b3]">{order.items?.length || 0} item(s)</div></td>
+                    <td className="px-5 py-4"><Link href={`/admin/orders/${order.id}`} className="font-black text-[#111827] hover:text-[#f47524] dark:text-white">#{String(order.id).slice(0, 8).toUpperCase()}</Link><div className="mt-0.5 text-[10px] text-[#98a2b3]">{order.items?.length || 0} item(s)</div></td>
                     <td className="px-4 py-4"><div className="font-semibold text-[#344054] dark:text-gray-200">{[order.user?.first_name, order.user?.last_name].filter(Boolean).join(" ") || "Customer"}</div><div className="mt-0.5 max-w-[180px] truncate text-[10px] text-[#98a2b3]">{order.user?.email || "—"}</div></td>
-                    <td className="px-4 py-4 font-black text-[#111827] dark:text-white">{money(order.total_amount, order.currency)}</td>
+                    <td className="px-4 py-4 font-black text-[#111827] dark:text-white">{money(order.total, order.currency)}</td>
                     <td className="px-4 py-4"><span className={`rounded-full px-2 py-1 text-[10px] font-bold ${String(order.payment_status).toLowerCase() === "completed" ? "bg-[#fff2e8] text-[#c75813]" : "bg-[#f2f4f7] text-[#667085]"}`}>{String(order.payment_status || "pending").replaceAll("_", " ")}</span></td>
                     <td className="px-4 py-4"><span className="rounded-full bg-[#111827] px-2 py-1 text-[10px] font-bold capitalize text-white">{String(order.status).replaceAll("_", " ")}</span></td>
                     <td className="px-4 py-4 whitespace-nowrap text-[#667085] dark:text-gray-300">{shortDate(order.created_at)}</td>
