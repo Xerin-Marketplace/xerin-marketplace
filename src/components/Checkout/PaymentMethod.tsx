@@ -135,7 +135,7 @@ const PaymentMethod = ({
                   <span className="rounded-lg border border-blue-200 bg-white px-3 py-2 font-bold tracking-wide text-blue-900 dark:border-white/10 dark:bg-white/5 dark:text-white">Mastercard</span>
                 </div>
                 <p className="mt-3 text-xs leading-5">
-                  After you place the order, Xerin opens the secure card checkout. Card number and CVV are not stored by Xerin.
+                  After you place the order, Xerin redirects you to Selcom Secure Checkout to enter your Visa or Mastercard details. Card number and CVV never pass through or get stored by Xerin.
                 </p>
               </div>
             )}

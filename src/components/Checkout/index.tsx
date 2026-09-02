@@ -581,7 +581,7 @@ const Checkout = () => {
         provider:
           form.paymentMethod === "cash_on_delivery"
             ? undefined
-            : paymentProvider || "azampay",
+            : paymentProvider || (form.paymentMethod === "card" ? "selcom" : "selcom"),
         phone_number:
           selectedPayment?.requires_phone
             ? phoneNumber
@@ -618,7 +618,7 @@ const Checkout = () => {
       const payment = await paymentsApi.initiate({
         order_id: String(order.id),
         method: form.paymentMethod,
-        provider: isCod ? undefined : paymentProvider || "azampay",
+        provider: isCod ? undefined : paymentProvider || (form.paymentMethod === "card" ? "selcom" : "selcom"),
         phone_number: selectedPayment?.requires_phone
           ? phoneNumber
           : undefined,
