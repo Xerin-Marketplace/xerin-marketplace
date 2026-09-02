@@ -16,12 +16,14 @@ export function ThemeProvider({ children }: { children: React.ReactNode }) {
 
   useEffect(() => {
     const savedTheme = localStorage.getItem("theme") as Theme | null;
-    const prefersDark = window.matchMedia("(prefers-color-scheme: dark)").matches;
-    const initialTheme = savedTheme || (prefersDark ? "dark" : "light");
+
+    // Xerin always starts in Light Mode for first-time visitors.
+    // A user's explicit Light/Dark choice is remembered on later visits.
+    const initialTheme: Theme =
+      savedTheme === "dark" || savedTheme === "light" ? savedTheme : "light";
+
     setTheme(initialTheme);
-    if (initialTheme === "dark") {
-      document.documentElement.classList.add("dark");
-    }
+    document.documentElement.classList.toggle("dark", initialTheme === "dark");
   }, []);
 
   const toggleTheme = () => {

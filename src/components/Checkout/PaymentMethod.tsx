@@ -81,7 +81,7 @@ const PaymentMethod = ({
                       {method.id === "cash_on_delivery"
                         ? "Pay when the logistics company delivers your local order."
                         : method.id === "mobile_money"
-                          ? "Pay securely using your preferred mobile network."
+                          ? "Pay securely using your preferred mobile network through Selcom."
                           : "Pay securely using Visa or Mastercard through the protected card checkout."}
                     </span>
                   </span>

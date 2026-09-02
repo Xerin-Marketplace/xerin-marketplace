@@ -75,12 +75,14 @@ export default function OrderSuccessPage() {
     try {
       let next = await paymentsApi.orderState(orderId);
 
-      // ZenoPay MNO is asynchronous. While an attempt is pending/processing,
-      // periodically ask Xerin backend to verify the provider's authoritative
-      // status as a fallback in case the webhook is delayed.
+      // Selcom/ZenoPay MNO payments are asynchronous. While an attempt is
+      // pending/processing, ask Xerin backend to verify the provider's
+      // authoritative status as a fallback in case the webhook is delayed.
       if (
         next.latest_payment?.id &&
-        (next.latest_payment.provider || "").toLowerCase() === "zenopay" &&
+        ["zenopay", "selcom"].includes(
+          (next.latest_payment.provider || "").toLowerCase(),
+        ) &&
         ["pending", "processing"].includes(next.payment_status)
       ) {
         try {
