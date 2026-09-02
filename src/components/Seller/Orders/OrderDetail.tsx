@@ -1100,7 +1100,7 @@ export default function SellerOrderDetail({ orderId }: { orderId: string }) {
                     type="button"
                     onClick={() => void confirmHandover()}
                     disabled={confirmingHandover}
-                    className="inline-flex items-center gap-2 rounded-xl bg-orange-500 px-4 py-2.5 text-sm font-bold text-white shadow-sm transition hover:bg-orange-600 disabled:cursor-not-allowed disabled:opacity-60"
+                    className="inline-flex items-center gap-2 rounded-xl bg-orange-500 px-4 py-2.5 text-sm font-bold text-black shadow-sm transition hover:bg-orange-600 disabled:cursor-not-allowed disabled:opacity-60"
                   >
                     {confirmingHandover ? <RefreshCw size={16} className="animate-spin" /> : <PackageCheck size={16} />}
                     {confirmingHandover ? "Confirming..." : "Confirm Product Handover"}

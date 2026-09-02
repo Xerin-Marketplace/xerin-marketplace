@@ -841,6 +841,7 @@ const listPaymentResource = async <T,>(path:string,params:PaymentAdminParams={})
 export const getAdminPaymentDashboard = async () => (await axiosInstance.get<AdminPaymentDashboard>("/admin/payments/dashboard")).data;
 export const listAdminPaymentProviders = async (params:PaymentAdminParams={}) => listPaymentResource<AdminPaymentProvider>("/admin/payment-providers",params);
 export const listAdminPayouts = async (params:PaymentAdminParams={}) => listPaymentResource<AdminPayout>("/admin/payouts",params);
+export const updateAdminPayout = async (id:string,payload:{status:string;provider_reference?:string|null;note?:string|null}) => (await axiosInstance.patch(`/wallet/admin/payouts/${id}`,payload)).data;
 export const listAdminPaymentDisputes = async (params:PaymentAdminParams={}) => listPaymentResource<AdminPaymentDispute>("/admin/payment-disputes",params);
 export const listAdminRiskEvents = async (params:PaymentAdminParams={}) => listPaymentResource<AdminRiskEvent>("/admin/payment-risk-events",params);
 export const listAdminReconciliation = async (params:PaymentAdminParams={}) => listPaymentResource<AdminReconciliation>("/admin/reconciliation",params);
