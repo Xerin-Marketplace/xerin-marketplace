@@ -91,7 +91,7 @@ const Header = () => {
           <div className="xl:w-auto flex w-full justify-between items-center gap-4 lg:gap-10">
             <Link className="flex-shrink-0 flex items-center" href="/">
             <Image
-              src="/images/logo/less.png"
+              src="/images/logo/logo.png"
               alt="Xerin Marketplace logo"
               width={132}
               height={40}
