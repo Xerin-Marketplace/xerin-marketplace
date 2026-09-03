@@ -84,19 +84,19 @@ const Header = () => {
         {/* <!-- header top start --> */}
         <div
           className={`flex flex-col lg:flex-row gap-3 lg:gap-5 items-stretch lg:items-center xl:justify-between ease-out duration-200 ${
-            stickyMenu ? "py-3" : "py-4"
+            stickyMenu ? "py-2" : "py-2.5"
           }`}
         >
           {/* <!-- header top left --> */}
           <div className="xl:w-auto flex w-full justify-between items-center gap-4 lg:gap-10">
             <Link className="flex-shrink-0 flex items-center" href="/">
             <Image
-              src="/images/logo/logo.png"
+              src="/images/logo/less.png"
               alt="Xerin Marketplace logo"
-              width={150}
-              height={46}
+              width={132}
+              height={40}
               className="object-contain"
-              style={{ width: "150px", height: "auto" }}
+              style={{ width: "132px", height: "auto" }}
               priority
             />
           </Link>
@@ -449,7 +449,7 @@ const Header = () => {
                         <Link
                           href={menuItem.path}
                           className={`hover:text-blue text-custom-sm font-medium text-dark dark:text-darkTheme-body-color flex ${
-                            stickyMenu ? "xl:py-4" : "xl:py-6"
+                            stickyMenu ? "xl:py-3" : "xl:py-3.5"
                           }`}
                         >
                           {menuItem.title}
@@ -466,7 +466,7 @@ const Header = () => {
                         <Link
                           href={`/shop-with-sidebar?category_id=${encodeURIComponent(String(category.id))}`}
                           className={`hover:text-blue text-custom-sm font-medium text-dark dark:text-darkTheme-body-color flex ${
-                            stickyMenu ? "xl:py-4" : "xl:py-6"
+                            stickyMenu ? "xl:py-3" : "xl:py-3.5"
                           }`}
                         >
                           {category.name}
@@ -483,7 +483,7 @@ const Header = () => {
             {/* // <!--=== Nav Right Start ===--> */}
             <div className="hidden xl:block">
               <ul className="flex items-center gap-5.5">
-                <li className="py-4">
+                <li className="py-3">
                   <a
                     href={ROUTES.shop}
                     className="flex items-center gap-1.5 font-medium text-custom-sm text-dark hover:text-blue"
@@ -509,7 +509,7 @@ const Header = () => {
                   </a>
                 </li>
 
-                <li className="py-4">
+                <li className="py-3">
                   <Link
                     href="/wishlist"
                     className="flex items-center gap-1.5 font-medium text-custom-sm text-dark hover:text-blue"
