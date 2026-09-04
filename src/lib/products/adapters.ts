@@ -112,6 +112,9 @@ export const mapApiProductToUiProduct = (product: ApiProduct): UiProduct => {
     sku: product.sku,
     status: product.status,
     isActive: product.is_active,
+    marketplaceAvailable: product.marketplace_available !== false,
+    marketplaceUnavailableReason: product.marketplace_unavailable_reason ?? null,
+    sellerComplianceStatus: product.seller_compliance_status ?? null,
     variants: product.variants?.map((variant) => ({
       id: variant.id,
       name: variant.variant_name,

@@ -7,6 +7,9 @@ export type Product = {
   sku?: string;
   status?: string;
   isActive?: boolean;
+  marketplaceAvailable?: boolean;
+  marketplaceUnavailableReason?: string | null;
+  sellerComplianceStatus?: string | null;
   variants?: Array<{
     id: string | number;
     name: string;

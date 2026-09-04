@@ -70,6 +70,8 @@ export const uploadKycDocument = async (
 ): Promise<SellerKycDocument> => {
   const formData = new FormData();
   formData.append("document_type", payload.document_type);
+  if (payload.document_number !== undefined) formData.append("document_number", payload.document_number);
+  if (payload.expiry_date !== undefined) formData.append("expiry_date", payload.expiry_date);
   formData.append("file", payload.file);
 
   const res = await axiosInstance.post<SellerKycDocument>(API_ENDPOINTS.sellers.kycDocuments, formData, {
@@ -92,13 +94,23 @@ export const uploadKycDocuments = async (
 };
 
 export const uploadBulkKycDocuments = async (
-  files: { tin: File; business_profile: File; business_registration: File },
+  files: {
+    tin: File;
+    business_registration: File;
+    business_license: File;
+    business_profile: File;
+    business_license_number: string;
+    business_license_expiry_date: string;
+  },
   token?: string | null
 ): Promise<SellerKycDocument[]> => {
   const formData = new FormData();
   formData.append("tin_file", files.tin);
   formData.append("business_profile_file", files.business_profile);
   formData.append("business_registration_file", files.business_registration);
+  formData.append("business_license_file", files.business_license);
+  formData.append("business_license_number", files.business_license_number);
+  formData.append("business_license_expiry_date", files.business_license_expiry_date);
   const res = await axiosInstance.post<SellerKycDocument[]>(
     `${API_ENDPOINTS.sellers.kycDocuments}/bulk`,
     formData,
@@ -109,11 +121,18 @@ export const uploadBulkKycDocuments = async (
 
 export const updateKycDocument = async (
   documentId: ID,
-  payload: { file?: File; document_type?: SellerDocumentType },
+  payload: {
+    file?: File;
+    document_type?: SellerDocumentType;
+    document_number?: string;
+    expiry_date?: string;
+  },
   token?: string | null
 ): Promise<SellerKycDocument> => {
   const formData = new FormData();
   if (payload.document_type) formData.append("document_type", payload.document_type);
+  if (payload.document_number !== undefined) formData.append("document_number", payload.document_number);
+  if (payload.expiry_date !== undefined) formData.append("expiry_date", payload.expiry_date);
   if (payload.file) formData.append("file", payload.file);
   const res = await axiosInstance.put<SellerKycDocument>(
     `${API_ENDPOINTS.sellers.kycDocuments}/${documentId}`,
@@ -125,6 +144,28 @@ export const updateKycDocument = async (
 
 export const getKycDocumentViewUrl = (documentId: ID) =>
   `${API_ENDPOINTS.sellers.kycDocuments}/${documentId}/view`;
+
+export const renewBusinessLicense = async (
+  payload: {
+    file: File;
+    business_license_number: string;
+    business_license_expiry_date: string;
+  },
+  token?: string | null,
+): Promise<SellerKycDocument> => {
+  const formData = new FormData();
+  formData.append("business_license_file", payload.file);
+  formData.append("business_license_number", payload.business_license_number);
+  formData.append("business_license_expiry_date", payload.business_license_expiry_date);
+
+  const res = await axiosInstance.post<SellerKycDocument>(
+    "/sellers/business-license/renew",
+    formData,
+    { headers: { "Content-Type": "multipart/form-data" } },
+  );
+  return res.data;
+};
+
 
 export const getPayoutAccounts = async (token?: string | null): Promise<PayoutAccount[]> => {
   const res = await axiosInstance.get<PaginatedResults<PayoutAccount> | PayoutAccount[]>(
@@ -189,6 +230,7 @@ export const sellersApi = {
   uploadBulkKycDocuments,
   updateKycDocument,
   getKycDocumentViewUrl,
+  renewBusinessLicense,
   getPayoutAccounts,
   createPayoutAccount,
   updatePayoutAccount,

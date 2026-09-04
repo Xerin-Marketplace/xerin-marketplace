@@ -37,7 +37,8 @@ const errorMessage = (error: unknown) =>
 const documentLabel = (type: string) => {
   const labels: Record<string, string> = {
     tin: "TIN Certificate",
-    business_registration: "Business Licence / Registration",
+    business_registration: "Business Registration / Incorporation",
+    business_license: "Business Licence",
     business_profile: "Business Profile",
   };
 
@@ -58,6 +59,8 @@ const sellerStatusStyle = (status: string) => {
       return "bg-blue-50 text-blue-700 border-blue-200";
     case "pending":
       return "bg-amber-50 text-amber-700 border-amber-200";
+    case "suspended":
+      return "bg-orange-50 text-orange-700 border-orange-200";
     default:
       return "bg-slate-50 text-slate-700 border-slate-200";
   }
@@ -96,6 +99,7 @@ export default function AdminSellers({
   } | null>(null);
   const [rejectReason, setRejectReason] = useState("");
   const [showRejectModal, setShowRejectModal] = useState(false);
+  const [rejectContext, setRejectContext] = useState<"application" | "license_renewal">("application");
   const [busy, setBusy] = useState<string | null>(null);
   const [page, setPage] = useState(1);
   const [pageSize, setPageSize] = useState(10);
@@ -139,6 +143,7 @@ export default function AdminSellers({
   const openSeller = async (seller: AdminSeller) => {
     setSelected(seller);
     setRejectReason("");
+    setRejectContext("application");
     setShowRejectModal(false);
     setDocuments([]);
     setDocumentsLoading(true);
@@ -177,6 +182,38 @@ export default function AdminSellers({
     }
   };
 
+  const startLicenseRenewalReview = async () => {
+    if (!selected) return;
+    setBusy("renewal-review");
+    try {
+      const updated = await adminService.startSellerLicenseRenewalReview(selected.id);
+      setSellers((items) => items.map((item) => (item.id === updated.id ? updated : item)));
+      setSelected(updated);
+      setDocuments(await adminService.getSellerDocuments(selected.id));
+      toast.success("Business Licence renewal review started.");
+    } catch (error) {
+      toast.error(errorMessage(error));
+    } finally {
+      setBusy(null);
+    }
+  };
+
+  const approveLicenseRenewal = async () => {
+    if (!selected) return;
+    setBusy("renewal-approve");
+    try {
+      const updated = await adminService.approveSellerLicenseRenewal(selected.id);
+      setSellers((items) => items.map((item) => (item.id === updated.id ? updated : item)));
+      setSelected(updated);
+      setDocuments(await adminService.getSellerDocuments(selected.id));
+      toast.success("Business Licence renewal approved. Seller selling access is active again.");
+    } catch (error) {
+      toast.error(errorMessage(error));
+    } finally {
+      setBusy(null);
+    }
+  };
+
   const reject = async () => {
     if (!selected || !rejectReason.trim()) {
       toast.error("Add a rejection reason first.");
@@ -186,10 +223,16 @@ export default function AdminSellers({
     setBusy("reject");
 
     try {
-      const updated = await adminService.rejectSeller(
-        selected.id,
-        rejectReason.trim(),
-      );
+      const updated =
+        rejectContext === "license_renewal"
+          ? await adminService.rejectSellerLicenseRenewal(
+              selected.id,
+              rejectReason.trim(),
+            )
+          : await adminService.rejectSeller(
+              selected.id,
+              rejectReason.trim(),
+            );
       setSellers((items) =>
         items.map((item) => (item.id === updated.id ? updated : item)),
       );
@@ -198,7 +241,9 @@ export default function AdminSellers({
       setShowRejectModal(false);
       setRejectReason("");
       toast.success(
-        "Seller application rejected. The seller can now see the reason and correct the rejected documents.",
+        rejectContext === "license_renewal"
+          ? "Business Licence renewal rejected. The seller remains on compliance hold and can submit a corrected renewal."
+          : "Seller application rejected. The seller can now see the reason and correct the rejected documents.",
       );
     } catch (error) {
       toast.error(errorMessage(error));
@@ -213,6 +258,7 @@ export default function AdminSellers({
     review: sellers.filter((seller) => seller.status === "under_review").length,
     approved: sellers.filter((seller) => seller.status === "approved").length,
     rejected: sellers.filter((seller) => seller.status === "rejected").length,
+    suspended: sellers.filter((seller) => seller.status === "suspended").length,
   };
 
   return (
@@ -312,6 +358,7 @@ export default function AdminSellers({
                 <option value="all">All statuses</option>
                 <option value="pending">Pending</option>
                 <option value="under_review">Under review</option>
+                <option value="suspended">Suspended / compliance hold</option>
                 <option value="approved">Approved</option>
                 <option value="rejected">Rejected</option>
               </select>
@@ -549,26 +596,32 @@ export default function AdminSellers({
 
             <div
               className={`mt-6 rounded-xl border p-4 text-sm ${
-                selected.status === "rejected"
-                  ? "border-red-200 bg-red-50 text-red-800"
-                  : selected.status === "approved"
-                    ? "border-emerald-200 bg-emerald-50 text-emerald-800"
-                    : "border-blue-100 bg-blue-50 text-blue-800"
+                selected.status === "suspended" && selected.suspension_reason === "business_license_expired"
+                  ? "border-amber-200 bg-amber-50 text-amber-900"
+                  : selected.status === "rejected"
+                    ? "border-red-200 bg-red-50 text-red-800"
+                    : selected.status === "approved"
+                      ? "border-emerald-200 bg-emerald-50 text-emerald-800"
+                      : "border-blue-100 bg-blue-50 text-blue-800"
               }`}
             >
               <p className="font-semibold">
-                {selected.status === "rejected"
-                  ? "Correction requested"
-                  : selected.status === "approved"
-                    ? "Seller verified"
-                    : "Admin review mode"}
+                {selected.status === "suspended" && selected.suspension_reason === "business_license_expired"
+                  ? "Business Licence renewal required"
+                  : selected.status === "rejected"
+                    ? "Correction requested"
+                    : selected.status === "approved"
+                      ? "Seller verified"
+                      : "Admin review mode"}
               </p>
               <p className="mt-1 text-xs leading-5">
-                {selected.status === "rejected"
-                  ? "The seller can edit the rejected document(s). Review the corrected submission when it is uploaded again."
-                  : selected.status === "approved"
-                    ? "This seller has completed verification. Documents remain available for audit and viewing."
-                    : "Seller documents are view-only during review. Admin does not edit seller files. Reject with a clear reason when a correction is required."}
+                {selected.status === "suspended" && selected.suspension_reason === "business_license_expired"
+                  ? "Selling is paused because the previous Business Licence expired. Review the current renewal document below; approval restores selling automatically, while rejection keeps the seller on compliance hold."
+                  : selected.status === "rejected"
+                    ? "The seller can edit the rejected document(s). Review the corrected submission when it is uploaded again."
+                    : selected.status === "approved"
+                      ? "This seller has completed verification. Documents remain available for audit and viewing."
+                      : "Seller documents are view-only during review. Admin does not edit seller files. Reject with a clear reason when a correction is required."}
               </p>
             </div>
 
@@ -606,13 +659,24 @@ export default function AdminSellers({
                           <p className="font-medium text-[#111827]">
                             {documentLabel(document.document_type)}
                           </p>
-                          <span
-                            className={`mt-1 inline-flex rounded-full px-2.5 py-1 text-[10px] font-semibold capitalize ${documentStatusStyle(
-                              document.status,
-                            )}`}
-                          >
-                            {document.status.replaceAll("_", " ")}
-                          </span>
+                          <div className="mt-1 flex flex-wrap items-center gap-2">
+                            <span
+                              className={`inline-flex rounded-full px-2.5 py-1 text-[10px] font-semibold capitalize ${documentStatusStyle(
+                                document.status,
+                              )}`}
+                            >
+                              {document.status.replaceAll("_", " ")}
+                            </span>
+                            {document.is_current === false && (
+                              <span className="rounded-full bg-slate-100 px-2 py-1 text-[10px] font-semibold text-slate-500">Archived v{document.version || 1}</span>
+                            )}
+                          </div>
+                          {document.document_type === "business_license" && (
+                            <div className="mt-2 text-xs leading-5 text-slate-500">
+                              <p><span className="font-semibold text-slate-700">Licence no:</span> {document.document_number || "—"}</p>
+                              <p><span className="font-semibold text-slate-700">Expiry:</span> {document.expiry_date || "—"}</p>
+                            </div>
+                          )}
                         </div>
 
                         <button
@@ -656,7 +720,66 @@ export default function AdminSellers({
 
             </div>
 
-            {selected.status !== "approved" && (
+            {selected.status === "suspended" && selected.suspension_reason === "business_license_expired" ? (
+              <div className="shrink-0 border-t border-amber-200 bg-amber-50 px-6 py-4 shadow-[0_-8px_24px_rgba(15,23,42,0.04)]">
+                {(() => {
+                  const renewal = documents.find(
+                    (document) =>
+                      document.document_type === "business_license" &&
+                      document.is_current !== false,
+                  );
+                  const renewalStatus = renewal?.status || "missing";
+
+                  return (
+                    <>
+                      <p className="mb-3 text-xs leading-5 text-amber-900">
+                        This is a licence renewal review. Do not use the normal seller onboarding approval flow.
+                      </p>
+                      {renewalStatus === "pending" || renewalStatus === "rejected" ? (
+                        <button
+                          type="button"
+                          disabled={Boolean(busy) || documentsLoading || !renewal}
+                          onClick={() => void startLicenseRenewalReview()}
+                          className="inline-flex h-12 w-full items-center justify-center gap-2 rounded-xl bg-blue-600 px-4 text-sm font-semibold text-white disabled:opacity-50"
+                        >
+                          <ShieldCheck size={17} />
+                          {busy === "renewal-review" ? "Starting review..." : "Start Licence Renewal Review"}
+                        </button>
+                      ) : renewalStatus === "under_review" ? (
+                        <div className="grid grid-cols-2 gap-3">
+                          <button
+                            type="button"
+                            disabled={Boolean(busy) || documentsLoading}
+                            onClick={() => void approveLicenseRenewal()}
+                            className="inline-flex h-12 items-center justify-center gap-2 rounded-xl bg-emerald-600 px-4 text-sm font-semibold text-white disabled:opacity-50"
+                          >
+                            <CheckCircle2 size={17} />
+                            {busy === "renewal-approve" ? "Approving..." : "Approve Renewal"}
+                          </button>
+                          <button
+                            type="button"
+                            disabled={Boolean(busy) || documentsLoading}
+                            onClick={() => {
+                              setRejectContext("license_renewal");
+                              setRejectReason("");
+                              setShowRejectModal(true);
+                            }}
+                            className="inline-flex h-12 items-center justify-center gap-2 rounded-xl bg-red-600 px-4 text-sm font-semibold text-white disabled:opacity-50"
+                          >
+                            <AlertCircle size={17} />
+                            Reject Renewal
+                          </button>
+                        </div>
+                      ) : (
+                        <p className="rounded-xl border border-amber-200 bg-white p-3 text-xs text-amber-900">
+                          Waiting for the seller to submit a Business Licence renewal.
+                        </p>
+                      )}
+                    </>
+                  );
+                })()}
+              </div>
+            ) : selected.status !== "approved" ? (
               <div className="shrink-0 border-t border-gray-200 bg-white px-6 py-4 shadow-[0_-8px_24px_rgba(15,23,42,0.04)]">
                 <p className="mb-3 text-xs leading-5 text-gray-500">
                   After reviewing the seller details and all submitted documents,
@@ -678,6 +801,7 @@ export default function AdminSellers({
                     type="button"
                     disabled={Boolean(busy) || documentsLoading || documents.length === 0}
                     onClick={() => {
+                      setRejectContext("application");
                       setRejectReason("");
                       setShowRejectModal(true);
                     }}
@@ -688,7 +812,7 @@ export default function AdminSellers({
                   </button>
                 </div>
               </div>
-            )}
+            ) : null}
           </aside>
         </div>
       )}
@@ -710,14 +834,17 @@ export default function AdminSellers({
             <div className="flex items-start justify-between border-b border-gray-100 px-6 py-5">
               <div>
                 <p className="text-xs font-bold uppercase tracking-[0.14em] text-red-600">
-                  Reject Seller Application
+                  {rejectContext === "license_renewal"
+                    ? "Reject Business Licence Renewal"
+                    : "Reject Seller Application"}
                 </p>
                 <h3 className="mt-1 text-xl font-semibold text-[#111827]">
                   {selected.business_name}
                 </h3>
                 <p className="mt-1 text-sm leading-6 text-gray-500">
-                  Tell the seller exactly what must be corrected. This reason will
-                  be visible to the seller and will allow document editing again.
+                  {rejectContext === "license_renewal"
+                    ? "Explain exactly what must be corrected in the renewed licence. The seller stays on compliance hold until a valid renewal is approved."
+                    : "Tell the seller exactly what must be corrected. This reason will be visible to the seller and will allow document editing again."}
                 </p>
               </div>
 

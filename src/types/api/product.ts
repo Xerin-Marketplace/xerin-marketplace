@@ -161,6 +161,9 @@ export type Product = TimestampFields & {
   approved_at?: string | null;
   approved_by_user_id?: ID | null;
   approval_method?: "automatic" | "manual" | string | null;
+  seller_compliance_status?: string | null;
+  marketplace_available?: boolean;
+  marketplace_unavailable_reason?: string | null;
 
   // Optional frontend-enriched fields when fetched separately.
   images?: ProductImage[];

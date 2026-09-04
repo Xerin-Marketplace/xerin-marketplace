@@ -43,7 +43,14 @@ const ShopDetails = ({ product }: { product: Product }) => {
   const addCartItem = useAddCartItem();
   const router = useRouter();
 
-  const available = Boolean(product.isActive && product.status === "approved");
+  const complianceUnavailable =
+    product.marketplaceAvailable === false ||
+    product.sellerComplianceStatus === "suspended";
+  const available = Boolean(
+    product.isActive &&
+      product.status === "approved" &&
+      !complianceUnavailable,
+  );
   const discountPercent = product.price > product.discountedPrice
     ? Math.round(((product.price - product.discountedPrice) / product.price) * 100)
     : 0;
@@ -193,6 +200,15 @@ const ShopDetails = ({ product }: { product: Product }) => {
                       </div>
                     </div>
 
+                    {complianceUnavailable && (
+                      <div className="mt-4 rounded-2xl border border-amber-200 bg-amber-50 px-4 py-3 text-amber-900 dark:border-amber-500/30 dark:bg-amber-500/10 dark:text-amber-200">
+                        <p className="text-sm font-bold">Temporarily unavailable</p>
+                        <p className="mt-1 text-xs leading-5">
+                          This seller cannot accept new sales while their business licence is under renewal. You can keep browsing or choose another seller offer.
+                        </p>
+                      </div>
+                    )}
+
                     <div className="mt-3 grid grid-cols-2 gap-2.5 sm:grid-cols-[minmax(0,1fr)_minmax(0,1fr)_48px] sm:gap-3">
                       <button
                         type="button"
@@ -200,7 +216,7 @@ const ShopDetails = ({ product }: { product: Product }) => {
                         disabled={addCartItem.isPending || !available}
                         className="inline-flex min-h-12 items-center justify-center rounded-xl border-2 border-orange bg-white px-4 text-sm font-bold text-orange transition hover:bg-orange hover:text-white disabled:cursor-not-allowed disabled:opacity-50 sm:px-5"
                       >
-                        {addCartItem.isPending ? "Adding..." : "Add to Cart"}
+                        {complianceUnavailable ? "Unavailable" : addCartItem.isPending ? "Adding..." : "Add to Cart"}
                       </button>
                       <button
                         type="button"
@@ -208,7 +224,7 @@ const ShopDetails = ({ product }: { product: Product }) => {
                         disabled={addCartItem.isPending || !available}
                         className="inline-flex min-h-12 items-center justify-center rounded-xl bg-orange px-4 text-sm font-bold text-white shadow-sm transition hover:bg-[#e95f23] disabled:cursor-not-allowed disabled:opacity-50 sm:px-5"
                       >
-                        Buy Now
+                        {complianceUnavailable ? "Unavailable" : "Buy Now"}
                       </button>
                       <a href={ROUTES.wishlist} aria-label="Add to wishlist" className="col-span-2 inline-flex min-h-12 items-center justify-center gap-2 rounded-xl border border-gray-3 bg-white px-4 text-sm font-semibold text-dark shadow-sm transition hover:border-orange hover:text-orange dark:border-darkTheme-border-color dark:bg-darkTheme-card dark:text-white sm:col-auto sm:w-12 sm:px-0">
                         <svg width="20" height="20" viewBox="0 0 24 24" fill="none"><path d="M20.8 4.6a5.5 5.5 0 0 0-7.8 0L12 5.6l-1-1a5.5 5.5 0 0 0-7.8 7.8l1 1L12 21l7.8-7.6 1-1a5.5 5.5 0 0 0 0-7.8Z" stroke="currentColor" strokeWidth="1.7" strokeLinecap="round" strokeLinejoin="round"/></svg>

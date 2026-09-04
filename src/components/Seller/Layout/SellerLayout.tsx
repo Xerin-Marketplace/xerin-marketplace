@@ -155,6 +155,45 @@ const activationGroups: Array<{ label: string; items: NavItem[] }> = [
   },
 ];
 
+const suspendedComplianceGroups: Array<{ label: string; items: NavItem[] }> = [
+  {
+    label: "Compliance Hold",
+    items: [
+      { label: "Dashboard", href: "/seller/dashboard", icon: Home },
+      { label: "Business Documents", href: "/seller/kyc?tab=documents", icon: FileCheck2 },
+    ],
+  },
+  {
+    label: "Existing Obligations",
+    items: [
+      { label: "Orders", href: "/seller/orders", icon: ClipboardList },
+      { label: "Returns", href: "/seller/returns", icon: RotateCcw },
+      { label: "Cancellations", href: "/seller/cancellations", icon: X },
+      { label: "Messages", href: "/seller/messages", icon: MessageSquare },
+    ],
+  },
+  {
+    label: "Account",
+    items: [
+      { label: "Account Settings", href: "/seller/account", icon: Settings },
+      { label: "Security", href: "/seller/account/security", icon: CircleUserRound },
+      { label: "Home", href: "/", icon: LifeBuoy },
+    ],
+  },
+];
+
+const suspendedAllowedPaths = [
+  "/seller/dashboard",
+  "/seller/kyc",
+  "/seller/documents",
+  "/seller/orders",
+  "/seller/returns",
+  "/seller/cancellations",
+  "/seller/messages",
+  "/seller/account",
+  "/",
+];
+
 const pendingAllowedPaths = [
   "/seller/dashboard",
   "/seller/kyc",
@@ -258,19 +297,29 @@ export default function SellerLayout({
 
   const sellerStatus = seller?.status || user?.seller_status || "pending";
   const isApprovedSeller = sellerStatus === "approved";
-  const groups = isApprovedSeller ? approvedGroups : activationGroups;
+  const isLicenceExpiredHold =
+    sellerStatus === "suspended" &&
+    seller?.suspension_reason === "business_license_expired";
+  const groups = isApprovedSeller
+    ? approvedGroups
+    : isLicenceExpiredHold
+      ? suspendedComplianceGroups
+      : activationGroups;
 
   useEffect(() => {
     if (!sellerLoaded || isApprovedSeller) return;
 
-    const allowed = pendingAllowedPaths.some(
+    const allowedPaths = isLicenceExpiredHold
+      ? suspendedAllowedPaths
+      : pendingAllowedPaths;
+    const allowed = allowedPaths.some(
       (path) => pathname === path || pathname.startsWith(`${path}/`),
     );
 
     if (!allowed) {
       router.replace("/seller/dashboard");
     }
-  }, [isApprovedSeller, pathname, router, sellerLoaded]);
+  }, [isApprovedSeller, isLicenceExpiredHold, pathname, router, sellerLoaded]);
   useEffect(() => {
     const close = (event: MouseEvent) => {
       if (
@@ -337,7 +386,7 @@ export default function SellerLayout({
             <div className="mt-3 flex gap-2">
               <Badge
                 label={`Account: ${sellerStatus}`}
-                tone={isApprovedSeller ? "green" : "amber"}
+                tone={isApprovedSeller ? "green" : isLicenceExpiredHold ? "red" : "amber"}
               />
             </div>
           </div>
@@ -497,7 +546,21 @@ export default function SellerLayout({
           </div>
         </header>
         <main className="min-h-[calc(100vh-8.5rem)] p-4 sm:p-6 lg:p-7 2xl:p-8">
-          {!isApprovedSeller && sellerLoaded && pathname !== "/seller/dashboard" && (
+          {isLicenceExpiredHold && sellerLoaded && (
+            <div className="mb-5 flex items-start gap-3 rounded-2xl border border-red-200 bg-red-50 px-4 py-3.5 text-red-900 dark:border-red-500/30 dark:bg-red-500/10 dark:text-red-200">
+              <ShieldCheck className="mt-0.5 shrink-0" size={19} />
+              <div className="min-w-0">
+                <p className="text-sm font-semibold">Selling temporarily suspended — Business Licence expired</p>
+                <p className="mt-0.5 text-xs leading-5 opacity-80">
+                  New listings, inventory changes and new customer sales are blocked. You can still complete existing orders. Renew your Business Licence in Business Documents to restore selling access after Marketplace approval.
+                </p>
+                <Link href="/seller/kyc?tab=documents" className="mt-2 inline-flex text-xs font-bold underline underline-offset-2">
+                  View Business Documents
+                </Link>
+              </div>
+            </div>
+          )}
+          {!isApprovedSeller && !isLicenceExpiredHold && sellerLoaded && pathname !== "/seller/dashboard" && (
             <div className="mb-5 flex items-start gap-3 rounded-2xl border border-amber-200 bg-amber-50 px-4 py-3.5 text-amber-900 dark:border-amber-500/30 dark:bg-amber-500/10 dark:text-amber-200">
               <ShieldCheck className="mt-0.5 shrink-0" size={19} />
               <div>

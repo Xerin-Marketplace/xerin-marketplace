@@ -1,6 +1,6 @@
 import type { ID, TimestampFields } from "./common";
 
-export type SellerStatus = "pending" | "under_review" | "approved";
+export type SellerStatus = "pending" | "under_review" | "approved" | "rejected" | "suspended";
 
 export type SellerBusinessCategory = {
   id: ID;
@@ -13,6 +13,7 @@ export type SellerBusinessCategory = {
 export type SellerDocumentType =
   | "tin"
   | "business_registration"
+  | "business_license"
   | "business_profile";
 
 export type Seller = TimestampFields & {
@@ -25,6 +26,15 @@ export type Seller = TimestampFields & {
   status: SellerStatus;
   is_verified?: boolean;
   rejection_reason?: string | null;
+  document_number?: string | null;
+  issued_date?: string | null;
+  expiry_date?: string | null;
+  version?: number;
+  is_current?: boolean;
+  approved_at?: string | null;
+  approved_by_user_id?: ID | null;
+  suspended_at?: string | null;
+  suspension_reason?: string | null;
 };
 
 export type SellerBusinessProfile = {
@@ -57,11 +67,20 @@ export type SellerKycDocument = TimestampFields & {
   mime_type?: string | null;
   status?: "pending" | "under_review" | "approved" | "rejected" | string;
   rejection_reason?: string | null;
+  document_number?: string | null;
+  issued_date?: string | null;
+  expiry_date?: string | null;
+  version?: number;
+  is_current?: boolean;
+  approved_at?: string | null;
+  approved_by_user_id?: ID | null;
 };
 
 export type UploadSellerKycDocumentRequest = {
   document_type: SellerDocumentType;
   file: File;
+  document_number?: string;
+  expiry_date?: string;
 };
 
 export type PayoutAccount = TimestampFields & {
@@ -92,6 +111,8 @@ export type SellerKycStatus = {
   uploaded_documents: string[];
   missing_documents: string[];
   can_submit_for_review: boolean;
+  suspension_reason?: string | null;
+  suspended_at?: string | null;
 };
 
 

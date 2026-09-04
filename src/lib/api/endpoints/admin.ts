@@ -35,6 +35,8 @@ export type AdminSeller = {
   years_in_business?: string | null;
   website_url?: string | null;
   agreement_accepted?: boolean;
+  suspended_at?: string | null;
+  suspension_reason?: string | null;
 };
 
 export type AdminSellerDocument = {
@@ -45,6 +47,13 @@ export type AdminSellerDocument = {
   mime_type?: string | null;
   status: string;
   rejection_reason?: string | null;
+  document_number?: string | null;
+  issued_date?: string | null;
+  expiry_date?: string | null;
+  version?: number;
+  is_current?: boolean;
+  approved_at?: string | null;
+  approved_by_user_id?: string | null;
   uploaded_at: string;
 };
 
@@ -856,6 +865,25 @@ export const startSellerReview = async (sellerId: string): Promise<AdminSeller> 
 
 export const getSellerDocumentViewUrl = (sellerId: string, documentId: string) =>
   `/admin/sellers/${sellerId}/documents/${documentId}/view`;
+
+export const startSellerLicenseRenewalReview = async (sellerId: string): Promise<AdminSeller> =>
+  (await axiosInstance.post<AdminSeller>(`/admin/sellers/${sellerId}/license-renewal/start-review`)).data;
+
+export const approveSellerLicenseRenewal = async (sellerId: string): Promise<AdminSeller> =>
+  (await axiosInstance.post<AdminSeller>(`/admin/sellers/${sellerId}/license-renewal/approve`)).data;
+
+export const rejectSellerLicenseRenewal = async (sellerId: string, reason: string): Promise<AdminSeller> => {
+  const formData = new FormData();
+  formData.append("reason", reason);
+  return (
+    await axiosInstance.post<AdminSeller>(
+      `/admin/sellers/${sellerId}/license-renewal/reject`,
+      formData,
+      { headers: { "Content-Type": "multipart/form-data" } },
+    )
+  ).data;
+};
+
 export const listSellerProducts = async () => (await axiosInstance.get<AdminSellerProduct[]>("/admin/seller-products")).data;
 export const listSellerOrders = async () => (await axiosInstance.get<AdminSellerOrder[]>("/admin/seller-orders")).data;
 export const listSellerPerformance = async () => (await axiosInstance.get<AdminSellerPerformance[]>("/admin/seller-performance")).data;
@@ -1219,6 +1247,9 @@ export const adminService = {
   getSellerDocuments,
   startSellerReview,
   getSellerDocumentViewUrl,
+  startSellerLicenseRenewalReview,
+  approveSellerLicenseRenewal,
+  rejectSellerLicenseRenewal,
   listSellerProducts,
   listSellerOrders,
   listSellerPerformance,
