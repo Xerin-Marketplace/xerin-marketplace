@@ -2,6 +2,7 @@
 
 import { useEffect, useMemo, useState } from "react";
 import {
+  CheckCircle2,
   ChevronLeft,
   ChevronRight,
   Eye,
@@ -12,6 +13,7 @@ import {
   Star,
   UserRound,
   X,
+  XCircle,
 } from "lucide-react";
 import toast from "react-hot-toast";
 import {
@@ -31,7 +33,7 @@ const STATUS_BADGES: Record<string, string> = {
   approved: "border-emerald-200 bg-emerald-50 text-emerald-700",
   rejected: "border-red-200 bg-red-50 text-red-700",
   hidden: "border-slate-200 bg-slate-100 text-slate-600",
-  flagged: "border-red-200 bg-red-50 text-red-700",
+  reported: "border-red-200 bg-red-50 text-red-700",
 };
 
 const pretty = (value: string) =>
@@ -52,6 +54,8 @@ export default function AdminCustomerReviews() {
   const [totalPages, setTotalPages] = useState(0);
   const [selected, setSelected] = useState<CustomerReview | null>(null);
   const [detailLoading, setDetailLoading] = useState(false);
+  const [moderationBusy, setModerationBusy] = useState<string | null>(null);
+  const [adminReply, setAdminReply] = useState("");
 
   useEffect(() => {
     const timer = window.setTimeout(() => {
@@ -95,16 +99,73 @@ export default function AdminCustomerReviews() {
 
   const openReview = async (review: CustomerReview) => {
     setSelected(review);
+    setAdminReply(review.admin_reply || "");
     setDetailLoading(true);
 
     try {
       const detail = await customersService.getCustomerReview(review.id);
       setSelected(detail);
+      setAdminReply(detail.admin_reply || "");
     } catch {
-      // Backend Task 2 will provide detail endpoint. The summary row is still
-      // useful now, so keep the drawer open with what we already have.
+      // Keep the drawer open with the summary row if the detail request fails.
     } finally {
       setDetailLoading(false);
+    }
+  };
+
+  const moderateReview = async (
+    review: CustomerReview,
+    nextStatus: "approved" | "rejected" | "hidden",
+    reply?: string | null,
+  ) => {
+    const actionKey = `${nextStatus}:${review.id}`;
+    setModerationBusy(actionKey);
+
+    try {
+      const updated = await customersService.moderateCustomerReview(review.id, {
+        status: nextStatus,
+        admin_reply: reply ?? undefined,
+      });
+
+      setReviews((current) =>
+        current.map((item) => (item.id === updated.id ? { ...item, ...updated } : item)),
+      );
+      setSelected((current) =>
+        current?.id === updated.id ? { ...current, ...updated } : current,
+      );
+      setAdminReply(updated.admin_reply || "");
+      toast.success(
+        nextStatus === "approved"
+          ? "Review approved and published."
+          : nextStatus === "rejected"
+            ? "Review rejected."
+            : "Review hidden from the marketplace.",
+      );
+      await fetchData();
+    } catch (cause) {
+      toast.error(getErrorMessage(cause));
+    } finally {
+      setModerationBusy(null);
+    }
+  };
+
+  const saveAdminReply = async () => {
+    if (!selected) return;
+    setModerationBusy(`reply:${selected.id}`);
+
+    try {
+      const updated = await customersService.moderateCustomerReview(selected.id, {
+        admin_reply: adminReply.trim() || null,
+      });
+      setSelected(updated);
+      setReviews((current) =>
+        current.map((item) => (item.id === updated.id ? { ...item, ...updated } : item)),
+      );
+      toast.success("Admin reply saved.");
+    } catch (cause) {
+      toast.error(getErrorMessage(cause));
+    } finally {
+      setModerationBusy(null);
     }
   };
 
@@ -113,7 +174,7 @@ export default function AdminCustomerReviews() {
       loaded: reviews.length,
       pending: reviews.filter((review) => review.status === "pending").length,
       flagged: reviews.filter(
-        (review) => review.status === "flagged" || review.reported,
+        (review) => review.status === "reported" || review.reported,
       ).length,
       average: reviews.length
         ? (
@@ -175,7 +236,7 @@ export default function AdminCustomerReviews() {
             className="h-11 rounded-xl border-2 border-[#d8e0e9] bg-white px-3 text-sm"
           >
             <option value="">All statuses</option>
-            {["pending", "approved", "hidden", "flagged", "rejected"].map(
+            {["pending", "approved", "hidden", "reported", "rejected"].map(
               (value) => (
                 <option key={value} value={value}>
                   {pretty(value)}
@@ -316,14 +377,38 @@ export default function AdminCustomerReviews() {
                     </td>
 
                     <td className="px-5 py-4">
-                      <button
-                        type="button"
-                        onClick={() => void openReview(review)}
-                        className="inline-flex items-center gap-1.5 rounded-lg bg-[#111827] px-3 py-2 text-xs font-semibold text-white"
-                      >
-                        <Eye size={13} />
-                        Review
-                      </button>
+                      <div className="flex flex-wrap items-center gap-2">
+                        {review.status === "pending" && (
+                          <>
+                            <button
+                              type="button"
+                              onClick={() => void moderateReview(review, "approved")}
+                              disabled={moderationBusy !== null}
+                              className="inline-flex items-center gap-1.5 rounded-lg bg-emerald-600 px-3 py-2 text-xs font-semibold text-black transition hover:bg-emerald-700 disabled:opacity-50"
+                            >
+                              <CheckCircle2 size={13} />
+                              Approve
+                            </button>
+                            <button
+                              type="button"
+                              onClick={() => void moderateReview(review, "rejected")}
+                              disabled={moderationBusy !== null}
+                              className="inline-flex items-center gap-1.5 rounded-lg border border-red-200 bg-red-50 px-3 py-2 text-xs font-semibold text-red-700 transition hover:bg-red-100 disabled:opacity-50"
+                            >
+                              <XCircle size={13} />
+                              Reject
+                            </button>
+                          </>
+                        )}
+                        <button
+                          type="button"
+                          onClick={() => void openReview(review)}
+                          className="inline-flex items-center gap-1.5 rounded-lg bg-[#111827] px-3 py-2 text-xs font-semibold text-white"
+                        >
+                          <Eye size={13} />
+                          Review
+                        </button>
+                      </div>
                     </td>
                   </tr>
                 ))}
@@ -410,22 +495,82 @@ export default function AdminCustomerReviews() {
                 </p>
               </section>
 
+              {selected.seller_reply && (
+                <section className="rounded-2xl border border-blue-100 bg-blue-50/50 p-5">
+                  <p className="text-xs font-bold uppercase tracking-wider text-blue-500">
+                    Seller response
+                  </p>
+                  <p className="mt-3 whitespace-pre-wrap text-sm leading-7 text-[#475569]">
+                    {selected.seller_reply}
+                  </p>
+                </section>
+              )}
+
               <section className="rounded-2xl border bg-white p-5">
-                <p className="text-xs font-bold uppercase tracking-wider text-gray-400">
-                  Admin reply
-                </p>
-                <p className="mt-3 whitespace-pre-wrap text-sm leading-7 text-[#475569]">
-                  {selected.admin_reply ||
-                    "No administrative response has been recorded yet."}
-                </p>
+                <div className="flex items-center justify-between gap-3">
+                  <p className="text-xs font-bold uppercase tracking-wider text-gray-400">
+                    Admin reply
+                  </p>
+                  <span className="text-[11px] text-gray-400">Optional internal moderation note</span>
+                </div>
+                <textarea
+                  value={adminReply}
+                  onChange={(event) => setAdminReply(event.target.value)}
+                  rows={4}
+                  maxLength={3000}
+                  placeholder="Add an administrative response or moderation note..."
+                  className="mt-3 w-full rounded-xl border-2 border-[#d8e0e9] px-3 py-2.5 text-sm leading-6 outline-none transition focus:border-[#f47524]"
+                />
+                <div className="mt-3 flex justify-end">
+                  <button
+                    type="button"
+                    onClick={() => void saveAdminReply()}
+                    disabled={moderationBusy !== null}
+                    className="rounded-lg border border-[#d8e0e9] bg-white px-3 py-2 text-xs font-semibold text-[#475569] transition hover:border-[#f47524] hover:text-[#f47524] disabled:opacity-50"
+                  >
+                    Save admin reply
+                  </button>
+                </div>
               </section>
 
-              <div className="rounded-xl border border-amber-200 bg-amber-50 p-4 text-xs leading-5 text-amber-800">
-                Moderation actions and admin replies are prepared in the
-                frontend API contract. We will connect the actual approve,
-                hide, reject and reply operations when we complete Backend
-                Task 2.
-              </div>
+              <section className="rounded-2xl border border-[#e2e8f0] bg-white p-5">
+                <p className="text-xs font-bold uppercase tracking-wider text-gray-400">
+                  Moderation decision
+                </p>
+                <p className="mt-2 text-sm leading-6 text-[#64748b]">
+                  Approved reviews become public and immediately contribute to the product rating. Rejected or hidden reviews are removed from public rating calculations.
+                </p>
+
+                <div className="mt-4 grid gap-2 sm:grid-cols-3">
+                  <button
+                    type="button"
+                    onClick={() => void moderateReview(selected, "approved", adminReply.trim() || null)}
+                    disabled={moderationBusy !== null || selected.status === "approved"}
+                    className="inline-flex min-h-11 items-center justify-center gap-2 rounded-xl bg-emerald-600 px-4 text-sm font-bold text-white transition hover:bg-emerald-700 disabled:opacity-40"
+                  >
+                    <CheckCircle2 size={16} />
+                    Approve
+                  </button>
+                  <button
+                    type="button"
+                    onClick={() => void moderateReview(selected, "rejected", adminReply.trim() || null)}
+                    disabled={moderationBusy !== null || selected.status === "rejected"}
+                    className="inline-flex min-h-11 items-center justify-center gap-2 rounded-xl border border-red-200 bg-red-50 px-4 text-sm font-bold text-red-700 transition hover:bg-red-100 disabled:opacity-40"
+                  >
+                    <XCircle size={16} />
+                    Reject
+                  </button>
+                  <button
+                    type="button"
+                    onClick={() => void moderateReview(selected, "hidden", adminReply.trim() || null)}
+                    disabled={moderationBusy !== null || selected.status === "hidden"}
+                    className="inline-flex min-h-11 items-center justify-center gap-2 rounded-xl border border-slate-200 bg-slate-100 px-4 text-sm font-bold text-slate-700 transition hover:bg-slate-200 disabled:opacity-40"
+                  >
+                    <Eye size={16} />
+                    Hide
+                  </button>
+                </div>
+              </section>
             </div>
           </aside>
         </div>

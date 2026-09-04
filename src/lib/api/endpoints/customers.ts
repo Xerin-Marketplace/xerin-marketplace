@@ -52,9 +52,12 @@ export type CustomerReview = {
   product_id: string;
   user_id: string;
   rating: number;
+  title?: string | null;
   comment: string | null;
+  verified_purchase?: boolean;
   status: string;
   admin_reply: string | null;
+  seller_reply?: string | null;
   created_at: string;
   updated_at: string | null;
   customer_name?: string | null;
@@ -307,7 +310,7 @@ export const listCustomerReviews = async (
     if (params.reported !== undefined) {
       rows = rows.filter(
         (review) =>
-          Boolean(review.reported || review.status === "flagged") ===
+          Boolean(review.reported || review.status === "reported") ===
           params.reported,
       );
     }

@@ -21,6 +21,7 @@ export type CustomerReviewList = {
   page: number;
   page_size: number;
   average_rating: number | string;
+  rating_breakdown?: Record<string, number>;
   results: CustomerReview[];
 };
 
@@ -32,6 +33,12 @@ export type ReviewCreatePayload = {
 };
 
 export const reviewsApi = {
+  product: async (
+    productId: string,
+    params: { page?: number; page_size?: number } = {},
+  ) =>
+    (await axiosInstance.get<CustomerReviewList>(`/products/${productId}/reviews`, { params })).data,
+
   mine: async (params: { page?: number; page_size?: number } = {}) =>
     (await axiosInstance.get<CustomerReviewList>("/reviews/my", { params })).data,
 

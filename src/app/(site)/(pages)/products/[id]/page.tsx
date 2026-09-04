@@ -9,6 +9,7 @@ import { discoveryApi } from "@/lib/api/endpoints/discovery";
 import { brokersApi } from "@/lib/api/endpoints/brokers";
 import { useAuthStore } from "@/store/useAuthStore";
 import RelatedProducts from "@/components/ProductDiscovery/RelatedProducts";
+import ProductReviews from "@/components/ProductReviews";
 
 export default function ProductDetailsPage() {
   const params = useParams();
@@ -64,6 +65,7 @@ export default function ProductDetailsPage() {
     <>
       <ShopDetails product={mapApiProductToUiProduct(apiProduct)} />
       <RelatedProducts productId={id} />
+      <ProductReviews productId={id} />
     </>
   );
 }
