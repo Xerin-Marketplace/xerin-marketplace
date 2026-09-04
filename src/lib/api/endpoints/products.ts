@@ -79,6 +79,11 @@ export const getCategoryAttributes = async (categoryId: ID): Promise<CategoryAtt
   return res.data;
 };
 
+export const getProductSpecifications = async (productId: ID): Promise<ProductSpecification[]> => {
+  const res = await axiosInstance.get<ProductSpecification[]>(`/products/${productId}/specifications`);
+  return res.data;
+};
+
 export const getMyProductSpecifications = async (productId: ID): Promise<ProductSpecification[]> => {
   const res = await axiosInstance.get<ProductSpecification[]>(`/products/my-products/${productId}/specifications`);
   return res.data;
@@ -255,6 +260,7 @@ export const productsApi = {
   getCategories,
   getBrands,
   getCategoryAttributes,
+  getProductSpecifications,
   getMyProductSpecifications,
   saveMyProductSpecifications,
   getListingCurrencies,

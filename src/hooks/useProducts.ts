@@ -5,6 +5,7 @@ import {
   getMyProducts as apiGetMyProducts,
   getCategories as apiGetCategories,
   getBrands as apiGetBrands,
+  getProductSpecifications as apiGetProductSpecifications,
   createProduct as apiCreateProduct,
   updateProduct as apiUpdateProduct,
   deleteProduct as apiDeleteProduct,
@@ -30,6 +31,16 @@ export const useProduct = (id: ID) => {
     queryFn: () => apiGetProduct(id),
     enabled: Boolean(id),
     retry: false,
+  });
+};
+
+export const useProductSpecifications = (id: ID) => {
+  return useQuery({
+    queryKey: ["product-specifications", id],
+    queryFn: () => apiGetProductSpecifications(id),
+    enabled: Boolean(id),
+    retry: false,
+    staleTime: 60_000,
   });
 };
 

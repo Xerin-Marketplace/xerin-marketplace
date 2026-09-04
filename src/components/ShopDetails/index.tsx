@@ -13,6 +13,7 @@ import { usePreviewSlider } from "@/app/context/PreviewSliderContext";
 import { useProductDetailsStore } from "@/store/useProductDetailsStore";
 import { useAddCartItem, addProductToCartPayload } from "@/hooks/useCartActions";
 import type { Product } from "@/types/product";
+import ProductSpecifications from "./ProductSpecifications";
 
 const CheckIcon = ({ className = "text-orange" }: { className?: string }) => (
   <svg className={className} width="18" height="18" viewBox="0 0 24 24" fill="none" aria-hidden="true">
@@ -243,6 +244,8 @@ const ShopDetails = ({ product }: { product: Product }) => {
               {product.description || "The seller has not provided a product description yet."}
             </p>
           </div>
+
+          <ProductSpecifications productId={product.id} />
         </div>
       </section>
 
