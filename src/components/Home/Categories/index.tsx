@@ -540,7 +540,7 @@ const Categories = () => {
                           {store?.store_name ? (
                             <>
                               <span className="shrink-0 text-gray-4">·</span>
-                              <span className="truncate">Seller: {store.store_name}</span>
+                              {/* <span className="truncate">Seller: {store.store_name}</span> */}
                             </>
                           ) : null}
                         </div>

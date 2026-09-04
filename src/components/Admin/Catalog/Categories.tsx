@@ -8,6 +8,7 @@ import {
   RefreshCw,
   Search,
   Trash2,
+  Settings2,
   X,
 } from "lucide-react";
 import toast from "react-hot-toast";
@@ -15,6 +16,8 @@ import {
   adminService,
   type BusinessCategory,
   type ProductCategory,
+  type CategoryAttribute,
+  type CategoryAttributeInputType,
 } from "@/lib/api/endpoints/admin";
 
 type Mode = "product" | "business";
@@ -49,6 +52,15 @@ export default function AdminCategories() {
   const [totalPages, setTotalPages] = useState(0);
 
   const [editing, setEditing] = useState<Editing>(null);
+  const [attributeCategory, setAttributeCategory] = useState<ProductCategory | null>(null);
+  const [attributes, setAttributes] = useState<CategoryAttribute[]>([]);
+  const [attributesLoading, setAttributesLoading] = useState(false);
+  const [editingAttribute, setEditingAttribute] = useState<CategoryAttribute | null>(null);
+  const [attributeForm, setAttributeForm] = useState({
+    key: "", name: "", description: "", input_type: "text" as CategoryAttributeInputType, unit: "",
+    allowed_values: "", is_required: false, is_filterable: true, is_comparable: true, use_for_similarity: true,
+    similarity_weight: "1", is_variant_attribute: false, inherit_to_children: true, display_order: "0", is_active: true,
+  });
 
   const [deleteTarget, setDeleteTarget] = useState<{
     row: ProductCategory | BusinessCategory;
@@ -135,6 +147,63 @@ export default function AdminCategories() {
     setQuery("");
     setDebouncedQuery("");
   }, [mode]);
+
+  const resetAttributeForm = () => {
+    setEditingAttribute(null);
+    setAttributeForm({ key: "", name: "", description: "", input_type: "text", unit: "", allowed_values: "", is_required: false, is_filterable: true, is_comparable: true, use_for_similarity: true, similarity_weight: "1", is_variant_attribute: false, inherit_to_children: true, display_order: "0", is_active: true });
+  };
+
+  const loadAttributes = async (category: ProductCategory) => {
+    setAttributeCategory(category);
+    setAttributesLoading(true);
+    try { setAttributes(await adminService.listProductCategoryAttributes(category.id, true)); }
+    catch (cause) { toast.error(cause instanceof Error ? cause.message : "Unable to load category attributes."); }
+    finally { setAttributesLoading(false); }
+  };
+
+  const saveAttribute = async (event: FormEvent) => {
+    event.preventDefault();
+    if (!attributeCategory || !attributeForm.name.trim()) return;
+    const key = (attributeForm.key.trim() || slugify(attributeForm.name).replaceAll("-", "_")).toLowerCase();
+    const allowedValues = attributeForm.allowed_values.split(/[,\n]/).map(v => v.trim()).filter(Boolean);
+    if (["select", "multiselect"].includes(attributeForm.input_type) && !allowedValues.length) { toast.error("Add at least one allowed value for select fields."); return; }
+    const payload = {
+      key, name: attributeForm.name.trim(), description: attributeForm.description.trim() || null, input_type: attributeForm.input_type,
+      unit: attributeForm.unit.trim() || null, allowed_values: allowedValues, is_required: attributeForm.is_required,
+      is_filterable: attributeForm.is_filterable, is_comparable: attributeForm.is_comparable, use_for_similarity: attributeForm.use_for_similarity,
+      similarity_weight: Number(attributeForm.similarity_weight || 1), is_variant_attribute: attributeForm.is_variant_attribute,
+      inherit_to_children: attributeForm.inherit_to_children, display_order: Number(attributeForm.display_order || 0), is_active: attributeForm.is_active,
+    };
+    setBusy(true);
+    try {
+      if (editingAttribute) await adminService.updateProductCategoryAttribute(attributeCategory.id, editingAttribute.id, payload);
+      else await adminService.createProductCategoryAttribute(attributeCategory.id, payload);
+      toast.success(editingAttribute ? "Attribute updated." : "Attribute added.");
+      resetAttributeForm();
+      setAttributes(await adminService.listProductCategoryAttributes(attributeCategory.id, true));
+    } catch (cause) { toast.error(cause instanceof Error ? cause.message : "Unable to save attribute."); }
+    finally { setBusy(false); }
+  };
+
+  const beginEditAttribute = (attribute: CategoryAttribute) => {
+    if (attribute.inherited) { toast.error("Edit inherited attributes on their source category."); return; }
+    setEditingAttribute(attribute);
+    setAttributeForm({
+      key: attribute.key, name: attribute.name, description: attribute.description ?? "", input_type: attribute.input_type, unit: attribute.unit ?? "",
+      allowed_values: (attribute.allowed_values ?? []).join(", "), is_required: attribute.is_required, is_filterable: attribute.is_filterable,
+      is_comparable: attribute.is_comparable, use_for_similarity: attribute.use_for_similarity, similarity_weight: String(attribute.similarity_weight ?? 1),
+      is_variant_attribute: attribute.is_variant_attribute, inherit_to_children: attribute.inherit_to_children, display_order: String(attribute.display_order ?? 0), is_active: attribute.is_active,
+    });
+  };
+
+  const removeAttribute = async (attribute: CategoryAttribute) => {
+    if (!attributeCategory || attribute.inherited) return;
+    if (!window.confirm(`Delete attribute “${attribute.name}”?`)) return;
+    setBusy(true);
+    try { await adminService.deleteProductCategoryAttribute(attributeCategory.id, attribute.id); toast.success("Attribute deleted."); setAttributes(await adminService.listProductCategoryAttributes(attributeCategory.id, true)); }
+    catch (cause) { toast.error(cause instanceof Error ? cause.message : "Unable to delete attribute."); }
+    finally { setBusy(false); }
+  };
 
   const createProduct = async (event: FormEvent) => {
     event.preventDefault();
@@ -566,6 +635,11 @@ export default function AdminCategories() {
                         )}
 
                         <td className="px-5 py-4">
+                          {mode === "product" && (
+                            <button type="button" onClick={() => void loadAttributes(row as ProductCategory)} className="mr-4 text-[#f47524] transition hover:text-orange-700">
+                              <Settings2 className="mr-1 inline" size={13} /> Attributes
+                            </button>
+                          )}
                           <button
                             type="button"
                             onClick={() =>
@@ -620,6 +694,48 @@ export default function AdminCategories() {
             />
           </section>
         </div>
+
+        {attributeCategory && (
+          <div className="fixed inset-0 z-[120] flex items-center justify-center bg-black/55 p-4">
+            <div className="max-h-[92vh] w-full max-w-5xl overflow-y-auto rounded-2xl bg-white p-6 shadow-2xl">
+              <div className="flex items-start justify-between gap-4">
+                <div><p className="text-xs font-bold uppercase tracking-wider text-[#f47524]">Product specifications</p><h3 className="mt-1 text-xl font-bold text-gray-900">{attributeCategory.name} attributes</h3><p className="mt-1 text-sm text-gray-500">These fields automatically appear when a seller selects this category. Inherited fields are shown too.</p></div>
+                <button type="button" onClick={() => { setAttributeCategory(null); resetAttributeForm(); }} className="rounded-lg p-2 hover:bg-gray-100"><X size={18}/></button>
+              </div>
+
+              <div className="mt-6 grid gap-6 lg:grid-cols-[1.15fr_.85fr]">
+                <div className="overflow-hidden rounded-2xl border">
+                  <div className="border-b bg-gray-50 px-4 py-3 text-sm font-bold">Configured attributes</div>
+                  {attributesLoading ? <p className="p-6 text-sm text-gray-500">Loading attributes...</p> : attributes.length === 0 ? <p className="p-6 text-sm text-gray-500">No attributes yet. Add the first field.</p> : (
+                    <div className="divide-y">{attributes.map((attribute) => (
+                      <div key={attribute.id} className="flex items-start justify-between gap-3 p-4">
+                        <div><div className="flex flex-wrap items-center gap-2"><span className="font-semibold text-gray-900">{attribute.name}</span>{attribute.unit && <span className="text-xs text-gray-500">({attribute.unit})</span>}{attribute.is_required && <span className="rounded-full bg-red-50 px-2 py-0.5 text-[10px] font-bold text-red-600">Required</span>}{attribute.inherited && <span className="rounded-full bg-blue-50 px-2 py-0.5 text-[10px] font-bold text-blue-600">Inherited</span>}</div><p className="mt-1 text-xs text-gray-500">{attribute.input_type} · key: {attribute.key} · similarity weight {String(attribute.similarity_weight)}</p>{attribute.allowed_values?.length > 0 && <p className="mt-1 text-xs text-gray-500">Values: {attribute.allowed_values.join(", ")}</p>}</div>
+                        {!attribute.inherited && <div className="flex shrink-0 gap-2"><button type="button" onClick={() => beginEditAttribute(attribute)} className="text-xs font-semibold text-blue-600">Edit</button><button type="button" onClick={() => void removeAttribute(attribute)} className="text-xs font-semibold text-red-600">Delete</button></div>}
+                      </div>
+                    ))}</div>
+                  )}
+                </div>
+
+                <form onSubmit={saveAttribute} className="rounded-2xl border p-4">
+                  <div className="flex items-center justify-between"><h4 className="font-bold text-gray-900">{editingAttribute ? "Edit attribute" : "Add attribute"}</h4>{editingAttribute && <button type="button" onClick={resetAttributeForm} className="text-xs font-semibold text-gray-500">Cancel edit</button>}</div>
+                  <div className="grid gap-3 sm:grid-cols-2">
+                    <Field label="Display name"><input className="field" value={attributeForm.name} onChange={e => setAttributeForm(f => ({...f,name:e.target.value,key:f.key || slugify(e.target.value).replaceAll("-","_")}))} placeholder="RAM" /></Field>
+                    <Field label="Key"><input className="field" value={attributeForm.key} onChange={e => setAttributeForm(f => ({...f,key:e.target.value.toLowerCase().replace(/[^a-z0-9_-]/g,"_")}))} placeholder="ram" /></Field>
+                    <Field label="Input type"><select className="field" value={attributeForm.input_type} onChange={e => setAttributeForm(f => ({...f,input_type:e.target.value as CategoryAttributeInputType}))}>{["text","textarea","number","boolean","select","multiselect","date"].map(type => <option key={type} value={type}>{type}</option>)}</select></Field>
+                    <Field label="Unit"><input className="field" value={attributeForm.unit} onChange={e => setAttributeForm(f => ({...f,unit:e.target.value}))} placeholder="GB, ml, inch..." /></Field>
+                  </div>
+                  <Field label="Description"><textarea className="field" rows={2} value={attributeForm.description} onChange={e => setAttributeForm(f => ({...f,description:e.target.value}))} placeholder="Help the seller understand what to enter." /></Field>
+                  {["select","multiselect"].includes(attributeForm.input_type) && <Field label="Allowed values"><textarea className="field" rows={3} value={attributeForm.allowed_values} onChange={e => setAttributeForm(f => ({...f,allowed_values:e.target.value}))} placeholder="4 GB, 6 GB, 8 GB, 12 GB" /></Field>}
+                  <div className="grid gap-3 sm:grid-cols-2"><Field label="Similarity weight"><input className="field" type="number" min="0" step="0.1" value={attributeForm.similarity_weight} onChange={e => setAttributeForm(f => ({...f,similarity_weight:e.target.value}))}/></Field><Field label="Display order"><input className="field" type="number" min="0" value={attributeForm.display_order} onChange={e => setAttributeForm(f => ({...f,display_order:e.target.value}))}/></Field></div>
+                  <div className="mt-4 grid gap-2 text-sm sm:grid-cols-2">{([
+                    ["is_required","Required for submission"],["is_filterable","Filterable"],["is_comparable","Comparable"],["use_for_similarity","Use for similarity"],["is_variant_attribute","Variant attribute"],["inherit_to_children","Inherit to child categories"],["is_active","Active"],
+                  ] as const).map(([key,label]) => <label key={key} className="flex items-center gap-2"><input type="checkbox" checked={attributeForm[key]} onChange={e => setAttributeForm(f => ({...f,[key]:e.target.checked}))}/>{label}</label>)}</div>
+                  <button type="submit" disabled={busy} className="mt-5 w-full rounded-xl bg-[#111827] px-4 py-3 text-sm font-bold text-white disabled:opacity-50">{busy ? "Saving..." : editingAttribute ? "Update attribute" : "Add attribute"}</button>
+                </form>
+              </div>
+            </div>
+          </div>
+        )}
 
         {/* Edit Modal */}
         {editing && (

@@ -4,6 +4,9 @@ import type { ApiMessageResponse, ID } from "@/types/api/common";
 import type {
   Brand,
   Category,
+  CategoryAttribute,
+  ProductSpecification,
+  ProductSpecificationInput,
   Product,
   ProductImage,
   ProductImageRequest,
@@ -67,6 +70,28 @@ export const getListingCurrencies = async (): Promise<ListingCurrency[]> => {
 
 export const getCategories = async (): Promise<Category[]> => {
   const res = await axiosInstance.get<Category[]>(API_ENDPOINTS.products.categories);
+  return res.data;
+};
+
+
+export const getCategoryAttributes = async (categoryId: ID): Promise<CategoryAttribute[]> => {
+  const res = await axiosInstance.get<CategoryAttribute[]>(`/products/categories/${categoryId}/attributes`);
+  return res.data;
+};
+
+export const getMyProductSpecifications = async (productId: ID): Promise<ProductSpecification[]> => {
+  const res = await axiosInstance.get<ProductSpecification[]>(`/products/my-products/${productId}/specifications`);
+  return res.data;
+};
+
+export const saveMyProductSpecifications = async (
+  productId: ID,
+  specifications: ProductSpecificationInput[],
+): Promise<ProductSpecification[]> => {
+  const res = await axiosInstance.put<ProductSpecification[]>(
+    `/products/my-products/${productId}/specifications`,
+    { specifications },
+  );
   return res.data;
 };
 
@@ -229,6 +254,9 @@ export const productsApi = {
   getMyProducts,
   getCategories,
   getBrands,
+  getCategoryAttributes,
+  getMyProductSpecifications,
+  saveMyProductSpecifications,
   getListingCurrencies,
   create: createProduct,
   update: updateProduct,

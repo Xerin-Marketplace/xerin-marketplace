@@ -8,6 +8,7 @@ import {
   BarChart3,
   LockKeyhole,
   Package,
+  MapPin,
   ShieldCheck,
   WalletCards,
 } from "lucide-react";
@@ -87,6 +88,12 @@ export default function BrokerDashboard() {
       description: approved ? "Browse seller campaigns" : "Locked until KYC approval",
       href: approved ? "/broker/opportunities" : "",
       icon: BarChart3,
+    },
+    {
+      title: "Delivery Addresses",
+      description: "Manage addresses used when you shop on Xerin",
+      href: "/account/addresses",
+      icon: MapPin,
     },
   ];
 

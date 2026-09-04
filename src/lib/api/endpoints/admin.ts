@@ -504,6 +504,52 @@ export type ProductCategory = {
   created_at: string;
 };
 
+export type CategoryAttributeInputType = "text" | "textarea" | "number" | "boolean" | "select" | "multiselect" | "date";
+
+export type CategoryAttribute = {
+  id: string;
+  category_id: string;
+  key: string;
+  name: string;
+  description?: string | null;
+  input_type: CategoryAttributeInputType;
+  unit?: string | null;
+  allowed_values: string[];
+  settings?: Record<string, unknown>;
+  is_required: boolean;
+  is_filterable: boolean;
+  is_comparable: boolean;
+  use_for_similarity: boolean;
+  similarity_weight: string | number;
+  is_variant_attribute: boolean;
+  inherit_to_children: boolean;
+  display_order: number;
+  is_active: boolean;
+  source_category_id?: string | null;
+  inherited?: boolean;
+  created_at: string;
+  updated_at?: string | null;
+};
+
+export type CategoryAttributePayload = {
+  key: string;
+  name: string;
+  description?: string | null;
+  input_type: CategoryAttributeInputType;
+  unit?: string | null;
+  allowed_values?: string[];
+  settings?: Record<string, unknown>;
+  is_required?: boolean;
+  is_filterable?: boolean;
+  is_comparable?: boolean;
+  use_for_similarity?: boolean;
+  similarity_weight?: number;
+  is_variant_attribute?: boolean;
+  inherit_to_children?: boolean;
+  display_order?: number;
+  is_active?: boolean;
+};
+
 export type CreateBusinessCategoryPayload = {
   name: string;
   slug: string;
@@ -1106,6 +1152,12 @@ export const deleteBrand = async (brandId: string): Promise<{ message: string }>
   return res.data;
 };
 
+
+export const listProductCategoryAttributes = async (categoryId:string, includeInherited=true):Promise<CategoryAttribute[]> => (await axiosInstance.get<CategoryAttribute[]>(`/admin/product-categories/${categoryId}/attributes`,{params:{include_inherited:includeInherited}})).data;
+export const createProductCategoryAttribute = async (categoryId:string,payload:CategoryAttributePayload):Promise<CategoryAttribute> => (await axiosInstance.post<CategoryAttribute>(`/admin/product-categories/${categoryId}/attributes`,payload)).data;
+export const updateProductCategoryAttribute = async (categoryId:string,attributeId:string,payload:Partial<CategoryAttributePayload>):Promise<CategoryAttribute> => (await axiosInstance.patch<CategoryAttribute>(`/admin/product-categories/${categoryId}/attributes/${attributeId}`,payload)).data;
+export const deleteProductCategoryAttribute = async (categoryId:string,attributeId:string):Promise<{message:string}> => (await axiosInstance.delete<{message:string}>(`/admin/product-categories/${categoryId}/attributes/${attributeId}`)).data;
+
 export const createProductCategory = async (payload: CreateProductCategoryPayload): Promise<ProductCategory> => {
   const res = await axiosInstance.post<ProductCategory>("/admin/product-categories", payload);
   return res.data;
@@ -1228,6 +1280,10 @@ export const adminService = {
   listBusinessCategories,
   listBusinessCategoriesPaginated,
   listProductCategories,
+  listProductCategoryAttributes,
+  createProductCategoryAttribute,
+  updateProductCategoryAttribute,
+  deleteProductCategoryAttribute,
   listProductCategoriesPaginated,
   createBusinessCategory,
   updateBusinessCategory,

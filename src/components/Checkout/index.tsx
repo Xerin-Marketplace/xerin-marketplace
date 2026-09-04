@@ -2,7 +2,7 @@
 
 import React, { useEffect, useMemo, useState } from "react";
 import { useRouter } from "next/navigation";
-import { useQuery } from "@tanstack/react-query";
+import { useQuery, useQueryClient } from "@tanstack/react-query";
 import Breadcrumb from "../Common/Breadcrumb";
 import Billing from "./Billing";
 import ShippingMethod from "./ShippingMethod";
@@ -16,6 +16,7 @@ import { useCreateOrder } from "@/hooks/useCommerce";
 import { useAddresses } from "@/hooks/useAddresses";
 import { useUserProfile } from "@/hooks/useUserProfile";
 import {
+  cartApi,
   checkoutApi,
   paymentsApi,
 } from "@/lib/api/endpoints/commerce";
@@ -118,6 +119,7 @@ const CHECKOUT_STEPS: Array<{ id: CheckoutStep; label: string; shortLabel: strin
 
 const Checkout = () => {
   const router = useRouter();
+  const queryClient = useQueryClient();
   const [form, setForm] = useState<CheckoutForm>(initialForm);
   const [deliveryMode, setDeliveryMode] = useState<DeliveryMode>("local");
   const [destinationCountry, setDestinationCountry] = useState("");
@@ -654,7 +656,7 @@ const Checkout = () => {
         `/order-success/${order.id}?payment_id=${payment.id}&payment=${payment.status}`,
       );
     } catch (error: unknown) {
-      type PendingOrderDetail = {
+      type CheckoutErrorDetail = {
         code?: string;
         message?: string;
         order_id?: string;
@@ -663,6 +665,10 @@ const Checkout = () => {
         payment_due_at?: string;
         remaining_seconds?: number;
         redirect_to?: string;
+        product_id?: string;
+        variant_id?: string | null;
+        requested_quantity?: number;
+        available_quantity?: number;
       };
 
       // `axiosInstance` response interceptor converts Axios errors into
@@ -673,13 +679,13 @@ const Checkout = () => {
       const candidate = error as {
         status?: number;
         data?: {
-          detail?: string | PendingOrderDetail;
+          detail?: string | CheckoutErrorDetail;
           message?: string;
         };
         response?: {
           status?: number;
           data?: {
-            detail?: string | PendingOrderDetail;
+            detail?: string | CheckoutErrorDetail;
             message?: string;
           };
         };
@@ -700,6 +706,55 @@ const Checkout = () => {
         typeof detail === "string"
           ? detail
           : detail?.message;
+
+      if (
+        status === 409 &&
+        typeof detail === "object" &&
+        detail?.code?.toUpperCase() === "INSUFFICIENT_STOCK"
+      ) {
+        const availableQuantity =
+          typeof detail.available_quantity === "number"
+            ? Math.max(0, detail.available_quantity)
+            : null;
+
+        // Revalidate the server cart immediately so the buyer cannot continue
+        // from stale availability after losing a last-unit checkout race.
+        try {
+          const refreshedCart = await cartApi.validate();
+          queryClient.setQueryData(["cart"], refreshedCart);
+        } catch {
+          // If cart validation itself cannot complete, still force the normal
+          // cart query to refresh on the review page.
+          await queryClient.invalidateQueries({ queryKey: ["cart"] });
+        }
+
+        if (detail.product_id) {
+          void queryClient.invalidateQueries({
+            queryKey: ["product", detail.product_id],
+          });
+        }
+        void queryClient.invalidateQueries({ queryKey: ["products"] });
+
+        const stockNote =
+          availableQuantity === null
+            ? ""
+            : availableQuantity === 0
+              ? " The item is now sold out."
+              : ` Only ${availableQuantity} item${availableQuantity === 1 ? " is" : "s are"} currently available.`;
+
+        toast.error(
+          `${
+            detailMessage ||
+            "This item just sold out or no longer has enough stock for your order."
+          }${stockNote} Your cart has been refreshed.`,
+          { duration: 6500 },
+        );
+
+        // Return the buyer to the refreshed cart where blocking stock
+        // validation messages disable checkout until the cart is corrected.
+        router.push("/cart");
+        return;
+      }
 
       if (
         status === 409 &&
@@ -908,7 +963,7 @@ const Checkout = () => {
                             </div>
                           )}
 
-                          <a href="/account/addresses" className="mt-4 inline-block text-sm font-semibold text-orange">
+                          <a href="/account/addresses?returnTo=%2Fcheckout" className="mt-4 inline-block text-sm font-semibold text-orange">
                             Manage delivery addresses
                           </a>
                         </section>

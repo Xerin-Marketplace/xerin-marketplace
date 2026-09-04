@@ -390,6 +390,7 @@ function AccountNav() {
         ["Profile", "/seller/account/profile"],
         ["Security", "/seller/account/security"],
         ["Notifications", "/seller/account/notifications"],
+        ["Delivery Addresses", "/account/addresses"],
         ["Store", "/seller/store"],
       ].map(([l, h]) => (
         <Link

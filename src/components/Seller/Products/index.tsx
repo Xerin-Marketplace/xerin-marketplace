@@ -10,6 +10,8 @@ import { authStorage } from "@/lib/auth/storage";
 import type {
   Brand,
   Category,
+  CategoryAttribute,
+  ProductSpecification,
   Product,
   ProductImage,
   ProductRequest,
@@ -182,6 +184,9 @@ const SellerProducts = () => {
   const [editorOpen, setEditorOpen] = useState(false);
   const [editingProduct, setEditingProduct] = useState<Product | null>(null);
   const [form, setForm] = useState<ProductRequest>(INITIAL_FORM);
+  const [categoryAttributes, setCategoryAttributes] = useState<CategoryAttribute[]>([]);
+  const [specValues, setSpecValues] = useState<Record<string, unknown>>({});
+  const [specificationsLoading, setSpecificationsLoading] = useState(false);
   const [stockForm, setStockForm] =
     useState<InitialStockForm>(INITIAL_STOCK_FORM);
   const [brokerOfferForm, setBrokerOfferForm] = useState<BrokerOfferForm>(INITIAL_BROKER_OFFER);
@@ -200,6 +205,22 @@ const SellerProducts = () => {
   const [submittingProductId, setSubmittingProductId] = useState<string | null>(
     null,
   );
+
+  useEffect(() => {
+    let cancelled = false;
+    const loadCategoryAttributes = async () => {
+      if (!form.category_id) { setCategoryAttributes([]); setSpecValues({}); return; }
+      setSpecificationsLoading(true);
+      try {
+        const attrs = await productsApi.getCategoryAttributes(form.category_id);
+        if (!cancelled) setCategoryAttributes(attrs);
+      } catch (cause) {
+        if (!cancelled) { setCategoryAttributes([]); toast.error(cause instanceof ApiError ? cause.message : "Unable to load product specifications."); }
+      } finally { if (!cancelled) setSpecificationsLoading(false); }
+    };
+    void loadCategoryAttributes();
+    return () => { cancelled = true; };
+  }, [form.category_id]);
 
   const loadData = useCallback(async () => {
     if (!token) return;
@@ -392,6 +413,8 @@ const SellerProducts = () => {
       currency: defaultCurrency,
     });
     setStockForm(INITIAL_STOCK_FORM);
+    setSpecValues({});
+    setCategoryAttributes([]);
     setBrokerOfferForm(INITIAL_BROKER_OFFER);
     setPricingPreview(null);
     setPricingPreviewError("");
@@ -426,6 +449,8 @@ const SellerProducts = () => {
       currency: defaultCurrency,
     });
     setStockForm(INITIAL_STOCK_FORM);
+    setSpecValues({});
+    setCategoryAttributes([]);
     setBrokerOfferForm(INITIAL_BROKER_OFFER);
     setImageError("");
     setSubmitIntent("draft");
@@ -462,11 +487,13 @@ const SellerProducts = () => {
     setImagesLoading(true);
 
     try {
-      const [images, offer] = await Promise.all([
+      const [images, offer, specifications] = await Promise.all([
         productsApi.getMyImages(product.id),
         productsApi.getBrokerOffer(product.id).catch(() => null),
+        productsApi.getMyProductSpecifications(product.id).catch(() => [] as ProductSpecification[]),
       ]);
       setExistingImages(images);
+      setSpecValues(Object.fromEntries(specifications.map((item) => [String(item.attribute_id), item.value])));
       if (offer) setBrokerOfferForm({ enabled:true, commission_type:offer.commission_type, commission_value:String(offer.commission_value), max_attributed_sales:offer.max_attributed_sales ? String(offer.max_attributed_sales) : "", starts_at:offer.starts_at ? offer.starts_at.slice(0,16) : "", ends_at:offer.ends_at ? offer.ends_at.slice(0,16) : "" });
       else setBrokerOfferForm(INITIAL_BROKER_OFFER);
     } catch (cause) {
@@ -624,6 +651,15 @@ const SellerProducts = () => {
       if (brokerOfferForm.starts_at && brokerOfferForm.ends_at && new Date(brokerOfferForm.ends_at) <= new Date(brokerOfferForm.starts_at)) return "Broker promotion end must be after its start.";
     }
 
+    if (submitIntent === "review") {
+      const missing = categoryAttributes.filter((attribute) => {
+        if (!attribute.is_required) return false;
+        const value = specValues[String(attribute.id)];
+        return value === undefined || value === null || value === "" || (Array.isArray(value) && value.length === 0);
+      });
+      if (missing.length) return `Complete required specifications: ${missing.map((item) => item.name).join(", ")}.`;
+    }
+
     const totalImages = existingImages.length + selectedImages.length;
 
     if (totalImages < 1) {
@@ -675,6 +711,13 @@ const SellerProducts = () => {
       const product = editingProduct
         ? await productsApi.update(editingProduct.id, payload)
         : await productsApi.create(payload);
+
+      await productsApi.saveMyProductSpecifications(
+        product.id,
+        categoryAttributes
+          .map((attribute) => ({ attribute_id: attribute.id, value: specValues[String(attribute.id)] }))
+          .filter((item) => item.value !== undefined && item.value !== null && item.value !== "" && (!Array.isArray(item.value) || item.value.length > 0)),
+      );
 
       if (!editingProduct) {
         await sellerInventoryApi.configure({
@@ -1256,10 +1299,10 @@ const SellerProducts = () => {
                       <select
                         value={String(form.category_id || "")}
                         onChange={(event) =>
-                          setForm((current) => ({
-                            ...current,
-                            category_id: event.target.value,
-                          }))
+                          {
+                            setForm((current) => ({ ...current, category_id: event.target.value }));
+                            setSpecValues({});
+                          }
                         }
                         disabled={isSubmitting}
                         className="input"
@@ -1373,6 +1416,44 @@ const SellerProducts = () => {
                       {(form.description?.length ?? 0).toLocaleString()} / 5,000
                     </p>
                   </Field>
+                </FormSection>
+
+                <FormSection
+                  icon={Boxes}
+                  title="Product specifications"
+                  description="These fields are configured by Admin for the selected category and help buyers compare similar products."
+                >
+                  {!form.category_id ? (
+                    <p className="rounded-xl border border-dashed p-4 text-sm text-[#64748b]">Select a product category first. Its specification fields will appear automatically.</p>
+                  ) : specificationsLoading ? (
+                    <p className="flex items-center gap-2 text-sm text-[#64748b]"><RefreshCw size={14} className="animate-spin"/> Loading category specifications...</p>
+                  ) : categoryAttributes.length === 0 ? (
+                    <p className="rounded-xl border border-dashed p-4 text-sm text-[#64748b]">No extra specifications have been configured for this category yet.</p>
+                  ) : (
+                    <div className="grid gap-4 md:grid-cols-2">
+                      {categoryAttributes.map((attribute) => {
+                        const id = String(attribute.id);
+                        const value = specValues[id];
+                        const label = `${attribute.name}${attribute.unit ? ` (${attribute.unit})` : ""}`;
+                        const setValue = (next: unknown) => setSpecValues((current) => ({ ...current, [id]: next }));
+                        return (
+                          <Field key={id} label={label} required={attribute.is_required} hint={attribute.description || (attribute.inherited ? "Inherited from a parent category." : undefined)}>
+                            {attribute.input_type === "textarea" ? (
+                              <textarea rows={3} className="input resize-y" value={String(value ?? "")} onChange={(e) => setValue(e.target.value)} disabled={isSubmitting}/>
+                            ) : attribute.input_type === "select" ? (
+                              <select className="input" value={String(value ?? "")} onChange={(e) => setValue(e.target.value)} disabled={isSubmitting}><option value="">Select {attribute.name}</option>{attribute.allowed_values.map((option) => <option key={option} value={option}>{option}</option>)}</select>
+                            ) : attribute.input_type === "multiselect" ? (
+                              <select multiple className="input min-h-28" value={Array.isArray(value) ? value.map(String) : []} onChange={(e) => setValue(Array.from(e.currentTarget.selectedOptions).map((option: HTMLOptionElement) => option.value))} disabled={isSubmitting}>{attribute.allowed_values.map((option) => <option key={option} value={option}>{option}</option>)}</select>
+                            ) : attribute.input_type === "boolean" ? (
+                              <label className="flex items-center gap-2 rounded-xl border border-[#dfe5ec] px-4 py-3 text-sm"><input type="checkbox" checked={Boolean(value)} onChange={(e) => setValue(e.target.checked)} disabled={isSubmitting}/> Yes / Available</label>
+                            ) : (
+                              <input className="input" type={attribute.input_type === "number" ? "number" : attribute.input_type === "date" ? "date" : "text"} value={String(value ?? "")} onChange={(e) => setValue(attribute.input_type === "number" ? (e.target.value === "" ? "" : Number(e.target.value)) : e.target.value)} disabled={isSubmitting}/>
+                            )}
+                          </Field>
+                        );
+                      })}
+                    </div>
+                  )}
                 </FormSection>
 
                 <FormSection

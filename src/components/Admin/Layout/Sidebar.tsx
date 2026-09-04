@@ -19,6 +19,7 @@ import {
   LayoutDashboard,
   LifeBuoy,
   Menu,
+  MapPin,
   Moon,
   Package,
   PackageCheck,
@@ -611,6 +612,15 @@ export default function AdminSidebar({
                 className="relative rounded-xl p-2.5 hover:bg-slate-100 dark:hover:bg-white/10"
               >
                 <Bell size={19} />
+              </Link>
+
+              <Link
+                href="/account/addresses"
+                aria-label="Delivery addresses"
+                title="Delivery addresses"
+                className="rounded-xl p-2.5 hover:bg-slate-100 dark:hover:bg-white/10"
+              >
+                <MapPin size={19} />
               </Link>
 
               <Link

@@ -12,6 +12,7 @@ import {
   LayoutDashboard,
   LogOut,
   Menu,
+  MapPin,
   PackageCheck,
   Settings,
   Truck,
@@ -63,6 +64,11 @@ const nav: LogisticsNavItem[] = [
     label: "Notifications",
     href: "/logistics/notifications",
     icon: Bell,
+  },
+  {
+    label: "Delivery addresses",
+    href: "/account/addresses",
+    icon: MapPin,
   },
   {
     label: "Zones & rates",

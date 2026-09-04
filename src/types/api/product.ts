@@ -26,6 +26,62 @@ export type Category = {
   created_at: string;
 };
 
+
+export type CategoryAttributeInputType =
+  | "text"
+  | "textarea"
+  | "number"
+  | "boolean"
+  | "select"
+  | "multiselect"
+  | "date";
+
+export type CategoryAttribute = {
+  id: ID;
+  category_id: ID;
+  key: string;
+  name: string;
+  description?: string | null;
+  input_type: CategoryAttributeInputType;
+  unit?: string | null;
+  allowed_values: string[];
+  settings?: Record<string, unknown>;
+  is_required: boolean;
+  is_filterable: boolean;
+  is_comparable: boolean;
+  use_for_similarity: boolean;
+  similarity_weight: string | number;
+  is_variant_attribute: boolean;
+  inherit_to_children: boolean;
+  display_order: number;
+  is_active: boolean;
+  source_category_id?: ID | null;
+  inherited?: boolean;
+  created_at: string;
+  updated_at?: string | null;
+};
+
+export type ProductSpecification = {
+  id: ID;
+  product_id: ID;
+  attribute_id: ID;
+  key: string;
+  name: string;
+  input_type: CategoryAttributeInputType;
+  unit?: string | null;
+  value: unknown;
+  normalized_value?: string | null;
+  is_comparable: boolean;
+  use_for_similarity: boolean;
+  similarity_weight: string | number;
+  display_order: number;
+};
+
+export type ProductSpecificationInput = {
+  attribute_id: ID;
+  value: unknown;
+};
+
 export type Brand = {
   id: ID;
   name: string;

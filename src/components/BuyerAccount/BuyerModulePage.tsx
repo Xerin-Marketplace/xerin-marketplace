@@ -3,6 +3,7 @@ import { formatCurrency } from "@/lib/formatCurrency";
 import { ordersApi, paymentsApi } from "@/lib/api/endpoints/commerce";
 import { authApi } from "@/lib/api/endpoints/auth";
 import { usersApi } from "@/lib/api/endpoints/users";
+import { useAuthStore } from "@/store/useAuthStore";
 import type { User } from "@/types/api/user";
 import type { Order, Payment } from "@/types/api/commerce";
 import {
@@ -19,6 +20,7 @@ import {
   UserRound,
 } from "lucide-react";
 import Link from "next/link";
+import { useSearchParams } from "next/navigation";
 import { FormEvent, useEffect, useState } from "react";
 import toast from "react-hot-toast";
 import AddressBookSection from "@/components/MyAccount/AddressBookSection";
@@ -58,6 +60,12 @@ const copy = {
   ],
 } as const;
 export default function BuyerModulePage({ view }: { view: View }) {
+  const searchParams = useSearchParams();
+  const requestedReturnTo = searchParams.get("returnTo");
+  const returnTo = requestedReturnTo?.startsWith("/") && !requestedReturnTo.startsWith("//")
+    ? requestedReturnTo
+    : null;
+  const authenticatedUser = useAuthStore((state) => state.user);
   const [loading, setLoading] = useState(true),
     [error, setError] = useState(false),
     [orders, setOrders] = useState<Order[]>([]),
@@ -133,8 +141,12 @@ export default function BuyerModulePage({ view }: { view: View }) {
             : 0,
         });
       }
-      else if (view === "addresses")
-        setProfile(await usersApi.getMe());
+      else if (view === "addresses") {
+        // Delivery addresses are a universal shopping capability. The user's
+        // identity is already present in the authenticated session, so do not
+        // make this page depend on a role-specific profile permission.
+        setProfile((authenticatedUser as User | null) ?? null);
+      }
       else if (view === "details") {
         const p = await usersApi.getMe();
         setProfile(p);
@@ -164,6 +176,7 @@ export default function BuyerModulePage({ view }: { view: View }) {
     orderSearch,
     orderStatusFilter,
     orderPaymentFilter,
+    authenticatedUser,
   ]);
   async function saveDetails(e: FormEvent) {
     e.preventDefault();
@@ -193,7 +206,7 @@ export default function BuyerModulePage({ view }: { view: View }) {
   return (
     <div className="space-y-5">
       <div>
-        <p className="text-sm font-semibold text-[#f7941d]">Buyer Account</p>
+        <p className="text-sm font-semibold text-[#f7941d]">{view === "addresses" ? "Shopping & Delivery" : "Buyer Account"}</p>
         <h1 className="text-2xl font-bold">{title}</h1>
         <p className="mt-1 text-sm text-[#64748b]">{description}</p>
       </div>
@@ -266,12 +279,28 @@ export default function BuyerModulePage({ view }: { view: View }) {
             onPage={setPaymentPage}
           />
         ) : view === "addresses" ? (
-          <AddressBookSection
-            isActive
-            displayName={`${profile?.first_name || ""} ${profile?.last_name || ""}`.trim() || "Name not provided"}
-            emailLabel={profile?.email || "Email unavailable"}
-            phoneLabel={profile?.phone || "Phone number not added"}
-          />
+          <div className="space-y-4">
+            {returnTo && (
+              <div className="flex flex-col gap-3 rounded-xl border border-orange-200 bg-orange-50 p-4 text-sm text-slate-700 sm:flex-row sm:items-center sm:justify-between dark:border-orange-400/20 dark:bg-orange-400/10 dark:text-white/75">
+                <div>
+                  <p className="font-bold text-slate-900 dark:text-white">Delivery address for your checkout</p>
+                  <p className="mt-1">Add or update the destination you want to use, then return to checkout.</p>
+                </div>
+                <Link
+                  href={returnTo}
+                  className="inline-flex shrink-0 items-center justify-center rounded-xl bg-[#f7941d] px-4 py-2.5 font-bold text-white transition hover:bg-[#e8830d]"
+                >
+                  Back to checkout
+                </Link>
+              </div>
+            )}
+            <AddressBookSection
+              isActive
+              displayName={`${profile?.first_name || ""} ${profile?.last_name || ""}`.trim() || "Name not provided"}
+              emailLabel={profile?.email || "Email unavailable"}
+              phoneLabel={profile?.phone || "Phone number not added"}
+            />
+          </div>
         ) : view === "details" ? (
           <Details
             profile={profile}
