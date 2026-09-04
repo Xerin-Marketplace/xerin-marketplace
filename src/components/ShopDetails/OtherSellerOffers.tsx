@@ -43,16 +43,30 @@ export function OtherSellerOffersButton({
   const reachedOfferLimit = count >= 24;
   const offerCountLabel = reachedOfferLimit ? "24+" : String(count);
 
-  const lowestOffer = data.reduce<{ amount: number; currency?: string } | null>((lowest, match) => {
-    const regular = Number(match.product.price || 0);
-    const sale = match.product.sale_price == null ? null : Number(match.product.sale_price);
-    const amount = sale && sale > 0 && sale < regular ? sale : regular;
-    if (!Number.isFinite(amount) || amount <= 0) return lowest;
-    if (!lowest || amount < lowest.amount) {
-      return { amount, currency: match.product.currency };
-    }
-    return lowest;
-  }, null);
+  const matches = data as SimilarProductMatch[];
+
+  const lowestOffer = matches.reduce(
+    (
+      lowest: { amount: number; currency?: string } | null,
+      match: SimilarProductMatch,
+    ) => {
+      const regular = Number(match.product.price || 0);
+      const sale =
+        match.product.sale_price == null
+          ? null
+          : Number(match.product.sale_price);
+      const amount = sale && sale > 0 && sale < regular ? sale : regular;
+
+      if (!Number.isFinite(amount) || amount <= 0) return lowest;
+
+      if (!lowest || amount < lowest.amount) {
+        return { amount, currency: match.product.currency };
+      }
+
+      return lowest;
+    },
+    null as { amount: number; currency?: string } | null,
+  );
 
   const inStockCount = data.filter((match) => match.in_stock).length;
 
