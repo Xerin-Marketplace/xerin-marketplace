@@ -22,7 +22,7 @@ const Hero = () => {
             </div>
           </div>
 
-          <div className="no-scrollbar flex snap-x gap-3 overflow-x-auto pb-1 lg:grid lg:grid-cols-1 lg:grid-rows-2 lg:overflow-visible lg:pb-0 xl:gap-5">
+          <div className="no-scrollbar hidden snap-x gap-3 overflow-x-auto pb-1 sm:flex lg:grid lg:grid-cols-1 lg:grid-rows-2 lg:overflow-visible lg:pb-0 xl:gap-5">
             {topAd ? (
               <div className="min-w-[82vw] snap-start sm:min-w-[48%] lg:min-w-0"><SponsoredHeroCard advertisement={topAd} /></div>
             ) : (
