@@ -6,6 +6,7 @@ import {
   getCategories as apiGetCategories,
   getBrands as apiGetBrands,
   getProductSpecifications as apiGetProductSpecifications,
+  getSimilarProducts as apiGetSimilarProducts,
   createProduct as apiCreateProduct,
   updateProduct as apiUpdateProduct,
   deleteProduct as apiDeleteProduct,
@@ -31,6 +32,16 @@ export const useProduct = (id: ID) => {
     queryFn: () => apiGetProduct(id),
     enabled: Boolean(id),
     retry: false,
+  });
+};
+
+export const useSimilarProducts = (id: ID, minScore = 75, limit = 8) => {
+  return useQuery({
+    queryKey: ["similar-products", id, minScore, limit],
+    queryFn: () => apiGetSimilarProducts(id, minScore, limit),
+    enabled: Boolean(id),
+    retry: false,
+    staleTime: 60_000,
   });
 };
 

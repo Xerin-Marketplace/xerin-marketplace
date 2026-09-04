@@ -1353,7 +1353,7 @@ const SellerProducts = () => {
                     <Field
                       label="SKU / ownership reference"
                       required
-                      hint="Your unique stock-keeping reference for this product."
+                      hint="Your stock-keeping reference. It must be unique only inside your seller catalog; another seller may use the same SKU."
                     >
                       <input
                         value={form.sku}
@@ -1373,7 +1373,7 @@ const SellerProducts = () => {
                       <Field
                         label="Product slug"
                         required
-                        hint="Used in product URLs. Generated from the product name and editable."
+                        hint="Generated from the product name. If another seller already uses the same public slug, Xerin will make yours unique automatically."
                       >
                         <input
                           value={form.slug}

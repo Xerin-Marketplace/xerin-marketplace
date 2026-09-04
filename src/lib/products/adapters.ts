@@ -4,7 +4,7 @@ import { API_BASE_URL } from "@/lib/api/endpoints";
 
 const PRODUCT_PLACEHOLDER_IMAGE = "/images/products/placeholder.svg";
 
-const resolveProductImageUrl = (imageUrl: string) => {
+export const resolveProductImageUrl = (imageUrl: string) => {
   if (!imageUrl) return PRODUCT_PLACEHOLDER_IMAGE;
 
   if (

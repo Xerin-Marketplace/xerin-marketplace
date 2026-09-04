@@ -4,8 +4,6 @@ import React, { useMemo, useState } from "react";
 import Image from "next/image";
 import { useRouter } from "next/navigation";
 import Breadcrumb from "../Common/Breadcrumb";
-import RecentlyViewdItems from "./RecentlyViewd";
-import Newsletter from "../Common/Newsletter";
 import StarRating from "@/components/Common/StarRating";
 import PriceDisplay from "@/components/shared/PriceDisplay";
 import { ROUTES } from "@/constants/links";
@@ -14,6 +12,7 @@ import { useProductDetailsStore } from "@/store/useProductDetailsStore";
 import { useAddCartItem, addProductToCartPayload } from "@/hooks/useCartActions";
 import type { Product } from "@/types/product";
 import ProductSpecifications from "./ProductSpecifications";
+import OtherSellerOffersModal, { OtherSellerOffersButton } from "./OtherSellerOffers";
 
 const CheckIcon = ({ className = "text-orange" }: { className?: string }) => (
   <svg className={className} width="18" height="18" viewBox="0 0 24 24" fill="none" aria-hidden="true">
@@ -38,6 +37,7 @@ const TrustIcon = ({ type }: { type: "return" | "delivery" | "secure" | "market"
 const ShopDetails = ({ product }: { product: Product }) => {
   const [previewImg, setPreviewImg] = useState(0);
   const [quantity, setQuantity] = useState(1);
+  const [sellerOffersOpen, setSellerOffersOpen] = useState(false);
   const { openPreviewModal } = usePreviewSlider();
   const updatePreviewProduct = useProductDetailsStore((state) => state.updateproductDetails);
   const addCartItem = useAddCartItem();
@@ -78,7 +78,7 @@ const ShopDetails = ({ product }: { product: Product }) => {
 
       <section className="bg-white pb-8 pt-[92px] dark:bg-darkTheme-bg sm:pb-12 sm:pt-6 lg:pb-16 lg:pt-10">
         <div className="mx-auto w-full max-w-[1280px] px-3 sm:px-6 lg:px-8 xl:px-4">
-          <div className="grid gap-5 lg:grid-cols-[minmax(0,0.95fr)_minmax(0,1.05fr)] lg:gap-9 xl:gap-12">
+          <div className="grid gap-5 lg:grid-cols-[minmax(0,0.90fr)_minmax(0,1.10fr)] lg:gap-9 xl:gap-12">
             {/* Gallery */}
             <div className="min-w-0">
               <div className="relative aspect-[1.03/1] min-h-[310px] overflow-hidden rounded-2xl border border-gray-3 bg-[#eef2f6] shadow-sm dark:border-darkTheme-border-color dark:bg-darkTheme-card sm:min-h-[430px] lg:min-h-[510px]">
@@ -160,62 +160,77 @@ const ShopDetails = ({ product }: { product: Product }) => {
                 <p className="mt-1.5 text-xs text-dark-4 sm:text-sm">Delivery price is calculated at checkout based on the selected destination.</p>
               </div>
 
-              <div className="mt-5 space-y-2.5 sm:mt-6">
-                {product.sku && <div className="flex items-center gap-2 text-sm text-dark dark:text-darkTheme-body-color"><CheckIcon /> <span><strong>SKU:</strong> {product.sku}</span></div>}
-                <div className="flex items-center gap-2 text-sm text-dark dark:text-darkTheme-body-color"><CheckIcon /> <span>Buyer protection and order tracking through Xerin Market</span></div>
-                {variantHighlights.map((item) => (
-                  <div key={item} className="flex items-start gap-2 text-sm text-dark dark:text-darkTheme-body-color"><span className="mt-0.5"><CheckIcon /></span><span>{item}</span></div>
-                ))}
-              </div>
-
-              {product.variants?.length ? (
-                <div className="mt-5 sm:mt-6">
-                  <p className="mb-2 text-sm font-semibold text-dark dark:text-white">Available options</p>
-                  <div className="flex flex-wrap gap-2">
-                    {product.variants.map((variant) => (
-                      <span key={String(variant.id)} className="rounded-lg border border-gray-3 bg-white px-3 py-2 text-xs font-medium text-dark dark:border-darkTheme-border-color dark:bg-darkTheme-card dark:text-white sm:text-sm">
-                        {variant.name}{variant.sku ? ` · ${variant.sku}` : ""}
-                      </span>
+              <div className="mt-5 grid gap-x-8 gap-y-0 sm:mt-6 lg:grid-cols-[minmax(0,1fr)_285px] xl:grid-cols-[minmax(0,1fr)_300px] xl:gap-x-10">
+                <div className="min-w-0 lg:col-start-1">
+                  <div className="space-y-2.5">
+                    {product.sku && <div className="flex items-center gap-2 text-sm text-dark dark:text-darkTheme-body-color"><CheckIcon /> <span><strong>SKU:</strong> {product.sku}</span></div>}
+                    <div className="flex items-center gap-2 text-sm text-dark dark:text-darkTheme-body-color"><CheckIcon /> <span>Buyer protection and order tracking through Xerin Market</span></div>
+                    {variantHighlights.map((item) => (
+                      <div key={item} className="flex items-start gap-2 text-sm text-dark dark:text-darkTheme-body-color"><span className="mt-0.5"><CheckIcon /></span><span>{item}</span></div>
                     ))}
                   </div>
-                </div>
-              ) : null}
 
-              <div className="mt-6 flex flex-col gap-3 sm:mt-7">
-                <div className="flex flex-wrap items-center gap-3">
-                  <span className="text-sm font-semibold text-dark dark:text-white">Qty:</span>
-                  <div className="flex h-11 items-center overflow-hidden rounded-lg border border-gray-3 dark:border-darkTheme-border-color">
-                    <button type="button" aria-label="Decrease quantity" onClick={() => setQuantity((value) => Math.max(1, value - 1))} className="flex h-full w-11 items-center justify-center text-lg transition hover:bg-gray-2 hover:text-orange">−</button>
-                    <span className="flex h-full w-12 items-center justify-center border-x border-gray-3 text-sm font-semibold dark:border-darkTheme-border-color">{quantity}</span>
-                    <button type="button" aria-label="Increase quantity" onClick={() => setQuantity((value) => value + 1)} className="flex h-full w-11 items-center justify-center text-lg transition hover:bg-gray-2 hover:text-orange">+</button>
+                  {product.variants?.length ? (
+                    <div className="mt-5">
+                      <p className="mb-2 text-sm font-semibold text-dark dark:text-white">Available options</p>
+                      <div className="flex flex-wrap gap-2">
+                        {product.variants.map((variant) => (
+                          <span key={String(variant.id)} className="rounded-lg border border-gray-3 bg-white px-3 py-2 text-xs font-medium text-dark dark:border-darkTheme-border-color dark:bg-darkTheme-card dark:text-white sm:text-sm">
+                            {variant.name}{variant.sku ? ` · ${variant.sku}` : ""}
+                          </span>
+                        ))}
+                      </div>
+                    </div>
+                  ) : null}
+
+                  <div className="mt-6">
+                    <div className="flex flex-wrap items-center gap-3">
+                      <span className="text-sm font-semibold text-dark dark:text-white">Qty:</span>
+                      <div className="flex h-11 items-center overflow-hidden rounded-lg border border-gray-3 dark:border-darkTheme-border-color">
+                        <button type="button" aria-label="Decrease quantity" onClick={() => setQuantity((value) => Math.max(1, value - 1))} className="flex h-full w-11 items-center justify-center text-lg transition hover:bg-gray-2 hover:text-orange">−</button>
+                        <span className="flex h-full w-12 items-center justify-center border-x border-gray-3 text-sm font-semibold dark:border-darkTheme-border-color">{quantity}</span>
+                        <button type="button" aria-label="Increase quantity" onClick={() => setQuantity((value) => value + 1)} className="flex h-full w-11 items-center justify-center text-lg transition hover:bg-gray-2 hover:text-orange">+</button>
+                      </div>
+                    </div>
+
+                    <div className="mt-3 grid grid-cols-2 gap-2.5 sm:grid-cols-[minmax(0,1fr)_minmax(0,1fr)_48px] sm:gap-3">
+                      <button
+                        type="button"
+                        onClick={addToCart}
+                        disabled={addCartItem.isPending || !available}
+                        className="inline-flex min-h-12 items-center justify-center rounded-xl border-2 border-orange bg-white px-4 text-sm font-bold text-orange transition hover:bg-orange hover:text-white disabled:cursor-not-allowed disabled:opacity-50 sm:px-5"
+                      >
+                        {addCartItem.isPending ? "Adding..." : "Add to Cart"}
+                      </button>
+                      <button
+                        type="button"
+                        onClick={buyNow}
+                        disabled={addCartItem.isPending || !available}
+                        className="inline-flex min-h-12 items-center justify-center rounded-xl bg-orange px-4 text-sm font-bold text-white shadow-sm transition hover:bg-[#e95f23] disabled:cursor-not-allowed disabled:opacity-50 sm:px-5"
+                      >
+                        Buy Now
+                      </button>
+                      <a href={ROUTES.wishlist} aria-label="Add to wishlist" className="col-span-2 inline-flex min-h-12 items-center justify-center gap-2 rounded-xl border border-gray-3 bg-white px-4 text-sm font-semibold text-dark shadow-sm transition hover:border-orange hover:text-orange dark:border-darkTheme-border-color dark:bg-darkTheme-card dark:text-white sm:col-auto sm:w-12 sm:px-0">
+                        <svg width="20" height="20" viewBox="0 0 24 24" fill="none"><path d="M20.8 4.6a5.5 5.5 0 0 0-7.8 0L12 5.6l-1-1a5.5 5.5 0 0 0-7.8 7.8l1 1L12 21l7.8-7.6 1-1a5.5 5.5 0 0 0 0-7.8Z" stroke="currentColor" strokeWidth="1.7" strokeLinecap="round" strokeLinejoin="round"/></svg>
+                        <span className="sm:hidden">Wishlist</span>
+                      </a>
+                    </div>
                   </div>
                 </div>
 
-                <div className="grid grid-cols-2 gap-2.5 sm:flex sm:flex-wrap sm:gap-3">
-                  <button
-                    type="button"
-                    onClick={addToCart}
-                    disabled={addCartItem.isPending || !available}
-                    className="inline-flex min-h-12 items-center justify-center rounded-xl border-2 border-orange bg-white px-4 text-sm font-bold text-orange transition hover:bg-orange hover:text-white disabled:cursor-not-allowed disabled:opacity-50 sm:min-w-[170px] sm:px-7"
-                  >
-                    {addCartItem.isPending ? "Adding..." : "Add to Cart"}
-                  </button>
-                  <button
-                    type="button"
-                    onClick={buyNow}
-                    disabled={addCartItem.isPending || !available}
-                    className="inline-flex min-h-12 items-center justify-center rounded-xl bg-orange px-4 text-sm font-bold text-white shadow-sm transition hover:bg-[#e95f23] disabled:cursor-not-allowed disabled:opacity-50 sm:min-w-[170px] sm:px-7"
-                  >
-                    Buy Now
-                  </button>
-                  <a href={ROUTES.wishlist} aria-label="Add to wishlist" className="col-span-2 inline-flex min-h-11 items-center justify-center gap-2 rounded-xl border border-gray-3 px-4 text-sm font-semibold text-dark transition hover:border-dark dark:border-darkTheme-border-color dark:text-white sm:col-auto sm:w-12 sm:px-0">
-                    <svg width="20" height="20" viewBox="0 0 24 24" fill="none"><path d="M20.8 4.6a5.5 5.5 0 0 0-7.8 0L12 5.6l-1-1a5.5 5.5 0 0 0-7.8 7.8l1 1L12 21l7.8-7.6 1-1a5.5 5.5 0 0 0 0-7.8Z" stroke="currentColor" strokeWidth="1.7" strokeLinecap="round" strokeLinejoin="round"/></svg>
-                    <span className="sm:hidden">Wishlist</span>
-                  </a>
+                <div className="mt-5 min-w-0 lg:col-start-2 lg:row-start-1 lg:mt-0 lg:justify-self-end lg:w-[285px] xl:w-[300px]">
+                  <OtherSellerOffersButton
+                    productId={String(product.id)}
+                    onOpen={() => setSellerOffersOpen(true)}
+                  />
+                </div>
+
+                <div className="min-w-0 lg:col-span-2">
+                  <ProductSpecifications productId={product.id} variant="overview" overviewLimit={6} />
                 </div>
               </div>
 
-              <div className="mt-6 grid grid-cols-2 overflow-hidden rounded-2xl border border-gray-3 bg-[#fbfcfd] dark:border-darkTheme-border-color dark:bg-darkTheme-card sm:grid-cols-4">
+              <div className="mt-4 grid grid-cols-2 overflow-hidden rounded-2xl border border-gray-3 bg-[#fbfcfd] dark:border-darkTheme-border-color dark:bg-darkTheme-card sm:grid-cols-4">
                 {[
                   { type: "return" as const, title: "Returns", text: "Policy applies" },
                   { type: "delivery" as const, title: "Delivery", text: "Shown at checkout" },
@@ -233,24 +248,72 @@ const ShopDetails = ({ product }: { product: Product }) => {
         </div>
       </section>
 
-      <section className="bg-gray-2 py-8 dark:bg-darkTheme-secondary-bg sm:py-12">
-        <div className="mx-auto w-full max-w-[1280px] px-3 sm:px-6 lg:px-8 xl:px-4">
-          <div className="rounded-2xl border border-gray-3 bg-white p-5 shadow-sm dark:border-darkTheme-border-color dark:bg-darkTheme-card sm:p-7 lg:p-8">
-            <div className="flex items-center gap-3 border-b border-gray-3 pb-4 dark:border-darkTheme-border-color">
-              <span className="h-6 w-1 rounded-full bg-orange" />
-              <h2 className="text-lg font-bold text-dark dark:text-white sm:text-xl">Product description</h2>
+      <section className="relative overflow-hidden border-y border-gray-3 bg-[#f7f9fc] py-10 dark:border-darkTheme-border-color dark:bg-darkTheme-secondary-bg sm:py-14">
+        <div className="pointer-events-none absolute -right-24 -top-24 h-64 w-64 rounded-full bg-orange/[0.05]" />
+        <div className="pointer-events-none absolute -bottom-28 left-10 h-72 w-72 rounded-full bg-[#2563eb]/[0.04]" />
+
+        <div className="relative mx-auto w-full max-w-[1280px] px-3 sm:px-6 lg:px-8 xl:px-4">
+          <div className="mb-6 flex flex-wrap items-end justify-between gap-4 sm:mb-8">
+            <div>
+              <div className="mb-2 inline-flex items-center gap-2 rounded-full border border-orange/20 bg-orange/[0.07] px-3 py-1 text-[11px] font-bold uppercase tracking-[0.12em] text-orange">
+                <span className="h-1.5 w-1.5 rounded-full bg-orange" />
+                Product information
+              </div>
+              <h2 className="text-2xl font-extrabold tracking-tight text-dark dark:text-white sm:text-3xl">
+                Everything you need to know
+              </h2>
+              <p className="mt-2 max-w-2xl text-sm leading-6 text-dark-4 dark:text-darkTheme-secondary-muted sm:text-base">
+                Review the seller&apos;s description together with structured product specifications before you buy.
+              </p>
             </div>
-            <p className="mt-5 whitespace-pre-line text-sm leading-7 text-dark-4 dark:text-darkTheme-secondary-muted sm:text-base">
-              {product.description || "The seller has not provided a product description yet."}
-            </p>
+            <span className="hidden rounded-2xl border border-gray-3 bg-white px-4 py-2 text-xs font-semibold text-dark-4 shadow-sm dark:border-darkTheme-border-color dark:bg-darkTheme-card sm:inline-flex">
+              Verified listing details
+            </span>
           </div>
 
-          <ProductSpecifications productId={product.id} />
+          <div className="grid items-stretch gap-5 lg:grid-cols-[minmax(0,0.9fr)_minmax(0,1.1fr)] lg:gap-6">
+            <article className="relative overflow-hidden rounded-3xl border border-gray-3 bg-white p-5 shadow-[0_10px_35px_rgba(15,23,42,0.05)] dark:border-darkTheme-border-color dark:bg-darkTheme-card sm:p-7">
+              <div className="absolute right-0 top-0 h-28 w-28 rounded-bl-[80px] bg-orange/[0.06]" />
+              <div className="relative">
+                <div className="flex items-center gap-3 border-b border-gray-3 pb-4 dark:border-darkTheme-border-color">
+                  <span className="flex h-11 w-11 shrink-0 items-center justify-center rounded-2xl bg-orange/10 text-orange">
+                    <svg width="22" height="22" viewBox="0 0 24 24" fill="none" aria-hidden="true">
+                      <path d="M6 3h9l3 3v15H6V3Z" stroke="currentColor" strokeWidth="1.7" strokeLinejoin="round"/>
+                      <path d="M15 3v4h4M9 11h6M9 15h6" stroke="currentColor" strokeWidth="1.7" strokeLinecap="round"/>
+                    </svg>
+                  </span>
+                  <div>
+                    <h3 className="text-lg font-extrabold text-dark dark:text-white sm:text-xl">Product description</h3>
+                    <p className="mt-0.5 text-xs text-dark-4 sm:text-sm">Seller-provided overview and important product notes.</p>
+                  </div>
+                </div>
+
+                <p className="mt-5 whitespace-pre-line text-sm leading-7 text-dark-4 dark:text-darkTheme-secondary-muted sm:text-[15px] sm:leading-8">
+                  {product.description || "The seller has not provided a product description yet."}
+                </p>
+
+                <div className="mt-6 flex flex-wrap gap-2">
+                  <span className="inline-flex items-center gap-1.5 rounded-full bg-green/10 px-3 py-1.5 text-[11px] font-semibold text-green">
+                    <CheckIcon className="text-green" /> Approved listing
+                  </span>
+                  <span className="inline-flex items-center gap-1.5 rounded-full bg-orange/10 px-3 py-1.5 text-[11px] font-semibold text-orange">
+                    Xerin buyer protection
+                  </span>
+                </div>
+              </div>
+            </article>
+
+            <ProductSpecifications productId={product.id} embedded />
+          </div>
         </div>
       </section>
 
-      <RecentlyViewdItems />
-      <Newsletter />
+      <OtherSellerOffersModal
+        productId={String(product.id)}
+        productName={product.title}
+        open={sellerOffersOpen}
+        onClose={() => setSellerOffersOpen(false)}
+      />
     </>
   );
 };

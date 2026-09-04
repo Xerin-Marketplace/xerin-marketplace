@@ -7,6 +7,7 @@ import type {
   CategoryAttribute,
   ProductSpecification,
   ProductSpecificationInput,
+  SimilarProductMatch,
   Product,
   ProductImage,
   ProductImageRequest,
@@ -76,6 +77,17 @@ export const getCategories = async (): Promise<Category[]> => {
 
 export const getCategoryAttributes = async (categoryId: ID): Promise<CategoryAttribute[]> => {
   const res = await axiosInstance.get<CategoryAttribute[]>(`/products/categories/${categoryId}/attributes`);
+  return res.data;
+};
+
+export const getSimilarProducts = async (
+  productId: ID,
+  minScore = 75,
+  limit = 8,
+): Promise<SimilarProductMatch[]> => {
+  const res = await axiosInstance.get<SimilarProductMatch[]>(`/products/${productId}/similar`, {
+    params: { min_score: minScore, limit },
+  });
   return res.data;
 };
 

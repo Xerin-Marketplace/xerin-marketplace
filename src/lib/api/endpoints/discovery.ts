@@ -1,5 +1,6 @@
 import axiosInstance from "../client";
 import type {
+  AlsoBoughtResponse,
   ProductSearchParams,
   ProductSearchResponse,
   RecommendationListResponse,
@@ -53,6 +54,17 @@ export const discoveryApi = {
     (
       await axiosInstance.get<RecommendationListResponse>(
         `/products/${productId}/related`,
+        { params: { limit } },
+      )
+    ).data,
+
+  alsoBought: async (
+    productId: string,
+    limit = 8,
+  ): Promise<AlsoBoughtResponse> =>
+    (
+      await axiosInstance.get<AlsoBoughtResponse>(
+        `/products/${productId}/also-bought`,
         { params: { limit } },
       )
     ).data,

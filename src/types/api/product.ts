@@ -176,6 +176,23 @@ export type Product = TimestampFields & {
   is_best_seller?: boolean;
 };
 
+export type SimilarProductMatchedAttribute = {
+  key: string;
+  name: string;
+  source_value: unknown;
+  candidate_value: unknown;
+  unit?: string | null;
+  match_strength: number;
+};
+
+export type SimilarProductMatch = {
+  product: Product;
+  similarity_score: number;
+  matched_attributes: SimilarProductMatchedAttribute[];
+  in_stock: boolean;
+  available_quantity: number;
+};
+
 export type ProductListQuery = {
   search?: string;
   store_id?: ID;

@@ -52,6 +52,16 @@ export type RecommendationListResponse = {
   results: SearchProductItem[];
 };
 
+export type AlsoBoughtProductItem = SearchProductItem & {
+  customer_count: number;
+  order_count: number;
+};
+
+export type AlsoBoughtResponse = {
+  total: number;
+  results: AlsoBoughtProductItem[];
+};
+
 export type WishlistProductItem = {
   wishlist_id: string;
   product_id: string;
