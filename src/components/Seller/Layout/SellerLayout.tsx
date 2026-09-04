@@ -623,10 +623,23 @@ function Nav({
     </Link>
   );
 }
-function Badge({ label, tone }: { label: string; tone: "green" | "amber" }) {
+function Badge({
+  label,
+  tone,
+}: {
+  label: string;
+  tone: "green" | "amber" | "red";
+}) {
+  const toneClass =
+    tone === "green"
+      ? "bg-green-400/15 text-green-300"
+      : tone === "red"
+        ? "bg-red-400/15 text-red-300"
+        : "bg-amber-400/15 text-amber-300";
+
   return (
     <span
-      className={`rounded-full px-2 py-1 text-[10px] font-semibold capitalize ${tone === "green" ? "bg-green-400/15 text-green-300" : "bg-amber-400/15 text-amber-300"}`}
+      className={`rounded-full px-2 py-1 text-[10px] font-semibold capitalize ${toneClass}`}
     >
       {label}
     </span>
