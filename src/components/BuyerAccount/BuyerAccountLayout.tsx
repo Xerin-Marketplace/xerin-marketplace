@@ -1,7 +1,15 @@
 "use client";
 
+import DashboardShell, {
+  type DashboardNavGroup,
+} from "@/components/Dashboard/DashboardShell";
 import RouteGuard from "@/guards/RouteGuard";
-import { isAdminUser, isSellerUser } from "@/guards/permissions";
+import {
+  isAdminUser,
+  isBrokerUser,
+  isLogisticsUser,
+  isSellerUser,
+} from "@/guards/permissions";
 import { useAuth } from "@/hooks/useAuth";
 import { useAuthStore } from "@/store/useAuthStore";
 import {
@@ -9,8 +17,6 @@ import {
   Bell,
   CreditCard,
   Heart,
-  LayoutDashboard,
-  LogOut,
   MapPin,
   Package,
   ScanSearch,
@@ -18,52 +24,133 @@ import {
   Star,
   UserRound,
 } from "lucide-react";
-import Link from "next/link";
 import { usePathname, useRouter } from "next/navigation";
-import { useEffect } from "react";
+import { useEffect, useMemo } from "react";
 
-type NavItem = readonly [string, string, typeof Package];
-type NavGroup = { label: string; items: readonly NavItem[] };
-
-const navGroups: readonly NavGroup[] = [
+const customerGroups: DashboardNavGroup[] = [
   {
-    label: "Overview",
-    items: [["Dashboard", "/account", LayoutDashboard]],
-  },
-  {
-    label: "Shopping",
+    title: "Shopping",
+    key: "customer-shopping",
+    icon: Package,
     items: [
-      ["Orders", "/account/orders", Package],
-      ["Wishlist", "/wishlist", Heart],
-      ["Reviews", "/account/reviews", Star],
+      { label: "Orders", href: "/account/orders", icon: Package },
+      { label: "Wishlist", href: "/wishlist", icon: Heart },
+      { label: "Reviews", href: "/account/reviews", icon: Star },
     ],
   },
   {
-    label: "Delivery & protection",
+    title: "Delivery & Protection",
+    key: "customer-delivery-protection",
+    icon: BadgeCheck,
     items: [
-      ["Confirm Delivery", "/account/delivery-verification", BadgeCheck],
-      ["Pickup Confirmations", "/account/pickup-verification", ScanSearch],
+      {
+        label: "Confirm Delivery",
+        href: "/account/delivery-verification",
+        icon: BadgeCheck,
+      },
+      {
+        label: "Pickup Confirmations",
+        href: "/account/pickup-verification",
+        icon: ScanSearch,
+      },
     ],
   },
   {
-    label: "Account",
+    title: "Account",
+    key: "customer-account",
+    icon: UserRound,
     items: [
-      ["Payments", "/account/payments", CreditCard],
-      ["Addresses", "/account/addresses", MapPin],
-      ["Notifications", "/account/notifications", Bell],
-      ["Security", "/account/security", Shield],
-      ["Account Details", "/account/details", UserRound],
+      { label: "Payments", href: "/account/payments", icon: CreditCard },
+      { label: "Addresses", href: "/account/addresses", icon: MapPin },
+      { label: "Notifications", href: "/account/notifications", icon: Bell },
+      { label: "Security", href: "/account/security", icon: Shield },
+      { label: "Account Details", href: "/account/details", icon: UserRound },
     ],
   },
-] as const;
+];
 
-const allNav = navGroups.flatMap((group) => group.items);
+const universalAddressGroups: DashboardNavGroup[] = [
+  {
+    title: "Shopping Account",
+    key: "universal-shopping-account",
+    icon: MapPin,
+    items: [
+      { label: "Delivery Addresses", href: "/account/addresses", icon: MapPin },
+    ],
+  },
+];
+
+function accountPageTitle(pathname: string) {
+  if (pathname.includes("/orders/")) return "Order Details";
+  if (pathname === "/account/orders") return "My Orders";
+  if (pathname === "/account/payments") return "My Payments";
+  if (pathname === "/account/addresses") return "Delivery Addresses";
+  if (pathname === "/account/reviews") return "My Reviews";
+  if (pathname === "/account/notifications") return "Notifications";
+  if (pathname === "/account/security") return "Account Security";
+  if (pathname === "/account/details") return "Account Details";
+  if (pathname === "/account/delivery-verification") return "Confirm Delivery";
+  if (pathname === "/account/pickup-verification") return "Pickup Confirmations";
+  return "My Account";
+}
+
+function ownerWorkspace(user: ReturnType<typeof useAuthStore.getState>["user"]) {
+  if (isSellerUser(user)) {
+    return {
+      href: "/seller/dashboard",
+      label: "Seller Dashboard",
+      center: "Seller Center",
+      subtitle: "Seller Center",
+      notifications: "/seller/account/notifications",
+      profile: "/seller/account",
+      settings: "/seller/account/security",
+    };
+  }
+
+  if (isBrokerUser(user)) {
+    return {
+      href: "/broker/dashboard",
+      label: "Broker Dashboard",
+      center: "Broker Center",
+      subtitle: "Broker Center",
+      notifications: "/broker/dashboard",
+      profile: "/broker/kyc",
+      settings: "/broker/kyc",
+    };
+  }
+
+  if (isLogisticsUser(user)) {
+    return {
+      href: "/logistics/dashboard",
+      label: "Logistics Dashboard",
+      center: "Logistics Center",
+      subtitle: "Logistics Center",
+      notifications: "/logistics/notifications",
+      profile: "/logistics/company-settings",
+      settings: "/logistics/company-settings",
+    };
+  }
+
+  if (isAdminUser(user)) {
+    return {
+      href: "/admin/dashboard",
+      label: "Admin Dashboard",
+      center: "Admin Center",
+      subtitle: "Admin Center",
+      notifications: "/admin/dashboard?tab=notifications",
+      profile: "/admin/dashboard",
+      settings: "/admin/dashboard?tab=settings",
+    };
+  }
+
+  return null;
+}
 
 export default function BuyerAccountLayout({ children }: { children: React.ReactNode }) {
   const pathname = usePathname();
   const router = useRouter();
-  const user = useAuthStore((s) => s.user);
-  const hydrated = useAuthStore((s) => s.hasHydrated);
+  const user = useAuthStore((state) => state.user);
+  const hydrated = useAuthStore((state) => state.hasHydrated);
   const { logout } = useAuth();
   const isUniversalAddressPage = pathname === "/account/addresses";
 
@@ -71,61 +158,63 @@ export default function BuyerAccountLayout({ children }: { children: React.React
     if (!hydrated || isUniversalAddressPage) return;
     if (isSellerUser(user)) router.replace("/seller/account");
     else if (isAdminUser(user)) router.replace("/admin/dashboard");
+    else if (isLogisticsUser(user)) router.replace("/logistics/dashboard");
+    else if (isBrokerUser(user)) router.replace("/broker/dashboard");
   }, [hydrated, isUniversalAddressPage, router, user]);
+
+  const foreignWorkspace = useMemo(
+    () => (isUniversalAddressPage ? ownerWorkspace(user) : null),
+    [isUniversalAddressPage, user],
+  );
 
   if (
     !hydrated ||
-    (!isUniversalAddressPage && (isSellerUser(user) || isAdminUser(user)))
+    (!isUniversalAddressPage &&
+      (isSellerUser(user) ||
+        isAdminUser(user) ||
+        isLogisticsUser(user) ||
+        isBrokerUser(user)))
   ) {
-    return <div className="min-h-[50vh] pt-52 text-center text-[#64748b]">Loading your account...</div>;
+    return (
+      <div className="min-h-screen bg-[#f6f7f9] pt-32 text-center text-[#64748b] dark:bg-[#111827]">
+        Loading your account...
+      </div>
+    );
   }
 
-  const currentLabel = allNav.find((item) => item[1] === pathname)?.[0] || "Account";
+  const groups = foreignWorkspace ? universalAddressGroups : customerGroups;
+  const dashboardHref = foreignWorkspace?.href || "/account";
+  const dashboardLabel = foreignWorkspace?.label || "My Account";
+  const centerLabel = foreignWorkspace?.center || "Customer Center";
+  const brandSubtitle = foreignWorkspace?.subtitle || "Customer Center";
 
   return (
     <RouteGuard
       accountTypes={isUniversalAddressPage ? [] : ["customer"]}
       fallbackPath="/signin"
     >
-      <div className="bg-[#f8fafc] pt-[190px] dark:bg-darkTheme-bg lg:pt-[175px]">
-        <div className="mx-auto max-w-[1220px] px-4 py-5 sm:px-8">
-          <p className="text-sm text-[#64748b]">Home / <span className="font-semibold text-[#0f172a] dark:text-white">My Account</span>{pathname !== "/account" && ` / ${currentLabel}`}</p>
-        </div>
-
-        <div className={`mx-auto grid max-w-[1220px] gap-6 px-4 pb-12 sm:px-8 ${isUniversalAddressPage ? "" : "lg:grid-cols-[250px_minmax(0,1fr)]"}`}>
-          {!isUniversalAddressPage && (
-            <aside className="min-w-0">
-              <div className="flex gap-2 overflow-x-auto rounded-2xl border border-[#e2e8f0] bg-white p-2 shadow-sm dark:border-white/10 dark:bg-darkTheme-card lg:sticky lg:top-44 lg:block lg:space-y-4 lg:p-3">
-                {navGroups.map((group) => (
-                  <div key={group.label} className="contents lg:block">
-                    <p className="hidden px-3 pb-1 text-[10px] font-extrabold uppercase tracking-[0.16em] text-[#94a3b8] lg:block">{group.label}</p>
-                    <div className="contents lg:block lg:space-y-1">
-                      {group.items.map(([label, href, Icon]) => {
-                        const active = pathname === href || (href.startsWith("/account/") && pathname.startsWith(`${href}/`));
-                        return (
-                          <Link
-                            key={href}
-                            href={href}
-                            className={`flex shrink-0 items-center gap-3 rounded-xl px-3 py-2.5 text-sm font-semibold transition ${active ? "bg-[#f7941d] text-white shadow-sm" : "text-[#4a4f54] hover:bg-orange-50 dark:text-white/70 dark:hover:bg-white/5"}`}
-                          >
-                            <Icon size={18} />
-                            {label}
-                          </Link>
-                        );
-                      })}
-                    </div>
-                  </div>
-                ))}
-                <div className="hidden h-px bg-[#e2e8f0] dark:bg-white/10 lg:block" />
-                <button onClick={() => void logout()} className="flex shrink-0 items-center gap-3 rounded-xl px-3 py-2.5 text-sm font-semibold text-red-600 transition hover:bg-red-50 lg:w-full">
-                  <LogOut size={18} />Logout
-                </button>
-              </div>
-            </aside>
-          )}
-          <main className="min-w-0">{children}</main>
-        </div>
-      </div>
+      <DashboardShell
+        user={user}
+        groups={groups}
+        title={accountPageTitle(pathname)}
+        breadcrumb={pathname === "/account" ? undefined : accountPageTitle(pathname)}
+        centerLabel={centerLabel}
+        brandSubtitle={brandSubtitle}
+        dashboardHref={dashboardHref}
+        dashboardLabel={dashboardLabel}
+        notificationsHref={
+          foreignWorkspace?.notifications || "/account/notifications"
+        }
+        profileHref={foreignWorkspace?.profile || "/account/details"}
+        settingsHref={foreignWorkspace?.settings || "/account/security"}
+        addressesHref="/account/addresses"
+        supportHref="/contact"
+        footerLabel="Xerin Marketplace"
+        searchPlaceholder="Search your account"
+        onSignOut={logout}
+      >
+        {children}
+      </DashboardShell>
     </RouteGuard>
   );
 }

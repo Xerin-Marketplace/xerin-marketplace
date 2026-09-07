@@ -1,10 +1,8 @@
 "use client";
-import Image from "next/image";
 import "../admin-ui.css";
 
 import { ReactNode, useEffect, useState, useMemo } from "react";
 import { usePathname, useRouter, useSearchParams } from "next/navigation";
-import Link from "next/link";
 import toast from "react-hot-toast";
 import { authStorage } from "@/lib/auth/storage";
 import { canAccessAdminDashboard, canAccessAdminItem, canAccessAdminSection } from "@/lib/auth/admin-access";
@@ -50,9 +48,8 @@ import AdminAccount, { AccountView } from "@/components/Admin/Account";
 import AdminFinance from "@/components/Admin/Finance";
 import AdminAnalytics from "@/components/Admin/Analytics";
 import MarketplaceOverview from "@/components/Admin/Dashboard/MarketplaceOverview";
+import DashboardShell, { type DashboardNavGroup } from "@/components/Dashboard/DashboardShell";
 import AdminConfiguration, { AdminConfigurationView } from "@/components/Admin/Configuration";
-import { useTheme } from "@/app/context/ThemeContext";
-import { useAuth } from "@/hooks/useAuth";
 import { formatCurrency } from "@/lib/formatCurrency";
 import {
   BarChart3,
@@ -577,8 +574,6 @@ export default function AdminDashboard() {
   const router = useRouter();
   const pathname = usePathname();
   const searchParams = useSearchParams();
-  const { theme, toggleTheme } = useTheme();
-  const { logout } = useAuth();
   const adminUser = authStorage.getUser<StoredUser>();
   const visibleSidebarGroups = useMemo(
     () =>
@@ -596,9 +591,19 @@ export default function AdminDashboard() {
         ),
     [adminUser],
   );
-  const adminName =
-    [adminUser?.first_name, adminUser?.last_name].filter(Boolean).join(" ") ||
-    "Administrator";
+  const shellGroups = useMemo<DashboardNavGroup[]>(
+    () =>
+      visibleSidebarGroups.map((group) => ({
+        ...group,
+        items: group.items.map((item) => ({
+          ...item,
+          href: item.href.startsWith("?")
+            ? `/admin/dashboard${item.href}`
+            : item.href,
+        })),
+      })),
+    [visibleSidebarGroups],
+  );
   const [activeTab, setActiveTab] = useState<AdminTab>("overview");
   const [isCheckingAccess, setIsCheckingAccess] = useState(true);
   const [isAuthorized, setIsAuthorized] = useState(false);
@@ -610,12 +615,8 @@ export default function AdminDashboard() {
   const [overviewError, setOverviewError] = useState("");
 
   const [surfaceSearch, setSurfaceSearch] = useState("");
-  const [openSidebarGroup, setOpenSidebarGroup] = useState<string | null>(null);
   const [activeSidebarItem, setActiveSidebarItem] =
     useState<string>("Dashboard");
-  const [isMobileSidebarOpen, setIsMobileSidebarOpen] = useState(false);
-  const [isSidebarCollapsed, setIsSidebarCollapsed] = useState(false);
-  const [isProfileOpen, setIsProfileOpen] = useState(false);
 
   const hiddenOverviewMenuGroups = [
     "Communications",
@@ -900,8 +901,6 @@ export default function AdminDashboard() {
 
     setActiveTab(nextTab);
     setActiveSidebarItem(sidebarItem);
-    setOpenSidebarGroup(sidebarGroup);
-    setIsMobileSidebarOpen(false);
 
     if (shouldSyncUrl) {
       syncSidebarUrl(nextTab, sidebarItem);
@@ -974,7 +973,9 @@ export default function AdminDashboard() {
     const itemParam = searchParams.get("item");
 
     if (!menuParam) {
-      if (pathname.startsWith("/admin/inventory")) {
+      if (pathname === "/admin/dashboard") {
+        applySidebarSelection("overview", "Dashboard", null, false);
+      } else if (pathname.startsWith("/admin/inventory")) {
         applySidebarSelection("inventory", "Inventory", "Inventory", false);
       } else if (pathname.startsWith("/admin/customers")) {
         const customerItem = pathname.includes("/addresses")
@@ -1108,360 +1109,22 @@ export default function AdminDashboard() {
     : Gauge;
 
   return (
-    <section className="admin-dashboard-shell min-h-screen overflow-x-clip bg-[#f6f7f9] text-[#111827] antialiased dark:bg-[#111827] dark:text-white" style={{ fontFamily: 'Inter, "Segoe UI", Roboto, Helvetica, Arial, sans-serif' }}>
-      {isMobileSidebarOpen ? (
-        <button
-          aria-label="Close admin navigation"
-          onClick={() => setIsMobileSidebarOpen(false)}
-          className="fixed inset-0 z-40 bg-black/50 xl:hidden"
-        />
-      ) : null}
-      <div className="w-full">
-        <div
-          className={`grid min-h-screen grid-cols-1 gap-0 ${isSidebarCollapsed ? "xl:grid-cols-[88px_minmax(0,1fr)]" : "xl:grid-cols-[270px_minmax(0,1fr)]"}`}
-        >
-          <aside
-            className={`${isMobileSidebarOpen ? "translate-x-0" : "-translate-x-full"} fixed inset-y-0 left-0 z-50 flex h-dvh w-[280px] flex-col overflow-hidden border-r border-[#e7ebf0] bg-white/95 text-[#111827] shadow-[8px_0_30px_rgba(15,23,42,0.035)] backdrop-blur-xl transition-all xl:sticky xl:top-0 xl:w-auto xl:translate-x-0 dark:border-white/10 dark:bg-[#1f2937]/95 dark:text-white`}
-          >
-            <div className="flex h-[74px] shrink-0 items-center border-b border-[#e7ebf0] px-5 dark:border-white/10">
-              <div className="flex items-center">
-                {!isSidebarCollapsed && (
-                  <div>
-                    <Image
-                      src="/images/logo/logo.png"
-                      alt="Xerin Marketplace logo"
-                      width={150}
-                      height={46}
-                      className="h-10 w-auto object-contain"
-                      priority
-                    />
-                    <h2 className="mt-1 text-xs text-[#94a3b8] dark:text-white/50">
-                      Admin Center
-                    </h2>
-                  </div>
-                )}
-                <button
-                  onClick={() => setIsMobileSidebarOpen(false)}
-                  className="ml-auto text-gray-400 hover:text-gray-600 xl:hidden"
-                >
-                  <X size={20} />
-                </button>
-              </div>
-            </div>
-
-            <div className="mt-3">
-              <button
-                type="button"
-                onClick={() => {
-                  applySidebarSelection("overview", "Dashboard", null);
-                }}
-                className={`flex w-full items-center gap-3 rounded-xl px-3 py-2.5 text-left text-[13px] transition ${
-                  activeSidebarItem === "Dashboard"
-                    ? "bg-[#f7941d] font-semibold text-white shadow-[0_6px_18px_rgba(247,148,29,0.18)]"
-                    : "text-[#64748b] hover:bg-slate-100 hover:text-[#111827] dark:text-white/65 dark:hover:bg-white/[0.08] dark:hover:text-white"
-                }`}
-              >
-                <span className="inline-flex items-center gap-3 text-[13px]">
-                  <span className="inline-flex h-5 w-5 items-center justify-center shrink-0">
-                    {tabIcon("overview")}
-                  </span>
-                  {!isSidebarCollapsed && "Dashboard"}
-                </span>
-              </button>
-            </div>
-
-            <nav className="mt-4 min-h-0 flex-1 space-y-3 overflow-y-auto overscroll-contain px-1 pb-3 [scrollbar-gutter:stable]">
-              {visibleSidebarGroups.map((group) => {
-                const GroupIcon = group.icon;
-                const isOpen =
-                  openSidebarGroup === group.title ||
-                  group.items.some((item) => {
-                    if (item.href.startsWith("/admin/")) {
-                      return pathname.startsWith(item.href.split("?")[0]);
-                    }
-                    const params = new URLSearchParams(
-                      item.href.replace("?", ""),
-                    );
-                    const menu = params.get("menu");
-                    const itemParam = params.get("item");
-                    if (!menu) return false;
-                    const currentMenu = searchParams.get("menu");
-                    const currentItem = searchParams.get("item");
-                    return (
-                      currentMenu === menu &&
-                      (!itemParam || currentItem === itemParam)
-                    );
-                  });
-                const isGroupActive =
-                  activeSidebarItem === group.title ||
-                  activeSidebarItem.startsWith(`${group.title}:`);
-
-                return (
-                  <div key={group.title} className="px-1">
-                    <button
-                      type="button"
-                      title={isSidebarCollapsed ? group.title : undefined}
-                      onClick={() => {
-                        if (isSidebarCollapsed) {
-                          setIsSidebarCollapsed(false);
-                          setOpenSidebarGroup(group.title);
-                          return;
-                        }
-                        const nextOpenGroup =
-                          openSidebarGroup === group.title ? null : group.title;
-                        setOpenSidebarGroup(nextOpenGroup);
-                      }}
-                      className={`w-full rounded-xl px-3 py-2.5 text-left text-[13px] transition ${
-                        isGroupActive || isOpen
-                          ? "bg-slate-100 font-semibold text-[#111827] dark:bg-white/[0.08] dark:text-white"
-                          : "text-[#64748b] hover:bg-slate-100 hover:text-[#111827] dark:text-white/65 dark:hover:bg-white/[0.08] dark:hover:text-white"
-                      }`}
-                    >
-                      <span className="flex items-center justify-between gap-2">
-                        <span className="inline-flex items-center gap-2.5">
-                          <span
-                            className="inline-flex h-5 w-5 items-center justify-center text-base leading-none shrink-0"
-                            aria-hidden="true"
-                          >
-                            <GroupIcon size={18} />
-                          </span>
-                          {!isSidebarCollapsed && <span>{group.title}</span>}
-                        </span>
-                        {!isSidebarCollapsed && (
-                          <svg
-                            className={`h-4 w-4 transition-transform ${isOpen ? "rotate-180" : "rotate-0"}`}
-                            viewBox="0 0 20 20"
-                            fill="currentColor"
-                            aria-hidden="true"
-                          >
-                            <path d="M5.23 7.21a.75.75 0 0 1 1.06.02L10 11.17l3.71-3.94a.75.75 0 0 1 1.1 1.02l-4.25 4.5a.75.75 0 0 1-1.1 0l-4.25-4.5a.75.75 0 0 1 .02-1.06Z" />
-                          </svg>
-                        )}
-                      </span>
-                    </button>
-
-                    {isOpen && !isSidebarCollapsed ? (
-                      <div className="mt-1 space-y-1 border-l border-[#e7ebf0] pl-3 dark:border-white/10">
-                        {group.items.map((item) => {
-                          const subItemKey = `${group.title}:${item.label}`;
-                          const isSelected = activeSidebarItem === subItemKey;
-                          const isExternal = item.href.startsWith("/admin/");
-
-                          return isExternal ? (
-                            <Link
-                              key={item.label}
-                              href={item.href}
-                              className={`flex w-full items-center gap-2.5 rounded-xl px-3 py-2 text-left text-[13px] transition ${
-                                pathname.startsWith(item.href.split("?")[0])
-                                  ? "bg-[#f7941d] font-semibold text-white shadow-[0_5px_14px_rgba(247,148,29,0.15)]"
-                                  : "text-[#64748b] hover:bg-slate-100 hover:text-[#111827] dark:text-white/60 dark:hover:bg-white/[0.08] dark:hover:text-white"
-                              }`}
-                            >
-                              <span className="inline-flex items-center gap-2">
-                                <span
-                                  className={`h-1.5 w-1.5 rounded-full ${pathname.startsWith(item.href.split("?")[0]) ? "bg-white" : "bg-slate-300 dark:bg-white/30"}`}
-                                />
-                                <span>{item.label}</span>
-                              </span>
-                            </Link>
-                          ) : (
-                            <button
-                              key={item.label}
-                              type="button"
-                              onClick={() => {
-                                if (group.title === "Catalog") {
-                                  applySidebarSelection(
-                                    subItemKey,
-                                    subItemKey,
-                                    group.title,
-                                  );
-                                  return;
-                                }
-                                if (group.title === "Orders") {
-                                  const orderTabMap: Record<string, string> = {
-                                    "All Orders": "all",
-                                    "Pending Orders": "pending",
-                                    "Processing Orders": "processing",
-                                    "Completed Orders": "completed",
-                                    "Cancelled Orders": "cancelled",
-                                    "Order Tracking": "tracking",
-                                  };
-                                  const ordersTab =
-                                    orderTabMap[item.label] ?? "all";
-                                  const itemSlug = normalizeSlug(item.label);
-                                  setIsMobileSidebarOpen(false);
-                                  router.push(
-                                    `/admin/dashboard?tab=orders&menu=orders&item=${itemSlug}&orders_tab=${ordersTab}`,
-                                  );
-                                  return;
-                                }
-                                applySidebarSelection(
-                                  group.key,
-                                  subItemKey,
-                                  group.title,
-                                );
-                              }}
-                              className={`flex w-full items-center gap-2.5 rounded-xl px-3 py-2 text-left text-[13px] transition ${
-                                isSelected
-                                  ? "bg-[#f7941d] font-semibold text-white shadow-[0_5px_14px_rgba(247,148,29,0.15)]"
-                                  : "text-[#64748b] hover:bg-slate-100 hover:text-[#111827] dark:text-white/60 dark:hover:bg-white/[0.08] dark:hover:text-white"
-                              }`}
-                            >
-                              <span className="inline-flex items-center gap-2">
-                                <span
-                                  className={`h-1.5 w-1.5 rounded-full ${isSelected ? "bg-white" : "bg-slate-300 dark:bg-white/30"}`}
-                                />
-                                <span>{item.label}</span>
-                              </span>
-                            </button>
-                          );
-                        })}
-                      </div>
-                    ) : null}
-                  </div>
-                );
-              })}
-            </nav>
-
-            {!isSidebarCollapsed && (
-              <div className="mx-1 mt-3 shrink-0 rounded-2xl border border-[#e7ebf0] bg-white/65 p-4 shadow-sm dark:border-white/10 dark:bg-white/[0.06]">
-                <p className="text-[10px] font-semibold uppercase tracking-[.16em] text-[#94a3b8]">Quick Moderation Queue</p>
-                <div className="mt-3 space-y-1.5 text-sm text-[#475467] dark:text-white/70">
-                  <p>
-                    Sellers:{" "}
-                    <span className="font-semibold text-[#111827] dark:text-white">
-                      {pendingSellers.length}
-                    </span>
-                  </p>
-                  <p>
-                    Products:{" "}
-                    <span className="font-semibold text-[#111827] dark:text-white">
-                      {pendingProducts.length}
-                    </span>
-                  </p>
-                </div>
-              </div>
-            )}
-
-            <button
-              type="button"
-              onClick={() => setIsSidebarCollapsed((v) => !v)}
-              className="mx-1 mb-3 mt-3 hidden w-[calc(100%-0.5rem)] shrink-0 rounded-xl border border-[#e7ebf0] px-3 py-2.5 text-sm font-medium text-[#64748b] transition hover:bg-slate-50 hover:text-[#111827] dark:border-white/10 dark:text-white/65 dark:hover:bg-white/10 dark:hover:text-white xl:block"
-            >
-              {isSidebarCollapsed ? "Expand" : "Collapse sidebar"}
-            </button>
-          </aside>
-
-          <main className="min-w-0 space-y-5 px-4 pb-10 pt-4 sm:px-5 lg:px-6 xl:px-7">
-            <header className="sticky top-0 z-30 -mx-4 border-b border-[#e7ebf0]/90 bg-white/90 px-4 py-3 backdrop-blur-xl dark:border-white/10 dark:bg-[#1f2937]/90 sm:-mx-5 sm:px-5 lg:-mx-6 lg:px-6 xl:-mx-7 xl:px-7">
-              <div className="flex items-center gap-3">
-                <button
-                  type="button"
-                  onClick={() => setIsMobileSidebarOpen(true)}
-                  className="rounded-xl p-2 hover:bg-slate-100 dark:hover:bg-white/10 xl:hidden"
-                >
-                  <Menu size={21} />
-                </button>
-                <div className="min-w-0">
-                  <p className="hidden text-xs text-[#64748b] sm:block">
-                    Admin Center / {activeMenuContextLabel}
-                  </p>
-                  <h2 className="truncate text-base font-bold">
-                    {activeMenuLabel}
-                  </h2>
-                </div>
-                <div className="ml-auto flex items-center gap-1 sm:gap-2">
-                  <button
-                    type="button"
-                    onClick={() =>
-                      applySidebarSelection(
-                        "overview",
-                        "System Management:System Events",
-                        "System Management",
-                      )
-                    }
-                    aria-label="System notifications"
-                    className="relative rounded-xl p-2.5 hover:bg-slate-100 dark:hover:bg-white/10"
-                  >
-                    <Bell size={19} />
-                    {pendingSellers.length + pendingProducts.length > 0 && (
-                      <span className="absolute right-2 top-2 h-2 w-2 rounded-full bg-[#f7941d]" />
-                    )}
-                  </button>
-                  <button
-                    type="button"
-                    onClick={toggleTheme}
-                    aria-label="Toggle theme"
-                    className="rounded-xl p-2.5 hover:bg-slate-100 dark:hover:bg-white/10"
-                  >
-                    {theme === "dark" ? <Sun size={19} /> : <Moon size={19} />}
-                  </button>
-                  <div className="relative">
-                    <button
-                      type="button"
-                      onClick={() => setIsProfileOpen((v) => !v)}
-                      className="flex items-center gap-2 rounded-xl border border-[#e2e8f0] px-2 py-1.5 dark:border-white/10"
-                    >
-                      <span className="flex h-8 w-8 items-center justify-center rounded-lg bg-[#f7941d] text-sm font-bold text-white">
-                        {adminName[0]}
-                      </span>
-                      <span className="hidden max-w-32 truncate text-sm font-semibold sm:block">
-                        {adminName}
-                      </span>
-                      <ChevronDown size={15} />
-                    </button>
-                    {isProfileOpen && (
-                      <div className="absolute right-0 mt-2 w-64 rounded-2xl border border-[#e2e8f0] bg-white p-2 shadow-xl dark:border-white/10 dark:bg-[#2d3134]">
-                        <div className="border-b border-[#e2e8f0] p-3 dark:border-white/10">
-                          <p className="font-semibold">{adminName}</p>
-                          <p className="truncate text-xs text-[#64748b]">
-                            {adminUser?.email}
-                          </p>
-                          <p className="mt-1 text-xs font-semibold text-green-600">
-                            Administrator
-                          </p>
-                        </div>
-                        <button
-                          onClick={() => {
-                            applySidebarSelection(
-                              "overview",
-                              "Account:Profile",
-                              "Account",
-                            );
-                            setIsProfileOpen(false);
-                          }}
-                          className="flex w-full items-center gap-2 rounded-lg px-3 py-2 text-sm hover:bg-slate-50 dark:hover:bg-white/10"
-                        >
-                          <CircleUserRound size={16} />
-                          Profile
-                        </button>
-                        <button
-                          onClick={() => {
-                            applySidebarSelection(
-                              "overview",
-                              "Account:Security",
-                              "Account",
-                            );
-                            setIsProfileOpen(false);
-                          }}
-                          className="flex w-full items-center gap-2 rounded-lg px-3 py-2 text-sm hover:bg-slate-50 dark:hover:bg-white/10"
-                        >
-                          <ShieldCheck size={16} />
-                          Security
-                        </button>
-                        <button
-                          onClick={() => void logout()}
-                          className="flex w-full items-center gap-2 rounded-lg px-3 py-2 text-sm text-red-600 hover:bg-red-50"
-                        >
-                          <LogOut size={16} />
-                          Logout
-                        </button>
-                      </div>
-                    )}
-                  </div>
-                </div>
-              </div>
-            </header>
+    <DashboardShell
+      user={adminUser}
+      groups={shellGroups}
+      title={activeMenuLabel}
+      breadcrumb={activeMenuContextLabel}
+      centerLabel="Admin Center"
+      brandSubtitle="Admin Center"
+      dashboardHref="/admin/dashboard"
+      notificationsHref="/admin/dashboard?tab=overview&menu=communications&item=notifications"
+      profileHref="/admin/dashboard?tab=overview&menu=account&item=profile"
+      settingsHref="/admin/dashboard?tab=overview&menu=account&item=profile"
+      supportHref="/admin/support"
+      footerLabel="Xerin Market Admin Center"
+      searchPlaceholder="Search admin records"
+    >
+      <div className="min-w-0 space-y-5">
             <div className="border-b border-gray-200 bg-transparent px-0 pb-4 pt-1 dark:border-white/10">
               <div className="flex flex-col gap-4 lg:flex-row lg:items-center lg:justify-between">
                 <div className="flex min-w-0 items-center gap-4">
@@ -2012,10 +1675,8 @@ export default function AdminDashboard() {
                 </div>
               </div>
             ) : null}
-          </main>
-        </div>
       </div>
       <ReasonActionDialog key={rejectionTarget ? `${rejectionTarget.kind}:${rejectionTarget.id}` : "closed"} open={Boolean(rejectionTarget)} title={`Reject ${rejectionTarget?.kind || "item"}?`} description="Provide a clear reason. It will be submitted through the backend moderation workflow and should help the applicant understand the decision." busy={Boolean(busyAction?.startsWith("reject-"))} onCancel={() => setRejectionTarget(null)} onSubmit={(reason) => void submitRejection(reason)} />
-    </section>
+    </DashboardShell>
   );
 }

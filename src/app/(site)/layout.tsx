@@ -17,7 +17,6 @@ import NotificationProvider from "@/app/providers/NotificationProvider";
 import ChatBot from "@/components/Common/ChatBot";
 // import ScrollToTop from "@/components/Common/ScrollToTop";
 import PreLoader from "@/components/Common/PreLoader";
-import BuyerAccountFooter from "@/components/BuyerAccount/BuyerAccountFooter";
 import MobileBottomNav from "@/components/Header/MobileBottomNav";
 import RuntimeStatus from "@/components/Common/RuntimeStatus";
 import { CurrencyProvider } from "@/app/context/CurrencyContext";
@@ -38,7 +37,9 @@ export default function RootLayout({
     pathname === "/logistics" ||
     pathname.startsWith("/logistics/") ||
     pathname === "/broker" ||
-    pathname.startsWith("/broker/");
+    pathname.startsWith("/broker/") ||
+    pathname === "/account" ||
+    pathname.startsWith("/account/");
 
   const hideStorefrontChrome =
     pathname === "/signin" ||
@@ -52,7 +53,6 @@ export default function RootLayout({
     pathname.startsWith("/payment-success/") ||
     pathname.startsWith("/payment-failed/") ||
     isWorkspaceRoute;
-  const isBuyerAccount = pathname === "/account" || pathname.startsWith("/account/") || pathname === "/my-account";
 
   useEffect(() => {
     setTimeout(() => setLoading(false), 1000);
@@ -74,8 +74,7 @@ export default function RootLayout({
                     <>
                       {!hideStorefrontChrome ? <Header /> : null}
                       {children}
-                      {!hideStorefrontChrome && !isBuyerAccount ? <Footer /> : null}
-                      {!hideStorefrontChrome && isBuyerAccount ? <BuyerAccountFooter /> : null}
+                      {!hideStorefrontChrome ? <Footer /> : null}
                       {!hideStorefrontChrome ? <QuickViewModal /> : null}
                       {!hideStorefrontChrome ? <CartSidebarModal /> : null}
                       {!hideStorefrontChrome ? <PreviewSliderModal /> : null}
