@@ -96,7 +96,7 @@ const Header = () => {
               width={132}
               height={40}
               className="object-contain"
-              style={{ width: "60px", height: "auto" }}
+              style={{ width: "70px", height: "auto" }}
               priority
             />
           </Link>
