@@ -49,3 +49,23 @@ Frontend/
 azampay_path/
 errors/
 .vscode/
+.gitignore
+Frontend/xerin-marketplace/.gitignore
+Frontend/xerin-marketplace/node_modules/
+Frontend/xerin-marketplace/node_modules/*
+Frontend/xerin-marketplace/.vscode/
+Frontend/xerin-marketplace/.vscode/*
+Frontend/xerin-marketplace/src/AUTH_FLOW_UPDATE.md
+Frontend/xerin-marketplace/src/KYC_BLOB_PREVIEW.md
+Frontend/xerin-marketplace/.env.example
+Frontend/xerin-marketplace/Xerin Market SRS V1.0.pdf
+
+
+git rm -r --cached Frontend/xerin-marketplace/.gitignore
+git rm -r --cached Frontend/xerin-marketplace/Xerin Market SRS V1.0.pdf
+git rm -r --cached Frontend/xerin-marketplace/node_modules/
+git rm -r --cached Frontend/xerin-marketplace/.env.example
+git rm -r --cached 
+git rm -r --cached 
+git rm -r --cached 
+git rm -r --cached 
