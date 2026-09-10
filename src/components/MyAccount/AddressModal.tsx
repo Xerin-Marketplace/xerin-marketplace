@@ -72,6 +72,8 @@ export default function AddressModal({
   const [mapSuggestions, setMapSuggestions] = useState<Array<{ place_id: string; description: string; main_text?: string | null; secondary_text?: string | null }>>([]);
   const [mapBusy, setMapBusy] = useState(false);
   const [locationError, setLocationError] = useState("");
+  const [editLocationDetails, setEditLocationDetails] = useState(false);
+  const [showManualFallback, setShowManualFallback] = useState(false);
 
   useEffect(() => {
     if (!isOpen) return;
@@ -97,6 +99,8 @@ export default function AddressModal({
     );
     setMapSuggestions([]);
     setLocationError("");
+    setEditLocationDetails(false);
+    setShowManualFallback(Boolean(initialAddress && initialAddress.latitude == null));
     setForm({
       label: initialAddress?.label || "Home",
       recipient_name: initialAddress?.recipient_name || "",
@@ -146,6 +150,7 @@ export default function AddressModal({
     setMapSearch(resolved.formatted_address);
     setMapSuggestions([]);
     setLocationError("");
+    setEditLocationDetails(false);
 
     setForm((current) => {
       const country = resolved.country?.trim() || current.country;
@@ -229,6 +234,15 @@ export default function AddressModal({
   const set = (key: keyof AddressRequest, value: string | boolean | number | null) =>
     setForm((current) => ({ ...current, [key]: value }));
 
+  const hasGpsLocation = form.latitude != null && form.longitude != null;
+  const hasRequiredResolvedAddress = Boolean(
+    hasGpsLocation &&
+    form.country?.trim() &&
+    form.region?.trim() &&
+    form.city?.trim() &&
+    form.street?.trim()
+  );
+
   const submit = async (event: FormEvent) => {
     event.preventDefault();
     await onSubmit({
@@ -276,68 +290,12 @@ export default function AddressModal({
             <Field label="Recipient phone">
               <input value={form.recipient_phone || ""} onChange={(e)=>set("recipient_phone",e.target.value)} className={input} placeholder="+255..." />
             </Field>
-            <Field label="Country" required>
+            <Field label="Delivery instructions">
               <input
-                required
-                value={form.country}
-                onChange={(e) => {
-                  const country = e.target.value;
-                  setForm((current) => ({
-                    ...current,
-                    country,
-                    region: isTanzania(country) ? canonicalTanzaniaRegion(current.region) : current.region,
-                  }));
-                }}
-                className={input}
-              />
-            </Field>
-            <Field label={isTanzania(form.country) ? "Region (official)" : "Region / State / Province"} required>
-              {isTanzania(form.country) ? (
-                <select
-                  required
-                  value={canonicalTanzaniaRegion(form.region)}
-                  onChange={(e) => set("region", e.target.value)}
-                  className={input}
-                >
-                  <option value="">Select official region</option>
-                  {TANZANIA_REGIONS.map((region) => (
-                    <option key={region} value={region}>{region}</option>
-                  ))}
-                </select>
-              ) : (
-                <input
-                  required
-                  value={form.region}
-                  onChange={(e) => set("region", e.target.value)}
-                  className={input}
-                  placeholder="State / province / region"
-                />
-              )}
-            </Field>
-            <Field label="District">
-              <input value={form.district || ""} onChange={(e)=>set("district",e.target.value)} className={input} placeholder="Kinondoni" />
-            </Field>
-            <Field label="Ward">
-              <input value={form.ward || ""} onChange={(e)=>set("ward",e.target.value)} className={input} placeholder="Mikocheni" />
-            </Field>
-            <Field label="City" required>
-              <input required value={form.city} onChange={(e)=>set("city",e.target.value)} className={input} placeholder="Dar es Salaam" />
-            </Field>
-            <Field label="Street / address line" required wide>
-              <input required value={form.street} onChange={(e)=>set("street",e.target.value)} className={input} placeholder="Street, building and house number" />
-            </Field>
-            <Field label="Landmark" wide>
-              <input value={form.landmark || ""} onChange={(e)=>set("landmark",e.target.value)} className={input} placeholder="Near..." />
-            </Field>
-            <Field label="Postal code">
-              <input value={form.postal_code || ""} onChange={(e)=>set("postal_code",e.target.value)} className={input} placeholder="Optional" />
-            </Field>
-            <Field label="Delivery instructions" wide>
-              <textarea
                 value={form.delivery_instructions || ""}
                 onChange={(e)=>set("delivery_instructions",e.target.value)}
-                className={`${input} min-h-24 resize-y`}
-                placeholder="Gate colour, floor, entrance, or other instructions for the courier"
+                className={input}
+                placeholder="Gate, floor, entrance..."
               />
             </Field>
           </div>
@@ -351,7 +309,7 @@ export default function AddressModal({
                 <div>
                   <h4 className="font-bold text-dark dark:text-white">Exact delivery location on Google Maps</h4>
                   <p className="mt-1 text-xs leading-5 text-[#64748b]">
-                    Search for the delivery point or use your current GPS location. Latitude and longitude will be saved with this address for accurate logistics routing.
+                    Use your current GPS location or search for a place. Xerin will automatically extract the country, region, district, ward, city, street, postal code, latitude and longitude from Google whenever those details are available.
                   </p>
                 </div>
               </div>
@@ -395,8 +353,18 @@ export default function AddressModal({
                 className="mt-3 inline-flex min-h-11 w-full items-center justify-center gap-2 rounded-xl border border-orange/30 bg-white px-4 text-sm font-bold text-orange transition hover:border-orange hover:bg-orange hover:text-white disabled:opacity-60 dark:bg-white/5 sm:w-auto"
               >
                 {mapBusy ? <Loader2 className="animate-spin" size={17} /> : <Crosshair size={17} />}
-                {mapBusy ? "Finding location..." : "Use my current location"}
+                {mapBusy ? "Finding and filling address..." : "Use my current location & fill address"}
               </button>
+
+              {!hasGpsLocation && (
+                <button
+                  type="button"
+                  onClick={() => setShowManualFallback((value) => !value)}
+                  className="mt-3 ml-0 inline-flex min-h-11 w-full items-center justify-center rounded-xl px-4 text-sm font-semibold text-[#64748b] hover:text-orange sm:ml-2 sm:w-auto"
+                >
+                  {showManualFallback ? "Hide manual address fields" : "Enter address manually instead"}
+                </button>
+              )}
 
               {locationError && (
                 <p role="alert" className="mt-3 rounded-xl border border-red-200 bg-red-50 p-3 text-xs leading-5 text-red-700">
@@ -439,6 +407,139 @@ export default function AddressModal({
             )}
           </section>
 
+          {hasGpsLocation && !editLocationDetails ? (
+            <section className="mt-5 rounded-2xl border border-green/20 bg-green/[0.04] p-4 sm:p-5">
+              <div className="flex flex-col gap-4 sm:flex-row sm:items-start sm:justify-between">
+                <div>
+                  <p className="flex items-center gap-2 text-sm font-bold text-green">
+                    <CheckCircle2 size={17} />
+                    Address details filled automatically
+                  </p>
+                  <p className="mt-1 text-xs leading-5 text-[#64748b]">
+                    These details came from your selected Google/GPS location. You do not need to type them manually.
+                  </p>
+                </div>
+                <button
+                  type="button"
+                  onClick={() => setEditLocationDetails(true)}
+                  className="inline-flex min-h-10 shrink-0 items-center justify-center rounded-xl border border-[#e2e8f0] bg-white px-3 text-xs font-bold text-dark hover:border-orange hover:text-orange dark:border-white/10 dark:bg-white/5 dark:text-white"
+                >
+                  Edit extracted details
+                </button>
+              </div>
+
+              <div className="mt-4 grid gap-3 sm:grid-cols-2 lg:grid-cols-3">
+                {[
+                  ["Country", form.country],
+                  ["Region", form.region],
+                  ["District", form.district],
+                  ["Ward", form.ward],
+                  ["City", form.city],
+                  ["Street", form.street],
+                  ["Postal code", form.postal_code],
+                ].map(([label, value]) => (
+                  <div key={label} className="rounded-xl border border-[#e2e8f0] bg-white px-3 py-2.5 dark:border-white/10 dark:bg-white/5">
+                    <p className="text-[11px] font-bold uppercase tracking-wide text-[#94a3b8]">{label}</p>
+                    <p className="mt-0.5 break-words text-sm font-semibold text-dark dark:text-white">
+                      {value || "Not returned by Google"}
+                    </p>
+                  </div>
+                ))}
+              </div>
+
+              {!hasRequiredResolvedAddress && (
+                <div className="mt-4 rounded-xl border border-amber-200 bg-amber-50 p-3 text-xs leading-5 text-amber-800">
+                  Google could not return every required address field for this point. Please use <b>Edit extracted details</b> and complete only the missing information.
+                </div>
+              )}
+            </section>
+          ) : (hasGpsLocation || showManualFallback) ? (
+            <section className="mt-5 rounded-2xl border border-[#e2e8f0] p-4 dark:border-white/10 sm:p-5">
+              <div className="mb-4 flex items-center justify-between gap-3">
+                <div>
+                  <h4 className="font-bold text-dark dark:text-white">
+                    {hasGpsLocation ? "Edit extracted location details" : "Manual address fallback"}
+                  </h4>
+                  <p className="mt-1 text-xs text-[#64748b]">
+                    {hasGpsLocation
+                      ? "Only change a value if Google returned it incorrectly."
+                      : "Use this only if you cannot use Google search or device location."}
+                  </p>
+                </div>
+                {hasGpsLocation && (
+                  <button
+                    type="button"
+                    onClick={() => setEditLocationDetails(false)}
+                    className="shrink-0 text-xs font-bold text-orange hover:underline"
+                  >
+                    Done editing
+                  </button>
+                )}
+              </div>
+
+              <div className="grid gap-4 sm:grid-cols-2">
+                <Field label="Country" required>
+                  <input
+                    required
+                    value={form.country}
+                    onChange={(e) => {
+                      const country = e.target.value;
+                      setForm((current) => ({
+                        ...current,
+                        country,
+                        region: isTanzania(country) ? canonicalTanzaniaRegion(current.region) : current.region,
+                      }));
+                    }}
+                    className={input}
+                  />
+                </Field>
+
+                <Field label={isTanzania(form.country) ? "Region (official)" : "Region / State / Province"} required>
+                  {isTanzania(form.country) ? (
+                    <select
+                      required
+                      value={canonicalTanzaniaRegion(form.region)}
+                      onChange={(e) => set("region", e.target.value)}
+                      className={input}
+                    >
+                      <option value="">Select official region</option>
+                      {TANZANIA_REGIONS.map((region) => (
+                        <option key={region} value={region}>{region}</option>
+                      ))}
+                    </select>
+                  ) : (
+                    <input
+                      required
+                      value={form.region}
+                      onChange={(e) => set("region", e.target.value)}
+                      className={input}
+                      placeholder="State / province / region"
+                    />
+                  )}
+                </Field>
+
+                <Field label="District">
+                  <input value={form.district || ""} onChange={(e)=>set("district",e.target.value)} className={input} placeholder="District" />
+                </Field>
+                <Field label="Ward">
+                  <input value={form.ward || ""} onChange={(e)=>set("ward",e.target.value)} className={input} placeholder="Ward" />
+                </Field>
+                <Field label="City" required>
+                  <input required value={form.city} onChange={(e)=>set("city",e.target.value)} className={input} placeholder="City" />
+                </Field>
+                <Field label="Postal code">
+                  <input value={form.postal_code || ""} onChange={(e)=>set("postal_code",e.target.value)} className={input} placeholder="Optional" />
+                </Field>
+                <Field label="Street / address line" required wide>
+                  <input required value={form.street} onChange={(e)=>set("street",e.target.value)} className={input} placeholder="Street, building and house number" />
+                </Field>
+                <Field label="Landmark" wide>
+                  <input value={form.landmark || ""} onChange={(e)=>set("landmark",e.target.value)} className={input} placeholder="Near..." />
+                </Field>
+              </div>
+            </section>
+          ) : null}
+
           <label className="mt-5 flex cursor-pointer items-center gap-3 rounded-xl border border-[#e2e8f0] p-4 text-sm dark:border-white/10">
             <input type="checkbox" checked={Boolean(form.is_default)} onChange={(e)=>set("is_default",e.target.checked)} />
             <span><b>Use as default delivery address</b><span className="mt-0.5 block text-xs font-normal text-[#64748b]">Checkout will prefer this address.</span></span>
@@ -446,7 +547,7 @@ export default function AddressModal({
 
           <div className="mt-6 flex flex-col gap-3 sm:flex-row sm:justify-end">
             <button type="button" disabled={isSubmitting} onClick={closeModal} className="rounded-xl border border-[#e2e8f0] px-5 py-3 text-sm font-semibold">Cancel</button>
-            <button type="submit" disabled={isSubmitting} className="rounded-xl bg-[#f7941d] px-5 py-3 text-sm font-semibold text-white disabled:opacity-50">
+            <button type="submit" disabled={isSubmitting || !form.country?.trim() || !form.region?.trim() || !form.city?.trim() || !form.street?.trim()} className="rounded-xl bg-[#f7941d] px-5 py-3 text-sm font-semibold text-white disabled:cursor-not-allowed disabled:opacity-50">
               {isSubmitting ? "Saving..." : initialAddress ? "Save Changes" : "Add Address"}
             </button>
           </div>
