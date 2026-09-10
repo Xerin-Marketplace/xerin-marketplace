@@ -25,6 +25,13 @@ export class ApiError extends Error {
 }
 
 type ValidationDetail = { loc?: Array<string | number>; msg?: string };
+type StructuredIssue = { code?: string; message?: string };
+type StructuredDetail = {
+  code?: string;
+  message?: string;
+  issues?: StructuredIssue[];
+  score?: number;
+};
 
 const parseFields = (detail: unknown): ApiFieldErrors => {
   if (!Array.isArray(detail)) return {};
@@ -49,14 +56,30 @@ export const toApiError = (error: unknown): ApiError => {
   }
 
   const data = error.response?.data as
-    | { detail?: string | ValidationDetail[]; message?: string }
+    | { detail?: string | ValidationDetail[] | StructuredDetail; message?: string }
     | undefined;
   const detail = data?.detail;
   const fieldErrors = parseFields(detail);
   const validationMessage = Object.values(fieldErrors).flat().join(", ");
+  const structuredDetail =
+    detail && typeof detail === "object" && !Array.isArray(detail)
+      ? (detail as StructuredDetail)
+      : undefined;
+  const issueMessages = structuredDetail?.issues
+    ?.map((issue) => issue.message?.trim())
+    .filter((message): message is string => Boolean(message));
+  const structuredMessage = structuredDetail
+    ? [
+        structuredDetail.message,
+        issueMessages?.length ? issueMessages.join(" ") : undefined,
+      ]
+        .filter(Boolean)
+        .join(" ")
+    : undefined;
   const timedOut = error.code === "ECONNABORTED" || error.code === "ETIMEDOUT";
   const message =
     (typeof detail === "string" ? detail : undefined) ||
+    structuredMessage ||
     validationMessage ||
     data?.message ||
     (timedOut

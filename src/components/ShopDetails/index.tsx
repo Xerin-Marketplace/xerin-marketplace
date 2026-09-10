@@ -2,6 +2,7 @@
 
 import React, { useMemo, useState } from "react";
 import Image from "next/image";
+import Link from "next/link";
 import { useRouter } from "next/navigation";
 import Breadcrumb from "../Common/Breadcrumb";
 import StarRating from "@/components/Common/StarRating";
@@ -132,7 +133,7 @@ const ShopDetails = ({ product }: { product: Product }) => {
             <div className="min-w-0 lg:pt-1">
               <div className="flex items-start justify-between gap-3">
                 <div className="min-w-0">
-                  <h1 className="text-[26px] font-bold leading-tight text-dark dark:text-white sm:text-3xl lg:text-[34px]">
+                  <h1 className="break-words text-[24px] font-bold leading-tight text-dark dark:text-white sm:text-3xl lg:text-[34px]">
                     {product.title}
                   </h1>
                   <div className="mt-2.5 flex flex-wrap items-center gap-x-3 gap-y-2 text-sm">
@@ -146,6 +147,20 @@ const ShopDetails = ({ product }: { product: Product }) => {
                       <CheckIcon className={available ? "text-green" : "text-dark-4"} />
                       {available ? "In Stock" : "Availability not confirmed"}
                     </span>
+                    {product.storeId ? (
+                      <>
+                        <span className="hidden h-4 w-px bg-gray-3 sm:block" />
+                        <Link
+                          href={`/stores/${product.storeId}`}
+                          className="inline-flex items-center gap-1.5 rounded-full border border-orange/30 bg-orange/[0.06] px-3 py-1.5 text-xs font-bold text-orange transition hover:border-orange hover:bg-orange hover:text-white sm:text-sm"
+                        >
+                          View seller store
+                          <svg width="14" height="14" viewBox="0 0 24 24" fill="none" aria-hidden="true">
+                            <path d="M5 12h14M13 6l6 6-6 6" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round" />
+                          </svg>
+                        </Link>
+                      </>
+                    ) : null}
                   </div>
                 </div>
                 {discountPercent > 0 && (
@@ -154,8 +169,8 @@ const ShopDetails = ({ product }: { product: Product }) => {
               </div>
 
               <div className="mt-5 border-y border-gray-3 py-4 dark:border-darkTheme-border-color sm:mt-6 sm:py-5">
-                <div className="flex flex-wrap items-end gap-2.5">
-                  <span className="text-2xl font-bold text-dark dark:text-white sm:text-[30px]">
+                <div className="flex min-w-0 flex-wrap items-end gap-2.5">
+                  <span className="min-w-0 break-words text-2xl font-bold text-dark dark:text-white sm:text-[30px]">
                     <PriceDisplay amount={product.discountedPrice} sourceCurrency={product.currency} />
                   </span>
                   {discountPercent > 0 && (
@@ -190,10 +205,10 @@ const ShopDetails = ({ product }: { product: Product }) => {
                     </div>
                   ) : null}
 
-                  <div className="mt-6">
-                    <div className="flex flex-wrap items-center gap-3">
-                      <span className="text-sm font-semibold text-dark dark:text-white">Qty:</span>
-                      <div className="flex h-11 items-center overflow-hidden rounded-lg border border-gray-3 dark:border-darkTheme-border-color">
+                  <div className="mt-6 rounded-2xl border border-gray-3 bg-[#fbfcfd] p-3.5 dark:border-darkTheme-border-color dark:bg-darkTheme-card sm:border-0 sm:bg-transparent sm:p-0 sm:dark:bg-transparent">
+                    <div className="flex w-full items-center justify-between gap-3 sm:w-auto sm:justify-start">
+                      <span className="shrink-0 text-sm font-semibold text-dark dark:text-white">Qty:</span>
+                      <div className="flex h-11 shrink-0 items-center overflow-hidden rounded-lg border border-gray-3 bg-white dark:border-darkTheme-border-color dark:bg-darkTheme-secondary-bg">
                         <button type="button" aria-label="Decrease quantity" onClick={() => setQuantity((value) => Math.max(1, value - 1))} className="flex h-full w-11 items-center justify-center text-lg transition hover:bg-gray-2 hover:text-orange">−</button>
                         <span className="flex h-full w-12 items-center justify-center border-x border-gray-3 text-sm font-semibold dark:border-darkTheme-border-color">{quantity}</span>
                         <button type="button" aria-label="Increase quantity" onClick={() => setQuantity((value) => value + 1)} className="flex h-full w-11 items-center justify-center text-lg transition hover:bg-gray-2 hover:text-orange">+</button>
@@ -209,12 +224,12 @@ const ShopDetails = ({ product }: { product: Product }) => {
                       </div>
                     )}
 
-                    <div className="mt-3 grid grid-cols-2 gap-2.5 sm:grid-cols-[minmax(0,1fr)_minmax(0,1fr)_48px] sm:gap-3">
+                    <div className="mt-3 grid grid-cols-1 gap-2.5 sm:grid-cols-[minmax(0,1fr)_minmax(0,1fr)_48px] sm:gap-3">
                       <button
                         type="button"
                         onClick={addToCart}
                         disabled={addCartItem.isPending || !available}
-                        className="inline-flex min-h-12 items-center justify-center rounded-xl border-2 border-orange bg-white px-4 text-sm font-bold text-orange transition hover:bg-orange hover:text-white disabled:cursor-not-allowed disabled:opacity-50 sm:px-5"
+                        className="inline-flex min-h-12 w-full items-center justify-center rounded-xl border-2 border-orange bg-white px-4 text-center text-sm font-bold leading-5 text-orange transition hover:bg-orange hover:text-white disabled:cursor-not-allowed disabled:opacity-50 sm:px-5"
                       >
                         {complianceUnavailable ? "Unavailable" : addCartItem.isPending ? "Adding..." : "Add to Cart"}
                       </button>
@@ -222,11 +237,11 @@ const ShopDetails = ({ product }: { product: Product }) => {
                         type="button"
                         onClick={buyNow}
                         disabled={addCartItem.isPending || !available}
-                        className="inline-flex min-h-12 items-center justify-center rounded-xl bg-orange px-4 text-sm font-bold text-white shadow-sm transition hover:bg-[#e95f23] disabled:cursor-not-allowed disabled:opacity-50 sm:px-5"
+                        className="inline-flex min-h-12 w-full items-center justify-center rounded-xl bg-orange px-4 text-center text-sm font-bold leading-5 text-white shadow-sm transition hover:bg-[#e95f23] disabled:cursor-not-allowed disabled:opacity-50 sm:px-5"
                       >
                         {complianceUnavailable ? "Unavailable" : "Buy Now"}
                       </button>
-                      <a href={ROUTES.wishlist} aria-label="Add to wishlist" className="col-span-2 inline-flex min-h-12 items-center justify-center gap-2 rounded-xl border border-gray-3 bg-white px-4 text-sm font-semibold text-dark shadow-sm transition hover:border-orange hover:text-orange dark:border-darkTheme-border-color dark:bg-darkTheme-card dark:text-white sm:col-auto sm:w-12 sm:px-0">
+                      <a href={ROUTES.wishlist} aria-label="Add to wishlist" className="inline-flex min-h-12 w-full items-center justify-center gap-2 rounded-xl border border-gray-3 bg-white px-4 text-sm font-semibold text-dark shadow-sm transition hover:border-orange hover:text-orange dark:border-darkTheme-border-color dark:bg-darkTheme-card dark:text-white sm:w-12 sm:px-0">
                         <svg width="20" height="20" viewBox="0 0 24 24" fill="none"><path d="M20.8 4.6a5.5 5.5 0 0 0-7.8 0L12 5.6l-1-1a5.5 5.5 0 0 0-7.8 7.8l1 1L12 21l7.8-7.6 1-1a5.5 5.5 0 0 0 0-7.8Z" stroke="currentColor" strokeWidth="1.7" strokeLinecap="round" strokeLinejoin="round"/></svg>
                         <span className="sm:hidden">Wishlist</span>
                       </a>
@@ -234,7 +249,7 @@ const ShopDetails = ({ product }: { product: Product }) => {
                   </div>
                 </div>
 
-                <div className="mt-5 min-w-0 lg:col-start-2 lg:row-start-1 lg:mt-0 lg:justify-self-end lg:w-[285px] xl:w-[300px]">
+                <div className="mt-5 min-w-0 w-full lg:col-start-2 lg:row-start-1 lg:mt-0 lg:justify-self-end lg:w-[285px] xl:w-[300px]">
                   <OtherSellerOffersButton
                     productId={String(product.id)}
                     onOpen={() => setSellerOffersOpen(true)}

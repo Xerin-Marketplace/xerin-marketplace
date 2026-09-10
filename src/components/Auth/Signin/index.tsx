@@ -12,7 +12,7 @@ import { ApiError } from "@/lib/api/client";
 import { useAuth } from "@/hooks/useAuth";
 import { getPostLoginPath } from "@/guards/auth-routing";
 import { useCartModalContext } from "@/app/context/CartSidebarModalContext";
-import type { AuthTokenResponse } from "@/types/api/auth";
+import type { AuthTokenResponse, StaffSecurityNotice } from "@/types/api/auth";
 
 const DEFAULT_DIAL_CODE = "255";
 
@@ -109,6 +109,53 @@ const isValidUrl = (value: string) => {
   } catch {
     return false;
   }
+};
+
+
+const STAFF_DEVICE_STORAGE_KEY = "xerin_staff_device_id";
+
+const getDeviceIdentity = () => {
+  if (typeof window === "undefined") {
+    return { device_id: undefined, device_name: undefined };
+  }
+
+  let deviceId = window.localStorage.getItem(STAFF_DEVICE_STORAGE_KEY);
+  if (!deviceId) {
+    deviceId =
+      typeof crypto !== "undefined" && "randomUUID" in crypto
+        ? crypto.randomUUID()
+        : `device-${Date.now()}-${Math.random().toString(36).slice(2)}`;
+    window.localStorage.setItem(STAFF_DEVICE_STORAGE_KEY, deviceId);
+  }
+
+  const ua = window.navigator.userAgent.toLowerCase();
+  const platform =
+    ua.includes("android")
+      ? "Android"
+      : ua.includes("iphone") || ua.includes("ipad")
+        ? "iPhone/iPad"
+        : ua.includes("windows")
+          ? "Windows"
+          : ua.includes("macintosh") || ua.includes("mac os")
+            ? "macOS"
+            : ua.includes("linux")
+              ? "Linux"
+              : "Device";
+  const browser =
+    ua.includes("edg/")
+      ? "Edge"
+      : ua.includes("firefox/")
+        ? "Firefox"
+        : ua.includes("chrome/") || ua.includes("crios/")
+          ? "Chrome"
+          : ua.includes("safari/")
+            ? "Safari"
+            : "Browser";
+
+  return {
+    device_id: deviceId,
+    device_name: `${browser} on ${platform}`,
+  };
 };
 
 interface PasswordRule {
@@ -443,6 +490,9 @@ const SignInPanel = ({ onSwitchTab }: { onSwitchTab: (tab: AuthTab) => void }) =
   const [showPassword, setShowPassword] = useState(false);
   const [rememberMe, setRememberMe] = useState(true);
   const [isSubmitting, setIsSubmitting] = useState(false);
+  const [securityNotice, setSecurityNotice] = useState<StaffSecurityNotice | null>(null);
+  const [pendingRedirect, setPendingRedirect] = useState<string | null>(null);
+  const [securityActionLoading, setSecurityActionLoading] = useState(false);
   const justVerified = searchParams.get("verified") === "1";
 
   useEffect(() => {
@@ -461,7 +511,12 @@ const SignInPanel = ({ onSwitchTab }: { onSwitchTab: (tab: AuthTab) => void }) =
     setIsSubmitting(true);
 
     try {
-      const session = await authApi.login({ email: email.trim(), password });
+      const deviceIdentity = getDeviceIdentity();
+      const session = await authApi.login({
+        email: email.trim(),
+        password,
+        ...deviceIdentity,
+      });
       setSession(session);
 
       if (getPostLoginPath("/account", session.user) === "/account") {
@@ -471,10 +526,17 @@ const SignInPanel = ({ onSwitchTab }: { onSwitchTab: (tab: AuthTab) => void }) =
       }
 
       closeCartModal();
-      toast.success("Signed in successfully.");
-
       const requestedRedirect = searchParams.get("redirect");
-      router.push(getPostLoginPath(requestedRedirect, session.user));
+      const destination = getPostLoginPath(requestedRedirect, session.user);
+
+      if (session.security_notice?.code === "STAFF_NEW_DEVICE_LOGIN") {
+        setSecurityNotice(session.security_notice);
+        setPendingRedirect(destination);
+        return;
+      }
+
+      toast.success("Signed in successfully.");
+      router.push(destination);
     } catch (error) {
       if (
         error instanceof ApiError &&
@@ -500,7 +562,110 @@ const SignInPanel = ({ onSwitchTab }: { onSwitchTab: (tab: AuthTab) => void }) =
     }
   };
 
+
+  const confirmRecognizedDevice = async () => {
+    setSecurityActionLoading(true);
+    try {
+      await authApi.recognizeCurrentSession();
+      toast.success("Device recognized.");
+      const destination = pendingRedirect || getPostLoginPath(null, undefined);
+      setSecurityNotice(null);
+      router.push(destination);
+    } catch (error) {
+      toast.error(error instanceof ApiError ? error.message : "Unable to confirm this device.");
+    } finally {
+      setSecurityActionLoading(false);
+    }
+  };
+
+  const reportUnknownLogin = async () => {
+    setSecurityActionLoading(true);
+    try {
+      await authApi.reportUnrecognizedLogin();
+    } catch {
+      // Even if the response is interrupted after revocation, clear the browser session.
+    } finally {
+      window.localStorage.removeItem("xerin_auth_store");
+      toast.error("All active sessions were revoked. Reset your password before signing in again.");
+      router.replace(`/forgot-password?email=${encodeURIComponent(email.trim())}`);
+      setSecurityActionLoading(false);
+    }
+  };
+
   return (
+    <>
+      {securityNotice && (
+        <div className="fixed inset-0 z-[10000] flex items-center justify-center bg-black/60 px-4 py-6">
+          <div className="w-full max-w-lg rounded-2xl bg-white p-6 shadow-2xl dark:bg-darkTheme-card sm:p-7">
+            <div className="mb-4 flex h-12 w-12 items-center justify-center rounded-full bg-amber-100 text-2xl">
+              ⚠️
+            </div>
+            <h2 className="text-xl font-bold text-dark dark:text-white">
+              New staff device detected
+            </h2>
+            <p className="mt-2 text-sm leading-6 text-dark-4 dark:text-darkTheme-secondary-muted">
+              This staff account is already signed in on another device. Confirm that you recognize this login before continuing.
+            </p>
+
+            <div className="mt-5 space-y-3 rounded-xl border border-gray-3 p-4 dark:border-darkTheme-border-color">
+              <div>
+                <p className="text-xs font-semibold uppercase tracking-wide text-dark-4">Existing session</p>
+                <p className="mt-1 font-semibold text-dark dark:text-white">
+                  {securityNotice.existing_session?.device_name || "Unknown device"}
+                </p>
+                <p className="mt-1 text-sm text-dark-4 dark:text-darkTheme-secondary-muted">
+                  Approximate location: {securityNotice.existing_session?.approximate_location || "Unavailable"}
+                </p>
+                <p className="text-sm text-dark-4 dark:text-darkTheme-secondary-muted">
+                  IP: {securityNotice.existing_session?.ip_address || "Unavailable"}
+                </p>
+                {securityNotice.existing_session?.last_seen_at && (
+                  <p className="text-sm text-dark-4 dark:text-darkTheme-secondary-muted">
+                    Last active: {new Date(securityNotice.existing_session.last_seen_at).toLocaleString()}
+                  </p>
+                )}
+              </div>
+
+              <div className="border-t border-gray-3 pt-3 dark:border-darkTheme-border-color">
+                <p className="text-xs font-semibold uppercase tracking-wide text-dark-4">This login</p>
+                <p className="mt-1 font-semibold text-dark dark:text-white">
+                  {securityNotice.current_device?.device_name || "Current device"}
+                </p>
+                <p className="mt-1 text-sm text-dark-4 dark:text-darkTheme-secondary-muted">
+                  Approximate location: {securityNotice.current_device?.approximate_location || "Unavailable"}
+                </p>
+                <p className="text-sm text-dark-4 dark:text-darkTheme-secondary-muted">
+                  IP: {securityNotice.current_device?.ip_address || "Unavailable"}
+                </p>
+              </div>
+            </div>
+
+            <p className="mt-4 text-xs leading-5 text-dark-4 dark:text-darkTheme-secondary-muted">
+              Location is approximate and depends on trusted proxy geolocation headers. Xerin does not treat it as precise GPS.
+            </p>
+
+            <div className="mt-6 grid gap-3 sm:grid-cols-2">
+              <button
+                type="button"
+                disabled={securityActionLoading}
+                onClick={reportUnknownLogin}
+                className="min-h-11 rounded-xl border border-red-300 px-4 text-sm font-semibold text-red-600 transition hover:bg-red-50 disabled:opacity-60"
+              >
+                I don&apos;t recognize this
+              </button>
+              <button
+                type="button"
+                disabled={securityActionLoading}
+                onClick={confirmRecognizedDevice}
+                className="min-h-11 rounded-xl bg-orange px-4 text-sm font-semibold text-white transition hover:opacity-90 disabled:opacity-60"
+              >
+                {securityActionLoading ? "Please wait..." : "This was me"}
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
+
     <form onSubmit={handleSubmit}>
       {justVerified && (
         <div className="mb-5 rounded-lg border border-green-200 bg-green-50 px-4 py-3 text-sm text-green-700">
@@ -563,6 +728,7 @@ const SignInPanel = ({ onSwitchTab }: { onSwitchTab: (tab: AuthTab) => void }) =
 <Link href="/signup" className="font-medium text-orange hover:underline">Sign Up</Link>
       </p>
     </form>
+    </>
   );
 };
 

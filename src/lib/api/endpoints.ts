@@ -22,6 +22,10 @@ export const API_ENDPOINTS = {
     forgotPassword: "/auth/forgot-password",
     resetPassword: "/auth/reset-password",
     changePassword: "/auth/change-password",
+    sessions: "/auth/sessions",
+    recognizeCurrentSession: "/auth/sessions/current/recognize",
+    revokeOtherSessions: "/auth/sessions/revoke-others",
+    unrecognizedLogin: "/auth/security/unrecognized-login",
   },
 
   users: {

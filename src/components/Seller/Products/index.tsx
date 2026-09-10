@@ -1080,7 +1080,7 @@ const SellerProducts = () => {
                       <div className="mt-4 grid grid-cols-2 gap-3">
                         <div className="rounded-xl bg-slate-50 p-3">
                           <p className="text-[10px] font-bold uppercase tracking-wide text-[#94a3b8]">
-                            Your base price
+                            Listed price
                           </p>
                           <p className="mt-1 font-bold text-[#111827]">
                             {formatPrice(
@@ -1459,7 +1459,7 @@ const SellerProducts = () => {
                 <FormSection
                   icon={Camera}
                   title="Product images"
-                  description={`Upload up to ${MAX_PRODUCT_IMAGES} real product images. JPEG, PNG or WEBP only, maximum 5 MB each.`}
+                  description={`Upload up to ${MAX_PRODUCT_IMAGES} real product images. Xerin checks format, size, resolution, aspect ratio, sharpness, lighting and primary-image background quality before saving.`}
                 >
                   <label className="group relative flex cursor-pointer flex-col items-center justify-center overflow-hidden rounded-2xl border-2 border-dashed border-orange-200 bg-gradient-to-br from-orange-50 via-white to-slate-50 px-5 py-10 text-center transition hover:border-[#f7941d] hover:shadow-[0_12px_28px_rgba(247,148,29,.10)]">
                     <span className="pointer-events-none absolute -right-12 -top-12 h-32 w-32 rounded-full bg-orange-100/70 blur-2xl" />
@@ -1470,7 +1470,10 @@ const SellerProducts = () => {
                       Drop product images here or browse
                     </span>
                     <span className="relative mt-1 text-xs text-[#64748b]">
-                      Add multiple buyer-ready photos · JPEG, PNG, WEBP · max 5 MB each
+                      Primary: at least 1000 × 1000 with a clean, mostly white background · Additional: at least 600 × 600
+                    </span>
+                    <span className="relative mt-1 text-[11px] text-[#94a3b8]">
+                      Blurry, very dark/washed-out, corrupt or extreme-aspect-ratio images will be rejected with an exact reason.
                     </span>
                     <span className="relative mt-3 rounded-full bg-white px-3 py-1 text-[10px] font-bold uppercase tracking-wide text-[#f7941d] shadow-sm">
                       Up to {MAX_PRODUCT_IMAGES} images
@@ -1589,7 +1592,7 @@ const SellerProducts = () => {
                 <FormSection
                   icon={Boxes}
                   title="Pricing & physical details"
-                  description="Enter the amount you want to receive. Xerin calculates the marketplace commission and customer-facing price from Admin commission rules."
+                  description="Set the price customers will pay. Xerin commission is deducted from your seller settlement; it is not added to the customer price."
                 >
                   <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-4">
                     <Field label="Currency" required>
@@ -1614,9 +1617,9 @@ const SellerProducts = () => {
                     </Field>
 
                     <Field
-                      label="Your base price"
+                      label="Customer listing price"
                       required
-                      hint="The amount you want for this product before Xerin marketplace commission."
+                      hint="This is the product price the customer will pay before shipping, tax, or other checkout charges. Xerin commission is deducted from your settlement."
                     >
                       <input
                         type="number"
@@ -1636,8 +1639,8 @@ const SellerProducts = () => {
                     </Field>
 
                     <Field
-                      label="Your promotional base price"
-                      hint="Optional seller price before commission. Must be lower than your regular base price."
+                      label="Promotional customer price"
+                      hint="Optional discounted price the customer will pay. It must be lower than your regular listing price."
                     >
                       <input
                         type="number"
@@ -1788,7 +1791,7 @@ const SellerProducts = () => {
                               Marketplace pricing preview
                             </p>
                             <p className="mt-0.5 text-xs leading-5 text-[#64748b]">
-                              Calculated from the active Admin commission rule. The final amount is recalculated again by the backend when the product is saved.
+                              The customer pays your listed price. Xerin commission is shown separately and deducted from your seller settlement.
                             </p>
                           </div>
                           {pricingPreview?.commission_scope && (
@@ -1806,22 +1809,7 @@ const SellerProducts = () => {
                         ) : pricingPreview ? (
                           <div className="mt-4 grid gap-3 sm:grid-cols-2 xl:grid-cols-4">
                             <PricingStat
-                              label="Your base price"
-                              value={formatPrice(
-                                pricingPreview.seller_base_price,
-                                pricingPreview.currency || form.currency,
-                              )}
-                            />
-                            <PricingStat
-                              label="Commission"
-                              value={`${Number(pricingPreview.commission_rate).toLocaleString()}%`}
-                              detail={formatPrice(
-                                pricingPreview.commission_amount,
-                                pricingPreview.currency || form.currency,
-                              )}
-                            />
-                            <PricingStat
-                              label="Customer regular price"
+                              label="Customer pays"
                               value={formatPrice(
                                 pricingPreview.customer_price,
                                 pricingPreview.currency || form.currency,
@@ -1829,7 +1817,22 @@ const SellerProducts = () => {
                               highlight
                             />
                             <PricingStat
-                              label="Customer sale price"
+                              label="Xerin commission"
+                              value={`${Number(pricingPreview.commission_rate).toLocaleString()}%`}
+                              detail={formatPrice(
+                                pricingPreview.commission_amount,
+                                pricingPreview.currency || form.currency,
+                              )}
+                            />
+                            <PricingStat
+                              label="Estimated seller net"
+                              value={formatPrice(
+                                pricingPreview.seller_net_amount,
+                                pricingPreview.currency || form.currency,
+                              )}
+                            />
+                            <PricingStat
+                              label="Promotional customer price"
                               value={
                                 pricingPreview.customer_sale_price
                                   ? formatPrice(
@@ -1838,11 +1841,19 @@ const SellerProducts = () => {
                                     )
                                   : "Not set"
                               }
+                              detail={
+                                pricingPreview.seller_sale_net_amount
+                                  ? `Seller net: ${formatPrice(
+                                      pricingPreview.seller_sale_net_amount,
+                                      pricingPreview.currency || form.currency,
+                                    )}`
+                                  : undefined
+                              }
                             />
                           </div>
                         ) : (
                           <p className="mt-4 text-sm text-[#64748b]">
-                            Select a category and enter your base price to see the marketplace calculation.
+                            Select a category and enter your listing price to see the marketplace calculation.
                           </p>
                         )}
 

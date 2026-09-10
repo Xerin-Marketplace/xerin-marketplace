@@ -3,6 +3,8 @@ import type { User } from "./user";
 export type LoginRequest = {
   email: string;
   password: string;
+  device_id?: string;
+  device_name?: string;
 };
 
 export type RegisterBuyerRequest = {
@@ -76,12 +78,32 @@ export type SellerRegistrationResponse = {
   resumed_registration: boolean;
 };
 
+export type StaffSecurityNotice = {
+  code: "STAFF_NEW_DEVICE_LOGIN";
+  message: string;
+  current_session_id?: string;
+  current_device?: {
+    device_name?: string | null;
+    ip_address?: string | null;
+    approximate_location?: string | null;
+  };
+  existing_session?: {
+    session_id?: string;
+    device_name?: string | null;
+    ip_address?: string | null;
+    approximate_location?: string | null;
+    last_seen_at?: string | null;
+    created_at?: string | null;
+  };
+};
+
 export type AuthTokenResponse = {
   access_token: string;
   refresh_token?: string;
   token_type?: string;
   expires_in?: number;
   user?: User;
+  security_notice?: StaffSecurityNotice | null;
 };
 
 export type RefreshTokenRequest = {

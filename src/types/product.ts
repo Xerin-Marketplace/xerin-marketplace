@@ -21,6 +21,7 @@ export type Product = {
   discountedPrice: number;
   currency?: string;
   id: number | string;
+  storeId?: number | string | null;
   imgs?: {
     thumbnails: string[];
     previews: string[];

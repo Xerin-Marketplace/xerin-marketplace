@@ -118,6 +118,21 @@ export const changePassword = async (
   return res.data;
 };
 
+
+export const recognizeCurrentSession = async (): Promise<ApiMessageResponse> => {
+  const res = await axiosInstance.post<ApiMessageResponse>(API_ENDPOINTS.auth.recognizeCurrentSession);
+  return res.data;
+};
+
+export const reportUnrecognizedLogin = async (): Promise<
+  ApiMessageResponse & { reset_required?: boolean; revoked_count?: number }
+> => {
+  const res = await axiosInstance.post<
+    ApiMessageResponse & { reset_required?: boolean; revoked_count?: number }
+  >(API_ENDPOINTS.auth.unrecognizedLogin);
+  return res.data;
+};
+
 export const authApi = {
   login,
   registerBuyer,
@@ -134,4 +149,6 @@ export const authApi = {
   forgotPassword,
   resetPassword,
   changePassword,
+  recognizeCurrentSession,
+  reportUnrecognizedLogin,
 };

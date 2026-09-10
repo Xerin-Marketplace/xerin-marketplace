@@ -143,13 +143,13 @@ export type Product = TimestampFields & {
   slug: string;
   description: string | null;
 
-  // Seller-entered prices are preserved separately from customer-facing prices.
+  // Seller-entered prices are the customer-facing product prices; commission is seller-funded.
   seller_base_price?: string;
   seller_sale_price?: string | null;
   commission_rate_snapshot?: string;
   commission_amount_snapshot?: string;
 
-  // Marketplace/customer-facing prices.
+  // Catalogue/customer-facing prices (kept equal to seller listing price by backend).
   price: string;
   sale_price: string | null;
   currency: string;

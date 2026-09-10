@@ -129,8 +129,10 @@ export type SellerPricingPreviewResponse = {
   seller_sale_price?: number | string | null;
   commission_rate: number | string;
   commission_amount: number | string;
+  seller_net_amount: number | string;
   customer_price: number | string;
   customer_sale_price?: number | string | null;
+  seller_sale_net_amount?: number | string | null;
   commission_scope?: string | null;
   currency: string;
 };
