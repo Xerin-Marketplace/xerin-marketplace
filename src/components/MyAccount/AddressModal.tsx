@@ -1,7 +1,10 @@
 "use client";
 
 import React, { FormEvent, useEffect, useState } from "react";
-import type { Address, AddressRequest } from "@/types/api/user";
+import toast from "react-hot-toast";
+import { CheckCircle2, Crosshair, Loader2, MapPin, Search } from "lucide-react";
+import { usersApi } from "@/lib/api/endpoints/users";
+import type { Address, AddressRequest, MapResolvedLocation } from "@/types/api/user";
 
 type Props = {
   isOpen: boolean;
@@ -25,6 +28,9 @@ const emptyForm: AddressRequest = {
   postal_code: "",
   latitude: null,
   longitude: null,
+  formatted_address: null,
+  place_id: null,
+  delivery_instructions: null,
   is_default: false,
 };
 
@@ -61,9 +67,36 @@ export default function AddressModal({
   onSubmit,
 }: Props) {
   const [form, setForm] = useState<AddressRequest>(emptyForm);
+  const [mapSearch, setMapSearch] = useState("");
+  const [mapLocation, setMapLocation] = useState<MapResolvedLocation | null>(null);
+  const [mapSuggestions, setMapSuggestions] = useState<Array<{ place_id: string; description: string; main_text?: string | null; secondary_text?: string | null }>>([]);
+  const [mapBusy, setMapBusy] = useState(false);
+  const [locationError, setLocationError] = useState("");
 
   useEffect(() => {
     if (!isOpen) return;
+    setMapSearch(initialAddress?.formatted_address || "");
+    setMapLocation(
+      initialAddress?.latitude != null && initialAddress?.longitude != null
+        ? {
+            provider: "google",
+            place_id: initialAddress.place_id || null,
+            display_name: initialAddress.formatted_address || null,
+            formatted_address: initialAddress.formatted_address || [initialAddress.street, initialAddress.city, initialAddress.region, initialAddress.country].filter(Boolean).join(", "),
+            latitude: Number(initialAddress.latitude),
+            longitude: Number(initialAddress.longitude),
+            country: initialAddress.country,
+            region: initialAddress.region,
+            city: initialAddress.city,
+            district: initialAddress.district || null,
+            ward: initialAddress.ward || null,
+            street: initialAddress.street,
+            postal_code: initialAddress.postal_code || null,
+          }
+        : null,
+    );
+    setMapSuggestions([]);
+    setLocationError("");
     setForm({
       label: initialAddress?.label || "Home",
       recipient_name: initialAddress?.recipient_name || "",
@@ -80,9 +113,116 @@ export default function AddressModal({
       postal_code: initialAddress?.postal_code || "",
       latitude: initialAddress?.latitude == null ? null : Number(initialAddress.latitude),
       longitude: initialAddress?.longitude == null ? null : Number(initialAddress.longitude),
+      formatted_address: initialAddress?.formatted_address || null,
+      place_id: initialAddress?.place_id || null,
+      delivery_instructions: initialAddress?.delivery_instructions || null,
       is_default: Boolean(initialAddress?.is_default),
     });
   }, [initialAddress, isOpen]);
+
+  useEffect(() => {
+    if (!isOpen || mapLocation || mapSearch.trim().length < 3) {
+      setMapSuggestions([]);
+      return;
+    }
+
+    const timer = window.setTimeout(async () => {
+      try {
+        const countryCode = isTanzania(form.country) ? "TZ" : undefined;
+        setMapSuggestions(await usersApi.searchMapPlaces(mapSearch.trim(), countryCode));
+      } catch {
+        setMapSuggestions([]);
+      }
+    }, 350);
+
+    return () => window.clearTimeout(timer);
+  }, [form.country, isOpen, mapLocation, mapSearch]);
+
+  const applyResolvedLocation = (resolved: MapResolvedLocation) => {
+    const latitude = Number(resolved.latitude);
+    const longitude = Number(resolved.longitude);
+
+    setMapLocation(resolved);
+    setMapSearch(resolved.formatted_address);
+    setMapSuggestions([]);
+    setLocationError("");
+
+    setForm((current) => {
+      const country = resolved.country?.trim() || current.country;
+      const resolvedRegion = resolved.region?.trim() || current.region;
+      return {
+        ...current,
+        country,
+        region: isTanzania(country)
+          ? canonicalTanzaniaRegion(resolvedRegion) || current.region
+          : resolvedRegion,
+        district: resolved.district?.trim() || current.district || "",
+        ward: resolved.ward?.trim() || current.ward || "",
+        city: resolved.city?.trim() || current.city,
+        street: resolved.street?.trim() || resolved.formatted_address || current.street,
+        postal_code: resolved.postal_code?.trim() || current.postal_code || "",
+        latitude,
+        longitude,
+        formatted_address: resolved.formatted_address,
+        place_id: resolved.place_id || null,
+      };
+    });
+  };
+
+  const chooseMapPlace = async (placeId: string) => {
+    setMapBusy(true);
+    try {
+      const countryCode = isTanzania(form.country) ? "TZ" : undefined;
+      const resolved = await usersApi.getMapPlace(placeId, countryCode);
+      applyResolvedLocation(resolved);
+      toast.success("Exact delivery location selected.");
+    } catch (error) {
+      toast.error(error instanceof Error ? error.message : "Unable to resolve that location.");
+    } finally {
+      setMapBusy(false);
+    }
+  };
+
+  const useCurrentLocation = () => {
+    if (!navigator.geolocation) {
+      const message = "Location access is not supported by this browser. Search for the delivery point instead.";
+      setLocationError(message);
+      toast.error(message);
+      return;
+    }
+
+    setLocationError("");
+    setMapBusy(true);
+    navigator.geolocation.getCurrentPosition(
+      async ({ coords }) => {
+        try {
+          const resolved = await usersApi.reverseGeocode(coords.latitude, coords.longitude);
+          applyResolvedLocation({
+            ...resolved,
+            latitude: coords.latitude,
+            longitude: coords.longitude,
+          });
+          toast.success("Your current GPS location has been added.");
+        } catch (error) {
+          toast.error(error instanceof Error ? error.message : "Unable to identify your current location.");
+        } finally {
+          setMapBusy(false);
+        }
+      },
+      (error) => {
+        setMapBusy(false);
+        const message =
+          error.code === 1
+            ? "Location permission is blocked. Allow Location for this site in your browser, then try again."
+            : error.code === 2
+              ? "Your device could not determine its location. Turn on GPS or search for the address."
+              : "Finding your location took too long. Try again or search for the delivery point.";
+        setLocationError(message);
+        toast.error(message);
+      },
+      { enableHighAccuracy: true, timeout: 15000, maximumAge: 0 },
+    );
+  };
 
   if (!isOpen) return null;
 
@@ -105,6 +245,9 @@ export default function AddressModal({
       postal_code: form.postal_code?.trim() || null,
       latitude: form.latitude == null ? null : Number(form.latitude),
       longitude: form.longitude == null ? null : Number(form.longitude),
+      formatted_address: form.formatted_address?.trim() || null,
+      place_id: form.place_id?.trim() || null,
+      delivery_instructions: form.delivery_instructions?.trim() || null,
       is_default: Boolean(form.is_default),
     });
   };
@@ -189,7 +332,112 @@ export default function AddressModal({
             <Field label="Postal code">
               <input value={form.postal_code || ""} onChange={(e)=>set("postal_code",e.target.value)} className={input} placeholder="Optional" />
             </Field>
+            <Field label="Delivery instructions" wide>
+              <textarea
+                value={form.delivery_instructions || ""}
+                onChange={(e)=>set("delivery_instructions",e.target.value)}
+                className={`${input} min-h-24 resize-y`}
+                placeholder="Gate colour, floor, entrance, or other instructions for the courier"
+              />
+            </Field>
           </div>
+
+          <section className="mt-6 overflow-hidden rounded-2xl border border-[#e2e8f0] bg-[#f8fafc] dark:border-white/10 dark:bg-white/5">
+            <div className="border-b border-[#e2e8f0] p-4 dark:border-white/10 sm:p-5">
+              <div className="flex items-start gap-3">
+                <span className="grid h-10 w-10 shrink-0 place-items-center rounded-xl bg-orange/10 text-orange">
+                  <MapPin size={19} />
+                </span>
+                <div>
+                  <h4 className="font-bold text-dark dark:text-white">Exact delivery location on Google Maps</h4>
+                  <p className="mt-1 text-xs leading-5 text-[#64748b]">
+                    Search for the delivery point or use your current GPS location. Latitude and longitude will be saved with this address for accurate logistics routing.
+                  </p>
+                </div>
+              </div>
+
+              <div className="relative mt-4">
+                <Search className="absolute left-3 top-3.5 text-[#94a3b8]" size={17} />
+                <input
+                  value={mapSearch}
+                  onChange={(event) => {
+                    setMapSearch(event.target.value);
+                    setMapLocation(null);
+                    set("latitude", null);
+                    set("longitude", null);
+                    set("formatted_address", null);
+                    set("place_id", null);
+                  }}
+                  className={`${input} mt-0 pl-10`}
+                  placeholder="Search street, building, landmark or place"
+                />
+                {mapSuggestions.length > 0 && !mapLocation && (
+                  <div className="absolute z-30 mt-1 max-h-56 w-full overflow-y-auto rounded-xl border border-[#e2e8f0] bg-white p-1 shadow-xl dark:border-white/10 dark:bg-darkTheme-card">
+                    {mapSuggestions.map((item) => (
+                      <button
+                        key={item.place_id}
+                        type="button"
+                        onClick={() => void chooseMapPlace(item.place_id)}
+                        className="block min-h-11 w-full rounded-lg px-3 py-2 text-left text-sm hover:bg-[#f8fafc] dark:hover:bg-white/5"
+                      >
+                        <b className="block text-dark dark:text-white">{item.main_text || item.description}</b>
+                        {item.secondary_text && <span className="text-xs font-normal text-[#64748b]">{item.secondary_text}</span>}
+                      </button>
+                    ))}
+                  </div>
+                )}
+              </div>
+
+              <button
+                type="button"
+                onClick={useCurrentLocation}
+                disabled={mapBusy}
+                className="mt-3 inline-flex min-h-11 w-full items-center justify-center gap-2 rounded-xl border border-orange/30 bg-white px-4 text-sm font-bold text-orange transition hover:border-orange hover:bg-orange hover:text-white disabled:opacity-60 dark:bg-white/5 sm:w-auto"
+              >
+                {mapBusy ? <Loader2 className="animate-spin" size={17} /> : <Crosshair size={17} />}
+                {mapBusy ? "Finding location..." : "Use my current location"}
+              </button>
+
+              {locationError && (
+                <p role="alert" className="mt-3 rounded-xl border border-red-200 bg-red-50 p-3 text-xs leading-5 text-red-700">
+                  {locationError}
+                </p>
+              )}
+            </div>
+
+            {form.latitude != null && form.longitude != null && (
+              <div>
+                <iframe
+                  title="Selected delivery location"
+                  className="h-56 w-full border-0 sm:h-72"
+                  loading="lazy"
+                  referrerPolicy="no-referrer-when-downgrade"
+                  src={`https://www.google.com/maps?q=${Number(form.latitude)},${Number(form.longitude)}&z=17&output=embed`}
+                />
+                <div className="flex flex-col gap-3 border-t border-[#e2e8f0] bg-white p-4 dark:border-white/10 dark:bg-darkTheme-card sm:flex-row sm:items-center sm:justify-between">
+                  <div className="min-w-0">
+                    <p className="flex items-center gap-2 text-sm font-bold text-green">
+                      <CheckCircle2 size={16} /> Exact GPS pin selected
+                    </p>
+                    <p className="mt-1 break-words text-xs text-[#64748b]">
+                      {form.formatted_address || mapSearch || "Selected map location"}
+                    </p>
+                    <p className="mt-1 font-mono text-xs text-dark dark:text-white">
+                      Latitude: {Number(form.latitude).toFixed(6)} · Longitude: {Number(form.longitude).toFixed(6)}
+                    </p>
+                  </div>
+                  <a
+                    href={`https://www.google.com/maps/search/?api=1&query=${Number(form.latitude)},${Number(form.longitude)}`}
+                    target="_blank"
+                    rel="noreferrer"
+                    className="inline-flex min-h-10 shrink-0 items-center justify-center rounded-xl border border-[#e2e8f0] px-3 text-xs font-bold text-dark hover:border-orange hover:text-orange dark:border-white/10 dark:text-white"
+                  >
+                    Open in Google Maps
+                  </a>
+                </div>
+              </div>
+            )}
+          </section>
 
           <label className="mt-5 flex cursor-pointer items-center gap-3 rounded-xl border border-[#e2e8f0] p-4 text-sm dark:border-white/10">
             <input type="checkbox" checked={Boolean(form.is_default)} onChange={(e)=>set("is_default",e.target.checked)} />

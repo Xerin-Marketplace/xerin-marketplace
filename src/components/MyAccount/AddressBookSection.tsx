@@ -264,6 +264,22 @@ const AddressBookSection = ({
                             Postal Code: {address.postal_code}
                           </p>
                         )}
+
+                        {address.latitude != null && address.longitude != null && (
+                          <div className="mt-3 flex flex-wrap items-center gap-2">
+                            <span className="rounded-full bg-green-light-6 px-3 py-1 text-custom-xs font-medium text-green">
+                              GPS location saved
+                            </span>
+                            <a
+                              href={`https://www.google.com/maps/search/?api=1&query=${Number(address.latitude)},${Number(address.longitude)}`}
+                              target="_blank"
+                              rel="noreferrer"
+                              className="text-custom-xs font-semibold text-orange hover:underline"
+                            >
+                              View on Google Maps
+                            </a>
+                          </div>
+                        )}
                       </div>
 
                       <div className="flex gap-3">
