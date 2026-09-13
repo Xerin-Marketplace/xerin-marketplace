@@ -1,5 +1,7 @@
 "use client";
 
+
+import { Spinner } from "@/components/ui/Spinner";
 import { useEffect, useMemo, useState } from "react";
 import {
   ArrowDownToLine,
@@ -77,7 +79,7 @@ export default function SellerEarnings() {
   if (loading) {
     return (
       <div className="rounded-2xl border border-slate-200 bg-white p-14 text-center text-sm text-slate-500 shadow-sm dark:border-white/10 dark:bg-[#1f2937]">
-        <RefreshCw size={22} className="mx-auto animate-spin" />
+        <Spinner className="mx-auto" />
         <p className="mt-3">Loading seller earnings...</p>
       </div>
     );

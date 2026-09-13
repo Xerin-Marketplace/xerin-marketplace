@@ -1,5 +1,7 @@
 "use client";
 
+
+import { Spinner } from "@/components/ui/Spinner";
 import BackendDocumentPreview from "@/components/Common/BackendDocumentPreview";
 import { ApiError } from "@/lib/api/client";
 import { sellersApi } from "@/lib/api/endpoints/sellers";
@@ -415,7 +417,7 @@ export default function SellerBusinessDocuments() {
   if (loading) {
     return (
       <div className="rounded-2xl border border-[#e7ebf0] bg-white p-12 text-center">
-        <RefreshCw className="mx-auto animate-spin text-[#f7941d]" size={24} />
+        <Spinner className="mx-auto text-[#f7941d]" />
         <p className="mt-3 text-sm text-[#64748b]">Loading business documents...</p>
       </div>
     );
@@ -601,7 +603,7 @@ export default function SellerBusinessDocuments() {
                   disabled={submittingRenewal || !renewalFile || !renewalLicenseNumber.trim() || !renewalExpiryDate}
                   className="inline-flex h-11 items-center gap-2 rounded-xl bg-[#f7941d] px-5 text-sm font-semibold text-white disabled:cursor-not-allowed disabled:opacity-50"
                 >
-                  {submittingRenewal ? <><RefreshCw size={15} className="animate-spin" />Submitting renewal...</> : <><Send size={15} />Submit renewal for approval</>}
+                  {submittingRenewal ? <><Spinner />Submitting renewal...</> : <><Send size={15} />Submit renewal for approval</>}
                 </button>
               </div>
             </div>
@@ -712,7 +714,7 @@ export default function SellerBusinessDocuments() {
         </div>
 
         <button type="button" onClick={() => void submitInitialDocuments()} disabled={allSubmitted || selectedCount !== required.length || submittingAll} className="mt-6 inline-flex h-11 items-center justify-center gap-2 rounded-[10px] bg-[#f7941d] px-5 text-sm font-semibold text-white disabled:cursor-not-allowed disabled:opacity-50">
-          {submittingAll ? <><RefreshCw size={16} className="animate-spin" />Submitting...</> : <><Send size={16} />Submit All Documents</>}
+          {submittingAll ? <><Spinner />Submitting...</> : <><Send size={16} />Submit All Documents</>}
         </button>
       </section>
 

@@ -1,5 +1,7 @@
 "use client";
 
+
+import { Spinner } from "@/components/ui/Spinner";
 import {
   AlertCircle,
   CheckCircle2,
@@ -293,7 +295,7 @@ export default function LogisticsDocuments() {
     return (
       <section id="documents" className="rounded-2xl border border-slate-200 bg-white p-6 dark:border-slate-700 dark:bg-slate-800">
         <div className="flex items-center gap-3 text-slate-500">
-          <RefreshCw size={18} className="animate-spin" />
+          <Spinner />
           Loading company documents…
         </div>
       </section>

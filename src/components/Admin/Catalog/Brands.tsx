@@ -1,5 +1,6 @@
 "use client";
 import { FormEvent,useEffect,useState } from "react";import { Edit3,Plus,RefreshCw,Search,Trash2,X } from "lucide-react";import toast from "react-hot-toast";import {adminService,type Brand} from "@/lib/api/endpoints/admin";
+import Pagination from "@/components/ui/Pagination";
 import { ConfirmActionDialog } from "@/components/Admin/shared/ActionDialog";
 const slugify=(v:string)=>v.toLowerCase().trim().replace(/[^a-z0-9]+/g,"-").replace(/^-+|-+$/g,"");
 export default function AdminBrands(){const[rows,setRows]=useState<Brand[]>([]);const[loading,setLoading]=useState(true);const[error,setError]=useState("");const[name,setName]=useState("");const[slug,setSlug]=useState("");const[busy,setBusy]=useState(false);const[query,setQuery]=useState("");const[debouncedQuery,setDebouncedQuery]=useState("");const[page,setPage]=useState(1);const[pageSize,setPageSize]=useState(20);const[total,setTotal]=useState(0);const[totalPages,setTotalPages]=useState(0);const[editing,setEditing]=useState<Brand|null>(null);const[deleteTarget,setDeleteTarget]=useState<Brand|null>(null);
@@ -73,16 +74,6 @@ return <div className="admin-catalog-page space-y-5">
 <button onClick={()=>void save()} disabled={busy} className="mt-5 w-full rounded-xl bg-[#111827] py-3 font-semibold text-white">Save Changes</button>
 </div>
 </div>}<ConfirmActionDialog open={Boolean(deleteTarget)} title="Delete brand?" description={<>The brand <strong>{deleteTarget?.name}</strong> will be permanently deleted. Products using it may prevent this action.</>} confirmLabel="Delete brand" busy={busy} onCancel={()=>setDeleteTarget(null)} onConfirm={()=>void remove()}/><style jsx global>{`.field{margin-top:.5rem;min-height:46px;width:100%;border-radius:.75rem;border:2px solid #d8e0e9;background:#fff;padding:.7rem .9rem;outline:none}.field:focus{border-color:#f47524}`}</style>
-</div>}
-function Pagination({page,pageSize,total,totalPages,onPageChange,onPageSizeChange}:{page:number;pageSize:number;total:number;totalPages:number;onPageChange:(n:number)=>void;onPageSizeChange:(n:number)=>void}){const a=total?((page-1)*pageSize+1):0,b=Math.min(page*pageSize,total);return <div className="flex flex-col gap-3 border-t p-4 sm:flex-row sm:items-center sm:justify-between">
-<span className="text-sm">Showing {a}-{b} of {total}</span>
-<div className="flex gap-2">
-<select value={pageSize} onChange={e=>onPageSizeChange(Number(e.target.value))} className="rounded-xl border px-2">{[10,20,50,100].map(x=>
-<option key={x}>{x}</option>)}</select>
-<button disabled={page<=1} onClick={()=>onPageChange(page-1)} className="rounded-xl border px-3 disabled:opacity-40">Previous</button>
-<span className="px-2 py-2 text-xs">Page {page} of {Math.max(totalPages,1)}</span>
-<button disabled={page>=totalPages||!totalPages} onClick={()=>onPageChange(page+1)} className="rounded-xl border px-3 disabled:opacity-40">Next</button>
-</div>
 </div>}
 function Field({label,children}:{label:string;children:React.ReactNode}){return <label className="mt-4 block">
 <span className="text-sm font-semibold">{label}</span>{children}</label>}

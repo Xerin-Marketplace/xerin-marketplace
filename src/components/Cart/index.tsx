@@ -1,5 +1,7 @@
 "use client";
 
+
+import { Spinner } from "@/components/ui/Spinner";
 import { formatCurrency } from "@/lib/formatCurrency";
 
 import Breadcrumb from "@/components/Common/Breadcrumb";
@@ -48,7 +50,7 @@ export default function Cart() {
         <div className="mx-auto max-w-[1240px] px-4 sm:px-8">
           {cart.isLoading ? (
             <div className="rounded-2xl bg-white p-14 text-center dark:bg-darkTheme-card">
-              <RefreshCw className="mx-auto animate-spin" size={20} />
+              <Spinner className="mx-auto" />
               <p className="mt-3">Loading your cart...</p>
             </div>
           ) : cart.error ? (
@@ -94,10 +96,7 @@ export default function Cart() {
                       onClick={() => validate.mutate()}
                       className="inline-flex items-center gap-2 rounded-xl border border-gray-3 bg-white px-4 py-2.5 text-sm font-semibold disabled:opacity-50 dark:border-white/10 dark:bg-darkTheme-card"
                     >
-                      <RefreshCw
-                        size={14}
-                        className={validate.isPending ? "animate-spin" : ""}
-                      />
+                      {validate.isPending ? <Spinner /> : <RefreshCw size={14} />}
                       Refresh Price & Stock
                     </button>
                   )}

@@ -1,5 +1,7 @@
 "use client";
 
+
+import { Spinner } from "@/components/ui/Spinner";
 import { ordersApi } from "@/lib/api/endpoints/commerce";
 import { formatCurrency } from "@/lib/formatCurrency";
 import type { SellerOrderMessage } from "@/types/api/seller-order";
@@ -899,7 +901,7 @@ export default function BuyerOrderDetails({ orderId }: { orderId: string }) {
               <span className="grid h-11 w-11 shrink-0 place-items-center rounded-xl bg-amber-50 text-amber-700 dark:bg-amber-500/10"><AlertTriangle size={20} /></span>
               <div><h2 id="approve-receipt-title" className="font-bold text-slate-900 dark:text-white">Approve complete receipt?</h2><p className="mt-1 text-sm leading-6 text-slate-500">Confirm only after receiving the complete order in acceptable condition. Approval releases the protected seller funds from Xerin escrow and cannot be reversed from this page.</p></div>
             </div>
-            <div className="mt-6 flex flex-col-reverse gap-2 sm:flex-row sm:justify-end"><button type="button" disabled={approvingReceipt} onClick={() => setReceiptDialogOpen(false)} className="min-h-11 rounded-xl border border-slate-200 px-4 text-sm font-semibold dark:border-white/10">Not yet</button><button type="button" disabled={approvingReceipt} onClick={() => void approveReceipt()} className="inline-flex min-h-11 items-center justify-center gap-2 rounded-xl bg-emerald-600 px-4 text-sm font-bold text-white disabled:opacity-60">{approvingReceipt && <RefreshCw className="animate-spin" size={15} />}Approve & release funds</button></div>
+            <div className="mt-6 flex flex-col-reverse gap-2 sm:flex-row sm:justify-end"><button type="button" disabled={approvingReceipt} onClick={() => setReceiptDialogOpen(false)} className="min-h-11 rounded-xl border border-slate-200 px-4 text-sm font-semibold dark:border-white/10">Not yet</button><button type="button" disabled={approvingReceipt} onClick={() => void approveReceipt()} className="inline-flex min-h-11 items-center justify-center gap-2 rounded-xl bg-emerald-600 px-4 text-sm font-bold text-white disabled:opacity-60">{approvingReceipt && <Spinner />}Approve & release funds</button></div>
           </div>
         </div>
       )}

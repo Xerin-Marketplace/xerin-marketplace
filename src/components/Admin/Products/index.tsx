@@ -8,6 +8,7 @@ import { adminService, type AdminProduct } from "@/lib/api/endpoints/admin";
 import { API_BASE_URL } from "@/lib/api/endpoints";
 import { ApiError } from "@/lib/api/errors";
 import { formatCurrency } from "@/lib/formatCurrency";
+import Pagination from "@/components/ui/Pagination";
 
 const errorMessage=(error:unknown)=>error instanceof ApiError||error instanceof Error?error.message:"Unable to load product moderation data.";
 const resolveImage=(url?:string|null)=>{if(!url)return "";if(/^(data:|blob:)/.test(url))return url;try{const api=new URL(API_BASE_URL);if(/^https?:/.test(url)){const absolute=new URL(url);if(absolute.pathname.startsWith("/api/v1/uploads/"))absolute.pathname=absolute.pathname.replace(/^\/api\/v1\/uploads\//,"/uploads/");return absolute.toString();}return `${api.origin}${url.startsWith("/")?"":"/"}${url}`;}catch{return url;}};
@@ -144,17 +145,6 @@ export default function AdminProducts(){
 </div>}
   </div>;
 }
-function Pagination({page,pageSize,total,totalPages,onPageChange,onPageSizeChange}:{page:number;pageSize:number;total:number;totalPages:number;onPageChange:(page:number)=>void;onPageSizeChange:(size:number)=>void}){const from=total===0?0:(page-1)*pageSize+1;const to=Math.min(page*pageSize,total);return <div className="flex flex-col gap-3 border-t px-5 py-4 text-sm sm:flex-row sm:items-center sm:justify-between">
-<p>Showing <b>{from}-{to}</b> of <b>{total}</b>
-</p>
-<div className="flex items-center gap-2">
-<select value={pageSize} onChange={e=>onPageSizeChange(Number(e.target.value))} className="h-10 rounded-xl border px-3">{[10,20,50,100].map(s=>
-<option key={s} value={s}>{s} / page</option>)}</select>
-<button disabled={page<=1} onClick={()=>onPageChange(page-1)} className="h-10 rounded-xl border px-3 disabled:opacity-40">Previous</button>
-<span className="text-xs font-semibold">Page {page} of {Math.max(totalPages,1)}</span>
-<button disabled={page>=totalPages||totalPages===0} onClick={()=>onPageChange(page+1)} className="h-10 rounded-xl border px-3 disabled:opacity-40">Next</button>
-</div>
-</div>}
 function Card({title,children}:{title:string;children:React.ReactNode}){return <section className="rounded-2xl border bg-white p-5">
 <h4 className="mb-4 font-semibold">{title}</h4>{children}</section>}
 function Info({label,value}:{label:string;value:string}){return <div className="rounded-xl bg-[#f8fafc] p-4">

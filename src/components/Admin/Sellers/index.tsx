@@ -1,5 +1,7 @@
 "use client";
 
+
+import { Spinner } from "@/components/ui/Spinner";
 import BackendDocumentPreview from "@/components/Common/BackendDocumentPreview";
 import { ApiError } from "@/lib/api/client";
 import {
@@ -640,7 +642,7 @@ export default function AdminSellers({
 
               {documentsLoading ? (
                 <div className="mt-4 flex items-center gap-2 rounded-xl bg-gray-50 p-4 text-sm text-gray-500">
-                  <RefreshCw size={15} className="animate-spin" />
+                  <Spinner />
                   Loading seller documents...
                 </div>
               ) : (

@@ -183,7 +183,7 @@ const TextInput = (props: React.InputHTMLAttributes<HTMLInputElement>) => (
   <input
     {...props}
     className={
-      "rounded-lg border border-gray-3 dark:border-darkTheme-border-color bg-gray-1 dark:bg-darkTheme-secondary-bg dark:text-darkTheme-body-color placeholder:text-dark-4 dark:placeholder:text-darkTheme-secondary-muted w-full py-3 px-4 outline-none duration-200 focus:border-transparent focus:ring-2 focus:ring-orange/30 disabled:cursor-not-allowed disabled:opacity-70 " +
+      "h-11 rounded-lg border border-gray-3 dark:border-darkTheme-border-color bg-gray-1 dark:bg-darkTheme-secondary-bg dark:text-darkTheme-body-color placeholder:text-dark-4 dark:placeholder:text-darkTheme-secondary-muted w-full px-3.5 text-sm outline-none duration-200 focus:border-transparent focus:ring-2 focus:ring-orange/30 disabled:cursor-not-allowed disabled:opacity-70 " +
       (props.className || "")
     }
   />
@@ -193,7 +193,7 @@ const TextArea = (props: React.TextareaHTMLAttributes<HTMLTextAreaElement>) => (
   <textarea
     {...props}
     className={
-      "rounded-lg border border-gray-3 dark:border-darkTheme-border-color bg-gray-1 dark:bg-darkTheme-secondary-bg dark:text-darkTheme-body-color placeholder:text-dark-4 dark:placeholder:text-darkTheme-secondary-muted w-full py-3 px-4 outline-none duration-200 focus:border-transparent focus:ring-2 focus:ring-orange/30 disabled:cursor-not-allowed disabled:opacity-70 resize-none " +
+      "rounded-lg border border-gray-3 dark:border-darkTheme-border-color bg-gray-1 dark:bg-darkTheme-secondary-bg dark:text-darkTheme-body-color placeholder:text-dark-4 dark:placeholder:text-darkTheme-secondary-muted w-full py-2.5 px-3.5 text-sm outline-none duration-200 focus:border-transparent focus:ring-2 focus:ring-orange/30 disabled:cursor-not-allowed disabled:opacity-70 resize-none " +
       (props.className || "")
     }
   />
@@ -237,7 +237,7 @@ const PhoneInput = ({
       }}
       autoComplete="tel-national"
       disabled={disabled}
-      className="flex-1 min-w-0 py-3 px-4 bg-transparent outline-none dark:text-darkTheme-body-color placeholder:text-dark-4 dark:placeholder:text-darkTheme-secondary-muted disabled:cursor-not-allowed disabled:opacity-70"
+      className="flex-1 min-w-0 h-11 px-3.5 bg-transparent outline-none dark:text-darkTheme-body-color placeholder:text-dark-4 dark:placeholder:text-darkTheme-secondary-muted disabled:cursor-not-allowed disabled:opacity-70"
     />
   </div>
 );
@@ -278,9 +278,9 @@ const PasswordInput = ({
       onChange={(event) => onChange(event.target.value)}
       autoComplete={autoComplete}
       disabled={disabled}
-      className={`rounded-lg border border-gray-3 dark:border-darkTheme-border-color bg-gray-1 dark:bg-darkTheme-secondary-bg dark:text-darkTheme-body-color placeholder:text-dark-4 dark:placeholder:text-darkTheme-secondary-muted w-full py-3 ${
-        withIcon ? "pl-11" : "pl-4"
-      } pr-12 outline-none duration-200 focus:border-transparent focus:ring-2 focus:ring-orange/30 disabled:cursor-not-allowed disabled:opacity-70`}
+      className={`h-11 rounded-lg border border-gray-3 dark:border-darkTheme-border-color bg-gray-1 dark:bg-darkTheme-secondary-bg dark:text-darkTheme-body-color placeholder:text-dark-4 dark:placeholder:text-darkTheme-secondary-muted w-full text-sm ${
+        withIcon ? "pl-10" : "pl-3.5"
+      } pr-10 outline-none duration-200 focus:border-transparent focus:ring-2 focus:ring-orange/30 disabled:cursor-not-allowed disabled:opacity-70`}
     />
     <button
       type="button"
@@ -383,7 +383,7 @@ const SignInPanel = ({ onSwitchTab }: { onSwitchTab: (tab: AuthTab) => void }) =
         </div>
       )}
 
-      <div className="mb-5">
+      <div className="mb-3.5">
         <FieldLabel htmlFor="signin-email">Email</FieldLabel>
         <div className="relative">
           <span className="absolute inset-y-0 left-0 flex items-center pl-4 text-dark-4 dark:text-darkTheme-secondary-muted">
@@ -403,7 +403,7 @@ const SignInPanel = ({ onSwitchTab }: { onSwitchTab: (tab: AuthTab) => void }) =
         </div>
       </div>
 
-      <div className="mb-5">
+      <div className="mb-3.5">
         <div className="flex items-center justify-between mb-2">
           <label htmlFor="signin-password" className="text-sm font-medium text-dark dark:text-darkTheme-body-color">
             Password
@@ -425,7 +425,7 @@ const SignInPanel = ({ onSwitchTab }: { onSwitchTab: (tab: AuthTab) => void }) =
         />
       </div>
 
-      <label htmlFor="remember" className="flex items-center gap-2.5 mb-6 cursor-pointer select-none w-fit">
+      <label htmlFor="remember" className="flex items-center gap-2.5 mb-4 cursor-pointer select-none w-fit">
         <input
           type="checkbox"
           id="remember"
@@ -442,7 +442,7 @@ const SignInPanel = ({ onSwitchTab }: { onSwitchTab: (tab: AuthTab) => void }) =
       <button
         type="submit"
         disabled={isSubmitting}
-        className="w-full flex justify-center font-medium text-white bg-orange py-3 px-6 rounded-lg ease-out duration-200 hover:bg-orange-dark disabled:cursor-not-allowed disabled:opacity-70"
+        className="flex h-11 w-full items-center justify-center rounded-lg bg-orange px-6 text-sm font-semibold text-white ease-out duration-200 hover:bg-orange-dark disabled:cursor-not-allowed disabled:opacity-70"
       >
         {isSubmitting ? "Signing in..." : "Sign in"}
       </button>
@@ -535,7 +535,7 @@ const SignUpPanel = ({ onSwitchTab }: { onSwitchTab: (tab: AuthTab) => void }) =
 
   return (
     <form onSubmit={handleSubmit}>
-      <div className="mb-5">
+      <div className="mb-3.5">
         <FieldLabel htmlFor="signup-name" required>Full Name</FieldLabel>
         <TextInput
           type="text"
@@ -549,7 +549,7 @@ const SignUpPanel = ({ onSwitchTab }: { onSwitchTab: (tab: AuthTab) => void }) =
         />
       </div>
 
-      <div className="mb-5">
+      <div className="mb-3.5">
         <FieldLabel htmlFor="signup-email" required>Email Address</FieldLabel>
         <TextInput
           type="email"
@@ -563,7 +563,7 @@ const SignUpPanel = ({ onSwitchTab }: { onSwitchTab: (tab: AuthTab) => void }) =
         />
       </div>
 
-      <div className="mb-5">
+      <div className="mb-3.5">
         <FieldLabel htmlFor="signup-phone" optional>Phone Number</FieldLabel>
         <PhoneInput id="signup-phone" value={phone} onChange={setPhone} disabled={isSubmitting} invalid={Boolean(phone) && !isPhoneValid} />
         {phone && !isPhoneValid && (
@@ -571,7 +571,7 @@ const SignUpPanel = ({ onSwitchTab }: { onSwitchTab: (tab: AuthTab) => void }) =
         )}
       </div>
 
-      <div className="mb-5">
+      <div className="mb-3.5">
         <FieldLabel htmlFor="signup-password" required>Password</FieldLabel>
         <PasswordInput
           id="signup-password"
@@ -586,7 +586,7 @@ const SignUpPanel = ({ onSwitchTab }: { onSwitchTab: (tab: AuthTab) => void }) =
         <PasswordChecklist password={password} />
       </div>
 
-      <div className="mb-5.5">
+      <div className="mb-3.5">
         <FieldLabel htmlFor="signup-confirm-password" required>Re-type Password</FieldLabel>
         <PasswordInput
           id="signup-confirm-password"
@@ -604,7 +604,7 @@ const SignUpPanel = ({ onSwitchTab }: { onSwitchTab: (tab: AuthTab) => void }) =
       <button
         type="submit"
         disabled={isSubmitting}
-        className="w-full flex justify-center font-medium text-white bg-orange py-3 px-6 rounded-lg ease-out duration-200 hover:bg-orange-dark disabled:cursor-not-allowed disabled:opacity-70"
+        className="flex h-11 w-full items-center justify-center rounded-lg bg-orange px-6 text-sm font-semibold text-white ease-out duration-200 hover:bg-orange-dark disabled:cursor-not-allowed disabled:opacity-70"
       >
         {isSubmitting ? "Creating account..." : "Create Account"}
       </button>
@@ -841,7 +841,7 @@ const SellerPanel = ({ onSwitchTab }: { onSwitchTab: (tab: AuthTab) => void }) =
         Personal details
       </h3>
 
-      <div className="grid sm:grid-cols-2 gap-5 mb-5">
+      <div className="grid sm:grid-cols-2 gap-3.5 mb-3.5">
         <div>
           <FieldLabel htmlFor="seller-first-name" required>First Name</FieldLabel>
           <TextInput
@@ -868,7 +868,7 @@ const SellerPanel = ({ onSwitchTab }: { onSwitchTab: (tab: AuthTab) => void }) =
         </div>
       </div>
 
-      <div className="grid sm:grid-cols-2 gap-5 mb-5">
+      <div className="grid sm:grid-cols-2 gap-3.5 mb-3.5">
         <div>
           <FieldLabel htmlFor="seller-email" required>Email Address</FieldLabel>
           <TextInput
@@ -893,7 +893,7 @@ const SellerPanel = ({ onSwitchTab }: { onSwitchTab: (tab: AuthTab) => void }) =
         </div>
       </div>
 
-      <div className="grid sm:grid-cols-2 gap-5 mb-6">
+      <div className="grid sm:grid-cols-2 gap-3.5 mb-3.5">
         <div>
           <FieldLabel htmlFor="seller-password" required>Password</FieldLabel>
           <PasswordInput
@@ -921,18 +921,18 @@ const SellerPanel = ({ onSwitchTab }: { onSwitchTab: (tab: AuthTab) => void }) =
           />
         </div>
       </div>
-      <div className="-mt-4 mb-6">
+      <div className="-mt-3 mb-3.5">
         <PasswordChecklist password={form.password} />
         {isPasswordMismatch && <p className="mt-2 text-sm text-red">Passwords do not match.</p>}
       </div>
 
-      <hr className="border-gray-3 dark:border-darkTheme-border-color mb-6" />
+      <hr className="border-gray-3 dark:border-darkTheme-border-color mb-4" />
 
       <h3 className="text-sm font-semibold text-dark dark:text-white mb-4 uppercase tracking-wide">
         Business details
       </h3>
 
-      <div className="mb-5">
+      <div className="mb-3.5">
         <FieldLabel htmlFor="seller-business-name" required>Business Name</FieldLabel>
         <TextInput
           type="text"
@@ -944,7 +944,7 @@ const SellerPanel = ({ onSwitchTab }: { onSwitchTab: (tab: AuthTab) => void }) =
         />
       </div>
 
-      <div className="mb-5">
+      <div className="mb-3.5">
         <FieldLabel htmlFor="seller-categories" required>Business Categories</FieldLabel>
         <div className="rounded-lg border border-gray-3 dark:border-darkTheme-border-color max-h-44 overflow-y-auto p-3 bg-gray-1 dark:bg-darkTheme-secondary-bg">
           {categoriesLoading && (
@@ -996,7 +996,7 @@ const SellerPanel = ({ onSwitchTab }: { onSwitchTab: (tab: AuthTab) => void }) =
         )}
       </div>
 
-      <div className="mb-5">
+      <div className="mb-3.5">
         <FieldLabel htmlFor="seller-business-description" required>Business Description</FieldLabel>
         <TextArea
           id="seller-business-description"
@@ -1008,7 +1008,7 @@ const SellerPanel = ({ onSwitchTab }: { onSwitchTab: (tab: AuthTab) => void }) =
         />
       </div>
 
-      <div className="mb-5">
+      <div className="mb-3.5">
         <FieldLabel htmlFor="seller-product-description" optional>Product Description</FieldLabel>
         <TextArea
           id="seller-product-description"
@@ -1020,7 +1020,7 @@ const SellerPanel = ({ onSwitchTab }: { onSwitchTab: (tab: AuthTab) => void }) =
         />
       </div>
 
-      <div className="grid sm:grid-cols-2 gap-5 mb-5">
+      <div className="grid sm:grid-cols-2 gap-3.5 mb-3.5">
         <div>
           <FieldLabel htmlFor="seller-country" required>Country</FieldLabel>
           <TextInput
@@ -1045,7 +1045,7 @@ const SellerPanel = ({ onSwitchTab }: { onSwitchTab: (tab: AuthTab) => void }) =
         </div>
       </div>
 
-      <div className="grid sm:grid-cols-2 gap-5 mb-5">
+      <div className="grid sm:grid-cols-2 gap-3.5 mb-3.5">
         <div>
           <FieldLabel htmlFor="seller-city" required>City</FieldLabel>
           <TextInput
@@ -1070,7 +1070,7 @@ const SellerPanel = ({ onSwitchTab }: { onSwitchTab: (tab: AuthTab) => void }) =
         </div>
       </div>
 
-      <div className="mb-5">
+      <div className="mb-3.5">
         <FieldLabel htmlFor="seller-address" optional>Business Address</FieldLabel>
         <TextInput
           type="text"
@@ -1082,7 +1082,7 @@ const SellerPanel = ({ onSwitchTab }: { onSwitchTab: (tab: AuthTab) => void }) =
         />
       </div>
 
-      <div className="grid sm:grid-cols-2 gap-5 mb-5">
+      <div className="grid sm:grid-cols-2 gap-3.5 mb-3.5">
         <div>
           <FieldLabel htmlFor="seller-years" optional>Years in Business</FieldLabel>
           <TextInput
@@ -1107,7 +1107,7 @@ const SellerPanel = ({ onSwitchTab }: { onSwitchTab: (tab: AuthTab) => void }) =
         </div>
       </div>
 
-      <hr className="border-gray-3 dark:border-darkTheme-border-color mb-6" />
+      <hr className="border-gray-3 dark:border-darkTheme-border-color mb-4" />
 
       <h3 className="text-sm font-semibold text-dark dark:text-white mb-4 uppercase tracking-wide">
         Business contact
@@ -1115,7 +1115,7 @@ const SellerPanel = ({ onSwitchTab }: { onSwitchTab: (tab: AuthTab) => void }) =
 
       <label
         htmlFor="seller-use-account-contact"
-        className="mb-5 flex cursor-pointer items-center gap-3 rounded-lg border border-gray-3 bg-gray-1 p-3 dark:border-darkTheme-border-color dark:bg-darkTheme-secondary-bg"
+        className="mb-3.5 flex cursor-pointer items-center gap-3 rounded-lg border border-gray-3 bg-gray-1 p-3 dark:border-darkTheme-border-color dark:bg-darkTheme-secondary-bg"
       >
         <input
           id="seller-use-account-contact"
@@ -1130,7 +1130,7 @@ const SellerPanel = ({ onSwitchTab }: { onSwitchTab: (tab: AuthTab) => void }) =
         </span>
       </label>
 
-      <div className="grid sm:grid-cols-2 gap-5 mb-7">
+      <div className="grid sm:grid-cols-2 gap-3.5 mb-4">
         <div>
           <FieldLabel htmlFor="seller-contact-email" required={!useAccountContact} optional={useAccountContact}>Contact Email</FieldLabel>
           <TextInput
@@ -1197,7 +1197,7 @@ const SellerPanel = ({ onSwitchTab }: { onSwitchTab: (tab: AuthTab) => void }) =
       <button
         type="submit"
         disabled={isSubmitting || !form.agreementAccepted}
-        className="w-full flex justify-center font-medium text-white bg-orange py-3 px-6 rounded-lg ease-out duration-200 hover:bg-orange-dark disabled:cursor-not-allowed disabled:opacity-50"
+        className="flex h-11 w-full items-center justify-center rounded-lg bg-orange px-6 text-sm font-semibold text-white ease-out duration-200 hover:bg-orange-dark disabled:cursor-not-allowed disabled:opacity-50"
       >
         {isSubmitting ? "Creating seller account..." : "Create Seller Account"}
       </button>

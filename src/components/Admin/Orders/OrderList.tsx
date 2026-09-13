@@ -1,5 +1,7 @@
 "use client";
 
+
+import { Spinner } from "@/components/ui/Spinner";
 import { useEffect, useMemo, useState } from "react";
 import Link from "next/link";
 import toast from "react-hot-toast";
@@ -355,7 +357,7 @@ export default function OrderList({
       <section className="overflow-hidden rounded-2xl border border-[#e2e8f0] bg-white shadow-sm">
         {loading ? (
           <div className="p-12 text-center text-gray-500">
-            <RefreshCw className="mx-auto animate-spin" size={22} />
+            <Spinner className="mx-auto" />
             <p className="mt-3 text-sm">Loading system orders...</p>
           </div>
         ) : error ? (

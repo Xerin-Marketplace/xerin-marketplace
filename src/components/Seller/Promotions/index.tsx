@@ -1,5 +1,7 @@
 "use client";
 
+
+import { Spinner } from "@/components/ui/Spinner";
 import { useEffect, useMemo, useState } from "react";
 import {
   BadgePercent,
@@ -19,6 +21,7 @@ import {
   Trash2,
   X,
 } from "lucide-react";
+import Pagination from "@/components/ui/Pagination";
 import toast from "react-hot-toast";
 
 import { ApiError } from "@/lib/api/client";
@@ -467,7 +470,7 @@ export default function SellerPromotions() {
 
         {loading ? (
           <div className="p-12 text-center text-sm text-[#64748b]">
-            <RefreshCw size={20} className="mx-auto animate-spin" />
+            <Spinner className="mx-auto" />
             <p className="mt-3">Loading promotions...</p>
           </div>
         ) : (
@@ -640,8 +643,8 @@ export default function SellerPromotions() {
               pageSize={pageSize}
               total={meta.total}
               totalPages={meta.total_pages}
-              onPage={setPage}
-              onPageSize={(size) => {
+              onPageChange={setPage}
+              onPageSizeChange={(size) => {
                 setPageSize(size);
                 setPage(1);
               }}
@@ -668,7 +671,7 @@ export default function SellerPromotions() {
         <div className="fixed inset-0 z-[150] flex items-end justify-center bg-black/60 sm:items-center sm:p-4">
           <div role="dialog" aria-modal="true" aria-labelledby="delete-promotion-title" className="w-full max-w-md rounded-t-2xl bg-white p-5 shadow-2xl dark:bg-[#1f2937] sm:rounded-2xl sm:p-6">
             <div className="flex items-start gap-3"><span className="grid h-11 w-11 shrink-0 place-items-center rounded-xl bg-red-50 text-red-600 dark:bg-red-500/10"><Trash2 size={20} /></span><div><h2 id="delete-promotion-title" className="font-bold text-slate-900 dark:text-white">{deleteTarget.usage_count ? "Deactivate promotion?" : "Delete promotion?"}</h2><p className="mt-1 text-sm leading-6 text-slate-500">{deleteTarget.usage_count ? `“${deleteTarget.name}” has usage history, so it will be safely deactivated and its records preserved.` : `“${deleteTarget.name}” will be permanently deleted. This action cannot be undone.`}</p></div></div>
-            <div className="mt-6 flex flex-col-reverse gap-2 sm:flex-row sm:justify-end"><button type="button" disabled={busy !== null} onClick={() => setDeleteTarget(null)} className="min-h-11 rounded-xl border border-slate-200 px-4 text-sm font-semibold dark:border-white/10">Keep promotion</button><button type="button" disabled={busy !== null} onClick={() => void removePromotion(deleteTarget)} className="inline-flex min-h-11 items-center justify-center gap-2 rounded-xl bg-red-600 px-4 text-sm font-bold text-white disabled:opacity-50">{busy && <RefreshCw className="animate-spin" size={15} />}{deleteTarget.usage_count ? "Deactivate" : "Delete promotion"}</button></div>
+            <div className="mt-6 flex flex-col-reverse gap-2 sm:flex-row sm:justify-end"><button type="button" disabled={busy !== null} onClick={() => setDeleteTarget(null)} className="min-h-11 rounded-xl border border-slate-200 px-4 text-sm font-semibold dark:border-white/10">Keep promotion</button><button type="button" disabled={busy !== null} onClick={() => void removePromotion(deleteTarget)} className="inline-flex min-h-11 items-center justify-center gap-2 rounded-xl bg-red-600 px-4 text-sm font-bold text-white disabled:opacity-50">{busy && <Spinner />}{deleteTarget.usage_count ? "Deactivate" : "Delete promotion"}</button></div>
           </div>
         </div>
       )}
@@ -1013,7 +1016,7 @@ function PromotionEditor({
 
               {productsLoading ? (
                 <div className="py-8 text-center text-sm text-[#64748b]">
-                  <RefreshCw size={18} className="mx-auto animate-spin" />
+                  <Spinner className="mx-auto" />
                   <p className="mt-2">Loading your products...</p>
                 </div>
               ) : (
@@ -1082,7 +1085,7 @@ function PromotionEditor({
             onClick={onSave}
             className="inline-flex items-center justify-center gap-2 rounded-xl bg-[#f7941d] px-5 py-2.5 text-sm font-semibold text-white disabled:opacity-50"
           >
-            {saving && <RefreshCw size={14} className="animate-spin" />}
+            {saving && <Spinner />}
             {saving
               ? "Saving..."
               : editing
@@ -1212,71 +1215,6 @@ function Toggle({
         className="mt-1 h-4 w-4 accent-[#f7941d]"
       />
     </label>
-  );
-}
-
-function Pagination({
-  page,
-  pageSize,
-  total,
-  totalPages,
-  onPage,
-  onPageSize,
-}: {
-  page: number;
-  pageSize: number;
-  total: number;
-  totalPages: number;
-  onPage: (page: number) => void;
-  onPageSize: (size: number) => void;
-}) {
-  const from = total ? (page - 1) * pageSize + 1 : 0;
-  const to = Math.min(page * pageSize, total);
-
-  return (
-    <div className="flex flex-col gap-3 border-t border-[#eef1f5] px-5 py-4 sm:flex-row sm:items-center sm:justify-between dark:border-white/10">
-      <p className="text-sm text-[#64748b] dark:text-white/55">
-        Showing <b>{from}-{to}</b> of <b>{total}</b>
-      </p>
-
-      <div className="flex flex-wrap items-center gap-2">
-        <select
-          value={pageSize}
-          onChange={(event) => onPageSize(Number(event.target.value))}
-          className="h-10 rounded-xl border border-[#e2e8f0] bg-white px-3 text-sm dark:border-white/10 dark:bg-white/5 dark:text-white"
-        >
-          {[10, 20, 50, 100].map((size) => (
-            <option key={size} value={size}>
-              {size} / page
-            </option>
-          ))}
-        </select>
-
-        <button
-          type="button"
-          disabled={page <= 1}
-          onClick={() => onPage(page - 1)}
-          className="inline-flex h-10 items-center gap-1 rounded-xl border border-[#e2e8f0] px-3 text-sm font-semibold disabled:opacity-40 dark:border-white/10"
-        >
-          <ChevronLeft size={14} />
-          Previous
-        </button>
-
-        <span className="min-w-[80px] text-center text-xs text-[#94a3b8]">
-          Page {page} of {Math.max(totalPages, 1)}
-        </span>
-
-        <button
-          type="button"
-          disabled={!totalPages || page >= totalPages}
-          onClick={() => onPage(page + 1)}
-          className="inline-flex h-10 items-center gap-1 rounded-xl border border-[#e2e8f0] px-3 text-sm font-semibold disabled:opacity-40 dark:border-white/10"
-        >
-          Next
-          <ChevronRight size={14} />
-        </button>
-      </div>
-    </div>
   );
 }
 

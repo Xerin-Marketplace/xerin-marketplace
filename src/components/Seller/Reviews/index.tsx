@@ -1,5 +1,7 @@
 "use client";
 
+
+import { Spinner } from "@/components/ui/Spinner";
 import { useEffect, useMemo, useState } from "react";
 import {
   BadgeCheck,
@@ -12,6 +14,7 @@ import {
   Star,
   X,
 } from "lucide-react";
+import Pagination from "@/components/ui/Pagination";
 import toast from "react-hot-toast";
 import { sellerFeedbackApi } from "@/lib/api/endpoints/seller-feedback";
 import type {
@@ -160,7 +163,7 @@ export default function SellerReviews() {
         </div>
 
         {loading ? (
-          <div className="p-14 text-center text-sm text-slate-500"><RefreshCw className="mx-auto animate-spin" size={20}/><p className="mt-2">Loading reviews...</p></div>
+          <div className="p-14 text-center text-sm text-slate-500"><Spinner className="mx-auto" /><p className="mt-2">Loading reviews...</p></div>
         ) : (
           <div className="divide-y divide-slate-100 dark:divide-white/10">
             {visible.map((row)=>(
@@ -197,7 +200,7 @@ export default function SellerReviews() {
           </div>
         )}
 
-        <Pagination page={page} pageSize={pageSize} total={total} totalPages={totalPages} onPage={setPage} onSize={(x)=>{setPageSize(x);setPage(1);}}/>
+        <Pagination page={page} pageSize={pageSize} total={total} totalPages={totalPages} onPageChange={setPage} onPageSizeChange={(x)=>{setPageSize(x);setPage(1);}}/>
       </section>
 
       {replyTarget && <Modal title={replyTarget.seller_reply ? "Edit Seller Response" : "Respond to Review"} onClose={()=>!busy&&setReplyTarget(null)}>
@@ -221,4 +224,3 @@ export default function SellerReviews() {
 function Stars({value}:{value:number}) { return <div className="flex gap-0.5">{[1,2,3,4,5].map(x=><Star key={x} size={15} className={x<=value ? "fill-amber-400 text-amber-400" : "text-slate-300"}/>)}</div>; }
 function Metric({label,value,star=false}:{label:string;value:string;star?:boolean}) { return <div className="rounded-xl border border-slate-200 bg-slate-50 p-4 dark:border-white/10 dark:bg-white/[.03]"><div className="flex items-center gap-2">{star&&<Star size={16} className="fill-amber-400 text-amber-400"/>}<p className="text-xl font-bold dark:text-white">{value}</p></div><p className="mt-1 text-xs text-slate-500">{label}</p></div>; }
 function Modal({title,onClose,children}:{title:string;onClose:()=>void;children:React.ReactNode}) { return <div className="fixed inset-0 z-[130] flex items-center justify-center bg-black/55 p-4"><div className="w-full max-w-xl rounded-2xl bg-white p-5 shadow-2xl dark:bg-[#1f2937]"><div className="mb-4 flex items-center justify-between"><h2 className="text-lg font-bold dark:text-white">{title}</h2><button onClick={onClose} className="rounded-lg border p-2 dark:border-white/10"><X size={15}/></button></div>{children}</div></div>; }
-function Pagination({page,pageSize,total,totalPages,onPage,onSize}:{page:number;pageSize:number;total:number;totalPages:number;onPage:(x:number)=>void;onSize:(x:number)=>void}) { const from=total?(page-1)*pageSize+1:0,to=Math.min(page*pageSize,total); return <div className="flex flex-col gap-3 border-t border-slate-100 px-5 py-4 sm:flex-row sm:items-center sm:justify-between dark:border-white/10"><p className="text-sm text-slate-500">Showing <b>{from}-{to}</b> of <b>{total}</b></p><div className="flex items-center gap-2"><select value={pageSize} onChange={e=>onSize(Number(e.target.value))} className="h-10 rounded-xl border px-3 text-sm dark:border-white/10 dark:bg-white/5">{[10,20,50,100].map(x=><option key={x}>{x}</option>)}</select><button disabled={page<=1} onClick={()=>onPage(page-1)} className="h-10 rounded-xl border px-3 disabled:opacity-40 dark:border-white/10"><ChevronLeft size={14}/></button><span className="text-xs text-slate-400">Page {page} of {Math.max(totalPages,1)}</span><button disabled={!totalPages||page>=totalPages} onClick={()=>onPage(page+1)} className="h-10 rounded-xl border px-3 disabled:opacity-40 dark:border-white/10"><ChevronRight size={14}/></button></div></div>; }

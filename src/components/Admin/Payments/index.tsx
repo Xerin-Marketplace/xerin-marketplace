@@ -1,5 +1,7 @@
 "use client";
 
+
+import { Spinner } from "@/components/ui/Spinner";
 import { useEffect, useState } from "react";
 import {
   AlertTriangle, Banknote, BarChart3, ChevronLeft, ChevronRight,
@@ -8,6 +10,7 @@ import {
   WalletCards,
 } from "lucide-react";
 import CurrencyFxManagement from "./CurrencyFxManagement";
+import Pagination from "@/components/ui/Pagination";
 import SellerPayoutAccounts from "./SellerPayoutAccounts";
 import {
   type AdminPayment,
@@ -132,7 +135,7 @@ export default function AdminPayments({view}:{view:PaymentView}) {
           <select value={status} onChange={e=>{setStatus(e.target.value);setPage(1)}} className="h-11 rounded-xl border border-slate-200 bg-white px-4 text-sm"><option value="all">All statuses</option>{["pending","processing","completed","active","inactive","failed","refunded","resolved","closed"].map(v=><option key={v} value={v}>{pretty(v)}</option>)}</select>
         </div>
         <DataTable view={view} rows={rows} loading={loading} onReview={setSelected} onReviewPayout={setSelectedPayout}/>
-        {!loading&&total>0&&<Pagination page={page} pageSize={pageSize} total={total} totalPages={totalPages} onPage={setPage} onPageSize={s=>{setPageSize(s);setPage(1)}}/>}
+        {!loading&&total>0&&<Pagination page={page} pageSize={pageSize} total={total} totalPages={totalPages} onPageChange={setPage} onPageSizeChange={s=>{setPageSize(s);setPage(1)}}/>}
       </section>}
     </>}
 
@@ -198,11 +201,7 @@ function PendingNotice({title}:{title:string}) {
   return <section className="rounded-2xl border border-amber-200 bg-amber-50 p-5"><div className="flex gap-3"><SlidersHorizontal className="mt-0.5 text-amber-700" size={18}/><div><h3 className="font-bold text-amber-900">{title} frontend is ready</h3><p className="mt-1 text-sm leading-6 text-amber-800">The workspace and API contract are prepared, but this backend endpoint is not available yet. No payment provider, payout, currency or FX value is invented in the frontend. Once the finance backend task creates the real tables/endpoints, this page will display them.</p></div></div></section>;
 }
 
-function Pagination({page,pageSize,total,totalPages,onPage,onPageSize}:{page:number;pageSize:number;total:number;totalPages:number;onPage:(p:number)=>void;onPageSize:(s:number)=>void}) {
-  const from=total?((page-1)*pageSize+1):0,to=Math.min(page*pageSize,total);
-  return <div className="flex flex-col gap-3 border-t px-5 py-4 sm:flex-row sm:items-center sm:justify-between"><p className="text-sm text-slate-500">Showing <b>{from}-{to}</b> of <b>{total}</b></p><div className="flex items-center gap-2"><select value={pageSize} onChange={e=>onPageSize(Number(e.target.value))} className="h-10 rounded-xl border px-3 text-sm">{[10,20,50,100].map(s=><option key={s} value={s}>{s} / page</option>)}</select><button disabled={page<=1} onClick={()=>onPage(page-1)} className="inline-flex h-10 items-center gap-1 rounded-xl border px-3 text-sm font-semibold disabled:opacity-40"><ChevronLeft size={14}/>Previous</button><span className="min-w-24 text-center text-xs text-slate-500">Page {page} of {Math.max(totalPages,1)}</span><button disabled={page>=totalPages||!totalPages} onClick={()=>onPage(page+1)} className="inline-flex h-10 items-center gap-1 rounded-xl border px-3 text-sm font-semibold disabled:opacity-40">Next<ChevronRight size={14}/></button></div></div>;
-}
 function Metric({icon:Icon,label,value}:{icon:any;label:string;value:string|number}) {return <article className="rounded-2xl border border-slate-200 bg-white p-5 shadow-sm"><span className="flex h-9 w-9 items-center justify-center rounded-xl bg-orange-50 text-[#f47524]"><Icon size={17}/></span><p className="mt-4 text-2xl font-bold">{value}</p><p className="mt-1 text-xs text-slate-500">{label}</p></article>}
 function Status({value}:{value:string}) {return <span className="inline-flex rounded-full border border-slate-200 bg-slate-50 px-2.5 py-1 text-xs font-semibold text-slate-700">{pretty(value)}</span>}
-function Loading({text}:{text:string}) {return <div className="p-12 text-center text-sm text-slate-500"><RefreshCw className="mx-auto animate-spin" size={20}/><p className="mt-3">{text}</p></div>}
+function Loading({text}:{text:string}) {return <div className="p-12 text-center text-sm text-slate-500"><Spinner className="mx-auto" /><p className="mt-3">{text}</p></div>}
 function Empty({text}:{text:string}) {return <div className="p-12 text-center"><CreditCard className="mx-auto text-slate-300" size={32}/><p className="mt-3 font-semibold text-slate-700">{text}</p></div>}

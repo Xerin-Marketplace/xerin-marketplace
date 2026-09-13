@@ -1,5 +1,7 @@
 "use client";
 
+
+import { Spinner } from "@/components/ui/Spinner";
 import { ApiError } from "@/lib/api/client";
 import { API_BASE_URL } from "@/lib/api/endpoints";
 import { productsApi } from "@/lib/api/endpoints/products";
@@ -974,10 +976,7 @@ const SellerProducts = () => {
 
           {loading ? (
             <div className="p-16 text-center">
-              <RefreshCw
-                className="mx-auto animate-spin text-[#f7941d]"
-                size={25}
-              />
+              <Spinner className="mx-auto text-[#f7941d]" />
               <p className="mt-3 text-sm text-[#64748b]">Loading products...</p>
             </div>
           ) : error ? (
@@ -1426,7 +1425,7 @@ const SellerProducts = () => {
                   {!form.category_id ? (
                     <p className="rounded-xl border border-dashed p-4 text-sm text-[#64748b]">Select a product category first. Its specification fields will appear automatically.</p>
                   ) : specificationsLoading ? (
-                    <p className="flex items-center gap-2 text-sm text-[#64748b]"><RefreshCw size={14} className="animate-spin"/> Loading category specifications...</p>
+                    <p className="flex items-center gap-2 text-sm text-[#64748b]"><Spinner /> Loading category specifications...</p>
                   ) : categoryAttributes.length === 0 ? (
                     <p className="rounded-xl border border-dashed p-4 text-sm text-[#64748b]">No extra specifications have been configured for this category yet.</p>
                   ) : (
@@ -1494,7 +1493,7 @@ const SellerProducts = () => {
 
                   {imagesLoading && (
                     <p className="mt-3 inline-flex items-center gap-2 text-sm text-[#64748b]">
-                      <RefreshCw size={14} className="animate-spin" />
+                      <Spinner />
                       Loading stored product images...
                     </p>
                   )}
@@ -1803,7 +1802,7 @@ const SellerProducts = () => {
 
                         {pricingPreviewLoading ? (
                           <div className="mt-4 flex items-center gap-2 text-sm text-[#64748b]">
-                            <RefreshCw size={15} className="animate-spin" />
+                            <Spinner />
                             Calculating customer price...
                           </div>
                         ) : pricingPreview ? (

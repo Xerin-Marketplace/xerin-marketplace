@@ -1,5 +1,7 @@
 "use client";
 
+
+import { Spinner } from "@/components/ui/Spinner";
 import Link from "next/link";
 import { useEffect, useMemo, useState } from "react";
 import {
@@ -531,7 +533,7 @@ export default function SellerOrderDetail({ orderId }: { orderId: string }) {
   if (loading) {
     return (
       <div className="p-14 text-center text-slate-500">
-        <RefreshCw className="mx-auto animate-spin" />
+        <Spinner className="mx-auto" />
         <p className="mt-2">Loading order...</p>
       </div>
     );
@@ -764,7 +766,7 @@ export default function SellerOrderDetail({ orderId }: { orderId: string }) {
                 <h2 className="flex items-center gap-2 font-bold dark:text-white"><PackageCheck size={18} />Fulfillment readiness</h2>
                 <p className="mt-1 text-xs leading-5 text-slate-400">Every blocking requirement must pass before Ready to Ship is accepted.</p>
               </div>
-              <button type="button" onClick={() => void loadReadiness()} disabled={readinessLoading} className="inline-flex min-h-11 items-center justify-center gap-2 rounded-xl border px-4 text-xs font-semibold dark:border-white/10"><RefreshCw size={14} className={readinessLoading ? "animate-spin" : ""} />Refresh checks</button>
+              <button type="button" onClick={() => void loadReadiness()} disabled={readinessLoading} className="inline-flex min-h-11 items-center justify-center gap-2 rounded-xl border px-4 text-xs font-semibold dark:border-white/10">{readinessLoading ? <Spinner /> : <RefreshCw size={14} />}Refresh checks</button>
             </div>
 
             {readinessLoading ? <div className="mt-4 grid gap-2 sm:grid-cols-2">{Array.from({ length: 6 }).map((_, index) => <div key={index} className="h-16 animate-pulse rounded-xl bg-slate-100 dark:bg-white/5" />)}</div> : readinessError ? <div className="mt-4 rounded-xl border border-red-200 bg-red-50 p-4 text-sm text-red-700"><b>Readiness check unavailable.</b><p className="mt-1 break-words text-xs">{readinessError}</p></div> : readiness ? <>
@@ -812,7 +814,7 @@ export default function SellerOrderDetail({ orderId }: { orderId: string }) {
             <div className="p-5 sm:p-6">
             {packageLoading ? (
               <div className="mt-5 rounded-xl border border-dashed p-7 text-center text-sm text-slate-500 dark:border-white/10">
-                <RefreshCw size={18} className="mx-auto animate-spin" />
+                <Spinner className="mx-auto" />
                 <p className="mt-2">Loading package information...</p>
               </div>
             ) : packageInfo ? (
@@ -1050,7 +1052,7 @@ export default function SellerOrderDetail({ orderId }: { orderId: string }) {
                   disabled={handoverLoading}
                   className="inline-flex items-center gap-2 rounded-xl border px-3 py-2 text-xs font-semibold text-slate-600 disabled:opacity-50 dark:border-white/10 dark:text-white/70"
                 >
-                  <RefreshCw size={13} className={handoverLoading ? "animate-spin" : ""} />
+                  {handoverLoading ? <Spinner /> : <RefreshCw size={13} />}
                   Refresh handover
                 </button>
               </div>
@@ -1102,7 +1104,7 @@ export default function SellerOrderDetail({ orderId }: { orderId: string }) {
                     disabled={confirmingHandover}
                     className="inline-flex items-center gap-2 rounded-xl bg-orange-500 px-4 py-2.5 text-sm font-bold text-black shadow-sm transition hover:bg-orange-600 disabled:cursor-not-allowed disabled:opacity-60"
                   >
-                    {confirmingHandover ? <RefreshCw size={16} className="animate-spin" /> : <PackageCheck size={16} />}
+                    {confirmingHandover ? <Spinner /> : <PackageCheck size={16} />}
                     {confirmingHandover ? "Confirming..." : "Confirm Product Handover"}
                   </button>
                 </div>
@@ -1143,10 +1145,7 @@ export default function SellerOrderDetail({ orderId }: { orderId: string }) {
                 disabled={messagesLoading}
                 className="inline-flex items-center gap-2 rounded-xl border px-3 py-2 text-xs font-semibold text-slate-600 disabled:opacity-50 dark:border-white/10 dark:text-white/60"
               >
-                <RefreshCw
-                  size={13}
-                  className={messagesLoading ? "animate-spin" : ""}
-                />
+                {messagesLoading ? <Spinner /> : <RefreshCw size={13} />}
                 Refresh
               </button>
             </div>
@@ -1154,7 +1153,7 @@ export default function SellerOrderDetail({ orderId }: { orderId: string }) {
             <div className="max-h-[430px] overflow-y-auto bg-slate-50/60 p-4 dark:bg-white/[0.025]">
               {messagesLoading ? (
                 <div className="py-10 text-center text-sm text-slate-500">
-                  <RefreshCw size={18} className="mx-auto animate-spin" />
+                  <Spinner className="mx-auto" />
                   <p className="mt-2">Loading order messages...</p>
                 </div>
               ) : orderedMessages.length ? (
@@ -1247,7 +1246,7 @@ export default function SellerOrderDetail({ orderId }: { orderId: string }) {
                   className="inline-flex items-center gap-2 rounded-xl bg-[#f7941d] px-5 py-2.5 text-sm font-semibold text-white disabled:opacity-50"
                 >
                   {sendingMessage ? (
-                    <RefreshCw size={15} className="animate-spin" />
+                    <Spinner />
                   ) : (
                     <Send size={15} />
                   )}
@@ -1585,7 +1584,7 @@ export default function SellerOrderDetail({ orderId }: { orderId: string }) {
                     }`}
                   >
                     {packageEvidenceUploading ? (
-                      <RefreshCw size={26} className="animate-spin text-[#f7941d]" />
+                      <Spinner className="text-[#f7941d]" />
                     ) : (
                       <ImageIcon size={28} className="text-[#f7941d]" />
                     )}
@@ -1718,7 +1717,7 @@ export default function SellerOrderDetail({ orderId }: { orderId: string }) {
                 className="inline-flex items-center justify-center gap-2 rounded-xl bg-[#f7941d] px-5 py-2.5 text-sm font-semibold text-white disabled:opacity-50"
               >
                 {packageSaving && (
-                  <RefreshCw size={14} className="animate-spin" />
+                  <Spinner />
                 )}
                 {packageSaving
                   ? "Saving..."

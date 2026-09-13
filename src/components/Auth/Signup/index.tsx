@@ -238,7 +238,7 @@ const Signup = () => {
 
           <div className="mt-4 sm:mt-5.5">
             <form onSubmit={handleSubmit}>
-              <div className="mb-4 sm:mb-5">
+              <div className="mb-3.5">
                 <label htmlFor="name" className="mb-2 block text-sm font-medium dark:text-darkTheme-body-color">
                   Full Name <span className="text-red">*</span>
                 </label>
@@ -252,11 +252,11 @@ const Signup = () => {
                   onChange={(event) => setFullName(event.target.value)}
                   autoComplete="name"
                   disabled={isSubmitting}
-                  className="h-12 w-full rounded-xl border border-gray-3 bg-gray-1 px-4 text-base outline-none duration-200 placeholder:text-dark-4 focus:border-transparent focus:ring-2 focus:ring-orange/25 disabled:cursor-not-allowed disabled:opacity-70 dark:border-darkTheme-border-color dark:bg-darkTheme-secondary-bg dark:text-darkTheme-body-color dark:placeholder:text-darkTheme-secondary-muted sm:text-sm"
+                  className="h-11 w-full rounded-lg border border-gray-3 bg-gray-1 px-3.5 text-sm outline-none duration-200 placeholder:text-dark-4 focus:border-transparent focus:ring-2 focus:ring-orange/30 disabled:cursor-not-allowed disabled:opacity-70 dark:border-darkTheme-border-color dark:bg-darkTheme-secondary-bg dark:text-darkTheme-body-color dark:placeholder:text-darkTheme-secondary-muted"
                 />
               </div>
 
-              <div className="mb-4 sm:mb-5">
+              <div className="mb-3.5">
                 <label htmlFor="email" className="mb-2 block text-sm font-medium dark:text-darkTheme-body-color">
                   Email Address <span className="text-red">*</span>
                 </label>
@@ -270,24 +270,24 @@ const Signup = () => {
                   onChange={(event) => setEmail(event.target.value)}
                   autoComplete="email"
                   disabled={isSubmitting}
-                  className="h-12 w-full rounded-xl border border-gray-3 bg-gray-1 px-4 text-base outline-none duration-200 placeholder:text-dark-4 focus:border-transparent focus:ring-2 focus:ring-orange/25 disabled:cursor-not-allowed disabled:opacity-70 dark:border-darkTheme-border-color dark:bg-darkTheme-secondary-bg dark:text-darkTheme-body-color dark:placeholder:text-darkTheme-secondary-muted sm:text-sm"
+                  className="h-11 w-full rounded-lg border border-gray-3 bg-gray-1 px-3.5 text-sm outline-none duration-200 placeholder:text-dark-4 focus:border-transparent focus:ring-2 focus:ring-orange/30 disabled:cursor-not-allowed disabled:opacity-70 dark:border-darkTheme-border-color dark:bg-darkTheme-secondary-bg dark:text-darkTheme-body-color dark:placeholder:text-darkTheme-secondary-muted"
                 />
               </div>
 
-              <div className="mb-4 sm:mb-5">
+              <div className="mb-3.5">
                 <label htmlFor="phone" className="mb-2 block text-sm font-medium dark:text-darkTheme-body-color">
                   Phone Number{" "}
                   <span className="text-dark-4 dark:text-darkTheme-secondary-muted">(optional)</span>
                 </label>
 
                 <div
-                  className={`flex h-12 items-stretch overflow-hidden rounded-xl border bg-gray-1 focus-within:ring-2 focus-within:ring-orange/25 dark:bg-darkTheme-secondary-bg ${
+                  className={`flex h-11 items-stretch overflow-hidden rounded-lg border bg-gray-1 focus-within:ring-2 focus-within:ring-orange/30 dark:bg-darkTheme-secondary-bg ${
                     phone && !isPhoneValid
                       ? "border-red"
                       : "border-gray-3 dark:border-darkTheme-border-color"
                   }`}
                 >
-                  <span className="flex shrink-0 items-center gap-1 border-r border-gray-3 bg-gray-2 px-3 text-sm font-medium text-dark-4 select-none dark:border-darkTheme-border-color dark:bg-darkTheme-bg dark:text-darkTheme-secondary-muted sm:px-4">
+                  <span className="flex shrink-0 items-center gap-1 border-r border-gray-3 bg-gray-2 px-3 text-sm font-medium text-dark-4 select-none dark:border-darkTheme-border-color dark:bg-darkTheme-bg dark:text-darkTheme-secondary-muted">
                     🇹🇿 +{COUNTRY_CODE}
                   </span>
 
@@ -302,7 +302,7 @@ const Signup = () => {
                     autoComplete="tel-national"
                     disabled={isSubmitting}
                     aria-invalid={phone ? !isPhoneValid : false}
-                    className="min-w-0 flex-1 bg-transparent px-3 text-base outline-none placeholder:text-dark-4 disabled:cursor-not-allowed disabled:opacity-70 dark:text-darkTheme-body-color dark:placeholder:text-darkTheme-secondary-muted sm:px-4 sm:text-sm"
+                    className="min-w-0 flex-1 bg-transparent px-3.5 text-sm outline-none placeholder:text-dark-4 disabled:cursor-not-allowed disabled:opacity-70 dark:text-darkTheme-body-color dark:placeholder:text-darkTheme-secondary-muted"
                   />
                 </div>
 
@@ -313,7 +313,7 @@ const Signup = () => {
                 )}
               </div>
 
-              <div className="mb-4 sm:mb-5">
+              <div className="mb-3.5">
                 <label htmlFor="password" className="mb-2 block text-sm font-medium dark:text-darkTheme-body-color">
                   Password <span className="text-red">*</span>
                 </label>
@@ -328,7 +328,7 @@ const Signup = () => {
                     onChange={(event) => setPassword(event.target.value)}
                     autoComplete="new-password"
                     disabled={isSubmitting}
-                    className="h-12 w-full rounded-xl border border-gray-3 bg-gray-1 pl-4 pr-12 text-base outline-none duration-200 placeholder:text-dark-4 focus:border-transparent focus:ring-2 focus:ring-orange/25 disabled:cursor-not-allowed disabled:opacity-70 dark:border-darkTheme-border-color dark:bg-darkTheme-secondary-bg dark:text-darkTheme-body-color dark:placeholder:text-darkTheme-secondary-muted sm:text-sm"
+                    className="h-11 w-full rounded-lg border border-gray-3 bg-gray-1 pl-3.5 pr-10 text-sm outline-none duration-200 placeholder:text-dark-4 focus:border-transparent focus:ring-2 focus:ring-orange/30 disabled:cursor-not-allowed disabled:opacity-70 dark:border-darkTheme-border-color dark:bg-darkTheme-secondary-bg dark:text-darkTheme-body-color dark:placeholder:text-darkTheme-secondary-muted"
                   />
 
                   <button
@@ -370,7 +370,7 @@ const Signup = () => {
                 )}
               </div>
 
-              <div className="mb-4 sm:mb-5.5">
+              <div className="mb-3.5">
                 <label
                   htmlFor="re-type-password"
                   className="mb-2 block text-sm font-medium dark:text-darkTheme-body-color"
@@ -389,7 +389,7 @@ const Signup = () => {
                     autoComplete="new-password"
                     disabled={isSubmitting}
                     aria-invalid={isPasswordMismatch}
-                    className="h-12 w-full rounded-xl border border-gray-3 bg-gray-1 pl-4 pr-12 text-base outline-none duration-200 placeholder:text-dark-4 focus:border-transparent focus:ring-2 focus:ring-orange/25 disabled:cursor-not-allowed disabled:opacity-70 dark:border-darkTheme-border-color dark:bg-darkTheme-secondary-bg dark:text-darkTheme-body-color dark:placeholder:text-darkTheme-secondary-muted sm:text-sm"
+                    className="h-11 w-full rounded-lg border border-gray-3 bg-gray-1 pl-3.5 pr-10 text-sm outline-none duration-200 placeholder:text-dark-4 focus:border-transparent focus:ring-2 focus:ring-orange/30 disabled:cursor-not-allowed disabled:opacity-70 dark:border-darkTheme-border-color dark:bg-darkTheme-secondary-bg dark:text-darkTheme-body-color dark:placeholder:text-darkTheme-secondary-muted"
                   />
 
                   <button
@@ -411,7 +411,7 @@ const Signup = () => {
               <button
                 type="submit"
                 disabled={isSubmitting}
-                className="mt-6 flex h-12 w-full items-center justify-center rounded-xl bg-orange px-6 text-base font-semibold text-white shadow-sm duration-200 hover:bg-orange-dark disabled:cursor-not-allowed disabled:opacity-70 sm:mt-7.5 sm:text-sm"
+                className="mt-2 flex h-11 w-full items-center justify-center rounded-lg bg-orange px-6 text-sm font-semibold text-white shadow-sm duration-200 hover:bg-orange-dark disabled:cursor-not-allowed disabled:opacity-70"
               >
                 {isSubmitting ? "Creating account..." : "Create Account"}
               </button>

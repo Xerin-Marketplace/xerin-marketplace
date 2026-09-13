@@ -1,5 +1,7 @@
 "use client";
 
+
+import { Spinner } from "@/components/ui/Spinner";
 import {
   sellerInventoryApi,
   type SellerInventoryItem,
@@ -246,7 +248,7 @@ export default function SellerInventoryPage() {
 
           {loading ? (
             <div className="p-14 text-center text-[#64748b]">
-              <RefreshCw className="mx-auto animate-spin" size={20} />
+              <Spinner className="mx-auto" />
               <p className="mt-3">Loading inventory...</p>
             </div>
           ) : error ? (

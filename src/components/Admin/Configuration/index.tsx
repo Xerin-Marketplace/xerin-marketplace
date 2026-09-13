@@ -1,7 +1,10 @@
 "use client";
 
+
+import { Spinner } from "@/components/ui/Spinner";
 import { useEffect, useMemo, useState } from "react";
 import toast from "react-hot-toast";
+import Pagination from "@/components/ui/Pagination";
 import {
   Banknote,
   Building2,
@@ -507,7 +510,7 @@ function CommissionRules() {
                 </tbody>
               </table>
             </div>
-            <Pagination page={page} pageSize={pageSize} total={meta.total} totalPages={meta.total_pages} setPage={setPage} setPageSize={setPageSize} />
+            <Pagination page={page} pageSize={pageSize} total={meta.total} totalPages={meta.total_pages} onPageChange={setPage} onPageSizeChange={setPageSize} />
           </>
         )}
       </TableCard>
@@ -611,7 +614,7 @@ function LogisticsCompanies() {
         <Toggle label="Supports COD" checked={form.supports_cod} onChange={(v) => setForm((x) => ({...x, supports_cod:v}))} />
         <Toggle label="Supports Tracking" checked={form.supports_tracking} onChange={(v) => setForm((x) => ({...x, supports_tracking:v}))} />
         <Toggle label="Webhook Integration" checked={form.supports_webhooks} onChange={(v) => setForm((x) => ({...x, supports_webhooks:v}))} />
-        <button disabled={creating} onClick={() => void create()} className="inline-flex w-full items-center justify-center gap-2 rounded-xl bg-[#f47524] py-3 text-sm font-semibold text-white disabled:cursor-not-allowed disabled:opacity-60">{creating && <RefreshCw className="animate-spin" size={16}/>} {creating ? "Creating company…" : "Create Company & Administrator"}</button>
+        <button disabled={creating} onClick={() => void create()} className="inline-flex w-full items-center justify-center gap-2 rounded-xl bg-[#f47524] py-3 text-sm font-semibold text-white disabled:cursor-not-allowed disabled:opacity-60">{creating && <Spinner />} {creating ? "Creating company…" : "Create Company & Administrator"}</button>
       </Card>
 
       <TableCard title="Registered logistics companies" search={search} setSearch={(v) => {setSearch(v);setPage(1);}}>
@@ -642,7 +645,7 @@ function LogisticsCompanies() {
               </tbody>
             </table>
           </div>
-          <Pagination page={page} pageSize={pageSize} total={meta.total} totalPages={meta.total_pages} setPage={setPage} setPageSize={setPageSize}/>
+          <Pagination page={page} pageSize={pageSize} total={meta.total} totalPages={meta.total_pages} onPageChange={setPage} onPageSizeChange={setPageSize}/>
         </>}
       </TableCard>
     </section>
@@ -690,7 +693,7 @@ function LogisticsServices() {
     </Card>
     <TableCard title="Delivery services" search={search} setSearch={(v)=>{setSearch(v);setPage(1);}}>
       <div className="overflow-x-auto"><table className="w-full min-w-[850px] text-left text-sm"><TableHead headers={["Service","Company","Scope","ETA","COD","Tracking","Action"]}/><tbody className="divide-y">{rows.map(r=><tr key={r.id}><td className="px-5 py-4"><b>{r.name}</b><p className="text-xs text-slate-400">{r.service_code||"—"}</p></td><td className="px-5 py-4">{companies.find(c=>c.id===r.logistics_company_id)?.name||r.carrier_name||"—"}</td><td className="px-5 py-4">{pretty(r.scope)}</td><td className="px-5 py-4">{r.min_delivery_days}-{r.max_delivery_days} days</td><td className="px-5 py-4">{r.supports_cod?"Yes":"No"}</td><td className="px-5 py-4">{r.supports_tracking?"Yes":"No"}</td><td className="px-5 py-4"><button className="text-xs font-semibold text-red-600" onClick={async()=>{await deactivateLogisticsService(r.id);await load();}}>Deactivate</button></td></tr>)}{!rows.length&&<EmptyRow colSpan={7} text="No delivery services found."/>}</tbody></table></div>
-      <Pagination page={page} pageSize={pageSize} total={meta.total} totalPages={meta.total_pages} setPage={setPage} setPageSize={setPageSize}/>
+      <Pagination page={page} pageSize={pageSize} total={meta.total} totalPages={meta.total_pages} onPageChange={setPage} onPageSizeChange={setPageSize}/>
     </TableCard>
   </section>;
 }
@@ -712,7 +715,7 @@ function LogisticsZones() {
     <button className="w-full rounded-xl bg-[#f47524] py-3 text-sm font-semibold text-white" onClick={async()=>{try{await createLogisticsZone({name:form.name,country:form.country,scope:form.scope,regions:split(form.regions),cities:split(form.cities),is_active:true});toast.success("Zone created.");await load();}catch(e){toast.error(errorMessage(e));}}}>Create Zone</button>
   </Card><TableCard title="Shipping zones" search={search} setSearch={v=>{setSearch(v);setPage(1);}}>
     <div className="overflow-x-auto"><table className="w-full min-w-[850px] text-left text-sm"><TableHead headers={["Zone","Country","Scope","Regions","Cities","Status","Action"]}/><tbody className="divide-y">{rows.map(r=><tr key={r.id}><td className="px-5 py-4 font-semibold">{r.name}</td><td className="px-5 py-4">{r.country}</td><td className="px-5 py-4">{pretty(r.scope)}</td><td className="px-5 py-4">{r.regions.join(", ")||"All"}</td><td className="px-5 py-4">{r.cities.join(", ")||"All"}</td><td className="px-5 py-4"><Status value={r.is_active?"active":"inactive"}/></td><td className="px-5 py-4"><button className="text-xs font-semibold text-red-600" onClick={async()=>{await deactivateLogisticsZone(r.id);await load();}}>Deactivate</button></td></tr>)}{!rows.length&&<EmptyRow colSpan={7} text="No shipping zones found."/>}</tbody></table></div>
-    <Pagination page={page} pageSize={pageSize} total={meta.total} totalPages={meta.total_pages} setPage={setPage} setPageSize={setPageSize}/>
+    <Pagination page={page} pageSize={pageSize} total={meta.total} totalPages={meta.total_pages} onPageChange={setPage} onPageSizeChange={setPageSize}/>
   </TableCard></section>;
 }
 
@@ -735,7 +738,7 @@ function LogisticsRates() {
     <button className="w-full rounded-xl bg-[#f47524] py-3 text-sm font-semibold text-white" onClick={async()=>{try{await createLogisticsRate({zone_id:form.zone_id,method_id:form.method_id,rate_type:form.rate_type,currency:form.currency,base_amount:form.base_amount,amount_per_kg:form.amount_per_kg,free_shipping_threshold:form.free_shipping_threshold?Number(form.free_shipping_threshold):null,is_active:true});toast.success("Shipping rate created.");await load();}catch(e){toast.error(errorMessage(e));}}}>Create Rate</button>
   </Card><TableCard title="Shipping rates" search={search} setSearch={v=>{setSearch(v);setPage(1);}}>
     <div className="overflow-x-auto"><table className="w-full min-w-[900px] text-left text-sm"><TableHead headers={["Provider / Service","Zone","Type","Base","Per KG","Currency","Action"]}/><tbody className="divide-y">{rows.map(r=><tr key={r.id}><td className="px-5 py-4"><b>{r.method.name}</b><p className="text-xs text-slate-400">{companies.find(c=>c.id===r.method.logistics_company_id)?.name||r.method.carrier_name||"—"}</p></td><td className="px-5 py-4">{r.zone.name}</td><td className="px-5 py-4">{pretty(r.rate_type)}</td><td className="px-5 py-4 font-semibold">{r.base_amount.toLocaleString()}</td><td className="px-5 py-4">{r.amount_per_kg.toLocaleString()}</td><td className="px-5 py-4">{r.currency}</td><td className="px-5 py-4"><button className="text-xs font-semibold text-red-600" onClick={async()=>{await deactivateLogisticsRate(r.id);await load();}}>Deactivate</button></td></tr>)}{!rows.length&&<EmptyRow colSpan={7} text="No shipping rates found."/>}</tbody></table></div>
-    <Pagination page={page} pageSize={pageSize} total={meta.total} totalPages={meta.total_pages} setPage={setPage} setPageSize={setPageSize}/>
+    <Pagination page={page} pageSize={pageSize} total={meta.total} totalPages={meta.total_pages} onPageChange={setPage} onPageSizeChange={setPageSize}/>
   </TableCard></section>;
 }
 
@@ -791,7 +794,7 @@ function EscrowHolds() {
   const resolve=async(claim:AdminSettlementProtectionClaim,action:"release_seller"|"keep_held"|"reject_claim")=>{const responsibility=(prompt("Responsibility: seller, logistics, customer, platform, or shared",claim.likely_responsibility||"seller")||"").trim() as "seller"|"logistics"|"customer"|"platform"|"shared";if(!["seller","logistics","customer","platform","shared"].includes(responsibility))return toast.error("Enter a valid responsibility.");const note=prompt("Resolution note:")?.trim();if(!note)return;try{await resolveProtectionClaim(claim.id,{responsibility,action,note});toast.success("Protection claim updated.");await load();}catch(e){toast.error(errorMessage(e));}};
   return <div className="space-y-5">
     <TableCard title="Escrow ledger" search={search} setSearch={v=>{setSearch(v);setPage(1);}} filter={<select className={inputClass} value={status} onChange={e=>{setStatus(e.target.value);setPage(1);}}><option value="all">All statuses</option><option value="held">Held</option><option value="release_pending">Release pending</option><option value="disputed">Disputed</option><option value="released">Released</option><option value="refunded">Refunded</option></select>}>
-      {loading?<Loading label="Loading escrow holds..."/>:<><div className="overflow-x-auto"><table className="w-full min-w-[1000px] text-left text-sm"><TableHead headers={["Reference","Order","Seller","Gross","Seller","Commission","Released","Status","Actions"]}/><tbody className="divide-y">{rows.map(r=><tr key={r.id}><td className="px-5 py-4 font-mono text-xs">{r.reference}</td><td className="px-5 py-4 font-mono text-xs">{r.order_id.slice(0,8)}…</td><td className="px-5 py-4 font-mono text-xs">{r.seller_id?r.seller_id.slice(0,8)+"…":"—"}</td><td className="px-5 py-4 font-semibold">{r.gross_amount.toLocaleString()} {r.currency}</td><td className="px-5 py-4">{r.seller_amount.toLocaleString()}</td><td className="px-5 py-4">{r.commission_amount.toLocaleString()}</td><td className="px-5 py-4">{r.released_amount.toLocaleString()}</td><td className="px-5 py-4"><Status value={r.status}/>{r.release_after&&<p className="mt-1 text-[10px] text-slate-400">Auto {new Date(r.release_after).toLocaleString()}</p>}</td><td className="px-5 py-4"><div className="flex gap-2">{["held","release_pending"].includes(r.status)&&<><button className="text-xs font-semibold text-emerald-700" onClick={async()=>{const amountText=prompt("Release amount (leave empty for full remaining amount):");const note=prompt("Release note (optional):")||undefined;try{await releaseEscrowHold(r.id,amountText?Number(amountText):undefined,note);toast.success("Escrow release recorded.");await load();}catch(e){toast.error(errorMessage(e));}}}>Release</button><button className="text-xs font-semibold text-red-600" onClick={async()=>{const note=prompt("Dispute reason:");if(!note)return;try{await disputeEscrowHold(r.id,note);toast.success("Escrow marked disputed.");await load();}catch(e){toast.error(errorMessage(e));}}}>Dispute</button></>}</div></td></tr>)}{!rows.length&&<EmptyRow colSpan={9} text="No escrow holds found yet."/>}</tbody></table></div><Pagination page={page} pageSize={pageSize} total={meta.total} totalPages={meta.total_pages} setPage={setPage} setPageSize={setPageSize}/></>}
+      {loading?<Loading label="Loading escrow holds..."/>:<><div className="overflow-x-auto"><table className="w-full min-w-[1000px] text-left text-sm"><TableHead headers={["Reference","Order","Seller","Gross","Seller","Commission","Released","Status","Actions"]}/><tbody className="divide-y">{rows.map(r=><tr key={r.id}><td className="px-5 py-4 font-mono text-xs">{r.reference}</td><td className="px-5 py-4 font-mono text-xs">{r.order_id.slice(0,8)}…</td><td className="px-5 py-4 font-mono text-xs">{r.seller_id?r.seller_id.slice(0,8)+"…":"—"}</td><td className="px-5 py-4 font-semibold">{r.gross_amount.toLocaleString()} {r.currency}</td><td className="px-5 py-4">{r.seller_amount.toLocaleString()}</td><td className="px-5 py-4">{r.commission_amount.toLocaleString()}</td><td className="px-5 py-4">{r.released_amount.toLocaleString()}</td><td className="px-5 py-4"><Status value={r.status}/>{r.release_after&&<p className="mt-1 text-[10px] text-slate-400">Auto {new Date(r.release_after).toLocaleString()}</p>}</td><td className="px-5 py-4"><div className="flex gap-2">{["held","release_pending"].includes(r.status)&&<><button className="text-xs font-semibold text-emerald-700" onClick={async()=>{const amountText=prompt("Release amount (leave empty for full remaining amount):");const note=prompt("Release note (optional):")||undefined;try{await releaseEscrowHold(r.id,amountText?Number(amountText):undefined,note);toast.success("Escrow release recorded.");await load();}catch(e){toast.error(errorMessage(e));}}}>Release</button><button className="text-xs font-semibold text-red-600" onClick={async()=>{const note=prompt("Dispute reason:");if(!note)return;try{await disputeEscrowHold(r.id,note);toast.success("Escrow marked disputed.");await load();}catch(e){toast.error(errorMessage(e));}}}>Dispute</button></>}</div></td></tr>)}{!rows.length&&<EmptyRow colSpan={9} text="No escrow holds found yet."/>}</tbody></table></div><Pagination page={page} pageSize={pageSize} total={meta.total} totalPages={meta.total_pages} onPageChange={setPage} onPageSizeChange={setPageSize}/></>}
     </TableCard>
 
     <section className="overflow-hidden rounded-2xl border border-slate-200 bg-white shadow-sm">
@@ -811,5 +814,4 @@ function TableCard({title,search,setSearch,filter,children}:{title:string;search
 function TableHead({headers}:{headers:string[]}){return <thead className="bg-slate-50 text-[11px] font-bold uppercase tracking-wide text-slate-500"><tr>{headers.map(h=><th key={h} className="px-5 py-3.5">{h}</th>)}</tr></thead>}
 function EmptyRow({colSpan,text}:{colSpan:number;text:string}){return <tr><td colSpan={colSpan} className="px-5 py-10 text-center text-sm text-slate-500">{text}</td></tr>}
 function Status({value}:{value:string}){const green=["active","released","completed","verified"].includes(value.toLowerCase());const red=["inactive","suspended","disputed","rejected","failed"].includes(value.toLowerCase());return <span className={`inline-flex rounded-full border px-2.5 py-1 text-[11px] font-semibold ${green?"border-emerald-200 bg-emerald-50 text-emerald-700":red?"border-red-200 bg-red-50 text-red-700":"border-amber-200 bg-amber-50 text-amber-700"}`}>{pretty(value)}</span>}
-function Loading({label}:{label:string}){return <div className="p-12 text-center text-sm text-slate-500"><RefreshCw size={20} className="mx-auto animate-spin"/><p className="mt-3">{label}</p></div>}
-function Pagination({page,pageSize,total,totalPages,setPage,setPageSize}:{page:number;pageSize:number;total:number;totalPages:number;setPage:(p:number)=>void;setPageSize:(s:number)=>void}){const from=total?(page-1)*pageSize+1:0;const to=Math.min(page*pageSize,total);return <div className="flex flex-col gap-3 border-t border-slate-100 px-5 py-4 sm:flex-row sm:items-center sm:justify-between"><p className="text-sm text-slate-500">Showing <b>{from}-{to}</b> of <b>{total}</b></p><div className="flex items-center gap-2"><select className="h-10 rounded-xl border border-slate-200 px-3 text-sm" value={pageSize} onChange={e=>{setPageSize(Number(e.target.value));setPage(1)}}>{[10,20,50,100].map(s=><option key={s} value={s}>{s} / page</option>)}</select><button disabled={page<=1} onClick={()=>setPage(page-1)} className="inline-flex h-10 items-center gap-1 rounded-xl border border-slate-200 px-3 text-sm font-semibold disabled:opacity-40"><ChevronLeft size={14}/>Previous</button><span className="min-w-20 text-center text-xs text-slate-500">Page {page} of {Math.max(1,totalPages)}</span><button disabled={page>=totalPages||!totalPages} onClick={()=>setPage(page+1)} className="inline-flex h-10 items-center gap-1 rounded-xl border border-slate-200 px-3 text-sm font-semibold disabled:opacity-40">Next<ChevronRight size={14}/></button></div></div>}
+function Loading({label}:{label:string}){return <div className="p-12 text-center text-sm text-slate-500"><Spinner className="mx-auto" /><p className="mt-3">{label}</p></div>}

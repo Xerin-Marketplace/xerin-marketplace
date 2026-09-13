@@ -1,5 +1,7 @@
 "use client";
 
+
+import { Spinner } from "@/components/ui/Spinner";
 import { operationsCommandApi } from "@/lib/api/endpoints/operations-command";
 import type { ActivityLog, OperationsException, OperationsOverview, SupportTicketSummary, SystemAlert } from "@/types/api/operations-command";
 import { Activity, AlertTriangle, BellRing, Download, FileBarChart, Headphones, RefreshCw, ShieldAlert, Truck } from "lucide-react";
@@ -35,7 +37,7 @@ export default function OperationsCommandCenter() {
 <div className="grid grid-cols-2 gap-2">
 <button onClick={() => void act("notifications", operationsCommandApi.processNotifications)} disabled={busy === "notifications"} className="min-h-11 rounded-xl border border-slate-300 px-3 text-xs font-bold disabled:opacity-50 dark:border-slate-600">Process notifications</button>
 <button onClick={() => void load()} disabled={loading} className="inline-flex min-h-11 items-center justify-center gap-2 rounded-xl bg-slate-900 px-3 text-xs font-bold text-white disabled:opacity-60 dark:bg-red-600">
-<RefreshCw size={16} className={loading ? "animate-spin" : ""} />Refresh</button>
+{loading ? <Spinner /> : <RefreshCw size={16} />}Refresh</button>
 </div>
 </div>
 </section>
@@ -61,7 +63,7 @@ export default function OperationsCommandCenter() {
 </div>}
       {tab === "support" && <Support rows={tickets} />}{tab === "alerts" && <Alerts rows={alerts} busy={busy} resolve={(id) => void act(id, () => operationsCommandApi.resolveAlert(id))} />}{tab === "activity" && <ActivityList rows={activity} />}{tab === "reports" && <Reports />}
       {loading && <div className="p-10 text-center text-sm text-slate-500">
-<RefreshCw className="mx-auto animate-spin" />
+<Spinner className="mx-auto" />
 <p className="mt-2">Loading operational state…</p>
 </div>}
     </section>

@@ -1,5 +1,7 @@
 "use client";
 
+
+import { Spinner } from "@/components/ui/Spinner";
 import { useCallback, useEffect, useMemo, useState } from "react";
 import Link from "next/link";
 import {
@@ -255,7 +257,7 @@ export default function MarketplaceOverview() {
               </button>
             ))}
             <button type="button" onClick={() => void load()} className="inline-flex items-center gap-2 rounded-lg bg-[#f47524] px-3.5 py-2 text-xs font-bold text-white transition hover:bg-[#dc6418]">
-              <RefreshCw size={14} className={loading ? "animate-spin" : ""} /> Refresh
+              {loading ? <Spinner /> : <RefreshCw size={14} />} Refresh
             </button>
           </div>
         </div>

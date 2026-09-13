@@ -1,5 +1,7 @@
 "use client";
 
+
+import { Spinner } from "@/components/ui/Spinner";
 import { financeFlowApi } from "@/lib/api/endpoints/finance-flow";
 import type { CommissionRule, EscrowHold, FinanceDashboard, FinancePayout, Reconciliation, SellerWallet } from "@/types/api/finance-flow";
 import { ArrowRight, Banknote, CircleDollarSign, Landmark, RefreshCw, RotateCcw } from "lucide-react";
@@ -33,7 +35,7 @@ export default function MarketplaceFinanceFlow() {
 <p className="mt-2 max-w-3xl text-sm leading-6 text-slate-500">Trace collections through escrow allocation, commission, wallet credit, payout and provider reconciliation.</p>
 </div>
 <button onClick={() => void load()} disabled={loading} className="inline-flex min-h-11 items-center justify-center gap-2 rounded-xl bg-slate-900 px-4 text-sm font-bold text-white disabled:opacity-60 dark:bg-emerald-600">
-<RefreshCw size={17} className={loading ? "animate-spin" : ""} />Refresh finance</button>
+{loading ? <Spinner /> : <RefreshCw size={17} />}Refresh finance</button>
 </div>
 </section>
     {error && <p className="rounded-2xl border border-amber-200 bg-amber-50 p-4 text-sm text-amber-900">Some financial resources are unavailable for this account: {error}</p>}
@@ -75,7 +77,7 @@ function FlowCard({ step, title, value, href }: { step: string; title: string; v
 function Badge({ value }: { value: string }) { return <span className={`rounded-full px-2 py-1 text-[10px] font-bold uppercase ${statusClass(value.toLowerCase())}`}>{pretty(value)}</span>; }
 function Empty({ text }: { text: string }) { return <p className="rounded-xl border border-dashed p-8 text-center text-sm text-slate-500">{text}</p>; }
 function Loading() { return <div className="p-10 text-center text-sm text-slate-500">
-<RefreshCw className="mx-auto animate-spin" />
+<Spinner className="mx-auto" />
 <p className="mt-2">Loading live finance data…</p>
 </div>; }
 function Escrow({ rows }: { rows: EscrowHold[] }) { return <div className="grid gap-3 md:grid-cols-2">{rows.map((row) => <article key={row.id} className="rounded-xl border p-4 dark:border-slate-700">

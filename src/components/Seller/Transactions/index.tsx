@@ -1,5 +1,7 @@
 "use client";
 
+
+import { Spinner } from "@/components/ui/Spinner";
 import { useEffect, useMemo, useState } from "react";
 import {
   ArrowDownCircle,
@@ -13,6 +15,7 @@ import {
   Search,
   WalletCards,
 } from "lucide-react";
+import Pagination from "@/components/ui/Pagination";
 import toast from "react-hot-toast";
 
 import { sellerWalletApi } from "@/lib/api/endpoints/seller-wallet";
@@ -225,7 +228,7 @@ export default function SellerTransactions() {
 
         {loading ? (
           <div className="p-12 text-center text-sm text-slate-500">
-            <RefreshCw size={20} className="mx-auto animate-spin" />
+            <Spinner className="mx-auto" />
             <p className="mt-3">Loading wallet transactions...</p>
           </div>
         ) : (
@@ -356,8 +359,8 @@ export default function SellerTransactions() {
               pageSize={pageSize}
               total={meta.total}
               totalPages={meta.total_pages}
-              onPage={setPage}
-              onPageSize={(size) => {
+              onPageChange={setPage}
+              onPageSizeChange={(size) => {
                 setPageSize(size);
                 setPage(1);
               }}
@@ -395,67 +398,3 @@ function Summary({
   );
 }
 
-function Pagination({
-  page,
-  pageSize,
-  total,
-  totalPages,
-  onPage,
-  onPageSize,
-}: {
-  page: number;
-  pageSize: number;
-  total: number;
-  totalPages: number;
-  onPage: (page: number) => void;
-  onPageSize: (size: number) => void;
-}) {
-  const from = total ? (page - 1) * pageSize + 1 : 0;
-  const to = Math.min(page * pageSize, total);
-
-  return (
-    <div className="flex flex-col gap-3 border-t border-slate-100 px-5 py-4 sm:flex-row sm:items-center sm:justify-between dark:border-white/10">
-      <p className="text-sm text-slate-500 dark:text-white/50">
-        Showing <b>{from}-{to}</b> of <b>{total}</b>
-      </p>
-
-      <div className="flex flex-wrap items-center gap-2">
-        <select
-          value={pageSize}
-          onChange={(event) => onPageSize(Number(event.target.value))}
-          className="h-10 rounded-xl border border-slate-200 bg-white px-3 text-sm dark:border-white/10 dark:bg-white/5 dark:text-white"
-        >
-          {[10, 20, 50, 100].map((size) => (
-            <option key={size} value={size}>
-              {size} / page
-            </option>
-          ))}
-        </select>
-
-        <button
-          type="button"
-          disabled={page <= 1}
-          onClick={() => onPage(page - 1)}
-          className="inline-flex h-10 items-center gap-1 rounded-xl border border-slate-200 px-3 text-sm font-semibold disabled:opacity-40 dark:border-white/10"
-        >
-          <ChevronLeft size={14} />
-          Previous
-        </button>
-
-        <span className="min-w-[80px] text-center text-xs text-slate-400">
-          Page {page} of {Math.max(totalPages, 1)}
-        </span>
-
-        <button
-          type="button"
-          disabled={!totalPages || page >= totalPages}
-          onClick={() => onPage(page + 1)}
-          className="inline-flex h-10 items-center gap-1 rounded-xl border border-slate-200 px-3 text-sm font-semibold disabled:opacity-40 dark:border-white/10"
-        >
-          Next
-          <ChevronRight size={14} />
-        </button>
-      </div>
-    </div>
-  );
-}

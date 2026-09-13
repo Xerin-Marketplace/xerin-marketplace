@@ -19,6 +19,7 @@ import {
   type CategoryAttribute,
   type CategoryAttributeInputType,
 } from "@/lib/api/endpoints/admin";
+import Pagination from "@/components/ui/Pagination";
 
 type Mode = "product" | "business";
 
@@ -956,87 +957,6 @@ export default function AdminCategories() {
         `}</style>
       </div>
     </>
-  );
-}
-
-function Pagination({
-  page,
-  pageSize,
-  total,
-  totalPages,
-  onPageChange,
-  onPageSizeChange,
-}: {
-  page: number;
-  pageSize: number;
-  total: number;
-  totalPages: number;
-  onPageChange: (page: number) => void;
-  onPageSizeChange: (size: number) => void;
-}) {
-  const start = total
-    ? (page - 1) * pageSize + 1
-    : 0;
-
-  const end = Math.min(
-    page * pageSize,
-    total
-  );
-
-  return (
-    <div className="flex flex-col gap-3 border-t p-4 sm:flex-row sm:items-center sm:justify-between">
-      <span className="text-sm text-gray-600">
-        Showing {start}-{end} of {total}
-      </span>
-
-      <div className="flex gap-2">
-        <select
-          value={pageSize}
-          onChange={(event) =>
-            onPageSizeChange(
-              Number(event.target.value)
-            )
-          }
-          className="rounded-xl border px-2 py-2 text-sm"
-        >
-          {[10, 20, 50, 100].map((size) => (
-            <option key={size} value={size}>
-              {size}
-            </option>
-          ))}
-        </select>
-
-        <button
-          type="button"
-          disabled={page <= 1}
-          onClick={() =>
-            onPageChange(page - 1)
-          }
-          className="rounded-xl border px-3 py-2 text-sm transition hover:bg-gray-50 disabled:opacity-40"
-        >
-          Previous
-        </button>
-
-        <span className="px-2 py-2 text-xs text-gray-600">
-          Page {page} of{" "}
-          {Math.max(totalPages, 1)}
-        </span>
-
-        <button
-          type="button"
-          disabled={
-            page >= totalPages ||
-            !totalPages
-          }
-          onClick={() =>
-            onPageChange(page + 1)
-          }
-          className="rounded-xl border px-3 py-2 text-sm transition hover:bg-gray-50 disabled:opacity-40"
-        >
-          Next
-        </button>
-      </div>
-    </div>
   );
 }
 

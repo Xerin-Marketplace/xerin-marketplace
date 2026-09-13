@@ -108,10 +108,10 @@ const ResetPassword = () => {
           )}
 
           <form onSubmit={handleSubmit}>
-            <div className="mb-5">
+            <div className="mb-3.5">
               <label
                 htmlFor="email"
-                className="block mb-2.5 text-custom-sm font-medium text-dark dark:text-white"
+                className="block mb-2 text-sm font-medium text-dark dark:text-darkTheme-body-color"
               >
                 Email Address
               </label>
@@ -123,14 +123,14 @@ const ResetPassword = () => {
                 onChange={(event) => setEmail(event.target.value)}
                 placeholder="you@example.com"
                 required
-                className="rounded-md border border-gray-3 dark:border-darkTheme-border-color bg-white dark:bg-darkTheme-secondary-bg w-full py-3 px-5 outline-none duration-200 focus:border-transparent focus:shadow-input focus:ring-2 focus:ring-blue/20"
+                className="h-11 rounded-lg border border-gray-3 dark:border-darkTheme-border-color bg-gray-1 dark:bg-darkTheme-secondary-bg dark:text-darkTheme-body-color placeholder:text-dark-4 dark:placeholder:text-darkTheme-secondary-muted w-full px-3.5 text-sm outline-none duration-200 focus:border-transparent focus:ring-2 focus:ring-orange/30 disabled:cursor-not-allowed disabled:opacity-70"
               />
             </div>
 
-            <div className="mb-5">
+            <div className="mb-3.5">
               <label
                 htmlFor="otpCode"
-                className="block mb-2.5 text-custom-sm font-medium text-dark dark:text-white"
+                className="block mb-2 text-sm font-medium text-dark dark:text-darkTheme-body-color"
               >
                 OTP Code
               </label>
@@ -142,14 +142,14 @@ const ResetPassword = () => {
                 onChange={(event) => setOtpCode(event.target.value)}
                 placeholder="Enter OTP code"
                 required
-                className="rounded-md border border-gray-3 dark:border-darkTheme-border-color bg-white dark:bg-darkTheme-secondary-bg w-full py-3 px-5 outline-none duration-200 focus:border-transparent focus:shadow-input focus:ring-2 focus:ring-blue/20"
+                className="h-11 rounded-lg border border-gray-3 dark:border-darkTheme-border-color bg-gray-1 dark:bg-darkTheme-secondary-bg dark:text-darkTheme-body-color placeholder:text-dark-4 dark:placeholder:text-darkTheme-secondary-muted w-full px-3.5 text-sm outline-none duration-200 focus:border-transparent focus:ring-2 focus:ring-orange/30 disabled:cursor-not-allowed disabled:opacity-70"
               />
             </div>
 
-            <div className="mb-5">
+            <div className="mb-3.5">
               <label
                 htmlFor="newPassword"
-                className="block mb-2.5 text-custom-sm font-medium text-dark dark:text-white"
+                className="block mb-2 text-sm font-medium text-dark dark:text-darkTheme-body-color"
               >
                 New Password
               </label>
@@ -161,14 +161,14 @@ const ResetPassword = () => {
                 onChange={(event) => setNewPassword(event.target.value)}
                 placeholder="Enter new password"
                 required
-                className="rounded-md border border-gray-3 dark:border-darkTheme-border-color bg-white dark:bg-darkTheme-secondary-bg w-full py-3 px-5 outline-none duration-200 focus:border-transparent focus:shadow-input focus:ring-2 focus:ring-blue/20"
+                className="h-11 rounded-lg border border-gray-3 dark:border-darkTheme-border-color bg-gray-1 dark:bg-darkTheme-secondary-bg dark:text-darkTheme-body-color placeholder:text-dark-4 dark:placeholder:text-darkTheme-secondary-muted w-full px-3.5 text-sm outline-none duration-200 focus:border-transparent focus:ring-2 focus:ring-orange/30 disabled:cursor-not-allowed disabled:opacity-70"
               />
             </div>
 
-            <div className="mb-6">
+            <div className="mb-4">
               <label
                 htmlFor="confirmPassword"
-                className="block mb-2.5 text-custom-sm font-medium text-dark dark:text-white"
+                className="block mb-2 text-sm font-medium text-dark dark:text-darkTheme-body-color"
               >
                 Confirm Password
               </label>
@@ -180,25 +180,25 @@ const ResetPassword = () => {
                 onChange={(event) => setConfirmPassword(event.target.value)}
                 placeholder="Confirm new password"
                 required
-                className="rounded-md border border-gray-3 dark:border-darkTheme-border-color bg-white dark:bg-darkTheme-secondary-bg w-full py-3 px-5 outline-none duration-200 focus:border-transparent focus:shadow-input focus:ring-2 focus:ring-blue/20"
+                className="h-11 rounded-lg border border-gray-3 dark:border-darkTheme-border-color bg-gray-1 dark:bg-darkTheme-secondary-bg dark:text-darkTheme-body-color placeholder:text-dark-4 dark:placeholder:text-darkTheme-secondary-muted w-full px-3.5 text-sm outline-none duration-200 focus:border-transparent focus:ring-2 focus:ring-orange/30 disabled:cursor-not-allowed disabled:opacity-70"
               />
             </div>
 
             <button
               type="submit"
               disabled={isSubmittingResetPassword}
-              className="w-full flex justify-center font-medium text-white bg-blue py-3 px-6 rounded-md ease-out duration-200 hover:bg-blue-dark disabled:opacity-70 disabled:cursor-not-allowed"
+              className="flex h-11 w-full items-center justify-center rounded-lg bg-orange px-6 text-sm font-semibold text-white ease-out duration-200 hover:bg-orange-dark disabled:cursor-not-allowed disabled:opacity-70"
             >
               {isSubmittingResetPassword ? "Resetting..." : "Reset Password"}
             </button>
           </form>
 
-          <div className="mt-6 flex flex-col sm:flex-row items-center justify-between gap-3 text-custom-sm">
-            <Link href="/forgot-password" className="text-blue hover:underline">
+          <div className="mt-5 flex flex-col sm:flex-row items-center justify-between gap-3 text-sm">
+            <Link href="/forgot-password" className="text-orange hover:underline">
               Request reset again
             </Link>
 
-            <Link href="/signin" className="text-blue hover:underline">
+            <Link href="/signin" className="text-orange hover:underline">
               Back to Sign In
             </Link>
           </div>

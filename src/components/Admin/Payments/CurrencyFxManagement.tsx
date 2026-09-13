@@ -1,5 +1,7 @@
 "use client";
 
+
+import { Spinner } from "@/components/ui/Spinner";
 import { FormEvent, type ReactNode, useCallback, useEffect, useMemo, useState } from "react";
 import { CircleDollarSign, Globe2, Pencil, Plus, RefreshCw, ShieldCheck, Trash2 } from "lucide-react";
 import {
@@ -280,7 +282,7 @@ export default function CurrencyFxManagement() {
           </div>
           <div className="flex gap-2">
             <button onClick={() => void load()} disabled={loading} className="inline-flex h-10 items-center gap-2 rounded-xl border border-slate-200 px-3 text-sm font-semibold text-slate-600 disabled:opacity-50">
-              <RefreshCw size={14} className={loading ? "animate-spin" : ""} /> Refresh
+              {loading ? <Spinner /> : <RefreshCw size={14} />} Refresh
             </button>
             <button
               onClick={() => {

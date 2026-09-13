@@ -1,15 +1,49 @@
 "use client";
 
-import { createIncidentId } from "@/lib/reliability/runtime-events";
-import { House, RefreshCw, ShieldAlert } from "lucide-react";
 import Link from "next/link";
-import { useEffect, useRef } from "react";
+import { useEffect } from "react";
 
 export default function SiteError({ error, reset }: { error: Error & { digest?: string }; reset: () => void }) {
-  const incident = useRef(error.digest || createIncidentId());
   useEffect(() => {
     if (process.env.NODE_ENV !== "production") console.error("Xerin route error", error);
   }, [error]);
 
-  return <main className="flex min-h-[70dvh] items-center justify-center bg-slate-50 px-4 py-12 dark:bg-slate-950"><section className="w-full max-w-xl rounded-3xl border border-slate-200 bg-white p-6 text-center shadow-xl dark:border-slate-700 dark:bg-slate-900 sm:p-10"><span className="mx-auto flex h-16 w-16 items-center justify-center rounded-2xl bg-red-50 text-red-600 dark:bg-red-950/40"><ShieldAlert size={30} /></span><p className="mt-5 text-xs font-bold uppercase tracking-[.16em] text-red-600">Temporary problem</p><h1 className="mt-2 text-2xl font-bold text-slate-900 dark:text-white sm:text-3xl">This page could not be loaded</h1><p className="mx-auto mt-3 max-w-md text-sm leading-6 text-slate-600 dark:text-slate-300">Your account and data remain safe. Try loading the page again, or return home if the problem continues.</p><p className="mt-4 text-xs text-slate-400">Support reference: {incident.current}</p><div className="mt-7 grid gap-3 sm:grid-cols-2"><button type="button" onClick={reset} className="inline-flex min-h-12 items-center justify-center gap-2 rounded-xl bg-blue-600 px-5 text-sm font-bold text-white hover:bg-blue-700"><RefreshCw size={17} />Try again</button><Link href="/" className="inline-flex min-h-12 items-center justify-center gap-2 rounded-xl border border-slate-200 px-5 text-sm font-bold text-slate-700 hover:bg-slate-50 dark:border-slate-700 dark:text-white dark:hover:bg-slate-800"><House size={17} />Go home</Link></div></section></main>;
+  return (
+    <main className="flex min-h-dvh items-center justify-center bg-body-bg px-4 py-16 text-dark dark:bg-darkTheme-bg dark:text-white">
+      <section className="w-full max-w-md text-center">
+        <h1 className="text-[5rem] font-extrabold leading-none tracking-tight text-red-500 sm:text-[7rem]">
+          500
+        </h1>
+
+        <h2 className="mt-4 text-xl font-bold tracking-tight sm:text-2xl">
+          Something went wrong
+        </h2>
+
+        <p className="mx-auto mt-3 max-w-sm text-sm leading-6 text-gray-500 dark:text-darkTheme-body-color">
+          This page could not be loaded. Your account and data remain safe.
+        </p>
+
+        {error.digest && (
+          <p className="mt-4 text-xs text-gray-400">Support reference: {error.digest}</p>
+        )}
+
+        <div className="mt-8 flex flex-col items-center gap-3 sm:flex-row sm:justify-center">
+          <button
+            type="button"
+            onClick={reset}
+            className="inline-flex min-h-11 w-full items-center justify-center rounded-xl bg-orange-500 px-6 text-sm font-semibold text-white transition hover:bg-orange-600 sm:w-auto"
+          >
+            Try again
+          </button>
+
+          <Link
+            href="/"
+            className="inline-flex min-h-11 w-full items-center justify-center rounded-xl border border-gray-200 bg-white px-6 text-sm font-semibold text-dark transition hover:border-orange-400 hover:text-orange-500 dark:border-darkTheme-border-color dark:bg-darkTheme-bg dark:text-white sm:w-auto"
+          >
+            Go home
+          </Link>
+        </div>
+      </section>
+    </main>
+  );
 }

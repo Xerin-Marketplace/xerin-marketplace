@@ -1,5 +1,7 @@
 "use client";
 
+
+import { Spinner } from "@/components/ui/Spinner";
 import { useEffect, useMemo, useState } from "react";
 import Link from "next/link";
 import {
@@ -17,6 +19,7 @@ import {
   WalletCards,
   XCircle,
 } from "lucide-react";
+import Pagination from "@/components/ui/Pagination";
 import toast from "react-hot-toast";
 
 import { sellerWalletApi } from "@/lib/api/endpoints/seller-wallet";
@@ -383,7 +386,7 @@ export default function SellerPayouts() {
 
           {loading ? (
             <div className="py-10 text-center text-sm text-slate-500">
-              <RefreshCw size={18} className="mx-auto animate-spin" />
+              <Spinner className="mx-auto" />
               <p className="mt-2">Loading payout configuration...</p>
             </div>
           ) : verifiedAccounts.length === 0 ? (
@@ -562,7 +565,7 @@ export default function SellerPayouts() {
 
           {historyLoading ? (
             <div className="p-12 text-center text-sm text-slate-500">
-              <RefreshCw size={20} className="mx-auto animate-spin" />
+              <Spinner className="mx-auto" />
               <p className="mt-3">Loading payout history...</p>
             </div>
           ) : (
@@ -698,8 +701,8 @@ export default function SellerPayouts() {
                 pageSize={pageSize}
                 total={meta.total}
                 totalPages={meta.total_pages}
-                onPage={setPage}
-                onPageSize={(value) => {
+                onPageChange={setPage}
+                onPageSizeChange={(value) => {
                   setPageSize(value);
                   setPage(1);
                 }}
@@ -712,7 +715,7 @@ export default function SellerPayouts() {
         <div className="fixed inset-0 z-[150] flex items-end justify-center bg-black/60 sm:items-center sm:p-4">
           <div role="dialog" aria-modal="true" aria-labelledby="cancel-payout-title" className="w-full max-w-md rounded-t-2xl bg-white p-5 shadow-2xl dark:bg-[#1f2937] sm:rounded-2xl sm:p-6">
             <div className="flex items-start gap-3"><span className="grid h-11 w-11 shrink-0 place-items-center rounded-xl bg-red-50 text-red-600 dark:bg-red-500/10"><CircleAlert size={20} /></span><div><h2 id="cancel-payout-title" className="font-bold text-slate-900 dark:text-white">Cancel payout request?</h2><p className="mt-1 text-sm leading-6 text-slate-500">The request for <strong className="text-slate-700 dark:text-white/80">{money(cancelTarget.amount, cancelTarget.currency)}</strong> will be cancelled. Funds will be returned according to the wallet rules.</p></div></div>
-            <div className="mt-6 flex flex-col-reverse gap-2 sm:flex-row sm:justify-end"><button type="button" disabled={busyPayout !== null} onClick={() => setCancelTarget(null)} className="min-h-11 rounded-xl border border-slate-200 px-4 text-sm font-semibold dark:border-white/10">Keep request</button><button type="button" disabled={busyPayout !== null} onClick={() => void cancelPayout()} className="inline-flex min-h-11 items-center justify-center gap-2 rounded-xl bg-red-600 px-4 text-sm font-bold text-white disabled:opacity-50">{busyPayout && <RefreshCw className="animate-spin" size={15} />}Cancel payout</button></div>
+            <div className="mt-6 flex flex-col-reverse gap-2 sm:flex-row sm:justify-end"><button type="button" disabled={busyPayout !== null} onClick={() => setCancelTarget(null)} className="min-h-11 rounded-xl border border-slate-200 px-4 text-sm font-semibold dark:border-white/10">Keep request</button><button type="button" disabled={busyPayout !== null} onClick={() => void cancelPayout()} className="inline-flex min-h-11 items-center justify-center gap-2 rounded-xl bg-red-600 px-4 text-sm font-bold text-white disabled:opacity-50">{busyPayout && <Spinner />}Cancel payout</button></div>
           </div>
         </div>
       )}
@@ -780,71 +783,6 @@ function Field({
         </span>
       )}
     </label>
-  );
-}
-
-function Pagination({
-  page,
-  pageSize,
-  total,
-  totalPages,
-  onPage,
-  onPageSize,
-}: {
-  page: number;
-  pageSize: number;
-  total: number;
-  totalPages: number;
-  onPage: (page: number) => void;
-  onPageSize: (size: number) => void;
-}) {
-  const from = total ? (page - 1) * pageSize + 1 : 0;
-  const to = Math.min(page * pageSize, total);
-
-  return (
-    <div className="flex flex-col gap-3 border-t border-slate-100 px-5 py-4 sm:flex-row sm:items-center sm:justify-between dark:border-white/10">
-      <p className="text-sm text-slate-500 dark:text-white/50">
-        Showing <b>{from}-{to}</b> of <b>{total}</b>
-      </p>
-
-      <div className="flex flex-wrap items-center gap-2">
-        <select
-          value={pageSize}
-          onChange={(event) => onPageSize(Number(event.target.value))}
-          className="h-10 rounded-xl border border-slate-200 bg-white px-3 text-sm dark:border-white/10 dark:bg-white/5 dark:text-white"
-        >
-          {[10, 20, 50, 100].map((size) => (
-            <option key={size} value={size}>
-              {size} / page
-            </option>
-          ))}
-        </select>
-
-        <button
-          type="button"
-          disabled={page <= 1}
-          onClick={() => onPage(page - 1)}
-          className="inline-flex h-10 items-center gap-1 rounded-xl border border-slate-200 px-3 text-sm font-semibold disabled:opacity-40 dark:border-white/10"
-        >
-          <ChevronLeft size={14} />
-          Previous
-        </button>
-
-        <span className="min-w-[80px] text-center text-xs text-slate-400">
-          Page {page} of {Math.max(totalPages, 1)}
-        </span>
-
-        <button
-          type="button"
-          disabled={!totalPages || page >= totalPages}
-          onClick={() => onPage(page + 1)}
-          className="inline-flex h-10 items-center gap-1 rounded-xl border border-slate-200 px-3 text-sm font-semibold disabled:opacity-40 dark:border-white/10"
-        >
-          Next
-          <ChevronRight size={14} />
-        </button>
-      </div>
-    </div>
   );
 }
 

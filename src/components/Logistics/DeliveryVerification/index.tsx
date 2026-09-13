@@ -1,5 +1,7 @@
 "use client";
 
+
+import { Spinner } from "@/components/ui/Spinner";
 import { deliveryVerificationApi } from "@/lib/api/endpoints/delivery-verification";
 import { logisticsApi } from "@/lib/api/endpoints/logistics";
 import { resolveBackendDocumentUrl } from "@/lib/documents/backend-document";
@@ -18,7 +20,7 @@ export default function LogisticsDeliveryVerification() {
   useEffect(() => { void load(); }, [load]);
 
   return <div className="mx-auto max-w-7xl space-y-5">
-    <header className="flex flex-col gap-3 rounded-2xl bg-gradient-to-r from-slate-950 to-blue p-4 text-black sm:flex-row sm:items-end sm:justify-between sm:p-6"><div><p className="text-sm text-blue-100">Proof of delivery</p><h2 className="mt-1 text-xl font-bold sm:text-2xl">Recipient OTP verification</h2><p className="mt-2 max-w-2xl text-sm leading-6 text-blue-100">Capture delivery evidence at the confirmed destination, send the recipient’s OTP, and verify it before completing delivery.</p></div><button onClick={() => void load()} disabled={loading} className="inline-flex min-h-11 items-center justify-center gap-2 rounded-xl bg-white/15 px-4 text-sm font-semibold disabled:opacity-50"><RefreshCw size={17} className={loading ? "animate-spin" : ""} />Refresh</button></header>
+    <header className="flex flex-col gap-3 rounded-2xl bg-gradient-to-r from-slate-950 to-blue p-4 text-black sm:flex-row sm:items-end sm:justify-between sm:p-6"><div><p className="text-sm text-blue-100">Proof of delivery</p><h2 className="mt-1 text-xl font-bold sm:text-2xl">Recipient OTP verification</h2><p className="mt-2 max-w-2xl text-sm leading-6 text-blue-100">Capture delivery evidence at the confirmed destination, send the recipient’s OTP, and verify it before completing delivery.</p></div><button onClick={() => void load()} disabled={loading} className="inline-flex min-h-11 items-center justify-center gap-2 rounded-xl bg-white/15 px-4 text-sm font-semibold disabled:opacity-50">{loading ? <Spinner /> : <RefreshCw size={17} />}Refresh</button></header>
     {error && <div className="rounded-2xl border border-red-200 bg-red-50 p-4 text-sm text-red-700">{error}</div>}
     {loading ? <div className="grid gap-4 md:grid-cols-2 xl:grid-cols-3">{Array.from({ length: 6 }).map((_, index) => <div key={index} className="h-48 animate-pulse rounded-2xl bg-slate-200 dark:bg-slate-800" />)}</div> : shipments.length ? <section className="grid gap-4 md:grid-cols-2 xl:grid-cols-3">{shipments.map((shipment) => <article key={shipment.id} className="rounded-2xl border border-slate-200 bg-white p-4 shadow-sm dark:border-slate-700 dark:bg-slate-800"><div className="flex items-start justify-between gap-3"><span className="grid h-11 w-11 place-items-center rounded-xl bg-blue/10 text-blue"><Truck size={20} /></span><span className="rounded-full bg-amber-100 px-2.5 py-1 text-xs font-semibold text-amber-800">Out for delivery</span></div><h3 className="mt-4 break-all font-bold">{shipment.tracking_number || `Shipment ${shipment.id.slice(0, 8)}`}</h3><p className="mt-1 text-sm text-slate-500">Order {shipment.order_id.slice(0, 8)} · {shipment.items.reduce((sum, item) => sum + item.quantity, 0)} item(s)</p><p className="mt-3 text-xs text-slate-500">Created {date(shipment.created_at)}</p><button onClick={() => setSelected(shipment)} className="mt-4 inline-flex min-h-11 w-full items-center justify-center gap-2 rounded-xl bg-blue px-4 text-sm font-semibold text-white"><ShieldCheck size={18} />Start delivery proof</button></article>)}</section> : !error && <div className="rounded-2xl border border-dashed border-slate-300 bg-white p-9 text-center dark:border-slate-700 dark:bg-slate-800"><CheckCircle2 className="mx-auto text-emerald-600" size={31} /><h3 className="mt-3 font-bold">No deliveries awaiting OTP</h3><p className="mt-1 text-sm text-slate-500">Shipments appear here after they are marked out for delivery.</p></div>}
     {selected && <DeliveryFlow shipment={selected} close={() => setSelected(null)} complete={() => { setSelected(null); void load(); }} />}
@@ -64,7 +66,7 @@ function DeliveryFlow({ shipment, close, complete }: { shipment: LogisticsShipme
     disabled={resending || resendCooldown > 0 || busy}
     className="mt-2 inline-flex min-h-10 items-center justify-center gap-2 rounded-lg border border-blue px-4 text-sm font-bold text-blue disabled:cursor-not-allowed disabled:opacity-50"
   >
-    <RefreshCw size={15} className={resending ? "animate-spin" : ""} />
+    {resending ? <Spinner /> : <RefreshCw size={15} />}
     {resending
       ? "Resending OTP…"
       : resendCooldown > 0

@@ -1,7 +1,10 @@
 "use client";
 
+
+import { Spinner } from "@/components/ui/Spinner";
 import { useEffect, useMemo, useState } from "react";
 import { ChevronLeft, ChevronRight, HelpCircle, MessageCircleReply, RefreshCw, Search, X } from "lucide-react";
+import Pagination from "@/components/ui/Pagination";
 import toast from "react-hot-toast";
 import { sellerFeedbackApi } from "@/lib/api/endpoints/seller-feedback";
 import { getMyProducts } from "@/lib/api/endpoints/products";
@@ -71,7 +74,7 @@ export default function SellerQuestions() {
         </div>
       </div>
 
-      {loading?<div className="p-14 text-center text-sm text-slate-500"><RefreshCw size={20} className="mx-auto animate-spin"/><p className="mt-2">Loading questions...</p></div>:
+      {loading?<div className="p-14 text-center text-sm text-slate-500"><Spinner className="mx-auto" /><p className="mt-2">Loading questions...</p></div>:
       <div className="divide-y divide-slate-100 dark:divide-white/10">
         {visible.map(row=><article key={row.id} className="p-5">
           <div className="flex flex-col gap-4 lg:flex-row lg:justify-between">
@@ -86,7 +89,7 @@ export default function SellerQuestions() {
         {!visible.length&&<div className="p-14 text-center"><HelpCircle size={28} className="mx-auto text-slate-300"/><p className="mt-3 font-semibold text-slate-600 dark:text-white/70">No questions found</p></div>}
       </div>}
 
-      <Pagination page={page} pageSize={pageSize} total={total} totalPages={totalPages} onPage={setPage} onSize={x=>{setPageSize(x);setPage(1);}}/>
+      <Pagination page={page} pageSize={pageSize} total={total} totalPages={totalPages} onPageChange={setPage} onPageSizeChange={x=>{setPageSize(x);setPage(1);}}/>
     </section>
 
     {target&&<div className="fixed inset-0 z-[130] flex items-center justify-center bg-black/55 p-4"><div className="w-full max-w-xl rounded-2xl bg-white p-5 shadow-2xl dark:bg-[#1f2937]"><div className="flex items-center justify-between"><h2 className="text-lg font-bold dark:text-white">Answer Product Question</h2><button onClick={()=>!busy&&setTarget(null)} className="rounded-lg border p-2 dark:border-white/10"><X size={15}/></button></div><p className="mt-4 rounded-xl bg-slate-50 p-3 text-sm leading-6 text-slate-700">{target.question}</p><textarea value={answer} onChange={e=>setAnswer(e.target.value)} maxLength={4000} className="mt-4 min-h-36 w-full rounded-xl border border-slate-200 p-3 text-sm outline-none focus:border-orange-300 dark:border-white/10 dark:bg-white/5 dark:text-white" placeholder="Write a clear answer for the customer..."/><button disabled={busy||answer.trim().length<2} onClick={()=>void submit()} className="mt-4 w-full rounded-xl bg-[#f7941d] py-3 text-sm font-semibold text-white disabled:opacity-50">{busy?"Publishing...":"Publish Official Answer"}</button></div></div>}
@@ -94,4 +97,3 @@ export default function SellerQuestions() {
 }
 
 function Metric({label,value}:{label:string;value:string}){return <div className="rounded-xl border border-slate-200 bg-slate-50 p-4 dark:border-white/10 dark:bg-white/[.03]"><p className="text-xl font-bold dark:text-white">{value}</p><p className="mt-1 text-xs text-slate-500">{label}</p></div>}
-function Pagination({page,pageSize,total,totalPages,onPage,onSize}:{page:number;pageSize:number;total:number;totalPages:number;onPage:(x:number)=>void;onSize:(x:number)=>void}){const from=total?(page-1)*pageSize+1:0,to=Math.min(page*pageSize,total);return <div className="flex flex-col gap-3 border-t border-slate-100 px-5 py-4 sm:flex-row sm:items-center sm:justify-between dark:border-white/10"><p className="text-sm text-slate-500">Showing <b>{from}-{to}</b> of <b>{total}</b></p><div className="flex items-center gap-2"><select value={pageSize} onChange={e=>onSize(Number(e.target.value))} className="h-10 rounded-xl border px-3 text-sm dark:border-white/10 dark:bg-white/5">{[10,20,50,100].map(x=><option key={x}>{x}</option>)}</select><button disabled={page<=1} onClick={()=>onPage(page-1)} className="h-10 rounded-xl border px-3 disabled:opacity-40 dark:border-white/10"><ChevronLeft size={14}/></button><span className="text-xs text-slate-400">Page {page} of {Math.max(totalPages,1)}</span><button disabled={!totalPages||page>=totalPages} onClick={()=>onPage(page+1)} className="h-10 rounded-xl border px-3 disabled:opacity-40 dark:border-white/10"><ChevronRight size={14}/></button></div></div>}

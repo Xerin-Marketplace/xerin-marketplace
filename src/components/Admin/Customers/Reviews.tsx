@@ -1,5 +1,7 @@
 "use client";
 
+
+import { Spinner } from "@/components/ui/Spinner";
 import { useEffect, useMemo, useState } from "react";
 import {
   CheckCircle2,
@@ -15,6 +17,7 @@ import {
   X,
   XCircle,
 } from "lucide-react";
+import Pagination from "@/components/ui/Pagination";
 import toast from "react-hot-toast";
 import {
   customersService,
@@ -278,7 +281,7 @@ export default function AdminCustomerReviews() {
       <section className="overflow-hidden rounded-2xl border border-[#e2e8f0] bg-white shadow-sm">
         {loading ? (
           <div className="p-12 text-center text-gray-500">
-            <RefreshCw className="mx-auto animate-spin" size={22} />
+            <Spinner className="mx-auto" />
             <p className="mt-3 text-sm">Loading customer reviews...</p>
           </div>
         ) : error ? (
@@ -423,10 +426,8 @@ export default function AdminCustomerReviews() {
             pageSize={pageSize}
             total={total}
             totalPages={totalPages}
-            from={from}
-            to={to}
-            onPage={setPage}
-            onPageSize={(size) => {
+            onPageChange={setPage}
+            onPageSizeChange={(size) => {
               setPageSize(size);
               setPage(1);
             }}
@@ -608,65 +609,6 @@ function Info({ label, value }: { label: string; value: string }) {
       <p className="mt-1 break-words text-sm font-semibold text-[#111827]">
         {value}
       </p>
-    </div>
-  );
-}
-
-function Pagination({
-  page,
-  pageSize,
-  total,
-  totalPages,
-  from,
-  to,
-  onPage,
-  onPageSize,
-}: {
-  page: number;
-  pageSize: number;
-  total: number;
-  totalPages: number;
-  from: number;
-  to: number;
-  onPage: (page: number) => void;
-  onPageSize: (size: number) => void;
-}) {
-  return (
-    <div className="flex flex-col gap-3 border-t px-5 py-4 sm:flex-row sm:items-center sm:justify-between">
-      <p className="text-sm text-gray-500">
-        Showing <b className="text-[#111827]">{from}-{to}</b> of{" "}
-        <b className="text-[#111827]">{total}</b>
-      </p>
-      <div className="flex items-center gap-2">
-        <select
-          value={pageSize}
-          onChange={(event) => onPageSize(Number(event.target.value))}
-          className="h-10 rounded-xl border bg-white px-3 text-sm"
-        >
-          {[10, 20, 50, 100].map((size) => (
-            <option key={size} value={size}>
-              {size} / page
-            </option>
-          ))}
-        </select>
-        <button
-          disabled={page <= 1}
-          onClick={() => onPage(page - 1)}
-          className="inline-flex h-10 items-center gap-1 rounded-xl border px-3 text-sm font-semibold disabled:opacity-40"
-        >
-          <ChevronLeft size={14} /> Previous
-        </button>
-        <span className="min-w-24 text-center text-xs font-semibold text-gray-500">
-          Page {page} of {Math.max(totalPages, 1)}
-        </span>
-        <button
-          disabled={page >= totalPages || totalPages === 0}
-          onClick={() => onPage(page + 1)}
-          className="inline-flex h-10 items-center gap-1 rounded-xl border px-3 text-sm font-semibold disabled:opacity-40"
-        >
-          Next <ChevronRight size={14} />
-        </button>
-      </div>
     </div>
   );
 }

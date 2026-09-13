@@ -1,6 +1,9 @@
 "use client";
 
+
+import { Spinner } from "@/components/ui/Spinner";
 import { ApiError } from "@/lib/api/client";
+import Pagination from "@/components/ui/Pagination";
 import {
   type AccessPermission,
   type AccessRole,
@@ -538,7 +541,7 @@ export default function AdminUserManagement({
 
         {loading ? (
           <div className="p-12 text-center text-gray-500">
-            <RefreshCw className="mx-auto animate-spin" size={20} />
+            <Spinner className="mx-auto" />
             <p className="mt-3 text-sm">Loading access data...</p>
           </div>
         ) : rows.length === 0 ? (
@@ -568,6 +571,7 @@ export default function AdminUserManagement({
             page={page}
             pageSize={pageSize}
             total={totalUsers}
+            totalPages={Math.max(1, Math.ceil(totalUsers / pageSize))}
             onPageChange={setPage}
           />
         )}
@@ -1448,23 +1452,6 @@ function CreateStaffWorkspace({
         </button>
       </div>
     </section>
-  );
-}
-
-function Pagination({ page, pageSize, total, onPageChange }: { page: number; pageSize: number; total: number; onPageChange: (page: number) => void; }) {
-  const totalPages = Math.max(1, Math.ceil(total / pageSize));
-  const start = (page - 1) * pageSize + 1;
-  const end = Math.min(page * pageSize, total);
-
-  return (
-    <div className="flex flex-col gap-3 border-t border-[#edf0f4] px-5 py-4 sm:flex-row sm:items-center sm:justify-between">
-      <p className="text-xs text-[#64748b]">Showing {start}-{end} of {total.toLocaleString()} users</p>
-      <div className="flex items-center gap-2">
-        <button type="button" disabled={page <= 1} onClick={()=>onPageChange(page-1)} className="inline-flex h-9 items-center gap-1 rounded-lg border border-[#e1e6ec] px-3 text-xs font-semibold disabled:opacity-40"><ChevronLeft size={14}/> Previous</button>
-        <span className="min-w-24 text-center text-xs font-semibold text-[#334155]">Page {page} of {totalPages}</span>
-        <button type="button" disabled={page >= totalPages} onClick={()=>onPageChange(page+1)} className="inline-flex h-9 items-center gap-1 rounded-lg border border-[#e1e6ec] px-3 text-xs font-semibold disabled:opacity-40">Next <ChevronRight size={14}/></button>
-      </div>
-    </div>
   );
 }
 

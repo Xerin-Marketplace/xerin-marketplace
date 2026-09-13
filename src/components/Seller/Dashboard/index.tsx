@@ -1,5 +1,7 @@
 "use client";
 
+
+import { Spinner } from "@/components/ui/Spinner";
 import { ApiError } from "@/lib/api/client";
 import { productsApi } from "@/lib/api/endpoints/products";
 import { sellersApi } from "@/lib/api/endpoints/sellers";
@@ -1211,10 +1213,7 @@ function SellerActivationDashboard({
                 disabled={refreshing}
                 className="inline-flex items-center gap-2 rounded-xl border border-[#dfe4ea] px-4 py-2.5 text-sm font-semibold text-[#64748b] transition hover:bg-slate-50 disabled:opacity-50 dark:border-white/10 dark:hover:bg-white/5"
               >
-                <RefreshCw
-                  size={16}
-                  className={refreshing ? "animate-spin" : ""}
-                />
+                {refreshing ? <Spinner /> : <RefreshCw size={16} />}
                 {refreshing ? "Refreshing" : "Refresh status"}
               </button>
             </div>
@@ -1524,10 +1523,7 @@ function Hero({
               disabled={refreshing}
               className="inline-flex items-center gap-2 rounded-xl border border-[#dfe4ea] bg-white/50 px-4 py-2.5 text-sm font-semibold text-[#475569] transition hover:bg-white disabled:opacity-60 dark:border-white/15 dark:bg-transparent dark:text-white/80 dark:hover:bg-white/10"
             >
-              <RefreshCw
-                size={16}
-                className={refreshing ? "animate-spin" : ""}
-              />
+              {refreshing ? <Spinner /> : <RefreshCw size={16} />}
               {refreshing ? "Refreshing" : "Refresh"}
             </button>
           </div>

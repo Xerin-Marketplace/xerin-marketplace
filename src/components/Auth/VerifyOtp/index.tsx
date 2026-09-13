@@ -313,7 +313,7 @@ const VerifyOtp = () => {
                     placeholder="you@example.com or 255712345678"
                     autoComplete="username"
                     disabled={isBusy}
-                    className="h-12 w-full rounded-xl border border-gray-3 bg-gray-1 px-4 text-base text-dark outline-none transition focus:border-orange focus:bg-white focus:ring-4 focus:ring-orange/10 dark:border-darkTheme-border-color dark:bg-darkTheme-secondary-bg dark:text-white sm:text-sm"
+                    className="h-11 w-full rounded-lg border border-gray-3 bg-gray-1 px-3.5 text-sm text-dark outline-none transition focus:border-transparent focus:ring-2 focus:ring-orange/30 disabled:cursor-not-allowed disabled:opacity-70 dark:border-darkTheme-border-color dark:bg-darkTheme-secondary-bg dark:text-darkTheme-body-color dark:placeholder:text-darkTheme-secondary-muted"
                   />
 
                   <p className="mt-2 text-xs leading-5 text-dark-4 dark:text-darkTheme-secondary-muted">
@@ -344,7 +344,7 @@ const VerifyOtp = () => {
                   autoFocus
                   required
                   disabled={isBusy}
-                  className="h-16 w-full rounded-2xl border border-gray-3 bg-gray-1 px-3 text-center text-[28px] font-bold tracking-[0.28em] text-dark outline-none transition placeholder:text-dark-4 placeholder:opacity-30 focus:border-orange focus:bg-white focus:ring-4 focus:ring-orange/10 dark:border-darkTheme-border-color dark:bg-darkTheme-secondary-bg dark:text-white sm:px-5 sm:text-2xl sm:font-semibold sm:tracking-[0.45em]"
+                  className="h-14 w-full rounded-lg border border-gray-3 bg-gray-1 px-3 text-center text-2xl font-bold tracking-[0.28em] text-dark outline-none transition placeholder:text-dark-4 placeholder:opacity-30 focus:border-transparent focus:ring-2 focus:ring-orange/30 dark:border-darkTheme-border-color dark:bg-darkTheme-secondary-bg dark:text-darkTheme-body-color sm:px-5 sm:text-xl sm:font-semibold sm:tracking-[0.45em]"
                 />
               </div>
 
@@ -355,7 +355,7 @@ const VerifyOtp = () => {
                   cleanOtp.length < 4 ||
                   (!registrationContext && !cleanIdentifier)
                 }
-                className="flex h-12 w-full items-center justify-center rounded-xl bg-orange px-6 text-base font-semibold text-white shadow-sm transition hover:bg-orange-dark disabled:cursor-not-allowed disabled:opacity-50 sm:text-sm"
+                className="flex h-11 w-full items-center justify-center rounded-lg bg-orange px-6 text-sm font-semibold text-white shadow-sm transition hover:bg-orange-dark disabled:cursor-not-allowed disabled:opacity-50"
               >
                 {isVerifyingOtp || isVerifyingAccountOtp
                   ? "Verifying..."

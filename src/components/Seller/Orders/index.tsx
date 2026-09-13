@@ -1,5 +1,7 @@
 "use client";
 
+
+import { Spinner } from "@/components/ui/Spinner";
 import Link from "next/link";
 import { useEffect, useState } from "react";
 import {
@@ -137,7 +139,7 @@ export default function SellerOrders() {
             disabled={loading}
             className="inline-flex min-h-11 items-center justify-center gap-2 rounded-xl border border-slate-200 px-4 text-sm font-semibold text-slate-700 hover:bg-slate-50 disabled:opacity-50 dark:border-white/10 dark:text-white/70 dark:hover:bg-white/5"
           >
-            <RefreshCw size={15} className={loading ? "animate-spin" : ""} />
+            {loading ? <Spinner /> : <RefreshCw size={15} />}
             Refresh orders
           </button>
         </div>
@@ -190,7 +192,7 @@ export default function SellerOrders() {
 
         {loading ? (
           <div className="p-14 text-center text-slate-500">
-            <RefreshCw className="mx-auto animate-spin" />
+            <Spinner className="mx-auto" />
             <p className="mt-2">Loading orders...</p>
           </div>
         ) : (
