@@ -1,8 +1,8 @@
 "use client";
 
-import { LoaderIcon } from "lucide-react";
+import { LoaderIcon, type LucideProps } from "lucide-react";
 
-function Spinner({ className, ...props }: React.ComponentProps<"svg">) {
+function Spinner({ className, ...props }: LucideProps) {
   return (
     <LoaderIcon
       role="status"
