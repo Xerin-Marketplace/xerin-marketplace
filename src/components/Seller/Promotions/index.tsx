@@ -515,7 +515,7 @@ export default function SellerPromotions() {
                               );
                               toast.success("Promo code copied.");
                             }}
-                            className="inline-flex items-center gap-1.5 rounded-lg border border-orange-200 bg-orange-50 px-2.5 py-1.5 font-mono text-xs font-bold text-[#c66c0b]"
+                            className="inline-flex items-center gap-1.5 rounded-[10px] border border-orange-200 bg-orange-50 px-2.5 py-1.5 font-mono text-xs font-bold text-[#c66c0b]"
                           >
                             {promotion.code}
                             <Copy size={12} />
@@ -586,7 +586,7 @@ export default function SellerPromotions() {
                           <button
                             type="button"
                             onClick={() => openEdit(promotion)}
-                            className="inline-flex h-9 w-9 items-center justify-center rounded-lg border border-[#e2e8f0] text-[#64748b] hover:bg-slate-50 dark:border-white/10 dark:hover:bg-white/5"
+                            className="inline-flex h-9 w-9 items-center justify-center rounded-[10px] border border-[#e2e8f0] text-[#64748b] hover:bg-slate-50 dark:border-white/10 dark:hover:bg-white/5"
                             aria-label="Edit promotion"
                           >
                             <Edit3 size={14} />
@@ -596,7 +596,7 @@ export default function SellerPromotions() {
                             type="button"
                             disabled={busy === String(promotion.id)}
                             onClick={() => void togglePromotion(promotion)}
-                            className="rounded-lg border border-[#e2e8f0] px-3 py-2 text-xs font-semibold text-[#475569] disabled:opacity-50 dark:border-white/10 dark:text-white/70"
+                            className="rounded-[10px] border border-[#e2e8f0] px-3 py-2 text-xs font-semibold text-[#475569] disabled:opacity-50 dark:border-white/10 dark:text-white/70"
                           >
                             {promotion.is_active ? "Pause" : "Activate"}
                           </button>
@@ -605,7 +605,7 @@ export default function SellerPromotions() {
                             type="button"
                             disabled={busy === String(promotion.id)}
                             onClick={() => setDeleteTarget(promotion)}
-                            className="inline-flex h-9 w-9 items-center justify-center rounded-lg border border-red-200 text-red-600 hover:bg-red-50 disabled:opacity-50"
+                            className="inline-flex h-9 w-9 items-center justify-center rounded-[10px] border border-red-200 text-red-600 hover:bg-red-50 disabled:opacity-50"
                             aria-label="Delete promotion"
                           >
                             <Trash2 size={14} />
@@ -724,7 +724,7 @@ function PromotionEditor({
             type="button"
             disabled={saving}
             onClick={onClose}
-            className="flex h-9 w-9 items-center justify-center rounded-lg border border-[#e2e8f0] text-[#64748b] dark:border-white/10"
+            className="flex h-9 w-9 items-center justify-center rounded-[10px] border border-[#e2e8f0] text-[#64748b] dark:border-white/10"
           >
             <X size={17} />
           </button>

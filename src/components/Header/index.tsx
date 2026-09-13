@@ -234,7 +234,7 @@ const Header = () => {
 
               <Link
                 href="/contact"
-                className="flex items-center gap-3 rounded-lg border border-gray-3 bg-gray-1/60 px-3 py-2 text-left transition hover:border-primary hover:bg-primary/5 dark:border-darkTheme-border-color dark:bg-darkTheme-secondary-bg dark:hover:border-primary"
+                className="flex items-center gap-3 rounded-[10px] border border-gray-3 bg-gray-1/60 px-3 py-2 text-left transition hover:border-primary hover:bg-primary/5 dark:border-darkTheme-border-color dark:bg-darkTheme-secondary-bg dark:hover:border-primary"
                 >
                 <div>
                 <span className="block text-2xs uppercase text-dark-4">
@@ -327,7 +327,7 @@ const Header = () => {
                     </p>
                   </div>
                 </Link>
-                {hasHydrated && isAuthenticated && user?.account_type === "customer" && <div className="invisible absolute right-0 top-full z-50 mt-2 w-52 rounded-xl border border-gray-3 bg-white p-2 opacity-0 shadow-lg transition group-hover:visible group-hover:opacity-100 dark:border-darkTheme-border-color dark:bg-darkTheme-card">{[["My Account","/account"],["Orders","/account/orders"],["Addresses","/account/addresses"],["Payments","/account/payments"],["Wishlist","/wishlist"],["Security","/account/security"]].map(([label,href])=><Link key={href} href={href} className="block rounded-lg px-3 py-2 text-sm hover:bg-gray-1 dark:hover:bg-white/5">{label}</Link>)}<button onClick={()=>void logout()} className="block w-full rounded-lg px-3 py-2 text-left text-sm text-red-600 hover:bg-red-50">Logout</button></div>}
+                {hasHydrated && isAuthenticated && user?.account_type === "customer" && <div className="invisible absolute right-0 top-full z-50 mt-2 w-52 rounded-[10px] border border-gray-3 bg-white p-2 opacity-0 shadow-lg transition group-hover:visible group-hover:opacity-100 dark:border-darkTheme-border-color dark:bg-darkTheme-card">{[["My Account","/account"],["Orders","/account/orders"],["Addresses","/account/addresses"],["Payments","/account/payments"],["Wishlist","/wishlist"],["Security","/account/security"]].map(([label,href])=><Link key={href} href={href} className="block rounded-[10px] px-3 py-2 text-sm hover:bg-gray-1 dark:hover:bg-white/5">{label}</Link>)}<button onClick={()=>void logout()} className="block w-full rounded-[10px] px-3 py-2 text-left text-sm text-red-600 hover:bg-red-50">Logout</button></div>}
                 </div>
 
                 <button
@@ -386,7 +386,7 @@ const Header = () => {
               <button
                 id="Toggle"
                 aria-label="Toggler"
-                className="xl:hidden flex items-center justify-center p-1.5 rounded-lg hover:bg-gray-1 dark:hover:bg-white/5 transition-colors"
+                className="xl:hidden flex items-center justify-center p-1.5 rounded-[10px] hover:bg-gray-1 dark:hover:bg-white/5 transition-colors"
                 onClick={() => setNavigationOpen(!navigationOpen)}
               >
                 <span className="block relative cursor-pointer w-5.5 h-5.5">
@@ -548,7 +548,7 @@ const Header = () => {
                     <Link
                       href={menuItem.path}
                       onClick={() => setNavigationOpen(false)}
-                      className="block px-3 py-2.5 text-custom-sm font-medium text-dark dark:text-darkTheme-body-color hover:text-blue hover:bg-gray-1 dark:hover:bg-white/5 rounded-lg"
+                      className="block px-3 py-2.5 text-custom-sm font-medium text-dark dark:text-darkTheme-body-color hover:text-blue hover:bg-gray-1 dark:hover:bg-white/5 rounded-[10px]"
                     >
                       {menuItem.title}
                     </Link>
@@ -560,7 +560,7 @@ const Header = () => {
                     <Link
                       href={`/shop-with-sidebar?category_id=${encodeURIComponent(String(category.id))}`}
                       onClick={() => setNavigationOpen(false)}
-                      className="block px-3 py-2.5 text-custom-sm font-medium text-dark dark:text-darkTheme-body-color hover:text-blue hover:bg-gray-1 dark:hover:bg-white/5 rounded-lg"
+                      className="block px-3 py-2.5 text-custom-sm font-medium text-dark dark:text-darkTheme-body-color hover:text-blue hover:bg-gray-1 dark:hover:bg-white/5 rounded-[10px]"
                     >
                       {category.name}
                     </Link>
@@ -570,7 +570,7 @@ const Header = () => {
                   <Link
                     href="/wishlist"
                     onClick={() => setNavigationOpen(false)}
-                    className="flex items-center gap-2 px-3 py-2.5 text-custom-sm font-medium text-dark dark:text-darkTheme-body-color hover:text-blue hover:bg-gray-1 dark:hover:bg-white/5 rounded-lg"
+                    className="flex items-center gap-2 px-3 py-2.5 text-custom-sm font-medium text-dark dark:text-darkTheme-body-color hover:text-blue hover:bg-gray-1 dark:hover:bg-white/5 rounded-[10px]"
                   >
                     <svg className="fill-current" width="16" height="16" viewBox="0 0 16 16" fill="none" xmlns="http://www.w3.org/2000/svg">
                       <path d="M5.97441 12.6073L6.43872 12.0183L5.97441 12.6073ZM7.99992 3.66709L7.45955 4.18719C7.60094 4.33408 7.79604 4.41709 7.99992 4.41709C8.2038 4.41709 8.3989 4.33408 8.54028 4.18719L7.99992 3.66709ZM10.0254 12.6073L10.4897 13.1962L10.0254 12.6073ZM6.43872 12.0183C5.41345 11.21 4.33627 10.4524 3.47904 9.48717C2.64752 8.55085 2.08325 7.47831 2.08325 6.0914H0.583252C0.583252 7.94644 1.3588 9.35867 2.35747 10.4832C3.33043 11.5788 4.57383 12.4582 5.51009 13.1962L6.43872 12.0183ZM2.08325 6.0914C2.08325 4.75102 2.84027 3.63995 3.85342 3.17683C4.81929 2.73533 6.15155 2.82823 7.45955 4.18719L8.54028 3.14699C6.84839 1.38917 4.84732 1.07324 3.22983 1.8126C1.65962 2.53035 0.583252 4.18982 0.583252 6.0914H2.08325ZM5.51009 13.1962C5.84928 13.4636 6.22932 13.7618 6.61834 13.9891C7.00711 14.2163 7.47619 14.4167 7.99992 14.4167V12.9167C7.85698 12.9167 7.65939 12.8601 7.37512 12.694C7.0911 12.5281 6.79171 12.2965 6.43872 12.0183L5.51009 13.1962ZM10.4897 13.1962C11.426 12.4582 12.6694 11.5788 13.6424 10.4832C14.641 9.35867 15.4166 7.94644 15.4166 6.0914H13.9166C13.9166 7.47831 13.3523 8.55085 12.5208 9.48717C11.6636 10.4524 10.5864 11.21 9.56112 12.0183L10.4897 13.1962ZM15.4166 6.0914C15.4166 4.18982 14.3402 2.53035 12.77 1.8126C11.1525 1.07324 9.15145 1.38917 7.45955 3.14699L8.54028 4.18719C9.84828 2.82823 11.1805 2.73533 12.1464 3.17683C13.1596 3.63995 13.9166 4.75102 13.9166 6.0914H15.4166ZM9.56112 12.0183C9.20813 12.2965 8.90874 12.5281 8.62471 12.694C8.34044 12.8601 8.14285 12.9167 7.99992 12.9167V14.4167C8.52365 14.4167 8.99273 14.2163 9.3815 13.9891C9.77052 13.7618 10.1506 13.4636 10.4897 13.1962L9.56112 12.0183Z" fill="" />

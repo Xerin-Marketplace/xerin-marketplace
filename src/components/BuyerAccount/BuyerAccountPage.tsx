@@ -154,10 +154,10 @@ export default function BuyerDashboard() {
             </p>
           </div>
           <div className="flex flex-wrap gap-2">
-            <Link href="/shop-with-sidebar" className="rounded-xl bg-[#f7941d] px-4 py-2.5 text-sm font-bold text-black transition hover:bg-[#ffab43]">
+            <Link href="/shop-with-sidebar" className="rounded-[10px] bg-[#f7941d] px-4 py-2.5 text-sm font-bold text-black transition hover:bg-[#ffab43]">
               Shop Products
             </Link>
-            <Link href="/account/orders" className="rounded-xl border border-white/20 px-4 py-2.5 text-sm font-semibold transition hover:bg-white/10">
+            <Link href="/account/orders" className="rounded-[10px] border border-white/20 px-4 py-2.5 text-sm font-semibold transition hover:bg-white/10">
               Track Orders
             </Link>
           </div>
@@ -340,7 +340,7 @@ function EmptyOrders() {
       <ShoppingBag className="mx-auto text-[#f7941d]" size={26} />
       <p className="mt-3 font-bold text-[#111827] dark:text-white">No orders yet</p>
       <p className="mt-1 text-sm text-[#64748b]">Your recent purchases will appear here.</p>
-      <Link href="/shop-with-sidebar" className="mt-4 inline-flex rounded-xl bg-[#f7941d] px-4 py-2 text-sm font-bold text-black">Start shopping</Link>
+      <Link href="/shop-with-sidebar" className="mt-4 inline-flex rounded-[10px] bg-[#f7941d] px-4 py-2 text-sm font-bold text-black">Start shopping</Link>
     </div>
   );
 }

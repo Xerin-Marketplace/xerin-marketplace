@@ -140,7 +140,7 @@ const MyAccount = () => {
                   <div className="flex flex-wrap xl:flex-nowrap xl:flex-col gap-4">
                     <button
                       onClick={() => setActiveTab("dashboard")}
-                      className={`flex items-center rounded-md gap-2.5 py-3 px-4.5 ease-out duration-200 hover:bg-blue hover:text-white ${
+                      className={`flex items-center rounded-[10px] gap-2.5 py-3 px-4.5 ease-out duration-200 hover:bg-blue hover:text-white ${
                         activeTab === "dashboard"
                           ? "text-white bg-blue"
                           : "text-dark-2 dark:text-darkTheme-body-color bg-gray-1 dark:bg-darkTheme-secondary-bg"
@@ -183,7 +183,7 @@ const MyAccount = () => {
                     </button>
                     <button
                       onClick={() => setActiveTab("orders")}
-                      className={`flex items-center rounded-md gap-2.5 py-3 px-4.5 ease-out duration-200 hover:bg-blue hover:text-white ${
+                      className={`flex items-center rounded-[10px] gap-2.5 py-3 px-4.5 ease-out duration-200 hover:bg-blue hover:text-white ${
                         activeTab === "orders"
                           ? "text-white bg-blue"
                           : "text-dark-2 dark:text-darkTheme-body-color bg-gray-1 dark:bg-darkTheme-secondary-bg"
@@ -221,7 +221,7 @@ const MyAccount = () => {
 
                     <button
                       onClick={() => setActiveTab("payments")}
-                      className={`flex items-center rounded-md gap-2.5 py-3 px-4.5 ease-out duration-200 hover:bg-blue hover:text-white ${
+                      className={`flex items-center rounded-[10px] gap-2.5 py-3 px-4.5 ease-out duration-200 hover:bg-blue hover:text-white ${
                         activeTab === "payments"
                           ? "text-white bg-blue"
                           : "text-dark-2 dark:text-darkTheme-body-color bg-gray-1 dark:bg-darkTheme-secondary-bg"
@@ -249,7 +249,7 @@ const MyAccount = () => {
 
                     <button
                       onClick={() => setActiveTab("addresses")}
-                      className={`flex items-center rounded-md gap-2.5 py-3 px-4.5 ease-out duration-200 hover:bg-blue hover:text-white ${
+                      className={`flex items-center rounded-[10px] gap-2.5 py-3 px-4.5 ease-out duration-200 hover:bg-blue hover:text-white ${
                         activeTab === "addresses"
                           ? "text-white bg-blue"
                           : "text-dark-2 dark:text-darkTheme-body-color bg-gray-1 dark:bg-darkTheme-secondary-bg"
@@ -279,7 +279,7 @@ const MyAccount = () => {
 
                     <button
                       onClick={() => setActiveTab("cart")}
-                      className={`flex items-center rounded-md gap-2.5 py-3 px-4.5 ease-out duration-200 hover:bg-blue hover:text-white ${
+                      className={`flex items-center rounded-[10px] gap-2.5 py-3 px-4.5 ease-out duration-200 hover:bg-blue hover:text-white ${
                         activeTab === "cart"
                           ? "text-white bg-blue"
                           : "text-dark-2 dark:text-darkTheme-body-color bg-gray-1 dark:bg-darkTheme-secondary-bg"
@@ -293,7 +293,7 @@ const MyAccount = () => {
 
                     <button
                       onClick={() => setActiveTab("wishlist")}
-                      className={`flex items-center rounded-md gap-2.5 py-3 px-4.5 ease-out duration-200 hover:bg-blue hover:text-white ${
+                      className={`flex items-center rounded-[10px] gap-2.5 py-3 px-4.5 ease-out duration-200 hover:bg-blue hover:text-white ${
                         activeTab === "wishlist"
                           ? "text-white bg-blue"
                           : "text-dark-2 dark:text-darkTheme-body-color bg-gray-1 dark:bg-darkTheme-secondary-bg"
@@ -307,7 +307,7 @@ const MyAccount = () => {
 
                     <button
                       onClick={() => setActiveTab("reviews")}
-                      className={`flex items-center rounded-md gap-2.5 py-3 px-4.5 ease-out duration-200 hover:bg-blue hover:text-white ${
+                      className={`flex items-center rounded-[10px] gap-2.5 py-3 px-4.5 ease-out duration-200 hover:bg-blue hover:text-white ${
                         activeTab === "reviews"
                           ? "text-white bg-blue"
                           : "text-dark-2 dark:text-darkTheme-body-color bg-gray-1 dark:bg-darkTheme-secondary-bg"
@@ -321,7 +321,7 @@ const MyAccount = () => {
 
                     <button
                       onClick={() => setActiveTab("notifications")}
-                      className={`flex items-center rounded-md gap-2.5 py-3 px-4.5 ease-out duration-200 hover:bg-blue hover:text-white ${
+                      className={`flex items-center rounded-[10px] gap-2.5 py-3 px-4.5 ease-out duration-200 hover:bg-blue hover:text-white ${
                         activeTab === "notifications"
                           ? "text-white bg-blue"
                           : "text-dark-2 dark:text-darkTheme-body-color bg-gray-1 dark:bg-darkTheme-secondary-bg"
@@ -335,7 +335,7 @@ const MyAccount = () => {
 
                     <button
                       onClick={() => setActiveTab("security")}
-                      className={`flex items-center rounded-md gap-2.5 py-3 px-4.5 ease-out duration-200 hover:bg-blue hover:text-white ${
+                      className={`flex items-center rounded-[10px] gap-2.5 py-3 px-4.5 ease-out duration-200 hover:bg-blue hover:text-white ${
                         activeTab === "security"
                           ? "text-white bg-blue"
                           : "text-dark-2 dark:text-darkTheme-body-color bg-gray-1 dark:bg-darkTheme-secondary-bg"
@@ -349,7 +349,7 @@ const MyAccount = () => {
 
                     <button
                       onClick={() => setActiveTab("account-details")}
-                      className={`flex items-center rounded-md gap-2.5 py-3 px-4.5 ease-out duration-200 hover:bg-blue hover:text-white ${
+                      className={`flex items-center rounded-[10px] gap-2.5 py-3 px-4.5 ease-out duration-200 hover:bg-blue hover:text-white ${
                         activeTab === "account-details"
                           ? "text-white bg-blue"
                           : "text-dark-2 dark:text-darkTheme-body-color bg-gray-1 dark:bg-darkTheme-secondary-bg"
@@ -381,7 +381,7 @@ const MyAccount = () => {
 
                     <button
                       onClick={handleLogout}
-                      className={`flex items-center rounded-md gap-2.5 py-3 px-4.5 ease-out duration-200 hover:bg-blue hover:text-white ${
+                      className={`flex items-center rounded-[10px] gap-2.5 py-3 px-4.5 ease-out duration-200 hover:bg-blue hover:text-white ${
                         activeTab === "logout"
                           ? "text-white bg-blue"
                           : "text-dark-2 dark:text-darkTheme-body-color bg-gray-1 dark:bg-darkTheme-secondary-bg"
@@ -516,21 +516,21 @@ const MyAccount = () => {
                   <div className="flex flex-wrap gap-3">
                     <Link
                       href="/shop-with-sidebar"
-                      className="inline-flex rounded-md bg-blue px-5 py-3 text-custom-sm font-medium text-white hover:bg-blue-dark"
+                      className="inline-flex rounded-[10px] bg-blue px-5 py-3 text-custom-sm font-medium text-white hover:bg-blue-dark"
                     >
                       Continue Shopping
                     </Link>
 
                     <Link
                       href="/cart"
-                      className="inline-flex rounded-md bg-gray-1 dark:bg-darkTheme-secondary-bg px-5 py-3 text-custom-sm font-medium text-dark dark:text-white hover:text-blue"
+                      className="inline-flex rounded-[10px] bg-gray-1 dark:bg-darkTheme-secondary-bg px-5 py-3 text-custom-sm font-medium text-dark dark:text-white hover:text-blue"
                     >
                       View Cart
                     </Link>
 
                     <button
                       onClick={() => setActiveTab("addresses")}
-                      className="inline-flex rounded-md bg-gray-1 dark:bg-darkTheme-secondary-bg px-5 py-3 text-custom-sm font-medium text-dark dark:text-white hover:text-blue"
+                      className="inline-flex rounded-[10px] bg-gray-1 dark:bg-darkTheme-secondary-bg px-5 py-3 text-custom-sm font-medium text-dark dark:text-white hover:text-blue"
                     >
                       Manage Addresses
                     </button>
@@ -586,7 +586,7 @@ const MyAccount = () => {
 
                   <Link
                     href="/orders"
-                    className="inline-flex w-fit rounded-md bg-blue px-5 py-3 text-custom-sm font-medium text-white hover:bg-blue-dark"
+                    className="inline-flex w-fit rounded-[10px] bg-blue px-5 py-3 text-custom-sm font-medium text-white hover:bg-blue-dark"
                   >
                     Open Orders Page
                   </Link>
@@ -752,14 +752,14 @@ const MyAccount = () => {
               <div className="mt-6 flex flex-wrap gap-3">
                 <Link
                   href="/cart"
-                  className="inline-flex rounded-md bg-blue px-5 py-3 text-custom-sm font-medium text-white hover:bg-blue-dark"
+                  className="inline-flex rounded-[10px] bg-blue px-5 py-3 text-custom-sm font-medium text-white hover:bg-blue-dark"
                 >
                   Open Cart
                 </Link>
 
                 <Link
                   href="/checkout"
-                  className="inline-flex rounded-md bg-gray-1 dark:bg-darkTheme-secondary-bg px-5 py-3 text-custom-sm font-medium text-dark dark:text-white hover:text-blue"
+                  className="inline-flex rounded-[10px] bg-gray-1 dark:bg-darkTheme-secondary-bg px-5 py-3 text-custom-sm font-medium text-dark dark:text-white hover:text-blue"
                 >
                   Proceed to Checkout
                 </Link>
@@ -791,7 +791,7 @@ const MyAccount = () => {
 
               <Link
                 href="/wishlist"
-                className="mt-6 inline-flex rounded-md bg-blue px-5 py-3 text-custom-sm font-medium text-white hover:bg-blue-dark"
+                className="mt-6 inline-flex rounded-[10px] bg-blue px-5 py-3 text-custom-sm font-medium text-white hover:bg-blue-dark"
               >
                 Open Wishlist
               </Link>

@@ -46,13 +46,13 @@ const CommerceFlow = () => {
               <div className="flex flex-wrap gap-3">
                 <Link
                   href={ROUTES.shop}
-                  className="inline-flex items-center justify-center rounded-md bg-dark dark:bg-darkTheme-tertiary-bg px-5 py-3 text-sm font-medium text-white transition-colors duration-200 hover:bg-opacity-90"
+                  className="inline-flex items-center justify-center rounded-[10px] bg-dark dark:bg-darkTheme-tertiary-bg px-5 py-3 text-sm font-medium text-white transition-colors duration-200 hover:bg-opacity-90"
                 >
                   Start shopping
                 </Link>
                 <Link
                   href={ROUTES.trackOrder}
-                  className="inline-flex items-center justify-center rounded-md border border-gray-3 dark:border-darkTheme-border-color bg-gray-1 dark:bg-darkTheme-secondary-bg px-5 py-3 text-sm font-medium text-dark dark:text-darkTheme-body-color transition-colors duration-200 hover:bg-dark hover:text-white dark:hover:bg-darkTheme-tertiary-bg"
+                  className="inline-flex items-center justify-center rounded-[10px] border border-gray-3 dark:border-darkTheme-border-color bg-gray-1 dark:bg-darkTheme-secondary-bg px-5 py-3 text-sm font-medium text-dark dark:text-darkTheme-body-color transition-colors duration-200 hover:bg-dark hover:text-white dark:hover:bg-darkTheme-tertiary-bg"
                 >
                   Track order
                 </Link>
@@ -87,7 +87,7 @@ const CommerceFlow = () => {
               ].map((item) => (
                 <div
                   key={item}
-                  className="rounded-xl border border-dashed border-gray-3 dark:border-darkTheme-border-color px-4 py-3 text-sm font-medium text-dark dark:text-darkTheme-body-color"
+                  className="rounded-[10px] border border-dashed border-gray-3 dark:border-darkTheme-border-color px-4 py-3 text-sm font-medium text-dark dark:text-darkTheme-body-color"
                 >
                   {item}
                 </div>

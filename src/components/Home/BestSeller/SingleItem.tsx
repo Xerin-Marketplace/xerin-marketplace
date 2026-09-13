@@ -207,7 +207,7 @@ const SingleItem = ({ item }: { item: Product }) => {
                 handleQuickViewUpdate();
                 openModal();
               }}
-              className="inline-flex items-center justify-center rounded-md bg-dark px-4 py-2 text-xs font-semibold text-white transition-colors duration-200 hover:bg-opacity-90 dark:bg-darkTheme-tertiary-bg"
+              className="inline-flex items-center justify-center rounded-[10px] bg-dark px-4 py-2 text-xs font-semibold text-white transition-colors duration-200 hover:bg-opacity-90 dark:bg-darkTheme-tertiary-bg"
             >
               Quick view
             </button>

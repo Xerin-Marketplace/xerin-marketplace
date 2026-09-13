@@ -40,7 +40,7 @@ const SingleListItem = ({ item }: { item: Product }) => {
   };
 
   return (
-    <div className="group rounded-lg bg-white shadow-1">
+    <div className="group rounded-[10px] bg-white shadow-1">
       <div className="flex">
         <div className="shadow-list relative overflow-hidden flex items-center justify-center max-w-[270px] w-full sm:min-h-[270px] p-4">
           <Image src={item.imgs.previews[0]} alt="" width={250} height={250} />
@@ -52,7 +52,7 @@ const SingleListItem = ({ item }: { item: Product }) => {
                 handleQuickViewUpdate();
               }}
               aria-label="button for quick view"
-              className="flex items-center justify-center w-9 h-9 rounded-[5px] shadow-1 ease-out duration-200 text-dark bg-white hover:text-blue"
+              className="flex items-center justify-center w-9 h-9 rounded-[10px] shadow-1 ease-out duration-200 text-dark bg-white hover:text-blue"
             >
               <svg
                 className="fill-current"
@@ -80,7 +80,7 @@ const SingleListItem = ({ item }: { item: Product }) => {
             <button
               onClick={() => handleAddToCart()}
               disabled={addCartItem.isPending}
-              className="inline-flex font-medium text-custom-sm py-[7px] px-5 rounded-[5px] bg-blue text-white ease-out duration-200 hover:bg-blue-dark disabled:opacity-50"
+              className="inline-flex font-medium text-custom-sm py-[7px] px-5 rounded-[10px] bg-blue text-white ease-out duration-200 hover:bg-blue-dark disabled:opacity-50"
             >
               {addCartItem.isPending ? "Adding..." : "Add to cart"}
             </button>
@@ -89,7 +89,7 @@ const SingleListItem = ({ item }: { item: Product }) => {
               onClick={() => handleItemToWishList()}
               disabled={addToWishlist.isPending}
               aria-label="button for favorite select"
-              className="flex items-center justify-center w-9 h-9 rounded-[5px] shadow-1 ease-out duration-200 text-dark bg-white hover:text-blue disabled:opacity-50"
+              className="flex items-center justify-center w-9 h-9 rounded-[10px] shadow-1 ease-out duration-200 text-dark bg-white hover:text-blue disabled:opacity-50"
             >
               <svg
                 className="fill-current"

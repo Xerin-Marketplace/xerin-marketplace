@@ -36,7 +36,7 @@ const SingleItem = ({ item }: { item: WishListItem }) => {
           onClick={() => handleRemoveFromWishlist()}
           disabled={removeFromBackend.isPending}
           aria-label="button for remove product from wishlist"
-          className="flex items-center justify-center rounded-lg max-w-[38px] w-full h-9.5 bg-gray-2 dark:bg-darkTheme-secondary-bg border border-gray-3 dark:border-darkTheme-border-color dark:text-darkTheme-body-color ease-out duration-200 hover:bg-red-light-6 hover:border-red-light-4 hover:text-red disabled:opacity-50"
+          className="flex items-center justify-center rounded-[10px] max-w-[38px] w-full h-9.5 bg-gray-2 dark:bg-darkTheme-secondary-bg border border-gray-3 dark:border-darkTheme-border-color dark:text-darkTheme-body-color ease-out duration-200 hover:bg-red-light-6 hover:border-red-light-4 hover:text-red disabled:opacity-50"
         >
           <svg
             className="fill-current"

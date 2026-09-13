@@ -104,7 +104,7 @@ export default function ProductSpecifications({
           <div className="mb-4 h-5 w-44 animate-pulse rounded bg-gray-2 dark:bg-darkTheme-secondary-bg" />
           <div className="grid grid-cols-2 gap-2.5 sm:grid-cols-3">
             {[0, 1, 2, 3, 4, 5].map((item) => (
-              <div key={item} className="h-[72px] animate-pulse rounded-xl bg-gray-2 dark:bg-darkTheme-secondary-bg" />
+              <div key={item} className="h-[72px] animate-pulse rounded-[10px] bg-gray-2 dark:bg-darkTheme-secondary-bg" />
             ))}
           </div>
         </div>
@@ -119,7 +119,7 @@ export default function ProductSpecifications({
       <div className="mt-6 rounded-2xl border border-gray-3 bg-[#fbfcfd] p-4 dark:border-darkTheme-border-color dark:bg-darkTheme-card sm:p-5">
         <div className="mb-4 flex items-center justify-between gap-3">
           <div className="flex min-w-0 items-center gap-2.5">
-            <span className="flex h-9 w-9 shrink-0 items-center justify-center rounded-xl bg-orange/10 text-orange">
+            <span className="flex h-9 w-9 shrink-0 items-center justify-center rounded-[10px] bg-orange/10 text-orange">
               <svg width="20" height="20" viewBox="0 0 24 24" fill="none" aria-hidden="true"><path d="M7 3h8l4 4v14H7V3Z" stroke="currentColor" strokeWidth="1.7" strokeLinejoin="round"/><path d="M15 3v5h4M10 12h6m-6 4h6" stroke="currentColor" strokeWidth="1.7" strokeLinecap="round"/></svg>
             </span>
             <div className="min-w-0">
@@ -134,8 +134,8 @@ export default function ProductSpecifications({
 
         <dl className="grid grid-cols-2 gap-2.5 sm:grid-cols-3">
           {overviewSpecs.map((spec) => (
-            <div key={String(spec.id)} className="flex min-h-[72px] items-start gap-2.5 rounded-xl border border-gray-3 bg-white p-3 dark:border-darkTheme-border-color dark:bg-darkTheme-secondary-bg sm:p-3.5">
-              <span className="flex h-8 w-8 shrink-0 items-center justify-center rounded-lg bg-orange/10 text-orange sm:h-9 sm:w-9">
+            <div key={String(spec.id)} className="flex min-h-[72px] items-start gap-2.5 rounded-[10px] border border-gray-3 bg-white p-3 dark:border-darkTheme-border-color dark:bg-darkTheme-secondary-bg sm:p-3.5">
+              <span className="flex h-8 w-8 shrink-0 items-center justify-center rounded-[10px] bg-orange/10 text-orange sm:h-9 sm:w-9">
                 <SpecIcon spec={spec} />
               </span>
               <div className="min-w-0">
@@ -163,7 +163,7 @@ export default function ProductSpecifications({
         </div>
         <div className="mt-5 grid gap-3 sm:grid-cols-2">
           {[0, 1, 2, 3].map((item) => (
-            <div key={item} className="h-14 animate-pulse rounded-xl bg-gray-2 dark:bg-darkTheme-secondary-bg" />
+            <div key={item} className="h-14 animate-pulse rounded-[10px] bg-gray-2 dark:bg-darkTheme-secondary-bg" />
           ))}
         </div>
       </div>
@@ -181,7 +181,7 @@ export default function ProductSpecifications({
     >
       <div className="flex items-start justify-between gap-4 border-b border-gray-3 pb-4 dark:border-darkTheme-border-color">
         <div className="flex items-center gap-3">
-          <span className="flex h-10 w-10 shrink-0 items-center justify-center rounded-xl bg-orange/10 text-orange">
+          <span className="flex h-10 w-10 shrink-0 items-center justify-center rounded-[10px] bg-orange/10 text-orange">
             <svg width="21" height="21" viewBox="0 0 24 24" fill="none" aria-hidden="true"><path d="M7 3h8l4 4v14H7V3Z" stroke="currentColor" strokeWidth="1.7" strokeLinejoin="round"/><path d="M15 3v5h4M10 12h6m-6 4h6" stroke="currentColor" strokeWidth="1.7" strokeLinecap="round"/></svg>
           </span>
           <div>
@@ -194,13 +194,13 @@ export default function ProductSpecifications({
         </span>
       </div>
 
-      <dl className="mt-5 grid overflow-hidden rounded-xl border border-gray-3 dark:border-darkTheme-border-color sm:grid-cols-2">
+      <dl className="mt-5 grid overflow-hidden rounded-[10px] border border-gray-3 dark:border-darkTheme-border-color sm:grid-cols-2">
         {specifications.map((spec, index) => (
           <div
             key={String(spec.id)}
             className={`flex min-h-[76px] items-start gap-3 border-gray-3 px-4 py-3.5 dark:border-darkTheme-border-color sm:px-5 ${index < specifications.length - (specifications.length % 2 || 2) ? "sm:border-b" : ""} ${index % 2 === 0 ? "sm:border-r" : ""} ${index !== specifications.length - 1 ? "border-b sm:border-b-0" : ""}`}
           >
-            <span className="flex h-9 w-9 shrink-0 items-center justify-center rounded-lg bg-gray-2 text-orange dark:bg-darkTheme-secondary-bg">
+            <span className="flex h-9 w-9 shrink-0 items-center justify-center rounded-[10px] bg-gray-2 text-orange dark:bg-darkTheme-secondary-bg">
               <SpecIcon spec={spec} />
             </span>
             <div className="min-w-0">

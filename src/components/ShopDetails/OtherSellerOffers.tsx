@@ -85,7 +85,7 @@ export function OtherSellerOffersButton({
     >
       <span className="flex flex-wrap items-center justify-between gap-2.5 border-b border-gray-3 bg-[#f8fbff] px-3.5 py-3 dark:border-darkTheme-border-color dark:bg-white/[0.03] sm:px-4">
         <span className="flex min-w-0 items-center gap-2.5">
-          <span className="flex h-9 w-9 shrink-0 items-center justify-center rounded-xl bg-[#eaf4ff] text-blue shadow-sm dark:bg-blue/15">
+          <span className="flex h-9 w-9 shrink-0 items-center justify-center rounded-[10px] bg-[#eaf4ff] text-blue shadow-sm dark:bg-blue/15">
             <SellerOffersIcon className="h-5 w-5" />
           </span>
           <span className="min-w-0">
@@ -249,7 +249,7 @@ export default function OtherSellerOffersModal({
                 return (
                   <div key={String(match.product.id)} className="rounded-2xl border border-gray-3 bg-white p-3.5 transition hover:border-orange/50 hover:shadow-sm dark:border-darkTheme-border-color dark:bg-darkTheme-card">
                     <div className="flex gap-3">
-                      <div className="relative h-24 w-24 shrink-0 overflow-hidden rounded-xl bg-[#f5f7fa] p-2 dark:bg-white/5">
+                      <div className="relative h-24 w-24 shrink-0 overflow-hidden rounded-[10px] bg-[#f5f7fa] p-2 dark:bg-white/5">
                         <Image src={imageFor(match)} alt={match.product.name} fill className="object-contain p-2" sizes="96px" />
                       </div>
                       <div className="min-w-0 flex-1">
@@ -280,7 +280,7 @@ export default function OtherSellerOffersModal({
                     <Link
                       href={`/products/${match.product.id}`}
                       onClick={onClose}
-                      className="mt-3 inline-flex min-h-10 w-full items-center justify-center gap-2 rounded-xl bg-orange px-4 text-xs font-bold text-white transition hover:bg-[#e95f23]"
+                      className="mt-3 inline-flex min-h-10 w-full items-center justify-center gap-2 rounded-[10px] bg-orange px-4 text-xs font-bold text-white transition hover:bg-[#e95f23]"
                     >
                       View this seller&apos;s offer
                       <svg width="15" height="15" viewBox="0 0 24 24" fill="none" aria-hidden="true"><path d="m9 18 6-6-6-6" stroke="currentColor" strokeWidth="1.9" strokeLinecap="round" strokeLinejoin="round"/></svg>

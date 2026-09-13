@@ -46,7 +46,7 @@ const HeroCarousel = () => {
 
             <a
               href={ROUTES.shop}
-              className="mt-4 inline-flex rounded-lg bg-orange px-5 py-2.5 text-xs font-bold text-white transition hover:bg-[#e95f23] sm:mt-8 sm:px-7 sm:py-3 sm:text-sm xl:px-9"
+              className="mt-4 inline-flex rounded-[10px] bg-orange px-5 py-2.5 text-xs font-bold text-white transition hover:bg-[#e95f23] sm:mt-8 sm:px-7 sm:py-3 sm:text-sm xl:px-9"
             >
               Shop Now
             </a>
@@ -90,7 +90,7 @@ const HeroCarousel = () => {
 
             <a
               href={ROUTES.sellerRegister}
-              className="mt-4 inline-flex rounded-lg bg-orange px-5 py-2.5 text-xs font-bold text-white transition hover:bg-[#e95f23] sm:mt-8 sm:px-7 sm:py-3 sm:text-sm xl:px-9"
+              className="mt-4 inline-flex rounded-[10px] bg-orange px-5 py-2.5 text-xs font-bold text-white transition hover:bg-[#e95f23] sm:mt-8 sm:px-7 sm:py-3 sm:text-sm xl:px-9"
             >
               Start Selling
             </a>

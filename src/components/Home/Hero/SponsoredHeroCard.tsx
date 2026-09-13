@@ -75,7 +75,7 @@ function SponsoredCardContents({
         </div>
 
         {advertisement.target_url ? (
-          <span className="mt-4 inline-flex w-fit items-center rounded-lg bg-[#f47524] px-4 py-2.5 text-sm font-bold text-white transition group-hover:bg-[#df6519]">
+          <span className="mt-4 inline-flex w-fit items-center rounded-[10px] bg-[#f47524] px-4 py-2.5 text-sm font-bold text-white transition group-hover:bg-[#df6519]">
             {advertisement.cta_label || "Learn More"}
           </span>
         ) : null}

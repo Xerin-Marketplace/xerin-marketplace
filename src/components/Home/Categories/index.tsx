@@ -205,7 +205,7 @@ const Categories = () => {
           </div>
 
           <details className="group relative shrink-0">
-            <summary className="flex cursor-pointer list-none items-center gap-2 rounded-lg border border-gray-3 bg-white px-3 py-2 text-xs font-bold text-dark shadow-sm transition hover:border-orange hover:text-orange dark:border-darkTheme-border-color dark:bg-darkTheme-card dark:text-white sm:px-4 sm:py-2.5 sm:text-sm">
+            <summary className="flex cursor-pointer list-none items-center gap-2 rounded-[10px] border border-gray-3 bg-white px-3 py-2 text-xs font-bold text-dark shadow-sm transition hover:border-orange hover:text-orange dark:border-darkTheme-border-color dark:bg-darkTheme-card dark:text-white sm:px-4 sm:py-2.5 sm:text-sm">
               <span className="max-w-[180px] truncate">{selectedLocationLabel}</span>
               <svg width="14" height="14" viewBox="0 0 24 24" fill="none" aria-hidden="true" className="transition group-open:rotate-180">
                 <path d="m6 9 6 6 6-6" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" />
@@ -230,7 +230,7 @@ const Categories = () => {
                     setPage(1);
                     (event.currentTarget.closest("details") as HTMLDetailsElement | null)?.removeAttribute("open");
                   }}
-                  className={`flex w-full items-start gap-3 rounded-xl px-3 py-2.5 text-left transition ${
+                  className={`flex w-full items-start gap-3 rounded-[10px] px-3 py-2.5 text-left transition ${
                     locationFilter === item.value
                       ? "bg-orange/10 text-orange"
                       : "text-dark hover:bg-gray-1 dark:text-white dark:hover:bg-darkTheme-secondary-bg"
@@ -261,7 +261,7 @@ const Categories = () => {
                             setPage(1);
                             (event.currentTarget.closest("details") as HTMLDetailsElement | null)?.removeAttribute("open");
                           }}
-                          className={`flex w-full items-center gap-2 rounded-xl px-3 py-2 text-left text-sm font-medium transition ${
+                          className={`flex w-full items-center gap-2 rounded-[10px] px-3 py-2 text-left text-sm font-medium transition ${
                             locationFilter === value
                               ? "bg-orange/10 text-orange"
                               : "text-dark hover:bg-gray-1 dark:text-white dark:hover:bg-darkTheme-secondary-bg"
@@ -279,7 +279,7 @@ const Categories = () => {
               <div className="mt-2 border-t border-gray-3 p-2 dark:border-darkTheme-border-color">
                 <Link
                   href="/shop-with-sidebar"
-                  className="flex w-full items-center justify-center rounded-lg bg-dark px-4 py-2.5 text-xs font-semibold text-white transition hover:bg-orange dark:bg-white dark:text-dark"
+                  className="flex w-full items-center justify-center rounded-[10px] bg-dark px-4 py-2.5 text-xs font-semibold text-white transition hover:bg-orange dark:bg-white dark:text-dark"
                 >
                   Open full shop
                 </Link>
@@ -347,7 +347,7 @@ const Categories = () => {
                 value={searchInput}
                 onChange={(event) => setSearchInput(event.target.value)}
                 placeholder="Search products by name, description or SKU..."
-                className="h-12 w-full rounded-xl border border-gray-3 bg-gray-1 pl-11 pr-4 text-sm text-dark outline-none transition focus:border-orange focus:ring-2 focus:ring-orange/10 dark:border-darkTheme-border-color dark:bg-darkTheme-secondary-bg dark:text-white"
+                className="h-12 w-full rounded-[10px] border border-gray-3 bg-gray-1 pl-11 pr-4 text-sm text-dark outline-none transition focus:border-orange focus:ring-2 focus:ring-orange/10 dark:border-darkTheme-border-color dark:bg-darkTheme-secondary-bg dark:text-white"
               />
             </div>
 
@@ -357,7 +357,7 @@ const Categories = () => {
                 setCategoryId(event.target.value);
                 setPage(1);
               }}
-              className="h-12 rounded-xl border border-gray-3 bg-gray-1 px-4 text-sm text-dark outline-none transition focus:border-orange focus:ring-2 focus:ring-orange/10 dark:border-darkTheme-border-color dark:bg-darkTheme-secondary-bg dark:text-white"
+              className="h-12 rounded-[10px] border border-gray-3 bg-gray-1 px-4 text-sm text-dark outline-none transition focus:border-orange focus:ring-2 focus:ring-orange/10 dark:border-darkTheme-border-color dark:bg-darkTheme-secondary-bg dark:text-white"
               aria-label="Filter products by category"
             >
               <option value="">All categories</option>
@@ -370,7 +370,7 @@ const Categories = () => {
 
             <button
               type="submit"
-              className="h-12 rounded-xl bg-orange px-6 text-sm font-semibold text-white transition hover:bg-orange-dark disabled:cursor-not-allowed disabled:opacity-60"
+              className="h-12 rounded-[10px] bg-orange px-6 text-sm font-semibold text-white transition hover:bg-orange-dark disabled:cursor-not-allowed disabled:opacity-60"
               disabled={isFetching}
             >
               {isFetching && !isLoading ? "Searching..." : "Search"}
@@ -447,7 +447,7 @@ const Categories = () => {
             <button
               type="button"
               onClick={() => void refetch()}
-              className="mt-5 rounded-lg bg-red-600 px-5 py-2.5 text-sm font-semibold text-white"
+              className="mt-5 rounded-[10px] bg-red-600 px-5 py-2.5 text-sm font-semibold text-white"
             >
               Retry
             </button>
@@ -462,7 +462,7 @@ const Categories = () => {
               <button
                 type="button"
                 onClick={clearFilters}
-                className="mt-5 rounded-lg bg-orange px-5 py-2.5 text-sm font-semibold text-white"
+                className="mt-5 rounded-[10px] bg-orange px-5 py-2.5 text-sm font-semibold text-white"
               >
                 Show all products
               </button>
@@ -483,7 +483,7 @@ const Categories = () => {
               return (
                 <article
                   key={String(product.id)}
-                  className="group flex h-full min-w-0 flex-col overflow-hidden rounded-xl border border-gray-3 bg-white shadow-sm transition duration-300 hover:shadow-lg dark:border-darkTheme-border-color dark:bg-darkTheme-card sm:rounded-2xl sm:hover:-translate-y-1"
+                  className="group flex h-full min-w-0 flex-col overflow-hidden rounded-[10px] border border-gray-3 bg-white shadow-sm transition duration-300 hover:shadow-lg dark:border-darkTheme-border-color dark:bg-darkTheme-card sm:hover:-translate-y-1"
                 >
                   <Link
                     href={`/products/${product.id}`}
@@ -592,7 +592,7 @@ const Categories = () => {
                       </div>
                       <Link
                         href={`/products/${product.id}`}
-                        className="hidden items-center justify-center rounded-lg bg-dark px-4 py-2.5 text-xs font-semibold text-white transition hover:bg-orange dark:bg-white dark:text-dark dark:hover:bg-orange dark:hover:text-white sm:inline-flex"
+                        className="hidden items-center justify-center rounded-[10px] bg-dark px-4 py-2.5 text-xs font-semibold text-white transition hover:bg-orange dark:bg-white dark:text-dark dark:hover:bg-orange dark:hover:text-white sm:inline-flex"
                       >
                         View product
                       </Link>
@@ -614,12 +614,12 @@ const Categories = () => {
                 window.scrollTo({ top: 0, behavior: "smooth" });
               }}
               disabled={page === 1 || isFetching}
-              className="inline-flex h-10 items-center justify-center rounded-lg border border-gray-3 bg-white px-4 text-sm font-semibold text-dark transition hover:border-orange hover:text-orange disabled:cursor-not-allowed disabled:opacity-40 dark:border-darkTheme-border-color dark:bg-darkTheme-card dark:text-white"
+              className="inline-flex h-10 items-center justify-center rounded-[10px] border border-gray-3 bg-white px-4 text-sm font-semibold text-dark transition hover:border-orange hover:text-orange disabled:cursor-not-allowed disabled:opacity-40 dark:border-darkTheme-border-color dark:bg-darkTheme-card dark:text-white"
             >
               Previous
             </button>
 
-            <span className="inline-flex h-10 min-w-10 items-center justify-center rounded-lg bg-orange px-4 text-sm font-semibold text-white">
+            <span className="inline-flex h-10 min-w-10 items-center justify-center rounded-[10px] bg-orange px-4 text-sm font-semibold text-white">
               {page}
             </span>
 
@@ -630,7 +630,7 @@ const Categories = () => {
                 window.scrollTo({ top: 0, behavior: "smooth" });
               }}
               disabled={!hasNextPage || isFetching}
-              className="inline-flex h-10 items-center justify-center rounded-lg border border-gray-3 bg-white px-4 text-sm font-semibold text-dark transition hover:border-orange hover:text-orange disabled:cursor-not-allowed disabled:opacity-40 dark:border-darkTheme-border-color dark:bg-darkTheme-card dark:text-white"
+              className="inline-flex h-10 items-center justify-center rounded-[10px] border border-gray-3 bg-white px-4 text-sm font-semibold text-dark transition hover:border-orange hover:text-orange disabled:cursor-not-allowed disabled:opacity-40 dark:border-darkTheme-border-color dark:bg-darkTheme-card dark:text-white"
             >
               Next
             </button>

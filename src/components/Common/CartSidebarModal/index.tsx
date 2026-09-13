@@ -96,14 +96,14 @@ const CartSidebarModal = () => {
               <Link
                 onClick={() => closeCartModal()}
                 href="/cart"
-                className="flex h-12 w-full items-center justify-center rounded-xl bg-blue px-3 text-sm font-semibold text-white transition hover:bg-blue-dark sm:rounded-md sm:px-6 sm:font-medium"
+                className="flex h-12 w-full items-center justify-center rounded-[10px] bg-blue px-3 text-sm font-semibold text-white transition hover:bg-blue-dark sm:px-6 sm:font-medium"
               >
                 View Cart
               </Link>
 
               <Link
                 href={isAuthenticated ? "/checkout" : "/signin?redirect=/checkout"}
-                className="flex h-12 w-full items-center justify-center rounded-xl bg-dark px-3 text-sm font-semibold text-white transition hover:bg-opacity-95 sm:rounded-md sm:px-6 sm:font-medium"
+                className="flex h-12 w-full items-center justify-center rounded-[10px] bg-dark px-3 text-sm font-semibold text-white transition hover:bg-opacity-95 sm:px-6 sm:font-medium"
               >
                 Checkout
               </Link>

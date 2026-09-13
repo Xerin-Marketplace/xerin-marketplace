@@ -35,7 +35,7 @@ export const ROUTES = {
 
 export const APP_LINKS = {
   appStore: "#",
-  googlePlay: "#",
+  googlePlay: "https://play.google.com/store/apps/details?id=com.xerinmarket.com&pcampaignid=web_share",
 } as const;
 
 export const SOCIAL_LINKS = {

@@ -628,7 +628,7 @@ export default function SellerBusinessDocuments() {
               <p className="mt-1 text-sm">Review the administrator reason and use Edit on the document that must be corrected.</p>
               <div className="mt-3 space-y-2">
                 {rejectedDocuments.map((document) => (
-                  <div key={document.id} className="rounded-lg border border-red-200 bg-white/70 p-3">
+                  <div key={document.id} className="rounded-[10px] border border-red-200 bg-white/70 p-3">
                     <p className="text-xs font-semibold">{pretty(document.document_type)}</p>
                     <p className="mt-1 text-xs leading-5">{document.rejection_reason || "Correction requested by administrator."}</p>
                   </div>
@@ -677,7 +677,7 @@ export default function SellerBusinessDocuments() {
                       disabled={allSubmitted || submittingAll}
                       onChange={(event) => setBusinessLicenseNumber(event.target.value)}
                       placeholder="Licence number"
-                      className="h-10 rounded-lg border border-[#dfe4ea] bg-white px-3 text-xs outline-none focus:border-[#f7941d]"
+                      className="h-10 rounded-[10px] border border-[#dfe4ea] bg-white px-3 text-xs outline-none focus:border-[#f7941d]"
                     />
                     <label className="text-[11px] font-semibold text-[#64748b]">
                       Expiry date
@@ -687,7 +687,7 @@ export default function SellerBusinessDocuments() {
                         min={new Date().toISOString().slice(0, 10)}
                         disabled={allSubmitted || submittingAll}
                         onChange={(event) => setBusinessLicenseExpiryDate(event.target.value)}
-                        className="mt-1 h-10 w-full rounded-lg border border-[#dfe4ea] bg-white px-3 text-xs outline-none focus:border-[#f7941d]"
+                        className="mt-1 h-10 w-full rounded-[10px] border border-[#dfe4ea] bg-white px-3 text-xs outline-none focus:border-[#f7941d]"
                       />
                     </label>
                   </div>
@@ -702,8 +702,8 @@ export default function SellerBusinessDocuments() {
                 </label>
                 {selected && (
                   <div className="mt-3 flex gap-2">
-                    <button type="button" onClick={() => setLocalPreview({ title: `${pretty(type)} — before submission`, url: selected.previewUrl })} className="flex flex-1 items-center justify-center gap-1.5 rounded-lg border border-orange-200 bg-orange-50 px-3 py-2 text-xs font-semibold text-[#f7941d]"><Eye size={14} />Preview</button>
-                    <button type="button" onClick={() => selectInitialFile(type, null)} className="flex h-9 w-9 items-center justify-center rounded-lg border border-[#e7ebf0]"><X size={15} /></button>
+                    <button type="button" onClick={() => setLocalPreview({ title: `${pretty(type)} — before submission`, url: selected.previewUrl })} className="flex flex-1 items-center justify-center gap-1.5 rounded-[10px] border border-orange-200 bg-orange-50 px-3 py-2 text-xs font-semibold text-[#f7941d]"><Eye size={14} />Preview</button>
+                    <button type="button" onClick={() => selectInitialFile(type, null)} className="flex h-9 w-9 items-center justify-center rounded-[10px] border border-[#e7ebf0]"><X size={15} /></button>
                   </div>
                 )}
               </article>
@@ -711,7 +711,7 @@ export default function SellerBusinessDocuments() {
           })}
         </div>
 
-        <button type="button" onClick={() => void submitInitialDocuments()} disabled={allSubmitted || selectedCount !== required.length || submittingAll} className="mt-6 inline-flex h-11 items-center justify-center gap-2 rounded-xl bg-[#f7941d] px-5 text-sm font-semibold text-white disabled:cursor-not-allowed disabled:opacity-50">
+        <button type="button" onClick={() => void submitInitialDocuments()} disabled={allSubmitted || selectedCount !== required.length || submittingAll} className="mt-6 inline-flex h-11 items-center justify-center gap-2 rounded-[10px] bg-[#f7941d] px-5 text-sm font-semibold text-white disabled:cursor-not-allowed disabled:opacity-50">
           {submittingAll ? <><RefreshCw size={16} className="animate-spin" />Submitting...</> : <><Send size={16} />Submit All Documents</>}
         </button>
       </section>
@@ -730,24 +730,24 @@ export default function SellerBusinessDocuments() {
             return (
               <article key={document.id} className="rounded-xl border border-[#e7ebf0] p-4">
                 <div className="flex items-start justify-between gap-3">
-                  <span className={`flex h-9 w-9 items-center justify-center rounded-lg ${document.status === "rejected" ? "bg-red-50 text-red-600" : document.status === "under_review" ? "bg-blue-50 text-blue-600" : document.status === "approved" ? "bg-emerald-50 text-emerald-600" : "bg-amber-50 text-amber-600"}`}>
+                  <span className={`flex h-9 w-9 items-center justify-center rounded-[10px] ${document.status === "rejected" ? "bg-red-50 text-red-600" : document.status === "under_review" ? "bg-blue-50 text-blue-600" : document.status === "approved" ? "bg-emerald-50 text-emerald-600" : "bg-amber-50 text-amber-600"}`}>
                     {document.status === "under_review" ? <Clock3 size={17} /> : document.status === "rejected" ? <AlertCircle size={17} /> : <CheckCircle2 size={17} />}
                   </span>
                   <span className="rounded-full bg-slate-100 px-2.5 py-1 text-[10px] font-bold uppercase">{(document.status || "pending").replaceAll("_", " ")}</span>
                 </div>
                 <h4 className="mt-3 font-semibold">{pretty(type)}</h4>
                 {type === "business_license" && (
-                  <div className="mt-3 rounded-lg bg-slate-50 p-3 text-xs text-[#64748b]">
+                  <div className="mt-3 rounded-[10px] bg-slate-50 p-3 text-xs text-[#64748b]">
                     <p><span className="font-semibold text-[#334155]">Licence:</span> {document.document_number || "—"}</p>
                     <p className="mt-1"><span className="font-semibold text-[#334155]">Expires:</span> {document.expiry_date || "—"}</p>
                     <p className="mt-1"><span className="font-semibold text-[#334155]">Version:</span> {document.version || 1}</p>
                   </div>
                 )}
-                {document.rejection_reason && <div className="mt-3 rounded-lg border border-red-200 bg-red-50 p-3"><p className="text-[10px] font-bold uppercase tracking-wider text-red-700">Rejection reason</p><p className="mt-1 text-xs leading-5 text-red-700">{document.rejection_reason}</p></div>}
+                {document.rejection_reason && <div className="mt-3 rounded-[10px] border border-red-200 bg-red-50 p-3"><p className="text-[10px] font-bold uppercase tracking-wider text-red-700">Rejection reason</p><p className="mt-1 text-xs leading-5 text-red-700">{document.rejection_reason}</p></div>}
                 <div className="mt-4 flex flex-wrap gap-2">
-                  <button type="button" onClick={() => setBackendPreview({ title: pretty(type), url: sellersApi.getKycDocumentViewUrl(document.id) })} className="inline-flex items-center gap-1.5 rounded-lg border border-[#e7ebf0] px-3 py-2 text-xs font-semibold text-[#f7941d]"><Eye size={14} />View</button>
-                  {editable && <button type="button" onClick={() => beginEdit(document)} className="inline-flex items-center gap-1.5 rounded-lg bg-[#111827] px-3 py-2 text-xs font-semibold text-white"><Pencil size={14} />Edit</button>}
-                  {!editable && reviewLocked && <span className="inline-flex items-center gap-1.5 rounded-lg bg-slate-100 px-3 py-2 text-xs font-medium text-[#64748b]"><LockKeyhole size={13} />View only</span>}
+                  <button type="button" onClick={() => setBackendPreview({ title: pretty(type), url: sellersApi.getKycDocumentViewUrl(document.id) })} className="inline-flex items-center gap-1.5 rounded-[10px] border border-[#e7ebf0] px-3 py-2 text-xs font-semibold text-[#f7941d]"><Eye size={14} />View</button>
+                  {editable && <button type="button" onClick={() => beginEdit(document)} className="inline-flex items-center gap-1.5 rounded-[10px] bg-[#111827] px-3 py-2 text-xs font-semibold text-white"><Pencil size={14} />Edit</button>}
+                  {!editable && reviewLocked && <span className="inline-flex items-center gap-1.5 rounded-[10px] bg-slate-100 px-3 py-2 text-xs font-medium text-[#64748b]"><LockKeyhole size={13} />View only</span>}
                 </div>
               </article>
             );
@@ -762,7 +762,7 @@ export default function SellerBusinessDocuments() {
                 .filter((document) => document.document_type === "business_license" && document.is_current === false)
                 .sort((a, b) => (b.version || 0) - (a.version || 0))
                 .map((document) => (
-                  <div key={document.id} className="flex flex-col gap-2 rounded-lg border border-slate-200 bg-white p-3 sm:flex-row sm:items-center sm:justify-between">
+                  <div key={document.id} className="flex flex-col gap-2 rounded-[10px] border border-slate-200 bg-white p-3 sm:flex-row sm:items-center sm:justify-between">
                     <div className="text-xs text-slate-600">
                       <span className="font-semibold">Version {document.version || 1}</span> · {document.document_number || "No number"} · expired/valid until {document.expiry_date || "—"}
                     </div>
@@ -781,7 +781,7 @@ export default function SellerBusinessDocuments() {
           <div className="w-full max-w-lg rounded-2xl bg-white p-6 shadow-2xl">
             <div className="flex items-start justify-between gap-4">
               <div><p className="text-xs font-bold uppercase tracking-wider text-[#f7941d]">Edit document</p><h3 className="mt-1 text-lg font-semibold">{pretty(editing.document_type)}</h3></div>
-              <button type="button" onClick={closeEdit} disabled={savingEdit} className="flex h-9 w-9 items-center justify-center rounded-lg bg-slate-100"><X size={17} /></button>
+              <button type="button" onClick={closeEdit} disabled={savingEdit} className="flex h-9 w-9 items-center justify-center rounded-[10px] bg-slate-100"><X size={17} /></button>
             </div>
             {editing.rejection_reason && <div className="mt-4 rounded-xl border border-red-200 bg-red-50 p-4"><p className="text-xs font-bold uppercase text-red-700">Admin reason</p><p className="mt-1 text-sm leading-6 text-red-700">{editing.rejection_reason}</p></div>}
             {editing.document_type === "business_license" && (
@@ -815,8 +815,8 @@ function LocalPdfPreview({ open, title, url, onClose }: { open: boolean; title: 
   return (
     <div className="fixed inset-0 z-[120] flex items-center justify-center bg-black/65 p-4">
       <div className="flex max-h-[92vh] w-full max-w-5xl flex-col overflow-hidden rounded-2xl bg-white shadow-2xl">
-        <div className="flex items-center justify-between border-b border-[#e7ebf0] px-5 py-4"><h3 className="font-semibold">{title}</h3><button type="button" onClick={onClose} className="flex h-9 w-9 items-center justify-center rounded-lg bg-slate-100"><X size={18} /></button></div>
-        <div className="bg-slate-100 p-4"><iframe src={url} title={title} className="h-[72vh] w-full rounded-lg bg-white" /></div>
+        <div className="flex items-center justify-between border-b border-[#e7ebf0] px-5 py-4"><h3 className="font-semibold">{title}</h3><button type="button" onClick={onClose} className="flex h-9 w-9 items-center justify-center rounded-[10px] bg-slate-100"><X size={18} /></button></div>
+        <div className="bg-slate-100 p-4"><iframe src={url} title={title} className="h-[72vh] w-full rounded-[10px] bg-white" /></div>
       </div>
     </div>
   );

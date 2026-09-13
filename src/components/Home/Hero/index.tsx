@@ -32,7 +32,7 @@ const Hero = () => {
                     <span className="mb-2 inline-flex rounded-full bg-orange/10 px-2.5 py-1 text-[10px] font-bold uppercase tracking-wide text-orange">Shop confidently</span>
                     <h2 className="text-lg font-bold leading-tight text-dark dark:text-white xl:text-2xl">Trusted marketplace</h2>
                     <p className="mt-1.5 max-w-[230px] text-xs leading-5 text-dark-4 sm:text-sm">Seller listings, protected checkout and order tracking in one place.</p>
-                    <Link href={ROUTES.shop} className="mt-3 inline-flex rounded-lg bg-orange px-4 py-2 text-xs font-bold text-white transition hover:bg-[#e95f23] sm:text-sm">Shop Now</Link>
+                    <Link href={ROUTES.shop} className="mt-3 inline-flex rounded-[10px] bg-orange px-4 py-2 text-xs font-bold text-white transition hover:bg-[#e95f23] sm:text-sm">Shop Now</Link>
                   </div>
                   <Image src="/images/hero/phoneremove.png" alt="Xerin Market promotion" width={145} height={190} className="h-[120px] w-auto shrink-0 object-contain sm:h-[135px] xl:h-[170px]" />
                 </div>
@@ -48,7 +48,7 @@ const Hero = () => {
                     <span className="mb-2 inline-flex rounded-full bg-white/10 px-2.5 py-1 text-[10px] font-bold uppercase tracking-wide text-orange">Delivery visibility</span>
                     <h2 className="text-lg font-bold leading-tight text-white xl:text-2xl">Xerin logistics</h2>
                     <p className="mt-1.5 max-w-[230px] text-xs leading-5 text-white/70 sm:text-sm">Follow your order from seller preparation to your doorstep.</p>
-                    <Link href={ROUTES.trackOrder} className="mt-3 inline-flex rounded-lg border border-white/30 px-4 py-2 text-xs font-bold text-white transition hover:border-orange hover:text-orange sm:text-sm">Track Order</Link>
+                    <Link href={ROUTES.trackOrder} className="mt-3 inline-flex rounded-[10px] border border-white/30 px-4 py-2 text-xs font-bold text-white transition hover:border-orange hover:text-orange sm:text-sm">Track Order</Link>
                   </div>
                   <Image src="/images/hero/headremove.png" alt="Xerin Logistics" width={145} height={190} className="h-[115px] w-auto shrink-0 object-contain sm:h-[130px] xl:h-[165px]" />
                 </div>

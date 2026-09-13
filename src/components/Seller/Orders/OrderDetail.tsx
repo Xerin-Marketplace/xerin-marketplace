@@ -732,7 +732,7 @@ export default function SellerOrderDetail({ orderId }: { orderId: string }) {
                             onClick={() => {
                               setProductDetailItemId(item.id);
                             }}
-                            className="inline-flex min-h-11 items-center justify-center gap-2 rounded-xl bg-slate-950 px-4 text-sm font-bold text-black shadow-sm transition hover:bg-[#f7941d] dark:bg-white dark:text-slate-950 dark:hover:bg-[#f7941d] dark:hover:text-white"
+                            className="inline-flex min-h-11 items-center justify-center gap-2 rounded-[10px] bg-slate-950 px-4 text-sm font-bold text-black shadow-sm transition hover:bg-[#f7941d] dark:bg-white dark:text-slate-950 dark:hover:bg-[#f7941d] dark:hover:text-white"
                           >
                             <Eye size={17} />
                             View Product Details
@@ -741,7 +741,7 @@ export default function SellerOrderDetail({ orderId }: { orderId: string }) {
                           <Link
                             href={`/products/${item.product_id}`}
                             target="_blank"
-                            className="inline-flex min-h-11 items-center justify-center rounded-xl border border-slate-200 px-4 text-sm font-semibold text-slate-600 transition hover:border-orange-200 hover:text-[#f7941d] dark:border-white/10 dark:text-white/60"
+                            className="inline-flex min-h-11 items-center justify-center rounded-[10px] border border-slate-200 px-4 text-sm font-semibold text-slate-600 transition hover:border-orange-200 hover:text-[#f7941d] dark:border-white/10 dark:text-white/60"
                           >
                             Open marketplace listing
                           </Link>

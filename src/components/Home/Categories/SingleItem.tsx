@@ -6,7 +6,7 @@ const SingleItem = ({ item }: { item: Category }) => {
   return (
     <Link
       href={`/shop-with-sidebar?category_id=${encodeURIComponent(String(item.id))}`}
-      className="group flex h-full flex-col items-center rounded-xl border border-gray-3 dark:border-darkTheme-border-color bg-white dark:bg-darkTheme-card p-2.5 sm:p-4 transition-all duration-300 hover:-translate-y-1 hover:shadow-lg"
+      className="group flex h-full flex-col items-center rounded-[10px] border border-gray-3 dark:border-darkTheme-border-color bg-white dark:bg-darkTheme-card p-2.5 sm:p-4 transition-all duration-300 hover:-translate-y-1 hover:shadow-lg"
     >
       <div className="relative mb-2 sm:mb-4 h-[70px] w-[70px] sm:h-[110px] sm:w-[110px] lg:h-[132px] lg:w-[132px] shrink-0 overflow-hidden rounded-full bg-[#F2F3F8] dark:bg-darkTheme-secondary-bg">
         <div

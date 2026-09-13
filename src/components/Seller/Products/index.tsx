@@ -1136,7 +1136,7 @@ const SellerProducts = () => {
                           <button
                             type="button"
                             onClick={() => void openEdit(product)}
-                            className="inline-flex items-center gap-1.5 rounded-lg border border-[#e1e6ec] px-3 py-2 text-xs font-semibold text-[#475569] hover:border-[#f7941d] hover:text-[#f7941d]"
+                            className="inline-flex items-center gap-1.5 rounded-[10px] border border-[#e1e6ec] px-3 py-2 text-xs font-semibold text-[#475569] hover:border-[#f7941d] hover:text-[#f7941d]"
                           >
                             <Pencil size={13} />
                             Edit
@@ -1150,7 +1150,7 @@ const SellerProducts = () => {
                               submittingProductId === String(product.id)
                             }
                             onClick={() => void submitExistingProduct(product)}
-                            className="inline-flex items-center gap-1.5 rounded-lg bg-[#111827] px-3 py-2 text-xs font-semibold text-white disabled:opacity-50"
+                            className="inline-flex items-center gap-1.5 rounded-[10px] bg-[#111827] px-3 py-2 text-xs font-semibold text-white disabled:opacity-50"
                           >
                             <Send size={13} />
                             {submittingProductId === String(product.id)
@@ -1163,7 +1163,7 @@ const SellerProducts = () => {
                           <button
                             type="button"
                             onClick={() => setDeleteTarget(product)}
-                            className="ml-auto inline-flex items-center gap-1.5 rounded-lg px-2.5 py-2 text-xs font-semibold text-red-600 hover:bg-red-50"
+                            className="ml-auto inline-flex items-center gap-1.5 rounded-[10px] px-2.5 py-2 text-xs font-semibold text-red-600 hover:bg-red-50"
                           >
                             <Archive size={13} />
                             Archive

@@ -29,7 +29,7 @@ const SingleItem = ({ item }: { item: CartItemUi }) => {
         onClick={handleRemoveFromCart}
         disabled={removeItem.isPending}
         aria-label="button for remove product from cart"
-        className="flex h-11 w-11 shrink-0 items-center justify-center rounded-xl sm:h-9.5 sm:w-full sm:max-w-[38px] sm:rounded-lg bg-gray-2 dark:bg-darkTheme-secondary-bg border border-gray-3 dark:border-darkTheme-border-color text-dark dark:text-darkTheme-body-color ease-out duration-200 hover:bg-red-light-6 hover:border-red-light-4 hover:text-red disabled:opacity-50"
+        className="flex h-11 w-11 shrink-0 items-center justify-center rounded-[10px] sm:h-9.5 sm:w-full sm:max-w-[38px] bg-gray-2 dark:bg-darkTheme-secondary-bg border border-gray-3 dark:border-darkTheme-border-color text-dark dark:text-darkTheme-body-color ease-out duration-200 hover:bg-red-light-6 hover:border-red-light-4 hover:text-red disabled:opacity-50"
       >
         <svg
           className="fill-current"

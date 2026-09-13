@@ -94,7 +94,7 @@ const ShopDetails = ({ product }: { product: Product }) => {
                   type="button"
                   onClick={handlePreviewSlider}
                   aria-label="Open image preview"
-                  className="absolute right-4 top-4 z-10 flex h-10 w-10 items-center justify-center rounded-xl border border-gray-3 bg-white text-dark shadow-sm transition hover:border-orange hover:text-orange dark:border-darkTheme-border-color dark:bg-darkTheme-secondary-bg dark:text-white"
+                  className="absolute right-4 top-4 z-10 flex h-10 w-10 items-center justify-center rounded-[10px] border border-gray-3 bg-white text-dark shadow-sm transition hover:border-orange hover:text-orange dark:border-darkTheme-border-color dark:bg-darkTheme-secondary-bg dark:text-white"
                 >
                   <svg width="21" height="21" viewBox="0 0 24 24" fill="none" aria-hidden="true"><path d="M8 3H3v5M16 3h5v5M8 21H3v-5M16 21h5v-5" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round"/></svg>
                 </button>
@@ -120,7 +120,7 @@ const ShopDetails = ({ product }: { product: Product }) => {
                       type="button"
                       onClick={() => setPreviewImg(key)}
                       key={`${item}-${key}`}
-                      className={`flex h-[70px] w-[70px] shrink-0 items-center justify-center overflow-hidden rounded-xl border-2 bg-[#f5f7fa] p-2 transition sm:h-[86px] sm:w-[86px] ${key === previewImg ? "border-orange shadow-sm" : "border-transparent hover:border-gray-4"}`}
+                      className={`flex h-[70px] w-[70px] shrink-0 items-center justify-center overflow-hidden rounded-[10px] border-2 bg-[#f5f7fa] p-2 transition sm:h-[86px] sm:w-[86px] ${key === previewImg ? "border-orange shadow-sm" : "border-transparent hover:border-gray-4"}`}
                     >
                       <Image width={76} height={76} src={item} alt={`${product.title} thumbnail ${key + 1}`} className="h-full w-full object-cover object-center" />
                     </button>
@@ -164,7 +164,7 @@ const ShopDetails = ({ product }: { product: Product }) => {
                   </div>
                 </div>
                 {discountPercent > 0 && (
-                  <span className="shrink-0 rounded-lg bg-orange px-2.5 py-1 text-xs font-bold text-white sm:text-sm">-{discountPercent}%</span>
+                  <span className="shrink-0 rounded-[10px] bg-orange px-2.5 py-1 text-xs font-bold text-white sm:text-sm">-{discountPercent}%</span>
                 )}
               </div>
 
@@ -197,7 +197,7 @@ const ShopDetails = ({ product }: { product: Product }) => {
                       <p className="mb-2 text-sm font-semibold text-dark dark:text-white">Available options</p>
                       <div className="flex flex-wrap gap-2">
                         {product.variants.map((variant) => (
-                          <span key={String(variant.id)} className="rounded-lg border border-gray-3 bg-white px-3 py-2 text-xs font-medium text-dark dark:border-darkTheme-border-color dark:bg-darkTheme-card dark:text-white sm:text-sm">
+                          <span key={String(variant.id)} className="rounded-[10px] border border-gray-3 bg-white px-3 py-2 text-xs font-medium text-dark dark:border-darkTheme-border-color dark:bg-darkTheme-card dark:text-white sm:text-sm">
                             {variant.name}{variant.sku ? ` · ${variant.sku}` : ""}
                           </span>
                         ))}
@@ -208,7 +208,7 @@ const ShopDetails = ({ product }: { product: Product }) => {
                   <div className="mt-6 rounded-2xl border border-gray-3 bg-[#fbfcfd] p-3.5 dark:border-darkTheme-border-color dark:bg-darkTheme-card sm:border-0 sm:bg-transparent sm:p-0 sm:dark:bg-transparent">
                     <div className="flex w-full items-center justify-between gap-3 sm:w-auto sm:justify-start">
                       <span className="shrink-0 text-sm font-semibold text-dark dark:text-white">Qty:</span>
-                      <div className="flex h-11 shrink-0 items-center overflow-hidden rounded-lg border border-gray-3 bg-white dark:border-darkTheme-border-color dark:bg-darkTheme-secondary-bg">
+                      <div className="flex h-11 shrink-0 items-center overflow-hidden rounded-[10px] border border-gray-3 bg-white dark:border-darkTheme-border-color dark:bg-darkTheme-secondary-bg">
                         <button type="button" aria-label="Decrease quantity" onClick={() => setQuantity((value) => Math.max(1, value - 1))} className="flex h-full w-11 items-center justify-center text-lg transition hover:bg-gray-2 hover:text-orange">−</button>
                         <span className="flex h-full w-12 items-center justify-center border-x border-gray-3 text-sm font-semibold dark:border-darkTheme-border-color">{quantity}</span>
                         <button type="button" aria-label="Increase quantity" onClick={() => setQuantity((value) => value + 1)} className="flex h-full w-11 items-center justify-center text-lg transition hover:bg-gray-2 hover:text-orange">+</button>
@@ -229,7 +229,7 @@ const ShopDetails = ({ product }: { product: Product }) => {
                         type="button"
                         onClick={addToCart}
                         disabled={addCartItem.isPending || !available}
-                        className="inline-flex min-h-12 w-full items-center justify-center rounded-xl border-2 border-orange bg-white px-4 text-center text-sm font-bold leading-5 text-orange transition hover:bg-orange hover:text-white disabled:cursor-not-allowed disabled:opacity-50 sm:px-5"
+                        className="inline-flex min-h-12 w-full items-center justify-center rounded-[10px] border-2 border-orange bg-white px-4 text-center text-sm font-bold leading-5 text-orange transition hover:bg-orange hover:text-white disabled:cursor-not-allowed disabled:opacity-50 sm:px-5"
                       >
                         {complianceUnavailable ? "Unavailable" : addCartItem.isPending ? "Adding..." : "Add to Cart"}
                       </button>
@@ -237,11 +237,11 @@ const ShopDetails = ({ product }: { product: Product }) => {
                         type="button"
                         onClick={buyNow}
                         disabled={addCartItem.isPending || !available}
-                        className="inline-flex min-h-12 w-full items-center justify-center rounded-xl bg-orange px-4 text-center text-sm font-bold leading-5 text-white shadow-sm transition hover:bg-[#e95f23] disabled:cursor-not-allowed disabled:opacity-50 sm:px-5"
+                        className="inline-flex min-h-12 w-full items-center justify-center rounded-[10px] bg-orange px-4 text-center text-sm font-bold leading-5 text-white shadow-sm transition hover:bg-[#e95f23] disabled:cursor-not-allowed disabled:opacity-50 sm:px-5"
                       >
                         {complianceUnavailable ? "Unavailable" : "Buy Now"}
                       </button>
-                      <a href={ROUTES.wishlist} aria-label="Add to wishlist" className="inline-flex min-h-12 w-full items-center justify-center gap-2 rounded-xl border border-gray-3 bg-white px-4 text-sm font-semibold text-dark shadow-sm transition hover:border-orange hover:text-orange dark:border-darkTheme-border-color dark:bg-darkTheme-card dark:text-white sm:w-12 sm:px-0">
+                      <a href={ROUTES.wishlist} aria-label="Add to wishlist" className="inline-flex min-h-12 w-full items-center justify-center gap-2 rounded-[10px] border border-gray-3 bg-white px-4 text-sm font-semibold text-dark shadow-sm transition hover:border-orange hover:text-orange dark:border-darkTheme-border-color dark:bg-darkTheme-card dark:text-white sm:w-12 sm:px-0">
                         <svg width="20" height="20" viewBox="0 0 24 24" fill="none"><path d="M20.8 4.6a5.5 5.5 0 0 0-7.8 0L12 5.6l-1-1a5.5 5.5 0 0 0-7.8 7.8l1 1L12 21l7.8-7.6 1-1a5.5 5.5 0 0 0 0-7.8Z" stroke="currentColor" strokeWidth="1.7" strokeLinecap="round" strokeLinejoin="round"/></svg>
                         <span className="sm:hidden">Wishlist</span>
                       </a>
