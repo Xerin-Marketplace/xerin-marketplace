@@ -11,8 +11,8 @@ const config: Config = {
   darkMode: "class",
   theme: {
     fontFamily: {
-      sans: ['"Euclid Circular A"', "sans-serif"],
-      heading: ['"Euclid Circular A"', "sans-serif"],
+      sans: ["var(--font-inter)", ...defaultTheme.fontFamily.sans],
+      heading: ["var(--font-inter)", ...defaultTheme.fontFamily.sans],
       mono: [
         "SFMono-Regular",
         "Menlo",

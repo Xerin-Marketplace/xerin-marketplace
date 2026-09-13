@@ -113,6 +113,9 @@ input[type='search']::-webkit-search-results-decoration {
   display: none;
 }
 .custom-search {
+  border-radius: 0;
+  border-top-right-radius: 5px;
+  border-bottom-right-radius: 5px;
   -webkit-border-radius: 0;
   -webkit-border-top-right-radius: 5px;
   -webkit-border-bottom-right-radius: 5px;

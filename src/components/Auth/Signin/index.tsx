@@ -1714,13 +1714,6 @@ const AuthPage = ({ initialTab = "signup" }: { initialTab?: AuthTab }) => {
         <div className={`flex flex-1 ${activeTab === "seller" || activeTab === "broker" ? "items-start" : "items-center"} justify-center py-5 sm:py-10`}>
           <div className={`w-full ${activeTab === "seller" || activeTab === "broker" ? "max-w-[640px]" : "max-w-[420px]"}`}>
             <div className="mb-5 text-center sm:mb-7">
-              <Image
-                src="/images/logo/logo.png"
-                alt="XerinMarket"
-                width={52}
-                height={52}
-                className="mx-auto mb-3 h-12 w-12 object-contain sm:mb-4 sm:h-14 sm:w-14"
-              />
               <h1 className="mb-1.5 text-2xl font-bold text-dark dark:text-white sm:font-semibold">{headings[activeTab].title}</h1>
               <p className="text-sm text-dark-4 dark:text-darkTheme-secondary-muted">{headings[activeTab].subtitle}</p>
             </div>
@@ -1741,51 +1734,60 @@ const AuthPage = ({ initialTab = "signup" }: { initialTab?: AuthTab }) => {
         </div>
       </div>
 
-      {/* Right panel: marketing / imagery */}
-      <div className="hidden lg:block relative overflow-hidden bg-dark">
-        <Image src="/images/bg6-dark.jpg" alt="" fill priority sizes="50vw" className="object-cover" />
-        <div className="absolute inset-0 bg-gradient-to-t from-black/80 via-black/40 to-black/20" />
+      {/* Right panel: marketing / imagery (deliveryoption style) */}
+      <div className="relative hidden min-h-[100dvh] overflow-hidden bg-[#0b0f19] lg:flex lg:flex-col">
+        <Image src="/35124 (1).jpg" alt="Xerin Marketplace" fill priority sizes="50vw" className="object-cover object-center" />
+        <div className="absolute inset-0 bg-gradient-to-t from-[#070a12]/95 via-[#0b0f19]/70 to-[#0b0f19]/40 backdrop-blur-[0.5px]" />
+        <div className="absolute inset-0 bg-radial from-transparent via-black/20 to-black/60" />
 
-        <div className="relative h-full flex flex-col justify-between p-12 xl:p-16">
-          <Link href="/" className="inline-flex items-center gap-2.5 w-fit">
-            <Image src="/images/logo/logo.png" alt="XerinMarket" width={32} height={32} className="object-contain" />
-            <span className="font-semibold text-lg text-white">XerinMarket</span>
-          </Link>
+        <div className="relative z-10 flex h-full flex-col justify-between p-10 xl:p-14">
+          <div />
 
-          <div className="max-w-md">
-            <h2 className="font-bold text-3xl xl:text-4xl text-white leading-tight mb-4">
-              The marketplace built for Africa
+          {/* Hero content */}
+          <div className="max-w-md space-y-6">
+            <h2 className="text-3xl font-bold leading-tight tracking-tight text-white xl:text-4xl">
+              The marketplace
+              <br />
+              built for Africa
             </h2>
-            <p className="text-white/80 leading-relaxed mb-9">
-              Browse seller listings, review checkout options, and manage marketplace orders in one platform.
+            <p className="text-base leading-relaxed text-white/75 sm:text-lg">
+              Browse seller listings, review checkout options, and manage marketplace orders in one seamless platform.
             </p>
-            <ul className="space-y-5">
-              {FEATURES.map((feature) => (
-                <li key={feature.title} className="flex items-start gap-3.5">
-                  <span className="flex items-center justify-center w-9 h-9 rounded-lg bg-white/10 text-white shrink-0">
-                    {feature.icon}
-                  </span>
-                  <div>
-                    <p className="font-semibold text-white text-sm">{feature.title}</p>
-                    <p className="text-white/70 text-sm">{feature.description}</p>
-                  </div>
-                </li>
-              ))}
-            </ul>
+
+            {/* Feature highlights */}
+            <div className="space-y-3.5 pt-2">
+              <div className="flex items-center gap-3">
+                <div className="flex size-8 shrink-0 items-center justify-center rounded-full bg-white/10 text-white">
+                  <svg className="size-4 text-white" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+                    <path d="M22 11.08V12a10 10 0 1 1-5.93-9.14" />
+                    <path d="m9 11 3 3L22 4" />
+                  </svg>
+                </div>
+                <span className="text-sm font-medium text-white/80">Direct Seller Listings & Verified Products</span>
+              </div>
+              <div className="flex items-center gap-3">
+                <div className="flex size-8 shrink-0 items-center justify-center rounded-full bg-white/10 text-white">
+                  <svg className="size-4 text-white" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+                    <path d="M3 3v18h18" />
+                    <path d="m19 9-5 5-4-4-3 3" />
+                  </svg>
+                </div>
+                <span className="text-sm font-medium text-white/80">Real-time Order & Delivery Tracking</span>
+              </div>
+              <div className="flex items-center gap-3">
+                <div className="flex size-8 shrink-0 items-center justify-center rounded-full bg-white/10 text-white">
+                  <svg className="size-4 text-white" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+                    <path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z" />
+                  </svg>
+                </div>
+                <span className="text-sm font-medium text-white/80">Secure Checkout & Protected Payments</span>
+              </div>
+            </div>
           </div>
 
-          <div className="flex items-center gap-6 text-white/80 text-sm">
-            <span className="flex items-center gap-1.5">
-              <UsersIcon />
-              Seller marketplace
-            </span>
-            <span className="flex items-center gap-1.5">
-              <span className="text-yellow-400">
-                <StarIcon />
-              </span>
-              Backend-sourced reviews
-            </span>
-            <span>Live order records</span>
+          {/* Footer note */}
+          <div className="flex items-center justify-between text-xs text-white/60">
+            <span>&copy; {new Date().getFullYear()} Xerin Marketplace. All rights reserved.</span>
           </div>
         </div>
       </div>

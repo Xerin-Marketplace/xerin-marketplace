@@ -14,7 +14,6 @@ import { PreviewSliderProvider } from "../context/PreviewSliderContext";
 import PreviewSliderModal from "@/components/Common/PreviewSlider";
 import { ThemeProvider } from "@/app/providers/ThemeProvider";
 import NotificationProvider from "@/app/providers/NotificationProvider";
-import ChatBot from "@/components/Common/ChatBot";
 // import ScrollToTop from "@/components/Common/ScrollToTop";
 import PreLoader from "@/components/Common/PreLoader";
 import MobileBottomNav from "@/components/Header/MobileBottomNav";
@@ -89,10 +88,6 @@ export default function RootLayout({
         </QueryProvider>
       </NotificationProvider>
       {/* <ScrollToTop /> */}
-      {!isWorkspaceRoute &&
-      !pathname.startsWith("/order-success/") &&
-      !pathname.startsWith("/payment-success/") &&
-      !pathname.startsWith("/payment-failed/") ? <ChatBot /> : null}
     </ThemeProvider>
   );
 }

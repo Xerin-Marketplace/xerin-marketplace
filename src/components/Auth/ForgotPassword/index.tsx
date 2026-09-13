@@ -270,30 +270,19 @@ const ForgotPassword = () => {
         </div>
       </div>
 
-      <div className="relative hidden min-h-screen overflow-hidden bg-dark lg:block">
+      <div className="relative hidden min-h-screen overflow-hidden bg-[#0b0f19] lg:block">
         <Image
-          src="/images/bg6-dark.jpg"
-          alt=""
+          src="/35124 (1).jpg"
+          alt="Xerin Marketplace"
           fill
           priority
           sizes="50vw"
-          className="object-cover"
+          className="object-cover object-center"
         />
+        <div className="absolute inset-0 bg-gradient-to-t from-[#070a12]/95 via-[#0b0f19]/70 to-[#0b0f19]/40 backdrop-blur-[0.5px]" />
+        <div className="absolute inset-0 bg-radial from-transparent via-black/20 to-black/60" />
 
-        <div className="absolute inset-0 bg-gradient-to-t from-black/85 via-black/50 to-black/25" />
-
-        <div className="relative flex h-full flex-col justify-between p-12 xl:p-16">
-          <Link href="/" className="inline-flex w-fit items-center gap-2.5">
-            <Image
-              src="/images/logo/logo.png"
-              alt="XerinMarket"
-              width={32}
-              height={32}
-              className="object-contain"
-            />
-            <span className="text-lg font-semibold text-white">XerinMarket</span>
-          </Link>
-
+        <div className="relative flex h-full flex-col justify-end p-12 xl:p-16">
           <div className="max-w-md">
             <h2 className="mb-4 text-3xl font-bold leading-tight text-white xl:text-4xl">
               Secure access to your XerinMarket account

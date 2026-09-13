@@ -166,7 +166,7 @@ const Categories = () => {
   const showingTo = products.length ? showingFrom + products.length - 1 : 0;
 
   return (
-    <section className="overflow-hidden bg-gray-1 pb-4 pt-3 dark:bg-darkTheme-bg sm:pb-8 sm:pt-10">
+    <section className="overflow-hidden bg-gray-1 pb-4 pt-[64px] sm:pt-[72px] lg:pt-10 dark:bg-darkTheme-bg sm:pb-8">
       <div className="mx-auto w-full max-w-[1440px] px-4 sm:px-6 lg:px-8 xl:px-10 2xl:px-6">
         {/* Heading */}
         <div className="mb-3 flex items-end justify-between gap-3 sm:mb-5 lg:items-end">

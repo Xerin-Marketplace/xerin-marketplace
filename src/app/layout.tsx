@@ -1,7 +1,13 @@
 import type { Metadata, Viewport } from "next";
+import { Inter } from "next/font/google";
 import { siteConfig } from "@/lib/site-config";
-import "./css/euclid-circular-a-font.css";
 import "./css/style.css";
+
+const inter = Inter({
+  subsets: ["latin"],
+  display: "swap",
+  variable: "--font-inter",
+});
 
 export const metadata: Metadata = {
   metadataBase: new URL(siteConfig.url),
@@ -78,7 +84,9 @@ export default function RootLayout({
 }) {
   return (
     <html lang="en" suppressHydrationWarning={true} data-scroll-behavior="smooth">
-      <body className="min-h-dvh overflow-x-hidden bg-body-bg dark:bg-darkTheme-bg">{children}</body>
+      <body className={`${inter.className} ${inter.variable} min-h-dvh overflow-x-hidden bg-body-bg dark:bg-darkTheme-bg font-sans`}>
+        {children}
+      </body>
     </html>
   );
 }

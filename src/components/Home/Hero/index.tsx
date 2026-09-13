@@ -12,7 +12,7 @@ const Hero = () => {
   const { topAd, bottomAd } = useHomepageAdvertisementSlots();
 
   return (
-    <section className="overflow-hidden bg-[#eef2f7] pb-4 pt-[90px] dark:bg-darkTheme-secondary-bg sm:pb-6 sm:pt-[118px] lg:pb-9 lg:pt-[142px] xl:pt-[150px]">
+    <section className="hidden lg:block overflow-hidden bg-[#eef2f7] pb-4 pt-[90px] dark:bg-darkTheme-secondary-bg sm:pb-6 sm:pt-[118px] lg:pb-9 lg:pt-[142px] xl:pt-[150px]">
       <div className="mx-auto w-full max-w-[1440px] px-3 sm:px-5 lg:px-8 xl:px-10 2xl:px-6">
         <div className="grid items-stretch gap-3 lg:grid-cols-[minmax(0,2fr)_minmax(300px,0.82fr)] xl:gap-5">
           <div className="min-w-0">

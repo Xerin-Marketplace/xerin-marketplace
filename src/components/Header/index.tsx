@@ -3,6 +3,8 @@ import React, { useState, useEffect } from "react";
 import Link from "next/link";
 import { ROUTES } from "@/constants/links";
 import CustomSelect from "./CustomSelect";
+import Dropdown from "./Dropdown";
+import CategoryMegaMenu from "./CategoryMegaMenu";
 import { menuData } from "./menuData";
 import { useCartView } from "@/hooks/useCartActions";
 import { useCartModalContext } from "@/app/context/CartSidebarModalContext";
@@ -10,17 +12,17 @@ import { useTheme } from "@/app/context/ThemeContext";
 import { useAuth } from "@/hooks/useAuth";
 import { getAccountHref, getAccountLabel } from "@/guards/auth-routing";
 import Image from "next/image";
-import PriceDisplay from "@/components/shared/PriceDisplay";
 import CurrencySelector from "./CurrencySelector";
 import { useAuthStore } from "@/store/useAuthStore";
 import { useRouter } from "next/navigation";
-import { useCategories } from "@/hooks/useProducts";
+import { useCategories, useProducts } from "@/hooks/useProducts";
 import MobileStorefrontHeader from "./MobileStorefrontHeader";
 
 const Header = () => {
   const [searchQuery, setSearchQuery] = useState("");
   const [selectedCategoryId, setSelectedCategoryId] = useState("0");
   const [navigationOpen, setNavigationOpen] = useState(false);
+  const [categoryMegaMenuOpen, setCategoryMegaMenuOpen] = useState(false);
   const [stickyMenu, setStickyMenu] = useState(false);
   const router = useRouter();
   const { openCartModal } = useCartModalContext();
@@ -28,7 +30,7 @@ const Header = () => {
   const { user, isAuthenticated, logout } = useAuth();
   const hasHydrated = useAuthStore((state) => state.hasHydrated);
 
-  const { items: cartItems, total: totalPrice } = useCartView();
+  const { items: cartItems } = useCartView();
 
   // Product categories are loaded from the public backend endpoint:
   // GET /api/v1/products/categories
@@ -36,8 +38,8 @@ const Header = () => {
   // header automatically reflects categories created or removed by an admin.
   const { data: categories = [] } = useCategories();
 
-  // Keep only the permanent navigation entries (Home + Shop). The old static
-  // "Categories" item is replaced by the live categories returned by the API.
+  // Keep only the permanent navigation entries (Home + Shop + Logistics).
+  // The old static "Categories" item is replaced by the live categories returned by the API.
   const primaryMenuItems = menuData.filter(
     (menuItem) => menuItem.title !== "Categories",
   );
@@ -79,7 +81,15 @@ const Header = () => {
         stickyMenu && "shadow"
       }`}
     >
-      <MobileStorefrontHeader />
+      <MobileStorefrontHeader
+        onToggleCategories={() => setCategoryMegaMenuOpen(!categoryMegaMenuOpen)}
+        onToggleMenu={() => setNavigationOpen(!navigationOpen)}
+        isMenuOpen={navigationOpen}
+        isCategoriesOpen={categoryMegaMenuOpen}
+        isAuthenticated={isAuthenticated}
+        accountHref={accountHref}
+        accountLabel={accountLabel}
+      />
       <div className="hidden lg:block max-w-[1440px] mx-auto px-4 sm:px-6 lg:px-8 xl:px-10 2xl:px-6">
         {/* <!-- header top start --> */}
         <div
@@ -117,30 +127,30 @@ const Header = () => {
                   }
                 }}
               >
-                <div className="flex items-center">
+                <div className="flex items-center rounded-[10px] border border-gray-3 bg-gray-1/60 transition-colors focus-within:border-orange dark:border-darkTheme-border-color dark:bg-darkTheme-secondary-bg dark:focus-within:border-orange">
                   <CustomSelect
                     options={options}
                     onChange={(option) => setSelectedCategoryId(option.value)}
                   />
 
-                  <div className="relative max-w-[333px] sm:min-w-[333px] lg:min-w-[220px] xl:min-w-[333px] w-full">
+                  <div className="relative flex-1 min-w-[220px] xl:min-w-[280px]">
                     {/* <!-- divider --> */}
-                    <span className="absolute left-0 top-1/2 -translate-y-1/2 inline-block w-px h-5.5 bg-gray-4"></span>
+                    <span className="absolute left-0 top-1/2 -translate-y-1/2 inline-block w-px h-5 bg-gray-3 dark:bg-darkTheme-border-color"></span>
                     <input
                       onChange={(e) => setSearchQuery(e.target.value)}
                       value={searchQuery}
                       type="search"
                       name="search"
                       id="search"
-                      placeholder="Search products, brands, or sellers..."
+                      placeholder="Search for products, brands & more..."
                       autoComplete="off"
-                      className="custom-search w-full rounded-r-[5px] bg-gray-1 dark:bg-darkTheme-secondary-bg dark:text-darkTheme-body-color !border-l-0 border border-gray-3 dark:border-darkTheme-border-color py-2.5 pl-4 pr-10 outline-none ease-in duration-200 focus:border-primary focus:ring-2 focus:ring-primary/20"
+                      className="w-full rounded-r-[10px] bg-transparent !border-l-0 border-0 py-2.5 pl-4 pr-10 text-custom-sm text-dark outline-none ease-in duration-200 placeholder:text-dark-4/60 dark:text-darkTheme-body-color dark:placeholder:text-white/40"
                     />
 
                     <button
                       id="search-btn"
                       aria-label="Search"
-                      className="flex items-center justify-center absolute right-3 top-1/2 -translate-y-1/2 ease-in duration-200 hover:text-blue"
+                      className="flex items-center justify-center absolute right-3 top-1/2 -translate-y-1/2 ease-in duration-200 hover:text-orange"
                     >
                       <svg
                         className="fill-current"
@@ -162,91 +172,8 @@ const Header = () => {
             </div>
           </div>
 
-          {/* <!-- Mobile Search Row --> */}
-          <div className="lg:hidden w-full">
-            <form
-              onSubmit={(event) => {
-                event.preventDefault();
-                const query = searchQuery.trim();
-                if (query) router.push(`/search?q=${encodeURIComponent(query)}`);
-              }}
-            >
-              <div className="relative w-full">
-                <input
-                  onChange={(e) => setSearchQuery(e.target.value)}
-                  value={searchQuery}
-                  type="search"
-                  name="mobile-search"
-                  id="mobile-search"
-                  placeholder="Search products, brands, or sellers..."
-                  autoComplete="off"
-                  className="w-full rounded-[5px] bg-gray-1 dark:bg-darkTheme-secondary-bg dark:text-darkTheme-body-color border border-gray-3 dark:border-darkTheme-border-color py-2.5 pl-4 pr-10 outline-none ease-in duration-200 focus:border-primary focus:ring-2 focus:ring-primary/20"
-                />
-                <button
-                  aria-label="Search"
-                  className="flex items-center justify-center absolute right-3 top-1/2 -translate-y-1/2 ease-in duration-200 hover:text-blue"
-                >
-                  <svg
-                    className="fill-current"
-                    width="18"
-                    height="18"
-                    viewBox="0 0 18 18"
-                    fill="none"
-                    xmlns="http://www.w3.org/2000/svg"
-                  >
-                    <path
-                      d="M17.2687 15.6656L12.6281 11.8969C14.5406 9.28123 14.3437 5.5406 11.9531 3.1781C10.6875 1.91248 8.99995 1.20935 7.19995 1.20935C5.39995 1.20935 3.71245 1.91248 2.44683 3.1781C-0.168799 5.79373 -0.168799 10.0687 2.44683 12.6844C3.71245 13.95 5.39995 14.6531 7.19995 14.6531C8.91558 14.6531 10.5187 14.0062 11.7843 12.8531L16.4812 16.65C16.5937 16.7344 16.7343 16.7906 16.875 16.7906C17.0718 16.7906 17.2406 16.7062 17.3531 16.5656C17.5781 16.2844 17.55 15.8906 17.2687 15.6656ZM7.19995 13.3875C5.73745 13.3875 4.38745 12.825 3.34683 11.7844C1.20933 9.64685 1.20933 6.18748 3.34683 4.0781C4.38745 3.03748 5.73745 2.47498 7.19995 2.47498C8.66245 2.47498 10.0125 3.03748 11.0531 4.0781C13.1906 6.2156 13.1906 9.67498 11.0531 11.7844C10.0406 12.825 8.66245 13.3875 7.19995 13.3875Z"
-                      fill=""
-                    />
-                  </svg>
-                </button>
-              </div>
-            </form>
-          </div>
-
           {/* <!-- header top right --> */}
           <div className="flex w-full lg:w-auto items-center gap-7.5">
-            <div className="hidden xl:flex items-center gap-3.5">
-              <svg
-                width="24"
-                height="24"
-                viewBox="0 0 24 24"
-                fill="none"
-                xmlns="http://www.w3.org/2000/svg"
-              >
-                <path
-                  fillRule="evenodd"
-                  clipRule="evenodd"
-                  d="M4.7177 3.09215C5.94388 1.80121 7.9721 2.04307 8.98569 3.47665L10.2467 5.26014C11.0574 6.4068 10.9889 8.00097 10.0214 9.01965L9.7765 9.27743C9.77582 9.27921 9.7751 9.28115 9.77436 9.28323C9.76142 9.31959 9.7287 9.43538 9.7609 9.65513C9.82765 10.1107 10.1793 11.0364 11.607 12.5394C13.0391 14.0472 13.9078 14.4025 14.3103 14.4679C14.484 14.4961 14.5748 14.4716 14.6038 14.4614L15.0124 14.0312C15.8862 13.1113 17.2485 12.9301 18.347 13.5623L20.2575 14.662C21.8904 15.6019 22.2705 17.9011 20.9655 19.275L19.545 20.7705C19.1016 21.2373 18.497 21.6358 17.75 21.7095C15.9261 21.8895 11.701 21.655 7.27161 16.9917C3.13844 12.6403 2.35326 8.85538 2.25401 7.00615L2.92011 6.9704L2.25401 7.00615C2.20497 6.09248 2.61224 5.30879 3.1481 4.74464L4.7177 3.09215ZM7.7609 4.34262C7.24855 3.61797 6.32812 3.57473 5.80528 4.12518L4.23568 5.77767C3.90429 6.12656 3.73042 6.52646 3.75185 6.92576C3.83289 8.43558 4.48307 11.8779 8.35919 15.9587C12.4234 20.2375 16.1676 20.3584 17.6026 20.2167C17.8864 20.1887 18.1783 20.0313 18.4574 19.7375L19.8779 18.2419C20.4907 17.5968 20.3301 16.4345 19.5092 15.962L17.5987 14.8624C17.086 14.5673 16.4854 14.6584 16.1 15.0642L15.6445 15.5437L15.1174 15.043C15.6445 15.5438 15.6438 15.5445 15.6432 15.5452L15.6417 15.5467L15.6388 15.5498L15.6324 15.5562L15.6181 15.5704C15.6078 15.5803 15.5959 15.5913 15.5825 15.6031C15.5556 15.6266 15.5223 15.6535 15.4824 15.6819C15.4022 15.7387 15.2955 15.8012 15.1606 15.8544C14.8846 15.9633 14.5201 16.0216 14.0699 15.9485C13.1923 15.806 12.0422 15.1757 10.5194 13.5724C8.99202 11.9644 8.40746 10.7647 8.27675 9.87259C8.21022 9.41852 8.26346 9.05492 8.36116 8.78035C8.40921 8.64533 8.46594 8.53766 8.51826 8.4559C8.54435 8.41514 8.56922 8.381 8.5912 8.35322C8.60219 8.33933 8.61246 8.32703 8.62182 8.31627L8.63514 8.30129L8.64125 8.29465L8.64415 8.29154L8.64556 8.29004C8.64625 8.28931 8.64694 8.28859 9.17861 8.79357L8.64695 8.28858L8.93376 7.98662C9.3793 7.51755 9.44403 6.72317 9.02189 6.1261L7.7609 4.34262Z"
-                  fill="#ff6c2f"
-                />
-                <path
-                  d="M13.2595 1.88008C13.3257 1.47119 13.7122 1.19381 14.1211 1.26001C14.1464 1.26485 14.2279 1.28007 14.2705 1.28958C14.3559 1.30858 14.4749 1.33784 14.6233 1.38106C14.9201 1.46751 15.3347 1.60991 15.8323 1.83805C16.8286 2.2948 18.1544 3.09381 19.5302 4.46961C20.906 5.84541 21.705 7.17122 22.1617 8.1675C22.3899 8.66511 22.5323 9.07972 22.6187 9.3765C22.6619 9.5249 22.6912 9.64393 22.7102 9.72926C22.7197 9.77193 22.7267 9.80619 22.7315 9.8315L22.7373 9.86269C22.8034 10.2716 22.5286 10.6741 22.1197 10.7403C21.712 10.8063 21.3279 10.5303 21.2601 10.1233C21.258 10.1124 21.2522 10.083 21.2461 10.0553C21.2337 9.99994 21.2124 9.91212 21.1786 9.79597C21.1109 9.56363 20.9934 9.2183 20.7982 8.79262C20.4084 7.94232 19.7074 6.76813 18.4695 5.53027C17.2317 4.2924 16.0575 3.59141 15.2072 3.20158C14.7815 3.00642 14.4362 2.88889 14.2038 2.82122C14.0877 2.78739 13.9417 2.75387 13.8863 2.74154C13.4793 2.67372 13.1935 2.2878 13.2595 1.88008Z"
-                  fill="#ff6c2f"
-                />
-                <path
-                  fillRule="evenodd"
-                  clipRule="evenodd"
-                  d="M13.4861 5.32955C13.5999 4.93128 14.015 4.70066 14.4133 4.81445L14.2072 5.53559C14.4133 4.81445 14.4136 4.81455 14.414 4.81465L14.4147 4.81486L14.4162 4.81531L14.4196 4.81628L14.4273 4.81859L14.4471 4.82476C14.4622 4.82958 14.481 4.83586 14.5035 4.84383C14.5484 4.85976 14.6077 4.88243 14.6805 4.91363C14.8262 4.97607 15.0253 5.07249 15.2698 5.2172C15.7593 5.50688 16.4275 5.98806 17.2124 6.77303C17.9974 7.558 18.4786 8.22619 18.7683 8.71565C18.913 8.96016 19.0094 9.15923 19.0718 9.30491C19.103 9.37772 19.1257 9.43708 19.1416 9.48199C19.1496 9.50444 19.1559 9.52327 19.1607 9.53835L19.1669 9.55814L19.1692 9.56589L19.1702 9.56922L19.1706 9.57075L19.1708 9.57148C19.1709 9.57184 19.171 9.57219 18.4499 9.77823L19.171 9.57219C19.2848 9.97047 19.0542 10.3856 18.6559 10.4994C18.261 10.6122 17.8496 10.3864 17.7317 9.99438L17.728 9.9836C17.7227 9.96858 17.7116 9.93899 17.6931 9.89579C17.6561 9.80946 17.589 9.66823 17.4774 9.47963C17.2544 9.10289 16.8517 8.53364 16.1518 7.83369C15.4518 7.13374 14.8826 6.73103 14.5058 6.50806C14.3172 6.39645 14.176 6.32935 14.0897 6.29235C14.0465 6.27383 14.0169 6.2628 14.0019 6.25747L13.9911 6.25377C13.599 6.13589 13.3733 5.72445 13.4861 5.32955Z"
-                  fill="#ff6c2f"
-                />
-              </svg>
-
-              <Link
-                href="/contact"
-                className="flex items-center gap-3 rounded-[10px] border border-gray-3 bg-gray-1/60 px-3 py-2 text-left transition hover:border-primary hover:bg-primary/5 dark:border-darkTheme-border-color dark:bg-darkTheme-secondary-bg dark:hover:border-primary"
-                >
-                <div>
-                <span className="block text-2xs uppercase text-dark-4">
-                Apply partnership
-              </span>
-                <p className="font-medium text-custom-sm text-dark dark:text-darkTheme-body-color">
-              Logistics partnership
-              </p>
-            </div>
-            </Link>
-            </div>
-
             {/* <!-- divider --> */}
             <span className="hidden xl:block w-px h-7.5 bg-gray-4"></span>
 
@@ -332,12 +259,12 @@ const Header = () => {
 
                 <button
                   onClick={handleOpenCartModal}
-                  className="flex items-center gap-2.5"
+                  className="flex items-center gap-1.5"
                 >
                   <span className="inline-block relative">
                     <svg
-                      width="24"
-                      height="24"
+                      width="20"
+                      height="20"
                       viewBox="0 0 24 24"
                       fill="none"
                       xmlns="http://www.w3.org/2000/svg"
@@ -370,15 +297,6 @@ const Header = () => {
                       {cartItems.length}
                     </span>
                   </span>
-
-                  <div>
-                    <span className="block text-2xs text-dark-4 uppercase">
-                      cart
-                    </span>
-                    <p className="font-medium text-custom-sm text-dark dark:text-darkTheme-body-color">
-                      <PriceDisplay amount={totalPrice} sourceCurrency="TZS" />
-                    </p>
-                  </div>
                 </button>
               </div>
 
@@ -429,7 +347,7 @@ const Header = () => {
         {/* <!-- header top end --> */}
       </div>
 
-      <div className="border-t border-gray-3 hidden xl:block">
+      <div className="relative border-t border-gray-3 hidden xl:block">
         <div className="max-w-[1440px] mx-auto px-4 sm:px-6 lg:px-8 xl:px-10 2xl:px-6">
           <div className="flex items-center justify-between">
             {/* <!--=== Main Nav Start ===--> */}
@@ -440,39 +358,43 @@ const Header = () => {
               <nav>
                 <ul className="flex xl:items-center flex-col xl:flex-row gap-5 xl:gap-6">
                   <>
-                    {/* Permanent navigation: Home + Shop */}
-                    {primaryMenuItems.map((menuItem) => (
-                      <li
-                        key={menuItem.id}
-                        className="group relative before:w-0 before:h-[3px] before:bg-blue before:absolute before:left-0 before:top-0 before:rounded-b-[3px] before:ease-out before:duration-200 hover:before:w-full"
+                    {/* All Categories Toggle (Alibaba Mega Menu trigger) */}
+                    <li className="hidden xl:flex items-center">
+                      <button
+                        onClick={() => setCategoryMegaMenuOpen(!categoryMegaMenuOpen)}
+                        className={`flex items-center gap-2 px-3 py-3 text-custom-sm font-semibold transition-colors border-b-2 ${
+                          categoryMegaMenuOpen
+                            ? "border-dark text-dark dark:border-white dark:text-white"
+                            : "border-transparent text-dark hover:text-orange dark:text-darkTheme-body-color dark:hover:text-white"
+                        }`}
                       >
-                        <Link
-                          href={menuItem.path}
-                          className={`hover:text-blue text-custom-sm font-medium text-dark dark:text-darkTheme-body-color flex ${
-                            stickyMenu ? "xl:py-3" : "xl:py-3.5"
-                          }`}
-                        >
-                          {menuItem.title}
-                        </Link>
-                      </li>
-                    ))}
+                        <svg className="size-4.5" viewBox="0 0 24 24" fill="none" aria-hidden="true">
+                          <path d="M4 6h16M4 12h16M4 18h16" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" />
+                        </svg>
+                        <span>All categories</span>
+                      </button>
+                    </li>
 
-                    {/* Every product category registered by admin */}
-                    {categories.map((category) => (
-                      <li
-                        key={String(category.id)}
-                        className="group relative before:w-0 before:h-[3px] before:bg-blue before:absolute before:left-0 before:top-0 before:rounded-b-[3px] before:ease-out before:duration-200 hover:before:w-full"
-                      >
-                        <Link
-                          href={`/shop-with-sidebar?category_id=${encodeURIComponent(String(category.id))}`}
-                          className={`hover:text-blue text-custom-sm font-medium text-dark dark:text-darkTheme-body-color flex ${
-                            stickyMenu ? "xl:py-3" : "xl:py-3.5"
-                          }`}
+                    {/* Permanent navigation: Home + Shop + Logistics */}
+                    {primaryMenuItems.map((menuItem) =>
+                      menuItem.submenu && menuItem.submenu.length > 0 ? (
+                        <Dropdown key={menuItem.id} menuItem={menuItem} stickyMenu={stickyMenu} />
+                      ) : (
+                        <li
+                          key={menuItem.id}
+                          className="group relative before:w-0 before:h-[3px] before:bg-blue before:absolute before:left-0 before:top-0 before:rounded-b-[3px] before:ease-out before:duration-200 hover:before:w-full"
                         >
-                          {category.name}
-                        </Link>
-                      </li>
-                    ))}
+                          <Link
+                            href={menuItem.path}
+                            className={`hover:text-blue text-custom-sm font-medium text-dark dark:text-darkTheme-body-color flex ${
+                              stickyMenu ? "xl:py-3" : "xl:py-3.5"
+                            }`}
+                          >
+                            {menuItem.title}
+                          </Link>
+                        </li>
+                      )
+                    )}
                   </>
                 </ul>
               </nav>
@@ -539,33 +461,92 @@ const Header = () => {
 
       {/* <!-- Mobile Navigation Drawer --> */}
       {navigationOpen && (
-        <div className="hidden lg:block xl:hidden border-t border-gray-3 dark:border-darkTheme-border-color bg-white dark:bg-darkTheme-card shadow-lg">
+        <div className="block xl:hidden border-t border-gray-3 dark:border-darkTheme-border-color bg-white dark:bg-darkTheme-card shadow-lg max-h-[80vh] overflow-y-auto">
           <div className="max-w-[1440px] mx-auto px-4 sm:px-7.5 py-4">
+            {/* Account / Sign In section */}
+            <div className="mb-3 pb-3 border-b border-gray-3 dark:border-darkTheme-border-color">
+              {hasHydrated && isAuthenticated ? (
+                <div className="flex flex-col gap-2">
+                  <div className="flex items-center gap-3">
+                    <div className="flex size-10 shrink-0 items-center justify-center rounded-full bg-orange font-bold text-sm text-white">
+                      {buyerName ? buyerName.charAt(0).toUpperCase() : "U"}
+                    </div>
+                    <div className="min-w-0 flex-1">
+                      <p className="truncate font-semibold text-sm text-dark dark:text-white">
+                        {buyerName || "My Account"}
+                      </p>
+                      <p className="truncate text-xs text-dark-4 dark:text-darkTheme-body-color">
+                        {user?.email || accountLabel}
+                      </p>
+                    </div>
+                  </div>
+                  <div className="mt-1 grid grid-cols-2 gap-2">
+                    <Link
+                      href={accountHref}
+                      onClick={() => setNavigationOpen(false)}
+                      className="rounded-[8px] bg-gray-1 px-3 py-2 text-center text-xs font-semibold text-dark transition hover:bg-gray-2 dark:bg-white/5 dark:text-white"
+                    >
+                      Dashboard
+                    </Link>
+                    <button
+                      type="button"
+                      onClick={() => {
+                        setNavigationOpen(false);
+                        void logout();
+                      }}
+                      className="rounded-[8px] bg-red-50 px-3 py-2 text-center text-xs font-semibold text-red-600 transition hover:bg-red-100 dark:bg-red-950/30 dark:text-red-400"
+                    >
+                      Sign Out
+                    </button>
+                  </div>
+                </div>
+              ) : (
+                <Link
+                  href={accountHref}
+                  onClick={() => setNavigationOpen(false)}
+                  className="flex items-center justify-center gap-2 rounded-[10px] bg-orange py-2.5 text-center text-xs font-bold text-white shadow-sm transition hover:bg-orange/90"
+                >
+                  <svg className="size-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
+                    <path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2" strokeLinecap="round" strokeLinejoin="round"/>
+                    <circle cx="12" cy="7" r="4" strokeLinecap="round" strokeLinejoin="round"/>
+                  </svg>
+                  <span>Sign In / Register</span>
+                </Link>
+              )}
+            </div>
+
             <nav>
               <ul className="flex flex-col gap-1">
                 {primaryMenuItems.map((menuItem) => (
                   <li key={menuItem.id}>
-                    <Link
-                      href={menuItem.path}
-                      onClick={() => setNavigationOpen(false)}
-                      className="block px-3 py-2.5 text-custom-sm font-medium text-dark dark:text-darkTheme-body-color hover:text-blue hover:bg-gray-1 dark:hover:bg-white/5 rounded-[10px]"
-                    >
-                      {menuItem.title}
-                    </Link>
+                    {menuItem.submenu && menuItem.submenu.length > 0 ? (
+                      <div className="flex flex-col">
+                        <span className="px-3 py-2 text-custom-sm font-semibold text-dark dark:text-white">
+                          {menuItem.title}
+                        </span>
+                        {menuItem.submenu.map((sub) => (
+                          <Link
+                            key={sub.id}
+                            href={sub.path}
+                            onClick={() => setNavigationOpen(false)}
+                            className="block py-2 pl-6 pr-3 text-custom-sm text-dark-4 dark:text-darkTheme-body-color hover:text-blue hover:bg-gray-1 dark:hover:bg-white/5 rounded-[10px]"
+                          >
+                            {sub.title}
+                          </Link>
+                        ))}
+                      </div>
+                    ) : (
+                      <Link
+                        href={menuItem.path}
+                        onClick={() => setNavigationOpen(false)}
+                        className="block px-3 py-2.5 text-custom-sm font-medium text-dark dark:text-darkTheme-body-color hover:text-blue hover:bg-gray-1 dark:hover:bg-white/5 rounded-[10px]"
+                      >
+                        {menuItem.title}
+                      </Link>
+                    )}
                   </li>
                 ))}
 
-                {categories.map((category) => (
-                  <li key={String(category.id)}>
-                    <Link
-                      href={`/shop-with-sidebar?category_id=${encodeURIComponent(String(category.id))}`}
-                      onClick={() => setNavigationOpen(false)}
-                      className="block px-3 py-2.5 text-custom-sm font-medium text-dark dark:text-darkTheme-body-color hover:text-blue hover:bg-gray-1 dark:hover:bg-white/5 rounded-[10px]"
-                    >
-                      {category.name}
-                    </Link>
-                  </li>
-                ))}
                 <li className="border-t border-gray-3 dark:border-darkTheme-border-color mt-2 pt-2">
                   <Link
                     href="/wishlist"
@@ -583,6 +564,12 @@ const Header = () => {
           </div>
         </div>
       )}
+
+      {/* <!-- Alibaba-style Category Mega Menu --> */}
+      <CategoryMegaMenu
+        isOpen={categoryMegaMenuOpen}
+        onClose={() => setCategoryMegaMenuOpen(false)}
+      />
     </header>
   );
 };

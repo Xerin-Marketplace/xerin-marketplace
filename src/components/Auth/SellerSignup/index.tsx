@@ -1287,16 +1287,12 @@ const AuthPage = ({ initialTab = "signup" }: { initialTab?: AuthTab }) => {
       </div>
 
       {/* Right panel: marketing / imagery */}
-      <div className="hidden lg:block relative overflow-hidden bg-dark">
-        <Image src="/images/bg6-dark.jpg" alt="" fill priority sizes="50vw" className="object-cover" />
-        <div className="absolute inset-0 bg-gradient-to-t from-black/80 via-black/40 to-black/20" />
+      <div className="relative hidden min-h-screen overflow-hidden bg-[#0b0f19] lg:flex lg:flex-col">
+        <Image src="/35124 (1).jpg" alt="Xerin Marketplace" fill priority sizes="50vw" className="object-cover object-center" />
+        <div className="absolute inset-0 bg-gradient-to-t from-[#070a12]/95 via-[#0b0f19]/70 to-[#0b0f19]/40 backdrop-blur-[0.5px]" />
+        <div className="absolute inset-0 bg-radial from-transparent via-black/20 to-black/60" />
 
-        <div className="relative h-full flex flex-col justify-between p-12 xl:p-16">
-          <Link href="/" className="inline-flex items-center gap-2.5 w-fit">
-            <Image src="/images/logo/logo.png" alt="XerinMarket" width={32} height={32} className="object-contain" />
-            <span className="font-semibold text-lg text-white">XerinMarket</span>
-          </Link>
-
+        <div className="relative h-full flex flex-col justify-end p-12 xl:p-16">
           <div className="max-w-md">
             <h2 className="font-bold text-3xl xl:text-4xl text-white leading-tight mb-4">
               The marketplace built for Africa

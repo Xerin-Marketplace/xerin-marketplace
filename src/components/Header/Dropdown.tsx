@@ -3,23 +3,10 @@
 import { useState } from "react";
 import Link from "next/link";
 import { usePathname } from "next/navigation";
-
-type SubMenuItem = {
-  id: string;
-  title: string;
-  path: string;
-  newTab?: boolean;
-};
-
-type MenuItem = {
-  id: number;
-  title: string;
-  path?: string;
-  submenu?: SubMenuItem[];
-};
+import type { Menu } from "@/types/Menu";
 
 type DropdownProps = {
-  menuItem: MenuItem;
+  menuItem: Menu;
   stickyMenu: boolean;
 };
 
@@ -62,7 +49,7 @@ const Dropdown = ({ menuItem, stickyMenu }: DropdownProps) => {
 
       {/* Dropdown */}
       <div
-        className={`absolute left-0 top-full z-50 min-w-[240px] rounded-lg border border-gray-200 dark:border-darkTheme-border-color bg-white dark:bg-darkTheme-card shadow-lg transition-all duration-200 ${
+        className={`absolute left-0 top-full z-50 min-w-[240px] rounded-[10px] border border-gray-200 dark:border-darkTheme-border-color bg-white dark:bg-darkTheme-card shadow-lg transition-all duration-200 ${
           isOpen
             ? "visible opacity-100 translate-y-0"
             : "invisible opacity-0 translate-y-3"
