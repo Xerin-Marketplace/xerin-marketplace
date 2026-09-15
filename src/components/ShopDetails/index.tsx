@@ -2,7 +2,6 @@
 
 import React, { useMemo, useState } from "react";
 import Image from "next/image";
-import Link from "next/link";
 import { useRouter } from "next/navigation";
 import Breadcrumb from "../Common/Breadcrumb";
 import StarRating from "@/components/Common/StarRating";
@@ -147,20 +146,6 @@ const ShopDetails = ({ product }: { product: Product }) => {
                       <CheckIcon className={available ? "text-green" : "text-dark-4"} />
                       {available ? "In Stock" : "Availability not confirmed"}
                     </span>
-                    {product.storeId ? (
-                      <>
-                        <span className="hidden h-4 w-px bg-gray-3 sm:block" />
-                        <Link
-                          href={`/stores/${product.storeId}`}
-                          className="inline-flex items-center gap-1.5 rounded-full border border-orange/30 bg-orange/[0.06] px-3 py-1.5 text-xs font-bold text-orange transition hover:border-orange hover:bg-orange hover:text-white sm:text-sm"
-                        >
-                          View seller store
-                          <svg width="14" height="14" viewBox="0 0 24 24" fill="none" aria-hidden="true">
-                            <path d="M5 12h14M13 6l6 6-6 6" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round" />
-                          </svg>
-                        </Link>
-                      </>
-                    ) : null}
                   </div>
                 </div>
                 {discountPercent > 0 && (
@@ -186,7 +171,7 @@ const ShopDetails = ({ product }: { product: Product }) => {
                 <div className="min-w-0 lg:col-start-1">
                   <div className="space-y-2.5">
                     {product.sku && <div className="flex items-center gap-2 text-sm text-dark dark:text-darkTheme-body-color"><CheckIcon /> <span><strong>SKU:</strong> {product.sku}</span></div>}
-                    <div className="flex items-center gap-2 text-sm text-dark dark:text-darkTheme-body-color"><CheckIcon /> <span>Buyer protection and order tracking through Xerin Market</span></div>
+                    <div className="flex items-center gap-2 text-sm text-dark dark:text-darkTheme-body-color"><CheckIcon /> <span>Buyer protection and order tracking through Xerin Marketplace</span></div>
                     {variantHighlights.map((item) => (
                       <div key={item} className="flex items-start gap-2 text-sm text-dark dark:text-darkTheme-body-color"><span className="mt-0.5"><CheckIcon /></span><span>{item}</span></div>
                     ))}

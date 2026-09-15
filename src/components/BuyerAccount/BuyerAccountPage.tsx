@@ -144,7 +144,7 @@ export default function BuyerDashboard() {
 
  return (
   <div className="space-y-6">
-   <section className="overflow-hidden rounded-3xl bg-[#202326] text-white shadow-sm">
+   <section className="overflow-hidden rounded-2xl bg-[#202326] text-white">
     <div className="grid gap-6 p-6 sm:p-7 lg:grid-cols-[1fr_auto] lg:items-center">
      <div>
       <p className="text-xs font-bold uppercase tracking-[0.18em] text-[#f7941d]">My Xerin Market</p>
@@ -165,7 +165,7 @@ export default function BuyerDashboard() {
      </div>
     </div>
    </section>
-   <section className="rounded-2xl border border-[#e2e8f0] bg-white p-5 shadow-sm dark:border-white/10 dark:bg-darkTheme-card">
+   <section className="rounded-xl border border-[#e2e8f0] bg-white p-5 dark:border-white/10 dark:bg-darkTheme-card">
     <div className="flex flex-col gap-2 sm:flex-row sm:items-center sm:justify-between">
      <div>
       <p className="text-sm font-bold text-[#111827] dark:text-white">Needs your attention</p>
@@ -280,7 +280,7 @@ export default function BuyerDashboard() {
 
 function AttentionCard({ icon: Icon, label, value, helper, href }: { icon: typeof Package; label: string; value: string; helper: string; href: string }) {
  return (
-  <Link href={href} className="group rounded-xl border border-[#e2e8f0] bg-[#fbfcfd] p-4 transition hover:border-[#f7941d] hover:bg-orange-50/30 dark:border-white/10 dark:bg-white/[0.03]">
+  <Link href={href} className="group rounded-xl border border-[#e2e8f0] bg-[#fbfcfd] p-4 transition hover:border-[#f7941d] dark:border-white/10 dark:bg-white/[0.03]">
    <div className="flex items-start justify-between gap-3">
     <span className="rounded-lg bg-orange-50 p-2 text-[#f7941d] dark:bg-orange-400/10"><Icon size={18} /></span>
     <b className="text-2xl text-[#111827] dark:text-white">{value}</b>
@@ -293,7 +293,7 @@ function AttentionCard({ icon: Icon, label, value, helper, href }: { icon: typeo
 
 function JourneyCard({ icon: Icon, label, value }: { icon: typeof Package; label: string; value: number }) {
  return (
-  <div className="rounded-2xl border border-[#e2e8f0] bg-white p-4 shadow-sm dark:border-white/10 dark:bg-darkTheme-card">
+  <div className="rounded-xl border border-[#e2e8f0] bg-white p-4 dark:border-white/10 dark:bg-darkTheme-card">
    <div className="flex items-center justify-between"><span className="rounded-xl bg-orange-50 p-2 text-[#f7941d] dark:bg-orange-400/10"><Icon size={18} /></span><b className="text-xl text-[#111827] dark:text-white">{value}</b></div>
    <p className="mt-3 text-sm font-semibold text-[#475569] dark:text-white/70">{label}</p>
   </div>
@@ -302,7 +302,7 @@ function JourneyCard({ icon: Icon, label, value }: { icon: typeof Package; label
 
 function Stat({ icon: Icon, label, value, href, helper }: { icon: typeof Package; label: string; value: string; href: string; helper: string }) {
  return (
-  <Link href={href} className="rounded-2xl border border-[#e2e8f0] bg-white p-5 shadow-sm transition hover:-translate-y-0.5 hover:border-[#f7941d] dark:border-white/10 dark:bg-darkTheme-card">
+  <Link href={href} className="rounded-xl border border-[#e2e8f0] bg-white p-5 transition hover:border-[#f7941d] dark:border-white/10 dark:bg-darkTheme-card">
    <div className="flex items-center justify-between"><span className="rounded-xl bg-orange-50 p-2 text-[#f7941d] dark:bg-orange-400/10"><Icon size={19} /></span><b className="text-xl text-[#111827] dark:text-white">{value}</b></div>
    <p className="mt-4 text-sm font-semibold text-[#111827] dark:text-white">{label}</p>
    <small className="text-[#64748b]">{helper}</small>
@@ -312,7 +312,7 @@ function Stat({ icon: Icon, label, value, href, helper }: { icon: typeof Package
 
 function Card({ title, action, children }: { title: string; action?: React.ReactNode; children: React.ReactNode }) {
  return (
-  <section className="rounded-2xl border border-[#e2e8f0] bg-white p-5 shadow-sm dark:border-white/10 dark:bg-darkTheme-card">
+  <section className="rounded-xl border border-[#e2e8f0] bg-white p-5 dark:border-white/10 dark:bg-darkTheme-card">
    <div className="mb-4 flex items-center justify-between gap-3"><h2 className="text-lg font-bold text-[#111827] dark:text-white">{title}</h2>{action}</div>
    {children}
   </section>
@@ -321,7 +321,7 @@ function Card({ title, action, children }: { title: string; action?: React.React
 
 function Action({ href, icon: Icon, label }: { href: string; icon: typeof Package; label: string }) {
  return (
-  <Link href={href} className="flex items-center justify-between gap-3 rounded-xl border border-[#e2e8f0] p-3 text-sm font-semibold text-[#111827] transition hover:border-[#f7941d] hover:bg-orange-50/30 dark:border-white/10 dark:text-white">
+  <Link href={href} className="flex items-center justify-between gap-3 rounded-xl border border-[#e2e8f0] p-3 text-sm font-semibold text-[#111827] transition hover:border-[#f7941d] dark:border-white/10 dark:text-white">
    <span className="flex items-center gap-3"><Icon size={18} className="text-[#f7941d]" />{label}</span><ChevronRight size={16} className="text-[#94a3b8]" />
   </Link>
  );

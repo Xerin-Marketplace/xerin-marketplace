@@ -252,7 +252,7 @@ const Signup = () => {
                   onChange={(event) => setFullName(event.target.value)}
                   autoComplete="name"
                   disabled={isSubmitting}
-                  className="h-11 w-full rounded-lg border border-gray-3 bg-gray-1 px-3.5 text-sm outline-none duration-200 placeholder:text-dark-4 focus:border-transparent focus:ring-2 focus:ring-orange/30 disabled:cursor-not-allowed disabled:opacity-70 dark:border-darkTheme-border-color dark:bg-darkTheme-secondary-bg dark:text-darkTheme-body-color dark:placeholder:text-darkTheme-secondary-muted"
+                  className="h-11 w-full rounded border border-gray-3 bg-gray-1 px-3.5 text-sm outline-none duration-200 placeholder:text-dark-4 focus:border-transparent focus:ring-2 focus:ring-orange/30 disabled:cursor-not-allowed disabled:opacity-70 dark:border-darkTheme-border-color dark:bg-darkTheme-secondary-bg dark:text-darkTheme-body-color dark:placeholder:text-darkTheme-secondary-muted"
                 />
               </div>
 
@@ -270,7 +270,7 @@ const Signup = () => {
                   onChange={(event) => setEmail(event.target.value)}
                   autoComplete="email"
                   disabled={isSubmitting}
-                  className="h-11 w-full rounded-lg border border-gray-3 bg-gray-1 px-3.5 text-sm outline-none duration-200 placeholder:text-dark-4 focus:border-transparent focus:ring-2 focus:ring-orange/30 disabled:cursor-not-allowed disabled:opacity-70 dark:border-darkTheme-border-color dark:bg-darkTheme-secondary-bg dark:text-darkTheme-body-color dark:placeholder:text-darkTheme-secondary-muted"
+                  className="h-11 w-full rounded border border-gray-3 bg-gray-1 px-3.5 text-sm outline-none duration-200 placeholder:text-dark-4 focus:border-transparent focus:ring-2 focus:ring-orange/30 disabled:cursor-not-allowed disabled:opacity-70 dark:border-darkTheme-border-color dark:bg-darkTheme-secondary-bg dark:text-darkTheme-body-color dark:placeholder:text-darkTheme-secondary-muted"
                 />
               </div>
 
@@ -281,7 +281,7 @@ const Signup = () => {
                 </label>
 
                 <div
-                  className={`flex h-11 items-stretch overflow-hidden rounded-lg border bg-gray-1 focus-within:ring-2 focus-within:ring-orange/30 dark:bg-darkTheme-secondary-bg ${
+                  className={`flex h-9 items-stretch overflow-hidden rounded border bg-gray-1 focus-within:ring-2 focus-within:ring-orange/30 dark:bg-darkTheme-secondary-bg ${
                     phone && !isPhoneValid
                       ? "border-red"
                       : "border-gray-3 dark:border-darkTheme-border-color"
@@ -328,7 +328,7 @@ const Signup = () => {
                     onChange={(event) => setPassword(event.target.value)}
                     autoComplete="new-password"
                     disabled={isSubmitting}
-                    className="h-11 w-full rounded-lg border border-gray-3 bg-gray-1 pl-3.5 pr-10 text-sm outline-none duration-200 placeholder:text-dark-4 focus:border-transparent focus:ring-2 focus:ring-orange/30 disabled:cursor-not-allowed disabled:opacity-70 dark:border-darkTheme-border-color dark:bg-darkTheme-secondary-bg dark:text-darkTheme-body-color dark:placeholder:text-darkTheme-secondary-muted"
+                    className="h-11 w-full rounded border border-gray-3 bg-gray-1 pl-3.5 pr-10 text-sm outline-none duration-200 placeholder:text-dark-4 focus:border-transparent focus:ring-2 focus:ring-orange/30 disabled:cursor-not-allowed disabled:opacity-70 dark:border-darkTheme-border-color dark:bg-darkTheme-secondary-bg dark:text-darkTheme-body-color dark:placeholder:text-darkTheme-secondary-muted"
                   />
 
                   <button
@@ -389,7 +389,7 @@ const Signup = () => {
                     autoComplete="new-password"
                     disabled={isSubmitting}
                     aria-invalid={isPasswordMismatch}
-                    className="h-11 w-full rounded-lg border border-gray-3 bg-gray-1 pl-3.5 pr-10 text-sm outline-none duration-200 placeholder:text-dark-4 focus:border-transparent focus:ring-2 focus:ring-orange/30 disabled:cursor-not-allowed disabled:opacity-70 dark:border-darkTheme-border-color dark:bg-darkTheme-secondary-bg dark:text-darkTheme-body-color dark:placeholder:text-darkTheme-secondary-muted"
+                    className="h-11 w-full rounded border border-gray-3 bg-gray-1 pl-3.5 pr-10 text-sm outline-none duration-200 placeholder:text-dark-4 focus:border-transparent focus:ring-2 focus:ring-orange/30 disabled:cursor-not-allowed disabled:opacity-70 dark:border-darkTheme-border-color dark:bg-darkTheme-secondary-bg dark:text-darkTheme-body-color dark:placeholder:text-darkTheme-secondary-muted"
                   />
 
                   <button
