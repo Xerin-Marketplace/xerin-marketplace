@@ -12,17 +12,17 @@ const Hero = () => {
   const { topAd, bottomAd } = useHomepageAdvertisementSlots();
 
   return (
-    <section className="hidden lg:block overflow-hidden bg-[#eef2f7] pb-4 pt-[90px] dark:bg-darkTheme-secondary-bg sm:pb-6 sm:pt-[118px] lg:pb-9 lg:pt-[142px] xl:pt-[150px]">
+    <section className="overflow-hidden bg-[#eef2f7] pb-4 pt-[90px] dark:bg-darkTheme-secondary-bg sm:pb-6 sm:pt-[118px] lg:pb-9 lg:pt-[142px] xl:pt-[150px]">
       <div className="mx-auto w-full max-w-[1440px] px-3 sm:px-5 lg:px-8 xl:px-10 2xl:px-6">
         <div className="grid items-stretch gap-3 lg:grid-cols-[minmax(0,2fr)_minmax(300px,0.82fr)] xl:gap-5">
           <div className="min-w-0">
             <div className="relative z-1 h-full min-h-[410px] overflow-hidden rounded-2xl bg-white shadow-sm dark:bg-darkTheme-card sm:min-h-[410px] lg:min-h-[470px] xl:min-h-[500px]">
-              <Image src="/images/hero/hero-bg.png" alt="hero background" className="absolute bottom-0 right-0 -z-1 hidden h-full w-auto object-cover sm:block" width={534} height={520} priority />
+              <Image src="/images/hero/hero-bg.png" alt="hero background" className="absolute bottom-0 right-0 -z-1 h-full w-auto object-cover" width={534} height={520} priority />
               <HeroCarousel />
             </div>
           </div>
 
-          <div className="no-scrollbar hidden snap-x gap-3 overflow-x-auto pb-1 sm:flex lg:grid lg:grid-cols-1 lg:grid-rows-2 lg:overflow-visible lg:pb-0 xl:gap-5">
+          <div className="no-scrollbar flex snap-x gap-3 overflow-x-auto pb-1 lg:grid lg:grid-cols-1 lg:grid-rows-2 lg:overflow-visible lg:pb-0 xl:gap-5">
             {topAd ? (
               <div className="min-w-[82vw] snap-start sm:min-w-[48%] lg:min-w-0"><SponsoredHeroCard advertisement={topAd} /></div>
             ) : (
