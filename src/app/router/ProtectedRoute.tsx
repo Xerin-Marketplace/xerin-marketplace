@@ -5,21 +5,21 @@ import { useRouter } from "next/navigation";
 import { authStorage } from "@/lib/auth/storage";
 
 export default function ProtectedRoute({
-  children,
-  redirectTo = "/signin",
+ children,
+ redirectTo = "/signin",
 }: {
-  children: ReactNode;
-  redirectTo?: string;
+ children: ReactNode;
+ redirectTo?: string;
 }) {
-  const router = useRouter();
-  const token = authStorage.getAccessToken();
+ const router = useRouter();
+ const token = authStorage.getAccessToken();
 
-  useEffect(() => {
-    if (!token) {
-      router.replace(redirectTo);
-    }
-  }, [token, router, redirectTo]);
+ useEffect(() => {
+ if (!token) {
+ router.replace(redirectTo);
+ }
+ }, [token, router, redirectTo]);
 
-  if (!token) return null;
-  return <>{children}</>;
+ if (!token) return null;
+ return <>{children}</>;
 }

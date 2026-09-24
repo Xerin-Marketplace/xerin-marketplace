@@ -15,26 +15,26 @@ export default function AdminReports({view}:{view:ReportView}){const[report,setR
 <section className="admin-operations-header">
 <div className="flex flex-col gap-5 lg:flex-row lg:items-end lg:justify-between">
 <div>
-<p className="text-xs font-bold uppercase tracking-[.18em] text-[#f47524]">Business intelligence</p>
-<h2 className="mt-2 text-2xl font-bold tracking-[-.02em] text-[#111827] dark:text-white">{names[view]}</h2>
-<p className="mt-1 max-w-2xl text-sm text-[#64748b] dark:text-white/60">Live operational totals, distribution and detailed records for the selected reporting period.</p>
+<p className="text-xs font-bold uppercase tracking-[.18em] text-primary">Business intelligence</p>
+<h2 className="mt-2 text-2xl font-bold tracking-[-.02em] text-foreground">{names[view]}</h2>
+<p className="mt-1 max-w-2xl text-sm text-muted-foreground /60">Live operational totals, distribution and detailed records for the selected reporting period.</p>
 </div>
 <div className="flex flex-col gap-2 sm:flex-row">
-<select value={range} onChange={e=>setRange(e.target.value)} className="min-h-11 rounded-xl border border-[#dfe5ec] bg-white px-4 py-2.5 text-sm font-semibold text-gray-900 dark:border-white/10 dark:bg-white/5 dark:text-white">
+<select value={range} onChange={e=>setRange(e.target.value)} className="min-h-11 rounded-xl border border-border bg-card px-4 py-2.5 text-sm font-semibold text-foreground dark:border-border">
 <option value="7">Last 7 days</option>
 <option value="30">Last 30 days</option>
 <option value="90">Last 90 days</option>
 <option value="365">Last year</option>
 </select>
-<button onClick={exportCsv} disabled={!rows.length} className="min-h-11 rounded-xl bg-[#111827] px-4 py-2.5 text-sm font-semibold text-white transition hover:bg-[#253044] disabled:opacity-40 dark:bg-[#f47524]">Export CSV</button>
+<button onClick={exportCsv} disabled={!rows.length} className="min-h-11 rounded-xl bg-foreground px-4 py-2.5 text-sm font-semibold text-background transition hover:bg-foreground disabled:opacity-40 dark:bg-primary">Export CSV</button>
 </div>
 </div>
-</section>{error&&<div className="rounded-xl border border-red-200 bg-red-50 p-4 text-sm text-red-700">{error}</div>}{loading?<div className="rounded-2xl border bg-white p-12 text-center text-gray-500">Generating report...</div>:report&&<>
+</section>{error&&<div className="rounded-xl border border-red-light-4 bg-red-light-6 p-4 text-sm text-red-dark">{error}</div>}{loading?<div className="rounded-xl border bg-card p-12 text-center text-muted-foreground">Generating report...</div>:report&&<>
 <section className="admin-metric-grid grid gap-4 sm:grid-cols-2 xl:grid-cols-4">{report.metrics.map(m=>
 <article key={m.label} className="admin-metric-card">
-<p className="text-sm text-gray-500">{m.label}</p>
+<p className="text-sm text-muted-foreground">{m.label}</p>
 <p className="mt-2 text-2xl font-semibold">{format(m.value,m.format)}</p>
-<p className="mt-1 text-xs text-gray-400">Selected period</p>
+<p className="mt-1 text-xs text-muted-foreground">Selected period</p>
 </article>)}</section>
 <section className="grid gap-5 lg:grid-cols-[1fr_2fr]">
 <article className="admin-operations-card p-5">
@@ -45,14 +45,14 @@ export default function AdminReports({view}:{view:ReportView}){const[report,setR
 <span>{pretty(b.label)}</span>
 <b>{b.value}</b>
 </div>
-<div className="h-2 rounded-full bg-gray-100">
-<div style={{width:`${Math.max(4,100*b.value/max)}%`}} className="h-2 rounded-full bg-orange-500"/>
+<div className="h-2 rounded-full bg-muted">
+<div style={{width:`${Math.max(4,100*b.value/max)}%`}} className="h-2 rounded-full bg-primary"/>
 </div>
-</div>):<p className="text-sm text-gray-500">No distribution data for this period.</p>}</div>
+</div>):<p className="text-sm text-muted-foreground">No distribution data for this period.</p>}</div>
 </article>
 <article className="admin-operations-card overflow-hidden">
 <div className="admin-operations-toolbar">
-<input value={query} onChange={e=>setQuery(e.target.value)} placeholder="Search report records" className="min-h-11 min-w-0 flex-1 rounded-xl border px-4 py-2.5 text-sm outline-none focus:border-orange-400"/>
+<input value={query} onChange={e=>setQuery(e.target.value)} placeholder="Search report records" className="min-h-11 min-w-0 flex-1 rounded-xl border px-4 py-2.5 text-sm outline-none focus:border-primary-400"/>
 <button onClick={()=>void load()} className="min-h-11 rounded-xl border px-4 text-sm font-semibold">Refresh</button>
 </div>
 <ReportTable rows={rows}/>
@@ -62,15 +62,15 @@ export default function AdminReports({view}:{view:ReportView}){const[report,setR
 function ReportTable({rows}:{rows:AdminReport["rows"]}){if(!rows.length)return <div className="p-10 text-center">
 <p className="text-3xl">📊</p>
 <p className="mt-2 font-medium">No records in this period</p>
-<p className="mt-1 text-sm text-gray-500">Try a wider reporting range.</p>
+<p className="mt-1 text-sm text-muted-foreground">Try a wider reporting range.</p>
 </div>;const keys=Object.keys(rows[0]).filter(k=>k!=="id").slice(0,7);return <div className="overflow-x-auto">
 <table className="w-full min-w-[700px] text-left text-sm">
-<thead className="bg-gray-50 text-xs uppercase text-gray-500">
+<thead className="bg-muted text-xs uppercase text-muted-foreground">
 <tr>{keys.map(k=>
 <th key={k} className="px-4 py-3">{pretty(k)}</th>)}</tr>
 </thead>
 <tbody className="divide-y">{rows.map((r,i)=>
-<tr key={String(r.id||i)} className="hover:bg-gray-50">{keys.map(k=>
+<tr key={String(r.id||i)} className="hover:bg-muted">{keys.map(k=>
 <td key={k} className="px-4 py-3">{k==="date"&&r[k]?new Date(String(r[k])).toLocaleDateString():k==="amount"?format(Number(r[k]),"currency"):k==="status"?<StatusBadge value={String(r[k])}/>:String(r[k]??"—")}</td>)}</tr>)}</tbody>
 </table>
 </div>}

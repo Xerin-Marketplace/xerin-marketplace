@@ -1111,8 +1111,8 @@ export const updateApplicationSetting=async(key:string,payload:Partial<Applicati
 export const getAccountProfile=async()=>(await axiosInstance.get<AccountProfile>("/users/me")).data;
 export const updateAccountProfile=async(payload:Pick<AccountProfile,"first_name"|"last_name"|"phone">)=>(await axiosInstance.patch<AccountProfile>("/users/me",payload)).data;
 export const changeAccountPassword=async(current_password:string,new_password:string)=>(await axiosInstance.post<{message:string}>("/auth/change-password",{current_password,new_password})).data;
-export const listAccountSessions=async()=>(await axiosInstance.get<AccountSession[]>("/users/me/sessions")).data;
-export const revokeAccountSession=async(id:string)=>(await axiosInstance.delete(`/users/me/sessions/${id}`)).data;
+export const listAccountSessions=async()=>(await axiosInstance.get<AccountSession[]>("/auth/sessions")).data;
+export const revokeAccountSession=async(id:string)=>(await axiosInstance.delete(`/auth/sessions/${id}`)).data;
 
 export const approveSeller = async (sellerId: string): Promise<AdminSeller> => {
   const res = await axiosInstance.post<AdminSeller>(`/admin/sellers/${sellerId}/approve`);

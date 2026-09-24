@@ -1,0 +1,108 @@
+import type { Metadata } from "next";
+import React from "react";
+import { siteConfig } from "@/lib/site-config";
+
+/** Apply to any page/layout that must never be indexed. */
+export const noindexMetadata: Metadata = {
+  robots: { index: false, follow: false, googleBot: { index: false, follow: false } },
+};
+
+/** Render a JSON-LD script tag. Server-component safe. */
+export function JsonLd({ data }: { data: Record<string, unknown> | Record<string, unknown>[] }) {
+  return (
+    <script
+      type="application/ld+json"
+      dangerouslySetInnerHTML={{ __html: JSON.stringify(data) }}
+    />
+  );
+}
+
+export const organizationJsonLd = () => ({
+  "@context": "https://schema.org",
+  "@type": "Organization",
+  name: siteConfig.name,
+  url: siteConfig.url,
+  logo: `${siteConfig.url}/images/logo/logo.png`,
+  contactPoint: {
+    "@type": "ContactPoint",
+    email: siteConfig.contact.email,
+    contactType: "customer support",
+  },
+  sameAs: Object.values(siteConfig.social).filter(Boolean),
+});
+
+export const websiteJsonLd = () => ({
+  "@context": "https://schema.org",
+  "@type": "WebSite",
+  name: siteConfig.name,
+  url: siteConfig.url,
+  potentialAction: {
+    "@type": "SearchAction",
+    target: {
+      "@type": "EntryPoint",
+      urlTemplate: `${siteConfig.url}/search?q={search_term_string}`,
+    },
+    "query-input": "required name=search_term_string",
+  },
+});
+
+type ProductLdInput = {
+  name: string;
+  slug: string;
+  description?: string | null;
+  images: string[];
+  price: number;
+  currency: string;
+  sku?: string | null;
+  brand?: string | null;
+  categoryName?: string | null;
+  inStock: boolean;
+  sellerName?: string | null;
+};
+
+export function productJsonLd(p: ProductLdInput) {
+  const url = `${siteConfig.url}/products/${p.slug}`;
+  return {
+    "@context": "https://schema.org",
+    "@type": "Product",
+    name: p.name,
+    url,
+    image: p.images,
+    description: p.description || `${p.name} on ${siteConfig.name}`,
+    ...(p.sku ? { sku: p.sku } : {}),
+    ...(p.brand ? { brand: { "@type": "Brand", name: p.brand } } : {}),
+    ...(p.categoryName
+      ? { category: p.categoryName }
+      : {}),
+    offers: {
+      "@type": "Offer",
+      url,
+      price: p.price,
+      priceCurrency: p.currency,
+      availability: p.inStock
+        ? "https://schema.org/InStock"
+        : "https://schema.org/OutOfStock",
+      ...(p.sellerName
+        ? { seller: { "@type": "Organization", name: p.sellerName } }
+        : {}),
+    },
+  };
+}
+
+export function breadcrumbJsonLd(items: Array<{ name: string; url: string }>) {
+  return {
+    "@context": "https://schema.org",
+    "@type": "BreadcrumbList",
+    itemListElement: items.map((item, i) => ({
+      "@type": "ListItem",
+      position: i + 1,
+      name: item.name,
+      item: item.url.startsWith("http") ? item.url : `${siteConfig.url}${item.url}`,
+    })),
+  };
+}
+
+export function truncate(text: string, max = 160): string {
+  const clean = text.replace(/\s+/g, " ").trim();
+  return clean.length > max ? `${clean.slice(0, max - 1).trim()}…` : clean;
+}

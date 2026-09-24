@@ -89,6 +89,7 @@ const nextConfig = {
     "e12a-41-207-244-106.ngrok-free.app",
     "backendtest.adam.com",
     "169.58.54.110",
+    "10.68.43.235",
   ],
 
   async rewrites() {

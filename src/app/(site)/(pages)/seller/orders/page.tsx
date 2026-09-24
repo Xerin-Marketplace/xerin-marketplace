@@ -2,14 +2,14 @@ import type { Metadata } from "next";
 import SellerOrders from "@/components/Seller/Orders";
 
 export const metadata: Metadata = {
-  title: "Seller Orders | Xerin Market",
-  description: "Manage customer orders in Seller Center.",
+ title: "Seller Orders",
+ description: "Manage customer orders in Seller Center.",
 };
 
 export default function SellerOrdersPage() {
-  return (
-    <main>
-      <SellerOrders />
-    </main>
-  );
+ return (
+ <main>
+ <SellerOrders />
+ </main>
+ );
 }

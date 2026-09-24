@@ -14,6 +14,7 @@ export type CartItemUi = {
   cartItemId: string;
   productId: string;
   title: string;
+  sellerName?: string | null;
   price: number;
   discountedPrice: number;
   quantity: number;
@@ -27,11 +28,17 @@ export const mapBackendCartToUi = (cart: Cart): CartItemUi[] => {
   if (!cart?.items) return [];
   return cart.items.map((item: BackendCartItem) => {
     const product = mapApiProductToUiProduct(item.product);
+    const sellerName =
+      (item.product as { store_name?: string | null; seller_name?: string | null })
+        .store_name ||
+      (item.product as { seller_name?: string | null }).seller_name ||
+      null;
     return {
       id: item.product_id,
       cartItemId: item.id,
       productId: item.product_id,
       title: product.title,
+      sellerName,
       // Cart unit_price is refreshed by the backend and is the financial source of truth.
       price: Number(item.unit_price),
       discountedPrice: Number(item.unit_price),

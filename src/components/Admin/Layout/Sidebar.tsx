@@ -2,335 +2,299 @@
 
 import "../admin-ui.css";
 import { ReactNode, useMemo } from "react";
-import {
-  BarChart3,
-  Bell,
-  Boxes,
-  CircleUserRound,
-  ClipboardList,
-  CreditCard,
-  FileCheck2,
-  LifeBuoy,
-  LockKeyhole,
-  Megaphone,
-  Package,
-  PackageCheck,
-  Search,
-  Settings,
-  ShieldCheck,
-  ShoppingBag,
-  Store,
-  Tag,
-  Users,
-  UserPlus,
-  KeyRound,
-  WalletCards,
-  Truck,
-  Globe2,
-  X,
-  Scale,
-  SlidersHorizontal,
-  type LucideIcon,
-} from "lucide-react";
+import { ChartColumnIcon, BellIcon, Package02Icon, UserCircleIcon, Task01Icon, CreditCardIcon, FileCheckIcon, LifebuoyIcon, LockKeyIcon, Megaphone01Icon, PackageIcon, PackageCheckIcon, Search01Icon, Settings01Icon, ShieldCheckIcon, ShoppingBag01Icon, Store01Icon, Tag01Icon, UserMultiple02Icon, UserAdd01Icon, Key01Icon, Wallet03Icon, TruckIcon, Globe02Icon, Cancel01Icon, JusticeScale01Icon, PreferenceHorizontalIcon } from "@hugeicons/core-free-icons";
 
 import DashboardShell, {
-  type DashboardNavGroup,
-  type DashboardShellUser,
+ type DashboardNavGroup,
+ type DashboardShellUser,
 } from "@/components/Dashboard/DashboardShell";
 import { authStorage } from "@/lib/auth/storage";
 import { canAccessAdminItem, canAccessAdminSection } from "@/lib/auth/admin-access";
+import { HugeiconsIcon, type IconSvgElement, type HugeiconsIconProps } from "@hugeicons/react";
 
 export type AdminTab =
-  | "overview"
-  | "users"
-  | "sellers"
-  | "products"
-  | "categories"
-  | "brands"
-  | "reviews"
-  | "orders"
-  | "inventory"
-  | "finance"
-  | "analytics";
+ | "overview"
+ | "users"
+ | "sellers"
+ | "products"
+ | "categories"
+ | "brands"
+ | "reviews"
+ | "orders"
+ | "inventory"
+ | "finance"
+ | "analytics";
 
 type NavItem = {
-  label: string;
-  href: string;
-  icon?: LucideIcon;
+ label: string;
+ href: string;
+ icon?: IconSvgElement;
 };
 
 export type SidebarGroup = {
-  title: string;
-  key: AdminTab | string;
-  items: NavItem[];
-  icon: LucideIcon;
+ title: string;
+ key: AdminTab | string;
+ items: NavItem[];
+ icon: IconSvgElement;
 };
 
 const sidebarGroups: SidebarGroup[] = [
-  {
-    title: "Marketplace Operations",
-    key: "orders",
-    icon: Truck,
-    items: [
-      { label: "Fulfilment Workflow", href: "/admin/operations/workflow", icon: PackageCheck },
-      { label: "Financial Flow", href: "/admin/operations/finance-flow", icon: WalletCards },
-      { label: "Command Center", href: "/admin/operations/command-center", icon: ShieldCheck },
-      { label: "End-to-End QA", href: "/admin/operations/qa", icon: FileCheck2 },
-    ],
-  },
-  {
-    title: "Catalog",
-    key: "products",
-    icon: Package,
-    items: [
-      { label: "Products", href: "/admin/dashboard?tab=products&menu=catalog&item=products", icon: ShoppingBag },
-      { label: "Categories", href: "/admin/dashboard?tab=categories&menu=catalog&item=categories", icon: Boxes },
-      { label: "Brands", href: "/admin/dashboard?tab=brands&menu=catalog&item=brands", icon: Tag },
-      // { label: "Product Reviews", href: "/admin/dashboard?tab=reviews&menu=catalog&item=product-reviews", icon: FileCheck2 },
-    ],
-  },
-  {
-    title: "Orders",
-    key: "orders",
-    icon: ShoppingBag,
-    items: [
-      { label: "All Orders", href: "/admin/dashboard?tab=orders&menu=orders&item=all-orders&orders_tab=all", icon: ClipboardList },
-      { label: "Pending Orders", href: "/admin/dashboard?tab=orders&menu=orders&item=pending-orders&orders_tab=pending", icon: ClipboardList },
-      { label: "Processing Orders", href: "/admin/dashboard?tab=orders&menu=orders&item=processing-orders&orders_tab=processing", icon: ClipboardList },
-      { label: "Completed Orders", href: "/admin/dashboard?tab=orders&menu=orders&item=completed-orders&orders_tab=completed", icon: ClipboardList },
-      { label: "Cancelled Orders", href: "/admin/dashboard?tab=orders&menu=orders&item=cancelled-orders&orders_tab=cancelled", icon: X },
-      { label: "Order Tracking", href: "/admin/dashboard?tab=orders&menu=orders&item=order-tracking&orders_tab=tracking", icon: Search },
-    ],
-  },
-  {
-    title: "Inventory",
-    key: "inventory",
-    icon: Boxes,
-    items: [
-      { label: "Stock Overview", href: "/admin/dashboard?tab=inventory&menu=inventory&item=stock-overview&inventory_tab=stock-overview", icon: Boxes },
-      { label: "Warehouses", href: "/admin/dashboard?tab=inventory&menu=inventory&item=warehouses&inventory_tab=warehouses", icon: Store },
-      { label: "Stock Adjustments", href: "/admin/dashboard?tab=inventory&menu=inventory&item=stock-adjustments&inventory_tab=stock-adjustments", icon: SlidersHorizontal },
-      { label: "Low Stock Products", href: "/admin/dashboard?tab=inventory&menu=inventory&item=low-stock-products&inventory_tab=low-stock-products", icon: Package },
-    ],
-  },
-  {
-    title: "Customers",
-    key: "users",
-    icon: Users,
-    items: [
-      { label: "Customer Reviews", href: "/admin/customers/reviews", icon: FileCheck2 },
-      { label: "Customer Support", href: "/admin/customers/support", icon: LifeBuoy },
-    ],
-  },
-  {
-    title: "Sellers",
-    key: "sellers",
-    icon: Store,
-    items: [
-      { label: "All Sellers", href: "/admin/dashboard?tab=sellers&menu=sellers&item=all-sellers", icon: Store },
-      { label: "Seller Applications", href: "/admin/dashboard?tab=sellers&menu=sellers&item=seller-applications", icon: ShieldCheck },
-      { label: "Seller Products", href: "/admin/dashboard?tab=sellers&menu=sellers&item=seller-products", icon: Package },
-      { label: "Seller Orders", href: "/admin/dashboard?tab=sellers&menu=sellers&item=seller-orders", icon: ClipboardList },
-      { label: "Seller Performance", href: "/admin/dashboard?tab=sellers&menu=sellers&item=seller-performance", icon: BarChart3 },
-    ],
-  },
-  {
-    title: "Brokers",
-    key: "brokers",
-    icon: Users,
-    items: [
-      { label: "Brokers & KYC Review", href: "/admin/brokers", icon: ShieldCheck },
-      { label: "Broker Security & Risk", href: "/admin/brokers/security", icon: LockKeyhole },
-      { label: "Broker Wallet Payouts", href: "/admin/brokers/payouts", icon: WalletCards },
-    ],
-  },
-  {
-    title: "Payments",
-    key: "finance",
-    icon: CreditCard,
-    items: [
-      { label: "Payments Dashboard", href: "?tab=finance&menu=payments&item=payments-dashboard" },
-      { label: "Transactions", href: "?tab=finance&menu=payments&item=transactions" },
-      { label: "Payment Methods", href: "?tab=finance&menu=payments&item=payment-methods" },
-      { label: "Payment Providers", href: "?tab=finance&menu=payments&item=payment-providers" },
-      { label: "Refunds", href: "?tab=finance&menu=payments&item=refunds" },
-      { label: "Disputes & Chargebacks", href: "?tab=finance&menu=payments&item=disputes-chargebacks" },
-      { label: "Seller Payout Accounts", href: "?tab=finance&menu=payments&item=seller-payout-accounts" },
-      { label: "Seller Payouts", href: "?tab=finance&menu=payments&item=seller-payouts" },
-      { label: "Pending Payouts", href: "?tab=finance&menu=payments&item=pending-payouts" },
-      { label: "Failed Payments", href: "?tab=finance&menu=payments&item=failed-payments" },
-      { label: "Fraud & Risk", href: "?tab=finance&menu=payments&item=fraud-risk" },
-      { label: "Reconciliation", href: "?tab=finance&menu=payments&item=reconciliation" },
-      { label: "Currencies & FX", href: "?tab=finance&menu=payments&item=currencies-fx" },
-      { label: "Countries", href: "?tab=finance&menu=payments&item=countries" },
-      { label: "Fees & Commissions", href: "?tab=finance&menu=payments&item=fees-commissions" },
-      { label: "Payment Reports", href: "?tab=finance&menu=payments&item=payment-reports" },
-      { label: "Payment Audit Logs", href: "?tab=finance&menu=payments&item=payment-audit-logs" },
-    ],
-  },
-  {
-    title: "Advertising",
-    key: "products",
-    icon: Megaphone,
-    items: [
-      { label: "All Advertisements", href: "/admin/dashboard?tab=products&menu=advertising&item=all-advertisements", icon: Megaphone },
-      { label: "Create Advertisement", href: "/admin/dashboard?tab=products&menu=advertising&item=create-advertisement", icon: Megaphone },
-      { label: "Active Ads", href: "/admin/dashboard?tab=products&menu=advertising&item=active-ads", icon: Megaphone },
-      { label: "Scheduled Ads", href: "/admin/dashboard?tab=products&menu=advertising&item=scheduled-ads", icon: Megaphone },
-      { label: "Paused Ads", href: "/admin/dashboard?tab=products&menu=advertising&item=paused-ads", icon: Megaphone },
-      { label: "Expired Ads", href: "/admin/dashboard?tab=products&menu=advertising&item=expired-ads", icon: Megaphone },
-      { label: "Advertisement Analytics", href: "/admin/dashboard?tab=products&menu=advertising&item=advertisement-analytics", icon: Megaphone },
-    ],
-  },
-  {
-    title: "Promotions",
-    key: "products",
-    icon: Tag,
-    items: [
-      { label: "Coupons", href: "/admin/dashboard?tab=products&menu=promotions&item=coupons", icon: Tag },
-      { label: "Discounts", href: "/admin/dashboard?tab=products&menu=promotions&item=discounts", icon: Tag },
-      { label: "Campaigns", href: "/admin/dashboard?tab=products&menu=promotions&item=campaigns", icon: Megaphone },
-    ],
-  },
-  {
-    title: "Disputes",
-    key: "orders",
-    icon: Scale,
-    items: [
-      { label: "All Disputes", href: "/admin/disputes", icon: Scale },
-      { label: "Open Disputes", href: "/admin/disputes?status=open", icon: Scale },
-      { label: "Resolved Disputes", href: "/admin/disputes?status=resolved", icon: FileCheck2 },
-    ],
-  },
-  {
-    title: "Analytics",
-    key: "analytics",
-    icon: BarChart3,
-    items: [
-      { label: "Sales Reports", href: "/admin/analytics?report=sales", icon: BarChart3 },
-      { label: "Order Reports", href: "/admin/analytics?report=orders", icon: ClipboardList },
-      { label: "Product Reports", href: "/admin/analytics?report=products", icon: Package },
-      { label: "Customer Reports", href: "/admin/analytics?report=customers", icon: Users },
-    ],
-  },
-  {
-    title: "Communications",
-    key: "overview",
-    icon: Megaphone,
-    items: [
-      { label: "Notifications", href: "/admin/dashboard?tab=overview&menu=communications&item=notifications", icon: Bell },
-      { label: "Email Messages", href: "/admin/dashboard?tab=overview&menu=communications&item=email-messages", icon: Bell },
-      { label: "SMS Messages", href: "/admin/dashboard?tab=overview&menu=communications&item=sms-messages", icon: Bell },
-    ],
-  },
-  {
-    title: "User Management",
-    key: "users",
-    icon: ShieldCheck,
-    items: [
-      { label: "Users", href: "/admin/dashboard?tab=users&menu=user-management&item=users", icon: Users },
-      { label: "Add New User", href: "/admin/dashboard?tab=users&menu=user-management&item=add-new-user", icon: UserPlus },
-      { label: "Roles", href: "/admin/dashboard?tab=users&menu=user-management&item=roles", icon: ShieldCheck },
-      { label: "Permissions", href: "/admin/dashboard?tab=users&menu=user-management&item=permissions", icon: KeyRound },
-      { label: "Active Sessions", href: "/admin/dashboard?tab=users&menu=user-management&item=active-sessions", icon: LockKeyhole },
-    ],
-  },
-  {
-    title: "Marketplace Settings",
-    key: "overview",
-    icon: SlidersHorizontal,
-    items: [
-      { label: "Marketplace Rules", href: "/admin/dashboard?tab=overview&menu=marketplace-settings&item=marketplace-rules", icon: SlidersHorizontal },
-      { label: "Commission Rules", href: "/admin/dashboard?tab=overview&menu=marketplace-settings&item=commission-rules", icon: Scale },
-    ],
-  },
-  {
-    title: "Logistics",
-    key: "overview",
-    icon: Truck,
-    items: [
-      { label: "Company Approvals", href: "/admin/logistics/approvals", icon: FileCheck2 },
-      { label: "Logistics Companies", href: "/admin/dashboard?tab=overview&menu=logistics&item=logistics-companies", icon: Store },
-      { label: "Delivery Services", href: "/admin/dashboard?tab=overview&menu=logistics&item=delivery-services", icon: Truck },
-      { label: "Shipping Zones", href: "/admin/dashboard?tab=overview&menu=logistics&item=shipping-zones", icon: Globe2 },
-      { label: "Shipping Rates", href: "/admin/dashboard?tab=overview&menu=logistics&item=shipping-rates", icon: WalletCards },
-      { label: "API & Webhooks", href: "/admin/dashboard?tab=overview&menu=logistics&item=api-webhooks", icon: Settings },
-    ],
-  },
-  {
-    title: "Finance Configuration",
-    key: "finance",
-    icon: WalletCards,
-    items: [
-      { label: "Finance Settings", href: "/admin/dashboard?tab=finance&menu=finance-configuration&item=finance-settings", icon: Settings },
-      { label: "Escrow Holds", href: "/admin/dashboard?tab=finance&menu=finance-configuration&item=escrow-holds", icon: LockKeyhole },
-    ],
-  },
-  {
-    title: "System Management",
-    key: "overview",
-    icon: Settings,
-    items: [
-      { label: "Audit Logs", href: "/admin/dashboard?tab=overview&menu=system-management&item=audit-logs", icon: FileCheck2 },
-      { label: "System Events", href: "/admin/dashboard?tab=overview&menu=system-management&item=system-events", icon: ShieldCheck },
-      { label: "Background Jobs", href: "/admin/dashboard?tab=overview&menu=system-management&item=background-jobs", icon: Settings },
-      { label: "Application Settings", href: "/admin/dashboard?tab=overview&menu=system-management&item=application-settings", icon: Settings },
-    ],
-  },
-  {
-    title: "Account",
-    key: "overview",
-    icon: CircleUserRound,
-    items: [
-      { label: "Logout", href: "/signout", icon: X },
-    ],
-  },
+ {
+ title: "Marketplace Operations",
+ key: "orders",
+ icon: TruckIcon,
+ items: [
+ { label: "Fulfilment Workflow", href: "/admin/operations/workflow", icon: PackageCheckIcon },
+ { label: "Financial Flow", href: "/admin/operations/finance-flow", icon: Wallet03Icon },
+ { label: "Command Center", href: "/admin/operations/command-center", icon: ShieldCheckIcon },
+ { label: "End-to-End QA", href: "/admin/operations/qa", icon: FileCheckIcon },
+ ],
+ },
+ {
+ title: "Catalog",
+ key: "products",
+ icon: PackageIcon,
+ items: [
+ { label: "Products", href: "/admin/dashboard?tab=products&menu=catalog&item=products", icon: ShoppingBag01Icon },
+ { label: "Categories", href: "/admin/dashboard?tab=categories&menu=catalog&item=categories", icon: Package02Icon },
+ { label: "Brands", href: "/admin/dashboard?tab=brands&menu=catalog&item=brands", icon: Tag01Icon },
+ // { label: "Product Reviews", href: "/admin/dashboard?tab=reviews&menu=catalog&item=product-reviews", icon: FileCheckIcon },
+ ],
+ },
+ {
+ title: "Orders",
+ key: "orders",
+ icon: ShoppingBag01Icon,
+ items: [
+ { label: "All Orders", href: "/admin/dashboard?tab=orders&menu=orders&item=all-orders&orders_tab=all", icon: Task01Icon },
+ { label: "Pending Orders", href: "/admin/dashboard?tab=orders&menu=orders&item=pending-orders&orders_tab=pending", icon: Task01Icon },
+ { label: "Processing Orders", href: "/admin/dashboard?tab=orders&menu=orders&item=processing-orders&orders_tab=processing", icon: Task01Icon },
+ { label: "Completed Orders", href: "/admin/dashboard?tab=orders&menu=orders&item=completed-orders&orders_tab=completed", icon: Task01Icon },
+ { label: "Cancelled Orders", href: "/admin/dashboard?tab=orders&menu=orders&item=cancelled-orders&orders_tab=cancelled", icon: Cancel01Icon },
+ { label: "Order Tracking", href: "/admin/dashboard?tab=orders&menu=orders&item=order-tracking&orders_tab=tracking", icon: Search01Icon },
+ ],
+ },
+ {
+ title: "Inventory",
+ key: "inventory",
+ icon: Package02Icon,
+ items: [
+ { label: "Stock Overview", href: "/admin/dashboard?tab=inventory&menu=inventory&item=stock-overview&inventory_tab=stock-overview", icon: Package02Icon },
+ { label: "Warehouses", href: "/admin/dashboard?tab=inventory&menu=inventory&item=warehouses&inventory_tab=warehouses", icon: Store01Icon },
+ { label: "Stock Adjustments", href: "/admin/dashboard?tab=inventory&menu=inventory&item=stock-adjustments&inventory_tab=stock-adjustments", icon: PreferenceHorizontalIcon },
+ { label: "Low Stock Products", href: "/admin/dashboard?tab=inventory&menu=inventory&item=low-stock-products&inventory_tab=low-stock-products", icon: PackageIcon },
+ ],
+ },
+ {
+ title: "Customers",
+ key: "users",
+ icon: UserMultiple02Icon,
+ items: [
+ { label: "Customer Reviews", href: "/admin/customers/reviews", icon: FileCheckIcon },
+ { label: "Customer Support", href: "/admin/customers/support", icon: LifebuoyIcon },
+ ],
+ },
+ {
+ title: "Sellers",
+ key: "sellers",
+ icon: Store01Icon,
+ items: [
+ { label: "All Sellers", href: "/admin/dashboard?tab=sellers&menu=sellers&item=all-sellers", icon: Store01Icon },
+ { label: "Seller Applications", href: "/admin/dashboard?tab=sellers&menu=sellers&item=seller-applications", icon: ShieldCheckIcon },
+ { label: "Seller Products", href: "/admin/dashboard?tab=sellers&menu=sellers&item=seller-products", icon: PackageIcon },
+ { label: "Seller Orders", href: "/admin/dashboard?tab=sellers&menu=sellers&item=seller-orders", icon: Task01Icon },
+ { label: "Seller Performance", href: "/admin/dashboard?tab=sellers&menu=sellers&item=seller-performance", icon: ChartColumnIcon },
+ ],
+ },
+ {
+ title: "Brokers",
+ key: "brokers",
+ icon: UserMultiple02Icon,
+ items: [
+ { label: "Brokers & KYC Review", href: "/admin/brokers", icon: ShieldCheckIcon },
+ { label: "Broker Security & Risk", href: "/admin/brokers/security", icon: LockKeyIcon },
+ { label: "Broker Wallet Payouts", href: "/admin/brokers/payouts", icon: Wallet03Icon },
+ ],
+ },
+ {
+ title: "Payments",
+ key: "finance",
+ icon: CreditCardIcon,
+ items: [
+ { label: "Payments Dashboard", href: "?tab=finance&menu=payments&item=payments-dashboard" },
+ { label: "Transactions", href: "?tab=finance&menu=payments&item=transactions" },
+ { label: "Payment Methods", href: "?tab=finance&menu=payments&item=payment-methods" },
+ { label: "Payment Providers", href: "?tab=finance&menu=payments&item=payment-providers" },
+ { label: "Refunds", href: "?tab=finance&menu=payments&item=refunds" },
+ { label: "Disputes & Chargebacks", href: "?tab=finance&menu=payments&item=disputes-chargebacks" },
+ { label: "Seller Payout Accounts", href: "?tab=finance&menu=payments&item=seller-payout-accounts" },
+ { label: "Seller Payouts", href: "?tab=finance&menu=payments&item=seller-payouts" },
+ { label: "Pending Payouts", href: "?tab=finance&menu=payments&item=pending-payouts" },
+ { label: "Failed Payments", href: "?tab=finance&menu=payments&item=failed-payments" },
+ { label: "Fraud & Risk", href: "?tab=finance&menu=payments&item=fraud-risk" },
+ { label: "Reconciliation", href: "?tab=finance&menu=payments&item=reconciliation" },
+ { label: "Currencies & FX", href: "?tab=finance&menu=payments&item=currencies-fx" },
+ { label: "Countries", href: "?tab=finance&menu=payments&item=countries" },
+ { label: "Fees & Commissions", href: "?tab=finance&menu=payments&item=fees-commissions" },
+ { label: "Payment Reports", href: "?tab=finance&menu=payments&item=payment-reports" },
+ { label: "Payment Audit Logs", href: "?tab=finance&menu=payments&item=payment-audit-logs" },
+ ],
+ },
+ {
+ title: "Advertising",
+ key: "products",
+ icon: Megaphone01Icon,
+ items: [
+ { label: "All Advertisements", href: "/admin/dashboard?tab=products&menu=advertising&item=all-advertisements", icon: Megaphone01Icon },
+ { label: "Create Advertisement", href: "/admin/dashboard?tab=products&menu=advertising&item=create-advertisement", icon: Megaphone01Icon },
+ { label: "Active Ads", href: "/admin/dashboard?tab=products&menu=advertising&item=active-ads", icon: Megaphone01Icon },
+ { label: "Scheduled Ads", href: "/admin/dashboard?tab=products&menu=advertising&item=scheduled-ads", icon: Megaphone01Icon },
+ { label: "Paused Ads", href: "/admin/dashboard?tab=products&menu=advertising&item=paused-ads", icon: Megaphone01Icon },
+ { label: "Expired Ads", href: "/admin/dashboard?tab=products&menu=advertising&item=expired-ads", icon: Megaphone01Icon },
+ { label: "Advertisement Analytics", href: "/admin/dashboard?tab=products&menu=advertising&item=advertisement-analytics", icon: Megaphone01Icon },
+ ],
+ },
+ {
+ title: "Promotions",
+ key: "products",
+ icon: Tag01Icon,
+ items: [
+ { label: "Coupons", href: "/admin/dashboard?tab=products&menu=promotions&item=coupons", icon: Tag01Icon },
+ { label: "Discounts", href: "/admin/dashboard?tab=products&menu=promotions&item=discounts", icon: Tag01Icon },
+ { label: "Campaigns", href: "/admin/dashboard?tab=products&menu=promotions&item=campaigns", icon: Megaphone01Icon },
+ ],
+ },
+ {
+ title: "Disputes",
+ key: "orders",
+ icon: JusticeScale01Icon,
+ items: [
+ { label: "All Disputes", href: "/admin/disputes", icon: JusticeScale01Icon },
+ { label: "Open Disputes", href: "/admin/disputes?status=open", icon: JusticeScale01Icon },
+ { label: "Resolved Disputes", href: "/admin/disputes?status=resolved", icon: FileCheckIcon },
+ ],
+ },
+ {
+ title: "Analytics",
+ key: "analytics",
+ icon: ChartColumnIcon,
+ items: [
+ { label: "Sales Reports", href: "/admin/analytics?report=sales", icon: ChartColumnIcon },
+ { label: "Order Reports", href: "/admin/analytics?report=orders", icon: Task01Icon },
+ { label: "Product Reports", href: "/admin/analytics?report=products", icon: PackageIcon },
+ { label: "Customer Reports", href: "/admin/analytics?report=customers", icon: UserMultiple02Icon },
+ ],
+ },
+ {
+ title: "Communications",
+ key: "overview",
+ icon: Megaphone01Icon,
+ items: [
+ { label: "Notifications", href: "/admin/dashboard?tab=overview&menu=communications&item=notifications", icon: BellIcon },
+ { label: "Email Messages", href: "/admin/dashboard?tab=overview&menu=communications&item=email-messages", icon: BellIcon },
+ { label: "SMS Messages", href: "/admin/dashboard?tab=overview&menu=communications&item=sms-messages", icon: BellIcon },
+ ],
+ },
+ {
+ title: "User Management",
+ key: "users",
+ icon: ShieldCheckIcon,
+ items: [
+ { label: "Users", href: "/admin/dashboard?tab=users&menu=user-management&item=users", icon: UserMultiple02Icon },
+ { label: "Add New User", href: "/admin/dashboard?tab=users&menu=user-management&item=add-new-user", icon: UserAdd01Icon },
+ { label: "Roles", href: "/admin/dashboard?tab=users&menu=user-management&item=roles", icon: ShieldCheckIcon },
+ { label: "Permissions", href: "/admin/dashboard?tab=users&menu=user-management&item=permissions", icon: Key01Icon },
+ { label: "Active Sessions", href: "/admin/dashboard?tab=users&menu=user-management&item=active-sessions", icon: LockKeyIcon },
+ ],
+ },
+ {
+ title: "Marketplace Settings",
+ key: "overview",
+ icon: PreferenceHorizontalIcon,
+ items: [
+ { label: "Marketplace Rules", href: "/admin/dashboard?tab=overview&menu=marketplace-settings&item=marketplace-rules", icon: PreferenceHorizontalIcon },
+ { label: "Commission Rules", href: "/admin/dashboard?tab=overview&menu=marketplace-settings&item=commission-rules", icon: JusticeScale01Icon },
+ ],
+ },
+ {
+ title: "Logistics",
+ key: "overview",
+ icon: TruckIcon,
+ items: [
+ { label: "Company Approvals", href: "/admin/logistics/approvals", icon: FileCheckIcon },
+ { label: "Logistics Companies", href: "/admin/dashboard?tab=overview&menu=logistics&item=logistics-companies", icon: Store01Icon },
+ { label: "Delivery Services", href: "/admin/dashboard?tab=overview&menu=logistics&item=delivery-services", icon: TruckIcon },
+ { label: "Shipping Zones", href: "/admin/dashboard?tab=overview&menu=logistics&item=shipping-zones", icon: Globe02Icon },
+ { label: "Shipping Rates", href: "/admin/dashboard?tab=overview&menu=logistics&item=shipping-rates", icon: Wallet03Icon },
+ { label: "API & Webhooks", href: "/admin/dashboard?tab=overview&menu=logistics&item=api-webhooks", icon: Settings01Icon },
+ ],
+ },
+ {
+ title: "Finance Configuration",
+ key: "finance",
+ icon: Wallet03Icon,
+ items: [
+ { label: "Finance Settings", href: "/admin/dashboard?tab=finance&menu=finance-configuration&item=finance-settings", icon: Settings01Icon },
+ { label: "Escrow Holds", href: "/admin/dashboard?tab=finance&menu=finance-configuration&item=escrow-holds", icon: LockKeyIcon },
+ ],
+ },
+ {
+ title: "System Management",
+ key: "overview",
+ icon: Settings01Icon,
+ items: [
+ { label: "Audit Logs", href: "/admin/dashboard?tab=overview&menu=system-management&item=audit-logs", icon: FileCheckIcon },
+ { label: "System Events", href: "/admin/dashboard?tab=overview&menu=system-management&item=system-events", icon: ShieldCheckIcon },
+ { label: "Background Jobs", href: "/admin/dashboard?tab=overview&menu=system-management&item=background-jobs", icon: Settings01Icon },
+ { label: "Application Settings", href: "/admin/dashboard?tab=overview&menu=system-management&item=application-settings", icon: Settings01Icon },
+ ],
+ },
 ];
 
 export default function AdminSidebar({
-  children,
-  title = "Dashboard Overview",
-  breadcrumb,
+ children,
+ title = "Dashboard Overview",
+ breadcrumb,
 }: {
-  children: ReactNode;
-  title?: string;
-  breadcrumb?: string;
+ children: ReactNode;
+ title?: string;
+ breadcrumb?: string;
 }) {
-  const user = authStorage.getUser<DashboardShellUser>();
+ const user = authStorage.getUser<DashboardShellUser>();
 
-  const visibleSidebarGroups = useMemo<DashboardNavGroup[]>(
-    () =>
-      sidebarGroups
-        .map((group) => ({
-          ...group,
-          items: group.items.filter((item) =>
-            canAccessAdminItem(user, item.label),
-          ),
-        }))
-        .filter(
-          (group) =>
-            canAccessAdminSection(user, group.title) && group.items.length > 0,
-        ),
-    [user],
-  );
+ const visibleSidebarGroups = useMemo<DashboardNavGroup[]>(
+ () =>
+ sidebarGroups
+ .map((group) => ({
+ ...group,
+ items: group.items.filter((item) =>
+ canAccessAdminItem(user, item.label),
+ ),
+ }))
+ .filter(
+ (group) =>
+ canAccessAdminSection(user, group.title) && group.items.length > 0,
+ ),
+ [user],
+ );
 
-  return (
-    <DashboardShell
-      user={user}
-      groups={visibleSidebarGroups}
-      title={title}
-      breadcrumb={breadcrumb}
-      centerLabel="Admin Center"
-      brandSubtitle="Admin Center"
-      dashboardHref="/admin/dashboard"
-      notificationsHref="/admin/dashboard?tab=overview&menu=communications&item=notifications"
-      profileHref="/admin/dashboard?tab=overview&menu=account&item=profile"
-      settingsHref="/admin/dashboard?tab=overview&menu=account&item=profile"
-      supportHref="/admin/support"
-      footerLabel="Xerin Market Admin Center"
-      searchPlaceholder="Search admin records"
-    >
-      {children}
-    </DashboardShell>
-  );
+ return (
+ <DashboardShell
+ user={user}
+ groups={visibleSidebarGroups}
+ title={title}
+ breadcrumb={breadcrumb}
+ centerLabel="Admin Center"
+ brandSubtitle="Admin Center"
+ dashboardHref="/admin/dashboard"
+ notificationsHref="/admin/dashboard?tab=overview&menu=communications&item=notifications"
+ profileHref="/admin/dashboard?tab=overview&menu=account&item=profile"
+ settingsHref="/admin/dashboard?tab=overview&menu=account&item=profile"
+ supportHref="/admin/support"
+ footerLabel="Xerin Market Admin Center"
+ searchPlaceholder="Search admin records"
+ >
+ {children}
+ </DashboardShell>
+ );
 }

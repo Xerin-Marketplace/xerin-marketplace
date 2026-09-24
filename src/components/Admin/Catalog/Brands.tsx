@@ -1,5 +1,7 @@
 "use client";
-import { FormEvent,useEffect,useState } from "react";import { Edit3,Plus,RefreshCw,Search,Trash2,X } from "lucide-react";import toast from "react-hot-toast";import {adminService,type Brand} from "@/lib/api/endpoints/admin";
+import { FormEvent,useEffect,useState } from "react";import { HugeiconsIcon } from "@hugeicons/react";
+import { Edit02Icon, PlusIcon, RefreshCwIcon, Search01Icon, Delete02Icon, Cancel01Icon } from "@hugeicons/core-free-icons";
+import toast from "react-hot-toast";import {adminService,type Brand} from "@/lib/api/endpoints/admin";
 import Pagination from "@/components/ui/Pagination";
 import { ConfirmActionDialog } from "@/components/Admin/shared/ActionDialog";
 const slugify=(v:string)=>v.toLowerCase().trim().replace(/[^a-z0-9]+/g,"-").replace(/^-+|-+$/g,"");
@@ -9,7 +11,7 @@ const submit=async(e:FormEvent)=>{e.preventDefault();if(!name.trim())return;setB
 return <div className="admin-catalog-page space-y-5">
 <section className="admin-catalog-header">
 <h2 className="text-2xl font-bold">Brand Management</h2>
-<p className="mt-1 text-sm text-gray-500">Backend-controlled search and pagination.</p>
+<p className="mt-1 text-sm text-muted-foreground">Backend-controlled search and pagination.</p>
 </section>
 <div className="grid gap-5 xl:grid-cols-[360px_minmax(0,1fr)]">
 <form onSubmit={submit} className="admin-catalog-form">
@@ -20,21 +22,21 @@ return <div className="admin-catalog-page space-y-5">
 <Field label="Slug">
 <input className="field" value={slug} onChange={e=>setSlug(slugify(e.target.value))}/>
 </Field>
-<button disabled={busy||!name.trim()} className="mt-5 w-full rounded-xl bg-[#111827] py-3 font-semibold text-white">
-<Plus className="mr-2 inline" size={14}/>Add Brand</button>
+<button disabled={busy||!name.trim()} className="mt-5 w-full rounded-xl bg-foreground py-3 font-semibold text-background">
+<HugeiconsIcon icon={PlusIcon} className="mr-2 inline" size={14}/>Add Brand</button>
 </form>
 <section className="admin-catalog-card overflow-hidden">
 <div className="admin-catalog-toolbar">
 <div className="relative flex-1">
-<Search size={15} className="absolute left-3 top-1/2 -translate-y-1/2"/>
+<HugeiconsIcon icon={Search01Icon} size={16} className="absolute left-3 top-1/2 -translate-y-1/2"/>
 <input value={query} onChange={e=>setQuery(e.target.value)} placeholder="Search brands..." className="h-10 w-full rounded-xl border pl-9 pr-3"/>
 </div>
 <button onClick={()=>void load()} className="rounded-xl border px-3">
-<RefreshCw size={15}/>
+<HugeiconsIcon icon={RefreshCwIcon} size={16}/>
 </button>
-</div>{loading?<p className="p-10 text-center">Loading...</p>:error?<p className="p-10 text-center text-red-600">{error}</p>:!rows.length?<p className="p-10 text-center">No matching brands.</p>:<div className="overflow-x-auto">
+</div>{loading?<p className="p-10 text-center">Loading...</p>:error?<p className="p-10 text-center text-destructive">{error}</p>:!rows.length?<p className="p-10 text-center">No matching brands.</p>:<div className="overflow-x-auto">
 <table className="w-full min-w-[680px] text-left text-sm">
-<thead className="bg-gray-50">
+<thead className="bg-muted">
 <tr>
 <th className="px-5 py-3">Name</th>
 <th className="px-5 py-3">Slug</th>
@@ -45,24 +47,24 @@ return <div className="admin-catalog-page space-y-5">
 <tbody className="divide-y">{rows.map(r=>
 <tr key={r.id}>
 <td className="px-5 py-4 font-semibold">{r.name}</td>
-<td className="px-5 py-4 text-gray-500">{r.slug}</td>
-<td className="px-5 py-4 text-gray-500">{new Date(r.created_at).toLocaleDateString()}</td>
+<td className="px-5 py-4 text-muted-foreground">{r.slug}</td>
+<td className="px-5 py-4 text-muted-foreground">{new Date(r.created_at).toLocaleDateString()}</td>
 <td className="px-5 py-4">
-<button onClick={()=>setEditing({...r})} className="mr-4 text-blue-600">
-<Edit3 className="inline" size={13}/> Edit</button>
-<button onClick={()=>setDeleteTarget(r)} className="text-red-600">
-<Trash2 className="inline" size={13}/> Delete</button>
+<button onClick={()=>setEditing({...r})} className="mr-4 text-primary-600">
+<HugeiconsIcon icon={Edit02Icon} className="inline" size={14}/> Edit</button>
+<button onClick={()=>setDeleteTarget(r)} className="text-destructive">
+<HugeiconsIcon icon={Delete02Icon} className="inline" size={14}/> Delete</button>
 </td>
 </tr>)}</tbody>
 </table>
 </div>}<Pagination page={page} pageSize={pageSize} total={total} totalPages={totalPages} onPageChange={setPage} onPageSizeChange={s=>{setPageSize(s);setPage(1)}}/>
 </section>
 </div>{editing&&<div className="fixed inset-0 z-[100] flex items-center justify-center bg-black/50 p-4">
-<div className="w-full max-w-md rounded-2xl bg-white p-6">
+<div className="w-full max-w-md rounded-xl bg-card p-6">
 <div className="flex justify-between">
 <h3 className="font-bold">Edit Brand</h3>
 <button onClick={()=>setEditing(null)}>
-<X size={18}/>
+<HugeiconsIcon icon={Cancel01Icon} size={18}/>
 </button>
 </div>
 <Field label="Name">
@@ -71,7 +73,7 @@ return <div className="admin-catalog-page space-y-5">
 <Field label="Slug">
 <input className="field" value={editing.slug} onChange={e=>setEditing(c=>c?{...c,slug:e.target.value}:c)}/>
 </Field>
-<button onClick={()=>void save()} disabled={busy} className="mt-5 w-full rounded-xl bg-[#111827] py-3 font-semibold text-white">Save Changes</button>
+<button onClick={()=>void save()} disabled={busy} className="mt-5 w-full rounded-xl bg-foreground py-3 font-semibold text-background">Save Changes</button>
 </div>
 </div>}<ConfirmActionDialog open={Boolean(deleteTarget)} title="Delete brand?" description={<>The brand <strong>{deleteTarget?.name}</strong> will be permanently deleted. Products using it may prevent this action.</>} confirmLabel="Delete brand" busy={busy} onCancel={()=>setDeleteTarget(null)} onConfirm={()=>void remove()}/><style jsx global>{`.field{margin-top:.5rem;min-height:46px;width:100%;border-radius:.75rem;border:2px solid #d8e0e9;background:#fff;padding:.7rem .9rem;outline:none}.field:focus{border-color:#f47524}`}</style>
 </div>}

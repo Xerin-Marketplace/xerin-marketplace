@@ -1,4 +1,5 @@
 import type { Product as ApiProduct, Category as ApiCategory } from "@/types/api/product";
+import type { SearchProductItem } from "@/types/api/discovery";
 import type { Product as UiProduct } from "@/types/product";
 import { API_BASE_URL } from "@/lib/api/endpoints";
 
@@ -135,6 +136,25 @@ export const mapApiProductToUiProduct = (product: ApiProduct): UiProduct => {
 
 export const mapApiProductsToUiProducts = (products: ApiProduct[]) =>
   products.map(mapApiProductToUiProduct);
+
+export const mapSearchItemToUiProduct = (item: SearchProductItem): UiProduct => {
+  const price = toNumber(item.price);
+  const sale = item.sale_price == null ? null : toNumber(item.sale_price);
+  const discounted = sale && sale > 0 && sale < price ? sale : price;
+  const image = item.primary_image_url
+    ? resolveProductImageUrl(item.primary_image_url)
+    : PRODUCT_PLACEHOLDER_IMAGE;
+
+  return {
+    id: item.id,
+    storeId: null,
+    title: item.name || item.slug || "Untitled product",
+    price,
+    discountedPrice: discounted,
+    currency: item.currency || "TZS",
+    imgs: { thumbnails: [image], previews: [image] },
+  };
+};
 
 export type UiCategoryFilter = {
   name: string;

@@ -14,9 +14,15 @@ let axiosInstance: AxiosInstance;
 const expireSession = () => {
   // Keep both auth persistence layers in sync. Some legacy dashboard code still
   // reads authStorage directly while newer code reads the Zustand auth store.
+  // Only announce an expiry when a session actually existed · a 401 from the
+  // login form (wrong password) must not surface a "session expired" toast.
+  const hadSession = Boolean(
+    useAuthStore.getState().accessToken || authStorage.getAccessToken(),
+  );
   authStorage.clearSession();
   useAuthStore.getState().clearSession();
-  announceSessionExpired();
+  if (hadSession) announceSessionExpired();
+  return hadSession;
 };
 
 const persistRefreshedTokens = (accessToken: string, refreshToken?: string) => {
@@ -108,9 +114,9 @@ export const setupInterceptors = (instance: AxiosInstance) => {
 
         const refreshToken = useAuthStore.getState().refreshToken;
         if (!refreshToken) {
-          expireSession();
+          const hadSession = expireSession();
           isRefreshing = false;
-          if (typeof window !== "undefined" && window.location.pathname !== "/signin") {
+          if (hadSession && typeof window !== "undefined" && window.location.pathname !== "/signin") {
             window.location.assign("/signin");
           }
           return Promise.reject(apiError);
@@ -138,9 +144,9 @@ export const setupInterceptors = (instance: AxiosInstance) => {
           return axiosInstance(originalRequest);
         } catch (refreshError) {
           processQueue(refreshError, null);
-          expireSession();
+          const hadSession = expireSession();
           isRefreshing = false;
-          if (typeof window !== "undefined") {
+          if (hadSession && typeof window !== "undefined") {
             window.location.href = "/signin";
           }
           return Promise.reject(apiError);

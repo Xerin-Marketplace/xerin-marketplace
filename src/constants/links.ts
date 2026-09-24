@@ -11,12 +11,8 @@ export const ROUTES = {
   account: "/account",
   contact: "/contact",
 
-  blogGrid: "/blogs/blog-grid",
-  blogDetails: "/blogs/blog-details",
-  blogGridWithSidebar: "/blogs/blog-grid-with-sidebar",
-  blogDetailsWithSidebar: "/blogs/blog-details-with-sidebar",
 
-  trackOrder: "/account/orders",
+  trackOrder: "/track",
   returnsRefunds: "/contact",
   helpCenter: "/contact",
   sellerRegister: "/seller/register",
@@ -34,15 +30,17 @@ export const ROUTES = {
 } as const;
 
 export const APP_LINKS = {
-  appStore: "#",
+  // Empty until the iOS app listing is live; the footer hides this button.
+  appStore: "",
   googlePlay: "https://play.google.com/store/apps/details?id=com.xerinmarket.com&pcampaignid=web_share",
 } as const;
 
 export const SOCIAL_LINKS = {
-  facebook: "#",
-  twitter: "#",
-  instagram: "#",
-  linkedin: "#",
+  // Empty until the official social pages are confirmed; hidden in the footer.
+  facebook: "",
+  twitter: "",
+  instagram: "",
+  linkedin: "",
 } as const;
 
 export const PAYMENT_LINKS = {
@@ -54,6 +52,6 @@ export const PAYMENT_LINKS = {
 } as const;
 
 export const CONTACT_LINKS = {
-  supportEmail: "mailto:support@xerinmarket.com",
+  supportEmail: "mailto:support@xerinmarketplace.com",
   supportPage: "/contact",
 } as const;

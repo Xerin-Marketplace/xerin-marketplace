@@ -1,16 +1,16 @@
 import { API_BASE_URL, API_DOCS_URL } from "@/lib/api/endpoints";
 
 export const siteConfig = {
-  name: "Xerin Market",
+  name: "Xerin Marketplace",
   shortName: "Xerin",
   tagline: "Your Trusted Marketplace",
   description:
-    "Xerin Market is a modern online marketplace connecting buyers and sellers across Africa. Shop quality products, manage your store, and grow your business.",
+    "Xerin Marketplace is a modern online marketplace connecting buyers and sellers across Africa. Shop quality products, manage your store, and grow your business.",
   url: process.env.NEXT_PUBLIC_SITE_URL || "http://localhost:3000",
   locale: "en_US",
-  themeColor: "#2563eb",
+  themeColor: "#c2410c",
   keywords: [
-    "Xerin Market",
+    "Xerin Marketplace",
     "online marketplace",
     "Africa marketplace",
     "ecommerce",
@@ -20,13 +20,13 @@ export const siteConfig = {
     "XerinMarket",
   ],
   authors: {
-    name: "Xerin Market",
+    name: "Xerin Marketplace",
     url: process.env.NEXT_PUBLIC_SITE_URL || "http://localhost:3000",
   },
-  creator: "Xerin Market",
-  publisher: "Xerin Market",
+  creator: "Xerin Marketplace",
+  publisher: "Xerin Marketplace",
   contact: {
-    email: "support@xerinmarket.com",
+    email: "support@xerinmarketplace.com",
     phone: "",
   },
   social: {

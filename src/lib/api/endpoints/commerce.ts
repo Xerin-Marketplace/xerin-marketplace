@@ -1,4 +1,9 @@
 import axiosInstance from "../client";
+
+// Shipping quotation runs route/distance calculations against logistics
+// providers and can legitimately take longer than the default 10s client
+// timeout. Give these calls more headroom so customers reach Review.
+const SHIPPING_QUOTE_TIMEOUT = 30_000;
 import type { SellerOrderMessage, SellerOrderMessageCreate } from "@/types/api/seller-order";
 import type {
   Cart,
@@ -67,7 +72,7 @@ export const checkoutApi = {
     (await axiosInstance.post<DetectedDeliveryMode>(
       "/shipping/detect-delivery-mode",
       { address_id: addressId },
-      { signal },
+      { signal, timeout: SHIPPING_QUOTE_TIMEOUT },
     )).data,
 
   eligibleLogistics: async (
@@ -77,14 +82,14 @@ export const checkoutApi = {
     (await axiosInstance.post<EligibleLogisticsResponse>(
       "/shipping/eligible-logistics",
       payload,
-      { params: { page: 1, page_size: 100 }, signal },
+      { params: { page: 1, page_size: 100 }, signal, timeout: SHIPPING_QUOTE_TIMEOUT },
     )).data,
 
   xerinExpressOptions: async (addressId: string, signal?: AbortSignal): Promise<import("@/types/api/commerce").XerinExpressOption[]> =>
     (await axiosInstance.post<import("@/types/api/commerce").XerinExpressOption[]>(
       "/shipping/xerin-express-options",
       { address_id: addressId, delivery_mode: "local" },
-      { signal },
+      { signal, timeout: SHIPPING_QUOTE_TIMEOUT },
     )).data,
 
   multiSellerPricing: async (
@@ -99,7 +104,7 @@ export const checkoutApi = {
     (await axiosInstance.post<MultiSellerPricingResponse>(
       "/shipping/multi-seller-pricing",
       payload,
-      { signal },
+      { signal, timeout: SHIPPING_QUOTE_TIMEOUT },
     )).data,
 
   freezeDeliveryQuote: async (payload: {
@@ -111,6 +116,7 @@ export const checkoutApi = {
     (await axiosInstance.post<CheckoutDeliveryQuote>(
       "/shipping/checkout-delivery-quote",
       payload,
+      { timeout: SHIPPING_QUOTE_TIMEOUT },
     )).data,
 
   shippingOptions: async (
@@ -146,7 +152,7 @@ export const checkoutApi = {
     const response = await axiosInstance.post<BackendShippingOption[]>(
       "/shipping/quote",
       payload,
-      { signal },
+      { signal, timeout: SHIPPING_QUOTE_TIMEOUT },
     );
 
     return response.data.map(

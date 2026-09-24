@@ -10,94 +10,69 @@ import { storeApi } from "@/lib/api/endpoints/store";
 import { sellerInventoryApi } from "@/lib/api/endpoints/seller-inventory";
 import { authStorage } from "@/lib/auth/storage";
 import type {
-  Brand,
-  Category,
-  CategoryAttribute,
-  ProductSpecification,
-  Product,
-  ProductImage,
-  ProductRequest,
-  ListingCurrency,
-  BrokerOfferRequest,
+ Brand,
+ Category,
+ CategoryAttribute,
+ ProductSpecification,
+ Product,
+ ProductImage,
+ ProductRequest,
+ ListingCurrency,
+ BrokerOfferRequest,
 } from "@/types/api/product";
 import type { Store } from "@/types/api/store";
 import type { SellerPricingPreviewResponse } from "@/types/api/seller";
-import {
-  AlertCircle,
-  Archive,
-  BadgeCheck,
-  Boxes,
-  Camera,
-  CheckCircle2,
-  Clock3,
-  Eye,
-  FileText,
-  CircleDollarSign,
-  Percent,
-  ImagePlus,
-  Package,
-  Pencil,
-  Plus,
-  RefreshCw,
-  Search,
-  Send,
-  ShoppingBag,
-  Tag,
-  Store as StoreIcon,
-  Trash2,
-  UploadCloud,
-  Warehouse,
-  X,
-} from "lucide-react";
+import { HugeiconsIcon, type IconSvgElement, type HugeiconsIconProps } from "@hugeicons/react";
+import { AlertCircleIcon, ArchiveIcon, CheckmarkBadge01Icon, Package02Icon, Camera01Icon, CheckmarkCircle02Icon, Clock01Icon, ViewIcon, File01Icon, DollarCircleIcon, PercentIcon, ImageAdd01Icon, PackageIcon, Edit02Icon, PlusIcon, RefreshCwIcon, Search01Icon, SentIcon, ShoppingBag01Icon, Tag01Icon, Store01Icon, Delete02Icon, CloudUploadIcon, WarehouseIcon, Cancel01Icon } from "@hugeicons/core-free-icons";
 import Image from "next/image";
 import { useRouter, useSearchParams } from "next/navigation";
 import {
-  ChangeEvent,
-  FormEvent,
-  useCallback,
-  useEffect,
-  useMemo,
-  useRef,
-  useState,
+ ChangeEvent,
+ FormEvent,
+ useCallback,
+ useEffect,
+ useMemo,
+ useRef,
+ useState,
 } from "react";
 import toast from "react-hot-toast";
 
 type StoredUser = {
-  account_type?: string;
-  roles?: string[];
-  seller_status?: string | null;
-  first_name?: string | null;
+ account_type?: string;
+ roles?: string[];
+ seller_status?: string | null;
+ first_name?: string | null;
 };
 
 type SelectedImage = {
-  file: File;
-  previewUrl: string;
+ file: File;
+ previewUrl: string;
 };
 
 type InitialStockForm = {
-  quantity: string;
-  low_stock_threshold: string;
-  warehouse_location: string;
-  restock_date: string;
+ quantity: string;
+ low_stock_threshold: string;
+ warehouse_location: string;
+ restock_date: string;
 };
 
 const INITIAL_STOCK_FORM: InitialStockForm = {
-  quantity: "0",
-  low_stock_threshold: "5",
-  warehouse_location: "",
-  restock_date: "",
+ quantity: "0",
+ low_stock_threshold: "5",
+ warehouse_location: "",
+ restock_date: "",
 };
 
 type BrokerOfferForm = { enabled:boolean; commission_type:"fixed"|"percentage"; commission_value:string; max_attributed_sales:string; starts_at:string; ends_at:string; };
 const INITIAL_BROKER_OFFER: BrokerOfferForm = { enabled:false, commission_type:"fixed", commission_value:"", max_attributed_sales:"", starts_at:"", ends_at:"" };
 
 const STATUS_OPTIONS = [
-  "all",
-  "draft",
-  "pending_review",
-  "approved",
-  "rejected",
-  "inactive",
+ "all",
+ "draft",
+ "pending_review",
+ "approved",
+ "rejected",
+ "inactive",
 ];
 
 const MAX_PRODUCT_IMAGES = 10;
@@ -105,2058 +80,2058 @@ const MAX_IMAGE_SIZE_BYTES = 5 * 1024 * 1024;
 const ALLOWED_IMAGE_TYPES = ["image/jpeg", "image/png", "image/webp"];
 
 const INITIAL_FORM: ProductRequest = {
-  store_id: "",
-  category_id: "",
-  brand_id: null,
-  sku: "",
-  name: "",
-  slug: "",
-  description: "",
-  price: "",
-  sale_price: null,
-  currency: "TZS",
-  weight: null,
+ store_id: "",
+ category_id: "",
+ brand_id: null,
+ sku: "",
+ name: "",
+ slug: "",
+ description: "",
+ price: "",
+ sale_price: null,
+ currency: "TZS",
+ weight: null,
 };
 
 const resolveImageUrl = (imageUrl: string) => {
-  if (/^(https?:|data:|blob:)/.test(imageUrl)) return imageUrl;
+ if (/^(https?:|data:|blob:)/.test(imageUrl)) return imageUrl;
 
-  try {
-    const base = new URL(API_BASE_URL);
-    return `${base.origin}${imageUrl.startsWith("/") ? "" : "/"}${imageUrl}`;
-  } catch {
-    return `${API_BASE_URL}${imageUrl.startsWith("/") ? "" : "/"}${imageUrl}`;
-  }
+ try {
+ const base = new URL(API_BASE_URL);
+ return `${base.origin}${imageUrl.startsWith("/") ? "" : "/"}${imageUrl}`;
+ } catch {
+ return `${API_BASE_URL}${imageUrl.startsWith("/") ? "" : "/"}${imageUrl}`;
+ }
 };
 
 const slugify = (value: string) =>
-  value
-    .toLowerCase()
-    .trim()
-    .replace(/[^a-z0-9]+/g, "-")
-    .replace(/^-+|-+$/g, "")
-    .slice(0, 240);
+ value
+ .toLowerCase()
+ .trim()
+ .replace(/[^a-z0-9]+/g, "-")
+ .replace(/^-+|-+$/g, "")
+ .slice(0, 240);
 
 const statusLabel = (status?: string | null) =>
-  (status || "draft").replaceAll("_", " ");
+ (status || "draft").replaceAll("_", " ");
 
 const statusClasses = (status?: string | null) => {
-  switch (status) {
-    case "approved":
-      return "border-emerald-200 bg-emerald-50 text-emerald-700";
-    case "pending_review":
-      return "border-blue-200 bg-blue-50 text-blue-700";
-    case "rejected":
-      return "border-red-200 bg-red-50 text-red-700";
-    case "inactive":
-      return "border-slate-200 bg-slate-100 text-slate-600";
-    default:
-      return "border-amber-200 bg-amber-50 text-amber-700";
-  }
+ switch (status) {
+ case "approved":
+ return "border-green-light-4 bg-green-light-6 text-green-dark";
+ case "pending_review":
+ return "border-primary-200 bg-primary-50 text-primary-700";
+ case "rejected":
+ return "border-red-light-4 bg-red-light-6 text-red-dark";
+ case "inactive":
+ return "border-border bg-muted text-muted-foreground";
+ default:
+ return "border-yellow-light-2 bg-yellow-light-4 text-yellow-dark-2";
+ }
 };
 
 const SellerProducts = () => {
-  const router = useRouter();
-  const searchParams = useSearchParams();
-  const user = authStorage.getUser<StoredUser>();
-  const token = authStorage.getAccessToken();
-  const objectUrlsRef = useRef<Set<string>>(new Set());
-
-  const isSeller = useMemo(() => {
-    if (!user) return false;
-    return (
-      user.account_type === "seller" ||
-      (user.roles ?? []).includes("seller")
-    );
-  }, [user]);
-
-  const sellerApproved = user?.seller_status === "approved";
-
-  const [products, setProducts] = useState<Product[]>([]);
-  const [categories, setCategories] = useState<Category[]>([]);
-  const [brands, setBrands] = useState<Brand[]>([]);
-  const [stores, setStores] = useState<Store[]>([]);
-  const [listingCurrencies, setListingCurrencies] = useState<ListingCurrency[]>([]);
-  const [loading, setLoading] = useState(false);
-  const [error, setError] = useState("");
-  const [search, setSearch] = useState("");
-  const [statusFilter, setStatusFilter] = useState("all");
-  const [storeFilter, setStoreFilter] = useState("all");
-
-  const [editorOpen, setEditorOpen] = useState(false);
-  const [editingProduct, setEditingProduct] = useState<Product | null>(null);
-  const [form, setForm] = useState<ProductRequest>(INITIAL_FORM);
-  const [categoryAttributes, setCategoryAttributes] = useState<CategoryAttribute[]>([]);
-  const [specValues, setSpecValues] = useState<Record<string, unknown>>({});
-  const [specificationsLoading, setSpecificationsLoading] = useState(false);
-  const [stockForm, setStockForm] =
-    useState<InitialStockForm>(INITIAL_STOCK_FORM);
-  const [brokerOfferForm, setBrokerOfferForm] = useState<BrokerOfferForm>(INITIAL_BROKER_OFFER);
-  const [existingImages, setExistingImages] = useState<ProductImage[]>([]);
-  const [selectedImages, setSelectedImages] = useState<SelectedImage[]>([]);
-  const [imagesLoading, setImagesLoading] = useState(false);
-  const [imageError, setImageError] = useState("");
-  const [isSubmitting, setIsSubmitting] = useState(false);
-  const [submitIntent, setSubmitIntent] = useState<"draft" | "review">("draft");
-  const [pricingPreview, setPricingPreview] =
-    useState<SellerPricingPreviewResponse | null>(null);
-  const [pricingPreviewLoading, setPricingPreviewLoading] = useState(false);
-  const [pricingPreviewError, setPricingPreviewError] = useState("");
-  const [deleteTarget, setDeleteTarget] = useState<Product | null>(null);
-  const [isDeleting, setIsDeleting] = useState(false);
-  const [submittingProductId, setSubmittingProductId] = useState<string | null>(
-    null,
-  );
-
-  useEffect(() => {
-    let cancelled = false;
-    const loadCategoryAttributes = async () => {
-      if (!form.category_id) { setCategoryAttributes([]); setSpecValues({}); return; }
-      setSpecificationsLoading(true);
-      try {
-        const attrs = await productsApi.getCategoryAttributes(form.category_id);
-        if (!cancelled) setCategoryAttributes(attrs);
-      } catch (cause) {
-        if (!cancelled) { setCategoryAttributes([]); toast.error(cause instanceof ApiError ? cause.message : "Unable to load product specifications."); }
-      } finally { if (!cancelled) setSpecificationsLoading(false); }
-    };
-    void loadCategoryAttributes();
-    return () => { cancelled = true; };
-  }, [form.category_id]);
-
-  const loadData = useCallback(async () => {
-    if (!token) return;
-
-    setLoading(true);
-    setError("");
-
-    try {
-      const [items, categoryList, brandList, storeList, currencyList] = await Promise.all([
-        productsApi.getMyProducts(),
-        productsApi.getCategories(),
-        productsApi.getBrands(),
-        storeApi.listMyStores(),
-        productsApi.getListingCurrencies(),
-      ]);
-
-      setProducts(items);
-      setCategories(categoryList);
-      setBrands(brandList);
-      setStores(storeList);
-      setListingCurrencies(currencyList);
-    } catch (cause) {
-      const message =
-        cause instanceof ApiError
-          ? cause.message
-          : "Unable to load your seller products.";
-
-      setError(message);
-      toast.error(message);
-    } finally {
-      setLoading(false);
-    }
-  }, [token]);
-
-  useEffect(() => {
-    if (!token) {
-      router.replace("/signin?redirect=/seller/products");
-      return;
-    }
-
-    if (!isSeller) {
-      router.replace("/account");
-      return;
-    }
-
-    void loadData();
-  }, [isSeller, loadData, router, token]);
-
-  useEffect(() => {
-    const requestedStatus = searchParams.get("status");
-
-    if (requestedStatus && STATUS_OPTIONS.includes(requestedStatus)) {
-      setStatusFilter(requestedStatus);
-    }
-
-    if (searchParams.get("create") === "true" && sellerApproved) {
-      openCreate();
-    }
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [searchParams, sellerApproved]);
-
-  useEffect(() => {
-    return () => {
-      objectUrlsRef.current.forEach((url) => URL.revokeObjectURL(url));
-      objectUrlsRef.current.clear();
-    };
-  }, []);
-
-
-  // Phase 1 pricing preview is always calculated by the backend.
-  // The browser never decides marketplace commission by itself.
-  useEffect(() => {
-    const basePrice = Number(form.price);
-    const salePrice =
-      form.sale_price === null || form.sale_price === ""
-        ? null
-        : Number(form.sale_price);
-
-    if (
-      !editorOpen ||
-      !form.category_id ||
-      !Number.isFinite(basePrice) ||
-      basePrice <= 0 ||
-      (salePrice !== null && (!Number.isFinite(salePrice) || salePrice <= 0))
-    ) {
-      setPricingPreview(null);
-      setPricingPreviewError("");
-      return;
-    }
-
-    const timer = window.setTimeout(async () => {
-      setPricingPreviewLoading(true);
-      setPricingPreviewError("");
-
-      try {
-        const preview = await sellersApi.previewPricing({
-          seller_base_price: basePrice,
-          seller_sale_price: salePrice,
-          category_id: form.category_id,
-          product_id: editingProduct?.id ?? null,
-          currency: form.currency || "TZS",
-        });
-
-        setPricingPreview(preview);
-      } catch (cause) {
-        setPricingPreview(null);
-        setPricingPreviewError(
-          cause instanceof ApiError
-            ? cause.message
-            : "Unable to calculate marketplace pricing.",
-        );
-      } finally {
-        setPricingPreviewLoading(false);
-      }
-    }, 350);
-
-    return () => window.clearTimeout(timer);
-  }, [
-    editorOpen,
-    editingProduct?.id,
-    form.category_id,
-    form.currency,
-    form.price,
-    form.sale_price,
-  ]);
-
-  const filteredProducts = useMemo(() => {
-    return products.filter((product) => {
-      const category = categories.find((item) => String(item.id) === String(product.category_id));
-      const brand = brands.find((item) => String(item.id) === String(product.brand_id));
-      const store = stores.find((item) => String(item.id) === String(product.store_id));
-      const haystack = [
-        product.name,
-        product.sku,
-        product.status,
-        category?.name,
-        brand?.name,
-        store?.store_name,
-        store?.country,
-        store?.store_scope,
-      ]
-        .filter(Boolean)
-        .join(" ")
-        .toLowerCase();
-
-      const matchesSearch =
-        !search.trim() || haystack.includes(search.trim().toLowerCase());
-      const matchesStatus =
-        statusFilter === "all" || product.status === statusFilter;
-      const matchesStore =
-        storeFilter === "all" || String(product.store_id) === storeFilter;
-
-      return matchesSearch && matchesStatus && matchesStore;
-    });
-  }, [brands, categories, products, search, statusFilter, storeFilter, stores]);
-
-  const counts = useMemo(
-    () => ({
-      total: products.length,
-      draft: products.filter((item) => item.status === "draft").length,
-      review: products.filter((item) => item.status === "pending_review").length,
-      approved: products.filter((item) => item.status === "approved").length,
-      rejected: products.filter((item) => item.status === "rejected").length,
-    }),
-    [products],
-  );
-
-  function clearSelectedImages() {
-    selectedImages.forEach(({ previewUrl }) => {
-      URL.revokeObjectURL(previewUrl);
-      objectUrlsRef.current.delete(previewUrl);
-    });
-    setSelectedImages([]);
-  }
-
-  function closeEditor() {
-    if (isSubmitting) return;
-
-    clearSelectedImages();
-    setEditorOpen(false);
-    setEditingProduct(null);
-    const defaultCurrency =
-      listingCurrencies.find((currency) => currency.code === "TZS")?.code ??
-      listingCurrencies[0]?.code ??
-      "TZS";
-
-    setForm({
-      ...INITIAL_FORM,
-      store_id: stores.length === 1 ? stores[0].id : "",
-      currency: defaultCurrency,
-    });
-    setStockForm(INITIAL_STOCK_FORM);
-    setSpecValues({});
-    setCategoryAttributes([]);
-    setBrokerOfferForm(INITIAL_BROKER_OFFER);
-    setPricingPreview(null);
-    setPricingPreviewError("");
-    setExistingImages([]);
-    setImageError("");
-    setSubmitIntent("draft");
-  }
-
-  function openCreate() {
-    if (!sellerApproved) {
-      toast.error("Your seller account must be approved before listing products.");
-      return;
-    }
-
-    if (!stores.length) {
-      toast.error("Create a store before adding a product.");
-      router.push("/seller/store");
-      return;
-    }
-
-    clearSelectedImages();
-    setEditingProduct(null);
-    setExistingImages([]);
-    const defaultCurrency =
-      listingCurrencies.find((currency) => currency.code === "TZS")?.code ??
-      listingCurrencies[0]?.code ??
-      "TZS";
-
-    setForm({
-      ...INITIAL_FORM,
-      store_id: stores.length === 1 ? stores[0].id : "",
-      currency: defaultCurrency,
-    });
-    setStockForm(INITIAL_STOCK_FORM);
-    setSpecValues({});
-    setCategoryAttributes([]);
-    setBrokerOfferForm(INITIAL_BROKER_OFFER);
-    setImageError("");
-    setSubmitIntent("draft");
-    setEditorOpen(true);
-  }
-
-  async function openEdit(product: Product) {
-    if (product.status === "pending_review") {
-      toast.error("This product is under review and cannot be edited.");
-      return;
-    }
-
-    clearSelectedImages();
-    setEditingProduct(product);
-    setForm({
-      store_id: product.store_id ?? "",
-      category_id: product.category_id ?? "",
-      brand_id: product.brand_id ?? null,
-      sku: product.sku ?? "",
-      name: product.name,
-      slug: product.slug ?? "",
-      description: product.description ?? "",
-      price: product.seller_base_price ?? product.price,
-      sale_price: product.seller_sale_price ?? product.sale_price ?? null,
-      currency: product.currency ?? "TZS",
-      weight: product.weight ?? null,
-    });
-    setImageError("");
-    setPricingPreview(null);
-    setPricingPreviewError("");
-    setExistingImages([]);
-    setSubmitIntent("draft");
-    setEditorOpen(true);
-    setImagesLoading(true);
-
-    try {
-      const [images, offer, specifications] = await Promise.all([
-        productsApi.getMyImages(product.id),
-        productsApi.getBrokerOffer(product.id).catch(() => null),
-        productsApi.getMyProductSpecifications(product.id).catch(() => [] as ProductSpecification[]),
-      ]);
-      setExistingImages(images);
-      setSpecValues(Object.fromEntries(specifications.map((item) => [String(item.attribute_id), item.value])));
-      if (offer) setBrokerOfferForm({ enabled:true, commission_type:offer.commission_type, commission_value:String(offer.commission_value), max_attributed_sales:offer.max_attributed_sales ? String(offer.max_attributed_sales) : "", starts_at:offer.starts_at ? offer.starts_at.slice(0,16) : "", ends_at:offer.ends_at ? offer.ends_at.slice(0,16) : "" });
-      else setBrokerOfferForm(INITIAL_BROKER_OFFER);
-    } catch (cause) {
-      toast.error(
-        cause instanceof ApiError
-          ? cause.message
-          : "Unable to load the product images.",
-      );
-    } finally {
-      setImagesLoading(false);
-    }
-  }
-
-  function validateImage(file: File) {
-    if (!ALLOWED_IMAGE_TYPES.includes(file.type)) {
-      return "Only JPEG, PNG and WEBP images are allowed.";
-    }
-
-    if (file.size > MAX_IMAGE_SIZE_BYTES) {
-      return "Each product image must be 5 MB or smaller.";
-    }
-
-    return null;
-  }
-
-  function selectImages(event: ChangeEvent<HTMLInputElement>) {
-    setImageError("");
-
-    const incoming = Array.from(event.target.files ?? []);
-    event.target.value = "";
-
-    if (!incoming.length) return;
-
-    const availableSlots =
-      MAX_PRODUCT_IMAGES - existingImages.length - selectedImages.length;
-
-    if (availableSlots <= 0) {
-      setImageError(`Maximum ${MAX_PRODUCT_IMAGES} product images are allowed.`);
-      return;
-    }
-
-    const accepted: SelectedImage[] = [];
-
-    for (const file of incoming.slice(0, availableSlots)) {
-      const validationError = validateImage(file);
-
-      if (validationError) {
-        setImageError(`${file.name}: ${validationError}`);
-        continue;
-      }
-
-      const previewUrl = URL.createObjectURL(file);
-      objectUrlsRef.current.add(previewUrl);
-      accepted.push({ file, previewUrl });
-    }
-
-    setSelectedImages((current) => [...current, ...accepted]);
-
-    if (incoming.length > availableSlots) {
-      setImageError(
-        `Only ${availableSlots} more image${
-          availableSlots === 1 ? "" : "s"
-        } can be added.`,
-      );
-    }
-  }
-
-  function removeSelectedImage(index: number) {
-    setSelectedImages((current) => {
-      const target = current[index];
-
-      if (target) {
-        URL.revokeObjectURL(target.previewUrl);
-        objectUrlsRef.current.delete(target.previewUrl);
-      }
-
-      return current.filter((_, itemIndex) => itemIndex !== index);
-    });
-  }
-
-  async function removeExistingImage(image: ProductImage) {
-    if (!editingProduct || editingProduct.status === "pending_review") return;
-
-    try {
-      await productsApi.deleteImage(editingProduct.id, image.id);
-      setExistingImages((current) =>
-        current.filter((item) => item.id !== image.id),
-      );
-      toast.success("Product image removed.");
-    } catch (cause) {
-      toast.error(
-        cause instanceof ApiError ? cause.message : "Unable to remove image.",
-      );
-    }
-  }
-
-  function updateName(value: string) {
-    setForm((current) => ({
-      ...current,
-      name: value,
-      slug:
-        editingProduct && current.slug
-          ? current.slug
-          : slugify(value),
-    }));
-  }
-
-  function validateForm() {
-    if (!form.store_id) return "Select the store this product belongs to.";
-    if (!stores.some((store) => String(store.id) === String(form.store_id))) {
-      return "Select one of your valid stores.";
-    }
-    if (!form.category_id) return "Select a product category.";
-    if (!form.name.trim()) return "Enter the product name.";
-    if (!form.sku.trim()) return "Enter the product SKU.";
-    if (!form.slug.trim()) return "Enter the product slug.";
-    if (!form.description?.trim()) return "Add a useful product description.";
-
-    const price = Number(form.price);
-    if (!Number.isFinite(price) || price < 0) {
-      return "Enter a valid seller base price.";
-    }
-
-    if (form.sale_price !== null && form.sale_price !== "") {
-      const salePrice = Number(form.sale_price);
-
-      if (!Number.isFinite(salePrice) || salePrice < 0) {
-        return "Enter a valid sale price.";
-      }
-
-      if (salePrice > price) {
-        return "Your promotional base price cannot be greater than your regular base price.";
-      }
-    }
-
-    if (!editingProduct) {
-      const openingStock = Number(stockForm.quantity);
-      const threshold = Number(stockForm.low_stock_threshold);
-
-      if (!Number.isInteger(openingStock) || openingStock < 0) {
-        return "Enter a valid opening stock quantity (0 or more).";
-      }
-
-      if (!Number.isInteger(threshold) || threshold < 0) {
-        return "Enter a valid low-stock threshold (0 or more).";
-      }
-    }
-
-    if (brokerOfferForm.enabled) {
-      const reward = Number(brokerOfferForm.commission_value);
-      if (!Number.isFinite(reward) || reward <= 0) return "Enter a valid Broker reward.";
-      if (brokerOfferForm.commission_type === "percentage" && reward > 100) return "Broker percentage cannot exceed 100%.";
-      const maxSales = brokerOfferForm.max_attributed_sales ? Number(brokerOfferForm.max_attributed_sales) : null;
-      if (maxSales !== null && (!Number.isInteger(maxSales) || maxSales <= 0)) return "Maximum broker-attributed sales must be a positive whole number.";
-      if (brokerOfferForm.starts_at && brokerOfferForm.ends_at && new Date(brokerOfferForm.ends_at) <= new Date(brokerOfferForm.starts_at)) return "Broker promotion end must be after its start.";
-    }
-
-    if (submitIntent === "review") {
-      const missing = categoryAttributes.filter((attribute) => {
-        if (!attribute.is_required) return false;
-        const value = specValues[String(attribute.id)];
-        return value === undefined || value === null || value === "" || (Array.isArray(value) && value.length === 0);
-      });
-      if (missing.length) return `Complete required specifications: ${missing.map((item) => item.name).join(", ")}.`;
-    }
-
-    const totalImages = existingImages.length + selectedImages.length;
-
-    if (totalImages < 1) {
-      return "Upload at least one product image.";
-    }
-
-    return null;
-  }
-
-  async function handleSubmit(event: FormEvent<HTMLFormElement>) {
-    event.preventDefault();
-
-    if (!sellerApproved) {
-      toast.error("Your seller account is not approved.");
-      return;
-    }
-
-    const validationError = validateForm();
-
-    if (validationError) {
-      toast.error(validationError);
-      return;
-    }
-
-    const payload: ProductRequest = {
-      ...form,
-      store_id: form.store_id,
-      category_id: form.category_id,
-      brand_id: form.brand_id || null,
-      sku: form.sku.trim(),
-      name: form.name.trim(),
-      slug: slugify(form.slug),
-      description: form.description?.trim() || null,
-      price: Number(form.price),
-      sale_price:
-        form.sale_price === null || form.sale_price === ""
-          ? null
-          : Number(form.sale_price),
-      currency: form.currency || "TZS",
-      weight:
-        form.weight === null || form.weight === ""
-          ? null
-          : Number(form.weight),
-    };
-
-    setIsSubmitting(true);
-
-    try {
-      const product = editingProduct
-        ? await productsApi.update(editingProduct.id, payload)
-        : await productsApi.create(payload);
-
-      await productsApi.saveMyProductSpecifications(
-        product.id,
-        categoryAttributes
-          .map((attribute) => ({ attribute_id: attribute.id, value: specValues[String(attribute.id)] }))
-          .filter((item) => item.value !== undefined && item.value !== null && item.value !== "" && (!Array.isArray(item.value) || item.value.length > 0)),
-      );
-
-      if (!editingProduct) {
-        await sellerInventoryApi.configure({
-          product_id: String(product.id),
-          variant_id: null,
-          quantity: Number(stockForm.quantity),
-          low_stock_threshold: Number(stockForm.low_stock_threshold),
-          warehouse_location:
-            stockForm.warehouse_location.trim() || null,
-          restock_date: stockForm.restock_date
-            ? new Date(stockForm.restock_date).toISOString()
-            : null,
-        });
-      }
-
-      if (selectedImages.length) {
-        await productsApi.uploadImageFiles(
-          product.id,
-          selectedImages.map((item) => item.file),
-          payload.name,
-        );
-      }
-
-      if (brokerOfferForm.enabled) {
-        const offerPayload: BrokerOfferRequest = {
-          commission_type: brokerOfferForm.commission_type,
-          commission_value: Number(brokerOfferForm.commission_value),
-          max_attributed_sales: brokerOfferForm.max_attributed_sales ? Number(brokerOfferForm.max_attributed_sales) : null,
-          starts_at: brokerOfferForm.starts_at ? new Date(brokerOfferForm.starts_at).toISOString() : null,
-          ends_at: brokerOfferForm.ends_at ? new Date(brokerOfferForm.ends_at).toISOString() : null,
-        };
-        await productsApi.saveBrokerOffer(product.id, offerPayload);
-      } else if (editingProduct) {
-        await productsApi.disableBrokerOffer(product.id).catch(() => undefined);
-      }
-
-      if (submitIntent === "review") {
-        const submitted = await productsApi.submitForReview(product.id);
-        toast.success(
-          submitted.status === "approved"
-            ? "Product approved automatically and is now available to customers."
-            : "Product submitted successfully and is now waiting for review.",
-        );
-      } else {
-        toast.success(
-          editingProduct
-            ? "Product draft updated successfully."
-            : "Product saved as a draft.",
-        );
-      }
-
-      closeEditor();
-      await loadData();
-    } catch (cause) {
-      toast.error(
-        cause instanceof ApiError ? cause.message : "Unable to save the product.",
-      );
-    } finally {
-      setIsSubmitting(false);
-    }
-  }
-
-  async function submitExistingProduct(product: Product) {
-    if (!["draft", "rejected"].includes(product.status)) return;
-
-    setSubmittingProductId(String(product.id));
-
-    try {
-      const submitted = await productsApi.submitForReview(product.id);
-      toast.success(
-        submitted.status === "approved"
-          ? "Product approved automatically and is now available to customers."
-          : "Product submitted for review.",
-      );
-      await loadData();
-    } catch (cause) {
-      toast.error(
-        cause instanceof ApiError
-          ? cause.message
-          : "Unable to submit the product for review.",
-      );
-    } finally {
-      setSubmittingProductId(null);
-    }
-  }
-
-  async function handleDelete() {
-    if (!deleteTarget) return;
-
-    setIsDeleting(true);
-
-    try {
-      await productsApi.delete(deleteTarget.id);
-      toast.success("Product archived successfully.");
-      setDeleteTarget(null);
-      await loadData();
-    } catch (cause) {
-      toast.error(
-        cause instanceof ApiError ? cause.message : "Unable to archive product.",
-      );
-    } finally {
-      setIsDeleting(false);
-    }
-  }
-
-  function formatPrice(
-    value: number | string | null | undefined,
-    currency = "TZS",
-  ) {
-    if (value === null || value === undefined) return "—";
-
-    const numeric = Number(value);
-
-    if (!Number.isFinite(numeric)) return "—";
-
-    const code = String(currency || "TZS").trim().toUpperCase();
-    const fractionDigits = code === "TZS" ? 0 : 3;
-
-    try {
-      return new Intl.NumberFormat("en-TZ", {
-        style: "currency",
-        currency: code,
-        currencyDisplay: code === "TZS" ? "narrowSymbol" : "symbol",
-        minimumFractionDigits: 0,
-        maximumFractionDigits: fractionDigits,
-      }).format(numeric);
-    } catch {
-      return `${code} ${numeric.toLocaleString(undefined, {
-        minimumFractionDigits: 0,
-        maximumFractionDigits: fractionDigits,
-      })}`;
-    }
-  }
-
-  if (!token || !isSeller) return null;
-
-  return (
-    <>
-      <div className="mx-auto max-w-[1500px] space-y-5">
-        {sellerApproved && stores.length === 0 && !loading && (
-          <div className="flex items-start justify-between gap-4 rounded-2xl border border-amber-200 bg-amber-50 p-5 text-amber-800">
-            <div className="flex items-start gap-3">
-              <StoreIcon size={20} className="mt-0.5 shrink-0" />
-              <div>
-                <p className="font-semibold">Create a store before listing products</p>
-                <p className="mt-1 text-sm leading-6">Every product must now belong to one of your stores.</p>
-              </div>
-            </div>
-            <button type="button" onClick={() => router.push("/seller/store")} className="shrink-0 rounded-xl bg-[#f7941d] px-4 py-2 text-sm font-semibold text-white">
-              My Stores
-            </button>
-          </div>
-        )}
-
-        {!sellerApproved && (
-          <div className="flex items-start gap-3 rounded-2xl border border-amber-200 bg-amber-50 p-5 text-amber-800">
-            <AlertCircle size={20} className="mt-0.5 shrink-0" />
-            <div>
-              <p className="font-semibold">Product listing is currently locked</p>
-              <p className="mt-1 text-sm leading-6">
-                Your seller account must be approved before you can create or
-                manage marketplace products.
-              </p>
-            </div>
-          </div>
-        )}
-
-        <section className="rounded-2xl border border-[#e7ebf0] bg-white p-5 shadow-sm sm:p-6">
-          <div className="flex flex-col gap-5 xl:flex-row xl:items-center xl:justify-between">
-            <div>
-              <p className="text-xs font-bold uppercase tracking-[0.14em] text-[#f7941d]">
-                Seller catalogue
-              </p>
-              <h1 className="mt-1 text-2xl font-bold tracking-[-0.025em] text-[#111827]">
-                Products
-              </h1>
-              <p className="mt-2 max-w-2xl text-sm leading-6 text-[#64748b]">
-                Create product listings, upload real product images, save drafts
-                and submit completed products for marketplace review.
-              </p>
-            </div>
-
-            <button
-              type="button"
-              disabled={!sellerApproved || stores.length === 0}
-              onClick={openCreate}
-              className="inline-flex h-11 items-center justify-center gap-2 rounded-xl bg-[#f7941d] px-5 text-sm font-semibold text-white shadow-[0_8px_20px_rgba(247,148,29,0.18)] transition hover:bg-[#e98716] disabled:cursor-not-allowed disabled:opacity-50"
-            >
-              <Plus size={17} />
-              Add Product
-            </button>
-          </div>
-        </section>
-
-        <section className="grid grid-cols-2 gap-3 md:grid-cols-3 xl:grid-cols-5">
-          <StatCard label="All products" value={counts.total} icon={ShoppingBag} />
-          <StatCard label="Draft" value={counts.draft} icon={FileText} />
-          <StatCard label="Under review" value={counts.review} icon={Clock3} />
-          <StatCard label="Approved" value={counts.approved} icon={BadgeCheck} />
-          <StatCard label="Rejected" value={counts.rejected} icon={AlertCircle} />
-        </section>
-
-        <section className="rounded-2xl border border-[#e7ebf0] bg-white shadow-sm">
-          <div className="flex flex-col gap-3 border-b border-[#edf0f4] p-5 lg:flex-row lg:items-center lg:justify-between">
-            <div className="relative min-w-0 flex-1 lg:max-w-xl">
-              <Search
-                size={17}
-                className="absolute left-3.5 top-1/2 -translate-y-1/2 text-[#94a3b8]"
-              />
-              <input
-                value={search}
-                onChange={(event) => setSearch(event.target.value)}
-                placeholder="Search by product name, SKU, category or brand..."
-                className="h-11 w-full rounded-xl border border-[#e1e6ec] bg-[#f8fafc] pl-10 pr-4 text-sm outline-none transition focus:border-[#f7941d] focus:bg-white"
-              />
-            </div>
-
-            <div className="flex gap-2">
-              <select
-                value={storeFilter}
-                onChange={(event) => setStoreFilter(event.target.value)}
-                className="h-11 rounded-xl border border-[#e1e6ec] bg-white px-4 text-sm outline-none"
-              >
-                <option value="all">All stores</option>
-                {stores.map((store) => (
-                  <option key={String(store.id)} value={String(store.id)}>
-                    {store.store_name}
-                  </option>
-                ))}
-              </select>
-
-              <select
-                value={statusFilter}
-                onChange={(event) => setStatusFilter(event.target.value)}
-                className="h-11 rounded-xl border border-[#e1e6ec] bg-white px-4 text-sm outline-none"
-              >
-                {STATUS_OPTIONS.map((status) => (
-                  <option key={status} value={status}>
-                    {status === "all" ? "All statuses" : statusLabel(status)}
-                  </option>
-                ))}
-              </select>
-
-              <button
-                type="button"
-                onClick={() => void loadData()}
-                className="inline-flex h-11 items-center justify-center gap-2 rounded-xl border border-[#e1e6ec] bg-white px-4 text-sm font-semibold text-[#475569] hover:bg-slate-50"
-              >
-                <RefreshCw size={15} />
-                Refresh
-              </button>
-            </div>
-          </div>
-
-          {loading ? (
-            <div className="p-16 text-center">
-              <Spinner className="mx-auto text-[#f7941d]" />
-              <p className="mt-3 text-sm text-[#64748b]">Loading products...</p>
-            </div>
-          ) : error ? (
-            <div className="p-12 text-center text-red-600">{error}</div>
-          ) : filteredProducts.length === 0 ? (
-            <div className="p-14 text-center">
-              <Package className="mx-auto text-[#cbd5e1]" size={40} />
-              <h3 className="mt-3 font-semibold text-[#111827]">
-                No products found
-              </h3>
-              <p className="mt-1 text-sm text-[#64748b]">
-                {products.length
-                  ? "Try changing your search or status filter."
-                  : "Create your first product listing to start building your seller catalogue."}
-              </p>
-              {!products.length && sellerApproved && (
-                <button
-                  type="button"
-                  onClick={openCreate}
-                  className="mt-5 rounded-xl bg-[#f7941d] px-5 py-2.5 text-sm font-semibold text-white"
-                >
-                  Add your first product
-                </button>
-              )}
-            </div>
-          ) : (
-            <div className="grid gap-4 p-5 sm:grid-cols-2 xl:grid-cols-3 2xl:grid-cols-4">
-              {filteredProducts.map((product) => {
-                const category = categories.find(
-                  (item) => item.id === product.category_id,
-                );
-                const brand = brands.find(
-                  (item) => String(item.id) === String(product.brand_id),
-                );
-                const productStore = stores.find(
-                  (item) => String(item.id) === String(product.store_id),
-                );
-                const editable = product.status !== "pending_review";
-
-                return (
-                  <article
-                    key={String(product.id)}
-                    className="overflow-hidden rounded-2xl border border-[#e7ebf0] bg-white transition hover:-translate-y-0.5 hover:shadow-lg"
-                  >
-                    <div className="relative flex h-40 items-center justify-center bg-gradient-to-br from-slate-50 to-slate-100">
-                      {product.images?.[0]?.image_url ? (
-                        <Image
-                          src={resolveImageUrl(product.images[0].image_url)}
-                          alt={product.name}
-                          fill
-                          unoptimized
-                          className="object-cover"
-                        />
-                      ) : (
-                        <Package size={38} className="text-[#cbd5e1]" />
-                      )}
-
-                      <span
-                        className={`absolute left-3 top-3 rounded-full border px-2.5 py-1 text-[10px] font-bold capitalize ${statusClasses(
-                          product.status,
-                        )}`}
-                      >
-                        {statusLabel(product.status)}
-                      </span>
-                      {product.status === "approved" && product.approval_method && (
-                        <span className="absolute right-3 top-3 rounded-full border border-white/70 bg-white/90 px-2.5 py-1 text-[9px] font-bold uppercase tracking-wide text-[#475569] shadow-sm">
-                          {product.approval_method === "automatic"
-                            ? "Auto approved"
-                            : "Manual approval"}
-                        </span>
-                      )}
-                    </div>
-
-                    <div className="p-4">
-                      <p className="text-[10px] font-bold uppercase tracking-[0.12em] text-[#f7941d]">
-                        {category?.name || "Uncategorised"}
-                      </p>
-
-                      <h3 className="mt-1 line-clamp-1 font-semibold text-[#111827]">
-                        {product.name}
-                      </h3>
-
-                      <p className="mt-1 text-xs text-[#94a3b8]">
-                        SKU: {product.sku}
-                        {brand?.name ? ` · ${brand.name}` : ""}
-                      </p>
-
-                      <div className="mt-3 flex items-center gap-2 rounded-xl border border-[#edf0f4] bg-slate-50 px-3 py-2 text-xs text-[#475569]">
-                        <StoreIcon size={14} className="shrink-0 text-[#f7941d]" />
-                        <span className="min-w-0 truncate font-semibold">
-                          {productStore?.store_name || "Assigned store"}
-                        </span>
-                        {productStore?.store_scope && (
-                          <span className="ml-auto rounded-full bg-white px-2 py-0.5 text-[9px] font-bold uppercase tracking-wide text-[#64748b]">
-                            {productStore.store_scope}
-                          </span>
-                        )}
-                      </div>
-
-                      <div className="mt-4 grid grid-cols-2 gap-3">
-                        <div className="rounded-xl bg-slate-50 p-3">
-                          <p className="text-[10px] font-bold uppercase tracking-wide text-[#94a3b8]">
-                            Listed price
-                          </p>
-                          <p className="mt-1 font-bold text-[#111827]">
-                            {formatPrice(
-                              product.seller_sale_price ||
-                                product.seller_base_price ||
-                                product.sale_price ||
-                                product.price,
-                              product.currency,
-                            )}
-                          </p>
-                        </div>
-
-                        <div className="rounded-xl bg-orange-50 p-3">
-                          <p className="text-[10px] font-bold uppercase tracking-wide text-[#c66c0b]">
-                            Customer price
-                          </p>
-                          <p className="mt-1 font-bold text-[#111827]">
-                            {formatPrice(
-                              product.sale_price || product.price,
-                              product.currency,
-                            )}
-                          </p>
-                        </div>
-                      </div>
-
-                      {product.commission_rate_snapshot !== undefined && (
-                        <p className="mt-2 text-xs text-[#64748b]">
-                          Marketplace commission:{" "}
-                          <b className="text-[#111827]">
-                            {Number(product.commission_rate_snapshot).toLocaleString()}%
-                          </b>
-                          {" · "}
-                          {formatPrice(
-                            product.commission_amount_snapshot,
-                            product.currency,
-                          )}
-                        </p>
-                      )}
-
-                      {product.rejection_reason && (
-                        <div className="mt-4 rounded-xl border border-red-200 bg-red-50 p-3">
-                          <p className="text-[10px] font-bold uppercase tracking-wider text-red-700">
-                            Admin feedback
-                          </p>
-                          <p className="mt-1 text-xs leading-5 text-red-700">
-                            {product.rejection_reason}
-                          </p>
-                        </div>
-                      )}
-
-                      <div className="mt-4 flex flex-wrap gap-2 border-t border-[#edf0f4] pt-4">
-                        {editable && (
-                          <button
-                            type="button"
-                            onClick={() => void openEdit(product)}
-                            className="inline-flex items-center gap-1.5 rounded-[10px] border border-[#e1e6ec] px-3 py-2 text-xs font-semibold text-[#475569] hover:border-[#f7941d] hover:text-[#f7941d]"
-                          >
-                            <Pencil size={13} />
-                            Edit
-                          </button>
-                        )}
-
-                        {["draft", "rejected"].includes(product.status) && (
-                          <button
-                            type="button"
-                            disabled={
-                              submittingProductId === String(product.id)
-                            }
-                            onClick={() => void submitExistingProduct(product)}
-                            className="inline-flex items-center gap-1.5 rounded-[10px] bg-[#111827] px-3 py-2 text-xs font-semibold text-white disabled:opacity-50"
-                          >
-                            <Send size={13} />
-                            {submittingProductId === String(product.id)
-                              ? "Submitting..."
-                              : "Submit review"}
-                          </button>
-                        )}
-
-                        {product.status !== "pending_review" && (
-                          <button
-                            type="button"
-                            onClick={() => setDeleteTarget(product)}
-                            className="ml-auto inline-flex items-center gap-1.5 rounded-[10px] px-2.5 py-2 text-xs font-semibold text-red-600 hover:bg-red-50"
-                          >
-                            <Archive size={13} />
-                            Archive
-                          </button>
-                        )}
-                      </div>
-                    </div>
-                  </article>
-                );
-              })}
-            </div>
-          )}
-        </section>
-      </div>
-
-      {editorOpen && (
-        <div
-          className="fixed inset-0 z-[100] flex justify-end bg-black/45 backdrop-blur-[2px]"
-          onMouseDown={closeEditor}
-        >
-          <aside
-            className="flex h-full w-full max-w-5xl flex-col bg-[#f4f7fb] shadow-2xl dark:bg-[#111827]"
-            onMouseDown={(event) => event.stopPropagation()}
-          >
-            <div className="relative shrink-0 overflow-hidden border-b border-black/10 bg-[#111827] px-5 py-5 text-white sm:px-7 sm:py-6">
-              <span className="pointer-events-none absolute -right-16 -top-20 h-48 w-48 rounded-full bg-[#f7941d]/25 blur-3xl" />
-              <span className="pointer-events-none absolute bottom-0 right-40 h-20 w-40 rounded-full bg-white/5 blur-2xl" />
-              <div className="relative flex items-start justify-between gap-5">
-                <div className="flex min-w-0 items-start gap-4">
-                  <span className="grid h-12 w-12 shrink-0 place-items-center rounded-2xl bg-[#f7941d] text-white shadow-[0_10px_25px_rgba(247,148,29,.3)]">
-                    <ShoppingBag size={22} />
-                  </span>
-                  <div>
-                    <p className="text-[10px] font-extrabold uppercase tracking-[0.18em] text-orange-300">
-                      Seller catalogue workspace
-                    </p>
-                    <h2 className="mt-1 text-xl font-extrabold tracking-[-0.025em] sm:text-2xl">
-                      {editingProduct ? "Edit Product" : "Create New Product"}
-                    </h2>
-                    <p className="mt-1 max-w-2xl text-xs leading-5 text-slate-300">
-                      Build a buyer-ready listing with clear identity, strong product images,
-                      pricing and accurate opening stock.
-                    </p>
-                  </div>
-                </div>
-
-                <button
-                  type="button"
-                  onClick={closeEditor}
-                  disabled={isSubmitting}
-                  className="grid h-10 w-10 shrink-0 place-items-center rounded-xl border border-white/15 bg-white/10 text-white transition hover:bg-white/20"
-                >
-                  <X size={18} />
-                </button>
-              </div>
-            </div>
-
-            <form
-              onSubmit={handleSubmit}
-              className="flex min-h-0 flex-1 flex-col"
-            >
-              <div className="flex-1 space-y-5 overflow-y-auto p-5 sm:p-7">
-                <div className="grid gap-2 sm:grid-cols-4">
-                  {([
-                    [Tag, "1", "Identity", "Store & catalogue"],
-                    [Camera, "2", "Media", "Buyer-ready photos"],
-                    [CircleDollarSign, "3", "Pricing", "Price & commission"],
-                    [Warehouse, "4", "Stock", "Opening inventory"],
-                  ] as const).map(([StepIcon, step, title, detail]) => (
-                    <div
-                      key={String(step)}
-                      className="flex items-center gap-3 rounded-2xl border border-[#e4e9ef] bg-white px-3 py-3 shadow-[0_5px_18px_rgba(15,23,42,.035)]"
-                    >
-                      <span className="grid h-9 w-9 shrink-0 place-items-center rounded-xl bg-orange-50 text-[#f7941d]">
-                        <StepIcon size={16} />
-                      </span>
-                      <div className="min-w-0">
-                        <p className="text-[9px] font-extrabold uppercase tracking-[.14em] text-[#94a3b8]">
-                          Step {step}
-                        </p>
-                        <p className="truncate text-xs font-bold text-[#111827]">{title}</p>
-                        <p className="truncate text-[10px] text-[#94a3b8]">{detail}</p>
-                      </div>
-                    </div>
-                  ))}
-                </div>
-
-                {editingProduct?.rejection_reason && (
-                  <div className="rounded-2xl border border-red-200 bg-red-50 p-4 text-red-700">
-                    <p className="text-xs font-bold uppercase tracking-wider">
-                      Admin correction request
-                    </p>
-                    <p className="mt-1 text-sm leading-6">
-                      {editingProduct.rejection_reason}
-                    </p>
-                  </div>
-                )}
-
-                <FormSection
-                  icon={Tag}
-                  title="Product identity"
-                  description="Choose the marketplace category and provide the basic product information."
-                >
-                  <div className="grid gap-4 md:grid-cols-2">
-                    <div className="md:col-span-2">
-                      <Field
-                        label="Store"
-                        required
-                        hint="Choose the physical/source store where this product is listed and fulfilled from."
-                      >
-                        <select
-                          value={String(form.store_id || "")}
-                          onChange={(event) =>
-                            setForm((current) => ({
-                              ...current,
-                              store_id: event.target.value,
-                            }))
-                          }
-                          disabled={isSubmitting}
-                          className="input"
-                        >
-                          <option value="">Select store</option>
-                          {stores.map((store) => (
-                            <option key={String(store.id)} value={String(store.id)}>
-                              {store.store_name} — {store.district || store.region || store.country || "Location not set"} — {store.store_scope.toUpperCase()}
-                            </option>
-                          ))}
-                        </select>
-                      </Field>
-                    </div>
-
-                    <Field label="Product category" required>
-                      <select
-                        value={String(form.category_id || "")}
-                        onChange={(event) =>
-                          {
-                            setForm((current) => ({ ...current, category_id: event.target.value }));
-                            setSpecValues({});
-                          }
-                        }
-                        disabled={isSubmitting}
-                        className="input"
-                      >
-                        <option value="">Select category</option>
-                        {categories.map((category) => (
-                          <option
-                            key={String(category.id)}
-                            value={String(category.id)}
-                          >
-                            {category.name}
-                          </option>
-                        ))}
-                      </select>
-                    </Field>
-
-                    <Field label="Brand">
-                      <select
-                        value={String(form.brand_id || "")}
-                        onChange={(event) =>
-                          setForm((current) => ({
-                            ...current,
-                            brand_id: event.target.value || null,
-                          }))
-                        }
-                        disabled={isSubmitting}
-                        className="input"
-                      >
-                        <option value="">No brand / unbranded</option>
-                        {brands.map((brand) => (
-                          <option key={String(brand.id)} value={String(brand.id)}>
-                            {brand.name}
-                          </option>
-                        ))}
-                      </select>
-                    </Field>
-
-                    <Field label="Product name" required>
-                      <input
-                        value={form.name}
-                        onChange={(event) => updateName(event.target.value)}
-                        placeholder="e.g. Samsung Galaxy S24 256GB"
-                        disabled={isSubmitting}
-                        className="input"
-                      />
-                    </Field>
-
-                    <Field
-                      label="SKU / ownership reference"
-                      required
-                      hint="Your stock-keeping reference. It must be unique only inside your seller catalog; another seller may use the same SKU."
-                    >
-                      <input
-                        value={form.sku}
-                        onChange={(event) =>
-                          setForm((current) => ({
-                            ...current,
-                            sku: event.target.value.toUpperCase(),
-                          }))
-                        }
-                        placeholder="e.g. PHYSIO-001"
-                        disabled={isSubmitting}
-                        className="input"
-                      />
-                    </Field>
-
-                    <div className="md:col-span-2">
-                      <Field
-                        label="Product slug"
-                        required
-                        hint="Generated from the product name. If another seller already uses the same public slug, Xerin will make yours unique automatically."
-                      >
-                        <input
-                          value={form.slug}
-                          onChange={(event) =>
-                            setForm((current) => ({
-                              ...current,
-                              slug: slugify(event.target.value),
-                            }))
-                          }
-                          placeholder="samsung-galaxy-s24-256gb"
-                          disabled={isSubmitting}
-                          className="input"
-                        />
-                      </Field>
-                    </div>
-                  </div>
-                </FormSection>
-
-                <FormSection
-                  icon={FileText}
-                  title="Description"
-                  description="Explain exactly what the buyer is purchasing, its condition and important features."
-                >
-                  <Field label="Product description" required>
-                    <textarea
-                      value={form.description ?? ""}
-                      onChange={(event) =>
-                        setForm((current) => ({
-                          ...current,
-                          description: event.target.value,
-                        }))
-                      }
-                      rows={6}
-                      maxLength={5000}
-                      placeholder="Describe the product, specifications, material, condition, package contents and other important buyer information..."
-                      disabled={isSubmitting}
-                      className="input min-h-36 resize-y"
-                    />
-                    <p className="mt-1 text-right text-[11px] text-[#94a3b8]">
-                      {(form.description?.length ?? 0).toLocaleString()} / 5,000
-                    </p>
-                  </Field>
-                </FormSection>
-
-                <FormSection
-                  icon={Boxes}
-                  title="Product specifications"
-                  description="These fields are configured by Admin for the selected category and help buyers compare similar products."
-                >
-                  {!form.category_id ? (
-                    <p className="rounded-xl border border-dashed p-4 text-sm text-[#64748b]">Select a product category first. Its specification fields will appear automatically.</p>
-                  ) : specificationsLoading ? (
-                    <p className="flex items-center gap-2 text-sm text-[#64748b]"><Spinner /> Loading category specifications...</p>
-                  ) : categoryAttributes.length === 0 ? (
-                    <p className="rounded-xl border border-dashed p-4 text-sm text-[#64748b]">No extra specifications have been configured for this category yet.</p>
-                  ) : (
-                    <div className="grid gap-4 md:grid-cols-2">
-                      {categoryAttributes.map((attribute) => {
-                        const id = String(attribute.id);
-                        const value = specValues[id];
-                        const label = `${attribute.name}${attribute.unit ? ` (${attribute.unit})` : ""}`;
-                        const setValue = (next: unknown) => setSpecValues((current) => ({ ...current, [id]: next }));
-                        return (
-                          <Field key={id} label={label} required={attribute.is_required} hint={attribute.description || (attribute.inherited ? "Inherited from a parent category." : undefined)}>
-                            {attribute.input_type === "textarea" ? (
-                              <textarea rows={3} className="input resize-y" value={String(value ?? "")} onChange={(e) => setValue(e.target.value)} disabled={isSubmitting}/>
-                            ) : attribute.input_type === "select" ? (
-                              <select className="input" value={String(value ?? "")} onChange={(e) => setValue(e.target.value)} disabled={isSubmitting}><option value="">Select {attribute.name}</option>{attribute.allowed_values.map((option) => <option key={option} value={option}>{option}</option>)}</select>
-                            ) : attribute.input_type === "multiselect" ? (
-                              <select multiple className="input min-h-28" value={Array.isArray(value) ? value.map(String) : []} onChange={(e) => setValue(Array.from(e.currentTarget.selectedOptions).map((option: HTMLOptionElement) => option.value))} disabled={isSubmitting}>{attribute.allowed_values.map((option) => <option key={option} value={option}>{option}</option>)}</select>
-                            ) : attribute.input_type === "boolean" ? (
-                              <label className="flex items-center gap-2 rounded-xl border border-[#dfe5ec] px-4 py-3 text-sm"><input type="checkbox" checked={Boolean(value)} onChange={(e) => setValue(e.target.checked)} disabled={isSubmitting}/> Yes / Available</label>
-                            ) : (
-                              <input className="input" type={attribute.input_type === "number" ? "number" : attribute.input_type === "date" ? "date" : "text"} value={String(value ?? "")} onChange={(e) => setValue(attribute.input_type === "number" ? (e.target.value === "" ? "" : Number(e.target.value)) : e.target.value)} disabled={isSubmitting}/>
-                            )}
-                          </Field>
-                        );
-                      })}
-                    </div>
-                  )}
-                </FormSection>
-
-                <FormSection
-                  icon={Camera}
-                  title="Product images"
-                  description={`Upload up to ${MAX_PRODUCT_IMAGES} real product images. Xerin checks format, size, resolution, aspect ratio, sharpness, lighting and primary-image background quality before saving.`}
-                >
-                  <label className="group relative flex cursor-pointer flex-col items-center justify-center overflow-hidden rounded-2xl border-2 border-dashed border-orange-200 bg-gradient-to-br from-orange-50 via-white to-slate-50 px-5 py-10 text-center transition hover:border-[#f7941d] hover:shadow-[0_12px_28px_rgba(247,148,29,.10)]">
-                    <span className="pointer-events-none absolute -right-12 -top-12 h-32 w-32 rounded-full bg-orange-100/70 blur-2xl" />
-                    <span className="relative grid h-14 w-14 place-items-center rounded-2xl bg-[#f7941d] text-white shadow-[0_10px_24px_rgba(247,148,29,.25)] transition group-hover:-translate-y-1">
-                      <UploadCloud size={25} />
-                    </span>
-                    <span className="relative mt-4 text-sm font-bold text-[#111827]">
-                      Drop product images here or browse
-                    </span>
-                    <span className="relative mt-1 text-xs text-[#64748b]">
-                      Primary: at least 1000 × 1000 with a clean, mostly white background · Additional: at least 600 × 600
-                    </span>
-                    <span className="relative mt-1 text-[11px] text-[#94a3b8]">
-                      Blurry, very dark/washed-out, corrupt or extreme-aspect-ratio images will be rejected with an exact reason.
-                    </span>
-                    <span className="relative mt-3 rounded-full bg-white px-3 py-1 text-[10px] font-bold uppercase tracking-wide text-[#f7941d] shadow-sm">
-                      Up to {MAX_PRODUCT_IMAGES} images
-                    </span>
-                    <input
-                      type="file"
-                      multiple
-                      accept="image/jpeg,image/png,image/webp,.jpg,.jpeg,.png,.webp"
-                      disabled={
-                        isSubmitting ||
-                        existingImages.length + selectedImages.length >=
-                          MAX_PRODUCT_IMAGES
-                      }
-                      onChange={selectImages}
-                      className="hidden"
-                    />
-                  </label>
-
-                  {imagesLoading && (
-                    <p className="mt-3 inline-flex items-center gap-2 text-sm text-[#64748b]">
-                      <Spinner />
-                      Loading stored product images...
-                    </p>
-                  )}
-
-                  {(existingImages.length > 0 || selectedImages.length > 0) && (
-                    <div className="mt-4 grid grid-cols-2 gap-3 sm:grid-cols-3 lg:grid-cols-5">
-                      {existingImages.map((image, index) => (
-                        <div
-                          key={String(image.id)}
-                          className="group relative overflow-hidden rounded-xl border border-[#e1e6ec] bg-white"
-                        >
-                          <div className="relative h-28">
-                            <Image
-                              src={resolveImageUrl(
-                                image.thumbnail_url || image.image_url,
-                              )}
-                              alt={
-                                image.alt_text ||
-                                `${form.name || "Product"} image ${index + 1}`
-                              }
-                              fill
-                              unoptimized
-                              className="object-cover"
-                            />
-                          </div>
-
-                          {image.is_primary && (
-                            <span className="absolute left-2 top-2 rounded-full bg-[#111827] px-2 py-1 text-[9px] font-bold uppercase text-white">
-                              Primary
-                            </span>
-                          )}
-
-                          <button
-                            type="button"
-                            disabled={isSubmitting}
-                            onClick={() => void removeExistingImage(image)}
-                            className="flex w-full items-center justify-center gap-1.5 border-t border-[#edf0f4] px-2 py-2 text-[11px] font-semibold text-red-600 hover:bg-red-50"
-                          >
-                            <Trash2 size={12} />
-                            Remove
-                          </button>
-                        </div>
-                      ))}
-
-                      {selectedImages.map((image, index) => (
-                        <div
-                          key={image.previewUrl}
-                          className="relative overflow-hidden rounded-xl border border-orange-200 bg-white"
-                        >
-                          <div className="relative h-28">
-                            <Image
-                              src={image.previewUrl}
-                              alt={`New product image ${index + 1}`}
-                              fill
-                              unoptimized
-                              className="object-cover"
-                            />
-                          </div>
-
-                          <span className="absolute left-2 top-2 rounded-full bg-[#f7941d] px-2 py-1 text-[9px] font-bold uppercase text-white">
-                            New
-                          </span>
-
-                          <button
-                            type="button"
-                            disabled={isSubmitting}
-                            onClick={() => removeSelectedImage(index)}
-                            className="flex w-full items-center justify-center gap-1.5 border-t border-[#edf0f4] px-2 py-2 text-[11px] font-semibold text-red-600 hover:bg-red-50"
-                          >
-                            <Trash2 size={12} />
-                            Remove
-                          </button>
-                        </div>
-                      ))}
-                    </div>
-                  )}
-
-                  <div className="mt-3 flex items-center justify-between gap-3 text-xs">
-                    <span className="text-[#64748b]">
-                      {existingImages.length + selectedImages.length} /{" "}
-                      {MAX_PRODUCT_IMAGES} images selected
-                    </span>
-                    <span className="text-[#94a3b8]">
-                      The first uploaded image becomes the primary image.
-                    </span>
-                  </div>
-
-                  {imageError && (
-                    <p className="mt-3 rounded-xl border border-red-200 bg-red-50 px-3 py-2 text-xs font-medium text-red-700">
-                      {imageError}
-                    </p>
-                  )}
-                </FormSection>
-
-                <FormSection
-                  icon={Boxes}
-                  title="Pricing & physical details"
-                  description="Set the price customers will pay. Xerin commission is deducted from your seller settlement; it is not added to the customer price."
-                >
-                  <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-4">
-                    <Field label="Currency" required>
-                      <select
-                        value={form.currency || "TZS"}
-                        onChange={(event) =>
-                          setForm((current) => ({
-                            ...current,
-                            currency: event.target.value,
-                          }))
-                        }
-                        disabled={isSubmitting || listingCurrencies.length === 0}
-                        className="input"
-                      >
-                        {listingCurrencies.length === 0 && <option value="">No active currencies configured</option>}
-                        {listingCurrencies.map((currency) => (
-                          <option key={currency.id} value={currency.code}>
-                            {currency.code} — {currency.name}
-                          </option>
-                        ))}
-                      </select>
-                    </Field>
-
-                    <Field
-                      label="Customer listing price"
-                      required
-                      hint="This is the product price the customer will pay before shipping, tax, or other checkout charges. Xerin commission is deducted from your settlement."
-                    >
-                      <input
-                        type="number"
-                        min="0"
-                        step="0.01"
-                        value={form.price}
-                        onChange={(event) =>
-                          setForm((current) => ({
-                            ...current,
-                            price: event.target.value,
-                          }))
-                        }
-                        placeholder="0.00"
-                        disabled={isSubmitting}
-                        className="input"
-                      />
-                    </Field>
-
-                    <Field
-                      label="Promotional customer price"
-                      hint="Optional discounted price the customer will pay. It must be lower than your regular listing price."
-                    >
-                      <input
-                        type="number"
-                        min="0"
-                        step="0.01"
-                        value={form.sale_price ?? ""}
-                        onChange={(event) =>
-                          setForm((current) => ({
-                            ...current,
-                            sale_price: event.target.value || null,
-                          }))
-                        }
-                        placeholder="0.00"
-                        disabled={isSubmitting}
-                        className="input"
-                      />
-                    </Field>
-
-                    <Field label="Weight (kg)">
-                      <input
-                        type="number"
-                        min="0"
-                        step="0.01"
-                        value={form.weight ?? ""}
-                        onChange={(event) =>
-                          setForm((current) => ({
-                            ...current,
-                            weight: event.target.value || null,
-                          }))
-                        }
-                        placeholder="e.g. 0.75"
-                        disabled={isSubmitting}
-                        className="input"
-                      />
-                    </Field>
-                  </div>
-                
-
-
-                  {!editingProduct && (
-                    <div className="mt-5 rounded-2xl border border-[#dfe5ec] bg-[#f8fafc] p-4 sm:p-5">
-                      <div className="flex items-start gap-3">
-                        <span className="flex h-10 w-10 shrink-0 items-center justify-center rounded-xl bg-white text-[#f7941d] shadow-sm">
-                          <Warehouse size={19} />
-                        </span>
-                        <div className="min-w-0 flex-1">
-                          <p className="text-sm font-bold text-[#111827]">
-                            Opening inventory
-                          </p>
-                          <p className="mt-1 text-xs leading-5 text-[#64748b]">
-                            Enter the seller's real physical stock for this product.
-                            Xerin calculates available quantity as physical quantity
-                            minus units reserved by active orders.
-                          </p>
-
-                          <div className="mt-4 grid gap-4 sm:grid-cols-2 lg:grid-cols-4">
-                            <Field label="Opening stock" required>
-                              <input
-                                type="number"
-                                min="0"
-                                step="1"
-                                value={stockForm.quantity}
-                                onChange={(event) =>
-                                  setStockForm((current) => ({
-                                    ...current,
-                                    quantity: event.target.value,
-                                  }))
-                                }
-                                disabled={isSubmitting}
-                                className="input"
-                              />
-                            </Field>
-
-                            <Field label="Low-stock threshold">
-                              <input
-                                type="number"
-                                min="0"
-                                step="1"
-                                value={stockForm.low_stock_threshold}
-                                onChange={(event) =>
-                                  setStockForm((current) => ({
-                                    ...current,
-                                    low_stock_threshold: event.target.value,
-                                  }))
-                                }
-                                disabled={isSubmitting}
-                                className="input"
-                              />
-                            </Field>
-
-                            <Field label="Warehouse / stock location">
-                              <input
-                                value={stockForm.warehouse_location}
-                                onChange={(event) =>
-                                  setStockForm((current) => ({
-                                    ...current,
-                                    warehouse_location: event.target.value,
-                                  }))
-                                }
-                                placeholder="e.g. Main Store - Rack A"
-                                disabled={isSubmitting}
-                                className="input"
-                              />
-                            </Field>
-
-                            <Field label="Expected restock date">
-                              <input
-                                type="date"
-                                value={stockForm.restock_date}
-                                onChange={(event) =>
-                                  setStockForm((current) => ({
-                                    ...current,
-                                    restock_date: event.target.value,
-                                  }))
-                                }
-                                disabled={isSubmitting}
-                                className="input"
-                              />
-                            </Field>
-                          </div>
-
-                          <div className="mt-4 grid gap-3 sm:grid-cols-3">
-                            <InventoryPreviewStat
-                              label="Physical quantity"
-                              value={Math.max(0, Number(stockForm.quantity) || 0)}
-                            />
-                            <InventoryPreviewStat label="Reserved" value={0} />
-                            <InventoryPreviewStat
-                              label="Available to customers"
-                              value={Math.max(0, Number(stockForm.quantity) || 0)}
-                              highlight
-                            />
-                          </div>
-                        </div>
-                      </div>
-                    </div>
-                  )}
-
-                  <div className="mt-5 rounded-2xl border border-orange-200 bg-orange-50/60 p-4 sm:p-5">
-                    <div className="flex items-start gap-3">
-                      <span className="flex h-10 w-10 shrink-0 items-center justify-center rounded-xl bg-white text-[#f7941d] shadow-sm">
-                        <CircleDollarSign size={19} />
-                      </span>
-                      <div className="min-w-0 flex-1">
-                        <div className="flex flex-col gap-1 sm:flex-row sm:items-center sm:justify-between">
-                          <div>
-                            <p className="text-sm font-bold text-[#111827]">
-                              Marketplace pricing preview
-                            </p>
-                            <p className="mt-0.5 text-xs leading-5 text-[#64748b]">
-                              The customer pays your listed price. Xerin commission is shown separately and deducted from your seller settlement.
-                            </p>
-                          </div>
-                          {pricingPreview?.commission_scope && (
-                            <span className="mt-2 inline-flex w-fit rounded-full border border-orange-200 bg-white px-2.5 py-1 text-[10px] font-bold uppercase tracking-wide text-[#c66c0b] sm:mt-0">
-                              {pricingPreview.commission_scope.replaceAll("_", " ")} rule
-                            </span>
-                          )}
-                        </div>
-
-                        {pricingPreviewLoading ? (
-                          <div className="mt-4 flex items-center gap-2 text-sm text-[#64748b]">
-                            <Spinner />
-                            Calculating customer price...
-                          </div>
-                        ) : pricingPreview ? (
-                          <div className="mt-4 grid gap-3 sm:grid-cols-2 xl:grid-cols-4">
-                            <PricingStat
-                              label="Customer pays"
-                              value={formatPrice(
-                                pricingPreview.customer_price,
-                                pricingPreview.currency || form.currency,
-                              )}
-                              highlight
-                            />
-                            <PricingStat
-                              label="Xerin commission"
-                              value={`${Number(pricingPreview.commission_rate).toLocaleString()}%`}
-                              detail={formatPrice(
-                                pricingPreview.commission_amount,
-                                pricingPreview.currency || form.currency,
-                              )}
-                            />
-                            <PricingStat
-                              label="Estimated seller net"
-                              value={formatPrice(
-                                pricingPreview.seller_net_amount,
-                                pricingPreview.currency || form.currency,
-                              )}
-                            />
-                            <PricingStat
-                              label="Promotional customer price"
-                              value={
-                                pricingPreview.customer_sale_price
-                                  ? formatPrice(
-                                      pricingPreview.customer_sale_price,
-                                      pricingPreview.currency || form.currency,
-                                    )
-                                  : "Not set"
-                              }
-                              detail={
-                                pricingPreview.seller_sale_net_amount
-                                  ? `Seller net: ${formatPrice(
-                                      pricingPreview.seller_sale_net_amount,
-                                      pricingPreview.currency || form.currency,
-                                    )}`
-                                  : undefined
-                              }
-                            />
-                          </div>
-                        ) : (
-                          <p className="mt-4 text-sm text-[#64748b]">
-                            Select a category and enter your listing price to see the marketplace calculation.
-                          </p>
-                        )}
-
-                        {pricingPreviewError && (
-                          <p className="mt-3 rounded-xl border border-red-200 bg-red-50 px-3 py-2 text-xs font-medium text-red-700">
-                            {pricingPreviewError}
-                          </p>
-                        )}
-                      </div>
-                    </div>
-                  </div>
+ const router = useRouter();
+ const searchParams = useSearchParams();
+ const user = authStorage.getUser<StoredUser>();
+ const token = authStorage.getAccessToken();
+ const objectUrlsRef = useRef<Set<string>>(new Set());
+
+ const isSeller = useMemo(() => {
+ if (!user) return false;
+ return (
+ user.account_type === "seller" ||
+ (user.roles ?? []).includes("seller")
+ );
+ }, [user]);
+
+ const sellerApproved = user?.seller_status === "approved";
+
+ const [products, setProducts] = useState<Product[]>([]);
+ const [categories, setCategories] = useState<Category[]>([]);
+ const [brands, setBrands] = useState<Brand[]>([]);
+ const [stores, setStores] = useState<Store[]>([]);
+ const [listingCurrencies, setListingCurrencies] = useState<ListingCurrency[]>([]);
+ const [loading, setLoading] = useState(false);
+ const [error, setError] = useState("");
+ const [search, setSearch] = useState("");
+ const [statusFilter, setStatusFilter] = useState("all");
+ const [storeFilter, setStoreFilter] = useState("all");
+
+ const [editorOpen, setEditorOpen] = useState(false);
+ const [editingProduct, setEditingProduct] = useState<Product | null>(null);
+ const [form, setForm] = useState<ProductRequest>(INITIAL_FORM);
+ const [categoryAttributes, setCategoryAttributes] = useState<CategoryAttribute[]>([]);
+ const [specValues, setSpecValues] = useState<Record<string, unknown>>({});
+ const [specificationsLoading, setSpecificationsLoading] = useState(false);
+ const [stockForm, setStockForm] =
+ useState<InitialStockForm>(INITIAL_STOCK_FORM);
+ const [brokerOfferForm, setBrokerOfferForm] = useState<BrokerOfferForm>(INITIAL_BROKER_OFFER);
+ const [existingImages, setExistingImages] = useState<ProductImage[]>([]);
+ const [selectedImages, setSelectedImages] = useState<SelectedImage[]>([]);
+ const [imagesLoading, setImagesLoading] = useState(false);
+ const [imageError, setImageError] = useState("");
+ const [isSubmitting, setIsSubmitting] = useState(false);
+ const [submitIntent, setSubmitIntent] = useState<"draft" | "review">("draft");
+ const [pricingPreview, setPricingPreview] =
+ useState<SellerPricingPreviewResponse | null>(null);
+ const [pricingPreviewLoading, setPricingPreviewLoading] = useState(false);
+ const [pricingPreviewError, setPricingPreviewError] = useState("");
+ const [deleteTarget, setDeleteTarget] = useState<Product | null>(null);
+ const [isDeleting, setIsDeleting] = useState(false);
+ const [submittingProductId, setSubmittingProductId] = useState<string | null>(
+ null,
+ );
+
+ useEffect(() => {
+ let cancelled = false;
+ const loadCategoryAttributes = async () => {
+ if (!form.category_id) { setCategoryAttributes([]); setSpecValues({}); return; }
+ setSpecificationsLoading(true);
+ try {
+ const attrs = await productsApi.getCategoryAttributes(form.category_id);
+ if (!cancelled) setCategoryAttributes(attrs);
+ } catch (cause) {
+ if (!cancelled) { setCategoryAttributes([]); toast.error(cause instanceof ApiError ? cause.message : "Unable to load product specifications."); }
+ } finally { if (!cancelled) setSpecificationsLoading(false); }
+ };
+ void loadCategoryAttributes();
+ return () => { cancelled = true; };
+ }, [form.category_id]);
+
+ const loadData = useCallback(async () => {
+ if (!token) return;
+
+ setLoading(true);
+ setError("");
+
+ try {
+ const [items, categoryList, brandList, storeList, currencyList] = await Promise.all([
+ productsApi.getMyProducts(),
+ productsApi.getCategories(),
+ productsApi.getBrands(),
+ storeApi.listMyStores(),
+ productsApi.getListingCurrencies(),
+ ]);
+
+ setProducts(items);
+ setCategories(categoryList);
+ setBrands(brandList);
+ setStores(storeList);
+ setListingCurrencies(currencyList);
+ } catch (cause) {
+ const message =
+ cause instanceof ApiError
+ ? cause.message
+ : "Unable to load your seller products.";
+
+ setError(message);
+ toast.error(message);
+ } finally {
+ setLoading(false);
+ }
+ }, [token]);
+
+ useEffect(() => {
+ if (!token) {
+ router.replace("/signin?redirect=/seller/products");
+ return;
+ }
+
+ if (!isSeller) {
+ router.replace("/account");
+ return;
+ }
+
+ void loadData();
+ }, [isSeller, loadData, router, token]);
+
+ useEffect(() => {
+ const requestedStatus = searchParams.get("status");
+
+ if (requestedStatus && STATUS_OPTIONS.includes(requestedStatus)) {
+ setStatusFilter(requestedStatus);
+ }
+
+ if (searchParams.get("create") === "true" && sellerApproved) {
+ openCreate();
+ }
+ // eslint-disable-next-line react-hooks/exhaustive-deps
+ }, [searchParams, sellerApproved]);
+
+ useEffect(() => {
+ return () => {
+ objectUrlsRef.current.forEach((url) => URL.revokeObjectURL(url));
+ objectUrlsRef.current.clear();
+ };
+ }, []);
+
+
+ // Phase 1 pricing preview is always calculated by the backend.
+ // The browser never decides marketplace commission by itself.
+ useEffect(() => {
+ const basePrice = Number(form.price);
+ const salePrice =
+ form.sale_price === null || form.sale_price === ""
+ ? null
+ : Number(form.sale_price);
+
+ if (
+ !editorOpen ||
+ !form.category_id ||
+ !Number.isFinite(basePrice) ||
+ basePrice <= 0 ||
+ (salePrice !== null && (!Number.isFinite(salePrice) || salePrice <= 0))
+ ) {
+ setPricingPreview(null);
+ setPricingPreviewError("");
+ return;
+ }
+
+ const timer = window.setTimeout(async () => {
+ setPricingPreviewLoading(true);
+ setPricingPreviewError("");
+
+ try {
+ const preview = await sellersApi.previewPricing({
+ seller_base_price: basePrice,
+ seller_sale_price: salePrice,
+ category_id: form.category_id,
+ product_id: editingProduct?.id ?? null,
+ currency: form.currency || "TZS",
+ });
+
+ setPricingPreview(preview);
+ } catch (cause) {
+ setPricingPreview(null);
+ setPricingPreviewError(
+ cause instanceof ApiError
+ ? cause.message
+ : "Unable to calculate marketplace pricing.",
+ );
+ } finally {
+ setPricingPreviewLoading(false);
+ }
+ }, 350);
+
+ return () => window.clearTimeout(timer);
+ }, [
+ editorOpen,
+ editingProduct?.id,
+ form.category_id,
+ form.currency,
+ form.price,
+ form.sale_price,
+ ]);
+
+ const filteredProducts = useMemo(() => {
+ return products.filter((product) => {
+ const category = categories.find((item) => String(item.id) === String(product.category_id));
+ const brand = brands.find((item) => String(item.id) === String(product.brand_id));
+ const store = stores.find((item) => String(item.id) === String(product.store_id));
+ const haystack = [
+ product.name,
+ product.sku,
+ product.status,
+ category?.name,
+ brand?.name,
+ store?.store_name,
+ store?.country,
+ store?.store_scope,
+ ]
+ .filter(Boolean)
+ .join(" ")
+ .toLowerCase();
+
+ const matchesSearch =
+ !search.trim() || haystack.includes(search.trim().toLowerCase());
+ const matchesStatus =
+ statusFilter === "all" || product.status === statusFilter;
+ const matchesStore =
+ storeFilter === "all" || String(product.store_id) === storeFilter;
+
+ return matchesSearch && matchesStatus && matchesStore;
+ });
+ }, [brands, categories, products, search, statusFilter, storeFilter, stores]);
+
+ const counts = useMemo(
+ () => ({
+ total: products.length,
+ draft: products.filter((item) => item.status === "draft").length,
+ review: products.filter((item) => item.status === "pending_review").length,
+ approved: products.filter((item) => item.status === "approved").length,
+ rejected: products.filter((item) => item.status === "rejected").length,
+ }),
+ [products],
+ );
+
+ function clearSelectedImages() {
+ selectedImages.forEach(({ previewUrl }) => {
+ URL.revokeObjectURL(previewUrl);
+ objectUrlsRef.current.delete(previewUrl);
+ });
+ setSelectedImages([]);
+ }
+
+ function closeEditor() {
+ if (isSubmitting) return;
+
+ clearSelectedImages();
+ setEditorOpen(false);
+ setEditingProduct(null);
+ const defaultCurrency =
+ listingCurrencies.find((currency) => currency.code === "TZS")?.code ??
+ listingCurrencies[0]?.code ??
+ "TZS";
+
+ setForm({
+ ...INITIAL_FORM,
+ store_id: stores.length === 1 ? stores[0].id : "",
+ currency: defaultCurrency,
+ });
+ setStockForm(INITIAL_STOCK_FORM);
+ setSpecValues({});
+ setCategoryAttributes([]);
+ setBrokerOfferForm(INITIAL_BROKER_OFFER);
+ setPricingPreview(null);
+ setPricingPreviewError("");
+ setExistingImages([]);
+ setImageError("");
+ setSubmitIntent("draft");
+ }
+
+ function openCreate() {
+ if (!sellerApproved) {
+ toast.error("Your seller account must be approved before listing products.");
+ return;
+ }
+
+ if (!stores.length) {
+ toast.error("Create a store before adding a product.");
+ router.push("/seller/store");
+ return;
+ }
+
+ clearSelectedImages();
+ setEditingProduct(null);
+ setExistingImages([]);
+ const defaultCurrency =
+ listingCurrencies.find((currency) => currency.code === "TZS")?.code ??
+ listingCurrencies[0]?.code ??
+ "TZS";
+
+ setForm({
+ ...INITIAL_FORM,
+ store_id: stores.length === 1 ? stores[0].id : "",
+ currency: defaultCurrency,
+ });
+ setStockForm(INITIAL_STOCK_FORM);
+ setSpecValues({});
+ setCategoryAttributes([]);
+ setBrokerOfferForm(INITIAL_BROKER_OFFER);
+ setImageError("");
+ setSubmitIntent("draft");
+ setEditorOpen(true);
+ }
+
+ async function openEdit(product: Product) {
+ if (product.status === "pending_review") {
+ toast.error("This product is under review and cannot be edited.");
+ return;
+ }
+
+ clearSelectedImages();
+ setEditingProduct(product);
+ setForm({
+ store_id: product.store_id ?? "",
+ category_id: product.category_id ?? "",
+ brand_id: product.brand_id ?? null,
+ sku: product.sku ?? "",
+ name: product.name,
+ slug: product.slug ?? "",
+ description: product.description ?? "",
+ price: product.seller_base_price ?? product.price,
+ sale_price: product.seller_sale_price ?? product.sale_price ?? null,
+ currency: product.currency ?? "TZS",
+ weight: product.weight ?? null,
+ });
+ setImageError("");
+ setPricingPreview(null);
+ setPricingPreviewError("");
+ setExistingImages([]);
+ setSubmitIntent("draft");
+ setEditorOpen(true);
+ setImagesLoading(true);
+
+ try {
+ const [images, offer, specifications] = await Promise.all([
+ productsApi.getMyImages(product.id),
+ productsApi.getBrokerOffer(product.id).catch(() => null),
+ productsApi.getMyProductSpecifications(product.id).catch(() => [] as ProductSpecification[]),
+ ]);
+ setExistingImages(images);
+ setSpecValues(Object.fromEntries(specifications.map((item) => [String(item.attribute_id), item.value])));
+ if (offer) setBrokerOfferForm({ enabled:true, commission_type:offer.commission_type, commission_value:String(offer.commission_value), max_attributed_sales:offer.max_attributed_sales ? String(offer.max_attributed_sales) : "", starts_at:offer.starts_at ? offer.starts_at.slice(0,16) : "", ends_at:offer.ends_at ? offer.ends_at.slice(0,16) : "" });
+ else setBrokerOfferForm(INITIAL_BROKER_OFFER);
+ } catch (cause) {
+ toast.error(
+ cause instanceof ApiError
+ ? cause.message
+ : "Unable to load the product images.",
+ );
+ } finally {
+ setImagesLoading(false);
+ }
+ }
+
+ function validateImage(file: File) {
+ if (!ALLOWED_IMAGE_TYPES.includes(file.type)) {
+ return "Only JPEG, PNG and WEBP images are allowed.";
+ }
+
+ if (file.size > MAX_IMAGE_SIZE_BYTES) {
+ return "Each product image must be 5 MB or smaller.";
+ }
+
+ return null;
+ }
+
+ function selectImages(event: ChangeEvent<HTMLInputElement>) {
+ setImageError("");
+
+ const incoming = Array.from(event.target.files ?? []);
+ event.target.value = "";
+
+ if (!incoming.length) return;
+
+ const availableSlots =
+ MAX_PRODUCT_IMAGES - existingImages.length - selectedImages.length;
+
+ if (availableSlots <= 0) {
+ setImageError(`Maximum ${MAX_PRODUCT_IMAGES} product images are allowed.`);
+ return;
+ }
+
+ const accepted: SelectedImage[] = [];
+
+ for (const file of incoming.slice(0, availableSlots)) {
+ const validationError = validateImage(file);
+
+ if (validationError) {
+ setImageError(`${file.name}: ${validationError}`);
+ continue;
+ }
+
+ const previewUrl = URL.createObjectURL(file);
+ objectUrlsRef.current.add(previewUrl);
+ accepted.push({ file, previewUrl });
+ }
+
+ setSelectedImages((current) => [...current, ...accepted]);
+
+ if (incoming.length > availableSlots) {
+ setImageError(
+ `Only ${availableSlots} more image${
+ availableSlots === 1 ? "" : "s"
+ } can be added.`,
+ );
+ }
+ }
+
+ function removeSelectedImage(index: number) {
+ setSelectedImages((current) => {
+ const target = current[index];
+
+ if (target) {
+ URL.revokeObjectURL(target.previewUrl);
+ objectUrlsRef.current.delete(target.previewUrl);
+ }
+
+ return current.filter((_, itemIndex) => itemIndex !== index);
+ });
+ }
+
+ async function removeExistingImage(image: ProductImage) {
+ if (!editingProduct || editingProduct.status === "pending_review") return;
+
+ try {
+ await productsApi.deleteImage(editingProduct.id, image.id);
+ setExistingImages((current) =>
+ current.filter((item) => item.id !== image.id),
+ );
+ toast.success("Product image removed.");
+ } catch (cause) {
+ toast.error(
+ cause instanceof ApiError ? cause.message : "Unable to remove image.",
+ );
+ }
+ }
+
+ function updateName(value: string) {
+ setForm((current) => ({
+ ...current,
+ name: value,
+ slug:
+ editingProduct && current.slug
+ ? current.slug
+ : slugify(value),
+ }));
+ }
+
+ function validateForm() {
+ if (!form.store_id) return "Select the store this product belongs to.";
+ if (!stores.some((store) => String(store.id) === String(form.store_id))) {
+ return "Select one of your valid stores.";
+ }
+ if (!form.category_id) return "Select a product category.";
+ if (!form.name.trim()) return "Enter the product name.";
+ if (!form.sku.trim()) return "Enter the product SKU.";
+ if (!form.slug.trim()) return "Enter the product slug.";
+ if (!form.description?.trim()) return "Add a useful product description.";
+
+ const price = Number(form.price);
+ if (!Number.isFinite(price) || price < 0) {
+ return "Enter a valid seller base price.";
+ }
+
+ if (form.sale_price !== null && form.sale_price !== "") {
+ const salePrice = Number(form.sale_price);
+
+ if (!Number.isFinite(salePrice) || salePrice < 0) {
+ return "Enter a valid sale price.";
+ }
+
+ if (salePrice > price) {
+ return "Your promotional base price cannot be greater than your regular base price.";
+ }
+ }
+
+ if (!editingProduct) {
+ const openingStock = Number(stockForm.quantity);
+ const threshold = Number(stockForm.low_stock_threshold);
+
+ if (!Number.isInteger(openingStock) || openingStock < 0) {
+ return "Enter a valid opening stock quantity (0 or more).";
+ }
+
+ if (!Number.isInteger(threshold) || threshold < 0) {
+ return "Enter a valid low-stock threshold (0 or more).";
+ }
+ }
+
+ if (brokerOfferForm.enabled) {
+ const reward = Number(brokerOfferForm.commission_value);
+ if (!Number.isFinite(reward) || reward <= 0) return "Enter a valid Broker reward.";
+ if (brokerOfferForm.commission_type === "percentage" && reward > 100) return "Broker percentage cannot exceed 100%.";
+ const maxSales = brokerOfferForm.max_attributed_sales ? Number(brokerOfferForm.max_attributed_sales) : null;
+ if (maxSales !== null && (!Number.isInteger(maxSales) || maxSales <= 0)) return "Maximum broker-attributed sales must be a positive whole number.";
+ if (brokerOfferForm.starts_at && brokerOfferForm.ends_at && new Date(brokerOfferForm.ends_at) <= new Date(brokerOfferForm.starts_at)) return "Broker promotion end must be after its start.";
+ }
+
+ if (submitIntent === "review") {
+ const missing = categoryAttributes.filter((attribute) => {
+ if (!attribute.is_required) return false;
+ const value = specValues[String(attribute.id)];
+ return value === undefined || value === null || value === "" || (Array.isArray(value) && value.length === 0);
+ });
+ if (missing.length) return `Complete required specifications: ${missing.map((item) => item.name).join(", ")}.`;
+ }
+
+ const totalImages = existingImages.length + selectedImages.length;
+
+ if (totalImages < 1) {
+ return "Upload at least one product image.";
+ }
+
+ return null;
+ }
+
+ async function handleSubmit(event: FormEvent<HTMLFormElement>) {
+ event.preventDefault();
+
+ if (!sellerApproved) {
+ toast.error("Your seller account is not approved.");
+ return;
+ }
+
+ const validationError = validateForm();
+
+ if (validationError) {
+ toast.error(validationError);
+ return;
+ }
+
+ const payload: ProductRequest = {
+ ...form,
+ store_id: form.store_id,
+ category_id: form.category_id,
+ brand_id: form.brand_id || null,
+ sku: form.sku.trim(),
+ name: form.name.trim(),
+ slug: slugify(form.slug),
+ description: form.description?.trim() || null,
+ price: Number(form.price),
+ sale_price:
+ form.sale_price === null || form.sale_price === ""
+ ? null
+ : Number(form.sale_price),
+ currency: form.currency || "TZS",
+ weight:
+ form.weight === null || form.weight === ""
+ ? null
+ : Number(form.weight),
+ };
+
+ setIsSubmitting(true);
+
+ try {
+ const product = editingProduct
+ ? await productsApi.update(editingProduct.id, payload)
+ : await productsApi.create(payload);
+
+ await productsApi.saveMyProductSpecifications(
+ product.id,
+ categoryAttributes
+ .map((attribute) => ({ attribute_id: attribute.id, value: specValues[String(attribute.id)] }))
+ .filter((item) => item.value !== undefined && item.value !== null && item.value !== "" && (!Array.isArray(item.value) || item.value.length > 0)),
+ );
+
+ if (!editingProduct) {
+ await sellerInventoryApi.configure({
+ product_id: String(product.id),
+ variant_id: null,
+ quantity: Number(stockForm.quantity),
+ low_stock_threshold: Number(stockForm.low_stock_threshold),
+ warehouse_location:
+ stockForm.warehouse_location.trim() || null,
+ restock_date: stockForm.restock_date
+ ? new Date(stockForm.restock_date).toISOString()
+ : null,
+ });
+ }
+
+ if (selectedImages.length) {
+ await productsApi.uploadImageFiles(
+ product.id,
+ selectedImages.map((item) => item.file),
+ payload.name,
+ );
+ }
+
+ if (brokerOfferForm.enabled) {
+ const offerPayload: BrokerOfferRequest = {
+ commission_type: brokerOfferForm.commission_type,
+ commission_value: Number(brokerOfferForm.commission_value),
+ max_attributed_sales: brokerOfferForm.max_attributed_sales ? Number(brokerOfferForm.max_attributed_sales) : null,
+ starts_at: brokerOfferForm.starts_at ? new Date(brokerOfferForm.starts_at).toISOString() : null,
+ ends_at: brokerOfferForm.ends_at ? new Date(brokerOfferForm.ends_at).toISOString() : null,
+ };
+ await productsApi.saveBrokerOffer(product.id, offerPayload);
+ } else if (editingProduct) {
+ await productsApi.disableBrokerOffer(product.id).catch(() => undefined);
+ }
+
+ if (submitIntent === "review") {
+ const submitted = await productsApi.submitForReview(product.id);
+ toast.success(
+ submitted.status === "approved"
+ ? "Product approved automatically and is now available to customers."
+ : "Product submitted successfully and is now waiting for review.",
+ );
+ } else {
+ toast.success(
+ editingProduct
+ ? "Product draft updated successfully."
+ : "Product saved as a draft.",
+ );
+ }
+
+ closeEditor();
+ await loadData();
+ } catch (cause) {
+ toast.error(
+ cause instanceof ApiError ? cause.message : "Unable to save the product.",
+ );
+ } finally {
+ setIsSubmitting(false);
+ }
+ }
+
+ async function submitExistingProduct(product: Product) {
+ if (!["draft", "rejected"].includes(product.status)) return;
+
+ setSubmittingProductId(String(product.id));
+
+ try {
+ const submitted = await productsApi.submitForReview(product.id);
+ toast.success(
+ submitted.status === "approved"
+ ? "Product approved automatically and is now available to customers."
+ : "Product submitted for review.",
+ );
+ await loadData();
+ } catch (cause) {
+ toast.error(
+ cause instanceof ApiError
+ ? cause.message
+ : "Unable to submit the product for review.",
+ );
+ } finally {
+ setSubmittingProductId(null);
+ }
+ }
+
+ async function handleDelete() {
+ if (!deleteTarget) return;
+
+ setIsDeleting(true);
+
+ try {
+ await productsApi.delete(deleteTarget.id);
+ toast.success("Product archived successfully.");
+ setDeleteTarget(null);
+ await loadData();
+ } catch (cause) {
+ toast.error(
+ cause instanceof ApiError ? cause.message : "Unable to archive product.",
+ );
+ } finally {
+ setIsDeleting(false);
+ }
+ }
+
+ function formatPrice(
+ value: number | string | null | undefined,
+ currency = "TZS",
+ ) {
+ if (value === null || value === undefined) return "—";
+
+ const numeric = Number(value);
+
+ if (!Number.isFinite(numeric)) return "—";
+
+ const code = String(currency || "TZS").trim().toUpperCase();
+ const fractionDigits = code === "TZS" ? 0 : 3;
+
+ try {
+ return new Intl.NumberFormat("en-TZ", {
+ style: "currency",
+ currency: code,
+ currencyDisplay: code === "TZS" ? "narrowSymbol" : "symbol",
+ minimumFractionDigits: 0,
+ maximumFractionDigits: fractionDigits,
+ }).format(numeric);
+ } catch {
+ return `${code} ${numeric.toLocaleString(undefined, {
+ minimumFractionDigits: 0,
+ maximumFractionDigits: fractionDigits,
+ })}`;
+ }
+ }
+
+ if (!token || !isSeller) return null;
+
+ return (
+ <>
+ <div className="mx-auto max-w-[1500px] space-y-5">
+ {sellerApproved && stores.length === 0 && !loading && (
+ <div className="flex items-start justify-between gap-4 rounded-xl border border-yellow-light-2 bg-yellow-light-4 p-5 text-yellow-dark-2">
+ <div className="flex items-start gap-3">
+ <HugeiconsIcon icon={Store01Icon} size={20} className="mt-0.5 shrink-0" />
+ <div>
+ <p className="font-semibold">Create a store before listing products</p>
+ <p className="mt-1 text-sm leading-6">Every product must now belong to one of your stores.</p>
+ </div>
+ </div>
+ <button type="button" onClick={() => router.push("/seller/store")} className="shrink-0 rounded-xl bg-primary px-4 py-2 text-sm font-semibold text-primary-foreground">
+ My Stores
+ </button>
+ </div>
+ )}
+
+ {!sellerApproved && (
+ <div className="flex items-start gap-3 rounded-xl border border-yellow-light-2 bg-yellow-light-4 p-5 text-yellow-dark-2">
+ <HugeiconsIcon icon={AlertCircleIcon} size={20} className="mt-0.5 shrink-0" />
+ <div>
+ <p className="font-semibold">Product listing is currently locked</p>
+ <p className="mt-1 text-sm leading-6">
+ Your seller account must be approved before you can create or
+ manage marketplace products.
+ </p>
+ </div>
+ </div>
+ )}
+
+ <section className="rounded-xl border border-border bg-card p-5 shadow-sm sm:p-6">
+ <div className="flex flex-col gap-5 xl:flex-row xl:items-center xl:justify-between">
+ <div>
+ <p className="text-xs font-bold uppercase tracking-[0.14em] text-primary">
+ Seller catalogue
+ </p>
+ <h1 className="mt-1 text-2xl font-bold tracking-[-0.025em] text-foreground">
+ Products
+ </h1>
+ <p className="mt-2 max-w-2xl text-sm leading-6 text-muted-foreground">
+ Create product listings, upload real product images, save drafts
+ and submit completed products for marketplace review.
+ </p>
+ </div>
+
+ <button
+ type="button"
+ disabled={!sellerApproved || stores.length === 0}
+ onClick={openCreate}
+ className="inline-flex h-11 items-center justify-center gap-2 rounded-xl bg-primary px-5 text-sm font-semibold text-primary-foreground shadow-sm transition hover:bg-primary/90 disabled:cursor-not-allowed disabled:opacity-50"
+ >
+ <HugeiconsIcon icon={PlusIcon} size={16} />
+ Add Product
+ </button>
+ </div>
+ </section>
+
+ <section className="grid grid-cols-2 gap-3 md:grid-cols-3 xl:grid-cols-5">
+ <StatCard label="All products" value={counts.total} icon={ShoppingBag01Icon} />
+ <StatCard label="Draft" value={counts.draft} icon={File01Icon} />
+ <StatCard label="Under review" value={counts.review} icon={Clock01Icon} />
+ <StatCard label="Approved" value={counts.approved} icon={CheckmarkBadge01Icon} />
+ <StatCard label="Rejected" value={counts.rejected} icon={AlertCircleIcon} />
+ </section>
+
+ <section className="rounded-xl border border-border bg-card shadow-sm">
+ <div className="flex flex-col gap-3 border-b border-border p-5 lg:flex-row lg:items-center lg:justify-between">
+ <div className="relative min-w-0 flex-1 lg:max-w-xl">
+ <HugeiconsIcon icon={Search01Icon}
+ size={16}
+ className="absolute left-3.5 top-1/2 -translate-y-1/2 text-muted-foreground"
+ />
+ <input
+ value={search}
+ onChange={(event) => setSearch(event.target.value)}
+ placeholder="Search by product name, SKU, category or brand..."
+ className="h-11 w-full rounded-xl border border-border bg-muted pl-10 pr-4 text-sm outline-none transition focus:border-[var(--primary)] focus:bg-card"
+ />
+ </div>
+
+ <div className="flex gap-2">
+ <select
+ value={storeFilter}
+ onChange={(event) => setStoreFilter(event.target.value)}
+ className="h-11 rounded-xl border border-border bg-card px-4 text-sm outline-none"
+ >
+ <option value="all">All stores</option>
+ {stores.map((store) => (
+ <option key={String(store.id)} value={String(store.id)}>
+ {store.store_name}
+ </option>
+ ))}
+ </select>
+
+ <select
+ value={statusFilter}
+ onChange={(event) => setStatusFilter(event.target.value)}
+ className="h-11 rounded-xl border border-border bg-card px-4 text-sm outline-none"
+ >
+ {STATUS_OPTIONS.map((status) => (
+ <option key={status} value={status}>
+ {status === "all" ? "All statuses" : statusLabel(status)}
+ </option>
+ ))}
+ </select>
+
+ <button
+ type="button"
+ onClick={() => void loadData()}
+ className="inline-flex h-11 items-center justify-center gap-2 rounded-xl border border-border bg-card px-4 text-sm font-semibold text-muted-foreground hover:bg-muted"
+ >
+ <HugeiconsIcon icon={RefreshCwIcon} size={16} />
+ Refresh
+ </button>
+ </div>
+ </div>
+
+ {loading ? (
+ <div className="p-16 text-center">
+ <Spinner className="mx-auto text-primary" />
+ <p className="mt-3 text-sm text-muted-foreground">Loading products...</p>
+ </div>
+ ) : error ? (
+ <div className="p-12 text-center text-destructive">{error}</div>
+ ) : filteredProducts.length === 0 ? (
+ <div className="p-14 text-center">
+ <HugeiconsIcon icon={PackageIcon} className="mx-auto text-muted-foreground" size={40} />
+ <h3 className="mt-3 font-semibold text-foreground">
+ No products found
+ </h3>
+ <p className="mt-1 text-sm text-muted-foreground">
+ {products.length
+ ? "Try changing your search or status filter."
+ : "Create your first product listing to start building your seller catalogue."}
+ </p>
+ {!products.length && sellerApproved && (
+ <button
+ type="button"
+ onClick={openCreate}
+ className="mt-5 rounded-xl bg-primary px-5 py-2.5 text-sm font-semibold text-primary-foreground"
+ >
+ Add your first product
+ </button>
+ )}
+ </div>
+ ) : (
+ <div className="grid gap-4 p-5 sm:grid-cols-2 xl:grid-cols-3 2xl:grid-cols-4">
+ {filteredProducts.map((product) => {
+ const category = categories.find(
+ (item) => item.id === product.category_id,
+ );
+ const brand = brands.find(
+ (item) => String(item.id) === String(product.brand_id),
+ );
+ const productStore = stores.find(
+ (item) => String(item.id) === String(product.store_id),
+ );
+ const editable = product.status !== "pending_review";
+
+ return (
+ <article
+ key={String(product.id)}
+ className="overflow-hidden rounded-xl border border-border bg-card transition hover:-translate-y-0.5 hover:shadow-lg"
+ >
+ <div className="relative flex h-40 items-center justify-center bg-muted">
+ {product.images?.[0]?.image_url ? (
+ <Image
+ src={resolveImageUrl(product.images[0].image_url)}
+ alt={product.name}
+ fill
+ unoptimized
+ className="object-cover"
+ />
+ ) : (
+ <HugeiconsIcon icon={PackageIcon} size={32} className="text-muted-foreground" />
+ )}
+
+ <span
+ className={`absolute left-3 top-3 rounded-full border px-2.5 py-1 text-[10px] font-bold capitalize ${statusClasses(
+ product.status,
+ )}`}
+ >
+ {statusLabel(product.status)}
+ </span>
+ {product.status === "approved" && product.approval_method && (
+ <span className="absolute right-3 top-3 rounded-full border border-white/70 bg-card/90 px-2.5 py-1 text-[9px] font-bold uppercase tracking-wide text-muted-foreground shadow-sm">
+ {product.approval_method === "automatic"
+ ? "Auto approved"
+ : "Manual approval"}
+ </span>
+ )}
+ </div>
+
+ <div className="p-4">
+ <p className="text-[10px] font-bold uppercase tracking-[0.12em] text-primary">
+ {category?.name || "Uncategorised"}
+ </p>
+
+ <h3 className="mt-1 line-clamp-1 font-semibold text-foreground">
+ {product.name}
+ </h3>
+
+ <p className="mt-1 text-xs text-muted-foreground">
+ SKU: {product.sku}
+ {brand?.name ? ` · ${brand.name}` : ""}
+ </p>
+
+ <div className="mt-3 flex items-center gap-2 rounded-xl border border-border bg-muted px-3 py-2 text-xs text-muted-foreground">
+ <HugeiconsIcon icon={Store01Icon} size={14} className="shrink-0 text-primary" />
+ <span className="min-w-0 truncate font-semibold">
+ {productStore?.store_name || "Assigned store"}
+ </span>
+ {productStore?.store_scope && (
+ <span className="ml-auto rounded-full bg-card px-2 py-0.5 text-[9px] font-bold uppercase tracking-wide text-muted-foreground">
+ {productStore.store_scope}
+ </span>
+ )}
+ </div>
+
+ <div className="mt-4 grid grid-cols-2 gap-3">
+ <div className="rounded-xl bg-muted p-3">
+ <p className="text-[10px] font-bold uppercase tracking-wide text-muted-foreground">
+ Listed price
+ </p>
+ <p className="mt-1 font-bold text-foreground">
+ {formatPrice(
+ product.seller_sale_price ||
+ product.seller_base_price ||
+ product.sale_price ||
+ product.price,
+ product.currency,
+ )}
+ </p>
+ </div>
+
+ <div className="rounded-xl bg-primary/10 p-3">
+ <p className="text-[10px] font-bold uppercase tracking-wide text-primary">
+ Customer price
+ </p>
+ <p className="mt-1 font-bold text-foreground">
+ {formatPrice(
+ product.sale_price || product.price,
+ product.currency,
+ )}
+ </p>
+ </div>
+ </div>
+
+ {product.commission_rate_snapshot !== undefined && (
+ <p className="mt-2 text-xs text-muted-foreground">
+ Marketplace commission:{" "}
+ <b className="text-foreground">
+ {Number(product.commission_rate_snapshot).toLocaleString()}%
+ </b>
+ {" · "}
+ {formatPrice(
+ product.commission_amount_snapshot,
+ product.currency,
+ )}
+ </p>
+ )}
+
+ {product.rejection_reason && (
+ <div className="mt-4 rounded-xl border border-red-light-4 bg-red-light-6 p-3">
+ <p className="text-[10px] font-bold uppercase tracking-wider text-red-dark">
+ Admin feedback
+ </p>
+ <p className="mt-1 text-xs leading-5 text-red-dark">
+ {product.rejection_reason}
+ </p>
+ </div>
+ )}
+
+ <div className="mt-4 flex flex-wrap gap-2 border-t border-border pt-4">
+ {editable && (
+ <button
+ type="button"
+ onClick={() => void openEdit(product)}
+ className="inline-flex items-center gap-1.5 rounded-lg border border-border px-3 py-2 text-xs font-semibold text-muted-foreground hover:border-[var(--primary)] hover:text-primary"
+ >
+ <HugeiconsIcon icon={Edit02Icon} size={14} />
+ Edit
+ </button>
+ )}
+
+ {["draft", "rejected"].includes(product.status) && (
+ <button
+ type="button"
+ disabled={
+ submittingProductId === String(product.id)
+ }
+ onClick={() => void submitExistingProduct(product)}
+ className="inline-flex items-center gap-1.5 rounded-lg bg-foreground px-3 py-2 text-xs font-semibold text-background disabled:opacity-50"
+ >
+ <HugeiconsIcon icon={SentIcon} size={14} />
+ {submittingProductId === String(product.id)
+ ? "Submitting..."
+ : "Submit review"}
+ </button>
+ )}
+
+ {product.status !== "pending_review" && (
+ <button
+ type="button"
+ onClick={() => setDeleteTarget(product)}
+ className="ml-auto inline-flex items-center gap-1.5 rounded-lg px-2.5 py-2 text-xs font-semibold text-destructive hover:bg-red-light-6"
+ >
+ <HugeiconsIcon icon={ArchiveIcon} size={14} />
+ Archive
+ </button>
+ )}
+ </div>
+ </div>
+ </article>
+ );
+ })}
+ </div>
+ )}
+ </section>
+ </div>
+
+ {editorOpen && (
+ <div
+ className="fixed inset-0 z-[100] flex justify-end bg-black/45 backdrop-blur-[2px]"
+ onMouseDown={closeEditor}
+ >
+ <aside
+ className="flex h-full w-full max-w-5xl flex-col bg-muted shadow-lg dark:bg-card"
+ onMouseDown={(event) => event.stopPropagation()}
+ >
+ <div className="relative shrink-0 overflow-hidden border-b border-black/10 bg-foreground px-5 py-5 text-background sm:px-7 sm:py-6">
+ 
+ 
+ <div className="relative flex items-start justify-between gap-5">
+ <div className="flex min-w-0 items-start gap-4">
+ <span className="grid h-12 w-12 shrink-0 place-items-center rounded-xl bg-primary text-primary-foreground shadow-sm">
+ <HugeiconsIcon icon={ShoppingBag01Icon} size={20} />
+ </span>
+ <div>
+ <p className="text-[10px] font-extrabold uppercase tracking-[0.18em] text-primary-300">
+ Seller catalogue workspace
+ </p>
+ <h2 className="mt-1 text-xl font-extrabold tracking-[-0.025em] sm:text-2xl">
+ {editingProduct ? "Edit Product" : "Create New Product"}
+ </h2>
+ <p className="mt-1 max-w-2xl text-xs leading-5 text-muted-foreground">
+ Build a buyer-ready listing with clear identity, strong product images,
+ pricing and accurate opening stock.
+ </p>
+ </div>
+ </div>
+
+ <button
+ type="button"
+ onClick={closeEditor}
+ disabled={isSubmitting}
+ className="grid h-10 w-10 shrink-0 place-items-center rounded-xl border border-white/15 bg-card/10 text-white transition hover:bg-card/20"
+ >
+ <HugeiconsIcon icon={Cancel01Icon} size={18} />
+ </button>
+ </div>
+ </div>
+
+ <form
+ onSubmit={handleSubmit}
+ className="flex min-h-0 flex-1 flex-col"
+ >
+ <div className="flex-1 space-y-5 overflow-y-auto p-5 sm:p-7">
+ <div className="grid gap-2 sm:grid-cols-4">
+ {([
+ [Tag01Icon, "1", "Identity", "Store & catalogue"],
+ [Camera01Icon, "2", "Media", "Buyer-ready photos"],
+ [DollarCircleIcon, "3", "Pricing", "Price & commission"],
+ [WarehouseIcon, "4", "Stock", "Opening inventory"],
+ ] as const).map(([StepIcon, step, title, detail]) => (
+ <div
+ key={String(step)}
+ className="flex items-center gap-3 rounded-xl border border-border bg-card px-3 py-3 shadow-sm"
+ >
+ <span className="grid h-9 w-9 shrink-0 place-items-center rounded-xl bg-primary/10 text-primary">
+ <HugeiconsIcon icon={StepIcon} size={16} />
+ </span>
+ <div className="min-w-0">
+ <p className="text-[9px] font-extrabold uppercase tracking-[.14em] text-muted-foreground">
+ Step {step}
+ </p>
+ <p className="truncate text-xs font-bold text-foreground">{title}</p>
+ <p className="truncate text-[10px] text-muted-foreground">{detail}</p>
+ </div>
+ </div>
+ ))}
+ </div>
+
+ {editingProduct?.rejection_reason && (
+ <div className="rounded-xl border border-red-light-4 bg-red-light-6 p-4 text-red-dark">
+ <p className="text-xs font-bold uppercase tracking-wider">
+ Admin correction request
+ </p>
+ <p className="mt-1 text-sm leading-6">
+ {editingProduct.rejection_reason}
+ </p>
+ </div>
+ )}
+
+ <FormSection
+ icon={Tag01Icon}
+ title="Product identity"
+ description="Choose the marketplace category and provide the basic product information."
+ >
+ <div className="grid gap-4 md:grid-cols-2">
+ <div className="md:col-span-2">
+ <Field
+ label="Store"
+ required
+ hint="Choose the physical/source store where this product is listed and fulfilled from."
+ >
+ <select
+ value={String(form.store_id || "")}
+ onChange={(event) =>
+ setForm((current) => ({
+ ...current,
+ store_id: event.target.value,
+ }))
+ }
+ disabled={isSubmitting}
+ className="input"
+ >
+ <option value="">Select store</option>
+ {stores.map((store) => (
+ <option key={String(store.id)} value={String(store.id)}>
+ {store.store_name} · {store.district || store.region || store.country || "Location not set"} · {store.store_scope.toUpperCase()}
+ </option>
+ ))}
+ </select>
+ </Field>
+ </div>
+
+ <Field label="Product category" required>
+ <select
+ value={String(form.category_id || "")}
+ onChange={(event) =>
+ {
+ setForm((current) => ({ ...current, category_id: event.target.value }));
+ setSpecValues({});
+ }
+ }
+ disabled={isSubmitting}
+ className="input"
+ >
+ <option value="">Select category</option>
+ {categories.map((category) => (
+ <option
+ key={String(category.id)}
+ value={String(category.id)}
+ >
+ {category.name}
+ </option>
+ ))}
+ </select>
+ </Field>
+
+ <Field label="Brand">
+ <select
+ value={String(form.brand_id || "")}
+ onChange={(event) =>
+ setForm((current) => ({
+ ...current,
+ brand_id: event.target.value || null,
+ }))
+ }
+ disabled={isSubmitting}
+ className="input"
+ >
+ <option value="">No brand / unbranded</option>
+ {brands.map((brand) => (
+ <option key={String(brand.id)} value={String(brand.id)}>
+ {brand.name}
+ </option>
+ ))}
+ </select>
+ </Field>
+
+ <Field label="Product name" required>
+ <input
+ value={form.name}
+ onChange={(event) => updateName(event.target.value)}
+ placeholder="e.g. Samsung Galaxy S24 256GB"
+ disabled={isSubmitting}
+ className="input"
+ />
+ </Field>
+
+ <Field
+ label="SKU / ownership reference"
+ required
+ hint="Your stock-keeping reference. It must be unique only inside your seller catalog; another seller may use the same SKU."
+ >
+ <input
+ value={form.sku}
+ onChange={(event) =>
+ setForm((current) => ({
+ ...current,
+ sku: event.target.value.toUpperCase(),
+ }))
+ }
+ placeholder="e.g. PHYSIO-001"
+ disabled={isSubmitting}
+ className="input"
+ />
+ </Field>
+
+ <div className="md:col-span-2">
+ <Field
+ label="Product slug"
+ required
+ hint="Generated from the product name. If another seller already uses the same public slug, Xerin will make yours unique automatically."
+ >
+ <input
+ value={form.slug}
+ onChange={(event) =>
+ setForm((current) => ({
+ ...current,
+ slug: slugify(event.target.value),
+ }))
+ }
+ placeholder="samsung-galaxy-s24-256gb"
+ disabled={isSubmitting}
+ className="input"
+ />
+ </Field>
+ </div>
+ </div>
+ </FormSection>
+
+ <FormSection
+ icon={File01Icon}
+ title="Description"
+ description="Explain exactly what the buyer is purchasing, its condition and important features."
+ >
+ <Field label="Product description" required>
+ <textarea
+ value={form.description ?? ""}
+ onChange={(event) =>
+ setForm((current) => ({
+ ...current,
+ description: event.target.value,
+ }))
+ }
+ rows={6}
+ maxLength={5000}
+ placeholder="Describe the product, specifications, material, condition, package contents and other important buyer information..."
+ disabled={isSubmitting}
+ className="input min-h-36 resize-y"
+ />
+ <p className="mt-1 text-right text-[11px] text-muted-foreground">
+ {(form.description?.length ?? 0).toLocaleString()} / 5,000
+ </p>
+ </Field>
+ </FormSection>
+
+ <FormSection
+ icon={Package02Icon}
+ title="Product specifications"
+ description="These fields are configured by Admin for the selected category and help buyers compare similar products."
+ >
+ {!form.category_id ? (
+ <p className="rounded-xl border border-dashed p-4 text-sm text-muted-foreground">Select a product category first. Its specification fields will appear automatically.</p>
+ ) : specificationsLoading ? (
+ <p className="flex items-center gap-2 text-sm text-muted-foreground"><Spinner /> Loading category specifications...</p>
+ ) : categoryAttributes.length === 0 ? (
+ <p className="rounded-xl border border-dashed p-4 text-sm text-muted-foreground">No extra specifications have been configured for this category yet.</p>
+ ) : (
+ <div className="grid gap-4 md:grid-cols-2">
+ {categoryAttributes.map((attribute) => {
+ const id = String(attribute.id);
+ const value = specValues[id];
+ const label = `${attribute.name}${attribute.unit ? ` (${attribute.unit})` : ""}`;
+ const setValue = (next: unknown) => setSpecValues((current) => ({ ...current, [id]: next }));
+ return (
+ <Field key={id} label={label} required={attribute.is_required} hint={attribute.description || (attribute.inherited ? "Inherited from a parent category." : undefined)}>
+ {attribute.input_type === "textarea" ? (
+ <textarea rows={3} className="input resize-y" value={String(value ?? "")} onChange={(e) => setValue(e.target.value)} disabled={isSubmitting}/>
+ ) : attribute.input_type === "select" ? (
+ <select className="input" value={String(value ?? "")} onChange={(e) => setValue(e.target.value)} disabled={isSubmitting}><option value="">Select {attribute.name}</option>{attribute.allowed_values.map((option) => <option key={option} value={option}>{option}</option>)}</select>
+ ) : attribute.input_type === "multiselect" ? (
+ <select multiple className="input min-h-28" value={Array.isArray(value) ? value.map(String) : []} onChange={(e) => setValue(Array.from(e.currentTarget.selectedOptions).map((option: HTMLOptionElement) => option.value))} disabled={isSubmitting}>{attribute.allowed_values.map((option) => <option key={option} value={option}>{option}</option>)}</select>
+ ) : attribute.input_type === "boolean" ? (
+ <label className="flex items-center gap-2 rounded-xl border border-border px-4 py-3 text-sm"><input type="checkbox" checked={Boolean(value)} onChange={(e) => setValue(e.target.checked)} disabled={isSubmitting}/> Yes / Available</label>
+ ) : (
+ <input className="input" type={attribute.input_type === "number" ? "number" : attribute.input_type === "date" ? "date" : "text"} value={String(value ?? "")} onChange={(e) => setValue(attribute.input_type === "number" ? (e.target.value === "" ? "" : Number(e.target.value)) : e.target.value)} disabled={isSubmitting}/>
+ )}
+ </Field>
+ );
+ })}
+ </div>
+ )}
+ </FormSection>
+
+ <FormSection
+ icon={Camera01Icon}
+ title="Product images"
+ description={`Upload up to ${MAX_PRODUCT_IMAGES} real product images. Xerin checks format, size, resolution, aspect ratio, sharpness, lighting and primary-image background quality before saving.`}
+ >
+ <label className="group relative flex cursor-pointer flex-col items-center justify-center overflow-hidden rounded-xl border-2 border-dashed border-primary/25 bg-muted px-5 py-10 text-center transition hover:border-[var(--primary)] hover:shadow-sm">
+ 
+ <span className="relative grid h-14 w-14 place-items-center rounded-xl bg-primary text-primary-foreground shadow-sm transition group-hover:-translate-y-1">
+ <HugeiconsIcon icon={CloudUploadIcon} size={24} />
+ </span>
+ <span className="relative mt-4 text-sm font-bold text-foreground">
+ Drop product images here or browse
+ </span>
+ <span className="relative mt-1 text-xs text-muted-foreground">
+ Primary: at least 1000 × 1000 with a clean, mostly white background · Additional: at least 600 × 600
+ </span>
+ <span className="relative mt-1 text-[11px] text-muted-foreground">
+ Blurry, very dark/washed-out, corrupt or extreme-aspect-ratio images will be rejected with an exact reason.
+ </span>
+ <span className="relative mt-3 rounded-full bg-card px-3 py-1 text-[10px] font-bold uppercase tracking-wide text-primary shadow-sm">
+ Up to {MAX_PRODUCT_IMAGES} images
+ </span>
+ <input
+ type="file"
+ multiple
+ accept="image/jpeg,image/png,image/webp,.jpg,.jpeg,.png,.webp"
+ disabled={
+ isSubmitting ||
+ existingImages.length + selectedImages.length >=
+ MAX_PRODUCT_IMAGES
+ }
+ onChange={selectImages}
+ className="hidden"
+ />
+ </label>
+
+ {imagesLoading && (
+ <p className="mt-3 inline-flex items-center gap-2 text-sm text-muted-foreground">
+ <Spinner />
+ Loading stored product images...
+ </p>
+ )}
+
+ {(existingImages.length > 0 || selectedImages.length > 0) && (
+ <div className="mt-4 grid grid-cols-2 gap-3 sm:grid-cols-3 lg:grid-cols-5">
+ {existingImages.map((image, index) => (
+ <div
+ key={String(image.id)}
+ className="group relative overflow-hidden rounded-xl border border-border bg-card"
+ >
+ <div className="relative h-28">
+ <Image
+ src={resolveImageUrl(
+ image.thumbnail_url || image.image_url,
+ )}
+ alt={
+ image.alt_text ||
+ `${form.name || "Product"} image ${index + 1}`
+ }
+ fill
+ unoptimized
+ className="object-cover"
+ />
+ </div>
+
+ {image.is_primary && (
+ <span className="absolute left-2 top-2 rounded-full bg-foreground px-2 py-1 text-[9px] font-bold uppercase text-background">
+ Primary
+ </span>
+ )}
+
+ <button
+ type="button"
+ disabled={isSubmitting}
+ onClick={() => void removeExistingImage(image)}
+ className="flex w-full items-center justify-center gap-1.5 border-t border-border px-2 py-2 text-[11px] font-semibold text-destructive hover:bg-red-light-6"
+ >
+ <HugeiconsIcon icon={Delete02Icon} size={12} />
+ Remove
+ </button>
+ </div>
+ ))}
+
+ {selectedImages.map((image, index) => (
+ <div
+ key={image.previewUrl}
+ className="relative overflow-hidden rounded-xl border border-primary/25 bg-card"
+ >
+ <div className="relative h-28">
+ <Image
+ src={image.previewUrl}
+ alt={`New product image ${index + 1}`}
+ fill
+ unoptimized
+ className="object-cover"
+ />
+ </div>
+
+ <span className="absolute left-2 top-2 rounded-full bg-primary px-2 py-1 text-[9px] font-bold uppercase text-primary-foreground">
+ New
+ </span>
+
+ <button
+ type="button"
+ disabled={isSubmitting}
+ onClick={() => removeSelectedImage(index)}
+ className="flex w-full items-center justify-center gap-1.5 border-t border-border px-2 py-2 text-[11px] font-semibold text-destructive hover:bg-red-light-6"
+ >
+ <HugeiconsIcon icon={Delete02Icon} size={12} />
+ Remove
+ </button>
+ </div>
+ ))}
+ </div>
+ )}
+
+ <div className="mt-3 flex items-center justify-between gap-3 text-xs">
+ <span className="text-muted-foreground">
+ {existingImages.length + selectedImages.length} /{" "}
+ {MAX_PRODUCT_IMAGES} images selected
+ </span>
+ <span className="text-muted-foreground">
+ The first uploaded image becomes the primary image.
+ </span>
+ </div>
+
+ {imageError && (
+ <p className="mt-3 rounded-xl border border-red-light-4 bg-red-light-6 px-3 py-2 text-xs font-medium text-red-dark">
+ {imageError}
+ </p>
+ )}
+ </FormSection>
+
+ <FormSection
+ icon={Package02Icon}
+ title="Pricing & physical details"
+ description="Set the price customers will pay. Xerin commission is deducted from your seller settlement; it is not added to the customer price."
+ >
+ <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-4">
+ <Field label="Currency" required>
+ <select
+ value={form.currency || "TZS"}
+ onChange={(event) =>
+ setForm((current) => ({
+ ...current,
+ currency: event.target.value,
+ }))
+ }
+ disabled={isSubmitting || listingCurrencies.length === 0}
+ className="input"
+ >
+ {listingCurrencies.length === 0 && <option value="">No active currencies configured</option>}
+ {listingCurrencies.map((currency) => (
+ <option key={currency.id} value={currency.code}>
+ {currency.code} · {currency.name}
+ </option>
+ ))}
+ </select>
+ </Field>
+
+ <Field
+ label="Customer listing price"
+ required
+ hint="This is the product price the customer will pay before shipping, tax, or other checkout charges. Xerin commission is deducted from your settlement."
+ >
+ <input
+ type="number"
+ min="0"
+ step="0.01"
+ value={form.price}
+ onChange={(event) =>
+ setForm((current) => ({
+ ...current,
+ price: event.target.value,
+ }))
+ }
+ placeholder="0.00"
+ disabled={isSubmitting}
+ className="input"
+ />
+ </Field>
+
+ <Field
+ label="Promotional customer price"
+ hint="Optional discounted price the customer will pay. It must be lower than your regular listing price."
+ >
+ <input
+ type="number"
+ min="0"
+ step="0.01"
+ value={form.sale_price ?? ""}
+ onChange={(event) =>
+ setForm((current) => ({
+ ...current,
+ sale_price: event.target.value || null,
+ }))
+ }
+ placeholder="0.00"
+ disabled={isSubmitting}
+ className="input"
+ />
+ </Field>
+
+ <Field label="Weight (kg)">
+ <input
+ type="number"
+ min="0"
+ step="0.01"
+ value={form.weight ?? ""}
+ onChange={(event) =>
+ setForm((current) => ({
+ ...current,
+ weight: event.target.value || null,
+ }))
+ }
+ placeholder="e.g. 0.75"
+ disabled={isSubmitting}
+ className="input"
+ />
+ </Field>
+ </div>
+ 
+
+
+ {!editingProduct && (
+ <div className="mt-5 rounded-xl border border-border bg-muted p-4 sm:p-5">
+ <div className="flex items-start gap-3">
+ <span className="flex h-10 w-10 shrink-0 items-center justify-center rounded-xl bg-card text-primary shadow-sm">
+ <HugeiconsIcon icon={WarehouseIcon} size={18} />
+ </span>
+ <div className="min-w-0 flex-1">
+ <p className="text-sm font-bold text-foreground">
+ Opening inventory
+ </p>
+ <p className="mt-1 text-xs leading-5 text-muted-foreground">
+ Enter the seller&apos;s real physical stock for this product.
+ Xerin calculates available quantity as physical quantity
+ minus units reserved by active orders.
+ </p>
+
+ <div className="mt-4 grid gap-4 sm:grid-cols-2 lg:grid-cols-4">
+ <Field label="Opening stock" required>
+ <input
+ type="number"
+ min="0"
+ step="1"
+ value={stockForm.quantity}
+ onChange={(event) =>
+ setStockForm((current) => ({
+ ...current,
+ quantity: event.target.value,
+ }))
+ }
+ disabled={isSubmitting}
+ className="input"
+ />
+ </Field>
+
+ <Field label="Low-stock threshold">
+ <input
+ type="number"
+ min="0"
+ step="1"
+ value={stockForm.low_stock_threshold}
+ onChange={(event) =>
+ setStockForm((current) => ({
+ ...current,
+ low_stock_threshold: event.target.value,
+ }))
+ }
+ disabled={isSubmitting}
+ className="input"
+ />
+ </Field>
+
+ <Field label="WarehouseIcon / stock location">
+ <input
+ value={stockForm.warehouse_location}
+ onChange={(event) =>
+ setStockForm((current) => ({
+ ...current,
+ warehouse_location: event.target.value,
+ }))
+ }
+ placeholder="e.g. Main Store - Rack A"
+ disabled={isSubmitting}
+ className="input"
+ />
+ </Field>
+
+ <Field label="Expected restock date">
+ <input
+ type="date"
+ value={stockForm.restock_date}
+ onChange={(event) =>
+ setStockForm((current) => ({
+ ...current,
+ restock_date: event.target.value,
+ }))
+ }
+ disabled={isSubmitting}
+ className="input"
+ />
+ </Field>
+ </div>
+
+ <div className="mt-4 grid gap-3 sm:grid-cols-3">
+ <InventoryPreviewStat
+ label="Physical quantity"
+ value={Math.max(0, Number(stockForm.quantity) || 0)}
+ />
+ <InventoryPreviewStat label="Reserved" value={0} />
+ <InventoryPreviewStat
+ label="Available to customers"
+ value={Math.max(0, Number(stockForm.quantity) || 0)}
+ highlight
+ />
+ </div>
+ </div>
+ </div>
+ </div>
+ )}
+
+ <div className="mt-5 rounded-xl border border-primary/25 bg-primary/10/60 p-4 sm:p-5">
+ <div className="flex items-start gap-3">
+ <span className="flex h-10 w-10 shrink-0 items-center justify-center rounded-xl bg-card text-primary shadow-sm">
+ <HugeiconsIcon icon={DollarCircleIcon} size={18} />
+ </span>
+ <div className="min-w-0 flex-1">
+ <div className="flex flex-col gap-1 sm:flex-row sm:items-center sm:justify-between">
+ <div>
+ <p className="text-sm font-bold text-foreground">
+ Marketplace pricing preview
+ </p>
+ <p className="mt-0.5 text-xs leading-5 text-muted-foreground">
+ The customer pays your listed price. Xerin commission is shown separately and deducted from your seller settlement.
+ </p>
+ </div>
+ {pricingPreview?.commission_scope && (
+ <span className="mt-2 inline-flex w-fit rounded-full border border-primary/25 bg-card px-2.5 py-1 text-[10px] font-bold uppercase tracking-wide text-primary sm:mt-0">
+ {pricingPreview.commission_scope.replaceAll("_", " ")} rule
+ </span>
+ )}
+ </div>
+
+ {pricingPreviewLoading ? (
+ <div className="mt-4 flex items-center gap-2 text-sm text-muted-foreground">
+ <Spinner />
+ Calculating customer price...
+ </div>
+ ) : pricingPreview ? (
+ <div className="mt-4 grid gap-3 sm:grid-cols-2 xl:grid-cols-4">
+ <PricingStat
+ label="Customer pays"
+ value={formatPrice(
+ pricingPreview.customer_price,
+ pricingPreview.currency || form.currency,
+ )}
+ highlight
+ />
+ <PricingStat
+ label="Xerin commission"
+ value={`${Number(pricingPreview.commission_rate).toLocaleString()}%`}
+ detail={formatPrice(
+ pricingPreview.commission_amount,
+ pricingPreview.currency || form.currency,
+ )}
+ />
+ <PricingStat
+ label="Estimated seller net"
+ value={formatPrice(
+ pricingPreview.seller_net_amount,
+ pricingPreview.currency || form.currency,
+ )}
+ />
+ <PricingStat
+ label="Promotional customer price"
+ value={
+ pricingPreview.customer_sale_price
+ ? formatPrice(
+ pricingPreview.customer_sale_price,
+ pricingPreview.currency || form.currency,
+ )
+ : "Not set"
+ }
+ detail={
+ pricingPreview.seller_sale_net_amount
+ ? `Seller net: ${formatPrice(
+ pricingPreview.seller_sale_net_amount,
+ pricingPreview.currency || form.currency,
+ )}`
+ : undefined
+ }
+ />
+ </div>
+ ) : (
+ <p className="mt-4 text-sm text-muted-foreground">
+ Select a category and enter your listing price to see the marketplace calculation.
+ </p>
+ )}
+
+ {pricingPreviewError && (
+ <p className="mt-3 rounded-xl border border-red-light-4 bg-red-light-6 px-3 py-2 text-xs font-medium text-red-dark">
+ {pricingPreviewError}
+ </p>
+ )}
+ </div>
+ </div>
+ </div>
 </FormSection>
 
-                <FormSection icon={CircleDollarSign} title="Broker promotion" description="Allow approved Xerin Brokers to promote this product. Referral links and order attribution will be added in B4.">
-                  <div className="rounded-2xl border border-orange-200 bg-orange-50/60 p-4">
-                    <label className="flex items-center justify-between gap-4"><div><p className="text-sm font-bold text-slate-900">Allow Brokers to promote this product?</p><p className="mt-1 text-xs text-slate-600">The opportunity becomes visible only when the product is approved, active and in stock.</p></div><input type="checkbox" checked={brokerOfferForm.enabled} onChange={e=>setBrokerOfferForm(v=>({...v,enabled:e.target.checked}))} className="h-5 w-5 accent-orange-500" /></label>
-                    {brokerOfferForm.enabled && <div className="mt-4 grid gap-4 sm:grid-cols-2 lg:grid-cols-5">
-                      <Field label="Reward type" required><select value={brokerOfferForm.commission_type} onChange={e=>setBrokerOfferForm(v=>({...v,commission_type:e.target.value as "fixed"|"percentage"}))} className="input"><option value="fixed">Fixed amount</option><option value="percentage">Percentage</option></select></Field>
-                      <Field label={brokerOfferForm.commission_type==="fixed"?"Reward per successful unit":"Reward percentage"} required><input type="number" min="0" step="0.01" value={brokerOfferForm.commission_value} onChange={e=>setBrokerOfferForm(v=>({...v,commission_value:e.target.value}))} className="input" placeholder={brokerOfferForm.commission_type==="fixed"?"10000":"10"}/></Field>
-                      <Field label="Maximum attributed sales"><input type="number" min="1" step="1" value={brokerOfferForm.max_attributed_sales} onChange={e=>setBrokerOfferForm(v=>({...v,max_attributed_sales:e.target.value}))} className="input" placeholder="Optional"/></Field>
-                      <Field label="Start"><input type="datetime-local" value={brokerOfferForm.starts_at} onChange={e=>setBrokerOfferForm(v=>({...v,starts_at:e.target.value}))} className="input"/></Field>
-                      <Field label="End"><input type="datetime-local" value={brokerOfferForm.ends_at} onChange={e=>setBrokerOfferForm(v=>({...v,ends_at:e.target.value}))} className="input"/></Field>
-                    </div>}
-                  </div>
-                </FormSection>
+ <FormSection icon={DollarCircleIcon} title="Broker promotion" description="Allow approved Xerin Brokers to promote this product. Referral links and order attribution will be added in B4.">
+ <div className="rounded-xl border border-primary/25 bg-primary/10/60 p-4">
+ <label className="flex items-center justify-between gap-4"><div><p className="text-sm font-bold text-foreground">Allow Brokers to promote this product?</p><p className="mt-1 text-xs text-muted-foreground">The opportunity becomes visible only when the product is approved, active and in stock.</p></div><input type="checkbox" checked={brokerOfferForm.enabled} onChange={e=>setBrokerOfferForm(v=>({...v,enabled:e.target.checked}))} className="h-5 w-5 accent-[var(--primary)]" /></label>
+ {brokerOfferForm.enabled && <div className="mt-4 grid gap-4 sm:grid-cols-2 lg:grid-cols-5">
+ <Field label="Reward type" required><select value={brokerOfferForm.commission_type} onChange={e=>setBrokerOfferForm(v=>({...v,commission_type:e.target.value as "fixed"|"percentage"}))} className="input"><option value="fixed">Fixed amount</option><option value="percentage">Percentage</option></select></Field>
+ <Field label={brokerOfferForm.commission_type==="fixed"?"Reward per successful unit":"Reward percentage"} required><input type="number" min="0" step="0.01" value={brokerOfferForm.commission_value} onChange={e=>setBrokerOfferForm(v=>({...v,commission_value:e.target.value}))} className="input" placeholder={brokerOfferForm.commission_type==="fixed"?"10000":"10"}/></Field>
+ <Field label="Maximum attributed sales"><input type="number" min="1" step="1" value={brokerOfferForm.max_attributed_sales} onChange={e=>setBrokerOfferForm(v=>({...v,max_attributed_sales:e.target.value}))} className="input" placeholder="Optional"/></Field>
+ <Field label="Start"><input type="datetime-local" value={brokerOfferForm.starts_at} onChange={e=>setBrokerOfferForm(v=>({...v,starts_at:e.target.value}))} className="input"/></Field>
+ <Field label="End"><input type="datetime-local" value={brokerOfferForm.ends_at} onChange={e=>setBrokerOfferForm(v=>({...v,ends_at:e.target.value}))} className="input"/></Field>
+ </div>}
+ </div>
+ </FormSection>
 
-                <div className="rounded-2xl border border-blue-200 bg-blue-50 p-4">
-                  <div className="flex items-start gap-3">
-                    <CheckCircle2
-                      size={19}
-                      className="mt-0.5 shrink-0 text-blue-600"
-                    />
-                    <div>
-                      <p className="text-sm font-semibold text-blue-900">
-                        Product ownership & review
-                      </p>
-                      <p className="mt-1 text-xs leading-5 text-blue-700">
-                        This product is automatically owned by your seller
-                        account. You can save it as a draft, or submit it for
-                        Admin review. Products become visible to customers only
-                        after approval.
-                      </p>
-                    </div>
-                  </div>
-                </div>
-              </div>
+ <div className="rounded-xl border border-primary-200 bg-primary-50 p-4">
+ <div className="flex items-start gap-3">
+ <HugeiconsIcon icon={CheckmarkCircle02Icon}
+ size={18}
+ className="mt-0.5 shrink-0 text-primary-600"
+ />
+ <div>
+ <p className="text-sm font-semibold text-primary-900">
+ Product ownership & review
+ </p>
+ <p className="mt-1 text-xs leading-5 text-primary-700">
+ This product is automatically owned by your seller
+ account. You can save it as a draft, or submit it for
+ Admin review. Products become visible to customers only
+ after approval.
+ </p>
+ </div>
+ </div>
+ </div>
+ </div>
 
-              <div className="shrink-0 border-t border-[#e7ebf0] bg-white/95 px-5 py-4 shadow-[0_-8px_30px_rgba(15,23,42,.04)] backdrop-blur sm:px-7">
-                <div className="flex flex-col-reverse gap-3 sm:flex-row sm:items-center sm:justify-between">
-                  <button
-                    type="button"
-                    onClick={closeEditor}
-                    disabled={isSubmitting}
-                    className="h-11 rounded-xl border border-[#e1e6ec] px-5 text-sm font-semibold text-[#475569] hover:bg-slate-50"
-                  >
-                    Cancel
-                  </button>
+ <div className="shrink-0 border-t border-border bg-card/95 px-5 py-4 shadow-sm backdrop-blur sm:px-7">
+ <div className="flex flex-col-reverse gap-3 sm:flex-row sm:items-center sm:justify-between">
+ <button
+ type="button"
+ onClick={closeEditor}
+ disabled={isSubmitting}
+ className="h-11 rounded-xl border border-border px-5 text-sm font-semibold text-muted-foreground hover:bg-muted"
+ >
+ Cancel
+ </button>
 
-                  <div className="flex flex-col gap-2 sm:flex-row">
-                    <button
-                      type="submit"
-                      disabled={isSubmitting}
-                      onClick={() => setSubmitIntent("draft")}
-                      className="inline-flex h-11 items-center justify-center gap-2 rounded-xl border border-[#cfd6df] bg-white px-5 text-sm font-bold text-[#334155] shadow-sm transition hover:border-[#111827] hover:bg-slate-50 disabled:opacity-50"
-                    >
-                      <FileText size={15} />
-                      {isSubmitting && submitIntent === "draft"
-                        ? "Saving..."
-                        : "Save Draft"}
-                    </button>
+ <div className="flex flex-col gap-2 sm:flex-row">
+ <button
+ type="submit"
+ disabled={isSubmitting}
+ onClick={() => setSubmitIntent("draft")}
+ className="inline-flex h-11 items-center justify-center gap-2 rounded-xl border border-border bg-card px-5 text-sm font-bold text-foreground shadow-sm transition hover:border-[var(--foreground)] hover:bg-muted disabled:opacity-50"
+ >
+ <HugeiconsIcon icon={File01Icon} size={16} />
+ {isSubmitting && submitIntent === "draft"
+ ? "Saving..."
+ : "Save Draft"}
+ </button>
 
-                    <button
-                      type="submit"
-                      disabled={isSubmitting}
-                      onClick={() => setSubmitIntent("review")}
-                      className="inline-flex h-11 items-center justify-center gap-2 rounded-xl bg-[#f7941d] px-5 text-sm font-bold text-white shadow-[0_9px_24px_rgba(247,148,29,0.25)] transition hover:-translate-y-0.5 hover:bg-[#e78315] disabled:opacity-50"
-                    >
-                      <Send size={15} />
-                      {isSubmitting && submitIntent === "review"
-                        ? "Submitting..."
-                        : "Save & Submit for Review"}
-                    </button>
-                  </div>
-                </div>
-              </div>
-            </form>
-          </aside>
-        </div>
-      )}
+ <button
+ type="submit"
+ disabled={isSubmitting}
+ onClick={() => setSubmitIntent("review")}
+ className="inline-flex h-11 items-center justify-center gap-2 rounded-xl bg-primary px-5 text-sm font-bold text-primary-foreground shadow-sm transition hover:-translate-y-0.5 hover:bg-primary disabled:opacity-50"
+ >
+ <HugeiconsIcon icon={SentIcon} size={16} />
+ {isSubmitting && submitIntent === "review"
+ ? "Submitting..."
+ : "Save & Submit for Review"}
+ </button>
+ </div>
+ </div>
+ </div>
+ </form>
+ </aside>
+ </div>
+ )}
 
-      {deleteTarget && (
-        <div className="fixed inset-0 z-[110] flex items-center justify-center bg-black/55 p-4">
-          <div className="w-full max-w-md rounded-2xl bg-white p-6 shadow-2xl">
-            <div className="flex h-11 w-11 items-center justify-center rounded-xl bg-red-50 text-red-600">
-              <Archive size={20} />
-            </div>
-            <h3 className="mt-4 text-lg font-semibold text-[#111827]">
-              Archive this product?
-            </h3>
-            <p className="mt-2 text-sm leading-6 text-[#64748b]">
-              <strong>{deleteTarget.name}</strong> will be removed from active
-              seller products. A product currently under review cannot be
-              archived.
-            </p>
+ {deleteTarget && (
+ <div className="fixed inset-0 z-[110] flex items-center justify-center bg-black/55 p-4">
+ <div className="w-full max-w-md rounded-xl bg-card p-6 shadow-lg">
+ <div className="flex h-11 w-11 items-center justify-center rounded-xl bg-red-light-6 text-destructive">
+ <HugeiconsIcon icon={ArchiveIcon} size={20} />
+ </div>
+ <h3 className="mt-4 text-lg font-semibold text-foreground">
+ Archive this product?
+ </h3>
+ <p className="mt-2 text-sm leading-6 text-muted-foreground">
+ <strong>{deleteTarget.name}</strong> will be removed from active
+ seller products. A product currently under review cannot be
+ archived.
+ </p>
 
-            <div className="mt-6 flex gap-3">
-              <button
-                type="button"
-                disabled={isDeleting}
-                onClick={() => setDeleteTarget(null)}
-                className="flex-1 rounded-xl border border-[#e1e6ec] px-4 py-3 text-sm font-semibold text-[#475569]"
-              >
-                Cancel
-              </button>
-              <button
-                type="button"
-                disabled={isDeleting}
-                onClick={() => void handleDelete()}
-                className="flex-1 rounded-xl bg-red-600 px-4 py-3 text-sm font-semibold text-white disabled:opacity-50"
-              >
-                {isDeleting ? "Archiving..." : "Archive Product"}
-              </button>
-            </div>
-          </div>
-        </div>
-      )}
+ <div className="mt-6 flex gap-3">
+ <button
+ type="button"
+ disabled={isDeleting}
+ onClick={() => setDeleteTarget(null)}
+ className="flex-1 rounded-xl border border-border px-4 py-3 text-sm font-semibold text-muted-foreground"
+ >
+ Cancel
+ </button>
+ <button
+ type="button"
+ disabled={isDeleting}
+ onClick={() => void handleDelete()}
+ className="flex-1 rounded-xl bg-destructive px-4 py-3 text-sm font-semibold text-white disabled:opacity-50"
+ >
+ {isDeleting ? "Archiving..." : "Archive Product"}
+ </button>
+ </div>
+ </div>
+ </div>
+ )}
 
-      <style jsx global>{`
-        .input {
-          width: 100%;
-          min-height: 44px;
-          border-radius: 0.85rem;
-          border: 1px solid #dce3ea;
-          background: #fbfdff;
-          padding: 0.76rem 0.95rem;
-          font-size: 0.875rem;
-          color: #111827;
-          outline: none;
-          transition:
-            border-color 160ms ease,
-            box-shadow 160ms ease,
-            background-color 160ms ease;
-        }
+ <style jsx global>{`
+ .input {
+ width: 100%;
+ min-height: 44px;
+ border-radius: 0.85rem;
+ border: 1px solid #dce3ea;
+ background: #fbfdff;
+ padding: 0.76rem 0.95rem;
+ font-size: 0.875rem;
+ color: #111827;
+ outline: none;
+ transition:
+ border-color 160ms ease,
+ box-shadow 160ms ease,
+ background-color 160ms ease;
+ }
 
-        .input:focus {
-          border-color: #f7941d;
-          background: #ffffff;
-          box-shadow: 0 0 0 4px rgba(247, 148, 29, 0.10);
-        }
+ .input:focus {
+ border-color: #f7941d;
+ background: #ffffff;
+ box-shadow: 0 0 0 4px rgba(247, 148, 29, 0.10);
+ }
 
-        .input:disabled {
-          cursor: not-allowed;
-          background: #f8fafc;
-          opacity: 0.7;
-        }
-      `}</style>
-    </>
-  );
+ .input:disabled {
+ cursor: not-allowed;
+ background: #f8fafc;
+ opacity: 0.7;
+ }
+ `}</style>
+ </>
+ );
 };
 
 function StatCard({
-  label,
-  value,
-  icon: Icon,
+ label,
+ value,
+ icon: Icon,
 }: {
-  label: string;
-  value: number;
-  icon: typeof ShoppingBag;
+ label: string;
+ value: number;
+ icon: IconSvgElement;
 }) {
-  return (
-    <div className="rounded-2xl border border-[#e7ebf0] bg-white p-4 shadow-sm">
-      <div className="flex items-center justify-between">
-        <span className="flex h-9 w-9 items-center justify-center rounded-xl bg-orange-50 text-[#f7941d]">
-          <Icon size={17} />
-        </span>
-        <span className="text-2xl font-bold tracking-[-0.03em] text-[#111827]">
-          {value}
-        </span>
-      </div>
-      <p className="mt-3 text-xs font-medium text-[#64748b]">{label}</p>
-    </div>
-  );
+ return (
+ <div className="rounded-xl border border-border bg-card p-4 shadow-sm">
+ <div className="flex items-center justify-between">
+ <span className="flex h-9 w-9 items-center justify-center rounded-xl bg-primary/10 text-primary">
+ <HugeiconsIcon icon={Icon} size={16} />
+ </span>
+ <span className="text-2xl font-bold tracking-[-0.03em] text-foreground">
+ {value}
+ </span>
+ </div>
+ <p className="mt-3 text-xs font-medium text-muted-foreground">{label}</p>
+ </div>
+ );
 }
 
 function FormSection({
-  icon: Icon,
-  title,
-  description,
-  children,
+ icon: Icon,
+ title,
+ description,
+ children,
 }: {
-  icon: typeof Tag;
-  title: string;
-  description: string;
-  children: React.ReactNode;
+ icon: IconSvgElement;
+ title: string;
+ description: string;
+ children: React.ReactNode;
 }) {
-  return (
-    <section className="relative overflow-hidden rounded-2xl border border-[#e3e8ee] bg-white p-5 shadow-[0_8px_26px_rgba(15,23,42,.045)] sm:p-6">
-      <span className="absolute inset-y-0 left-0 w-1 bg-gradient-to-b from-[#f7941d] to-orange-300" />
-      <span className="pointer-events-none absolute -right-14 -top-14 h-36 w-36 rounded-full bg-orange-50 blur-2xl" />
-      <div className="relative mb-5 flex items-start gap-3">
-        <span className="grid h-11 w-11 shrink-0 place-items-center rounded-2xl bg-[#111827] text-[#f7941d] shadow-sm">
-          <Icon size={19} />
-        </span>
-        <div>
-          <h3 className="text-base font-extrabold tracking-[-0.015em] text-[#111827]">{title}</h3>
-          <p className="mt-1 max-w-3xl text-xs leading-5 text-[#64748b]">{description}</p>
-        </div>
-      </div>
-      <div className="relative">{children}</div>
-    </section>
-  );
+ return (
+ <section className="relative overflow-hidden rounded-xl border border-border bg-card p-5 shadow-sm sm:p-6">
+ <span className="absolute inset-y-0 left-0 w-1 bg-primary" />
+ 
+ <div className="relative mb-5 flex items-start gap-3">
+ <span className="grid h-11 w-11 shrink-0 place-items-center rounded-xl bg-[var(--foreground)] text-primary shadow-sm">
+ <HugeiconsIcon icon={Icon} size={18} />
+ </span>
+ <div>
+ <h3 className="text-base font-extrabold tracking-[-0.015em] text-foreground">{title}</h3>
+ <p className="mt-1 max-w-3xl text-xs leading-5 text-muted-foreground">{description}</p>
+ </div>
+ </div>
+ <div className="relative">{children}</div>
+ </section>
+ );
 }
 
 
 function InventoryPreviewStat({
-  label,
-  value,
-  highlight = false,
+ label,
+ value,
+ highlight = false,
 }: {
-  label: string;
-  value: number;
-  highlight?: boolean;
+ label: string;
+ value: number;
+ highlight?: boolean;
 }) {
-  return (
-    <div
-      className={`rounded-xl border p-3 ${
-        highlight
-          ? "border-emerald-200 bg-emerald-50"
-          : "border-[#e2e8f0] bg-white"
-      }`}
-    >
-      <p className="text-[10px] font-bold uppercase tracking-wide text-[#94a3b8]">
-        {label}
-      </p>
-      <p
-        className={`mt-1 text-lg font-bold ${
-          highlight ? "text-emerald-700" : "text-[#111827]"
-        }`}
-      >
-        {value.toLocaleString()}
-      </p>
-    </div>
-  );
+ return (
+ <div
+ className={`rounded-xl border p-3 ${
+ highlight
+ ? "border-green-light-4 bg-green-light-6"
+ : "border-border bg-card"
+ }`}
+ >
+ <p className="text-[10px] font-bold uppercase tracking-wide text-muted-foreground">
+ {label}
+ </p>
+ <p
+ className={`mt-1 text-lg font-bold ${
+ highlight ? "text-green-dark" : "text-foreground"
+ }`}
+ >
+ {value.toLocaleString()}
+ </p>
+ </div>
+ );
 }
 
 function PricingStat({
-  label,
-  value,
-  detail,
-  highlight = false,
+ label,
+ value,
+ detail,
+ highlight = false,
 }: {
-  label: string;
-  value: string;
-  detail?: string;
-  highlight?: boolean;
+ label: string;
+ value: string;
+ detail?: string;
+ highlight?: boolean;
 }) {
-  return (
-    <div
-      className={`rounded-xl border p-3 ${
-        highlight
-          ? "border-orange-200 bg-white shadow-sm"
-          : "border-white/80 bg-white/70"
-      }`}
-    >
-      <p className="text-[10px] font-bold uppercase tracking-wide text-[#94a3b8]">
-        {label}
-      </p>
-      <p
-        className={`mt-1 text-base font-bold ${
-          highlight ? "text-[#f7941d]" : "text-[#111827]"
-        }`}
-      >
-        {value}
-      </p>
-      {detail && <p className="mt-0.5 text-xs text-[#64748b]">{detail}</p>}
-    </div>
-  );
+ return (
+ <div
+ className={`rounded-xl border p-3 ${
+ highlight
+ ? "border-primary/25 bg-card shadow-sm"
+ : "border-white/80 bg-card/70"
+ }`}
+ >
+ <p className="text-[10px] font-bold uppercase tracking-wide text-muted-foreground">
+ {label}
+ </p>
+ <p
+ className={`mt-1 text-base font-bold ${
+ highlight ? "text-primary" : "text-foreground"
+ }`}
+ >
+ {value}
+ </p>
+ {detail && <p className="mt-0.5 text-xs text-muted-foreground">{detail}</p>}
+ </div>
+ );
 }
 
 function Field({
-  label,
-  required,
-  hint,
-  children,
+ label,
+ required,
+ hint,
+ children,
 }: {
-  label: string;
-  required?: boolean;
-  hint?: string;
-  children: React.ReactNode;
+ label: string;
+ required?: boolean;
+ hint?: string;
+ children: React.ReactNode;
 }) {
-  return (
-    <label className="block">
-      <span className="text-sm font-semibold text-[#334155]">
-        {label}
-        {required && <span className="ml-1 text-red-500">*</span>}
-      </span>
-      {hint && (
-        <span className="mt-0.5 block text-[11px] leading-4 text-[#94a3b8]">
-          {hint}
-        </span>
-      )}
-      <div className="mt-2">{children}</div>
-    </label>
-  );
+ return (
+ <label className="block">
+ <span className="text-sm font-semibold text-foreground">
+ {label}
+ {required && <span className="ml-1 text-destructive">*</span>}
+ </span>
+ {hint && (
+ <span className="mt-0.5 block text-[11px] leading-4 text-muted-foreground">
+ {hint}
+ </span>
+ )}
+ <div className="mt-2">{children}</div>
+ </label>
+ );
 }
 
 export default SellerProducts;

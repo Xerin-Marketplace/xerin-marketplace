@@ -8,19 +8,19 @@ const load=async()=>{setLoading(true);setError("");try{if(view==="audit")setLogs
 const metrics=view==="audit"?[["Audit entries",logs.length],["Actors",new Set(logs.map(x=>x.actor_id).filter(Boolean)).size],["Changes",logs.filter(x=>x.action.includes("updated")).length],["Today",logs.filter(x=>new Date(x.created_at).toDateString()===new Date().toDateString()).length]]:view==="events"?[["Events",events.length],["Open",events.filter(x=>x.status==="open").length],["Critical",events.filter(x=>x.severity==="critical").length],["Acknowledged",events.filter(x=>x.status==="acknowledged").length]]:view==="jobs"?[["Jobs",jobs.length],["Queued",jobs.filter(x=>x.status==="queued").length],["Running",jobs.filter(x=>x.status==="running").length],["Failed",jobs.filter(x=>x.status==="failed").length]]:[["Settings",settings.length],["Public",settings.filter(x=>x.is_public).length],["Operational",settings.filter(x=>!x.is_public).length],["Configured",settings.filter(x=>x.id).length]];
 return <div className="admin-operations-page space-y-5">
 <section className="admin-operations-header">
-<p className="text-xs font-bold uppercase tracking-[.18em] text-[#f47524]">Platform reliability</p>
-<h2 className="mt-2 text-2xl font-bold tracking-[-.02em] text-[#111827] dark:text-white">{titles[view]}</h2>
-<p className="mt-1 max-w-2xl text-sm text-[#64748b] dark:text-white/60">Observe platform state, triage exceptions and apply controlled changes with an administrator audit trail.</p>
+<p className="text-xs font-bold uppercase tracking-[.18em] text-primary">Platform reliability</p>
+<h2 className="mt-2 text-2xl font-bold tracking-[-.02em] text-foreground">{titles[view]}</h2>
+<p className="mt-1 max-w-2xl text-sm text-muted-foreground /60">Observe platform state, triage exceptions and apply controlled changes with an administrator audit trail.</p>
 </section>
 <section className="admin-metric-grid grid gap-4 sm:grid-cols-2 xl:grid-cols-4">{metrics.map(([l,v])=>
 <article key={l} className="admin-metric-card">
-<p className="text-sm text-gray-500">{l}</p>
+<p className="text-sm text-muted-foreground">{l}</p>
 <p className="mt-2 text-2xl font-semibold">{v}</p>
-</article>)}</section>{error&&<div className="rounded-xl border border-red-200 bg-red-50 p-4 text-sm text-red-700">{error}</div>}<section className="admin-operations-card overflow-hidden">
+</article>)}</section>{error&&<div className="rounded-xl border border-red-light-4 bg-red-light-6 p-4 text-sm text-red-dark">{error}</div>}<section className="admin-operations-card overflow-hidden">
 <div className="admin-operations-toolbar">
-<input value={query} onChange={e=>setQuery(e.target.value)} placeholder={`Search ${titles[view].toLowerCase()}`} className="min-h-11 min-w-0 flex-1 rounded-xl border px-4 py-2.5 text-sm outline-none focus:border-orange-400"/>
+<input value={query} onChange={e=>setQuery(e.target.value)} placeholder={`Search ${titles[view].toLowerCase()}`} className="min-h-11 min-w-0 flex-1 rounded-xl border px-4 py-2.5 text-sm outline-none focus:border-primary-400"/>
 <button onClick={()=>void load()} className="min-h-11 rounded-xl border px-4 text-sm font-semibold">Refresh</button>
-</div>{loading?<p className="p-10 text-center text-gray-500">Loading system data...</p>:!filtered.length?<Empty view={view}/>:view==="audit"?<AuditTable rows={filtered as AuditLog[]}/>:view==="events"?<EventTable rows={filtered as SystemEvent[]} busy={busy} act={act}/>:view==="jobs"?<JobTable rows={filtered as BackgroundJob[]} busy={busy} act={act}/>:<Settings rows={filtered as ApplicationSetting[]} busy={busy} act={act}/>}</section>
+</div>{loading?<p className="p-10 text-center text-muted-foreground">Loading system data...</p>:!filtered.length?<Empty view={view}/>:view==="audit"?<AuditTable rows={filtered as AuditLog[]}/>:view==="events"?<EventTable rows={filtered as SystemEvent[]} busy={busy} act={act}/>:view==="jobs"?<JobTable rows={filtered as BackgroundJob[]} busy={busy} act={act}/>:<Settings rows={filtered as ApplicationSetting[]} busy={busy} act={act}/>}</section>
 </div>}
 function AuditTable({rows}:{rows:AuditLog[]}){return <Table heads={["Actor","Action","Resource","Details","Time"]}>{rows.map(r=>
 <tr key={r.id}>
@@ -37,7 +37,7 @@ function EventTable({rows,busy,act}:{rows:SystemEvent[];busy:string|null;act:(id
 <Td main={r.message}/>
 <td className="px-4 py-3"><StatusBadge value={r.severity} kind="severity"/></td>
 <td className="px-4 py-3"><StatusBadge value={r.status}/></td>
-<td className="px-4 py-3">{r.status==="open"&&<button disabled={busy===r.id} onClick={()=>void act(r.id,()=>acknowledgeSystemEvent(r.id))} className="font-semibold text-orange-600">Acknowledge</button>}</td>
+<td className="px-4 py-3">{r.status==="open"&&<button disabled={busy===r.id} onClick={()=>void act(r.id,()=>acknowledgeSystemEvent(r.id))} className="font-semibold text-primary">Acknowledge</button>}</td>
 </tr>)}</Table>}
 function JobTable({rows,busy,act}:{rows:BackgroundJob[];busy:string|null;act:(id:string,fn:()=>Promise<unknown>)=>void}){return <Table heads={["Job","Queue","Attempts","Status","Failure",""]}>{rows.map(r=>
 <tr key={r.id}>
@@ -46,7 +46,7 @@ function JobTable({rows,busy,act}:{rows:BackgroundJob[];busy:string|null;act:(id
 <Td main={`${r.attempts} / ${r.max_attempts}`}/>
 <td className="px-4 py-3"><StatusBadge value={r.status}/></td>
 <Td main={r.failure_reason||"—"}/>
-<td className="px-4 py-3 whitespace-nowrap">{["failed","cancelled"].includes(r.status)&&<button disabled={busy===r.id} onClick={()=>void act(r.id,()=>retryBackgroundJob(r.id))} className="mr-3 font-semibold text-orange-600">Retry</button>}{["queued","scheduled"].includes(r.status)&&<button disabled={busy===r.id} onClick={()=>void act(r.id,()=>cancelBackgroundJob(r.id))} className="font-semibold text-red-600">Cancel</button>}</td>
+<td className="px-4 py-3 whitespace-nowrap">{["failed","cancelled"].includes(r.status)&&<button disabled={busy===r.id} onClick={()=>void act(r.id,()=>retryBackgroundJob(r.id))} className="mr-3 font-semibold text-primary">Retry</button>}{["queued","scheduled"].includes(r.status)&&<button disabled={busy===r.id} onClick={()=>void act(r.id,()=>cancelBackgroundJob(r.id))} className="font-semibold text-destructive">Cancel</button>}</td>
 </tr>)}</Table>}
 function Settings({rows,busy,act}:{rows:ApplicationSetting[];busy:string|null;act:(id:string,fn:()=>Promise<unknown>)=>void}){return <div className="grid gap-4 p-5 md:grid-cols-2">{rows.map(r=>
 <Setting key={r.key} row={r} busy={busy===r.key} save={value=>act(r.key,()=>updateApplicationSetting(r.key,{value,category:r.category,description:r.description}))}/>)}</div>}
@@ -54,25 +54,25 @@ function Setting({row,busy,save}:{row:ApplicationSetting;busy:boolean;save:(v:un
 <div className="flex justify-between">
 <div>
 <h3 className="font-semibold">{pretty(row.key)}</h3>
-<p className="mt-1 text-xs text-gray-500">{row.description}</p>
+<p className="mt-1 text-xs text-muted-foreground">{row.description}</p>
 </div>
-<span className="rounded-full bg-gray-100 px-2 py-1 text-xs">{pretty(row.category)}</span>
+<span className="rounded-full bg-muted px-2 py-1 text-xs">{pretty(row.category)}</span>
 </div>{bool?<label className="mt-5 flex items-center gap-3">
 <input type="checkbox" checked={value==="true"} onChange={e=>setValue(String(e.target.checked))}/>
 <span>Enabled</span>
-</label>:<input value={value} onChange={e=>setValue(e.target.value)} type={typeof row.value==="number"?"number":"text"} className="mt-5 w-full rounded-xl border px-3 py-2.5"/>}<button disabled={busy} onClick={()=>save(bool?value==="true":typeof row.value==="number"?Number(value):value)} className="mt-4 rounded-xl bg-[#111827] px-4 py-2.5 text-sm font-semibold text-white transition hover:bg-[#253044] disabled:opacity-40">{busy?"Saving...":"Save setting"}</button>
+</label>:<input value={value} onChange={e=>setValue(e.target.value)} type={typeof row.value==="number"?"number":"text"} className="mt-5 w-full rounded-xl border px-3 py-2.5"/>}<button disabled={busy} onClick={()=>save(bool?value==="true":typeof row.value==="number"?Number(value):value)} className="mt-4 rounded-xl bg-foreground px-4 py-2.5 text-sm font-semibold text-background transition hover:bg-foreground disabled:opacity-40">{busy?"Saving...":"Save setting"}</button>
 </article>}
 function Table({heads,children}:{heads:string[];children:React.ReactNode}){return <div className="overflow-x-auto">
 <table className="w-full min-w-[850px] text-left text-sm">
-<thead className="bg-gray-50 text-xs uppercase text-gray-500">
+<thead className="bg-muted text-xs uppercase text-muted-foreground">
 <tr>{heads.map(h=>
 <th key={h} className="px-4 py-3">{h}</th>)}</tr>
 </thead>
 <tbody className="divide-y">{children}</tbody>
 </table>
 </div>}function Td({main,sub}:{main:string;sub?:string}){return <td className="max-w-[260px] px-4 py-3">
-<p className="truncate font-medium">{main}</p>{sub&&<p className="truncate text-xs text-gray-500">{sub}</p>}</td>}function StatusBadge({value,kind="status"}:{value:string;kind?:"status"|"severity"}){const normalized=value.toLowerCase();const tone=kind==="severity"?(normalized==="critical"||normalized==="high"?"danger":normalized==="medium"?"warning":"neutral"):(normalized==="completed"||normalized==="acknowledged"||normalized==="running"||normalized==="success"?"success":normalized==="failed"||normalized==="cancelled"?"danger":normalized==="queued"||normalized==="scheduled"||normalized==="open"?"warning":"neutral");return <span className={`admin-status-badge admin-status-${tone}`}>{pretty(value)}</span>}function Empty({view}:{view:SystemView}){return <div className="p-10 text-center">
+<p className="truncate font-medium">{main}</p>{sub&&<p className="truncate text-xs text-muted-foreground">{sub}</p>}</td>}function StatusBadge({value,kind="status"}:{value:string;kind?:"status"|"severity"}){const normalized=value.toLowerCase();const tone=kind==="severity"?(normalized==="critical"||normalized==="high"?"danger":normalized==="medium"?"warning":"neutral"):(normalized==="completed"||normalized==="acknowledged"||normalized==="running"||normalized==="success"?"success":normalized==="failed"||normalized==="cancelled"?"danger":normalized==="queued"||normalized==="scheduled"||normalized==="open"?"warning":"neutral");return <span className={`admin-status-badge admin-status-${tone}`}>{pretty(value)}</span>}function Empty({view}:{view:SystemView}){return <div className="p-10 text-center">
 <p className="text-3xl">⚙️</p>
 <p className="mt-2 font-medium">No {titles[view].toLowerCase()} recorded</p>
-<p className="mt-1 text-sm text-gray-500">Operational records will appear here when the platform produces them.</p>
+<p className="mt-1 text-sm text-muted-foreground">Operational records will appear here when the platform produces them.</p>
 </div>}
