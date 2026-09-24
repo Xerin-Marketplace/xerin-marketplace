@@ -1101,13 +1101,92 @@ export const listAccessSessions = async () =>
 export const revokeAccessSession = async (id: string) => (await axiosInstance.delete(`/admin/active-sessions/${id}`)).data;
 export const getAdminReport = async (type: string, params: {date_from?:string;date_to?:string}={}) => (await axiosInstance.get<AdminReport>(`/admin/reports/${type}`,{params})).data;
 export const listAuditLogs=async()=>(await axiosInstance.get<AuditLog[]>("/audit-logs")).data;
-export const listSystemEvents=async()=>(await axiosInstance.get<SystemEvent[]>("/system/events")).data;
-export const acknowledgeSystemEvent=async(id:string)=>(await axiosInstance.post<SystemEvent>(`/system/events/${id}/acknowledge`)).data;
-export const listBackgroundJobs=async()=>(await axiosInstance.get<BackgroundJob[]>("/system/jobs")).data;
-export const retryBackgroundJob=async(id:string)=>(await axiosInstance.post<BackgroundJob>(`/system/jobs/${id}/retry`)).data;
-export const cancelBackgroundJob=async(id:string)=>(await axiosInstance.post<BackgroundJob>(`/system/jobs/${id}/cancel`)).data;
-export const listApplicationSettings=async()=>(await axiosInstance.get<ApplicationSetting[]>("/system/settings")).data;
-export const updateApplicationSetting=async(key:string,payload:Partial<ApplicationSetting>)=>(await axiosInstance.put<ApplicationSetting>(`/system/settings/${key}`,payload)).data;
+// Live API has no /system/* routes. Security events map to the audit
+// security-events endpoints; background jobs have no admin API yet.
+type SecurityEventWire={
+  id:string;
+  event_type:string;
+  severity:string;
+  description:string;
+  request_path:string|null;
+  http_method:string|null;
+  response_status:number|null;
+  ip_address:string|null;
+  event_metadata:Record<string,unknown>|null;
+  resolved:boolean;
+  resolved_at:string|null;
+  created_at:string;
+};
+
+const mapSecurityEvent=(e:SecurityEventWire):SystemEvent=>({
+  id:e.id,
+  source:"security",
+  event_type:e.event_type,
+  severity:e.severity,
+  message:e.description,
+  metadata_json:{
+    request_path:e.request_path,
+    http_method:e.http_method,
+    response_status:e.response_status,
+    ip_address:e.ip_address,
+    ...(e.event_metadata||{}),
+  },
+  status:e.resolved?"resolved":"open",
+  acknowledged_at:e.resolved_at,
+  created_at:e.created_at,
+});
+
+export const listSystemEvents=async()=>
+  (await axiosInstance.get<SecurityEventWire[]>("/audit-logs/security/events")).data.map(mapSecurityEvent);
+export const acknowledgeSystemEvent=async(id:string)=>
+  mapSecurityEvent((await axiosInstance.patch<SecurityEventWire>(`/audit-logs/security/events/${id}/resolve`,{note:null})).data);
+export const listBackgroundJobs=async()=>{
+  throw new Error("Background job monitoring is not exposed by the API yet.");
+};
+export const retryBackgroundJob=async(_id:string)=>{throw new Error("Background job monitoring is not exposed by the API yet.");};
+export const cancelBackgroundJob=async(_id:string)=>{throw new Error("Background job monitoring is not exposed by the API yet.");};
+
+// "Application settings" in this UI are backed by the real finance settings
+// singleton (GET/PATCH /admin/finance/settings). Flatten its fields into
+// key/value rows so the generic settings editor can render real data.
+const FINANCE_SETTINGS_META_KEYS=["id","singleton_key","created_at","updated_at"];
+const FINANCE_SETTINGS_DESCRIPTIONS:Record<string,string>={
+  default_payment_provider_code:"Payment provider used for new checkouts",
+  settlement_currency:"Currency used for seller settlements",
+  minimum_payout_amount:"Smallest payout a seller can request",
+  payout_fee_type:"Whether the payout fee is fixed or a percentage",
+  payout_fee_value:"Payout fee amount or percentage value",
+  payout_processing_days:"Days before a payout is processed",
+  auto_payout_enabled:"Process payouts automatically",
+  escrow_enabled:"Hold buyer funds in escrow until delivery",
+  auto_release_enabled:"Release escrow automatically after the hold period",
+  allow_partial_release:"Allow partial escrow releases",
+  hold_commission_until_release:"Hold marketplace commission until escrow release",
+};
+
+export const listApplicationSettings=async()=>{
+  const res=await axiosInstance.get<Record<string,unknown>>("/admin/finance/settings");
+  return Object.entries(res.data)
+    .filter(([key])=>!FINANCE_SETTINGS_META_KEYS.includes(key))
+    .map(([key,value]):ApplicationSetting=>({
+      id:key,
+      key,
+      value,
+      category:"finance",
+      description:FINANCE_SETTINGS_DESCRIPTIONS[key]||null,
+      is_public:false,
+      updated_at:(res.data.updated_at as string)||null,
+    }));
+};
+export const updateApplicationSetting=async(key:string,payload:Partial<ApplicationSetting>)=>{
+  let value=payload.value;
+  if(typeof value==="string"){
+    if(value==="true"||value==="false")value=value==="true";
+    else if(value!==""&&!Number.isNaN(Number(value)))value=Number(value);
+  }
+  const res=await axiosInstance.patch<Record<string,unknown>>("/admin/finance/settings",{[key]:value});
+  return{...payload,key,value:res.data[key]}as ApplicationSetting;
+};
 export const getAccountProfile=async()=>(await axiosInstance.get<AccountProfile>("/users/me")).data;
 export const updateAccountProfile=async(payload:Pick<AccountProfile,"first_name"|"last_name"|"phone">)=>(await axiosInstance.patch<AccountProfile>("/users/me",payload)).data;
 export const changeAccountPassword=async(current_password:string,new_password:string)=>(await axiosInstance.post<{message:string}>("/auth/change-password",{current_password,new_password})).data;

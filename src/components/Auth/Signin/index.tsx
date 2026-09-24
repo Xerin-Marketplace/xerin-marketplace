@@ -470,11 +470,17 @@ const SignInPanel = ({ onSwitchTab }: { onSwitchTab: (tab: AuthTab) => void }) =
  toast.success("Signed in successfully.");
  router.push(destination);
  } catch (error) {
- if (
- error instanceof ApiError &&
+ if (error instanceof ApiError) {
+ const reason = error.message.toLowerCase();
+ // Unverified / pending / inactive / suspended accounts must always
+ // surface the real backend reason, never a silent failure.
+ const needsOtp =
  error.status === 403 &&
- error.message.toLowerCase().includes("not verified")
- ) {
+ (reason.includes("not verified") ||
+ reason.includes("unverified") ||
+ reason.includes("verify"));
+
+ if (needsOtp) {
  toast("Your account is not verified yet. Enter the OTP or request a new one.");
 
  const params = new URLSearchParams({
@@ -487,8 +493,18 @@ const SignInPanel = ({ onSwitchTab }: { onSwitchTab: (tab: AuthTab) => void }) =
  return;
  }
 
- if (error instanceof ApiError) toast.error(error.message);
- else toast.error("Unable to sign in. Please try again.");
+ // Other blocked accounts (pending approval, suspended, inactive):
+ // show the backend's actual reason so the user knows what happened.
+ if (error.status === 403 || error.status === 423) {
+ toast.error(error.message || "Your account cannot sign in right now.", { duration: 6000 });
+ return;
+ }
+
+ toast.error(error.message);
+ return;
+ }
+
+ toast.error("Unable to sign in. Please try again.");
  } finally {
  setIsSubmitting(false);
  }
@@ -1649,7 +1665,7 @@ const AuthPage = ({ initialTab = "signup" }: { initialTab?: AuthTab }) => {
  <div className="flex min-h-[100dvh] flex-col px-4 pb-[max(20px,env(safe-area-inset-bottom))] pt-[max(18px,env(safe-area-inset-top))] sm:px-10 sm:py-8 xl:px-20">
  <div className="flex items-center justify-between">
  <Link href="/" className="inline-flex w-fit items-center gap-2">
- <Image src="/images/logo/logo.png" alt="Xerin Marketplace" width={30} height={30} priority className="h-[30px] w-[30px] object-contain" />
+ <Image src="/images/logo/xerin-logo-mark.png" alt="Xerin Marketplace" width={30} height={30} priority className="h-[30px] w-[30px] object-contain" />
  <span className="text-base font-bold text-foreground sm:text-lg">Xerin Marketplace</span>
  </Link>
  <Link href="/" className="rounded-full border border-border px-3 py-1.5 text-xs font-semibold text-muted-foreground transition hover:text-primary lg:hidden">

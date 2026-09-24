@@ -58,10 +58,9 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
   ]);
 
   for (const category of categories ?? []) {
-    const slugOrId = category.slug || category.id;
-    if (!slugOrId) continue;
+    if (!category.slug) continue;
     entries.push({
-      url: `${siteConfig.url}/shop-with-sidebar?category_id=${encodeURIComponent(String(slugOrId))}`,
+      url: `${siteConfig.url}/category/${encodeURIComponent(String(category.slug))}`,
       lastModified,
       changeFrequency: "weekly",
       priority: category.parent_id == null ? 0.7 : 0.6,

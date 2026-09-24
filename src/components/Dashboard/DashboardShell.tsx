@@ -185,10 +185,10 @@ export default function DashboardShell({
  {!collapsed && (
  <div className="min-w-0">
  <Image
- src="/images/logo/logo.png"
+ src="/images/logo/logooriginal.png"
  alt="Xerin Marketplace logo"
  width={150}
- height={46}
+ height={48}
  className="h-10 w-auto object-contain"
  priority
  />

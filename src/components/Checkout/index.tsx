@@ -1,6 +1,7 @@
 "use client";
 
 import React, { useEffect, useMemo, useState } from "react";
+import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { useQuery, useQueryClient } from "@tanstack/react-query";
 import Breadcrumb from "../Common/Breadcrumb";
@@ -20,6 +21,7 @@ import {
  checkoutApi,
  paymentsApi,
 } from "@/lib/api/endpoints/commerce";
+import axiosInstance from "@/lib/api/client";
 import type { DeliveryMode } from "@/types/api/commerce";
 import { formatCurrency } from "@/lib/formatCurrency";
 import PriceDisplay from "@/components/shared/PriceDisplay";
@@ -251,6 +253,44 @@ const Checkout = () => {
  setSelectedCompanyId("");
  setForm((current) => ({ ...current, shippingMethod: "" }));
  }, [detectedDelivery.data, deliveryMode]);
+
+ const deliveryErrorText = errorText(detectedDelivery.error);
+ const storeConfigMissing = Boolean(
+ detectedDelivery.isError && /country|store|origin/i.test(deliveryErrorText),
+ );
+ const cartStoreIds = useMemo<string[]>(
+ () =>
+ Array.from(
+ new Set(
+ (cart?.items ?? [])
+ .map((item) => item.product?.store_id)
+ .filter((id): id is string | number => Boolean(id))
+ .map(String),
+ ),
+ ),
+ [cart],
+ );
+ // When the backend reports a missing store country, resolve which stores
+ // in the cart are actually unconfigured so the buyer sees the exact item.
+ const missingCountryStores = useQuery({
+ queryKey: ["checkout", "missing-store-country", cartStoreIds],
+ enabled: Boolean(storeConfigMissing && cartStoreIds.length),
+ queryFn: async () => {
+ const stores = await Promise.all(
+ cartStoreIds.map((id) =>
+ axiosInstance
+ .get<{ store_name?: string; country?: string | null }>(
+ `/stores/${encodeURIComponent(id)}`,
+ )
+ .then((res) => res.data)
+ .catch(() => null),
+ ),
+ );
+ return stores.filter((s): s is { store_name?: string } => Boolean(s && !s.country));
+ },
+ retry: false,
+ staleTime: 60_000,
+ });
 
  const xerinExpress = useQuery({
  queryKey: ["checkout", "xerin-express", selectedAddressId, cart?.total],
@@ -900,8 +940,9 @@ const Checkout = () => {
  />
 
  {detectedDelivery.error && (
- <div className="flex flex-wrap items-center justify-between gap-3 rounded-xl border border-red-light-4 bg-red-light-6 p-3 text-xs leading-5 text-red-dark">
- <span>{errorText(detectedDelivery.error)}</span>
+ <div className="rounded-xl border border-red-light-4 bg-red-light-6 p-4">
+ <div className="flex flex-wrap items-center justify-between gap-3 text-xs leading-5 text-red-dark">
+ <span className="min-w-0 flex-1">{errorText(detectedDelivery.error)}</span>
  <button
  type="button"
  onClick={() => void detectedDelivery.refetch()}
@@ -909,6 +950,29 @@ const Checkout = () => {
  >
  Retry
  </button>
+ </div>
+ {storeConfigMissing && (
+ <div className="mt-3 border-t border-red-light-4 pt-3 text-xs leading-5 text-red-dark">
+ <p>
+ One or more stores in your cart have not configured their store
+ country, so a delivery route cannot be calculated for them.
+ </p>
+ {missingCountryStores.data?.length ? (
+ <p className="mt-2 font-semibold">
+ Affected store{missingCountryStores.data.length === 1 ? "" : "s"}:{" "}
+ {missingCountryStores.data
+ .map((s, i) => s.store_name || `Store ${i + 1}`)
+ .join(", ")}
+ </p>
+ ) : null}
+ <Link
+ href="/cart"
+ className="mt-2 inline-flex items-center gap-1 font-bold underline underline-offset-2 hover:text-foreground"
+ >
+ Review cart and remove the affected item
+ </Link>
+ </div>
+ )}
  </div>
  )}
 

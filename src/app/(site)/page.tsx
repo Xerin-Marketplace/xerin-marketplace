@@ -2,9 +2,10 @@ import Home from "@/components/Home";
 import { Metadata } from "next";
 
 export const metadata: Metadata = {
- title: "Xerin Market | Africa's Premier E-Commerce Marketplace",
+ title: "Xerin Marketplace | Shop Products Online in Africa",
  description:
- "Browse products listed by sellers on Xerin Market.",
+ "Shop quality products from verified sellers on Xerin Marketplace. Protected checkout, delivery quotes, order tracking and seller stores across Africa.",
+ alternates: { canonical: "/" },
 };
 
 export default function HomePage() {

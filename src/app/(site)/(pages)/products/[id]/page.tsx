@@ -1,4 +1,5 @@
 import type { Metadata } from "next";
+import { notFound } from "next/navigation";
 import { ProductDetailClient } from "./ProductDetailClient";
 import { siteConfig } from "@/lib/site-config";
 import { API_BASE_URL } from "@/lib/api/endpoints";
@@ -44,10 +45,7 @@ export async function generateMetadata({ params }: RouteParams): Promise<Metadat
   const product = await fetchProduct(id);
 
   if (!product || !product.is_active || product.status !== "approved") {
-    return {
-      title: "Product Not Found",
-      robots: { index: false, follow: false },
-    };
+    notFound();
   }
 
   const title = `${product.name} | Buy Online | ${siteConfig.name}`;
@@ -78,6 +76,7 @@ export default async function ProductDetailsPage({ params }: RouteParams) {
   const product = await fetchProduct(id);
 
   const indexable = Boolean(product && product.is_active && product.status === "approved");
+  if (!indexable || !product) notFound();
 
   return (
     <>
@@ -103,7 +102,9 @@ export default async function ProductDetailsPage({ params }: RouteParams) {
                 ? [
                     {
                       name: product.category.name,
-                      url: `/shop-with-sidebar?category_id=${product.category.id}`,
+                      url: product.category.slug
+                        ? `/category/${product.category.slug}`
+                        : `/shop-with-sidebar?category_id=${product.category.id}`,
                     },
                   ]
                 : []),

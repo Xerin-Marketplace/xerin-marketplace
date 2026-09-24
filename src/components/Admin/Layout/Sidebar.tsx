@@ -290,7 +290,7 @@ export default function AdminSidebar({
  notificationsHref="/admin/dashboard?tab=overview&menu=communications&item=notifications"
  profileHref="/admin/dashboard?tab=overview&menu=account&item=profile"
  settingsHref="/admin/dashboard?tab=overview&menu=account&item=profile"
- supportHref="/admin/support"
+ supportHref="/admin/customers/support"
  footerLabel="Xerin Market Admin Center"
  searchPlaceholder="Search admin records"
  >

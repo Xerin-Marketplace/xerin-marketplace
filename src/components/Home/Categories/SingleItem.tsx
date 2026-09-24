@@ -5,7 +5,7 @@ import Link from "next/link";
 const SingleItem = ({ item }: { item: Category }) => {
  return (
  <Link
- href={`/shop-with-sidebar?category_id=${encodeURIComponent(String(item.id))}`}
+ href={item.slug ? `/category/${item.slug}` : `/shop-with-sidebar?category_id=${encodeURIComponent(String(item.id))}`}
  className="group flex h-full flex-col items-center rounded-lg border border-border bg-card p-2.5 sm:p-4 transition-all duration-300 hover:-translate-y-1 hover:shadow-lg"
  >
  <div className="relative mb-2 sm:mb-4 h-[70px] w-[70px] sm:h-[110px] sm:w-[110px] lg:h-[132px] lg:w-[132px] shrink-0 overflow-hidden rounded-full bg-muted">

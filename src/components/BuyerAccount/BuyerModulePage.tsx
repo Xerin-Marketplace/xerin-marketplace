@@ -2,6 +2,7 @@
 import { formatCurrency } from "@/lib/formatCurrency";
 import { ordersApi, paymentsApi } from "@/lib/api/endpoints/commerce";
 import { authApi } from "@/lib/api/endpoints/auth";
+import { accountApi, type AccountSession } from "@/lib/api/endpoints/account";
 import { usersApi } from "@/lib/api/endpoints/users";
 import { useAuthStore } from "@/store/useAuthStore";
 import type { User } from "@/types/api/user";
@@ -80,6 +81,8 @@ export default function BuyerModulePage({ view }: { view: View }) {
  next: "",
  confirm: "",
  });
+ const [sessions, setSessions] = useState<AccountSession[]>([]);
+ const [sessionsState, setSessionsState] = useState<"idle" | "ok" | "error">("idle");
  const [form, setForm] = useState({
  first_name: "",
  last_name: "",
@@ -145,8 +148,15 @@ export default function BuyerModulePage({ view }: { view: View }) {
  phone: p.phone || "",
  });
  } else if (view === "security") {
- // Change-password is available. Session-management endpoints are not
- // exposed by the current backend, so do not fail this page trying to load them.
+ // Session management is a best-effort enhancement: a failed list call
+ // must not break the password-change controls on this page.
+ try {
+ setSessions(await accountApi.listSessions());
+ setSessionsState("ok");
+ } catch {
+ setSessions([]);
+ setSessionsState("error");
+ }
  }
  } catch {
  setError(true);
@@ -190,6 +200,24 @@ export default function BuyerModulePage({ view }: { view: View }) {
  window.location.assign("/signin");
  } catch {
  toast.error("Unable to change password.");
+ }
+ }
+ async function revokeSession(id: string) {
+ try {
+ await accountApi.revokeSession(id);
+ setSessions((prev) => prev.filter((s) => s.id !== id));
+ toast.success("Session signed out.");
+ } catch {
+ toast.error("Unable to sign out that session.");
+ }
+ }
+ async function revokeOtherSessions() {
+ try {
+ await accountApi.revokeOtherSessions();
+ await load();
+ toast.success("Other sessions signed out.");
+ } catch {
+ toast.error("Unable to sign out other sessions.");
  }
  }
  return (
@@ -302,6 +330,10 @@ export default function BuyerModulePage({ view }: { view: View }) {
  passwords={passwords}
  setPasswords={setPasswords}
  submit={changePassword}
+ sessions={sessions}
+ sessionsState={sessionsState}
+ onRevoke={revokeSession}
+ onRevokeOthers={revokeOtherSessions}
  />
  ) : view === "notifications" ? (
  <NotificationCenter />
@@ -635,10 +667,18 @@ function Security({
  passwords,
  setPasswords,
  submit,
+ sessions,
+ sessionsState,
+ onRevoke,
+ onRevokeOthers,
 }: {
  passwords: { current: string; next: string; confirm: string };
  setPasswords: (v: typeof passwords) => void;
  submit: (e: FormEvent) => void;
+ sessions: AccountSession[];
+ sessionsState: "idle" | "ok" | "error";
+ onRevoke: (id: string) => void;
+ onRevokeOthers: () => void;
 }) {
  const strong =
  passwords.next.length >= 8 &&
@@ -677,9 +717,63 @@ function Security({
  </div>
 
  <div className="rounded-xl border border-border p-5 dark:border-border">
+ <div className="flex items-start justify-between gap-4">
+ <div className="flex items-start gap-3">
+ <span className="rounded-xl bg-primary/10 p-2.5 text-primary">
+ <HugeiconsIcon icon={ShieldIcon} size={18} />
+ </span>
+ <div>
+ <h3 className="font-bold">Active sessions</h3>
+ <p className="mt-1 text-sm text-muted-foreground">
+ Sign out sessions you no longer recognize.
+ </p>
+ </div>
+ </div>
+ {sessionsState === "ok" && sessions.length > 1 && (
+ <button
+ onClick={onRevokeOthers}
+ className="shrink-0 rounded-xl border border-border px-4 py-2 text-sm font-semibold hover:bg-muted dark:border-border"
+ >
+ Sign out other devices
+ </button>
+ )}
+ </div>
+
+ <div className="mt-4">
+ {sessionsState === "error" ? (
+ <div className="rounded-xl bg-muted p-3 text-sm text-muted-foreground">
+ Session list could not be loaded right now. Your password controls above still work.
+ </div>
+ ) : sessions.length ? (
+ <div className="divide-y divide-border rounded-xl border border-border dark:border-border">
+ {sessions.map((s) => (
+ <div key={s.id} className="flex items-center justify-between gap-3 p-3">
+ <div className="min-w-0">
+ <p className="truncate text-sm font-semibold">Marketplace session</p>
+ <p className="mt-0.5 text-xs text-muted-foreground">
+ {s.created_at ? `Started ${new Date(s.created_at).toLocaleString()}` : "Start time unavailable"}
+ {s.expires_at ? ` · Expires ${new Date(s.expires_at).toLocaleString()}` : ""}
+ </p>
+ </div>
+ <button
+ onClick={() => onRevoke(s.id)}
+ className="shrink-0 rounded-lg border border-border px-3 py-1.5 text-xs font-semibold text-destructive hover:bg-destructive/10 dark:border-border"
+ >
+ Sign out
+ </button>
+ </div>
+ ))}
+ </div>
+ ) : (
+ <p className="text-sm text-muted-foreground">No other active sessions.</p>
+ )}
+ </div>
+ </div>
+
+ <div className="rounded-xl border border-border p-5 dark:border-border">
  <h3 className="font-bold">Account security status</h3>
  <p className="mt-2 text-sm leading-6 text-muted-foreground">
- Password changes are supported by the backend. Active-session management and two-factor authentication are not currently exposed as customer APIs, so this page does not show non-functional controls for them.
+ Password changes and active-session management are supported by the backend. Two-factor authentication is not currently exposed as a customer API, so this page does not show a non-functional control for it.
  </p>
  </div>
  </div>

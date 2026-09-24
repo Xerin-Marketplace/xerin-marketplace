@@ -33,10 +33,10 @@ function CheckoutHeader() {
  <div className="mx-auto flex h-16 max-w-[1220px] items-center justify-between px-4 sm:px-6 lg:px-8">
  <Link href="/" className="flex items-center" aria-label="Xerin Market home">
  <Image
- src="/images/logo/logo.png"
+ src="/images/logo/logooriginal.png"
  alt="Xerin Marketplace"
  width={120}
- height={36}
+ height={38}
  className="h-9 w-auto object-contain"
  />
  </Link>

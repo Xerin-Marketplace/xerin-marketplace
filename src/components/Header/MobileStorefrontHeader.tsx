@@ -2,199 +2,259 @@
 
 import React, { FormEvent, useState, useRef, useEffect } from "react";
 import Link from "next/link";
+import Image from "next/image";
 import { useRouter } from "next/navigation";
-import { useTheme } from "@/app/context/ThemeContext";
-import CurrencySelector from "./CurrencySelector";
 import { HugeiconsIcon } from "@hugeicons/react";
-import { GridIcon, Search01Icon, Cancel01Icon, Menu01Icon } from "@hugeicons/core-free-icons";
+import {
+  GridIcon,
+  Search01Icon,
+  Cancel01Icon,
+  Menu01Icon,
+  Location01Icon,
+  ShoppingCart01Icon,
+  UserIcon,
+  ArrowRight01Icon,
+} from "@hugeicons/core-free-icons";
+import { useAddresses } from "@/hooks/useAddresses";
 
 interface MobileStorefrontHeaderProps {
- onToggleCategories: () => void;
- onToggleMenu: () => void;
- isMenuOpen: boolean;
- isCategoriesOpen: boolean;
- isAuthenticated: boolean;
- accountHref: string;
- accountLabel: string;
+  onToggleCategories: () => void;
+  onToggleMenu: () => void;
+  isMenuOpen: boolean;
+  isCategoriesOpen: boolean;
+  isAuthenticated: boolean;
+  accountHref: string;
+  accountLabel: string;
+  cartCount: number;
+  onOpenCart: () => void;
 }
 
 export default function MobileStorefrontHeader({
- onToggleCategories,
- onToggleMenu,
- isMenuOpen,
- isCategoriesOpen,
- isAuthenticated,
- accountHref,
- accountLabel,
+  onToggleCategories,
+  onToggleMenu,
+  isMenuOpen,
+  isCategoriesOpen,
+  isAuthenticated,
+  accountHref,
+  accountLabel,
+  cartCount,
+  onOpenCart,
 }: MobileStorefrontHeaderProps) {
- const router = useRouter();
- const [query, setQuery] = useState("");
- const [isSearchOpen, setIsSearchOpen] = useState(false);
- const inputRef = useRef<HTMLInputElement>(null);
+  const router = useRouter();
+  const [query, setQuery] = useState("");
+  const [isSearchOpen, setIsSearchOpen] = useState(false);
+  const inputRef = useRef<HTMLInputElement>(null);
+  const { addresses } = useAddresses(isAuthenticated);
 
- // Auto focus input when modal opens
- useEffect(() => {
- if (isSearchOpen) {
- setTimeout(() => {
- inputRef.current?.focus();
- }, 100);
- }
- }, [isSearchOpen]);
+  const defaultAddress =
+    addresses.find((a) => a.is_default) ?? addresses[0] ?? null;
+  const locationLabel = defaultAddress
+    ? [defaultAddress.city, defaultAddress.region]
+        .filter(Boolean)
+        .join(", ")
+    : null;
 
- const submitSearch = (event: FormEvent<HTMLFormElement>) => {
- event.preventDefault();
- const value = query.trim();
- setIsSearchOpen(false);
- if (value) {
- router.push(`/search?q=${encodeURIComponent(value)}`);
- } else {
- router.push("/search");
- }
- };
+  useEffect(() => {
+    if (isSearchOpen) {
+      setTimeout(() => inputRef.current?.focus(), 100);
+    }
+  }, [isSearchOpen]);
 
- const handleQuickSearch = (term: string) => {
- setIsSearchOpen(false);
- router.push(`/search?q=${encodeURIComponent(term)}`);
- };
+  const submitSearch = (event: FormEvent<HTMLFormElement>) => {
+    event.preventDefault();
+    const value = query.trim();
+    setIsSearchOpen(false);
+    router.push(value ? `/search?q=${encodeURIComponent(value)}` : "/search");
+  };
 
- return (
- <>
- <div className="lg:hidden border-b border-border bg-card">
- <div className="px-3.5 pt-[max(8px,env(safe-area-inset-top))] pb-2.5">
- {/* Main Bar with Categories Toggle, Search Trigger Button, and Main Menu Toggle */}
- <div className="flex items-center justify-between gap-2">
- {/* Toggle 1: Categories Button */}
- <button
- type="button"
- onClick={onToggleCategories}
- aria-label="Open categories menu"
- className={`flex h-9.5 items-center gap-1.5 rounded-lg border px-3 text-xs font-semibold transition-colors ${
- isCategoriesOpen
- ? "border-primary bg-orange text-white"
- : "border-border bg-muted/60 text-foreground hover:border-primary hover:text-primary "
- }`}
- >
- <HugeiconsIcon icon={GridIcon} size={16} className="shrink-0" />
- <span>Categories</span>
- </button>
+  const handleQuickSearch = (term: string) => {
+    setIsSearchOpen(false);
+    router.push(`/search?q=${encodeURIComponent(term)}`);
+  };
 
- {/* Centered Search Trigger Button */}
- <button
- type="button"
- onClick={() => setIsSearchOpen(true)}
- aria-label="Search products"
- className="flex h-9.5 flex-1 items-center justify-between rounded-lg border border-border bg-muted/60 px-3 text-xs text-muted-foreground transition-colors hover:border-primary /60"
- >
- <span className="truncate">Search products, brands...</span>
- <div className="flex size-7 items-center justify-center rounded-md bg-orange text-white">
- <HugeiconsIcon icon={Search01Icon} size={14} />
- </div>
- </button>
+  return (
+    <>
+      <div className="lg:hidden border-b border-border bg-card">
+        <div className="px-3.5 pt-[max(6px,env(safe-area-inset-top))] pb-2.5">
+          {/* Row 1: menu, logo, account, cart */}
+          <div className="flex items-center justify-between gap-2">
+            <button
+              type="button"
+              onClick={onToggleMenu}
+              aria-label="Toggle main menu"
+              className={`flex h-10 w-10 shrink-0 items-center justify-center rounded-xl border transition-colors ${
+                isMenuOpen
+                  ? "border-primary bg-orange text-white"
+                  : "border-border bg-muted/60 text-foreground hover:border-primary hover:text-primary"
+              }`}
+            >
+              <HugeiconsIcon
+                icon={isMenuOpen ? Cancel01Icon : Menu01Icon}
+                size={18}
+              />
+            </button>
 
- {/* Toggle 2: Main Menu Hamburger Button */}
- <button
- type="button"
- onClick={onToggleMenu}
- aria-label="Toggle main menu"
- className={`flex h-9.5 w-9.5 shrink-0 items-center justify-center rounded-lg border transition-colors ${
- isMenuOpen
- ? "border-primary bg-orange text-white"
- : "border-border bg-muted/60 text-foreground hover:border-primary hover:text-primary "
- }`}
- >
- {isMenuOpen ? (
- <HugeiconsIcon icon={Cancel01Icon} size={18} />
- ) : (
- <HugeiconsIcon icon={Menu01Icon} size={18} />
- )}
- </button>
- </div>
- </div>
- </div>
+            <Link href="/" className="flex min-w-0 flex-1 items-center justify-center px-1" aria-label="Xerin Marketplace home">
+              <Image
+                src="/images/logo/logooriginal.png"
+                alt="Xerin Marketplace"
+                width={150}
+                height={48}
+                className="h-8 w-auto object-contain"
+                priority
+              />
+            </Link>
 
- {/* Centered Search Modal Dialog */}
- {isSearchOpen && (
- <div className="fixed inset-0 z-[99999] flex items-center justify-center p-4">
- {/* Backdrop */}
- <div
- className="fixed inset-0 bg-black/60 backdrop-blur-sm transition-opacity"
- onClick={() => setIsSearchOpen(false)}
- />
+            <Link
+              href={accountHref}
+              aria-label={accountLabel}
+              className="flex h-10 w-10 shrink-0 items-center justify-center rounded-xl border border-border bg-muted/60 text-foreground transition-colors hover:border-primary hover:text-primary"
+            >
+              <HugeiconsIcon icon={UserIcon} size={18} />
+            </Link>
 
- {/* Centered Modal Content */}
- <div className="relative z-10 w-full max-w-md rounded-2xl border border-border bg-card p-5 shadow-lg animate-in fade-in zoom-in-95 duration-200">
- {/* Modal Header */}
- <div className="mb-4 flex items-center justify-between">
- <div className="flex items-center gap-2">
- <div className="flex size-8 items-center justify-center rounded-full bg-primary/10 text-primary">
- <HugeiconsIcon icon={Search01Icon} size={14} />
- </div>
- <h3 className="font-bold text-base text-foreground">
- Search Products
- </h3>
- </div>
- <button
- type="button"
- onClick={() => setIsSearchOpen(false)}
- className="flex size-8 items-center justify-center rounded-full text-muted-foreground hover:bg-muted /60 dark:hover:bg-card/10"
- >
- <HugeiconsIcon icon={Cancel01Icon} size={18} />
- </button>
- </div>
+            <button
+              type="button"
+              onClick={onOpenCart}
+              aria-label="Open cart"
+              className="relative flex h-10 w-10 shrink-0 items-center justify-center rounded-xl border border-border bg-muted/60 text-foreground transition-colors hover:border-primary hover:text-primary"
+            >
+              <HugeiconsIcon icon={ShoppingCart01Icon} size={18} />
+              {cartCount > 0 && (
+                <span className="absolute -right-1.5 -top-1.5 flex h-5 min-w-5 items-center justify-center rounded-full bg-orange px-1 text-[10px] font-bold text-white">
+                  {cartCount > 99 ? "99+" : cartCount}
+                </span>
+              )}
+            </button>
+          </div>
 
- {/* Search Form */}
- <form onSubmit={submitSearch}>
- <div className="relative mb-4">
- <input
- ref={inputRef}
- value={query}
- onChange={(e) => setQuery(e.target.value)}
- type="search"
- placeholder="Type product name, brand, or category..."
- className="h-12 w-full rounded-xl border-2 border-primary/40 bg-muted/60 pl-4 pr-12 text-sm text-foreground outline-none transition-colors focus:border-primary dark:focus:border-primary"
- />
- {query && (
- <button
- type="button"
- onClick={() => setQuery("")}
- className="absolute right-12 top-1/2 -translate-y-1/2 text-muted-foreground hover:text-foreground/40 dark:hover:text-white"
- >
- <HugeiconsIcon icon={Cancel01Icon} size={18} />
- </button>
- )}
- <button
- type="submit"
- aria-label="Search"
- className="absolute right-1.5 top-1/2 flex h-9 w-9 -translate-y-1/2 items-center justify-center rounded-lg bg-orange text-white shadow transition hover:bg-primary/90"
- >
- <HugeiconsIcon icon={Search01Icon} size={14} />
- </button>
- </div>
- </form>
+          {/* Row 2: delivery location */}
+          <Link
+            href={isAuthenticated ? "/account/addresses" : "/signin?returnTo=/account/addresses"}
+            className="mt-2 flex items-center gap-1.5 rounded-lg py-1 text-xs text-muted-foreground transition-colors hover:text-primary"
+          >
+            <HugeiconsIcon icon={Location01Icon} size={14} className="shrink-0 text-primary" />
+            <span className="truncate">
+              {locationLabel ? (
+                <>
+                  Deliver to <b className="font-semibold text-foreground">{locationLabel}</b>
+                </>
+              ) : (
+                "Set your delivery location"
+              )}
+            </span>
+            <HugeiconsIcon icon={ArrowRight01Icon} size={12} className="ml-auto shrink-0" />
+          </Link>
 
- {/* Popular Searches / Quick Suggestions */}
- <div>
- <p className="mb-2 text-xs font-semibold text-muted-foreground /50">
- Popular Searches:
- </p>
- <div className="flex flex-wrap gap-1.5">
- {["Laptops", "Shoes", "Phones", "Watches", "Dresses", "Electronics", "Beauty"].map(
- (term) => (
- <button
- key={term}
- type="button"
- onClick={() => handleQuickSearch(term)}
- className="rounded-full border border-border bg-muted/60 px-3 py-1 text-xs font-medium text-foreground transition-colors hover:border-primary hover:bg-primary/10 hover:text-primary dark:hover:text-primary"
- >
- {term}
- </button>
- )
- )}
- </div>
- </div>
- </div>
- </div>
- )}
- </>
- );
+          {/* Row 3: categories + search */}
+          <div className="mt-1.5 flex items-center gap-2">
+            <button
+              type="button"
+              onClick={onToggleCategories}
+              aria-label="Open categories menu"
+              className={`flex h-10 shrink-0 items-center gap-1.5 rounded-xl border px-3 text-xs font-semibold transition-colors ${
+                isCategoriesOpen
+                  ? "border-primary bg-orange text-white"
+                  : "border-border bg-muted/60 text-foreground hover:border-primary hover:text-primary"
+              }`}
+            >
+              <HugeiconsIcon icon={GridIcon} size={16} className="shrink-0" />
+              <span>Categories</span>
+            </button>
+
+            <button
+              type="button"
+              onClick={() => setIsSearchOpen(true)}
+              aria-label="Search products"
+              className="flex h-10 flex-1 items-center justify-between rounded-xl border border-border bg-muted/60 px-3 text-xs text-muted-foreground transition-colors hover:border-primary"
+            >
+              <span className="truncate">Search products, brands...</span>
+              <div className="flex size-7 items-center justify-center rounded-lg bg-orange text-white">
+                <HugeiconsIcon icon={Search01Icon} size={14} />
+              </div>
+            </button>
+          </div>
+        </div>
+      </div>
+
+      {/* Centered Search Modal Dialog */}
+      {isSearchOpen && (
+        <div className="fixed inset-0 z-[99999] flex items-center justify-center p-4">
+          <div
+            className="fixed inset-0 bg-black/60 backdrop-blur-sm transition-opacity"
+            onClick={() => setIsSearchOpen(false)}
+          />
+
+          <div className="relative z-10 w-full max-w-md rounded-2xl border border-border bg-card p-5 shadow-lg animate-in fade-in zoom-in-95 duration-200">
+            <div className="mb-4 flex items-center justify-between">
+              <div className="flex items-center gap-2">
+                <div className="flex size-8 items-center justify-center rounded-full bg-primary/10 text-primary">
+                  <HugeiconsIcon icon={Search01Icon} size={14} />
+                </div>
+                <h3 className="font-bold text-base text-foreground">
+                  Search Products
+                </h3>
+              </div>
+              <button
+                type="button"
+                onClick={() => setIsSearchOpen(false)}
+                className="flex size-8 items-center justify-center rounded-full text-muted-foreground hover:bg-muted dark:hover:bg-card/10"
+              >
+                <HugeiconsIcon icon={Cancel01Icon} size={18} />
+              </button>
+            </div>
+
+            <form onSubmit={submitSearch}>
+              <div className="relative mb-4">
+                <input
+                  ref={inputRef}
+                  value={query}
+                  onChange={(e) => setQuery(e.target.value)}
+                  type="search"
+                  placeholder="Type product name, brand, or category..."
+                  className="h-12 w-full rounded-xl border-2 border-primary/40 bg-muted/60 pl-4 pr-12 text-sm text-foreground outline-none transition-colors focus:border-primary dark:focus:border-primary"
+                />
+                {query && (
+                  <button
+                    type="button"
+                    onClick={() => setQuery("")}
+                    className="absolute right-12 top-1/2 -translate-y-1/2 text-muted-foreground hover:text-foreground"
+                  >
+                    <HugeiconsIcon icon={Cancel01Icon} size={18} />
+                  </button>
+                )}
+                <button
+                  type="submit"
+                  aria-label="Search"
+                  className="absolute right-1.5 top-1/2 flex h-9 w-9 -translate-y-1/2 items-center justify-center rounded-lg bg-orange text-white shadow transition hover:bg-primary/90"
+                >
+                  <HugeiconsIcon icon={Search01Icon} size={14} />
+                </button>
+              </div>
+            </form>
+
+            <div>
+              <p className="mb-2 text-xs font-semibold text-muted-foreground">
+                Popular Searches:
+              </p>
+              <div className="flex flex-wrap gap-1.5">
+                {["Laptops", "Shoes", "Phones", "Watches", "Dresses", "Electronics", "Beauty"].map(
+                  (term) => (
+                    <button
+                      key={term}
+                      type="button"
+                      onClick={() => handleQuickSearch(term)}
+                      className="rounded-full border border-border bg-muted/60 px-3 py-1 text-xs font-medium text-foreground transition-colors hover:border-primary hover:bg-primary/10 hover:text-primary dark:hover:text-primary"
+                    >
+                      {term}
+                    </button>
+                  ),
+                )}
+              </div>
+            </div>
+          </div>
+        </div>
+      )}
+    </>
+  );
 }

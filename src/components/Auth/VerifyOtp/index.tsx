@@ -226,7 +226,7 @@ const VerifyOtp = () => {
  <div className="flex items-center justify-between">
  <Link href="/" className="inline-flex w-fit items-center gap-2">
  <Image
- src="/images/logo/logo.png"
+ src="/images/logo/xerin-logo-mark.png"
  alt="Xerin Marketplace"
  width={30}
  height={30}

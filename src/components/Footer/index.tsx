@@ -65,11 +65,11 @@ const Footer = () => {
  <div className="flex flex-col gap-5">
  <Link href="/" className="flex items-center transition-opacity hover:opacity-90">
  <Image
- src="/images/logo/logo.png"
+ src="/images/logo/logooriginal.png"
  alt="Xerin Marketplace"
  width={150}
- height={45}
- className="object-contain"
+ height={48}
+ className="h-11 w-auto object-contain"
  />
  </Link>
  <p className="max-w-xs text-sm text-muted-foreground text-pretty">

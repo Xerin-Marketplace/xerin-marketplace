@@ -1,4 +1,5 @@
 import type { Metadata } from "next";
+import { notFound } from "next/navigation";
 import { StoreClient } from "./StoreClient";
 import { siteConfig } from "@/lib/site-config";
 import { API_BASE_URL } from "@/lib/api/endpoints";
@@ -34,9 +35,7 @@ export async function generateMetadata({ params }: RouteParams): Promise<Metadat
   const { storeId } = await params;
   const store = await fetchStore(storeId);
 
-  if (!store) {
-    return { title: "Store Not Found", robots: { index: false, follow: false } };
-  }
+  if (!store) notFound();
 
   const title = store.seo_title || `${store.store_name} | ${siteConfig.name}`;
   const description = truncate(
@@ -60,10 +59,10 @@ export async function generateMetadata({ params }: RouteParams): Promise<Metadat
 export default async function StorefrontPage({ params }: RouteParams) {
   const { storeId } = await params;
   const store = await fetchStore(storeId);
+  if (!store) notFound();
 
   return (
     <>
-      {store ? (
         <JsonLd
           data={[
             {
@@ -82,7 +81,6 @@ export default async function StorefrontPage({ params }: RouteParams) {
             ]),
           ]}
         />
-      ) : null}
       <StoreClient />
     </>
   );

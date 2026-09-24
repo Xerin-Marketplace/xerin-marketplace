@@ -153,6 +153,8 @@ const CategoryMegaMenu: React.FC<CategoryMegaMenuProps> = ({ isOpen, onClose }) 
  href={
  selectedCategoryId === "all"
  ? "/shop-with-sidebar"
+ : activeCategory?.slug
+ ? `/category/${activeCategory.slug}`
  : `/shop-with-sidebar?category_id=${encodeURIComponent(selectedCategoryId)}`
  }
  onClick={onClose}

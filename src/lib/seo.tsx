@@ -22,7 +22,7 @@ export const organizationJsonLd = () => ({
   "@type": "Organization",
   name: siteConfig.name,
   url: siteConfig.url,
-  logo: `${siteConfig.url}/images/logo/logo.png`,
+  logo: `${siteConfig.url}/images/logo/xerin-logo-mark.png`,
   contactPoint: {
     "@type": "ContactPoint",
     email: siteConfig.contact.email,
@@ -98,6 +98,58 @@ export function breadcrumbJsonLd(items: Array<{ name: string; url: string }>) {
       position: i + 1,
       name: item.name,
       item: item.url.startsWith("http") ? item.url : `${siteConfig.url}${item.url}`,
+    })),
+  };
+}
+
+export const canonicalUrl = (path = "/"): string => {
+  const clean = path === "/" ? "" : path.replace(/\/+$/, "");
+  return `${siteConfig.url}${clean}`;
+};
+
+export const pageMetadata = ({
+  title,
+  description,
+  path = "/",
+  image,
+  noindex = false,
+  ogType = "website",
+}: {
+  title: string;
+  description: string;
+  path?: string;
+  image?: string;
+  noindex?: boolean;
+  ogType?: "website" | "article";
+}): Metadata => {
+  const url = canonicalUrl(path);
+  const images = [{ url: image || `${siteConfig.url}/images/logo/logooriginal.png` }];
+  return {
+    title,
+    description: truncate(description),
+    alternates: { canonical: url },
+    robots: noindex ? { index: false, follow: false } : { index: true, follow: true },
+    openGraph: { type: ogType, url, title, description: truncate(description), images, siteName: siteConfig.name },
+    twitter: { card: "summary_large_image", title, description: truncate(description), images: images.map((i) => i.url) },
+  };
+};
+
+export function itemListJsonLd(
+  items: Array<{ name: string; url: string; image?: string }>,
+  listName: string,
+) {
+  return {
+    "@context": "https://schema.org",
+    "@type": "ItemList",
+    name: listName,
+    itemListOrder: "https://schema.org/ItemListOrderDescending",
+    numberOfItems: items.length,
+    itemListElement: items.map((item, index) => ({
+      "@type": "ListItem",
+      position: index + 1,
+      url: item.url.startsWith("http") ? item.url : canonicalUrl(item.url),
+      name: item.name,
+      ...(item.image ? { image: item.image } : {}),
     })),
   };
 }

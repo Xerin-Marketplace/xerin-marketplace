@@ -71,4 +71,15 @@ export const advertisementsApi = {
         signal,
       })
     ).data,
+
+  slotsFor: async (
+    signal: AbortSignal | undefined,
+    placements: PublicAdvertisementPlacement[],
+  ): Promise<PublicAdvertisementSlot[]> =>
+    (
+      await axiosInstance.get<PublicAdvertisementSlot[]>("/advertisements/slots", {
+        signal,
+        params: { placements },
+      })
+    ).data,
 };

@@ -94,6 +94,8 @@ const Header = () => {
  isAuthenticated={isAuthenticated}
  accountHref={accountHref}
  accountLabel={accountLabel}
+ cartCount={cartItems.length}
+ onOpenCart={handleOpenCartModal}
  />
  <div className="hidden lg:block max-w-[1440px] mx-auto px-4 sm:px-6 lg:px-8 xl:px-10 2xl:px-6">
  {/* <!-- header top start --> */}
@@ -106,10 +108,10 @@ const Header = () => {
  <div className="xl:w-auto flex w-full justify-between items-center gap-4 lg:gap-10">
  <Link className="flex-shrink-0 flex items-center" href="/">
  <Image
- src="/images/logo/logo.png"
+ src="/images/logo/logooriginal.png"
  alt="Xerin Marketplace logo"
  width={132}
- height={40}
+ height={42}
  className="object-contain"
  style={{ width: "70px", height: "auto" }}
  priority

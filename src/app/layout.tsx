@@ -1,11 +1,16 @@
 import type { Metadata, Viewport } from "next";
-import { Inter } from "next/font/google";
+import localFont from "next/font/local";
 import { siteConfig } from "@/lib/site-config";
 import { JsonLd, organizationJsonLd, websiteJsonLd } from "@/lib/seo";
 import "./css/style.css";
 
-const inter = Inter({
- subsets: ["latin"],
+const inter = localFont({
+ src: [
+ { path: "./fonts/EuclidCircularA-Regular.woff2", weight: "400", style: "normal" },
+ { path: "./fonts/EuclidCircularA-Medium.woff2", weight: "500", style: "normal" },
+ { path: "./fonts/EuclidCircularA-SemiBold.woff2", weight: "600", style: "normal" },
+ { path: "./fonts/EuclidCircularA-Bold.woff2", weight: "700", style: "normal" },
+ ],
  display: "swap",
  variable: "--font-inter",
 });

@@ -307,7 +307,7 @@ export default function OrderSuccessPage() {
  <div className="mx-auto max-w-2xl space-y-4 px-3 sm:space-y-5 sm:px-4">
  <div className="flex items-center justify-between gap-3 px-1 py-1">
  <Link href="/" className="inline-flex items-center">
- <img src="/images/logo/logo.png" alt="Xerin Marketplace" className="h-9 w-auto sm:h-11" />
+ <img src="/images/logo/logooriginal.png" alt="Xerin Marketplace" className="h-9 w-auto sm:h-11" />
  </Link>
  <span className="rounded-full bg-card px-3 py-1.5 text-[10px] font-bold uppercase tracking-wide text-muted-foreground shadow-sm">Secure order</span>
  </div>

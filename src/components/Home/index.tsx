@@ -6,6 +6,7 @@ import FeaturedProducts from "./FeaturedProducts";
 import BestSellers from "./BestSellers";
 import WhyChooseXerin from "./WhyChooseXerin";
 import DiscoveryRails from "./DiscoveryRails";
+import MarketRails from "./MarketRails";
 
 const Home = () => {
  return (
@@ -16,6 +17,7 @@ const Home = () => {
  for the current user (recently viewed / recommendations). */}
  <DiscoveryRails />
  <FlashDeals />
+ <MarketRails />
  <FeaturedProducts />
  <BestSellers />
  <WhyChooseXerin />

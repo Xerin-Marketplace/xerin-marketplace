@@ -90,6 +90,7 @@ const nextConfig = {
     "backendtest.adam.com",
     "169.58.54.110",
     "10.68.43.235",
+    "10.68.43.234",
   ],
 
   async rewrites() {

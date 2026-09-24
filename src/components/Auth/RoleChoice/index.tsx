@@ -79,10 +79,10 @@ export default function RoleChoice() {
  <div className="mx-auto mb-7 flex justify-center sm:mb-8">
  <button type="button" onClick={() => router.push("/")} aria-label="Go to XerinMarket home">
  <Image
- src="/images/logo/logo.png"
+ src="/images/logo/logooriginal.png"
  alt="XerinMarket"
  width={170}
- height={58}
+ height={54}
  className="h-auto w-[145px] object-contain sm:w-[165px]"
  priority
  />
