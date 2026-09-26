@@ -1284,6 +1284,11 @@ export const listProductReviews = async (params: { status?: string } = {}): Prom
   return Array.isArray(payload.results) ? payload.results : [];
 };
 
+export type ProductReviewStatus = "pending" | "approved" | "rejected" | "hidden" | "reported";
+
+export const moderateProductReview = async (id: string, payload: { status: ProductReviewStatus; reason?: string }): Promise<ProductReview> =>
+  (await axiosInstance.patch<ProductReview>(`/admin/reviews/${id}/moderate`, payload)).data;
+
 export type FinanceSummary = {
   totalRevenue: number;
   totalCommissions: number;
@@ -1407,6 +1412,7 @@ export const adminService = {
   updateProductCategory,
   deleteProductCategory,
   listProductReviews,
+  moderateProductReview,
 };
 
 
