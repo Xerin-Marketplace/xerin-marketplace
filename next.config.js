@@ -110,7 +110,8 @@ const nextConfig = {
     const csp = [
       "default-src 'self'",
 
-      "script-src 'self' 'unsafe-eval' 'unsafe-inline'",
+      // accounts.google.com: GIS script for "Continue with Google".
+      "script-src 'self' 'unsafe-eval' 'unsafe-inline' https://accounts.google.com",
 
       "style-src 'self' 'unsafe-inline'",
 
@@ -125,10 +126,11 @@ const nextConfig = {
 
       "font-src 'self' data:",
 
-      // Frontend API calls
+      // Frontend API calls + Google sign-in endpoints.
       `connect-src 'self' ${apiCspSource} https:`,
 
-      "frame-src 'self' blob:",
+      // Google One Tap / sign-in prompt iframe.
+      "frame-src 'self' blob: https://accounts.google.com",
 
       "object-src 'none'",
 
