@@ -42,8 +42,8 @@ const SingleGridItem = ({ item }: { item: Product }) => {
 
  return (
  <div className="group">
- <div className="relative overflow-hidden flex items-center justify-center rounded-lg bg-card shadow-1 min-h-[270px] mb-4">
- <Image src={item.imgs.previews[0]} alt="" width={250} height={250} />
+ <div className="relative overflow-hidden flex items-center justify-center rounded-lg bg-card shadow-1 min-h-[150px] sm:min-h-[220px] lg:min-h-[270px] mb-2.5 sm:mb-4">
+ <Image src={item.imgs.previews[0]} alt="" width={250} height={250} className="w-full max-w-[120px] sm:max-w-[200px] lg:max-w-[250px] h-auto object-contain" />
 
  <div className="absolute left-0 bottom-0 translate-y-full w-full flex items-center justify-center gap-2.5 pb-5 ease-linear duration-200 group-hover:translate-y-0">
  <button
@@ -82,11 +82,11 @@ const SingleGridItem = ({ item }: { item: Product }) => {
  <StarRating rating={item.rating} reviewCount={item.reviewCount ?? item.reviews} size={15} />
  </div>
 
- <h3 className="font-medium text-foreground ease-out duration-200 hover:text-primary mb-1.5">
+ <h3 className="font-medium text-sm sm:text-base leading-snug text-foreground ease-out duration-200 hover:text-primary mb-1.5 line-clamp-2">
  <Link href={`/products/${item.id}`}> {item.title} </Link>
  </h3>
 
- <span className="flex items-center gap-2 font-medium text-lg">
+ <span className="flex flex-wrap items-center gap-x-2 gap-y-0.5 font-medium text-base sm:text-lg">
  <span className="text-foreground"><PriceDisplay amount={item.discountedPrice} sourceCurrency={item.currency} /></span>
  <span className="text-muted-foreground line-through"><PriceDisplay amount={item.price} sourceCurrency={item.currency} /></span>
  </span>

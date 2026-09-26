@@ -135,7 +135,65 @@ export default function Cart() {
 
  <div className="grid gap-6 xl:grid-cols-[1fr_390px]">
  <div className="space-y-6">
- <div className="overflow-x-auto rounded-2xl bg-card shadow-sm">
+ <div className="space-y-3 sm:hidden">
+ {cart.items.map((item) => (
+ <div
+ key={item.cartItemId}
+ className="rounded-2xl bg-card p-4 shadow-sm"
+ >
+ <div className="flex items-start justify-between gap-3">
+ <div className="min-w-0">
+ <Link
+ className="font-semibold text-sm leading-snug line-clamp-2 hover:text-primary"
+ href={`/products/${item.productId}`}
+ >
+ {item.title}
+ </Link>
+ {item.sellerName && (
+ <p className="mt-0.5 text-[11px] text-muted-foreground">
+ Sold by {item.sellerName}
+ </p>
+ )}
+ </div>
+ <button
+ disabled={busy}
+ onClick={() => remove.mutate(item.cartItemId)}
+ aria-label="Remove item"
+ className="shrink-0 p-1.5 text-muted-foreground disabled:opacity-40"
+ >
+ <svg width="18" height="18" viewBox="0 0 24 24" fill="none" className="stroke-current">
+ <path d="M6 6l12 12M18 6L6 18" strokeWidth="2" strokeLinecap="round" />
+ </svg>
+ </button>
+ </div>
+ <div className="mt-3 flex items-center justify-between">
+ <div className="inline-flex items-center overflow-hidden rounded-xl border border-border">
+ <button
+ disabled={busy || item.quantity <= 1}
+ onClick={() => update.mutate({ itemId: item.cartItemId, quantity: item.quantity - 1 })}
+ className="px-3 py-2 disabled:opacity-40"
+ >−</button>
+ <span className="border-x border-border px-4 py-2">{item.quantity}</span>
+ <button
+ disabled={busy}
+ onClick={() => update.mutate({ itemId: item.cartItemId, quantity: item.quantity + 1 })}
+ className="px-3 py-2 disabled:opacity-40"
+ >+</button>
+ </div>
+ <div className="text-right">
+ <p className="text-[11px] text-muted-foreground">
+ {formatCurrency(item.discountedPrice, cart.currency)} each
+ </p>
+ <p className="font-bold">
+ {formatCurrency(item.discountedPrice * item.quantity, cart.currency)}
+ </p>
+ </div>
+ </div>
+ </div>
+ ))}
+ </div>
+
+ <div className="hidden overflow-x-auto rounded-2xl bg-card shadow-sm sm:block">
  <table className="w-full min-w-[850px] text-left">
  <thead className="bg-muted text-xs font-bold uppercase tracking-wide text-muted-foreground dark:bg-muted">
  <tr>
