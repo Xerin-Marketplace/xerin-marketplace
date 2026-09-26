@@ -46,15 +46,20 @@ export async function generateMetadata({ params }: RouteParams): Promise<Metadat
       `Shop products from ${store.store_name} on ${siteConfig.name}.`,
   );
   const url = `${siteConfig.url}/stores/${store.slug || store.id}`;
-  const image = store.banner_url || store.logo_url;
-  const images = image ? [{ url: resolveProductImageUrl(image), alt: store.store_name }] : undefined;
+  const ogCard = `${siteConfig.url}/og/store/${store.slug || store.id}`;
 
   return {
     title,
     description,
     alternates: { canonical: url },
-    openGraph: { type: "website", url, title, description, images },
-    twitter: { card: "summary_large_image", title, description },
+    openGraph: {
+      type: "website",
+      url,
+      title,
+      description,
+      images: [{ url: ogCard, width: 1200, height: 630, alt: store.store_name }],
+    },
+    twitter: { card: "summary_large_image", title, description, images: [ogCard] },
   };
 }
 

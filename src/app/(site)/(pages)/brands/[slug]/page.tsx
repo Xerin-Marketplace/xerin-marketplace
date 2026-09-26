@@ -61,12 +61,13 @@ export async function generateMetadata({ params }: RouteParams): Promise<Metadat
     `Shop ${brand.name} products from verified sellers on ${siteConfig.name}. Protected checkout, delivery quotes and order tracking.`,
   );
   const url = canonicalUrl(`/brands/${brand.slug}`);
+  const ogCard = `${siteConfig.url}/og/brand/${brand.slug}`;
   return {
     title,
     description,
     alternates: { canonical: url },
-    openGraph: { title, description, url },
-    twitter: { card: "summary", title, description },
+    openGraph: { title, description, url, images: [{ url: ogCard, width: 1200, height: 630 }] },
+    twitter: { card: "summary_large_image", title, description, images: [ogCard] },
   };
 }
 

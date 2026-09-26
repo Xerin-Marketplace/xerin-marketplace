@@ -134,7 +134,14 @@ export const pageMetadata = ({
   ogType?: "website" | "article";
 }): Metadata => {
   const url = canonicalUrl(path);
-  const images = [{ url: image || `${siteConfig.url}/images/logo/logooriginal.png` }];
+  // Site-relative image paths (e.g. /og/product/123) resolve to absolute
+  // URLs — crawlers require absolute og:image values.
+  const imageUrl = image
+    ? image.startsWith("http")
+      ? image
+      : `${siteConfig.url}${image}`
+    : `${siteConfig.url}/og/fallback`;
+  const images = [{ url: imageUrl }];
   return {
     title,
     description: truncate(description),

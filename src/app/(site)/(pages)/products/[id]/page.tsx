@@ -56,6 +56,9 @@ export async function generateMetadata({ params }: RouteParams): Promise<Metadat
   );
   const url = `${siteConfig.url}/products/${product.slug || product.id}`;
   const images = productImages(product);
+  // Branded 1200×630 card first — social platforms use the first og:image;
+  // raw product photos stay as additional images.
+  const ogCard = `${siteConfig.url}/og/product/${product.slug || product.id}`;
 
   return {
     title,
@@ -66,9 +69,12 @@ export async function generateMetadata({ params }: RouteParams): Promise<Metadat
       url,
       title,
       description,
-      images: images.map((src) => ({ url: src, alt: product.name })),
+      images: [
+        { url: ogCard, width: 1200, height: 630, alt: product.name },
+        ...images.map((src) => ({ url: src, alt: product.name })),
+      ],
     },
-    twitter: { card: "summary_large_image", title, description, images },
+    twitter: { card: "summary_large_image", title, description, images: [ogCard] },
   };
 }
 

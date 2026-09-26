@@ -78,12 +78,15 @@ export async function generateMetadata({ params }: RouteParams): Promise<Metadat
       url,
       title,
       description,
-      images: category.image_url
-        ? [{ url: resolveProductImageUrl(category.image_url), alt: category.name }]
-        : undefined,
+      images: [{ url: `${siteConfig.url}/og/category/${category.slug}`, width: 1200, height: 630, alt: category.name }],
       siteName: siteConfig.name,
     },
-    twitter: { card: "summary_large_image", title, description },
+    twitter: {
+      card: "summary_large_image",
+      title,
+      description,
+      images: [`${siteConfig.url}/og/category/${category.slug}`],
+    },
   };
 }
 
