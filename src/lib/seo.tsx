@@ -58,6 +58,8 @@ type ProductLdInput = {
   categoryName?: string | null;
   inStock: boolean;
   sellerName?: string | null;
+  rating?: number | null;
+  reviewCount?: number | null;
 };
 
 export function productJsonLd(p: ProductLdInput) {
@@ -73,6 +75,15 @@ export function productJsonLd(p: ProductLdInput) {
     ...(p.brand ? { brand: { "@type": "Brand", name: p.brand } } : {}),
     ...(p.categoryName
       ? { category: p.categoryName }
+      : {}),
+    ...(p.rating != null && p.reviewCount && p.reviewCount > 0
+      ? {
+          aggregateRating: {
+            "@type": "AggregateRating",
+            ratingValue: p.rating,
+            reviewCount: p.reviewCount,
+          },
+        }
       : {}),
     offers: {
       "@type": "Offer",

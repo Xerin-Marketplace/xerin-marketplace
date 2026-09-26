@@ -1,4 +1,5 @@
 import Home from "@/components/Home";
+import { JsonLd, organizationJsonLd, websiteJsonLd } from "@/lib/seo";
 import { Metadata } from "next";
 
 export const metadata: Metadata = {
@@ -11,6 +12,7 @@ export const metadata: Metadata = {
 export default function HomePage() {
  return (
  <>
+ <JsonLd data={[organizationJsonLd(), websiteJsonLd()]} />
  <Home />
  </>
  );

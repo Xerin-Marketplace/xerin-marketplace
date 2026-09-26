@@ -96,6 +96,8 @@ export default async function ProductDetailsPage({ params }: RouteParams) {
               categoryName: product.category?.name ?? null,
               inStock: product.marketplace_available !== false,
               sellerName: null,
+              rating: product.rating != null ? Number(product.rating) : null,
+              reviewCount: product.review_count != null ? Number(product.review_count) : null,
             }),
             breadcrumbJsonLd([
               { name: "Home", url: "/" },

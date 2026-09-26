@@ -7,6 +7,7 @@ const REVALIDATE_SECONDS = 3600;
 type SitemapProduct = { slug?: string | null; id?: string | number; updated_at?: string | null };
 type SitemapCategory = { slug?: string | null; id?: string | number; parent_id?: string | number | null };
 type SitemapStore = { slug?: string | null; id?: string | number; is_public?: boolean };
+type SitemapBrand = { slug?: string | null; id?: string | number };
 
 async function fetchJson<T>(path: string): Promise<T | null> {
   try {
@@ -30,6 +31,7 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
     { path: "", priority: 1.0, freq: "daily" },
     { path: "/shop-with-sidebar", priority: 0.9, freq: "daily" },
     { path: "/shop-without-sidebar", priority: 0.8, freq: "daily" },
+    { path: "/brands", priority: 0.7, freq: "weekly" },
     { path: "/track", priority: 0.5, freq: "monthly" },
     { path: "/contact", priority: 0.6, freq: "monthly" },
     { path: "/help", priority: 0.6, freq: "monthly" },
@@ -53,11 +55,22 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
     });
   }
 
-  const [products, categories, stores] = await Promise.all([
+  const [products, categories, stores, brands] = await Promise.all([
     fetchJson<SitemapProduct[]>("/products?limit=1000"),
     fetchJson<SitemapCategory[]>("/products/categories"),
     fetchJson<{ results?: SitemapStore[] } | SitemapStore[]>("/stores?limit=500"),
+    fetchJson<SitemapBrand[]>("/products/brands"),
   ]);
+
+  for (const brand of brands ?? []) {
+    if (!brand.slug) continue;
+    entries.push({
+      url: `${siteConfig.url}/brands/${encodeURIComponent(String(brand.slug))}`,
+      lastModified,
+      changeFrequency: "weekly",
+      priority: 0.6,
+    });
+  }
 
   for (const category of categories ?? []) {
     if (!category.slug) continue;
