@@ -27,6 +27,7 @@ import { useClearCart } from "@/hooks/useCartActions";
 import { Suspense } from "react";
 import GoogleOneTap from "@/components/Auth/GoogleOneTap";
 import AuthPrompt from "@/components/Auth/AuthPrompt";
+import AppBanner from "@/components/Engagement/AppBanner";
 
 function CheckoutHeader() {
  const clearCart = useClearCart();
@@ -135,6 +136,7 @@ export default function RootLayout({
  <Suspense fallback={null}>
  <GoogleOneTap />
  <AuthPrompt />
+ <AppBanner />
  </Suspense>
  </>
  )}

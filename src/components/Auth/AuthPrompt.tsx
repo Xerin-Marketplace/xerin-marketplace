@@ -11,6 +11,7 @@ import { ApiError } from "@/lib/api/client";
 import { useAuth } from "@/hooks/useAuth";
 import { useAuthStore } from "@/store/useAuthStore";
 import { getPostLoginPath } from "@/guards/auth-routing";
+import { EngagementRules, claimPrompt, releasePrompt, suppressPrompt, trackEvent, maybeNudgeProfileCompletion } from "@/lib/engagement";
 import Link from "next/link";
 
 export const AUTH_PROMPT_EVENT = "xerin:auth-prompt";
@@ -45,6 +46,9 @@ export default function AuthPrompt() {
   useEffect(() => {
     const handler = (e: Event) => {
       if (useAuthStore.getState().isAuthenticated) return;
+      // One interruptive experience at a time — skip if one tap/banner is live.
+      if (!claimPrompt("auth_prompt")) return;
+      trackEvent("smart_auth_displayed", { action: (e as CustomEvent<AuthPromptPayload>).detail?.action ?? "default" });
       setOpen((e as CustomEvent<AuthPromptPayload>).detail ?? {});
     };
     window.addEventListener(AUTH_PROMPT_EVENT, handler);
@@ -56,7 +60,15 @@ export default function AuthPrompt() {
     if (isAuthenticated) setOpen(null);
   }, [isAuthenticated]);
 
-  const close = useCallback(() => setOpen(null), []);
+  useEffect(() => {
+    if (!open) releasePrompt("auth_prompt");
+  }, [open]);
+
+  const close = useCallback(() => {
+    suppressPrompt("auth_prompt", EngagementRules.authPrompt.cooldownMs);
+    trackEvent("smart_auth_dismissed");
+    setOpen(null);
+  }, []);
 
   const returnTo = `${pathname}${searchParams.size ? `?${searchParams.toString()}` : ""}`;
 
@@ -68,8 +80,10 @@ export default function AuthPrompt() {
       if (getPostLoginPath("/account", session.user) === "/account") {
         await mergeGuestCart().catch(() => {});
       }
+      maybeNudgeProfileCompletion(session.user);
       toast.success("Signed in with Google.");
-      close();
+      trackEvent("smart_auth_completed");
+      setOpen(null);
       const destination = getPostLoginPath(returnTo, session.user);
       if (destination !== returnTo) router.push(destination);
     } catch (error) {
