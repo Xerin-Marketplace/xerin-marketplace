@@ -27,6 +27,7 @@ import { formatCurrency } from "@/lib/formatCurrency";
 import PriceDisplay from "@/components/shared/PriceDisplay";
 import toast from "react-hot-toast";
 import { useAuthStore } from "@/store/useAuthStore";
+import { requestAuthPrompt } from "@/components/Auth/AuthPrompt";
 import { HugeiconsIcon } from "@hugeicons/react";
 import { CheckIcon, ArrowLeft01Icon, ArrowRight01Icon, Globe02Icon, Location01Icon } from "@hugeicons/core-free-icons";
 import InfoPopover from "@/components/Common/Info/InfoPopover";
@@ -136,6 +137,15 @@ const Checkout = () => {
 
  const isAuthenticated = useAuthStore((state) => state.isAuthenticated);
  const hasHydrated = useAuthStore((state) => state.hasHydrated);
+
+ // Offer contextual sign-in (Google / email) without losing checkout state.
+ // The drawer mounts once per guest visit; "Continue with email" returns to
+ // /checkout through the validated redirect param.
+ useEffect(() => {
+ if (hasHydrated && !isAuthenticated) {
+ requestAuthPrompt({ action: "checkout" });
+ }
+ }, [hasHydrated, isAuthenticated]);
 
  const {
  data: cart,
@@ -868,8 +878,20 @@ const Checkout = () => {
  };
 
  if (hasHydrated && !isAuthenticated) {
- router.replace("/signin?redirect=/checkout");
- return null;
+ return (
+ <section className="py-20 text-center">
+ <h2 className="text-xl font-bold">Sign in to check out</h2>
+ <p className="mt-2 text-sm text-muted-foreground">Your cart is saved — sign in to finish your order.</p>
+ <div className="mt-6 flex items-center justify-center gap-3">
+ <Link href="/signin?redirect=/checkout" className="rounded-lg bg-orange px-5 py-2.5 text-sm font-semibold text-white">
+ Sign in
+ </Link>
+ <Link href="/signup?redirect=/checkout" className="rounded-lg border border-border px-5 py-2.5 text-sm font-semibold">
+ Create account
+ </Link>
+ </div>
+ </section>
+ );
  }
 
  if (isLoadingCart || isLoadingAddresses || deliveryConfig.isLoading) {

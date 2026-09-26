@@ -6,6 +6,7 @@ import type { Product as UiProduct } from "@/types/product";
 import type { WishlistProductItem } from "@/types/api/discovery";
 import toast from "react-hot-toast";
 import { useAuthStore } from "@/store/useAuthStore";
+import { requestAuthPrompt } from "@/components/Auth/AuthPrompt";
 
 const WISHLIST_QUERY_KEY = ["wishlist"];
 
@@ -71,17 +72,15 @@ export const useAddToWishlist = () => {
   return useMutation({
     mutationFn: (productId: string) => {
       if (!useAuthStore.getState().isAuthenticated) {
-        return Promise.resolve({ message: "Saved on this device" });
+        return Promise.resolve({ message: "Saved on this device", guest: true });
       }
       return usersApi.addToWishlist(productId);
     },
-    onSuccess: () => {
+    onSuccess: (result: { guest?: boolean } | unknown) => {
       queryClient.invalidateQueries({ queryKey: WISHLIST_QUERY_KEY });
-      toast.success(
-        useAuthStore.getState().isAuthenticated
-          ? "Added to wishlist"
-          : "Saved to your guest wishlist",
-      );
+      const guest = Boolean((result as { guest?: boolean })?.guest);
+      toast.success(guest ? "Saved to your guest wishlist" : "Added to wishlist");
+      if (guest) requestAuthPrompt({ action: "wishlist" });
     },
     onError: (error: any) => {
       const detail = error?.response?.data?.detail;

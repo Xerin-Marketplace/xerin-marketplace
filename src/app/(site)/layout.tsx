@@ -24,6 +24,9 @@ import MobileBottomNav from "@/components/Header/MobileBottomNav";
 import RuntimeStatus from "@/components/Common/RuntimeStatus";
 import { CurrencyProvider } from "@/app/context/CurrencyContext";
 import { useClearCart } from "@/hooks/useCartActions";
+import { Suspense } from "react";
+import GoogleOneTap from "@/components/Auth/GoogleOneTap";
+import AuthPrompt from "@/components/Auth/AuthPrompt";
 
 function CheckoutHeader() {
  const clearCart = useClearCart();
@@ -129,6 +132,10 @@ export default function RootLayout({
  {!hideStorefrontChrome ? <CartSidebarModal /> : null}
  {!hideStorefrontChrome ? <PreviewSliderModal /> : null}
  {!hideStorefrontChrome ? <MobileBottomNav /> : null}
+ <Suspense fallback={null}>
+ <GoogleOneTap />
+ <AuthPrompt />
+ </Suspense>
  </>
  )}
  </PreviewSliderProvider>

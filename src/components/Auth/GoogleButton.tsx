@@ -1,46 +1,7 @@
 "use client";
 
 import { useEffect, useRef, useState } from "react";
-
-const GOOGLE_CLIENT_ID = process.env.NEXT_PUBLIC_GOOGLE_CLIENT_ID;
-const GIS_SCRIPT_SRC = "https://accounts.google.com/gsi/client";
-const SCRIPT_LOAD_TIMEOUT_MS = 8000;
-
-declare global {
-  interface Window {
-    google?: {
-      accounts: {
-        id: {
-          initialize: (config: Record<string, unknown>) => void;
-          renderButton: (el: HTMLElement, opts: Record<string, unknown>) => void;
-          prompt: () => void;
-        };
-      };
-    };
-  }
-}
-
-let scriptPromise: Promise<void> | null = null;
-
-function loadGoogleScript(): Promise<void> {
-  if (window.google?.accounts?.id) return Promise.resolve();
-  if (!scriptPromise) {
-    scriptPromise = new Promise<void>((resolve, reject) => {
-      const existing = document.querySelector<HTMLScriptElement>(`script[src="${GIS_SCRIPT_SRC}"]`);
-      const script = existing ?? document.createElement("script");
-      if (!existing) {
-        script.src = GIS_SCRIPT_SRC;
-        script.async = true;
-        script.defer = true;
-        document.head.appendChild(script);
-      }
-      const timer = window.setTimeout(() => reject(new Error("Google sign-in took too long to load.")), SCRIPT_LOAD_TIMEOUT_MS);
-      script.addEventListener("load", () => { window.clearTimeout(timer); resolve(); }, { once: true });
-      script.addEventListener("error", () => { window.clearTimeout(timer); reject(new Error("Google sign-in failed to load.")); }, { once: true });
-    });
-  }
-  return scriptPromise;
-}
+import { GOOGLE_CLIENT_ID, loadGoogleScript, type GoogleCredentialResponse } from "@/lib/google-gis";
 
 export type GoogleButtonProps = {
   /** Called with the Google-issued ID token (JWT credential). */
@@ -69,7 +30,7 @@ export default function GoogleButton({ onCredential, disabled, context = "signin
         if (cancelled || !containerRef.current || !window.google) return;
         window.google.accounts.id.initialize({
           client_id: GOOGLE_CLIENT_ID,
-          callback: (resp: { credential?: string }) => {
+          callback: (resp: GoogleCredentialResponse) => {
             if (resp.credential) void onCredential(resp.credential);
           },
           auto_select: false,
