@@ -30,6 +30,12 @@ export const login = async (payload: LoginRequest): Promise<AuthTokenResponse> =
   return res.data;
 };
 
+/** Google-issued ID token from Google Identity Services → Xerin session. */
+export const loginWithGoogle = async (credential: string): Promise<AuthTokenResponse> => {
+  const res = await axiosInstance.post<AuthTokenResponse>(API_ENDPOINTS.auth.google, { credential });
+  return res.data;
+};
+
 export const registerBuyer = async (payload: RegisterBuyerRequest): Promise<RegistrationResponse> => {
   const res = await axiosInstance.post<RegistrationResponse>(API_ENDPOINTS.auth.register, payload);
   return res.data;
@@ -135,6 +141,7 @@ export const reportUnrecognizedLogin = async (): Promise<
 
 export const authApi = {
   login,
+  loginWithGoogle,
   registerBuyer,
   registerSeller,
   registerBroker,

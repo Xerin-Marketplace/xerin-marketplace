@@ -14,6 +14,7 @@ export const API_DOCS_URL =
 export const API_ENDPOINTS = {
   auth: {
     login: "/auth/login",
+    google: "/auth/google",
     register: "/auth/register",
     registerSeller: "/auth/register-seller",
     registerBroker: "/auth/register-broker",

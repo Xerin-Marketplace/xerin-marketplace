@@ -7,6 +7,7 @@ import { useRouter, useSearchParams } from "next/navigation";
 import toast from "react-hot-toast";
 
 import { authApi } from "@/lib/api/endpoints/auth";
+import GoogleButton from "@/components/Auth/GoogleButton";
 import { sellersApi } from "@/lib/api/endpoints/sellers";
 import { ApiError } from "@/lib/api/client";
 import { useAuth } from "@/hooks/useAuth";
@@ -425,7 +426,27 @@ const SignInPanel = ({ onSwitchTab }: { onSwitchTab: (tab: AuthTab) => void }) =
  const [securityNotice, setSecurityNotice] = useState<StaffSecurityNotice | null>(null);
  const [pendingRedirect, setPendingRedirect] = useState<string | null>(null);
  const [securityActionLoading, setSecurityActionLoading] = useState(false);
+ const [googleBusy, setGoogleBusy] = useState(false);
  const justVerified = searchParams.get("verified") === "1";
+
+ const handleGoogleCredential = async (credential: string) => {
+ setGoogleBusy(true);
+ try {
+ const session = await authApi.loginWithGoogle(credential);
+ setSession(session);
+ if (getPostLoginPath("/account", session.user) === "/account") {
+ await mergeGuestCart().catch(() => {});
+ }
+ closeCartModal();
+ const destination = getPostLoginPath(searchParams.get("redirect"), session.user);
+ toast.success("Signed in with Google.");
+ router.push(destination);
+ } catch (error) {
+ toast.error(error instanceof ApiError ? error.message : "Google sign-in failed. Please try again.");
+ } finally {
+ setGoogleBusy(false);
+ }
+ };
 
  useEffect(() => {
  const emailFromQuery = searchParams.get("email");
@@ -666,11 +687,21 @@ const SignInPanel = ({ onSwitchTab }: { onSwitchTab: (tab: AuthTab) => void }) =
 
  <button
  type="submit"
- disabled={isSubmitting}
+ disabled={isSubmitting || googleBusy}
  className="flex h-11 w-full items-center justify-center rounded-lg bg-orange px-6 text-sm font-semibold text-white shadow-sm ease-out duration-200 hover:bg-primary/90-dark disabled:cursor-not-allowed disabled:opacity-70"
  >
  {isSubmitting ? "Signing in..." : "Sign in"}
  </button>
+
+ <div className="my-5 flex items-center gap-3" aria-hidden="true">
+ <span className="h-px flex-1 bg-border" />
+ <span className="text-xs font-medium uppercase tracking-wide text-muted-foreground">or</span>
+ <span className="h-px flex-1 bg-border" />
+ </div>
+
+ <div className="flex justify-center">
+ <GoogleButton onCredential={handleGoogleCredential} disabled={isSubmitting || googleBusy} context="signin" />
+ </div>
 
  <p className="mt-5 text-center text-sm sm:mt-6">
  <span className="text-muted-foreground">Don&apos;t have an account? </span>
@@ -687,7 +718,27 @@ const SignInPanel = ({ onSwitchTab }: { onSwitchTab: (tab: AuthTab) => void }) =
 
 const SignUpPanel = ({ onSwitchTab }: { onSwitchTab: (tab: AuthTab) => void }) => {
  const router = useRouter();
- const { setSession } = useAuth();
+ const searchParams = useSearchParams();
+ const { setSession, mergeGuestCart } = useAuth();
+ const [googleBusy, setGoogleBusy] = useState(false);
+
+ const handleGoogleCredential = async (credential: string) => {
+ setGoogleBusy(true);
+ try {
+ const session = await authApi.loginWithGoogle(credential);
+ setSession(session);
+ if (getPostLoginPath("/account", session.user) === "/account") {
+ await mergeGuestCart().catch(() => {});
+ }
+ const destination = getPostLoginPath(searchParams.get("redirect"), session.user);
+ toast.success("Account ready — signed in with Google.");
+ router.push(destination);
+ } catch (error) {
+ toast.error(error instanceof ApiError ? error.message : "Google sign-up failed. Please try again.");
+ } finally {
+ setGoogleBusy(false);
+ }
+ };
 
  const [fullName, setFullName] = useState("");
  const [email, setEmail] = useState("");
@@ -832,11 +883,21 @@ const SignUpPanel = ({ onSwitchTab }: { onSwitchTab: (tab: AuthTab) => void }) =
 
  <button
  type="submit"
- disabled={isSubmitting}
+ disabled={isSubmitting || googleBusy}
  className="flex h-11 w-full items-center justify-center rounded-lg bg-orange px-6 text-sm font-semibold text-white ease-out duration-200 hover:bg-primary/90-dark disabled:cursor-not-allowed disabled:opacity-70"
  >
  {isSubmitting ? "Creating account..." : "Create Account"}
  </button>
+
+ <div className="my-5 flex items-center gap-3" aria-hidden="true">
+ <span className="h-px flex-1 bg-border" />
+ <span className="text-xs font-medium uppercase tracking-wide text-muted-foreground">or</span>
+ <span className="h-px flex-1 bg-border" />
+ </div>
+
+ <div className="flex justify-center">
+ <GoogleButton onCredential={handleGoogleCredential} disabled={isSubmitting || googleBusy} context="signup" />
+ </div>
 
  <p className="text-center mt-6 text-sm">
  <span className="text-muted-foreground">Already have an account? </span>
