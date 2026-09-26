@@ -36,8 +36,7 @@ export function CurrencyProvider({ children }: { children: React.ReactNode }) {
  if (stored) setSelectedCurrencyState(stored.toUpperCase());
 
  let cancelled = false;
- void getDisplayCurrencies()
- .then((rows) => {
+ const applyRows = (rows: DisplayCurrency[]) => {
  if (cancelled) return;
  const normalized = rows.length ? rows : [fallbackTzs];
  setCurrencies(normalized);
@@ -46,12 +45,20 @@ export function CurrencyProvider({ children }: { children: React.ReactNode }) {
  setSelectedCurrencyState("TZS");
  window.localStorage.setItem(STORAGE_KEY, "TZS");
  }
- })
- .catch(() => {
- if (!cancelled) {
+ };
+ const fallback = () => {
+ if (cancelled) return;
  setCurrencies([fallbackTzs]);
  setSelectedCurrencyState("TZS");
- }
+ };
+
+ void getDisplayCurrencies()
+ .then(applyRows)
+ .catch(async () => {
+ // One retry for transient API errors; then degrade to TZS.
+ await new Promise((resolve) => setTimeout(resolve, 2000));
+ if (cancelled) return;
+ await getDisplayCurrencies().then(applyRows).catch(fallback);
  })
  .finally(() => {
  if (!cancelled) setIsLoading(false);

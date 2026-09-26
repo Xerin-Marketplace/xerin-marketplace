@@ -5,6 +5,7 @@ import { Spinner } from "@/components/ui/Spinner";
 import React, { useMemo, useState } from "react";
 import toast from "react-hot-toast";
 import { useAddresses } from "@/hooks/useAddresses";
+import { useAuthStore } from "@/store/useAuthStore";
 import type { Address, AddressRequest } from "@/types/api/user";
 import AddressModal from "./AddressModal";
 import { HugeiconsIcon } from "@hugeicons/react";
@@ -55,7 +56,7 @@ const AddressBookSection = ({
  isSettingDefaultAddress,
  deleteAddress,
  isDeletingAddress,
- } = useAddresses();
+ } = useAddresses(useAuthStore((s) => s.isAuthenticated));
 
  const [isModalOpen, setIsModalOpen] = useState(false);
  const [editingAddress, setEditingAddress] = useState<Address | null>(null);

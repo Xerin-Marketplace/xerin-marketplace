@@ -7,6 +7,7 @@ import { useParams, useRouter } from "next/navigation";
 import { useMutation, useQueryClient } from "@tanstack/react-query";
 import { useOrder } from "@/hooks/useCommerce";
 import { useAddresses } from "@/hooks/useAddresses";
+import { useAuthStore } from "@/store/useAuthStore";
 import { ordersApi } from "@/lib/api/endpoints/commerce";
 import { formatCurrency } from "@/lib/formatCurrency";
 import { printOrderInvoice } from "@/lib/invoice";
@@ -51,7 +52,7 @@ export default function OrderDetail() {
  const [showCancel, setShowCancel] = useState(false);
 
  const { data: order, isLoading, error } = useOrder(orderId);
- const { addresses } = useAddresses();
+ const { addresses } = useAddresses(useAuthStore((s) => s.isAuthenticated));
  const shippingAddress = addresses.find(
  (a) => String(a.id) === String(order?.shipping_address_id),
  );

@@ -15,6 +15,14 @@ export const resolveProductImageUrl = (imageUrl: string) => {
     return imageUrl;
   }
 
+  // Normalize unsafe characters (spaces, etc.) so the resolved URL is always
+  // valid for next/image — malformed urls return 400 from /_next/image.
+  try {
+    imageUrl = encodeURI(imageUrl);
+  } catch {
+    return PRODUCT_PLACEHOLDER_IMAGE;
+  }
+
   // When the browser uses the same-origin Next.js proxy, keep uploads on that
   // same origin as well. This works on localhost, LAN devices and tunnels.
   if (API_BASE_URL.startsWith("/")) {
