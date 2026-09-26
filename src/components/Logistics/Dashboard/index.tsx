@@ -51,7 +51,7 @@ export default function LogisticsDashboardPage() {
  </div>
  </div>
  </section>
- <section className="grid grid-cols-1 gap-3 sm:grid-cols-2 xl:grid-cols-4">{cards.map(({ label, value, icon: Icon }) => <article key={label} className="rounded-xl border border-border bg-card p-4 shadow-sm dark:border-border dark:bg-muted"><div className="flex items-center justify-between gap-3"><div><p className="text-sm text-muted-foreground dark:text-muted-foreground">{label}</p><p className="mt-2 text-2xl font-bold text-foreground">{value.toLocaleString()}</p></div><span className="grid h-11 w-11 place-items-center rounded-xl bg-primary/10 text-primary dark:bg-muted dark:text-[var(--warning)]"><HugeiconsIcon icon={Icon} size={20} /></span></div></article>)}</section>
+ <section className="grid grid-cols-2 gap-3 sm:grid-cols-2 xl:grid-cols-4">{cards.map(({ label, value, icon: Icon }) => <article key={label} className="rounded-xl border border-border bg-card p-4 shadow-sm dark:border-border dark:bg-muted"><div className="flex items-center justify-between gap-3"><div><p className="text-sm text-muted-foreground dark:text-muted-foreground">{label}</p><p className="mt-2 text-2xl font-bold text-foreground">{value.toLocaleString()}</p></div><span className="grid h-11 w-11 place-items-center rounded-xl bg-primary/10 text-primary dark:bg-muted dark:text-[var(--warning)]"><HugeiconsIcon icon={Icon} size={20} /></span></div></article>)}</section>
  <section className="grid gap-4 xl:grid-cols-2">
  <StatusPanel title="Shipments by status" icon={TruckIcon} values={dashboard.shipments_by_status} />
  <StatusPanel title="Pickup jobs by status" icon={PackageCheckIcon} values={dashboard.pickup_jobs_by_status} />

@@ -380,7 +380,7 @@ export default function SellerDashboard() {
  />
  <OnboardingTour steps={SELLER_TOUR_STEPS} active={tour.active} onFinish={tour.finish} />
 
- <section className="grid grid-cols-1 gap-3 sm:grid-cols-2 lg:grid-cols-3 lg:gap-4 2xl:grid-cols-6">
+ <section className="grid grid-cols-2 gap-3 sm:grid-cols-2 lg:grid-cols-3 lg:gap-4 2xl:grid-cols-6">
  <MetricCard
  label="Total Products"
  value={number.format(dashboardProductsTotal)}

@@ -1150,7 +1150,7 @@ export default function AdminDashboard() {
  </button>
  </div>
 
- <div className="mt-6 grid gap-3 sm:grid-cols-3">
+ <div className="mt-6 grid grid-cols-2 gap-3 sm:grid-cols-3">
  {[
  {
  label: "Registered users",
@@ -1220,7 +1220,7 @@ export default function AdminDashboard() {
  </div>
 
  <div className="mt-6 rounded-xl border border-border bg-muted p-4 dark:border-border dark:bg-card/[.02] sm:p-5">
- <div className="grid h-48 grid-cols-7 items-end gap-3 border-b border-l border-border px-4 pb-0 pt-4 dark:border-border">
+ <div className="grid h-48 grid-cols-7 items-end gap-1.5 sm:gap-3 border-b border-l border-border px-2 sm:px-4 pb-0 pt-4 dark:border-border">
  {[42, 58, 50, 72, 61, 84, 70].map((height, index) => {
  const sellerFactor = Math.max(18, Math.min(92, height + Math.min(pendingSellers.length * 2, 12)));
  const productFactor = Math.max(16, Math.min(88, height - 12 + Math.min(pendingProducts.length * 2, 14)));
