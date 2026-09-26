@@ -2,7 +2,7 @@ import type { Metadata } from "next";
 import { notFound } from "next/navigation";
 import { ProductDetailClient } from "./ProductDetailClient";
 import { siteConfig } from "@/lib/site-config";
-import { API_BASE_URL } from "@/lib/api/endpoints";
+import { API_SERVER_BASE_URL } from "@/lib/api/endpoints";
 import { JsonLd, breadcrumbJsonLd, productJsonLd, truncate } from "@/lib/seo";
 import { resolveProductImageUrl } from "@/lib/products/adapters";
 import type { Product } from "@/types/api/product";
@@ -11,16 +11,17 @@ type RouteParams = { params: Promise<{ id: string }> };
 
 async function fetchProduct(id: string): Promise<Product | null> {
   try {
-    const res = await fetch(`${API_BASE_URL}/products/${encodeURIComponent(id)}`, {
+    const res = await fetch(`${API_SERVER_BASE_URL}/products/${encodeURIComponent(id)}`, {
       next: { revalidate: 300 },
+      signal: AbortSignal.timeout(15000),
     });
     if (!res.ok) return null;
     const product = (await res.json()) as Product;
     if (!Array.isArray(product.images)) {
       try {
         const images = await fetch(
-          `${API_BASE_URL}/products/${encodeURIComponent(String(product.id))}/images`,
-          { next: { revalidate: 300 } },
+          `${API_SERVER_BASE_URL}/products/${encodeURIComponent(String(product.id))}/images`,
+          { next: { revalidate: 300 }, signal: AbortSignal.timeout(15000) },
         );
         if (images.ok) product.images = await images.json();
       } catch {

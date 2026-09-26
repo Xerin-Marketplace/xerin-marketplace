@@ -2,7 +2,7 @@ import type { Metadata } from "next";
 import { notFound } from "next/navigation";
 import { StoreClient } from "./StoreClient";
 import { siteConfig } from "@/lib/site-config";
-import { API_BASE_URL } from "@/lib/api/endpoints";
+import { API_SERVER_BASE_URL } from "@/lib/api/endpoints";
 import { JsonLd, breadcrumbJsonLd, truncate } from "@/lib/seo";
 import { resolveProductImageUrl } from "@/lib/products/adapters";
 import type { Store } from "@/types/api/store";
@@ -11,16 +11,18 @@ type RouteParams = { params: Promise<{ storeId: string }> };
 
 async function fetchStore(storeId: string): Promise<Store | null> {
   try {
-    const res = await fetch(`${API_BASE_URL}/stores/${encodeURIComponent(storeId)}`, {
+    const res = await fetch(`${API_SERVER_BASE_URL}/stores/${encodeURIComponent(storeId)}`, {
       next: { revalidate: 600 },
+      signal: AbortSignal.timeout(15000),
     });
     if (res.ok) return (await res.json()) as Store;
   } catch {
     /* fall through to list lookup */
   }
   try {
-    const res = await fetch(`${API_BASE_URL}/stores?page=1&page_size=100`, {
+    const res = await fetch(`${API_SERVER_BASE_URL}/stores?page=1&page_size=100`, {
       next: { revalidate: 600 },
+      signal: AbortSignal.timeout(15000),
     });
     if (!res.ok) return null;
     const data = (await res.json()) as { results?: Store[] } | Store[];

@@ -2,7 +2,7 @@ import type { Metadata } from "next";
 import Link from "next/link";
 import Image from "next/image";
 import { notFound } from "next/navigation";
-import { API_BASE_URL } from "@/lib/api/endpoints";
+import { API_SERVER_BASE_URL } from "@/lib/api/endpoints";
 import { siteConfig } from "@/lib/site-config";
 import {
   JsonLd,
@@ -20,8 +20,9 @@ const REVALIDATE = 600;
 
 async function fetchCategories(): Promise<Category[]> {
   try {
-    const res = await fetch(`${API_BASE_URL}/products/categories`, {
+    const res = await fetch(`${API_SERVER_BASE_URL}/products/categories`, {
       next: { revalidate: REVALIDATE },
+      signal: AbortSignal.timeout(15000),
     });
     if (!res.ok) return [];
     return (await res.json()) as Category[];
@@ -33,8 +34,8 @@ async function fetchCategories(): Promise<Category[]> {
 async function fetchCategoryProducts(categoryId: string, page = 1, pageSize = 24) {
   try {
     const res = await fetch(
-      `${API_BASE_URL}/products?category_id=${encodeURIComponent(categoryId)}&limit=${pageSize}&skip=${(page - 1) * pageSize}`,
-      { next: { revalidate: REVALIDATE } },
+      `${API_SERVER_BASE_URL}/products?category_id=${encodeURIComponent(categoryId)}&limit=${pageSize}&skip=${(page - 1) * pageSize}`,
+      { next: { revalidate: REVALIDATE }, signal: AbortSignal.timeout(15000) },
     );
     if (!res.ok) return [];
     const data = await res.json();

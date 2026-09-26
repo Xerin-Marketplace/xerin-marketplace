@@ -1,6 +1,13 @@
 export const API_BASE_URL =
   process.env.NEXT_PUBLIC_API_BASE_URL || "https://api.xerinmarketplace.com/api/v1";
 
+// Server-side rendering can't fetch same-origin paths like "/backend-api" —
+// resolve those to the private backend origin instead.
+export const API_SERVER_BASE_URL =
+  API_BASE_URL.startsWith("/") && typeof window === "undefined"
+    ? `${process.env.BACKEND_INTERNAL_URL || "http://127.0.0.1:8000"}/api/v1`
+    : API_BASE_URL;
+
 export const API_DOCS_URL =
   process.env.NEXT_PUBLIC_API_DOCS_URL || `${API_BASE_URL}/docs`;
 

@@ -1,6 +1,6 @@
 import type { MetadataRoute } from "next";
 import { siteConfig } from "@/lib/site-config";
-import { API_BASE_URL } from "@/lib/api/endpoints";
+import { API_SERVER_BASE_URL } from "@/lib/api/endpoints";
 
 const REVALIDATE_SECONDS = 3600;
 
@@ -10,8 +10,10 @@ type SitemapStore = { slug?: string | null; id?: string | number; is_public?: bo
 
 async function fetchJson<T>(path: string): Promise<T | null> {
   try {
-    const res = await fetch(`${API_BASE_URL}${path}`, {
+    const res = await fetch(`${API_SERVER_BASE_URL}${path}`, {
       next: { revalidate: REVALIDATE_SECONDS },
+      // Never let a slow/unreachable backend stall the sitemap (or the build).
+      signal: AbortSignal.timeout(15000),
     });
     if (!res.ok) return null;
     return (await res.json()) as T;
