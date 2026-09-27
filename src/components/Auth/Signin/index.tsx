@@ -1601,6 +1601,8 @@ const AuthPage = ({ initialTab = "signup" }: { initialTab?: AuthTab }) => {
 
  {activeTab === "signin" && <SignInPanel onSwitchTab={setActiveTab} />}
  {activeTab === "signup" && <SignUpPanel onSwitchTab={setActiveTab} />}
+ {activeTab === "seller" && <SellerPanel onSwitchTab={setActiveTab} />}
+ {activeTab === "broker" && <BrokerPanel onSwitchTab={setActiveTab} />}
  </div>
  </div>
 
