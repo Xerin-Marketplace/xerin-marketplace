@@ -1,71 +1,14 @@
-# See https://help.github.com/articles/ignoring-files/ for more about ignoring files.
-
-# dependencies
-/node_modules
-/.pnp
-.pnp.js
-.vscode
-
-# testing
-/coverage
-
-# next.js
-/.next/
-/out/
-
-# production
-/build
-
-# misc
-.DS_Store
-*.pem
-
-# debug
-npm-debug.log*
-yarn-debug.log*
-yarn-error.log*
-
-# local env files
-.env*.local
-
-# vercel
-.vercel
-
-# typescript
+node_modules/
+.next/
+out/
+build/
 *.tsbuildinfo
-next-env.d.ts
-
-# environment secrets
-.vscode
-.vscode/
 .env
-.env.*
-!.env.example
-Frontend/xerin-marketplace/node_modules/
-Frontend/
-azampay_path/
-errors/
-Frontend/
-azampay_path/
-errors/
-.vscode/
-.gitignore
-Frontend/xerin-marketplace/.gitignore
-Frontend/xerin-marketplace/node_modules/
-Frontend/xerin-marketplace/node_modules/*
-Frontend/xerin-marketplace/.vscode/
-Frontend/xerin-marketplace/.vscode/*
-Frontend/xerin-marketplace/src/AUTH_FLOW_UPDATE.md
-Frontend/xerin-marketplace/src/KYC_BLOB_PREVIEW.md
-Frontend/xerin-marketplace/.env.example
-Frontend/xerin-marketplace/Xerin Market SRS V1.0.pdf
-
-
-git rm -r --cached Frontend/xerin-marketplace/.gitignore
-git rm -r --cached Frontend/xerin-marketplace/Xerin Market SRS V1.0.pdf
-git rm -r --cached Frontend/xerin-marketplace/node_modules/
-git rm -r --cached Frontend/xerin-marketplace/.env.example
-git rm -r --cached 
-git rm -r --cached 
-git rm -r --cached 
-git rm -r --cached 
+.env.local
+.env.development
+.env.staging
+.env.production
+.env*.local
+.DS_Store
+.vercel
+coverage/

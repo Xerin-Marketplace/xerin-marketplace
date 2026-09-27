@@ -228,29 +228,7 @@ export default function OrderDetail() {
  </div>
  </section>
 
- <section className="rounded-xl border border-border bg-card p-5 shadow-sm">
- <h2 className="mb-3 text-lg font-bold">After-sale</h2>
- <div className="space-y-2 text-sm">
- <button
- disabled
- title="Return workflow is not available yet"
- className="flex w-full items-center gap-2 rounded-xl border border-border px-3 py-2 text-left text-muted-foreground disabled:cursor-not-allowed disabled:opacity-50"
- >
- <HugeiconsIcon icon={RotateLeft01Icon} size={16} />
- Request return
- <span className="ml-auto text-xs">Coming soon</span>
- </button>
- <button
- disabled
- title="Refund workflow is not available yet"
- className="flex w-full items-center gap-2 rounded-xl border border-border px-3 py-2 text-left text-muted-foreground disabled:cursor-not-allowed disabled:opacity-50"
- >
- <HugeiconsIcon icon={PackageIcon} size={16} />
- Request refund
- <span className="ml-auto text-xs">Coming soon</span>
- </button>
- </div>
- </section>
+ 
  </div>
  </div>
 

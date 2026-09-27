@@ -155,6 +155,8 @@ const Header = () => {
  type="search"
  name="search"
  id="search"
+ aria-label="Search products"
+ role="combobox"
  placeholder="Search for products, brands & more..."
  autoComplete="off"
  aria-expanded={suggestionsOpen}
@@ -203,6 +205,7 @@ const Header = () => {
 
  <button
  onClick={toggleTheme}
+ aria-label={theme === "dark" ? "Switch to light mode" : "Switch to dark mode"}
  className="flex items-center justify-center p-2 rounded-full hover:bg-muted transition-colors"
  >
  {theme === "dark" ? (
@@ -224,11 +227,12 @@ const Header = () => {
  </p>
  </div>
  </Link>
- {hasHydrated && isAuthenticated && user?.account_type === "customer" && <div className="invisible absolute right-0 top-full z-50 mt-2 w-52 rounded-lg border border-border bg-card p-2 opacity-0 shadow-lg transition group-hover:visible group-hover:opacity-100">{[["Orders","/account/orders"],["Addresses","/account/addresses"],["Payments","/account/payments"],["Wishlist","/wishlist"],["Security","/account/security"]].map(([label,href])=><Link key={href} href={href} className="block rounded-lg px-3 py-2 text-sm hover:bg-muted dark:hover:bg-card/5">{label}</Link>)}<button onClick={()=>void logout()} className="block w-full rounded-lg px-3 py-2 text-left text-sm text-destructive hover:bg-red-light-6">Logout</button></div>}
+ {hasHydrated && isAuthenticated && user?.account_type === "customer" && <div className="invisible absolute right-0 top-full z-50 mt-2 w-52 rounded-lg border border-border bg-card p-2 opacity-0 shadow-lg transition group-hover:visible group-hover:opacity-100 group-focus-within:visible group-focus-within:opacity-100">{[["Orders","/account/orders"],["Addresses","/account/addresses"],["Payments","/account/payments"],["Wishlist","/wishlist"],["Security","/account/security"]].map(([label,href])=><Link key={href} href={href} className="block rounded-lg px-3 py-2 text-sm hover:bg-muted dark:hover:bg-card/5">{label}</Link>)}<button onClick={()=>void logout()} className="block w-full rounded-lg px-3 py-2 text-left text-sm text-destructive hover:bg-red-light-6">Logout</button></div>}
  </div>
 
  <button
  onClick={handleOpenCartModal}
+ aria-label={`Cart, ${cartItems.length} items`}
  className="flex items-center gap-1.5"
  >
  <span className="inline-block relative">
@@ -244,7 +248,8 @@ const Header = () => {
  {/* <!-- Hamburger Toggle BTN --> */}
  <button
  id="Toggle"
- aria-label="Toggler"
+ aria-label="Toggle navigation menu"
+ aria-expanded={navigationOpen}
  className="xl:hidden flex items-center justify-center p-1.5 rounded-lg hover:bg-muted dark:hover:bg-card/5 transition-colors"
  onClick={() => setNavigationOpen(!navigationOpen)}
  >
@@ -350,7 +355,7 @@ const Header = () => {
  className="flex items-center gap-1.5 font-medium text-custom-sm text-foreground hover:text-primary"
  >
  <HugeiconsIcon icon={HistoryIcon} size={16} />
- Recently Viewed
+ Shop
  </a>
  </li>
 

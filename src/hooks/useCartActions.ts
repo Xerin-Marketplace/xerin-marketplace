@@ -233,15 +233,15 @@ export const addProductToCartPayload = (product: UiProduct, quantity = 1, varian
 });
 
 
-export const useAvailableCartPromotions = (enabled = true) =>
-  useQuery({
+export const useAvailableCartPromotions = (enabled = true) => {
+  const isAuthenticated = useAuthStore((state) => state.isAuthenticated);
+  return useQuery({
     queryKey: ["cart-promotions"],
     queryFn: cartApi.availablePromotions,
-    enabled:
-      enabled &&
-      useAuthStore.getState().isAuthenticated,
+    enabled: enabled && isAuthenticated,
     retry: false,
   });
+};
 
 export const useApplyPromotion = () => {
   const queryClient = useQueryClient();

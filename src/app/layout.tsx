@@ -28,9 +28,6 @@ export const metadata: Metadata = {
  publisher: siteConfig.publisher,
  applicationName: siteConfig.name,
  category: "eCommerce",
- alternates: {
- canonical: siteConfig.url,
- },
  openGraph: {
  type: "website",
  locale: siteConfig.locale,

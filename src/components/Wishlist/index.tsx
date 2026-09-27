@@ -20,6 +20,8 @@ export const Wishlist = () => {
  data: backendWishlist,
  isLoading,
  isFetching,
+ isError,
+ refetch,
  } = useWishlist({ page, page_size: PAGE_SIZE });
 
  const guestWishlistItems = useWishlistStore((state) => state.items);
@@ -74,6 +76,21 @@ export const Wishlist = () => {
  {isLoading ? (
  <div className="p-14 text-center text-muted-foreground">
  Loading wishlist...
+ </div>
+ ) : isError ? (
+ <div className="p-14 text-center">
+ <p className="font-semibold text-foreground">
+ We could not load your wishlist.
+ </p>
+ <p className="mt-1 text-sm text-muted-foreground">
+ Check your connection and try again.
+ </p>
+ <button
+ onClick={() => refetch()}
+ className="mt-4 rounded-lg bg-primary px-4 py-2 text-sm font-semibold text-white"
+ >
+ Retry
+ </button>
  </div>
  ) : (
  <div className="w-full overflow-x-auto">

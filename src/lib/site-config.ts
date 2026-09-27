@@ -6,7 +6,7 @@ export const siteConfig = {
   tagline: "Your Trusted Marketplace",
   description:
     "Xerin Marketplace is a modern online marketplace connecting buyers and sellers across Africa. Shop quality products, manage your store, and grow your business.",
-  url: process.env.NEXT_PUBLIC_SITE_URL || "http://localhost:3000",
+  url: process.env.NEXT_PUBLIC_SITE_URL || "https://xerinmarketplace.com",
   locale: "en_US",
   themeColor: "#c2410c",
   keywords: [
@@ -21,7 +21,7 @@ export const siteConfig = {
   ],
   authors: {
     name: "Xerin Marketplace",
-    url: process.env.NEXT_PUBLIC_SITE_URL || "http://localhost:3000",
+    url: process.env.NEXT_PUBLIC_SITE_URL || "https://xerinmarketplace.com",
   },
   creator: "Xerin Marketplace",
   publisher: "Xerin Marketplace",

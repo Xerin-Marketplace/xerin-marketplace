@@ -34,6 +34,8 @@ export default function SearchPage() {
  const [rows, setRows] = useState<SearchProductItem[]>([]);
  const [total, setTotal] = useState(0);
  const [loading, setLoading] = useState(true);
+ const [error, setError] = useState(false);
+ const [retryTick, setRetryTick] = useState(0);
  const [categories, setCategories] = useState<Category[]>([]);
  const [brands, setBrands] = useState<Brand[]>([]);
  const [suggestions, setSuggestions] = useState<string[]>([]);
@@ -94,7 +96,7 @@ export default function SearchPage() {
  return () => {
  active = false;
  };
- }, [query, categoryId, brandId, minPrice, maxPrice, sort, page]);
+ }, [query, categoryId, brandId, minPrice, maxPrice, sort, page, retryTick]);
 
  useEffect(() => {
  const value = input.trim();
@@ -295,6 +297,23 @@ export default function SearchPage() {
  {loading ? (
  <div className="rounded-2xl bg-card p-14 text-center">
  Searching products...
+ </div>
+ ) : error ? (
+ <div className="rounded-2xl bg-card p-14 text-center">
+ <p className="font-semibold">Search is unavailable right now.</p>
+ <p className="mt-1 text-sm text-muted-foreground">
+ Please try again in a moment.
+ </p>
+ <button
+ onClick={() => {
+ setError(false);
+ setLoading(true);
+ setRetryTick((n) => n + 1);
+ }}
+ className="mt-4 rounded-lg bg-primary px-4 py-2 text-sm font-semibold text-white"
+ >
+ Retry
+ </button>
  </div>
  ) : rows.length === 0 ? (
  <div className="rounded-2xl bg-card p-14 text-center">

@@ -33,8 +33,16 @@ export function middleware(request: NextRequest) {
     }
   }
 
-  if (pathname.startsWith("/seller/dashboard")) {
+  if (pathname.startsWith("/seller")) {
     if (!sellerPresent && !adminPresent) {
+      const signinUrl = new URL("/signin", request.url);
+      signinUrl.searchParams.set("redirect", pathname);
+      return withBrowserPermissions(NextResponse.redirect(signinUrl));
+    }
+  }
+
+  if (pathname.startsWith("/broker")) {
+    if (!authPresent) {
       const signinUrl = new URL("/signin", request.url);
       signinUrl.searchParams.set("redirect", pathname);
       return withBrowserPermissions(NextResponse.redirect(signinUrl));

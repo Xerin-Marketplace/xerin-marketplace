@@ -1,5 +1,5 @@
-import AdminDashboard from "@/components/Admin/Dashboard";
+import { redirect } from "next/navigation";
 
-export default function TransactionsPage() {
- return <AdminDashboard />;
+export default function Page() {
+  redirect("/admin/dashboard?tab=finance&menu=payments&item=transactions");
 }

@@ -341,15 +341,6 @@ export default function DashboardShell({
  </div>
 
  <div className="ml-auto flex items-center gap-1 sm:gap-2">
- <label className="hidden items-center gap-2 rounded-xl border border-border bg-muted px-3 py-2 lg:flex dark:border-border">
- <HugeiconsIcon icon={Search01Icon} size={16} className="text-muted-foreground" />
- <input
- aria-label={`Search ${centerLabel.toLowerCase()} records`}
- placeholder={searchPlaceholder}
- className="w-36 bg-transparent text-sm outline-none placeholder:text-muted-foreground"
- />
- </label>
-
  {notificationsHref && (
  <Link
  href={notificationsHref}
