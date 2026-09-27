@@ -91,31 +91,28 @@ export default function BrokerDashboard() {
 
  return (
  <div className="space-y-6 text-foreground">
- <section className="overflow-hidden rounded-xl border border-[var(--foreground)] bg-[var(--foreground)] p-6 shadow-sm sm:p-8">
- <div className="flex flex-col gap-5 sm:flex-row sm:items-end sm:justify-between">
+ <div className="flex flex-wrap items-center justify-between gap-3">
  <div>
- <p className="text-xs font-black uppercase tracking-[0.2em] text-primary">Broker Center</p>
- <h1 className="mt-2 text-3xl font-black tracking-tight text-white sm:text-4xl">
+ <h1 className="text-xl font-bold text-foreground sm:text-2xl">
  Welcome, {broker.first_name || "Broker"}
  </h1>
- <p className="mt-2 text-sm font-medium text-white/70">
- Broker ID: <span className="font-black text-white">{broker.broker_code}</span>
+ <p className="mt-1 text-sm text-muted-foreground">
+ Broker ID: <span className="font-semibold text-foreground">{broker.broker_code}</span>
  </p>
  </div>
- <span className="w-fit rounded-full border border-[var(--primary)]/40 bg-primary/10 px-4 py-2 text-sm font-black text-primary">
+ <span className="rounded-full bg-primary/10 px-3.5 py-1.5 text-xs font-semibold text-primary">
  {labels[broker.status] || broker.status}
  </span>
  </div>
- </section>
 
  {!approved && (
- <section className="rounded-xl border border-primary/25 bg-card p-6 shadow-sm sm:p-7">
- <div className="flex flex-col gap-5 sm:flex-row sm:items-start">
- <div className="flex h-12 w-12 shrink-0 items-center justify-center rounded-xl bg-primary/10 text-primary">
- <HugeiconsIcon icon={ShieldCheckIcon} size={24} />
+ <section className="rounded-xl border border-primary/25 bg-card p-5 sm:p-6">
+ <div className="flex flex-col gap-4 sm:flex-row sm:items-start">
+ <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-lg bg-primary/10 text-primary">
+ <HugeiconsIcon icon={ShieldCheckIcon} size={20} />
  </div>
  <div className="min-w-0 flex-1">
- <h2 className="text-lg font-black text-foreground">
+ <h2 className="text-base font-bold text-foreground">
  Complete identity verification to activate your Broker account.
  </h2>
  <p className="mt-2 max-w-3xl text-sm font-medium leading-6 text-muted-foreground">
