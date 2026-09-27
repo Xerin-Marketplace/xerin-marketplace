@@ -362,7 +362,7 @@ export default function RoleOnboarding({ role }: { role: "seller" | "winga" }) {
  </option>
  ))}
  </select>
- <span className="pointer-events-none absolute right-4 top-1/2 -translate-y-1/2 text-muted-foreground">⌄</span>
+ <span className="pointer-events-none absolute right-4 top-1/2 -translate-y-1/2 text-muted-foreground"><HugeiconsIcon icon={ArrowDown01Icon} size={16} /></span>
  </div>
  );
 
