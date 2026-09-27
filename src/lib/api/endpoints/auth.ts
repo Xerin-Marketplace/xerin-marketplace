@@ -46,8 +46,18 @@ export const registerBroker = async (payload: RegisterBrokerRequest): Promise<Br
   return res.data;
 };
 
-export const registerSeller = async (payload: RegisterSellerRequest): Promise<SellerRegistrationResponse> => {
-  const res = await axiosInstance.post<SellerRegistrationResponse>(API_ENDPOINTS.auth.registerSeller, payload);
+export const registerSeller = async (
+  payload: RegisterSellerRequest,
+  license?: File | null,
+): Promise<SellerRegistrationResponse> => {
+  const formData = new FormData();
+  formData.append("data", JSON.stringify(payload));
+  if (license) formData.append("license", license);
+  const res = await axiosInstance.post<SellerRegistrationResponse>(
+    API_ENDPOINTS.auth.registerSeller,
+    formData,
+    { headers: { "Content-Type": "multipart/form-data" } },
+  );
   return res.data;
 };
 

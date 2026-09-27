@@ -118,7 +118,8 @@ export const useAuth = () => {
   });
 
   const registerSellerMutation = useMutation({
-    mutationFn: apiRegisterSeller,
+    mutationFn: (payload: Parameters<typeof apiRegisterSeller>[0]) =>
+      apiRegisterSeller(payload),
     onSuccess: (data) => {
       const params = new URLSearchParams({
         phone: data.phone,

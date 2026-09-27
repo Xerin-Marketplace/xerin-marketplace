@@ -16,7 +16,7 @@ import { PhoneInput, isValidInternationalPhone, buildInternationalPhone, DEFAULT
 import { useCartModalContext } from "@/app/context/CartSidebarModalContext";
 import type { AuthTokenResponse, StaffSecurityNotice } from "@/types/api/auth";
 import { HugeiconsIcon } from "@hugeicons/react";
-import { Mail01Icon, LockIcon, UserIcon, SmartPhone01Icon, ViewIcon, ViewOffIcon, CheckIcon, CheckmarkCircle02Icon, ShieldCheckIcon, SecurityCheckIcon, TruckIcon, Wallet01Icon, ChartIncreaseIcon } from "@hugeicons/core-free-icons";
+import { Mail01Icon, LockIcon, UserIcon, SmartPhone01Icon, ViewIcon, ViewOffIcon, CheckIcon, CheckmarkCircle02Icon, ShieldCheckIcon, SecurityCheckIcon, TruckIcon, Wallet01Icon, ChartIncreaseIcon, Upload04Icon } from "@hugeicons/core-free-icons";
 
 
 const splitFullName = (fullName: string) => {
@@ -821,6 +821,7 @@ const SellerPanel = ({ onSwitchTab }: { onSwitchTab: (tab: AuthTab) => void }) =
  const [phoneDialCode, setPhoneDialCode] = useState(DEFAULT_DIAL_CODE);
  const [contactPhoneDialCode, setContactPhoneDialCode] = useState(DEFAULT_DIAL_CODE);
  const [step, setStep] = useState(0);
+ const [licenseFile, setLicenseFile] = useState<File | null>(null);
 
  const [categories, setCategories] = useState<BusinessCategory[]>([]);
  const [selectedCategoryIds, setSelectedCategoryIds] = useState<string[]>([]);
@@ -963,6 +964,11 @@ const SellerPanel = ({ onSwitchTab }: { onSwitchTab: (tab: AuthTab) => void }) =
  return;
  }
 
+ if (!licenseFile) {
+ toast.error("Attach your business license to continue.");
+ return;
+ }
+
  if (!form.agreementAccepted) {
  toast.error("You must accept the Seller Agreement and Terms & Conditions.");
  return;
@@ -995,7 +1001,7 @@ const SellerPanel = ({ onSwitchTab }: { onSwitchTab: (tab: AuthTab) => void }) =
  agreement_accepted: form.agreementAccepted,
  };
 
- const response = await authApi.registerSeller(payload);
+ const response = await authApi.registerSeller(payload, licenseFile);
 
  toast.success(response.message || "Verification code sent.");
 
@@ -1389,6 +1395,32 @@ const SellerPanel = ({ onSwitchTab }: { onSwitchTab: (tab: AuthTab) => void }) =
  invalid={!useAccountContact && Boolean(form.contactPhone) && !isContactPhoneValid}
  />
  </div>
+ </div>
+
+ <div className="mb-4">
+ <FieldLabel htmlFor="seller-license" required>Business License</FieldLabel>
+ <label
+ htmlFor="seller-license"
+ className={`flex cursor-pointer items-center justify-center gap-2 rounded-lg border border-dashed px-4 py-5 text-sm transition ${
+ licenseFile
+ ? "border-primary/50 bg-primary/5 font-medium text-foreground"
+ : "border-border bg-muted text-muted-foreground hover:border-primary/40 hover:text-foreground"
+ }`}
+ >
+ <HugeiconsIcon icon={Upload04Icon} size={16} />
+ {licenseFile ? licenseFile.name : "Upload license (PDF, JPG, PNG)"}
+ <input
+ id="seller-license"
+ type="file"
+ accept="application/pdf,image/jpeg,image/png"
+ className="hidden"
+ disabled={isSubmitting}
+ onChange={(event) => setLicenseFile(event.target.files?.[0] || null)}
+ />
+ </label>
+ <p className="mt-1.5 text-xs text-muted-foreground">
+ Required — sellers are only approved with a valid business license.
+ </p>
  </div>
 
  {/* Seller Agreement - required before registration */}
