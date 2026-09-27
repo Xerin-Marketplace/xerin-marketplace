@@ -110,10 +110,10 @@ const Header = () => {
  <Image
  src="/images/logo/logooriginal.png"
  alt="Xerin Marketplace logo"
- width={264}
- height={84}
+ width={340}
+ height={108}
  className="object-contain"
- style={{ width: "132px", height: "auto" }}
+ style={{ width: "170px", height: "auto" }}
  priority
  />
  </Link>

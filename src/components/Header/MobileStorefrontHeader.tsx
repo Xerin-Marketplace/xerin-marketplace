@@ -98,9 +98,9 @@ export default function MobileStorefrontHeader({
               <Image
                 src="/images/logo/logooriginal.png"
                 alt="Xerin Marketplace"
-                width={150}
-                height={48}
-                className="h-10 w-auto object-contain"
+                width={200}
+                height={64}
+                className="h-12 w-auto object-contain"
                 priority
               />
             </Link>

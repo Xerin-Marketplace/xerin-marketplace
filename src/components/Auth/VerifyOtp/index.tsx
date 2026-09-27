@@ -231,9 +231,9 @@ const VerifyOtp = () => {
  width={30}
  height={30}
  priority
- className="h-9 w-9 object-contain"
+ className="h-11 w-11 object-contain"
  />
- <span className="text-lg font-bold text-foreground sm:text-xl">
+ <span className="text-xl font-bold text-foreground sm:text-2xl">
  Xerin Marketplace
  </span>
  </Link>
