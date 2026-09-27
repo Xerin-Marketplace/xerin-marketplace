@@ -20,15 +20,17 @@ import { useAuth } from "@/hooks/useAuth";
 import { brokersApi } from "@/lib/api/endpoints/brokers";
 import type { Broker } from "@/types/api/broker";
 
-const brokerGroups: DashboardNavGroup[] = [
+function buildBrokerGroups(approved: boolean): DashboardNavGroup[] {
+ const locked = !approved;
+ return [
  {
  title: "Broker Workspace",
  key: "broker-workspace",
  icon: DollarCircleIcon,
  items: [
  { href: "/broker/kyc", label: "KYC Verification", icon: ShieldCheckIcon },
- { href: "/broker/products", label: "Own Products", icon: PackageIcon },
- { href: "/broker/opportunities", label: "Opportunities", icon: DollarCircleIcon },
+ { href: "/broker/products", label: "Own Products", icon: PackageIcon, locked },
+ { href: "/broker/opportunities", label: "Opportunities", icon: DollarCircleIcon, locked },
  ],
  },
  {
@@ -36,12 +38,13 @@ const brokerGroups: DashboardNavGroup[] = [
  key: "broker-finance",
  icon: Wallet03Icon,
  items: [
- { href: "/broker/earnings", label: "Earnings", icon: Wallet03Icon },
- { href: "/broker/wallet", label: "Wallet & Payouts", icon: Wallet03Icon },
- { href: "/broker/analytics", label: "Analytics", icon: ChartColumnIcon },
+ { href: "/broker/earnings", label: "Earnings", icon: Wallet03Icon, locked },
+ { href: "/broker/wallet", label: "Wallet & Payouts", icon: Wallet03Icon, locked },
+ { href: "/broker/analytics", label: "Analytics", icon: ChartColumnIcon, locked },
  ],
  },
-];
+ ];
+}
 
 const statusLabel: Record<string, string> = {
  pending_kyc: "Complete KYC",
@@ -94,7 +97,7 @@ export default function BrokerLayout({ children }: { children: React.ReactNode }
  return (
  <DashboardShell
  user={user}
- groups={brokerGroups}
+ groups={buildBrokerGroups(approved)}
  dashboardHref="/broker/dashboard"
  dashboardLabel="Dashboard"
  title={title}

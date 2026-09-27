@@ -4,7 +4,7 @@ import Image from "next/image";
 import Link from "next/link";
 import { ReactNode, useEffect, useMemo, useRef, useState } from "react";
 import { usePathname, useSearchParams } from "next/navigation";
-import { BellIcon, ArrowDown01Icon, ArrowRight01Icon, UserCircleIcon, Home01Icon, DashboardSquare01Icon, Location01Icon, Menu01Icon, Moon02Icon, SidebarLeft01Icon, SidebarRight01Icon, Search01Icon, Settings01Icon, Logout01Icon, Sun03Icon, Cancel01Icon } from "@hugeicons/core-free-icons";
+import { BellIcon, ArrowDown01Icon, ArrowRight01Icon, UserCircleIcon, Home01Icon, DashboardSquare01Icon, Location01Icon, Menu01Icon, Moon02Icon, SidebarLeft01Icon, SidebarRight01Icon, Search01Icon, Settings01Icon, Logout01Icon, Sun03Icon, Cancel01Icon, LockKeyIcon } from "@hugeicons/core-free-icons";
 
 import { useTheme } from "@/app/context/ThemeContext";
 import { useAuth } from "@/hooks/useAuth";
@@ -23,6 +23,8 @@ export type DashboardNavItem = {
  label: string;
  href: string;
  icon?: IconSvgElement;
+ /** Renders a lock marker for gated sections (e.g. pending KYC). */
+ locked?: boolean;
 };
 
 export type DashboardNavGroup = {
@@ -251,11 +253,12 @@ export default function DashboardShell({
  : "text-muted-foreground hover:bg-sidebar-accent hover:text-sidebar-accent-foreground /65 dark:hover:bg-sidebar-accent dark:hover:text-sidebar-accent-foreground"
  }`}
  >
- <HugeiconsIcon icon={Icon} size={18} strokeWidth={active ? 2.25 : 1.9} className="shrink-0" />
+ <HugeiconsIcon icon={Icon} size={18} strokeWidth={active ? 2.25 : 1.9} className={`shrink-0 ${item.locked ? "opacity-50" : ""}`} />
  {!collapsed && (
  <>
- <span className="truncate">{item.label}</span>
- {active && <HugeiconsIcon icon={ArrowRight01Icon} size={14} className="ml-auto opacity-80" />}
+ <span className={`truncate ${item.locked ? "opacity-60" : ""}`}>{item.label}</span>
+ {item.locked && <HugeiconsIcon icon={LockKeyIcon} size={13} className="ml-auto opacity-60" />}
+ {!item.locked && active && <HugeiconsIcon icon={ArrowRight01Icon} size={14} className="ml-auto opacity-80" />}
  </>
  )}
  </Link>
