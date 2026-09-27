@@ -18,6 +18,7 @@ import {
  ArrowLeft01Icon,
  CheckmarkCircle02Icon,
  InformationCircleIcon,
+ FileValidationIcon,
 } from "@hugeicons/core-free-icons";
 import { PhoneInput, buildInternationalPhone, PHONE_COUNTRIES, DEFAULT_DIAL_CODE } from "../phone-input";
 import {
@@ -49,6 +50,7 @@ export default function RoleOnboarding({ role }: { role: "seller" | "winga" }) {
  const router = useRouter();
  const { isAuthenticated, user, setSession } = useAuth();
  const [busy, setBusy] = useState(false);
+ const [licenseFile, setLicenseFile] = useState<File | null>(null);
  const [categories, setCategories] = useState<{ id: string; name: string }[]>([]);
  const [categoryIds, setCategoryIds] = useState<string[]>([]);
  const [regionOptions, setRegionOptions] = useState<string[]>([]);
@@ -281,9 +283,10 @@ export default function RoleOnboarding({ role }: { role: "seller" | "winga" }) {
  !form.business_city.trim() ||
  (localCountry && !form.business_ward.trim()) ||
  !categoryIds.length ||
+ !licenseFile ||
  !form.agreement_accepted
  ) {
- toast.error("Complete the required seller onboarding details.");
+ toast.error(licenseFile ? "Complete the required seller onboarding details." : "Attach your business license to continue.");
  return;
  }
 
@@ -306,6 +309,16 @@ export default function RoleOnboarding({ role }: { role: "seller" | "winga" }) {
  : undefined,
  agreement_accepted: true,
  });
+ if (licenseFile) {
+ try {
+ await sellersApi.uploadKycDocument({
+ document_type: "business_registration",
+ file: licenseFile,
+ });
+ } catch {
+ toast.error("Account created — license upload failed. Re-upload it in Seller → KYC.");
+ }
+ }
  refreshUser(res.user);
  toast.success(res.message);
  router.replace("/seller/dashboard");
@@ -593,6 +606,32 @@ export default function RoleOnboarding({ role }: { role: "seller" | "winga" }) {
  </div>
  </div>
  </section>
+
+ <div>
+ <label className="mb-1.5 block text-sm font-medium text-foreground">
+ Business license <span className="text-destructive">*</span>
+ </label>
+ <label
+ className={`flex cursor-pointer items-center justify-center gap-2 rounded-lg border border-dashed px-4 py-4 text-sm transition ${
+ licenseFile
+ ? "border-primary/50 bg-primary/5 font-medium text-foreground"
+ : "border-border bg-muted text-muted-foreground hover:border-primary/40 hover:text-foreground"
+ }`}
+ >
+ <HugeiconsIcon icon={FileValidationIcon} size={16} />
+ {licenseFile ? licenseFile.name : "Upload license (PDF, JPG, PNG)"}
+ <input
+ type="file"
+ accept="application/pdf,image/jpeg,image/png"
+ className="hidden"
+ disabled={busy}
+ onChange={(e) => setLicenseFile(e.target.files?.[0] || null)}
+ />
+ </label>
+ <p className="mt-1 text-xs text-muted-foreground">
+ Required — sellers are only approved with a valid business license.
+ </p>
+ </div>
 
  <label className="flex items-start gap-3 rounded-xl border border-primary/30 bg-primary/5 p-4">
  <input
