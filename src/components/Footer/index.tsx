@@ -40,21 +40,21 @@ const Footer = () => {
  <div className="flex flex-wrap items-center justify-center gap-3">
  <Link
  href="/signup?tab=seller"
- className="group inline-flex shrink-0 items-center gap-2 rounded-lg bg-primary px-6 py-3 text-sm font-semibold text-primary-foreground transition-all duration-300 hover:shadow-md"
+ className="group inline-flex shrink-0 items-center gap-2 rounded-lg bg-[#123B5D] px-6 py-3 text-sm font-semibold text-white transition-all duration-300 hover:bg-[#0F3049] hover:shadow-md"
  >
  Become a Seller
  <HugeiconsIcon icon={ArrowUpRight01Icon} size={16} />
  </Link>
  <Link
  href="/signup?tab=broker"
- className="group inline-flex shrink-0 items-center gap-2 rounded-lg border border-primary px-6 py-3 text-sm font-semibold text-primary transition-all duration-300 hover:bg-primary/10"
+ className="group inline-flex shrink-0 items-center gap-2 rounded-lg bg-[#C6922E] px-6 py-3 text-sm font-semibold text-white transition-all duration-300 hover:bg-[#B08226] hover:shadow-md"
  >
  Become a Winga
  <HugeiconsIcon icon={ArrowUpRight01Icon} size={16} />
  </Link>
  <Link
  href="/signup"
- className="group inline-flex shrink-0 items-center gap-2 rounded-lg bg-foreground px-6 py-3 text-sm font-semibold text-background transition-all duration-300 hover:bg-foreground/90"
+ className="group inline-flex shrink-0 items-center gap-2 rounded-lg bg-[#176B65] px-6 py-3 text-sm font-semibold text-white transition-all duration-300 hover:bg-[#125853] hover:shadow-md"
  >
  Join Logistics Network
  <HugeiconsIcon icon={ArrowUpRight01Icon} size={16} />
