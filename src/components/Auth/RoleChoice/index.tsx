@@ -11,14 +11,13 @@ import { HugeiconsIcon, type IconSvgElement } from "@hugeicons/react";
 import {
  ShoppingBag02Icon,
  Store01Icon,
- AgreementIcon,
  CheckmarkCircle02Icon,
  ArrowRight01Icon,
  ShieldCheckIcon,
 } from "@hugeicons/core-free-icons";
 
 const cards: {
- key: "customer" | "seller" | "winga";
+ key: "customer" | "seller";
  title: string;
  subtitle: string;
  icon: IconSvgElement;
@@ -49,17 +48,6 @@ const cards: {
  action: "Continue as Seller",
  accent: "#123B5D",
  tag: "Sell",
- },
- {
- key: "winga",
- title: "Winga",
- subtitle: "Earn commissions by promoting and selling products",
- icon: AgreementIcon,
- href: "/onboarding/winga",
- benefits: ["Promote marketplace products", "Earn commissions", "No inventory required", "Flexible earning opportunity"],
- action: "Continue as Winga",
- accent: "#C6922E",
- tag: "Earn",
  },
 ];
 
@@ -130,12 +118,12 @@ export default function RoleChoice() {
  </p>
  </section>
 
- <section className="grid gap-5 md:grid-cols-3 lg:gap-6">
+ <section className="mx-auto grid max-w-3xl gap-5 md:grid-cols-2 lg:gap-6">
  {cards.map((card) => (
  <button
  key={card.key}
  type="button"
- onClick={() => void chooseRole(card.key === "winga" ? "broker" : card.key, card.href)}
+ onClick={() => void chooseRole(card.key, card.href)}
  disabled={Boolean(busyRole)}
  className="group flex min-h-[390px] flex-col rounded-3xl border border-border bg-card p-6 text-left shadow-[0_12px_35px_rgba(15,23,42,0.06)] transition duration-300 hover:-translate-y-1.5 hover:border-primary/50 hover:shadow-[0_18px_45px_rgba(15,23,42,0.10)] focus:outline-none focus:ring-2 focus:ring-ring/30 sm:p-7"
  >
@@ -179,9 +167,7 @@ export default function RoleChoice() {
  className="mt-auto flex w-full items-center justify-center gap-2 rounded-xl px-4 py-3.5 text-sm font-bold text-white shadow-sm transition"
  style={{ backgroundColor: card.accent }}
  >
- {busyRole === (card.key === "winga" ? ("broker" as const) : card.key)
- ? "Saving..."
- : card.action}
+ {busyRole === card.key ? "Saving..." : card.action}
  <HugeiconsIcon icon={ArrowRight01Icon} size={16} className="transition-transform group-hover:translate-x-1" />
  </span>
  </button>
