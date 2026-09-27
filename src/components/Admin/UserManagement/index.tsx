@@ -1255,7 +1255,7 @@ function CreateStaffWorkspace({
  form.first_name.trim() &&
  form.last_name.trim() &&
  form.email.trim() &&
- form.password.length >= 8 &&
+ form.password.length >= 6 &&
  roleIds.length > 0;
 
  if (!canCreate) {
@@ -1375,7 +1375,7 @@ function CreateStaffWorkspace({
  Temporary password <span className="text-destructive">*</span>
  </span>
  <span className="mt-1 block text-[11px] text-muted-foreground">
- Minimum 8 characters. The user can change it after signing in.
+ Minimum 6 characters. The user can change it after signing in.
  </span>
  <input
  type="password"
@@ -1472,7 +1472,7 @@ function CreateStaffModal({
  form.first_name.trim() &&
  form.last_name.trim() &&
  form.email.trim() &&
- form.password.length >= 8 &&
+ form.password.length >= 6 &&
  roleIds.length > 0;
 
  const inputClass =
@@ -1593,7 +1593,7 @@ function CreateStaffModal({
  Temporary password <span className="text-destructive">*</span>
  </span>
  <span className="mt-1 block text-[11px] text-muted-foreground">
- Minimum 8 characters. The staff member should change it after first login.
+ Minimum 6 characters. The staff member should change it after first login.
  </span>
  <input
  type="password"

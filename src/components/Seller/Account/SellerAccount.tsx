@@ -143,8 +143,8 @@ export default function SellerAccount({ view }: { view: SellerAccountView }) {
  }
  async function changePassword(event: FormEvent) {
  event.preventDefault();
- if (passwords.next.length < 8)
- return toast.error("New password must contain at least 8 characters.");
+ if (passwords.next.length < 6)
+ return toast.error("New password must contain at least 6 characters.");
  if (passwords.next !== passwords.confirm)
  return toast.error("New passwords do not match.");
  setSaving(true);
@@ -517,7 +517,7 @@ function Security({
  const [deletePassword, setDeletePassword] = useState("");
  const [deleteConfirm, setDeleteConfirm] = useState("");
  const [deleting, setDeleting] = useState(false);
- const readyToDelete = deletePassword.length >= 8 && deleteConfirm === "DELETE";
+ const readyToDelete = deletePassword.length >= 6 && deleteConfirm === "DELETE";
 
  const deleteAccount = async () => {
  setDeleting(true);

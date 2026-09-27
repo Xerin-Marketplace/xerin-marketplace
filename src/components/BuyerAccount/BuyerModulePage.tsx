@@ -681,9 +681,7 @@ function Security({
  onRevokeOthers: () => void;
 }) {
  const strong =
- passwords.next.length >= 8 &&
- /[A-Za-z]/.test(passwords.next) &&
- /\d/.test(passwords.next);
+ passwords.next.length >= 6;
 
  return (
  <div className="space-y-6">
@@ -707,7 +705,7 @@ function Security({
  <Field type="password" label="Confirm new password" value={passwords.confirm} set={(v)=>setPasswords({...passwords,confirm:v})}/>
  </div>
  <div className="mt-3 rounded-xl bg-muted p-3 text-xs text-muted-foreground">
- Use at least 8 characters. A combination of letters and numbers is recommended.
+ Use at least 6 characters. A combination of letters and numbers is recommended.
  {passwords.next && <span className={`ml-2 font-bold ${strong ? "text-green-dark" : "text-yellow-dark"}`}>{strong ? "Good password format" : "Password can be stronger"}</span>}
  </div>
  <button disabled={!passwords.current || !passwords.next || passwords.next !== passwords.confirm} className="mt-4 rounded-xl bg-primary px-5 py-2.5 text-sm font-semibold text-primary-foreground disabled:cursor-not-allowed disabled:opacity-50">

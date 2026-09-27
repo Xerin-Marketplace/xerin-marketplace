@@ -167,11 +167,7 @@ interface PasswordRule {
 }
 
 const PASSWORD_RULES: PasswordRule[] = [
- { label: "At least 8 characters", test: (v) => v.length >= 8 },
- { label: "One uppercase letter (A-Z)", test: (v) => /[A-Z]/.test(v) },
- { label: "One lowercase letter (a-z)", test: (v) => /[a-z]/.test(v) },
- { label: "One number (0-9)", test: (v) => /\d/.test(v) },
- { label: "One special character (!@#$...)", test: (v) => /[^A-Za-z0-9]/.test(v) },
+ { label: "At least 6 characters", test: (v) => v.length >= 6 },
 ];
 
 interface BusinessCategory {
