@@ -1,21 +1,13 @@
 "use client";
 
-import { FormEvent, useEffect, useMemo, useState } from "react";
+import { FormEvent, useEffect, useState } from "react";
 import { resolveProductImageUrl } from "@/lib/products/adapters";
 import { brokersApi } from "@/lib/api/endpoints/brokers";
 import { productsApi } from "@/lib/api/endpoints/products";
 import type { BrokerProduct } from "@/types/api/broker";
 import type { Brand, Category, ListingCurrency } from "@/types/api/product";
 import { HugeiconsIcon } from "@hugeicons/react";
-import {
- PlusSignIcon,
- Cancel01Icon,
- PackageIcon,
- PercentCircleIcon,
- Timer01Icon,
-} from "@hugeicons/core-free-icons";
-
-const ACCENT = "#C6922E"; // Winga gold
+import { PlusSignIcon, Cancel01Icon } from "@hugeicons/core-free-icons";
 
 const emptyForm = {
  name: "",
@@ -82,26 +74,12 @@ export default function BrokerOwnProducts() {
  void load();
  }, []);
 
- // Lock body scroll while the drawer is open.
  useEffect(() => {
  document.body.style.overflow = drawerOpen ? "hidden" : "";
  return () => {
  document.body.style.overflow = "";
  };
  }, [drawerOpen]);
-
- const active = useMemo(
- () => items.filter((x) => x.status === "approved" && x.is_active).length,
- [items],
- );
-
- const expired = useMemo(
- () =>
- items.filter(
- (x) => x.listing_expired_at || (!x.is_active && x.status === "inactive"),
- ).length,
- [items],
- );
 
  async function submit(e: FormEvent) {
  e.preventDefault();
@@ -161,160 +139,153 @@ export default function BrokerOwnProducts() {
  }
 
  return (
- <div className="space-y-6 pb-20">
- {/* Hero */}
- <section
- className="rounded-2xl p-6 text-white shadow-sm sm:p-8"
- style={{ background: `linear-gradient(135deg, #1a1408 0%, #2a2110 55%, ${ACCENT}22 100%)`, backgroundColor: "#20180a" }}
- >
- <div className="flex flex-wrap items-start justify-between gap-4">
+ <div className="space-y-5 pb-20">
+ {/* Page header — same pattern as the other dashboards */}
+ <div className="flex flex-wrap items-center justify-between gap-3">
  <div>
- <p className="text-xs font-bold uppercase tracking-widest" style={{ color: ACCENT }}>
- Sell your own product
- </p>
- <h1 className="mt-2 text-2xl font-extrabold sm:text-3xl">
- 24-hour Broker listings
+ <h1 className="text-xl font-bold text-foreground sm:text-2xl">
+ Broker products
  </h1>
- <p className="mt-2 max-w-xl text-sm leading-6 text-white/70">
- Create products you own. Once approved and public, each listing
- stays live for exactly 24 hours, then Xerin archives it automatically.
+ <p className="mt-1 text-sm text-muted-foreground">
+ Each approved listing stays live for 24 hours, then archives automatically.
  </p>
  </div>
  <button
  onClick={() => setDrawerOpen(true)}
- className="inline-flex items-center gap-2 rounded-xl px-5 py-3 text-sm font-bold text-white shadow-sm transition hover:opacity-90"
- style={{ backgroundColor: ACCENT }}
- >
- <HugeiconsIcon icon={PlusSignIcon} size={16} />
- Create product
- </button>
- </div>
-
- <div className="mt-6 grid grid-cols-3 gap-3">
- <Stat n={items.length} l="All listings" />
- <Stat n={active} l="Live now" />
- <Stat n={expired} l="Expired" />
- </div>
- </section>
-
- {error && (
- <div className="rounded-xl border border-red-light-4 bg-red-light-6 p-4 text-sm font-semibold text-red-dark">
- {error}
- </div>
- )}
-
- {message && (
- <div className="rounded-xl border border-green-light-4 bg-green-light-6 p-4 text-sm font-semibold text-green-dark">
- {message}
- </div>
- )}
-
- {/* Product list */}
- <section>
- <div className="mb-4 flex items-center justify-between">
- <h2 className="text-lg font-bold text-foreground">Your Broker products</h2>
- <span className="text-xs font-medium text-muted-foreground">
- {items.length} total
- </span>
- </div>
-
- {!items.length ? (
- <div className="flex flex-col items-center rounded-2xl border border-dashed border-border bg-card px-6 py-14 text-center">
- <span
- className="mb-4 flex h-14 w-14 items-center justify-center rounded-2xl text-white"
- style={{ backgroundColor: `${ACCENT}` }}
- >
- <HugeiconsIcon icon={PackageIcon} size={26} />
- </span>
- <p className="font-bold text-foreground">No Broker products yet</p>
- <p className="mt-1 max-w-sm text-sm text-muted-foreground">
- Create your first 24-hour listing — it goes live after a quick review.
- </p>
- <button
- onClick={() => setDrawerOpen(true)}
- className="mt-5 inline-flex items-center gap-2 rounded-xl px-5 py-2.5 text-sm font-bold text-white"
- style={{ backgroundColor: ACCENT }}
+ className="inline-flex items-center gap-2 rounded-lg bg-primary px-4 py-2.5 text-sm font-semibold text-primary-foreground transition hover:bg-primary/90"
  >
  <HugeiconsIcon icon={PlusSignIcon} size={15} />
  Create product
  </button>
  </div>
- ) : (
- <div className="grid gap-4 sm:grid-cols-2 xl:grid-cols-3">
- {items.map((p) => (
- <article
- key={p.id}
- className="group overflow-hidden rounded-2xl border border-border bg-card transition hover:shadow-md"
- >
- <div className="relative aspect-[4/3] w-full overflow-hidden bg-muted">
- {p.images?.[0] ? (
- <img
- src={resolveProductImageUrl(p.images[0].thumbnail_url || p.images[0].image_url)}
- alt={p.name}
- className="h-full w-full object-cover transition duration-300 group-hover:scale-[1.03]"
- />
- ) : (
- <div className="flex h-full items-center justify-center text-muted-foreground">
- <HugeiconsIcon icon={PackageIcon} size={32} />
+
+ {error && (
+ <div className="rounded-lg border border-red-light-4 bg-red-light-6 p-3.5 text-sm font-medium text-red-dark">
+ {error}
  </div>
  )}
+
+ {message && (
+ <div className="rounded-lg border border-green-light-4 bg-green-light-6 p-3.5 text-sm font-medium text-green-dark">
+ {message}
+ </div>
+ )}
+
+ {/* Products — simple dashboard table */}
+ <div className="overflow-hidden rounded-xl border border-border bg-card">
+ {!items.length ? (
+ <div className="px-6 py-12 text-center">
+ <p className="font-semibold text-foreground">No Broker products yet</p>
+ <p className="mt-1 text-sm text-muted-foreground">
+ Create your first listing to start selling.
+ </p>
+ <button
+ onClick={() => setDrawerOpen(true)}
+ className="mt-4 rounded-lg bg-primary px-4 py-2 text-sm font-semibold text-primary-foreground hover:bg-primary/90"
+ >
+ Create product
+ </button>
+ </div>
+ ) : (
+ <div className="overflow-x-auto">
+ <table className="w-full min-w-[720px] text-sm">
+ <thead>
+ <tr className="border-b border-border bg-muted/60 text-left text-xs font-semibold uppercase tracking-wide text-muted-foreground">
+ <th className="px-4 py-3">Product</th>
+ <th className="px-4 py-3">Status</th>
+ <th className="px-4 py-3">Price</th>
+ <th className="px-4 py-3">Stock</th>
+ <th className="px-4 py-3">Time left</th>
+ <th className="px-4 py-3 text-right">Action</th>
+ </tr>
+ </thead>
+ <tbody className="divide-y divide-border">
+ {items.map((p) => (
+ <tr key={p.id} className="transition hover:bg-muted/40">
+ <td className="px-4 py-3">
+ <div className="flex items-center gap-3">
+ <span className="flex h-10 w-10 shrink-0 items-center justify-center overflow-hidden rounded-lg bg-muted">
+ {p.images?.[0] ? (
+ <img
+ src={resolveProductImageUrl(
+ p.images[0].thumbnail_url || p.images[0].image_url,
+ )}
+ alt={p.name}
+ className="h-full w-full object-cover"
+ />
+ ) : (
+ <span className="text-xs text-muted-foreground">—</span>
+ )}
+ </span>
+ <span className="min-w-0">
+ <span className="block truncate font-semibold text-foreground">
+ {p.name}
+ </span>
+ {p.rejection_reason && (
+ <span className="block truncate text-xs text-destructive">
+ {p.rejection_reason}
+ </span>
+ )}
+ </span>
+ </div>
+ </td>
+ <td className="px-4 py-3">
  <span
- className={`absolute left-3 top-3 rounded-full px-2.5 py-1 text-[11px] font-bold uppercase tracking-wide ${statusStyle[p.status] || statusStyle.draft}`}
+ className={`inline-block rounded-full px-2.5 py-0.5 text-[11px] font-semibold capitalize ${statusStyle[p.status] || statusStyle.draft}`}
  >
  {p.status.replace("_", " ")}
  </span>
- </div>
-
- <div className="p-4">
- <h3 className="truncate font-bold text-foreground">{p.name}</h3>
- <p className="mt-1 text-sm font-semibold" style={{ color: ACCENT }}>
+ </td>
+ <td className="whitespace-nowrap px-4 py-3 font-medium text-foreground">
  {p.currency} {Number(p.sale_price || p.price).toLocaleString()}
- </p>
- <p className="mt-0.5 text-xs text-muted-foreground">
- Stock {p.available_quantity}/{p.quantity}
- {p.status === "approved" && p.is_active ? ` · ${countdown(p.seconds_remaining)} left` : ""}
- </p>
-
- {p.rejection_reason && (
- <p className="mt-2 text-xs font-semibold text-destructive">
- Reason: {p.rejection_reason}
- </p>
- )}
-
+ </td>
+ <td className="px-4 py-3 text-muted-foreground">
+ {p.available_quantity}/{p.quantity}
+ </td>
+ <td className="px-4 py-3 text-muted-foreground">
+ {p.status === "approved" && p.is_active
+ ? countdown(p.seconds_remaining)
+ : "—"}
+ </td>
+ <td className="px-4 py-3 text-right">
  {p.is_active && p.status !== "pending_review" && (
  <button
  disabled={busy}
  onClick={() => void archive(p.id)}
- className="mt-3 w-full rounded-lg border border-border py-2 text-xs font-bold text-foreground transition hover:bg-muted disabled:opacity-50"
+ className="rounded-lg border border-border px-3 py-1.5 text-xs font-semibold text-muted-foreground transition hover:bg-muted hover:text-foreground disabled:opacity-50"
  >
- Archive listing
+ Archive
  </button>
  )}
- </div>
- </article>
+ </td>
+ </tr>
  ))}
+ </tbody>
+ </table>
  </div>
  )}
- </section>
+ </div>
 
  {/* Create drawer */}
  {drawerOpen && (
  <div className="fixed inset-0 z-[90]">
  <div
- className="absolute inset-0 bg-black/50 backdrop-blur-[2px]"
+ className="absolute inset-0 bg-black/50"
  onClick={() => !busy && setDrawerOpen(false)}
  />
  <aside
  role="dialog"
  aria-modal="true"
  aria-label="Create Broker product"
- className="absolute inset-y-0 right-0 flex w-full max-w-xl flex-col bg-card shadow-2xl"
+ className="absolute inset-y-0 right-0 flex w-full max-w-lg flex-col bg-card shadow-2xl"
  >
  <header className="flex items-center justify-between border-b border-border px-5 py-4">
  <div>
- <h2 className="text-lg font-bold text-foreground">Create Broker product</h2>
+ <h2 className="text-base font-bold text-foreground">
+ Create Broker product
+ </h2>
  <p className="text-xs text-muted-foreground">
- Listings go live for 24 hours after approval.
+ Listings stay live for 24 hours after approval.
  </p>
  </div>
  <button
@@ -434,9 +405,11 @@ export default function BrokerOwnProducts() {
  </Field>
 
  <Field label="Product images" required>
- <label className="flex cursor-pointer items-center justify-center gap-2 rounded-lg border-2 border-dashed border-border bg-muted px-4 py-6 text-sm font-medium text-muted-foreground transition hover:border-primary/40 hover:text-foreground">
- <HugeiconsIcon icon={PlusSignIcon} size={16} />
- {files.length ? `${files.length} image(s) selected` : "Choose images (JPEG, PNG, WEBP)"}
+ <label className="flex cursor-pointer items-center justify-center gap-2 rounded-lg border border-dashed border-border bg-muted px-4 py-5 text-sm text-muted-foreground transition hover:border-primary/40 hover:text-foreground">
+ <HugeiconsIcon icon={PlusSignIcon} size={15} />
+ {files.length
+ ? `${files.length} image(s) selected`
+ : "Choose images (JPEG, PNG, WEBP)"}
  <input
  required={!files.length}
  multiple
@@ -461,15 +434,9 @@ export default function BrokerOwnProducts() {
  <div className="sticky bottom-0 -mx-5 border-t border-border bg-card px-5 py-4">
  <button
  disabled={busy}
- className="flex h-12 w-full items-center justify-center gap-2 rounded-xl text-sm font-bold text-white transition hover:opacity-90 disabled:cursor-not-allowed disabled:opacity-50"
- style={{ backgroundColor: ACCENT }}
+ className="flex h-11 w-full items-center justify-center rounded-lg bg-primary text-sm font-semibold text-primary-foreground transition hover:bg-primary/90 disabled:cursor-not-allowed disabled:opacity-50"
  >
- {busy ? "Publishing…" : (
- <>
- <HugeiconsIcon icon={Timer01Icon} size={16} />
- Create &amp; publish for 24h
- </>
- )}
+ {busy ? "Publishing…" : "Create & publish"}
  </button>
  </div>
  </form>
@@ -493,20 +460,9 @@ function Field({
  <label className="block">
  <span className="mb-1.5 block text-sm font-medium text-foreground">
  {label}
- {required && <span className="ml-0.5" style={{ color: ACCENT }}>*</span>}
+ {required && <span className="ml-0.5 text-destructive">*</span>}
  </span>
  {children}
  </label>
- );
-}
-
-function Stat({ n, l }: { n: number; l: string }) {
- return (
- <div className="rounded-xl bg-white/10 p-4 text-center backdrop-blur-sm">
- <div className="text-2xl font-extrabold text-white">{n}</div>
- <div className="mt-1 text-xs font-semibold uppercase tracking-wide text-white/60">
- {l}
- </div>
- </div>
  );
 }
