@@ -7,39 +7,61 @@ import { useAuth } from "@/hooks/useAuth";
 import { authApi } from "@/lib/api/endpoints/auth";
 import { authStorage } from "@/lib/auth/storage";
 import toast from "react-hot-toast";
+import { HugeiconsIcon, type IconSvgElement } from "@hugeicons/react";
+import {
+ ShoppingBag02Icon,
+ Store01Icon,
+ AgreementIcon,
+ CheckmarkCircle02Icon,
+ ArrowRight01Icon,
+ ShieldCheckIcon,
+} from "@hugeicons/core-free-icons";
 
-const cards = [
+const cards: {
+ key: "customer" | "seller" | "winga";
+ title: string;
+ subtitle: string;
+ icon: IconSvgElement;
+ href: string;
+ benefits: string[];
+ action: string;
+ accent: string;
+ tag: string;
+}[] = [
  {
  key: "customer",
  title: "Customer",
- subtitle: "Buy products",
- icon: "🛍️",
+ subtitle: "Shop and receive deliveries across the marketplace",
+ icon: ShoppingBag02Icon,
  href: "/account",
  benefits: ["Shop thousands of products", "Secure payments", "Reliable delivery", "Order tracking"],
  action: "Continue as Customer",
- tone: "bg-green-light-6",
+ accent: "#176B65",
+ tag: "Shop",
  },
  {
  key: "seller",
  title: "Seller",
- subtitle: "Sell your products",
- icon: "🏪",
+ subtitle: "Open a store and sell your products on Xerin",
+ icon: Store01Icon,
  href: "/onboarding/seller",
  benefits: ["Create and manage your store", "Reach more customers", "Manage orders easily", "Grow your business"],
  action: "Continue as Seller",
- tone: "bg-blue-50",
+ accent: "#123B5D",
+ tag: "Sell",
  },
  {
  key: "winga",
- title: "Winga (Broker)",
- subtitle: "Earn by promoting and selling products",
- icon: "🤝",
+ title: "Winga",
+ subtitle: "Earn commissions by promoting and selling products",
+ icon: AgreementIcon,
  href: "/onboarding/winga",
  benefits: ["Promote marketplace products", "Earn commissions", "No inventory required", "Flexible earning opportunity"],
  action: "Continue as Winga",
- tone: "bg-primary/10",
+ accent: "#C6922E",
+ tag: "Earn",
  },
-] as const;
+];
 
 export default function RoleChoice() {
  const router = useRouter();
@@ -117,8 +139,19 @@ export default function RoleChoice() {
  disabled={Boolean(busyRole)}
  className="group flex min-h-[390px] flex-col rounded-3xl border border-border bg-card p-6 text-left shadow-[0_12px_35px_rgba(15,23,42,0.06)] transition duration-300 hover:-translate-y-1.5 hover:border-primary/50 hover:shadow-[0_18px_45px_rgba(15,23,42,0.10)] focus:outline-none focus:ring-2 focus:ring-ring/30 sm:p-7"
  >
- <div className={`mb-5 flex h-20 w-20 items-center justify-center rounded-full ${card.tone} text-4xl transition duration-300 group-hover:scale-105`}>
- {card.icon}
+ <div className="mb-5 flex items-center justify-between">
+ <span
+ className="flex h-14 w-14 items-center justify-center rounded-2xl text-white transition duration-300 group-hover:scale-105"
+ style={{ backgroundColor: card.accent }}
+ >
+ <HugeiconsIcon icon={card.icon} size={26} />
+ </span>
+ <span
+ className="rounded-full px-3 py-1 text-[11px] font-bold uppercase tracking-widest text-white/95"
+ style={{ backgroundColor: `${card.accent}1A`, color: card.accent }}
+ >
+ {card.tag}
+ </span>
  </div>
 
  <h2 className="text-2xl font-extrabold text-foreground">{card.title}</h2>
@@ -126,29 +159,37 @@ export default function RoleChoice() {
  {card.subtitle}
  </p>
 
- <div className="my-5 h-px w-full bg-gray-3" />
+ <div className="my-5 h-px w-full bg-border" />
 
  <ul className="mb-6 space-y-3">
  {card.benefits.map((benefit) => (
  <li key={benefit} className="flex items-start gap-2.5 text-sm text-foreground-3">
- <span className="mt-0.5 flex h-5 w-5 shrink-0 items-center justify-center rounded-full bg-primary/10 text-[11px] font-bold text-primary">
- ✓
- </span>
+ <HugeiconsIcon
+ icon={CheckmarkCircle02Icon}
+ size={18}
+ className="mt-0.5 shrink-0"
+ style={{ color: card.accent }}
+ />
  <span>{benefit}</span>
  </li>
  ))}
  </ul>
 
- <span className="mt-auto flex w-full items-center justify-center rounded-xl bg-primary px-4 py-3.5 text-sm font-bold text-primary-foreground shadow-sm transition group-hover:bg-primary/90">
- {card.action}
- <span className="ml-2 text-lg transition-transform group-hover:translate-x-1">→</span>
+ <span
+ className="mt-auto flex w-full items-center justify-center gap-2 rounded-xl px-4 py-3.5 text-sm font-bold text-white shadow-sm transition"
+ style={{ backgroundColor: card.accent }}
+ >
+ {busyRole === (card.key === "winga" ? ("broker" as const) : card.key)
+ ? "Saving..."
+ : card.action}
+ <HugeiconsIcon icon={ArrowRight01Icon} size={16} className="transition-transform group-hover:translate-x-1" />
  </span>
  </button>
  ))}
  </section>
 
  <div className="mx-auto mt-7 flex max-w-xl items-center justify-center gap-2 rounded-xl border border-border bg-card/80 px-4 py-3 text-center text-xs text-muted-foreground shadow-sm backdrop-blur /80 sm:text-sm">
- <span className="text-base text-primary">✓</span>
+ <HugeiconsIcon icon={ShieldCheckIcon} size={16} className="shrink-0 text-primary" />
  <span>Your Xerin account stays secure. Choose the role that fits how you want to start.</span>
  </div>
 
