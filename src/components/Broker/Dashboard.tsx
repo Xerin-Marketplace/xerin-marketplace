@@ -139,7 +139,7 @@ export default function BrokerDashboard() {
 
  {approved && analytics && (
  <>
- <div className="grid gap-4 sm:grid-cols-2 xl:grid-cols-4">
+ <div className="grid grid-cols-2 gap-3 sm:gap-4 xl:grid-cols-4">
  <Metric
  title="Referral Clicks"
  value={analytics.total_clicks.toLocaleString()}
@@ -162,20 +162,30 @@ export default function BrokerDashboard() {
  />
  </div>
 
+ {/* Performance funnel — real conversion data */}
+ <section className="rounded-xl border border-border bg-card p-5">
+ <div className="mb-4 flex items-center justify-between">
+ <div>
+ <h2 className="text-sm font-bold text-foreground">30-day conversion funnel</h2>
+ <p className="text-xs text-muted-foreground">From clicks to successful sales.</p>
+ </div>
  <Link
  href="/broker/analytics"
- className="group block rounded-xl border border-primary/25 bg-primary/10 p-5 transition hover:border-[var(--primary)] hover:shadow-sm"
+ className="inline-flex items-center gap-1 text-xs font-semibold text-primary hover:underline"
  >
- <div className="flex items-center justify-between gap-4">
- <div>
- <p className="font-black text-foreground">Open full performance analytics</p>
- <p className="mt-1 text-sm font-medium text-muted-foreground">
- Campaign clicks, conversions, successful sales, refunds and commission performance.
- </p>
- </div>
- <HugeiconsIcon icon={ArrowRight01Icon} className="shrink-0 text-primary transition group-hover:translate-x-1" size={20} />
- </div>
+ Full analytics
+ <HugeiconsIcon icon={ArrowRight01Icon} size={13} />
  </Link>
+ </div>
+ <Funnel
+ stages={[
+ { label: "Clicks", value: analytics.total_clicks },
+ { label: "Unique visitors", value: analytics.unique_visitors },
+ { label: "Orders", value: analytics.attributed_orders },
+ { label: "Successful sales", value: analytics.successful_sales },
+ ]}
+ />
+ </section>
  </>
  )}
 
@@ -226,4 +236,26 @@ function Metric({ title, value, subtitle }: { title: string; value: string; subt
 
 function Panel({ children }: { children: React.ReactNode }) {
  return <div className="rounded-xl border border-border bg-card p-6 shadow-sm">{children}</div>;
+}
+
+function Funnel({ stages }: { stages: { label: string; value: number }[] }) {
+ const max = Math.max(...stages.map((s) => s.value), 1);
+ return (
+ <div className="space-y-3">
+ {stages.map((stage) => (
+ <div key={stage.label}>
+ <div className="mb-1 flex items-center justify-between text-xs">
+ <span className="font-medium text-muted-foreground">{stage.label}</span>
+ <span className="font-bold text-foreground">{stage.value.toLocaleString()}</span>
+ </div>
+ <div className="h-2.5 w-full overflow-hidden rounded-full bg-muted">
+ <div
+ className="h-full rounded-full bg-primary transition-all duration-500"
+ style={{ width: `${Math.max((stage.value / max) * 100, stage.value > 0 ? 4 : 0)}%` }}
+ />
+ </div>
+ </div>
+ ))}
+ </div>
+ );
 }
