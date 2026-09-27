@@ -34,7 +34,7 @@ const Footer = () => {
  Ready to grow your business with Xerin?
  </h3>
  <p className="text-sm text-muted-foreground">
- Start selling, join our logistics network, or explore the marketplace · all in one place.
+ Start selling, become a Winga, join our logistics network, or explore the marketplace — all in one place.
  </p>
  </div>
  <div className="flex flex-wrap items-center justify-center gap-3">
@@ -45,13 +45,20 @@ const Footer = () => {
  Become a Seller
  <HugeiconsIcon icon={ArrowUpRight01Icon} size={16} />
  </Link>
+ <Link
+ href="/onboarding/winga"
+ className="group inline-flex shrink-0 items-center gap-2 rounded-lg border border-primary px-6 py-3 text-sm font-semibold text-primary transition-all duration-300 hover:bg-primary/10"
+ >
+ Become a Winga
+ <HugeiconsIcon icon={ArrowUpRight01Icon} size={16} />
+ </Link>
  <a
  href="https://xerinexpress.com"
  target="_blank"
  rel="noopener noreferrer"
  className="group inline-flex shrink-0 items-center gap-2 rounded-lg bg-foreground px-6 py-3 text-sm font-semibold text-background transition-all duration-300 hover:bg-foreground/90"
  >
- Join Logistics
+ Join Logistics Network
  <HugeiconsIcon icon={ArrowUpRight01Icon} size={16} />
  </a>
  </div>
