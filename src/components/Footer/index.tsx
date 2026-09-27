@@ -39,28 +39,26 @@ const Footer = () => {
  </div>
  <div className="flex flex-wrap items-center justify-center gap-3">
  <Link
- href={ROUTES.sellerRegister}
+ href="/signup?tab=seller"
  className="group inline-flex shrink-0 items-center gap-2 rounded-lg bg-primary px-6 py-3 text-sm font-semibold text-primary-foreground transition-all duration-300 hover:shadow-md"
  >
  Become a Seller
  <HugeiconsIcon icon={ArrowUpRight01Icon} size={16} />
  </Link>
  <Link
- href="/onboarding/winga"
+ href="/signup?tab=broker"
  className="group inline-flex shrink-0 items-center gap-2 rounded-lg border border-primary px-6 py-3 text-sm font-semibold text-primary transition-all duration-300 hover:bg-primary/10"
  >
  Become a Winga
  <HugeiconsIcon icon={ArrowUpRight01Icon} size={16} />
  </Link>
- <a
- href="https://xerinexpress.com"
- target="_blank"
- rel="noopener noreferrer"
+ <Link
+ href="/signup"
  className="group inline-flex shrink-0 items-center gap-2 rounded-lg bg-foreground px-6 py-3 text-sm font-semibold text-background transition-all duration-300 hover:bg-foreground/90"
  >
  Join Logistics Network
  <HugeiconsIcon icon={ArrowUpRight01Icon} size={16} />
- </a>
+ </Link>
  </div>
  </div>
  </div>

@@ -104,6 +104,7 @@ export type AuthTokenResponse = {
   expires_in?: number;
   user?: User;
   security_notice?: StaffSecurityNotice | null;
+  is_new_user?: boolean;
 };
 
 export type RefreshTokenRequest = {

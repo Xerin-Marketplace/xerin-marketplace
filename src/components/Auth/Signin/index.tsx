@@ -434,6 +434,11 @@ const SignInPanel = ({ onSwitchTab }: { onSwitchTab: (tab: AuthTab) => void }) =
  await mergeGuestCart().catch(() => {});
  }
  closeCartModal();
+ if (session.is_new_user) {
+ toast.success("Account created — signed in with Google.");
+ router.push("/choose-role");
+ return;
+ }
  const destination = getPostLoginPath(searchParams.get("redirect"), session.user);
  toast.success("Signed in with Google.");
  router.push(destination);
@@ -725,6 +730,11 @@ const SignUpPanel = ({ onSwitchTab }: { onSwitchTab: (tab: AuthTab) => void }) =
  setSession(session);
  if (getPostLoginPath("/account", session.user) === "/account") {
  await mergeGuestCart().catch(() => {});
+ }
+ if (session.is_new_user) {
+ toast.success("Account created — signed in with Google.");
+ router.push("/choose-role");
+ return;
  }
  const destination = getPostLoginPath(searchParams.get("redirect"), session.user);
  toast.success("Account ready — signed in with Google.");
@@ -1695,11 +1705,15 @@ const AuthPage = ({ initialTab = "signup" }: { initialTab?: AuthTab }) => {
  const searchParams = useSearchParams();
  const requestedTab = searchParams.get("tab");
  const resolvedInitialTab: AuthTab =
- requestedTab === "signup" ? "signup" : initialTab === "signup" ? "signup" : "signin";
+ requestedTab === "signup" || requestedTab === "seller" || requestedTab === "broker"
+ ? requestedTab
+ : initialTab === "signup" ? "signup" : "signin";
  const [activeTab, setActiveTab] = useState<AuthTab>(resolvedInitialTab);
 
  useEffect(() => {
- if (requestedTab === "signup") setActiveTab("signup");
+ if (requestedTab === "signup" || requestedTab === "seller" || requestedTab === "broker") {
+ setActiveTab(requestedTab);
+ }
  }, [requestedTab]);
 
  const panelCopy: Record<AuthTab, { title: string; body: string }> = {
