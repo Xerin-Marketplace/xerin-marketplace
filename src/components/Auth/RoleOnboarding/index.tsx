@@ -340,7 +340,7 @@ export default function RoleOnboarding({ role }: { role: "seller" | "winga" }) {
  if (!isAuthenticated) return null;
 
  const input =
- "h-12 w-full rounded-xl border border-border bg-card px-4 outline-none focus:border-primary ";
+ "h-11 w-full rounded-lg border border-border bg-muted px-3.5 text-sm text-foreground outline-none transition placeholder:text-muted-foreground focus:border-transparent focus:ring-2 focus:ring-primary/30 disabled:cursor-not-allowed disabled:opacity-70";
 
  const locationSelect = `${input} appearance-none cursor-pointer`;
 
@@ -380,9 +380,31 @@ export default function RoleOnboarding({ role }: { role: "seller" | "winga" }) {
  ward: form.ward,
  };
 
+ const panel = role === "seller"
+ ? {
+ title: "Sell on Xerin.",
+ body: "Open your store, list your products and reach buyers across the region. Getting started takes minutes, not days.",
+ points: [
+ "Create and manage your own store",
+ "Reach thousands of ready buyers",
+ "Track orders and payouts in one place",
+ ],
+ }
+ : {
+ title: "Earn with Xerin.",
+ body: "Share products you believe in and earn when people buy through your link. No inventory needed.",
+ points: [
+ "Promote products with your unique link",
+ "Earn commission on every sale",
+ "No stock, no capital — flexible income",
+ ],
+ };
+
+ const accent = role === "seller" ? "#123B5D" : "#C6922E";
+
  return (
- <main className="min-h-[100dvh] bg-card">
- <div className="mx-auto flex min-h-[100dvh] w-full max-w-[1100px] flex-col px-4 pb-[max(20px,env(safe-area-inset-bottom))] pt-[max(18px,env(safe-area-inset-top))] sm:px-8 sm:py-8 lg:px-12">
+ <main className="min-h-[100dvh] bg-card lg:grid lg:grid-cols-2">
+ <div className="flex min-h-[100dvh] flex-col px-4 pb-[max(20px,env(safe-area-inset-bottom))] pt-[max(18px,env(safe-area-inset-top))] sm:px-10 sm:py-8 xl:px-20">
  <div className="flex items-center justify-between">
  <Link href="/" className="inline-flex w-fit items-center gap-2">
  <Image
@@ -405,9 +427,9 @@ export default function RoleOnboarding({ role }: { role: "seller" | "winga" }) {
  </div>
 
  <div className="flex flex-1 items-start justify-center py-6 sm:py-10">
- <div className="w-full max-w-[640px]">
+ <div className="w-full max-w-[560px]">
  <div className="mb-6 sm:mb-8">
- <div className="mb-4 flex h-12 w-12 items-center justify-center rounded-2xl text-white" style={{ backgroundColor: role === "seller" ? "#123B5D" : "#C6922E" }}>
+ <div className="mb-4 flex h-12 w-12 items-center justify-center rounded-2xl text-white" style={{ backgroundColor: accent }}>
  <HugeiconsIcon icon={role === "seller" ? Store01Icon : AgreementIcon} size={24} />
  </div>
  <p className="mb-2 text-xs font-bold uppercase tracking-[0.22em] text-primary">
@@ -426,7 +448,7 @@ export default function RoleOnboarding({ role }: { role: "seller" | "winga" }) {
  <>
  <section className="space-y-4 rounded-2xl border border-border bg-muted/40 p-4 sm:p-5">
  <div className="flex items-center gap-2.5">
- <span className="flex h-8 w-8 items-center justify-center rounded-lg bg-[#123B5D]/10 text-[#123B5D]">
+ <span className="flex h-8 w-8 items-center justify-center rounded-lg text-white" style={{ backgroundColor: accent }}>
  <HugeiconsIcon icon={Store01Icon} size={16} />
  </span>
  <div>
@@ -465,7 +487,7 @@ export default function RoleOnboarding({ role }: { role: "seller" | "winga" }) {
 
  <section className="space-y-4 rounded-2xl border border-border bg-muted/40 p-4 sm:p-5">
  <div className="flex items-center gap-2.5">
- <span className="flex h-8 w-8 items-center justify-center rounded-lg bg-[#123B5D]/10 text-[#123B5D]">
+ <span className="flex h-8 w-8 items-center justify-center rounded-lg text-white" style={{ backgroundColor: accent }}>
  <HugeiconsIcon icon={Location05Icon} size={16} />
  </span>
  <div>
@@ -529,7 +551,7 @@ export default function RoleOnboarding({ role }: { role: "seller" | "winga" }) {
 
  <section className="space-y-4 rounded-2xl border border-border bg-muted/40 p-4 sm:p-5">
  <div className="flex items-center gap-2.5">
- <span className="flex h-8 w-8 items-center justify-center rounded-lg bg-[#123B5D]/10 text-[#123B5D]">
+ <span className="flex h-8 w-8 items-center justify-center rounded-lg text-white" style={{ backgroundColor: accent }}>
  <HugeiconsIcon icon={InformationCircleIcon} size={16} />
  </span>
  <div>
@@ -586,7 +608,7 @@ export default function RoleOnboarding({ role }: { role: "seller" | "winga" }) {
  <>
  <section className="space-y-4 rounded-2xl border border-border bg-muted/40 p-4 sm:p-5">
  <div className="flex items-center gap-2.5">
- <span className="flex h-8 w-8 items-center justify-center rounded-lg bg-[#C6922E]/15 text-[#C6922E]">
+ <span className="flex h-8 w-8 items-center justify-center rounded-lg text-white" style={{ backgroundColor: accent }}>
  <HugeiconsIcon icon={Location05Icon} size={16} />
  </span>
  <div>
@@ -667,6 +689,40 @@ export default function RoleOnboarding({ role }: { role: "seller" | "winga" }) {
  <Link href="/privacy" className="hover:text-foreground dark:hover:text-white">Privacy</Link>
  <span>•</span>
  <span>© {new Date().getFullYear()} XerinMarket</span>
+ </div>
+ </div>
+
+ {/* Right panel: role-specific marketing / imagery — same as auth pages */}
+ <div className="relative hidden min-h-[100dvh] overflow-hidden bg-carbon lg:flex lg:flex-col">
+ <Image src="/35124 (1).jpg" alt="Xerin Marketplace" fill priority sizes="50vw" className="object-cover object-center" />
+ <div className="absolute inset-0 bg-black/55" />
+ <div className="absolute inset-0 bg-gradient-to-t from-black/70 via-black/40 to-transparent" />
+ <div className="absolute inset-0 bg-gradient-to-br from-black/30 via-transparent to-transparent" />
+
+ <div className="relative z-10 flex h-full flex-col justify-between p-10 xl:p-14">
+ <div />
+
+ <div className="max-w-md space-y-6">
+ <div className="flex h-12 w-12 items-center justify-center rounded-xl text-white" style={{ backgroundColor: `${accent}33` }}>
+ <HugeiconsIcon icon={role === "seller" ? Store01Icon : AgreementIcon} size={24} />
+ </div>
+ <h2 className="text-3xl font-bold leading-tight tracking-tight text-white xl:text-4xl">
+ {panel.title}
+ </h2>
+ <p className="text-base leading-relaxed text-white/75 sm:text-lg">
+ {panel.body}
+ </p>
+
+ <div className="space-y-3 border-l-2 pl-4 pt-1" style={{ borderColor: accent }}>
+ {panel.points.map((point) => (
+ <p key={point} className="text-sm font-medium text-white/85">{point}</p>
+ ))}
+ </div>
+ </div>
+
+ <div className="flex items-center justify-between text-xs text-white/60">
+ <span>&copy; {new Date().getFullYear()} Xerin Marketplace. All rights reserved.</span>
+ </div>
  </div>
  </div>
  </main>
