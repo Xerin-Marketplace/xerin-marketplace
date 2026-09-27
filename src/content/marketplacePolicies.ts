@@ -233,5 +233,61 @@ export const marketplacePolicies = {
       },
     ],
   },
+  returnsRefunds: {
+    slug: "returns-refunds",
+    title: "Returns & Refunds Policy",
+    summary:
+      "How returns, refunds and disputes work on Xerin Marketplace — including buyer protection and timelines.",
+    sections: [
+      {
+        heading: "Buyer protection",
+        paragraphs: [
+          "Every order placed through Xerin Marketplace is covered by buyer protection. Your payment is held securely and is only released to the seller after the order is delivered and confirmed. If your order does not arrive, is damaged, or is materially different from the listing, you can open a dispute from your order page.",
+        ],
+        bullets: [
+          "Secure payment through Xerin — sellers are paid only after delivery is confirmed",
+          "Every order includes tracking and a clear delivery status",
+          "A dispute can be opened directly from your order",
+          "Our team reviews disputes fairly and quickly",
+        ],
+      },
+      {
+        heading: "When you can return an item",
+        bullets: [
+          "The item was not delivered",
+          "The item arrived damaged or defective",
+          "The item is materially different from its description or photos",
+          "You received the wrong item or wrong quantity",
+        ],
+        paragraphs: [
+          "Returns for change of mind are not guaranteed and depend on the seller's listing terms. Custom-made, perishable and personal-care items may not be eligible for return.",
+        ],
+      },
+      {
+        heading: "How to request a return or refund",
+        paragraphs: [
+          "Open your order from your account, choose the affected item and select the return or refund option. Describe the issue clearly and attach photos where relevant. Our team will review the request with the seller and keep you updated on the order timeline.",
+        ],
+      },
+      {
+        heading: "Refund processing",
+        paragraphs: [
+          "Approved refunds are issued back to the original payment method or to your Xerin wallet where applicable. Mobile money refunds follow the provider's settlement time, and card refunds depend on the bank. If a refund cannot be completed on the original method, support will contact you to agree on an alternative.",
+        ],
+      },
+      {
+        heading: "Seller obligations",
+        paragraphs: [
+          "Sellers must keep listings accurate, pack items safely and ship within the stated handling time. Sellers who repeatedly fail to deliver or misdescribe products may have payouts withheld and may be suspended from the marketplace.",
+        ],
+      },
+      {
+        heading: "Questions",
+        paragraphs: [
+          "For return or refund questions contact support@xerinmarketplace.com or use the contact page.",
+        ],
+      },
+    ],
+  },
 } satisfies Record<string, MarketplacePolicy>;
 

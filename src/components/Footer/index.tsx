@@ -13,7 +13,8 @@ import { Location01Icon, Mail01Icon, FacebookIcon, NewTwitterIcon, InstagramIcon
 const marketplacePolicyLinks = [
  { label: "Product Listing Policy", href: "/policies/product-listing" },
  { label: "Intellectual Property Protection", href: "/policies/intellectual-property" },
- { label: "Privacy Policy", href: "/policies/privacy" },
+ { label: "Returns & Refunds", href: "/policies/returns-refunds" },
+  { label: "Privacy Policy", href: "/policies/privacy" },
  { label: "Terms of Use", href: "/policies/terms-of-use" },
  { label: "User Information Legal Enquiry Guide", href: "/policies/legal-enquiry" },
  { label: "Integrity Compliance", href: "/policies/integrity-compliance" },

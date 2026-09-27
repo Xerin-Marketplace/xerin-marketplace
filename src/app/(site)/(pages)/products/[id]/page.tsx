@@ -78,12 +78,29 @@ export async function generateMetadata({ params }: RouteParams): Promise<Metadat
   };
 }
 
+async function fetchSellerName(product: Product): Promise<string | null> {
+  if (!product.seller_id) return null;
+  try {
+    const res = await fetch(
+      `${API_SERVER_BASE_URL}/sellers/${encodeURIComponent(String(product.seller_id))}/public`,
+      { next: { revalidate: 300 }, signal: AbortSignal.timeout(10000) },
+    );
+    if (!res.ok) return null;
+    const data = (await res.json()) as { store?: { name?: string } | null; business_name?: string };
+    return data.store?.name || data.business_name || null;
+  } catch {
+    return null;
+  }
+}
+
 export default async function ProductDetailsPage({ params }: RouteParams) {
   const { id } = await params;
   const product = await fetchProduct(id);
 
   const indexable = Boolean(product && product.is_active && product.status === "approved");
   if (!indexable || !product) notFound();
+
+  const sellerName = await fetchSellerName(product);
 
   return (
     <>
@@ -101,7 +118,7 @@ export default async function ProductDetailsPage({ params }: RouteParams) {
               brand: product.brand?.name ?? null,
               categoryName: product.category?.name ?? null,
               inStock: product.marketplace_available !== false,
-              sellerName: null,
+              sellerName,
               rating: product.rating != null ? Number(product.rating) : null,
               reviewCount: product.review_count != null ? Number(product.review_count) : null,
             }),

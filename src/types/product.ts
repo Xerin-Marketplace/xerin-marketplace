@@ -22,6 +22,7 @@ export type Product = {
   currency?: string;
   id: number | string;
   storeId?: number | string | null;
+  sellerId?: number | string | null;
   imgs?: {
     thumbnails: string[];
     previews: string[];

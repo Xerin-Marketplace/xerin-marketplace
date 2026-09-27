@@ -130,3 +130,27 @@ export const storeApi = {
   uploadStoreLogo,
   uploadStoreBanner,
 };
+
+
+export type PublicSellerSummary = {
+  seller_id: string;
+  business_name: string;
+  verified: boolean;
+  store: {
+    name: string;
+    slug: string;
+    logo_url: string | null;
+    country: string | null;
+    region: string | null;
+    district: string | null;
+  } | null;
+  rating: number | null;
+  review_count: number;
+  products_count: number;
+  member_since: string | null;
+};
+
+export const getPublicSeller = async (sellerId: string | number): Promise<PublicSellerSummary> => {
+  const res = await axiosInstance.get<PublicSellerSummary>(`/sellers/${sellerId}/public`);
+  return res.data;
+};

@@ -13,6 +13,7 @@ import { useAddCartItem, addProductToCartPayload } from "@/hooks/useCartActions"
 import type { Product } from "@/types/product";
 import ProductSpecifications from "./ProductSpecifications";
 import OtherSellerOffersModal, { OtherSellerOffersButton } from "./OtherSellerOffers";
+import SellerCard from "./SellerCard";
 import { HugeiconsIcon } from "@hugeicons/react";
 import { CheckIcon, TruckIcon, ShieldCheckIcon, Store01Icon, RotateLeft01Icon, ExpandIcon, FavouriteIcon, File01Icon, ArrowLeft01Icon, ArrowRight01Icon } from "@hugeicons/core-free-icons";
 import InfoPopover from "@/components/Common/Info/InfoPopover";
@@ -285,6 +286,7 @@ const ShopDetails = ({ product }: { product: Product }) => {
  productId={String(product.id)}
  onOpen={() => setSellerOffersOpen(true)}
  />
+ {product.sellerId ? <SellerCard sellerId={product.sellerId} /> : null}
  </div>
 
  <div className="min-w-0 lg:col-span-2">
@@ -294,7 +296,7 @@ const ShopDetails = ({ product }: { product: Product }) => {
 
  <div className="mt-4 grid grid-cols-2 overflow-hidden rounded-2xl border border-border bg-muted sm:grid-cols-4">
  {[
- { type: "return" as const, title: "Returns", text: "Policy applies" },
+ { type: "return" as const, title: "Returns", text: "Buyer protection applies" },
  { type: "delivery" as const, title: "Delivery", text: "Shown at checkout" },
  { type: "secure" as const, title: "Protection", text: "Secure checkout" },
  { type: "market" as const, title: "Marketplace", text: "Xerin order tracking" },

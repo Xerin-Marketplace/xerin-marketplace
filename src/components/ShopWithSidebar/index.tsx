@@ -3,6 +3,7 @@ import React, { useState, useEffect } from "react";
 import Breadcrumb from "../Common/Breadcrumb";
 import CustomSelect from "./CustomSelect";
 import CategoryDropdown from "./CategoryDropdown";
+import BrandDropdown from "./BrandDropdown";
 import PriceDropdown from "./PriceDropdown";
 import { useCategories } from "@/lib/products";
 import { mapSearchItemToUiProduct } from "@/lib/products/adapters";
@@ -31,6 +32,8 @@ const ShopWithSidebar = () => {
  const categoryId = searchParams.get("category_id") || undefined;
  const minPrice = searchParams.get("min_price") || "";
  const maxPrice = searchParams.get("max_price") || "";
+ const brandId = searchParams.get("brand_id") || undefined;
+ const inStockOnly = searchParams.get("in_stock") === "1";
  const sort = (searchParams.get("sort") || "newest") as SearchSort;
  const page = Math.max(1, Number(searchParams.get("page") || 1));
  const [productStyle, setProductStyle] = useState("grid");
@@ -71,6 +74,8 @@ const ShopWithSidebar = () => {
  category_id: categoryId,
  min_price: minPrice ? Number(minPrice) : undefined,
  max_price: maxPrice ? Number(maxPrice) : undefined,
+ brand_id: brandId,
+ in_stock: inStockOnly || undefined,
  sort,
  page,
  page_size: PAGE_SIZE,
@@ -97,7 +102,7 @@ const ShopWithSidebar = () => {
  return () => {
  active = false;
  };
- }, [categoryId, minPrice, maxPrice, sort, page]);
+ }, [categoryId, brandId, inStockOnly, minPrice, maxPrice, sort, page]);
 
  const {
  categories: apiCategories,
@@ -175,6 +180,27 @@ const ShopWithSidebar = () => {
 
  {/* <!-- category box --> */}
  <CategoryDropdown categories={categories} />
+
+ {/* <!-- brand box --> */}
+ <BrandDropdown />
+
+ {/* // <!-- availability --> */}
+ <div className="bg-card shadow-1 rounded-lg py-4 px-5">
+ <label className="flex cursor-pointer items-center gap-2 text-custom-sm font-medium text-foreground">
+ <input
+ type="checkbox"
+ checked={inStockOnly}
+ onChange={(e) =>
+ updateParams({
+ in_stock: e.target.checked ? "1" : null,
+ page: null,
+ })
+ }
+ className="h-4 w-4 accent-primary"
+ />
+ In stock only
+ </label>
+ </div>
 
  {/* // <!-- price range box --> */}
  <PriceDropdown

@@ -114,6 +114,7 @@ export const mapApiProductToUiProduct = (product: ApiProduct): UiProduct => {
   return {
     id: product.id as UiProduct["id"],
     storeId: product.store_id ?? null,
+    sellerId: product.seller_id ?? null,
     title: product.name || product.slug || "Untitled product",
     reviews: reviewCount,
     reviewCount,
