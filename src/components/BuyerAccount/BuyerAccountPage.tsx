@@ -142,7 +142,7 @@ export default function BuyerDashboard() {
  <div className="grid gap-6 p-6 sm:p-7 lg:grid-cols-[1fr_auto] lg:items-center">
  <div>
  <p className="text-xs font-bold uppercase tracking-[0.18em] text-primary">My Xerin Market</p>
- <h1 className="mt-2 text-2xl font-extrabold sm:text-3xl">
+ <h1 className="mt-2 text-2xl font-extrabold text-white sm:text-3xl">
  {profile.state === "ready" && first ? `Welcome back, ${first}` : profile.state === "error" ? "Customer Dashboard" : "Loading your account..."}
  </h1>
  <p className="mt-2 max-w-2xl text-sm leading-6 text-white/70">
