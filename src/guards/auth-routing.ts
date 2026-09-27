@@ -30,6 +30,12 @@ export const getPostLoginPath = (
     return "/choose-role";
   }
 
+  // Accounts without a verified phone (e.g. fresh Google sign-ups) must
+  // complete phone verification before reaching any dashboard or shop page.
+  if (guardUser && !(guardUser as Record<string, unknown>).phone) {
+    return "/verify-phone";
+  }
+
   if (isSafeInternalPath(requestedPath)) {
     const path = requestedPath as string;
     if (isLogisticsUser(guardUser)) {

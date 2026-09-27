@@ -10,7 +10,7 @@ import type { Order, Payment } from "@/types/api/commerce";
 import { HugeiconsIcon, type IconSvgElement, type HugeiconsIconProps } from "@hugeicons/react";
 import { AlertCircleIcon, BellIcon, CreditCardIcon, Key01Icon, Loading03Icon, Location01Icon, PackageIcon, RefreshCwIcon, ShieldIcon, StarIcon, UserIcon } from "@hugeicons/core-free-icons";
 import Link from "next/link";
-import { useSearchParams } from "next/navigation";
+import { useRouter, useSearchParams } from "next/navigation";
 import { FormEvent, useEffect, useState } from "react";
 import toast from "react-hot-toast";
 import AddressBookSection from "@/components/MyAccount/AddressBookSection";
@@ -774,6 +774,76 @@ function Security({
  Password changes and active-session management are supported by the backend. Two-factor authentication is not currently exposed as a customer API, so this page does not show a non-functional control for it.
  </p>
  </div>
+
+ <DeleteAccountCard />
+ </div>
+ );
+}
+
+function DeleteAccountCard() {
+ const router = useRouter();
+ const user = useAuthStore((state) => state.user);
+ const clearSession = useAuthStore((state) => state.clearSession);
+ const [password, setPassword] = useState("");
+ const [confirmation, setConfirmation] = useState("");
+ const [busy, setBusy] = useState(false);
+
+ const isCustomer = (user as { account_type?: string } | null)?.account_type === "customer"
+ || !user?.roles?.some((r) => ["admin", "super_admin", "seller", "broker"].includes(r));
+ const ready = password.length >= 6 && confirmation.trim().toUpperCase() === "DELETE";
+
+ if (!isCustomer) return null;
+
+ const submit = async (e: FormEvent) => {
+ e.preventDefault();
+ if (!ready || busy) return;
+ setBusy(true);
+ try {
+ await accountApi.deleteAccount({ current_password: password, confirmation: "DELETE" });
+ clearSession();
+ toast.success("Your account has been deleted.");
+ router.push("/");
+ } catch {
+ toast.error("Unable to delete account. Check your password and try again.");
+ setBusy(false);
+ }
+ };
+
+ return (
+ <div className="rounded-xl border border-destructive/40 p-5">
+ <div className="flex items-start gap-3">
+ <span className="rounded-xl bg-destructive/10 p-2.5 text-destructive">
+ <HugeiconsIcon icon={AlertCircleIcon} size={18} />
+ </span>
+ <div>
+ <h3 className="font-bold text-destructive">Delete account</h3>
+ <p className="mt-1 text-sm text-muted-foreground">
+ Permanently remove your Xerin account. Your profile is anonymised and you will no longer be able to sign in. Active orders are preserved for the sellers.
+ </p>
+ </div>
+ </div>
+
+ <form onSubmit={submit} className="mt-5 grid gap-4">
+ <Field type="password" label="Current password" value={password} set={setPassword}/>
+ <div>
+ <label className="block text-sm font-medium">
+ Type <span className="font-bold text-destructive">DELETE</span> to confirm
+ <input
+ type="text"
+ value={confirmation}
+ onChange={(e) => setConfirmation(e.target.value)}
+ placeholder="DELETE"
+ className="mt-1.5 h-11 w-full rounded-xl border-2 border-border bg-card px-4 text-sm font-medium outline-none transition placeholder:text-muted-foreground focus:border-destructive/60"
+ />
+ </label>
+ </div>
+ <button
+ disabled={!ready || busy}
+ className="w-fit rounded-xl bg-destructive px-5 py-2.5 text-sm font-semibold text-white disabled:cursor-not-allowed disabled:opacity-50"
+ >
+ {busy ? "Deleting..." : "Delete my account"}
+ </button>
+ </form>
  </div>
  );
 }

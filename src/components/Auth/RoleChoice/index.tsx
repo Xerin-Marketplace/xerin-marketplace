@@ -60,6 +60,11 @@ export default function RoleChoice() {
  if (current) {
  setSession({ ...current, user: result.user });
  }
+ if (!result.user?.phone) {
+ // Phone verification is mandatory before entering the workspace.
+ router.push(`/verify-phone?next=${encodeURIComponent(href)}`);
+ return;
+ }
  router.push(href);
  } catch (error: any) {
  toast.error(error?.message || "Unable to save your role choice. Please try again.");

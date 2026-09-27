@@ -98,6 +98,7 @@ export default function RootLayout({
  pathname === "/reset-password" ||
  pathname === "/verify-otp" ||
  pathname === "/choose-role" ||
+ pathname === "/verify-phone" ||
  pathname.startsWith("/onboarding/") ||
  pathname.startsWith("/order-success/") ||
  pathname.startsWith("/payment-success/") ||
