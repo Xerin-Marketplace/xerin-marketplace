@@ -7,7 +7,7 @@ import { useRouter, useSearchParams } from "next/navigation";
 import { useAuth } from "@/hooks/useAuth";
 import type { OtpPurpose } from "@/types/api/auth";
 import { HugeiconsIcon } from "@hugeicons/react";
-import { SecurityCheckIcon, Mail01Icon, KeyIcon } from "@hugeicons/core-free-icons";
+import { SecurityCheckIcon, Mail01Icon } from "@hugeicons/core-free-icons";
 
 const getApiErrorMessage = (error: unknown, fallback: string) => {
  const apiError = error as {
@@ -322,35 +322,15 @@ const VerifyOtp = () => {
  </div>
  )}
 
- <div className="mb-4 sm:mb-5">
- <label
- htmlFor="otpCode"
- className="mb-2 block text-sm font-medium text-foreground"
- >
+ <div className="mb-5 sm:mb-6">
+ <label className="mb-3 block text-center text-sm font-medium text-foreground">
  Verification Code
  </label>
-
- <div className="relative">
- <span className="pointer-events-none absolute inset-y-0 left-0 flex items-center pl-4 text-muted-foreground">
- <HugeiconsIcon icon={KeyIcon} size={18} />
- </span>
- <input
- id="otpCode"
- type="text"
- inputMode="numeric"
- autoComplete="one-time-code"
+ <OtpBoxes
  value={otpCode}
- onChange={(event) =>
- setOtpCode(event.target.value.replace(/\D/g, "").slice(0, 6))
- }
- placeholder="• • • • • •"
- maxLength={6}
- autoFocus
- required
+ onChange={setOtpCode}
  disabled={isBusy}
- className="h-14 w-full rounded-lg border border-border bg-muted pl-11 pr-3 text-center text-2xl font-bold tracking-[0.28em] text-foreground outline-none transition placeholder:text-muted-foreground placeholder:opacity-40 focus:border-transparent focus:ring-2 focus:ring-ring/30 sm:px-5 sm:text-xl sm:font-semibold sm:tracking-[0.45em]"
  />
- </div>
  </div>
 
  <button
@@ -360,41 +340,32 @@ const VerifyOtp = () => {
  cleanOtp.length < 4 ||
  (!registrationContext && !cleanIdentifier)
  }
- className="flex h-11 w-full items-center justify-center rounded-lg bg-primary px-6 text-sm font-semibold text-primary-foreground shadow-sm transition hover:bg-primary/90 disabled:cursor-not-allowed disabled:opacity-50"
+ className="flex h-12 w-full items-center justify-center rounded-xl bg-primary px-6 text-sm font-bold text-primary-foreground shadow-sm transition hover:bg-primary/90 disabled:cursor-not-allowed disabled:opacity-50"
  >
  {isVerifyingOtp || isVerifyingAccountOtp
  ? "Verifying..."
  : "Verify & Continue"}
  </button>
 
- <div className="mt-4 rounded-xl border border-border bg-muted/60 p-3 sm:mt-5 sm:p-4">
- <p className="text-center text-sm text-muted-foreground">
- OTP expired or didn&apos;t arrive?
- </p>
-
- {registrationContext && (
- <p className="mt-1 text-center text-xs text-muted-foreground">
- We&apos;ll resend it using the phone number from your registration.
- </p>
- )}
-
+ <p className="mt-5 text-center text-sm text-muted-foreground">
+ Didn&apos;t receive the code?{" "}
+ {isSendingOtp || isResendingVerification ? (
+ <span className="font-semibold text-muted-foreground">Sending…</span>
+ ) : resendCooldown > 0 ? (
+ <span className="font-semibold text-muted-foreground">
+ Resend in {resendCooldown}s
+ </span>
+ ) : (
  <button
  type="button"
  onClick={handleResend}
- disabled={
- isBusy ||
- resendCooldown > 0 ||
- (!registrationContext && !cleanIdentifier)
- }
- className="mt-3 flex h-11 w-full items-center justify-center rounded-lg border border-primary px-5 text-sm font-semibold text-primary transition hover:bg-primary/5 disabled:cursor-not-allowed disabled:opacity-50"
+ disabled={isBusy || (!registrationContext && !cleanIdentifier)}
+ className="font-bold text-primary transition hover:underline disabled:cursor-not-allowed disabled:opacity-50"
  >
- {isSendingOtp || isResendingVerification
- ? "Sending..."
- : resendCooldown > 0
- ? `Resend available in ${resendCooldown}s`
- : "Resend OTP"}
+ Resend OTP
  </button>
- </div>
+ )}
+ </p>
  </form>
 
  <div className="mt-5 text-center sm:mt-7">
@@ -468,3 +439,84 @@ const VerifyOtp = () => {
 };
 
 export default VerifyOtp;
+
+function OtpBoxes({
+ value,
+ onChange,
+ disabled,
+}: {
+ value: string;
+ onChange: (v: string) => void;
+ disabled?: boolean;
+}) {
+ const refs = React.useRef<Array<HTMLInputElement | null>>([]);
+ const digits = Array.from({ length: 6 }, (_, i) => value[i] ?? "");
+
+ const setAt = (i: number, d: string) => {
+ const next = value.split("");
+ next[i] = d;
+ onChange(next.join("").slice(0, 6));
+ };
+
+ return (
+ <div
+ className="flex items-center justify-center gap-2 sm:gap-3"
+ onPaste={(e) => {
+ const pasted = e.clipboardData.getData("text").replace(/\D/g, "").slice(0, 6);
+ if (!pasted) return;
+ e.preventDefault();
+ onChange(pasted);
+ refs.current[Math.min(pasted.length, 5)]?.focus();
+ }}
+ >
+ {digits.map((digit, i) => (
+ <input
+ key={i}
+ ref={(el) => { refs.current[i] = el; }}
+ type="text"
+ inputMode="numeric"
+ autoComplete={i === 0 ? "one-time-code" : "off"}
+ aria-label={`Digit ${i + 1}`}
+ value={digit}
+ maxLength={1}
+ autoFocus={i === 0}
+ disabled={disabled}
+ onFocus={(e) => e.target.select()}
+ onChange={(e) => {
+ const d = e.target.value.replace(/\D/g, "");
+ if (!d) return;
+ if (d.length > 1) {
+ // multi-digit input (autofill / quick typing)
+ const merged = `${value.slice(0, i)}${d}`.slice(0, 6);
+ onChange(merged);
+ refs.current[Math.min(merged.length, 5)]?.focus();
+ return;
+ }
+ setAt(i, d);
+ if (i < 5) refs.current[i + 1]?.focus();
+ }}
+ onKeyDown={(e) => {
+ if (e.key === "Backspace") {
+ e.preventDefault();
+ if (digits[i]) {
+ setAt(i, "");
+ } else if (i > 0) {
+ setAt(i - 1, "");
+ refs.current[i - 1]?.focus();
+ }
+ } else if (e.key === "ArrowLeft" && i > 0) {
+ refs.current[i - 1]?.focus();
+ } else if (e.key === "ArrowRight" && i < 5) {
+ refs.current[i + 1]?.focus();
+ }
+ }}
+ className={`h-12 w-11 rounded-xl border-2 bg-muted text-center text-xl font-bold text-foreground outline-none transition sm:h-14 sm:w-13 sm:text-2xl disabled:cursor-not-allowed disabled:opacity-60 ${
+ digit
+ ? "border-primary text-primary"
+ : "border-border focus:border-primary focus:ring-4 focus:ring-primary/10"
+ }`}
+ />
+ ))}
+ </div>
+ );
+}
