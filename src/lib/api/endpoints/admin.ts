@@ -2050,3 +2050,22 @@ export const verifyAdminSellerPayoutAccount = async (
   );
   return res.data;
 };
+
+export type MonitoringOverview = {
+  enabled: boolean;
+  alert_recipient: string | null;
+  weekly_report: { enabled: boolean; day: string; time: string; last_sent: string | null; last_status: string | null };
+  last_24h: { audit_events: number; critical: number; warnings: number; security_events: number; server_errors: number };
+  open_security_events: number;
+  pending_alerts: number;
+  failed_alerts_7d: number;
+  last_migration: { name: string | null; status: string; at: string } | null;
+};
+export type AlertNotificationRow = { id: string; subject: string; severity: string; event_type: string | null; status: string; attempts: number; aggregate_count: number; last_error: string | null; sent_at: string | null; created_at: string };
+export type MigrationEventRow = { id: string; revision: string | null; name: string | null; status: string; environment: string | null; app_version: string | null; error_summary: string | null; duration_ms: number | null; created_at: string };
+export type WeeklyReportRow = { id: string; subject: string; period_start: string | null; period_end: string | null; status: string; sent_at: string | null; stats: Record<string, unknown> };
+
+export const getMonitoringOverview = async () => (await axiosInstance.get<MonitoringOverview>("/monitoring/overview")).data;
+export const listAlertNotifications = async () => (await axiosInstance.get<AlertNotificationRow[]>("/monitoring/alerts")).data;
+export const listMigrationEvents = async () => (await axiosInstance.get<MigrationEventRow[]>("/monitoring/migrations")).data;
+export const listWeeklyReports = async () => (await axiosInstance.get<WeeklyReportRow[]>("/monitoring/reports")).data;

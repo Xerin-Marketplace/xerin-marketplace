@@ -2,7 +2,7 @@
 
 import "../admin-ui.css";
 import { ReactNode, useMemo } from "react";
-import { ChartColumnIcon, BellIcon, Package02Icon, UserCircleIcon, Task01Icon, CreditCardIcon, FileCheckIcon, LifebuoyIcon, LockKeyIcon, Megaphone01Icon, PackageIcon, PackageCheckIcon, Search01Icon, Settings01Icon, ShieldCheckIcon, ShoppingBag01Icon, Store01Icon, Tag01Icon, UserMultiple02Icon, UserAdd01Icon, Key01Icon, Wallet03Icon, TruckIcon, Globe02Icon, Cancel01Icon, JusticeScale01Icon, PreferenceHorizontalIcon } from "@hugeicons/core-free-icons";
+import { ChartColumnIcon, BellIcon, Package02Icon, UserCircleIcon, Task01Icon, CreditCardIcon, FileCheckIcon, LifebuoyIcon, LockKeyIcon, Megaphone01Icon, PackageIcon, PackageCheckIcon, Search01Icon, Settings01Icon, ShieldCheckIcon, ShoppingBag01Icon, Store01Icon, Tag01Icon, UserMultiple02Icon, UserAdd01Icon, Key01Icon, Wallet03Icon, TruckIcon, Globe02Icon, Cancel01Icon, JusticeScale01Icon, PreferenceHorizontalIcon, DashboardSquare01Icon, Mail01Icon, DatabaseIcon } from "@hugeicons/core-free-icons";
 
 import DashboardShell, {
  type DashboardNavGroup,
@@ -243,8 +243,12 @@ const sidebarGroups: SidebarGroup[] = [
  key: "overview",
  icon: Settings01Icon,
  items: [
+ { label: "Monitoring Overview", href: "/admin/dashboard?tab=overview&menu=system-management&item=monitoring-overview", icon: DashboardSquare01Icon },
  { label: "Audit Logs", href: "/admin/dashboard?tab=overview&menu=system-management&item=audit-logs", icon: FileCheckIcon },
  { label: "System Events", href: "/admin/dashboard?tab=overview&menu=system-management&item=system-events", icon: ShieldCheckIcon },
+ { label: "Email Alerts", href: "/admin/dashboard?tab=overview&menu=system-management&item=email-alerts", icon: Mail01Icon },
+ { label: "Migrations", href: "/admin/dashboard?tab=overview&menu=system-management&item=migrations", icon: DatabaseIcon },
+ { label: "Weekly Reports", href: "/admin/dashboard?tab=overview&menu=system-management&item=weekly-reports", icon: FileCheckIcon },
  { label: "Background Jobs", href: "/admin/dashboard?tab=overview&menu=system-management&item=background-jobs", icon: Settings01Icon },
  { label: "Application Settings", href: "/admin/dashboard?tab=overview&menu=system-management&item=application-settings", icon: Settings01Icon },
  ],

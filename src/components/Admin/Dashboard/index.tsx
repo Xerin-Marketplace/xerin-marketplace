@@ -376,8 +376,24 @@ const sidebarGroups: SidebarGroup[] = [
  icon: Settings01Icon,
  items: [
  {
+ label: "Monitoring Overview",
+ href: "?tab=overview&menu=system-management&item=monitoring-overview",
+ },
+ {
  label: "Audit Logs",
  href: "?tab=overview&menu=system-management&item=audit-logs",
+ },
+ {
+ label: "Email Alerts",
+ href: "?tab=overview&menu=system-management&item=email-alerts",
+ },
+ {
+ label: "Migrations",
+ href: "?tab=overview&menu=system-management&item=migrations",
+ },
+ {
+ label: "Weekly Reports",
+ href: "?tab=overview&menu=system-management&item=weekly-reports",
  },
  {
  label: "System Events",
@@ -688,6 +704,14 @@ export default function AdminDashboard() {
  ? "jobs"
  : activeSidebarItem === "System Management:Application Settings"
  ? "settings"
+ : activeSidebarItem === "System Management:Monitoring Overview"
+ ? "monitoring"
+ : activeSidebarItem === "System Management:Email Alerts"
+ ? "alerts"
+ : activeSidebarItem === "System Management:Migrations"
+ ? "migrations"
+ : activeSidebarItem === "System Management:Weekly Reports"
+ ? "reports"
  : "audit";
  const isAccountWorkspace =
  activeSidebarItem === "Account" || activeSidebarItem.startsWith("Account:");
