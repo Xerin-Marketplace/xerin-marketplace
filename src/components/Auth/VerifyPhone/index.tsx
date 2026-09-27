@@ -1,6 +1,7 @@
 "use client";
 
 import Image from "next/image";
+import Link from "next/link";
 import { FormEvent, useEffect, useState } from "react";
 import { useRouter, useSearchParams } from "next/navigation";
 import { useAuth } from "@/hooks/useAuth";
@@ -58,8 +59,9 @@ export default function VerifyPhone() {
  }
  setBusy(true);
  try {
- await sendOtp({ phone: clean.startsWith("+") ? clean : `+${clean}`, purpose: "generic" });
- setPhone(clean.startsWith("+") ? clean : `+${clean}`);
+ const normalized = clean.startsWith("+") ? clean : `+${clean}`;
+ await sendOtp({ phone: normalized, purpose: "generic" });
+ setPhone(normalized);
  setStep("otp");
  toast.success("OTP sent to your phone.");
  } catch (error) {
@@ -91,35 +93,50 @@ export default function VerifyPhone() {
  }
  };
 
+ const inputClass =
+ "h-12 w-full rounded-xl border-2 border-border bg-card px-4 text-sm font-medium text-foreground shadow-sm outline-none transition placeholder:text-muted-foreground focus:border-primary focus:ring-4 focus:ring-primary/10";
+
  return (
- <main className="relative flex min-h-[100dvh] items-center justify-center overflow-hidden bg-[var(--muted)] px-4 py-10">
- <div className="w-full max-w-md">
- <div className="mb-7 flex justify-center">
- <button type="button" onClick={() => router.push("/")} aria-label="Go to XerinMarket home">
+ <section className="min-h-[100dvh] bg-card lg:grid lg:grid-cols-2">
+ {/* Left panel: form */}
+ <div className="flex min-h-[100dvh] flex-col px-4 pb-[max(20px,env(safe-area-inset-bottom))] pt-[max(18px,env(safe-area-inset-top))] sm:px-10 sm:py-8 xl:px-20">
+ <div className="flex items-center justify-between">
+ <Link href="/" className="inline-flex w-fit items-center gap-2">
  <Image
- src="/images/logo/logooriginal.png"
- alt="XerinMarket"
- width={170}
- height={54}
- className="h-auto w-[145px] object-contain sm:w-[160px]"
+ src="/images/logo/xerin-logo-mark.png"
+ alt="Xerin Marketplace"
+ width={30}
+ height={30}
  priority
+ className="h-[30px] w-[30px] object-contain"
  />
- </button>
+ <span className="text-base font-bold text-foreground sm:text-lg">Xerin Marketplace</span>
+ </Link>
+ <Link
+ href="/"
+ className="rounded-full border border-border px-3 py-1.5 text-xs font-semibold text-muted-foreground transition hover:text-primary lg:hidden"
+ >
+ Shop
+ </Link>
  </div>
 
- <div className="rounded-3xl border border-border bg-card p-6 shadow-[0_12px_35px_rgba(15,23,42,0.06)] sm:p-8">
- <p className="mb-2 text-xs font-bold uppercase tracking-[0.22em] text-primary">
- One more step
- </p>
- <h1 className="text-2xl font-extrabold tracking-tight text-foreground">
- Verify your phone number
+ <div className="flex flex-1 items-center justify-center py-5 sm:py-10">
+ <div className="w-full max-w-[420px]">
+ <div className="mb-5 text-center sm:mb-7">
+ <h1 className="mb-1.5 text-2xl font-bold text-foreground sm:font-semibold">
+ Verify your phone
  </h1>
- <p className="mt-2 text-sm leading-6 text-muted-foreground">
- Your Google account is connected. Add and verify your mobile number so we can reach you about orders and deliveries.
+ <p className="text-sm text-muted-foreground">
+ One last step — confirm your mobile number
  </p>
+ </div>
 
  {step === "phone" ? (
- <form onSubmit={submitPhone} className="mt-6 space-y-4">
+ <form onSubmit={submitPhone} className="space-y-5">
+ <p className="rounded-xl bg-muted px-4 py-3 text-sm leading-6 text-muted-foreground">
+ Your account is connected. Add your mobile number so we can send order
+ and delivery updates — and verify it with a quick OTP.
+ </p>
  <label className="block text-sm font-medium text-foreground">
  Mobile number
  <input
@@ -128,24 +145,25 @@ export default function VerifyPhone() {
  onChange={(e) => setPhone(e.target.value)}
  placeholder="+255 712 345 678"
  autoComplete="tel"
- className="mt-1.5 h-12 w-full rounded-xl border-2 border-border bg-card px-4 text-sm font-medium outline-none transition placeholder:text-muted-foreground focus:border-primary"
+ autoFocus
+ className={`mt-1.5 ${inputClass}`}
  />
  </label>
  <button
  type="submit"
  disabled={busy}
- className="w-full rounded-xl bg-primary py-3 text-sm font-bold text-primary-foreground transition hover:bg-primary/90 disabled:opacity-50"
+ className="w-full rounded-xl bg-primary py-3 text-sm font-bold text-primary-foreground transition hover:bg-primary/90 disabled:cursor-not-allowed disabled:opacity-50"
  >
- {busy ? "Sending..." : "Send verification code"}
+ {busy ? "Sending code..." : "Send verification code"}
  </button>
  </form>
  ) : (
- <form onSubmit={submitOtp} className="mt-6 space-y-4">
- <div>
- <p className="text-sm text-muted-foreground">
- Code sent to <span className="font-semibold text-foreground">{phone}</span>
+ <form onSubmit={submitOtp} className="space-y-5">
+ <p className="rounded-xl bg-muted px-4 py-3 text-sm leading-6 text-muted-foreground">
+ We sent a verification code to{" "}
+ <span className="font-semibold text-foreground">{phone}</span>
  </p>
- <label className="mt-3 block text-sm font-medium text-foreground">
+ <label className="block text-sm font-medium text-foreground">
  OTP code
  <input
  type="text"
@@ -154,28 +172,90 @@ export default function VerifyPhone() {
  onChange={(e) => setOtp(e.target.value)}
  placeholder="Enter code"
  autoComplete="one-time-code"
- className="mt-1.5 h-12 w-full rounded-xl border-2 border-border bg-card px-4 text-center text-lg font-bold tracking-[0.4em] outline-none transition placeholder:text-muted-foreground placeholder:tracking-normal focus:border-primary"
+ autoFocus
+ className={`mt-1.5 text-center text-lg font-bold tracking-[0.4em] placeholder:tracking-normal ${inputClass}`}
  />
  </label>
- </div>
  <button
  type="submit"
  disabled={busy}
- className="w-full rounded-xl bg-primary py-3 text-sm font-bold text-primary-foreground transition hover:bg-primary/90 disabled:opacity-50"
+ className="w-full rounded-xl bg-primary py-3 text-sm font-bold text-primary-foreground transition hover:bg-primary/90 disabled:cursor-not-allowed disabled:opacity-50"
  >
  {busy ? "Verifying..." : "Verify & continue"}
  </button>
+ <div className="flex items-center justify-between text-sm">
  <button
  type="button"
  onClick={() => setStep("phone")}
- className="w-full text-sm font-semibold text-primary hover:underline"
+ className="font-semibold text-muted-foreground transition hover:text-foreground"
  >
- Use a different number
+ Change number
  </button>
+ <button
+ type="button"
+ disabled={busy}
+ onClick={async () => {
+ setBusy(true);
+ try {
+ await sendOtp({ phone, purpose: "generic" });
+ toast.success("OTP resent.");
+ } catch (error) {
+ toast.error(getApiErrorMessage(error, "Could not resend OTP."));
+ } finally {
+ setBusy(false);
+ }
+ }}
+ className="font-semibold text-primary transition hover:underline disabled:opacity-50"
+ >
+ Resend code
+ </button>
+ </div>
  </form>
  )}
  </div>
  </div>
- </main>
+
+ <div className="flex flex-wrap items-center justify-center gap-x-3 gap-y-1 pb-1 text-[11px] text-muted-foreground sm:gap-4 sm:text-xs">
+ <Link href="/help" className="hover:text-foreground dark:hover:text-white">Help Center</Link>
+ <span>•</span>
+ <Link href="/terms" className="hover:text-foreground dark:hover:text-white">Terms</Link>
+ <span>•</span>
+ <Link href="/privacy" className="hover:text-foreground dark:hover:text-white">Privacy</Link>
+ <span>•</span>
+ <span>© {new Date().getFullYear()} XerinMarket</span>
+ </div>
+ </div>
+
+ {/* Right panel: marketing / imagery — same as signin/signup */}
+ <div className="relative hidden min-h-[100dvh] overflow-hidden bg-carbon lg:flex lg:flex-col">
+ <Image src="/35124 (1).jpg" alt="XerinMarket" fill priority sizes="50vw" className="object-cover object-center" />
+ <div className="absolute inset-0 bg-black/55" />
+ <div className="absolute inset-0 bg-gradient-to-t from-black/70 via-black/40 to-transparent" />
+ <div className="absolute inset-0 bg-gradient-to-br from-black/30 via-transparent to-transparent" />
+
+ <div className="relative z-10 flex h-full flex-col justify-between p-10 xl:p-14">
+ <div />
+
+ <div className="max-w-md space-y-6">
+ <h2 className="text-3xl font-bold leading-tight tracking-tight text-white xl:text-4xl">
+ Secure your account.
+ </h2>
+ <p className="text-base leading-relaxed text-white/75 sm:text-lg">
+ A verified phone keeps your orders, deliveries and account recovery tied to you — and lets sellers and riders reach you when it matters.
+ </p>
+
+ <div className="space-y-3 border-l-2 border-primary/60 pl-4 pt-1">
+ <p className="text-sm font-medium text-white/85">Get order &amp; delivery updates by SMS</p>
+ <p className="text-sm font-medium text-white/85">Recover your account easily</p>
+ <p className="text-sm font-medium text-white/85">One number, verified once</p>
+ </div>
+ </div>
+
+ <div className="flex items-center justify-between text-xs text-white/60">
+ <span>&copy; {new Date().getFullYear()} Xerin Marketplace. All rights reserved.</span>
+ </div>
+ </div>
+ </div>
+ </section>
  );
 }
