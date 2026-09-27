@@ -820,6 +820,7 @@ const SellerPanel = ({ onSwitchTab }: { onSwitchTab: (tab: AuthTab) => void }) =
  const [useAccountContact, setUseAccountContact] = useState(true);
  const [phoneDialCode, setPhoneDialCode] = useState(DEFAULT_DIAL_CODE);
  const [contactPhoneDialCode, setContactPhoneDialCode] = useState(DEFAULT_DIAL_CODE);
+ const [step, setStep] = useState(0);
 
  const [categories, setCategories] = useState<BusinessCategory[]>([]);
  const [selectedCategoryIds, setSelectedCategoryIds] = useState<string[]>([]);
@@ -867,6 +868,50 @@ const SellerPanel = ({ onSwitchTab }: { onSwitchTab: (tab: AuthTab) => void }) =
  () => !form.contactPhone || isValidInternationalPhone(form.contactPhone, contactPhoneDialCode),
  [form.contactPhone, contactPhoneDialCode]
  );
+
+ const stepValid = (stepIndex: number): boolean => {
+ if (stepIndex === 0) {
+ if (!form.firstName.trim() || !form.lastName.trim() || !form.email.trim() || !form.phone) {
+ toast.error("Fill in your name, email and phone number.");
+ return false;
+ }
+ if (!isValidInternationalPhone(form.phone, phoneDialCode)) {
+ toast.error("Enter a valid phone number.");
+ return false;
+ }
+ if (!form.password || !isPasswordStrong) {
+ toast.error("Password must be at least 6 characters.");
+ return false;
+ }
+ if (form.password !== form.confirmPassword) {
+ toast.error("Passwords do not match.");
+ return false;
+ }
+ return true;
+ }
+ if (stepIndex === 1) {
+ if (!form.businessName.trim() || !form.businessDescription.trim() || !form.businessCountry.trim() || !form.businessCity.trim()) {
+ toast.error("Fill in business name, description, country and city.");
+ return false;
+ }
+ if (selectedCategoryIds.length === 0) {
+ toast.error("Please select at least one business category.");
+ return false;
+ }
+ if (form.websiteUrl && !isValidUrl(form.websiteUrl)) {
+ toast.error("Enter a valid website URL, e.g. https://example.com.");
+ return false;
+ }
+ return true;
+ }
+ return true;
+ };
+
+ const SELLER_STEPS = [
+ { title: "Account", hint: "Your name & login" },
+ { title: "Business", hint: "What you sell" },
+ { title: "Contact & finish", hint: "How buyers reach you" },
+ ];
 
  const handleSubmit = async (event: FormEvent<HTMLFormElement>) => {
  event.preventDefault();
@@ -975,10 +1020,54 @@ const SellerPanel = ({ onSwitchTab }: { onSwitchTab: (tab: AuthTab) => void }) =
 
  return (
  <form onSubmit={handleSubmit}>
- <h3 className="text-sm font-semibold text-foreground mb-4 uppercase tracking-wide">
- Personal details
- </h3>
+ {/* Stepper header */}
+ <div className="mb-6">
+ <ol className="flex items-center">
+ {SELLER_STEPS.map((st, i) => (
+ <li key={st.title} className="flex flex-1 items-center last:flex-none">
+ <button
+ type="button"
+ onClick={() => {
+ if (i < step || stepValid(step)) setStep(i);
+ }}
+ className="flex flex-col items-start gap-1.5 text-left"
+ >
+ <span
+ className={`flex h-8 w-8 items-center justify-center rounded-full border-2 text-xs font-bold transition ${
+ i < step
+ ? "border-primary bg-primary text-white"
+ : i === step
+ ? "border-primary text-primary"
+ : "border-border text-muted-foreground"
+ }`}
+ >
+ {i < step ? <HugeiconsIcon icon={CheckIcon} size={14} /> : i + 1}
+ </span>
+ <span className="hidden sm:block">
+ <span className={`block text-xs font-semibold ${i === step ? "text-foreground" : "text-muted-foreground"}`}>
+ {st.title}
+ </span>
+ <span className="block text-[11px] text-muted-foreground">{st.hint}</span>
+ </span>
+ </button>
+ {i < SELLER_STEPS.length - 1 && (
+ <span
+ className={`mx-3 h-0.5 flex-1 rounded-full transition ${
+ i < step ? "bg-primary" : "bg-border"
+ }`}
+ />
+ )}
+ </li>
+ ))}
+ </ol>
+ <p className="mt-3 text-xs font-medium text-muted-foreground sm:hidden">
+ Step {step + 1} of 3 — {SELLER_STEPS[step].title}
+ </p>
+ </div>
 
+ {/* Step 1 — Account */}
+ {step === 0 && (
+ <>
  <div className="grid sm:grid-cols-2 gap-3.5 mb-3.5">
  <div>
  <FieldLabel htmlFor="seller-first-name" required>First Name</FieldLabel>
@@ -1067,13 +1156,12 @@ const SellerPanel = ({ onSwitchTab }: { onSwitchTab: (tab: AuthTab) => void }) =
  <PasswordChecklist password={form.password} />
  {isPasswordMismatch && <p className="mt-2 text-sm text-red">Passwords do not match.</p>}
  </div>
+ </>
+ )}
 
- <hr className="border-border mb-4" />
-
- <h3 className="text-sm font-semibold text-foreground mb-4 uppercase tracking-wide">
- Business details
- </h3>
-
+ {/* Step 2 — Business */}
+ {step === 1 && (
+ <>
  <div className="mb-3.5">
  <FieldLabel htmlFor="seller-business-name" required>Business Name</FieldLabel>
  <TextInput
@@ -1212,7 +1300,12 @@ const SellerPanel = ({ onSwitchTab }: { onSwitchTab: (tab: AuthTab) => void }) =
  </div>
  </div>
 
- <div className="mb-3.5">
+ <details className="mb-1 rounded-lg border border-border bg-muted/40">
+ <summary className="cursor-pointer select-none px-3.5 py-3 text-sm font-medium text-muted-foreground">
+ Optional details (address, years, website)
+ </summary>
+ <div className="space-y-3.5 px-3.5 pb-3.5">
+ <div>
  <FieldLabel htmlFor="seller-address" optional>Business Address</FieldLabel>
  <TextInput
  type="text"
@@ -1223,8 +1316,7 @@ const SellerPanel = ({ onSwitchTab }: { onSwitchTab: (tab: AuthTab) => void }) =
  disabled={isSubmitting}
  />
  </div>
-
- <div className="grid sm:grid-cols-2 gap-3.5 mb-3.5">
+ <div className="grid sm:grid-cols-2 gap-3.5">
  <div>
  <FieldLabel htmlFor="seller-years" optional>Years in Business</FieldLabel>
  <TextInput
@@ -1248,13 +1340,14 @@ const SellerPanel = ({ onSwitchTab }: { onSwitchTab: (tab: AuthTab) => void }) =
  />
  </div>
  </div>
+ </div>
+ </details>
+ </>
+ )}
 
- <hr className="border-border mb-4" />
-
- <h3 className="text-sm font-semibold text-foreground mb-4 uppercase tracking-wide">
- Business contact
- </h3>
-
+ {/* Step 3 — Contact & finish */}
+ {step === 2 && (
+ <>
  <label
  htmlFor="seller-use-account-contact"
  className="mb-3.5 flex cursor-pointer items-center gap-3 rounded-lg border border-border bg-muted p-3"
@@ -1327,22 +1420,42 @@ const SellerPanel = ({ onSwitchTab }: { onSwitchTab: (tab: AuthTab) => void }) =
  </span>
  </span>
  </label>
-
- {!form.agreementAccepted && (
- <p className="mt-2 pl-8 text-xs text-muted-foreground">
- Please tick the checkbox above to enable seller registration.
- </p>
- )}
  </div>
+ </>
+ )}
 
+ {/* Step navigation */}
+ <div className="flex gap-3">
+ {step > 0 && (
+ <button
+ type="button"
+ onClick={() => setStep((v) => v - 1)}
+ disabled={isSubmitting}
+ className="h-11 rounded-lg border border-border px-5 text-sm font-semibold text-foreground transition hover:bg-muted disabled:opacity-50"
+ >
+ Back
+ </button>
+ )}
+ {step < SELLER_STEPS.length - 1 ? (
+ <button
+ type="button"
+ onClick={() => {
+ if (stepValid(step)) setStep((v) => v + 1);
+ }}
+ className="flex h-11 flex-1 items-center justify-center rounded-lg bg-orange px-6 text-sm font-semibold text-white transition hover:bg-primary/90-dark"
+ >
+ Continue
+ </button>
+ ) : (
  <button
  type="submit"
  disabled={isSubmitting || !form.agreementAccepted}
- className="flex h-11 w-full items-center justify-center rounded-lg bg-orange px-6 text-sm font-semibold text-white ease-out duration-200 hover:bg-primary/90-dark disabled:cursor-not-allowed disabled:opacity-50"
+ className="flex h-11 flex-1 items-center justify-center rounded-lg bg-orange px-6 text-sm font-semibold text-white transition hover:bg-primary/90-dark disabled:cursor-not-allowed disabled:opacity-50"
  >
  {isSubmitting ? "Creating seller account..." : "Create Seller Account"}
  </button>
-
+ )}
+ </div>
  <p className="text-center mt-6 text-sm">
  <span className="text-muted-foreground">Already have an account? </span>
  <button type="button" onClick={() => onSwitchTab("signin")} className="font-medium text-primary hover:underline">
