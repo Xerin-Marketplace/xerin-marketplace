@@ -411,9 +411,20 @@ const VerifyOtp = () => {
  </p>
  </div>
  </div>
+
+ <div className="flex flex-wrap items-center justify-center gap-x-3 gap-y-1 pb-1 text-[11px] text-muted-foreground sm:gap-4 sm:text-xs">
+ <Link href="/help" className="hover:text-foreground dark:hover:text-white">Help Center</Link>
+ <span>•</span>
+ <Link href="/terms" className="hover:text-foreground dark:hover:text-white">Terms</Link>
+ <span>•</span>
+ <Link href="/privacy" className="hover:text-foreground dark:hover:text-white">Privacy</Link>
+ <span>•</span>
+ <span>© {new Date().getFullYear()} XerinMarket</span>
+ </div>
  </div>
 
- <div className="relative hidden min-h-screen overflow-hidden bg-foreground lg:block">
+ {/* Right panel: marketing / imagery — same as signin/signup */}
+ <div className="relative hidden min-h-[100dvh] overflow-hidden bg-carbon lg:flex lg:flex-col">
  <Image
  src="/35124 (1).jpg"
  alt="Xerin Marketplace"
@@ -426,23 +437,29 @@ const VerifyOtp = () => {
  <div className="absolute inset-0 bg-gradient-to-t from-black/70 via-black/40 to-transparent" />
  <div className="absolute inset-0 bg-gradient-to-br from-black/30 via-transparent to-transparent" />
 
- <div className="relative flex h-full flex-col justify-end p-12 xl:p-16">
- <div className="max-w-md">
- <div className="mb-5 flex h-12 w-12 items-center justify-center rounded-xl bg-card/10 text-white">
+ <div className="relative z-10 flex h-full flex-col justify-between p-10 xl:p-14">
+ <div />
+
+ <div className="max-w-md space-y-6">
+ <div className="flex h-12 w-12 items-center justify-center rounded-xl bg-card/10 text-white">
  <HugeiconsIcon icon={SecurityCheckIcon} size={22} />
  </div>
-
- <h2 className="mb-4 text-3xl font-bold leading-tight text-white xl:text-4xl">
+ <h2 className="text-3xl font-bold leading-tight tracking-tight text-white xl:text-4xl">
  Almost there.
  </h2>
-
- <p className="leading-relaxed text-white/75">
+ <p className="text-base leading-relaxed text-white/75 sm:text-lg">
  Enter the code we sent you. This quick check keeps your account, orders and payments safe.
  </p>
+
+ <div className="space-y-3 border-l-2 border-primary/60 pl-4 pt-1">
+ <p className="text-sm font-medium text-white/85">Codes expire quickly for your safety</p>
+ <p className="text-sm font-medium text-white/85">We only send OTPs to your registered contact</p>
+ <p className="text-sm font-medium text-white/85">Verified accounts shop with full protection</p>
+ </div>
  </div>
 
- <div className="text-sm text-white/65">
- Quick security check • XerinMarket
+ <div className="flex items-center justify-between text-xs text-white/60">
+ <span>&copy; {new Date().getFullYear()} Xerin Marketplace. All rights reserved.</span>
  </div>
  </div>
  </div>
