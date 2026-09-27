@@ -413,9 +413,9 @@ export default function RoleOnboarding({ role }: { role: "seller" | "winga" }) {
  width={30}
  height={30}
  priority
- className="h-[30px] w-[30px] object-contain"
+ className="h-9 w-9 object-contain"
  />
- <span className="text-base font-bold text-foreground sm:text-lg">Xerin Marketplace</span>
+ <span className="text-lg font-bold text-foreground sm:text-xl">Xerin Marketplace</span>
  </Link>
  <Link
  href="/choose-role"

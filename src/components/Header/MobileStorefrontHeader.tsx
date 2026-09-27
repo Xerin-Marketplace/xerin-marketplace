@@ -100,7 +100,7 @@ export default function MobileStorefrontHeader({
                 alt="Xerin Marketplace"
                 width={150}
                 height={48}
-                className="h-8 w-auto object-contain"
+                className="h-10 w-auto object-contain"
                 priority
               />
             </Link>

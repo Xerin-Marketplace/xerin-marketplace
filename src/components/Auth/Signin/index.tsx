@@ -1584,8 +1584,8 @@ const AuthPage = ({ initialTab = "signup" }: { initialTab?: AuthTab }) => {
  <div className="flex min-h-[100dvh] flex-col px-4 pb-[max(20px,env(safe-area-inset-bottom))] pt-[max(18px,env(safe-area-inset-top))] sm:px-10 sm:py-8 xl:px-20">
  <div className="flex items-center justify-between">
  <Link href="/" className="inline-flex w-fit items-center gap-2">
- <Image src="/images/logo/xerin-logo-mark.png" alt="Xerin Marketplace" width={30} height={30} priority className="h-[30px] w-[30px] object-contain" />
- <span className="text-base font-bold text-foreground sm:text-lg">Xerin Marketplace</span>
+ <Image src="/images/logo/xerin-logo-mark.png" alt="Xerin Marketplace" width={36} height={36} priority className="h-9 w-9 object-contain" />
+ <span className="text-lg font-bold text-foreground sm:text-xl">Xerin Marketplace</span>
  </Link>
  <Link href="/" className="rounded-full border border-border px-3 py-1.5 text-xs font-semibold text-muted-foreground transition hover:text-primary lg:hidden">
  Shop

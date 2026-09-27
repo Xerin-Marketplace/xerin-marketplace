@@ -74,7 +74,7 @@ const Footer = () => {
  alt="Xerin Marketplace"
  width={150}
  height={48}
- className="h-11 w-auto object-contain"
+ className="h-12 w-auto object-contain"
  />
  </Link>
  <p className="max-w-xs text-sm text-muted-foreground text-pretty">

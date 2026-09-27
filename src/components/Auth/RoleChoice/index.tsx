@@ -98,7 +98,7 @@ export default function RoleChoice() {
  alt="XerinMarket"
  width={170}
  height={54}
- className="h-auto w-[145px] object-contain sm:w-[165px]"
+ className="h-auto w-[165px] object-contain sm:w-[190px]"
  priority
  />
  </button>
