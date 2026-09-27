@@ -14,7 +14,8 @@ export type SellerDocumentType =
   | "tin"
   | "business_registration"
   | "business_license"
-  | "business_profile";
+  | "business_profile"
+  | "national_id";
 
 export type Seller = TimestampFields & {
   id: ID;

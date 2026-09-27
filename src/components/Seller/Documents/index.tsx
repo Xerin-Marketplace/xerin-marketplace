@@ -32,6 +32,7 @@ const labels: Record<string, string> = {
  business_registration: "Business Registration / Incorporation",
  business_license: "Business Licence",
  business_profile: "Business Profile",
+ national_id: "National ID (NIDA)",
 };
 
 const descriptions: Record<string, string> = {
@@ -39,6 +40,7 @@ const descriptions: Record<string, string> = {
  business_registration: "Official business registration or incorporation certificate.",
  business_license: "Current operating/business licence. Licence number and expiry date are required.",
  business_profile: "Required company or business profile document.",
+ national_id: "Clear copy of the owner's National ID / NIDA card.",
 };
 
 const MAX_FILE_SIZE = 10 * 1024 * 1024;
@@ -291,8 +293,8 @@ export default function SellerBusinessDocuments() {
  const required = (status?.required_documents ?? []) as SellerDocumentType[];
  const missingSelection = required.filter((type) => !selectedFiles[type]);
 
- if (required.length !== 4 || missingSelection.length) {
- toast.error("Select all four required PDF documents before submitting.");
+ if (required.length < 4 || missingSelection.length) {
+ toast.error(`Select all ${required.length} required PDF documents before submitting.`);
  return;
  }
 
@@ -319,6 +321,7 @@ export default function SellerBusinessDocuments() {
  business_profile: selectedFiles.business_profile!.file,
  business_registration: selectedFiles.business_registration!.file,
  business_license: selectedFiles.business_license!.file,
+ national_id: selectedFiles.national_id?.file,
  business_license_number: businessLicenseNumber.trim(),
  business_license_expiry_date: businessLicenseExpiryDate,
  },

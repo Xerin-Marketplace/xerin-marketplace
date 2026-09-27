@@ -99,6 +99,7 @@ export const uploadBulkKycDocuments = async (
     business_registration: File;
     business_license: File;
     business_profile: File;
+    national_id?: File;
     business_license_number: string;
     business_license_expiry_date: string;
   },
@@ -109,6 +110,7 @@ export const uploadBulkKycDocuments = async (
   formData.append("business_profile_file", files.business_profile);
   formData.append("business_registration_file", files.business_registration);
   formData.append("business_license_file", files.business_license);
+  if (files.national_id) formData.append("national_id_file", files.national_id);
   formData.append("business_license_number", files.business_license_number);
   formData.append("business_license_expiry_date", files.business_license_expiry_date);
   const res = await axiosInstance.post<SellerKycDocument[]>(

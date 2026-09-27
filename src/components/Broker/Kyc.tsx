@@ -11,9 +11,15 @@ import {
  Camera01Icon,
  UserIcon,
  ArrowRight01Icon,
+ BankIcon,
 } from "@hugeicons/core-free-icons";
 import { brokersApi } from "@/lib/api/endpoints/brokers";
-import type { Broker, BrokerKycDocument, BrokerKycStatus } from "@/types/api/broker";
+import type {
+ Broker,
+ BrokerKycDocument,
+ BrokerKycStatus,
+ BrokerPayoutAccount,
+} from "@/types/api/broker";
 
 const REQUIRED_DOCS: { key: string; label: string; hint: string; icon: IconSvgElement }[] = [
  {
@@ -49,20 +55,23 @@ export default function BrokerKyc() {
  const [broker, setBroker] = useState<Broker | null>(null);
  const [status, setStatus] = useState<BrokerKycStatus | null>(null);
  const [docs, setDocs] = useState<BrokerKycDocument[]>([]);
+ const [accounts, setAccounts] = useState<BrokerPayoutAccount[]>([]);
  const [nida, setNida] = useState("");
  const [busy, setBusy] = useState(false);
  const [busyDoc, setBusyDoc] = useState<string | null>(null);
 
  const load = async () => {
  try {
- const [b, s, d] = await Promise.all([
+ const [b, s, d, a] = await Promise.all([
  brokersApi.me(),
  brokersApi.kycStatus(),
  brokersApi.documents(),
+ brokersApi.payoutAccounts(),
  ]);
  setBroker(b);
  setStatus(s);
  setDocs(d);
+ setAccounts(a);
  setNida(b.nida_number || "");
  } catch (e) {
  toast.error(e instanceof Error ? e.message : "Unable to load KYC details");
@@ -101,6 +110,29 @@ export default function BrokerKyc() {
  toast.error(e instanceof Error ? e.message : "Upload failed");
  } finally {
  setBusyDoc(null);
+ }
+ };
+
+ const addAccount = async (e: React.FormEvent<HTMLFormElement>) => {
+ e.preventDefault();
+ const f = new FormData(e.currentTarget);
+ setBusy(true);
+ try {
+ await brokersApi.createPayoutAccount({
+ account_type: String(f.get("account_type")) as "mobile_money" | "bank",
+ provider: String(f.get("provider")),
+ account_name: String(f.get("account_name")),
+ account_number: String(f.get("account_number")),
+ currency: "TZS",
+ is_default: true,
+ });
+ toast.success("Payout account saved for verification");
+ e.currentTarget.reset();
+ await load();
+ } catch (err) {
+ toast.error(err instanceof Error ? err.message : "Unable to save account");
+ } finally {
+ setBusy(false);
  }
  };
 
@@ -261,22 +293,100 @@ export default function BrokerKyc() {
  </div>
  </section>
 
- {/* Step 3 — submit */}
+ {/* Step 3 — payout account */}
+ <section className="rounded-xl border border-border bg-card p-5">
+ <div className="flex items-center gap-2.5">
+ <span className="flex h-8 w-8 items-center justify-center rounded-lg bg-primary/10 text-primary">
+ <HugeiconsIcon icon={BankIcon} size={16} />
+ </span>
+ <div>
+ <h2 className="text-sm font-bold text-foreground">3. Payout account</h2>
+ <p className="text-xs text-muted-foreground">
+ Where your commission is paid — verified by Admin.
+ </p>
+ </div>
+ </div>
+
+ {accounts.length > 0 && (
+ <div className="mt-4 space-y-2">
+ {accounts.map((a) => (
+ <div
+ key={a.id}
+ className="flex items-center justify-between gap-3 rounded-lg border border-border p-3.5"
+ >
+ <div className="min-w-0">
+ <p className="truncate text-sm font-semibold text-foreground">
+ {a.provider} · {a.account_number}
+ </p>
+ <p className="text-xs text-muted-foreground">
+ {a.account_name} · {a.account_type.replaceAll("_", " ")}
+ </p>
+ </div>
+ <span className="shrink-0 rounded-full bg-amber-100 px-2.5 py-0.5 text-[11px] font-semibold capitalize text-amber-700">
+ {a.verification_status}
+ </span>
+ </div>
+ ))}
+ </div>
+ )}
+
+ {!locked && (
+ <form
+ onSubmit={addAccount}
+ className="mt-4 grid gap-3 sm:grid-cols-2"
+ >
+ <select name="account_type" className="h-11 rounded-lg border border-border bg-muted px-3.5 text-sm text-foreground outline-none focus:ring-2 focus:ring-primary/30">
+ <option value="mobile_money">Mobile money</option>
+ <option value="bank">Bank</option>
+ </select>
+ <input
+ name="provider"
+ required
+ placeholder="Provider (e.g. M-Pesa, CRDB)"
+ className="h-11 rounded-lg border border-border bg-muted px-3.5 text-sm text-foreground outline-none focus:ring-2 focus:ring-primary/30"
+ />
+ <input
+ name="account_name"
+ required
+ placeholder="Account holder name"
+ className="h-11 rounded-lg border border-border bg-muted px-3.5 text-sm text-foreground outline-none focus:ring-2 focus:ring-primary/30"
+ />
+ <input
+ name="account_number"
+ required
+ placeholder="Phone / account number"
+ className="h-11 rounded-lg border border-border bg-muted px-3.5 text-sm text-foreground outline-none focus:ring-2 focus:ring-primary/30"
+ />
+ <button
+ disabled={busy}
+ className="h-11 rounded-lg bg-primary/10 text-sm font-semibold text-primary transition hover:bg-primary/15 disabled:opacity-50 sm:col-span-2"
+ >
+ {accounts.length ? "Add another account" : "Save payout account"}
+ </button>
+ </form>
+ )}
+ </section>
+
+ {/* Step 4 — submit */}
  <section className="rounded-xl border border-border bg-card p-5">
  <div className="flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
  <div>
- <h2 className="text-sm font-bold text-foreground">3. Submit for review</h2>
+ <h2 className="text-sm font-bold text-foreground">4. Submit for review</h2>
  <p className="mt-0.5 text-xs text-muted-foreground">
- {status.missing_documents.length
+ {!nida.trim()
+ ? "Add your NIDA number in step 1."
+ : status.missing_documents.length
  ? `Missing: ${status.missing_documents.join(", ")}`
+ : accounts.length === 0
+ ? "Add a payout account in step 3."
  : broker.status === "rejected"
  ? "Fix the rejected items above, then resubmit."
- : "All documents ready — submit for admin review."}
+ : "Everything is ready — submit for admin review."}
  </p>
  </div>
  <button
  onClick={() => void submit()}
- disabled={busy || !status.can_submit_for_review}
+ disabled={busy || !status.can_submit_for_review || !nida.trim() || accounts.length === 0}
  className="inline-flex items-center justify-center gap-2 rounded-lg bg-primary px-5 py-2.5 text-sm font-semibold text-primary-foreground transition hover:bg-primary/90 disabled:cursor-not-allowed disabled:opacity-50"
  >
  Submit KYC
