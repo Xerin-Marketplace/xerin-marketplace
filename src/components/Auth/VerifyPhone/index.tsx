@@ -7,6 +7,12 @@ import { useRouter, useSearchParams } from "next/navigation";
 import { useAuth } from "@/hooks/useAuth";
 import { usersApi } from "@/lib/api/endpoints/users";
 import { authStorage } from "@/lib/auth/storage";
+import {
+ PhoneInput,
+ isValidInternationalPhone,
+ buildInternationalPhone,
+ DEFAULT_DIAL_CODE,
+} from "../phone-input";
 import toast from "react-hot-toast";
 
 const getApiErrorMessage = (error: unknown, fallback: string) => {
@@ -29,6 +35,8 @@ export default function VerifyPhone() {
  const { isAuthenticated, user, sendOtp, verifyOtp, setSession } = useAuth();
 
  const [phone, setPhone] = useState("");
+ const [dialCode, setDialCode] = useState(DEFAULT_DIAL_CODE);
+ const [verifiedPhone, setVerifiedPhone] = useState("");
  const [otp, setOtp] = useState("");
  const [step, setStep] = useState<"phone" | "otp">("phone");
  const [busy, setBusy] = useState(false);
@@ -52,16 +60,15 @@ export default function VerifyPhone() {
 
  const submitPhone = async (e: FormEvent) => {
  e.preventDefault();
- const clean = phone.replace(/[\s-]/g, "");
- if (!/^\+?\d{7,15}$/.test(clean)) {
- toast.error("Enter a valid phone number, e.g. +255712345678");
+ if (!isValidInternationalPhone(phone, dialCode)) {
+ toast.error("Enter a valid phone number.");
  return;
  }
  setBusy(true);
  try {
- const normalized = clean.startsWith("+") ? clean : `+${clean}`;
+ const normalized = buildInternationalPhone(phone, dialCode);
  await sendOtp({ phone: normalized, purpose: "generic" });
- setPhone(normalized);
+ setVerifiedPhone(normalized);
  setStep("otp");
  toast.success("OTP sent to your phone.");
  } catch (error) {
@@ -80,8 +87,8 @@ export default function VerifyPhone() {
  }
  setBusy(true);
  try {
- await verifyOtp({ phone, otp_code: cleanOtp, purpose: "generic" });
- const updated = await usersApi.updateMe({ phone });
+ await verifyOtp({ phone: verifiedPhone, otp_code: cleanOtp, purpose: "generic" });
+ const updated = await usersApi.updateMe({ phone: verifiedPhone });
  const current = authStorage.getSession();
  if (current) setSession({ ...current, user: updated });
  toast.success("Phone number verified.");
@@ -137,18 +144,24 @@ export default function VerifyPhone() {
  Your account is connected. Add your mobile number so we can send order
  and delivery updates — and verify it with a quick OTP.
  </p>
- <label className="block text-sm font-medium text-foreground">
+ <div>
+ <label htmlFor="verify-phone-number" className="mb-1.5 block text-sm font-medium text-foreground">
  Mobile number
- <input
- type="tel"
- value={phone}
- onChange={(e) => setPhone(e.target.value)}
- placeholder="+255 712 345 678"
- autoComplete="tel"
- autoFocus
- className={`mt-1.5 ${inputClass}`}
- />
  </label>
+ <PhoneInput
+ id="verify-phone-number"
+ value={phone}
+ onChange={setPhone}
+ dialCode={dialCode}
+ onDialCodeChange={setDialCode}
+ disabled={busy}
+ invalid={Boolean(phone) && !isValidInternationalPhone(phone, dialCode)}
+ placeholder="712 345 678"
+ />
+ {phone && !isValidInternationalPhone(phone, dialCode) && (
+ <p className="mt-2 text-sm text-red">Enter a valid international phone number.</p>
+ )}
+ </div>
  <button
  type="submit"
  disabled={busy}
@@ -161,7 +174,7 @@ export default function VerifyPhone() {
  <form onSubmit={submitOtp} className="space-y-5">
  <p className="rounded-xl bg-muted px-4 py-3 text-sm leading-6 text-muted-foreground">
  We sent a verification code to{" "}
- <span className="font-semibold text-foreground">{phone}</span>
+ <span className="font-semibold text-foreground">{verifiedPhone}</span>
  </p>
  <label className="block text-sm font-medium text-foreground">
  OTP code
@@ -197,7 +210,7 @@ export default function VerifyPhone() {
  onClick={async () => {
  setBusy(true);
  try {
- await sendOtp({ phone, purpose: "generic" });
+ await sendOtp({ phone: verifiedPhone, purpose: "generic" });
  toast.success("OTP resent.");
  } catch (error) {
  toast.error(getApiErrorMessage(error, "Could not resend OTP."));
