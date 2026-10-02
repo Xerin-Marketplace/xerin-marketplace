@@ -144,6 +144,24 @@ export const clearWishlist = async (): Promise<WishlistMutationResponse> => {
   return res.data;
 };
 
+export const uploadAvatar = async (file: File): Promise<{ avatar_url: string }> => {
+  const formData = new FormData();
+  formData.append("file", file);
+  const res = await axiosInstance.post<{ avatar_url: string }>(
+    "/users/me/avatar",
+    formData,
+    { headers: { "Content-Type": "multipart/form-data" } },
+  );
+  return res.data;
+};
+
+export const deleteAvatar = async (): Promise<{ avatar_url: string | null }> => {
+  const res = await axiosInstance.delete<{ avatar_url: string | null }>(
+    "/users/me/avatar",
+  );
+  return res.data;
+};
+
 export const usersApi = {
   getMe,
   updateMe,
@@ -156,6 +174,8 @@ export const usersApi = {
   addToWishlist,
   removeFromWishlist,
   clearWishlist,
+  uploadAvatar,
+  deleteAvatar,
   searchMapPlaces,
   getMapPlace,
   reverseGeocode,

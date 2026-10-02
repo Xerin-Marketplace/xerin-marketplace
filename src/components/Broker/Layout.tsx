@@ -9,6 +9,7 @@ import {
  PackageIcon,
  ShieldCheckIcon,
  Wallet03Icon,
+ UserIcon,
  LockKeyIcon,
  ArrowRight01Icon,
 } from "@hugeicons/core-free-icons";
@@ -28,6 +29,7 @@ function buildBrokerGroups(approved: boolean): DashboardNavGroup[] {
  key: "broker-workspace",
  icon: DollarCircleIcon,
  items: [
+ { href: "/broker/profile", label: "My Profile", icon: UserIcon },
  { href: "/broker/kyc", label: "KYC Verification", icon: ShieldCheckIcon },
  { href: "/broker/products", label: "Own Products", icon: PackageIcon, locked },
  { href: "/broker/opportunities", label: "Opportunities", icon: DollarCircleIcon, locked },
@@ -55,9 +57,10 @@ const statusLabel: Record<string, string> = {
 };
 
 // Routes that stay reachable before KYC approval. Everything else locks.
-const OPEN_ROUTES = ["/broker/dashboard", "/broker/kyc"];
+const OPEN_ROUTES = ["/broker/dashboard", "/broker/kyc", "/broker/profile"];
 
 function brokerTitle(pathname: string) {
+ if (pathname.startsWith("/broker/profile")) return "My Profile";
  if (pathname.startsWith("/broker/kyc")) return "KYC Verification";
  if (pathname.startsWith("/broker/products")) return "Own Products";
  if (pathname.startsWith("/broker/opportunities")) return "Opportunities";
@@ -105,7 +108,7 @@ export default function BrokerLayout({ children }: { children: React.ReactNode }
  centerLabel="Broker Center"
  brandSubtitle="Broker Center"
  notificationsHref="/account/notifications"
- profileHref="/account"
+ profileHref="/broker/profile"
  settingsHref="/account/security"
  addressesHref="/account/addresses"
  supportHref="/"

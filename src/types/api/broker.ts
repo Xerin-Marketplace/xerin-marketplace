@@ -1,6 +1,6 @@
 import type { Product } from "./product";
 export type BrokerStatus = "pending_kyc" | "kyc_submitted" | "under_review" | "approved" | "rejected" | "suspended";
-export type Broker = { id:string; user_id:string; broker_code:string; first_name?:string|null; last_name?:string|null; email?:string|null; phone?:string|null; country:string; region:string; city:string; nida_number?:string|null; status:BrokerStatus; approved_at?:string|null; rejected_at?:string|null; suspended_at?:string|null; status_reason?:string|null; created_at:string; };
+export type Broker = { id:string; user_id:string; broker_code:string; first_name?:string|null; last_name?:string|null; email?:string|null; phone?:string|null; avatar_url?:string|null; country:string; region:string; city:string; nida_number?:string|null; status:BrokerStatus; approved_at?:string|null; rejected_at?:string|null; suspended_at?:string|null; status_reason?:string|null; created_at:string; };
 export type BrokerKycDocument = { id:string; broker_id:string; document_type:string; original_filename?:string|null; mime_type?:string|null; status:string; rejection_reason?:string|null; reviewed_at?:string|null; created_at:string; };
 export type BrokerKycStatus = { broker_status:BrokerStatus; required_documents:string[]; uploaded_documents:string[]; missing_documents:string[]; can_submit_for_review:boolean; can_use_broker_features:boolean; };
 export type PaginatedBrokers = { total:number; page:number; page_size:number; results:Broker[]; };
