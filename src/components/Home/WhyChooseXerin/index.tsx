@@ -1,5 +1,5 @@
-import React from "react";
 "use client";
+import React from "react";
 import { useLanguage } from "@/app/context/LanguageContext";
 import Link from "next/link";
 import { HugeiconsIcon } from "@hugeicons/react";
