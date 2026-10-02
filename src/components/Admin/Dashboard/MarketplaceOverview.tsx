@@ -96,7 +96,7 @@ function SalesChart({ data, currency }: { data: SeriesPoint[]; currency: string 
 
  return (
  <div className="overflow-x-auto">
- <svg viewBox={`0 0 ${width} ${height}`} className="min-w-[650px] w-full" role="img" aria-label="Marketplace sales trend">
+ <svg viewBox={`0 0 ${width} ${height}`} className="min-w-[650px] w-full" role="img" aria-label="Sales trend">
  <defs>
  <linearGradient id="xerinSalesFill" x1="0" y1="0" x2="0" y2="1">
  <stop offset="0%" stopColor="#f47524" stopOpacity="0.24" />
@@ -213,7 +213,7 @@ export default function MarketplaceOverview() {
  });
  setOrderCounts(nextCounts);
  } catch (caught) {
- const message = caught instanceof Error ? caught.message : "Unable to load marketplace analytics.";
+ const message = caught instanceof Error ? caught.message : "Unable to load analytics.";
  setError(message);
  } finally {
  setLoading(false);
@@ -224,11 +224,11 @@ export default function MarketplaceOverview() {
 
  const currency = overview?.money.currency || "TZS";
  const metrics = useMemo(() => [
- { label: "Gross sales", value: money(overview?.money.gross_sales, currency), hint: `${days}-day marketplace GMV`, icon: DollarCircleIcon },
+ { label: "Gross sales", value: money(overview?.money.gross_sales, currency), hint: `${days}-day GMV`, icon: DollarCircleIcon },
  { label: "Orders", value: (overview?.counts.orders ?? 0).toLocaleString(), hint: `${overview?.counts.paid_orders ?? 0} paid`, icon: ShoppingBag01Icon },
  { label: "Active sellers", value: (overview?.counts.active_sellers ?? 0).toLocaleString(), hint: `${pendingSellers} awaiting review`, icon: Store01Icon },
  { label: "Brokers", value: brokers == null ? "—" : brokers.toLocaleString(), hint: "Registered Broker accounts", icon: UserMultiple02Icon },
- { label: "Registered users", value: users == null ? "—" : users.toLocaleString(), hint: "Marketplace accounts", icon: UserMultiple02Icon },
+ { label: "Registered users", value: users == null ? "—" : users.toLocaleString(), hint: "Registered accounts", icon: UserMultiple02Icon },
  { label: "Active products", value: (overview?.counts.products ?? 0).toLocaleString(), hint: `${pendingProducts} awaiting moderation`, icon: Package02Icon },
  ], [overview, currency, days, pendingSellers, pendingProducts, brokers, users]);
 
@@ -237,7 +237,7 @@ export default function MarketplaceOverview() {
  <section className="overflow-hidden rounded-xl border border-border bg-card shadow-sm dark:border-border dark:bg-card">
  <div className="flex flex-col gap-4 border-b border-border px-5 py-5 sm:flex-row sm:items-center sm:justify-between sm:px-6 dark:border-border">
  <div>
- <p className="text-[11px] font-black uppercase tracking-[.18em] text-primary">Xerin marketplace intelligence</p>
+ <p className="text-[11px] font-black uppercase tracking-[.18em] text-primary">Xerin Mart intelligence</p>
  <h2 className="mt-1 text-2xl font-black tracking-[-.025em] text-foreground">Admin Dashboard</h2>
  <p className="mt-1 text-sm text-muted-foreground dark:text-gray-300">Live commerce, partner, order and finance performance from your backend.</p>
  </div>
@@ -275,7 +275,7 @@ export default function MarketplaceOverview() {
  <div className="flex flex-wrap items-start justify-between gap-4">
  <div>
  <p className="text-[11px] font-black uppercase tracking-[.16em] text-primary">Sales overview</p>
- <h3 className="mt-1 text-lg font-black text-foreground">Marketplace sales trend</h3>
+ <h3 className="mt-1 text-lg font-black text-foreground">Sales trend</h3>
  <p className="text-xs text-muted-foreground">Gross seller-item value recorded by the commission ledger.</p>
  </div>
  <div className="text-right">
@@ -290,7 +290,7 @@ export default function MarketplaceOverview() {
  <div>
  <p className="text-[11px] font-black uppercase tracking-[.16em] text-primary">Order status</p>
  <h3 className="mt-1 text-lg font-black text-foreground">Current order pipeline</h3>
- <p className="text-xs text-muted-foreground">Live totals by marketplace order status.</p>
+ <p className="text-xs text-muted-foreground">Live totals by order status.</p>
  </div>
  <div className="mt-5"><OrderStatusDonut counts={orderCounts} /></div>
  </section>
@@ -347,7 +347,7 @@ export default function MarketplaceOverview() {
 
  <div className="grid gap-4 sm:grid-cols-2 xl:grid-cols-4">
  {[
- { label: "Xerin commission", value: money(overview?.money.commission_revenue, currency), note: "Marketplace revenue", icon: DollarCircleIcon },
+ { label: "Xerin commission", value: money(overview?.money.commission_revenue, currency), note: "Platform revenue", icon: DollarCircleIcon },
  { label: "Seller net earnings", value: money(overview?.money.seller_net_earnings, currency), note: "Seller entitlement in period", icon: PackageCheckIcon },
  { label: "Pending seller payouts", value: money(overview?.pending_payout_amount, currency), note: "Awaiting / processing", icon: DollarCircleIcon },
  { label: "Completed refunds", value: money(overview?.money.refunds_completed, currency), note: `${Number(overview?.refund_rate_percent || 0).toFixed(2)}% refund rate`, icon: RefreshCwIcon },

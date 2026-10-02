@@ -119,8 +119,8 @@ const ResetPassword = () => {
  <div className="flex min-h-[100dvh] flex-col px-4 pb-[max(20px,env(safe-area-inset-bottom))] pt-[max(18px,env(safe-area-inset-top))] sm:px-10 sm:py-8 xl:px-20">
  <div className="flex items-center justify-between">
  <Link href="/" className="inline-flex w-fit items-center gap-2">
- <Image src="/images/logo/xerin-logo-mark.png" alt="Xerin Marketplace" width={44} height={44} priority className="h-11 w-11 object-contain" />
- <span className="text-xl font-bold text-foreground sm:text-2xl">Xerin Marketplace</span>
+ <Image src="/images/logo/xerin-logo-mark.png" alt="Xerin Mart" width={44} height={44} priority className="h-11 w-11 object-contain" />
+ <span className="text-xl font-bold text-foreground sm:text-2xl">Xerin Mart</span>
  </Link>
  <Link href="/" className="rounded-full border border-border px-3 py-1.5 text-xs font-semibold text-muted-foreground transition hover:text-primary lg:hidden">
  Shop
@@ -251,13 +251,13 @@ const ResetPassword = () => {
  <span>•</span>
  <Link href="/privacy" className="hover:text-foreground">Privacy</Link>
  <span>•</span>
- <span>© {new Date().getFullYear()} XerinMarket</span>
+ <span>© {new Date().getFullYear()} Xerin Mart</span>
  </div>
  </div>
 
  {/* Right panel: marketing / imagery */}
  <div className="relative hidden min-h-[100dvh] overflow-hidden bg-carbon lg:flex lg:flex-col">
- <Image src="/35124 (1).jpg" alt="XerinMarket" fill priority sizes="50vw" className="object-cover object-center" />
+ <Image src="/35124 (1).jpg" alt="Xerin Mart" fill priority sizes="50vw" className="object-cover object-center" />
  <div className="absolute inset-0 bg-black/55" />
  <div className="absolute inset-0 bg-gradient-to-t from-black/70 via-black/40 to-transparent" />
  <div className="absolute inset-0 bg-gradient-to-br from-black/30 via-transparent to-transparent" />
@@ -283,7 +283,7 @@ const ResetPassword = () => {
 
  {/* Footer note */}
  <div className="flex items-center justify-between text-xs text-white/60">
- <span>&copy; {new Date().getFullYear()} Xerin Marketplace. All rights reserved.</span>
+ <span>&copy; {new Date().getFullYear()} Xerin Mart. All rights reserved.</span>
  </div>
  </div>
  </div>

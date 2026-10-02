@@ -5,7 +5,7 @@ import VerifyOtp from "@/components/Auth/VerifyOtp";
 export const metadata: Metadata = {
  robots: { index: false, follow: false },
  title: "Verify OTP",
- description: "Verify your Xerin Market account using OTP.",
+ description: "Verify your Xerin Mart account using OTP.",
 };
 
 const VerifyOtpPage = () => {

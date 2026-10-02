@@ -126,7 +126,7 @@ const DiscoveryRails = () => {
       />
       <Rail
         title="Recommended for you"
-        subtitle="Picked by the marketplace from your activity"
+        subtitle="Picked for you from your activity"
         icon="spark"
         items={recommended}
       />

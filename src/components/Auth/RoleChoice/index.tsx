@@ -30,7 +30,7 @@ const cards: {
  {
  key: "customer",
  title: "Customer",
- subtitle: "Shop and receive deliveries across the marketplace",
+ subtitle: "Shop and receive deliveries across Xerin Mart",
  icon: ShoppingBag02Icon,
  href: "/account",
  benefits: ["Shop thousands of products", "Secure payments", "Reliable delivery", "Order tracking"],
@@ -92,10 +92,10 @@ export default function RoleChoice() {
 
  <div className="relative mx-auto max-w-6xl">
  <div className="mx-auto mb-7 flex justify-center sm:mb-8">
- <button type="button" onClick={() => router.push("/")} aria-label="Go to XerinMarket home">
+ <button type="button" onClick={() => router.push("/")} aria-label="Go to Xerin Mart home">
  <Image
  src="/images/logo/logooriginal.png"
- alt="XerinMarket"
+ alt="Xerin Mart"
  width={170}
  height={54}
  className="h-auto w-[195px] object-contain sm:w-[225px]"
@@ -106,15 +106,15 @@ export default function RoleChoice() {
 
  <section className="mx-auto mb-8 max-w-3xl text-center sm:mb-10">
  <p className="mb-3 text-xs font-bold uppercase tracking-[0.22em] text-primary sm:text-sm">
- Welcome to XerinMarket
+ Welcome to Xerin Mart
  </p>
  <h1 className="text-[30px] font-extrabold leading-[1.12] tracking-tight text-foreground sm:text-4xl lg:text-5xl">
  How would you like to use{" "}
- <span className="text-primary">XerinMarket?</span>
+ <span className="text-primary">Xerin Mart?</span>
  </h1>
  <p className="mx-auto mt-4 max-w-2xl text-sm leading-6 text-muted-foreground sm:text-base">
  {user?.first_name ? `Welcome, ${user.first_name}. ` : ""}
- Choose the option that best describes what you want to do. You can still use the same Xerin account across the marketplace.
+ Choose the option that best describes what you want to do. You can still use the same Xerin account across Xerin Mart.
  </p>
  </section>
 

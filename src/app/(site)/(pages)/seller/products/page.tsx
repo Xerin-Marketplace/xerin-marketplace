@@ -3,7 +3,7 @@ import SellerProducts from "@/components/Seller/Products";
 
 export const metadata: Metadata = {
  title: "Seller Products",
- description: "Manage your product listings on Xerin Market.",
+ description: "Manage your product listings on Xerin Mart.",
 };
 
 const SellerProductsPage = () => {

@@ -114,10 +114,10 @@ const FeaturedProducts = () => {
  Featured Products
  </span>
  <h2 className="text-xl font-bold tracking-tight text-foreground sm:text-2xl lg:text-3xl">
- Trending on XerinMarket
+ Trending on Xerin Mart
  </h2>
  <p className="mt-1.5 hidden max-w-lg text-sm text-muted-foreground dark:text-muted-foreground sm:block">
- Discover products our buyers love · handpicked from top sellers across the marketplace.
+ Discover products our buyers love · handpicked from top sellers across Xerin Mart.
  </p>
  </div>
 

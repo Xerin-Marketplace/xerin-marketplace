@@ -66,12 +66,12 @@ export type AdminConfigurationView =
 
 const titles: Record<AdminConfigurationView, [string, string, string]> = {
  marketplace: [
- "Marketplace governance",
- "Marketplace Settings",
+ "Platform governance",
+ "Store Settings",
  "Control escrow timing, dispute window, checkout rules and product moderation from one backend-backed configuration.",
  ],
  commissions: [
- "Marketplace economics",
+ "Platform economics",
  "Commission Rules",
  "Configure global, category, seller and product-specific commissions. The backend resolves the most specific applicable rule.",
  ],
@@ -217,7 +217,7 @@ function MarketplaceSettings() {
  try {
  await saveMarketplaceSettings(form);
  setConfigured(true);
- toast.success("Marketplace settings saved.");
+ toast.success("Store settings saved.");
  } catch (error) {
  toast.error(errorMessage(error));
  } finally {
@@ -234,13 +234,13 @@ function MarketplaceSettings() {
  try { await updateDomesticServiceStandard(row.id, { origin_region: row.origin_region, destination_region: row.destination_region, tier: row.tier, max_delivery_minutes: row.max_delivery_minutes, is_active: !row.is_active }); setStandards(await listDomesticServiceStandards()); } catch(error){ toast.error(errorMessage(error)); }
  };
 
- if (loading) return <Loading label="Loading marketplace settings..." />;
+ if (loading) return <Loading label="Loading store settings..." />;
 
  return (
  <>
  {!configured && (
  <div className="rounded-xl border border-yellow-light-2 bg-yellow-light-4 p-4 text-sm text-yellow-dark-2">
- These marketplace business rules have not been configured yet. Save the
+ These store business rules have not been configured yet. Save the
  settings below before Customer checkout depends on them.
  </div>
  )}
@@ -338,7 +338,7 @@ function MarketplaceSettings() {
  disabled={saving}
  className="rounded-xl bg-primary px-5 py-3 text-sm font-semibold text-primary-foreground disabled:opacity-50"
  >
- {saving ? "Saving..." : "Save Marketplace Settings"}
+ {saving ? "Saving..." : "Save Store Settings"}
  </button>
  </>
  );
@@ -353,7 +353,7 @@ function CommissionRules() {
  const [meta, setMeta] = useState({ total: 0, total_pages: 0 });
  const [loading, setLoading] = useState(true);
  const [form, setForm] = useState({
- name: "Default marketplace commission",
+ name: "Default platform commission",
  scope: "global",
  rule_type: "percentage",
  rate: 2,
@@ -767,7 +767,7 @@ function FinanceSettings() {
  <Toggle label="Automatic release" checked={form.auto_release_enabled} onChange={v=>setForm({...form,auto_release_enabled:v})}/>
  <Toggle label="Allow partial release" checked={form.allow_partial_release} onChange={v=>setForm({...form,allow_partial_release:v})}/>
  <Toggle label="Hold Xerin commission until release" checked={form.hold_commission_until_release} onChange={v=>setForm({...form,hold_commission_until_release:v})}/>
- <div className="rounded-xl bg-muted p-4 text-xs leading-5 text-muted-foreground">Marketplace Settings controls <b>when</b> a hold is eligible for release. Finance Settings controls <b>how</b> settlement and payout behaviour operates.</div>
+ <div className="rounded-xl bg-muted p-4 text-xs leading-5 text-muted-foreground">Store Settings controls <b>when</b> a hold is eligible for release. Finance Settings controls <b>how</b> settlement and payout behaviour operates.</div>
  <button disabled={saving} className="w-full rounded-xl bg-primary py-3 text-sm font-semibold text-primary-foreground disabled:opacity-50" onClick={async()=>{setSaving(true);try{const {id,singleton_key,created_at,updated_at,...payload}=form;setForm(await updateFinanceSettings(payload));toast.success("Finance settings saved.");}catch(e){toast.error(errorMessage(e));}finally{setSaving(false)}}}>{saving?"Saving...":"Save Finance Settings"}</button>
  </Card></section>;
 }

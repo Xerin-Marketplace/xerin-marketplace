@@ -210,7 +210,7 @@ export default function SellerAccount({ view }: { view: SellerAccountView }) {
  <div className="space-y-6">
  <PageIntro
  title={view === "profile" ? "Seller Profile" : "Account Settings"}
- text="Manage your seller identity, business details and marketplace account status."
+ text="Manage your seller identity, business details and account status."
  />
  <AccountNav />
  <div className="grid gap-4 sm:grid-cols-2 xl:grid-cols-4">
@@ -758,7 +758,7 @@ function StoreSettings({
  <div className="space-y-6">
  <PageIntro
  title="Store Settings"
- text="Control how your business appears to marketplace customers."
+ text="Control how your business appears to customers."
  />
  <AccountNav />
  <form onSubmit={save}>
@@ -848,7 +848,7 @@ function Support() {
  <Section
  icon={BellIcon}
  title="Contact Seller Support"
- description="Our marketplace operations team can help with verification, products and payouts."
+ description="Our operations team can help with verification, products and payouts."
  >
  <div className="grid gap-4 md:grid-cols-3">
  {[

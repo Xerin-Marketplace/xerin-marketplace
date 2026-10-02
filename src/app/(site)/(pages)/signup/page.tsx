@@ -6,7 +6,7 @@ import { Metadata } from "next";
 export const metadata: Metadata = {
  robots: { index: false, follow: false },
  title: "Create Account",
- description: "Create your Xerin Market account to shop, sell, and manage your orders.",
+ description: "Create your Xerin Mart account to shop, sell, and manage your orders.",
  // other metadata
 };
 

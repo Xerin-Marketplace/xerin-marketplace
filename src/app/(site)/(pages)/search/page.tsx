@@ -134,8 +134,8 @@ export default function SearchPage() {
  Product Discovery
  </h1>
  <p className="mt-1 text-sm text-muted-foreground">
- Search only active, approved marketplace products. Prices shown are
- customer-facing marketplace prices.
+ Search only active, approved products. Prices shown are
+ customer-facing prices.
  </p>
 
  <form onSubmit={submitSearch} className="relative mt-5">
@@ -284,7 +284,7 @@ export default function SearchPage() {
  <div className="mb-4 flex flex-wrap items-center justify-between gap-3">
  <div>
  <h2 className="font-bold text-foreground">
- {query ? `Results for “${query}”` : "Marketplace products"}
+ {query ? `Results for “${query}”` : "Products"}
  </h2>
  <p className="mt-1 text-xs text-muted-foreground">
  {total

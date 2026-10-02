@@ -140,7 +140,7 @@ export default function ProductReviews({ productId }: { productId: string }) {
  <div className="flex items-start gap-3">
  <span className="flex h-11 w-11 shrink-0 items-center justify-center rounded-xl bg-primary text-primary-foreground shadow-sm">★</span>
  <div>
- <span className="text-[11px] font-bold uppercase tracking-[0.14em] text-primary">Verified marketplace feedback</span>
+ <span className="text-[11px] font-bold uppercase tracking-[0.14em] text-primary">Verified buyer feedback</span>
  <h2 className="mt-1 text-xl font-extrabold text-foreground sm:text-2xl">Customer Reviews</h2>
  <p className="mt-1.5 text-sm leading-6 text-muted-foreground">Reviews shown here are approved Xerin reviews from customers who received the product.</p>
  </div>

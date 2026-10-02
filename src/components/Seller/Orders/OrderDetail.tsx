@@ -724,7 +724,7 @@ export default function SellerOrderDetail({ orderId }: { orderId: string }) {
  target="_blank"
  className="inline-flex min-h-11 items-center justify-center rounded-lg border border-border px-4 text-sm font-semibold text-muted-foreground transition hover:border-primary/25 hover:text-primary dark:border-border /60"
  >
- Open marketplace listing
+ Open listing
  </Link>
 
  <span className="ml-auto hidden text-[11px] font-medium text-muted-foreground lg:inline">
@@ -1385,7 +1385,7 @@ export default function SellerOrderDetail({ orderId }: { orderId: string }) {
  className="inline-flex min-h-11 items-center justify-center gap-2 rounded-xl bg-primary px-4 text-sm font-bold text-primary-foreground"
  >
  <HugeiconsIcon icon={ViewIcon} size={16} />
- Open marketplace listing
+ Open listing
  </Link>
  <button
  type="button"

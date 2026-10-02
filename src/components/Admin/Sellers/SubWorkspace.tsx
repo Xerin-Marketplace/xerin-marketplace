@@ -47,7 +47,7 @@ const config = {
  eyebrow: "Seller intelligence",
  title: "Seller Performance",
  description:
- "Compare seller activity, fulfillment quality, revenue and marketplace readiness using operational signals.",
+ "Compare seller activity, fulfillment quality, revenue and readiness using operational signals.",
  steps: [
  "Collect activity",
  "Calculate KPIs",
@@ -164,7 +164,7 @@ export default function SellerSubWorkspace({ view }: { view: View }) {
  value: products
  .filter((row) => row.status === "approved")
  .length.toLocaleString(),
- detail: "Marketplace ready",
+ detail: "Ready to sell",
  icon: CheckmarkCircle02Icon,
  },
  {
@@ -328,7 +328,7 @@ export default function SellerSubWorkspace({ view }: { view: View }) {
  <div>
  <h3 className="font-bold text-foreground">Operational flow</h3>
  <p className="mt-1 text-xs text-muted-foreground">
- How this seller activity moves through the marketplace.
+ How this seller activity moves through Xerin Mart.
  </p>
  </div>
  </div>

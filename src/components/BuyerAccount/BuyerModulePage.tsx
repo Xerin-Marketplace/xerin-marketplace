@@ -747,7 +747,7 @@ function Security({
  {sessions.map((s) => (
  <div key={s.id} className="flex items-center justify-between gap-3 p-3">
  <div className="min-w-0">
- <p className="truncate text-sm font-semibold">Marketplace session</p>
+ <p className="truncate text-sm font-semibold">Session</p>
  <p className="mt-0.5 text-xs text-muted-foreground">
  {s.created_at ? `Started ${new Date(s.created_at).toLocaleString()}` : "Start time unavailable"}
  {s.expires_at ? ` · Expires ${new Date(s.expires_at).toLocaleString()}` : ""}

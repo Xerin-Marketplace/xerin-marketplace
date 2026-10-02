@@ -301,7 +301,7 @@ const AdminCustomers = () => {
  </>
  )}
  </div>
- <ConfirmActionDialog open={Boolean(statusTarget)} title={statusTarget?.status === "suspended" ? "Reactivate customer?" : "Suspend customer?"} description={statusTarget?.status === "suspended" ? <>Restore marketplace access for <strong>{statusTarget.email}</strong>.</> : <>Suspend marketplace access for <strong>{statusTarget?.email}</strong>. Existing records will be preserved.</>} confirmLabel={statusTarget?.status === "suspended" ? "Reactivate customer" : "Suspend customer"} busy={Boolean(statusTarget && busyCustomerId === statusTarget.id)} tone={statusTarget?.status === "suspended" ? "warning" : "danger"} onCancel={() => setStatusTarget(null)} onConfirm={() => statusTarget && void toggleCustomerStatus(statusTarget)} />
+ <ConfirmActionDialog open={Boolean(statusTarget)} title={statusTarget?.status === "suspended" ? "Reactivate customer?" : "Suspend customer?"} description={statusTarget?.status === "suspended" ? <>Restore selling access for <strong>{statusTarget.email}</strong>.</> : <>Suspend selling access for <strong>{statusTarget?.email}</strong>. Existing records will be preserved.</>} confirmLabel={statusTarget?.status === "suspended" ? "Reactivate customer" : "Suspend customer"} busy={Boolean(statusTarget && busyCustomerId === statusTarget.id)} tone={statusTarget?.status === "suspended" ? "warning" : "danger"} onCancel={() => setStatusTarget(null)} onConfirm={() => statusTarget && void toggleCustomerStatus(statusTarget)} />
  </div>
  );
 };

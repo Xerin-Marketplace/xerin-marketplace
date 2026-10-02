@@ -1,4 +1,4 @@
-# Xerin Market - Pending Links Register
+# Xerin Mart - Pending Links Register
 
 This document tracks all frontend links, URLs, API routes, and external integrations that are not yet final.
 

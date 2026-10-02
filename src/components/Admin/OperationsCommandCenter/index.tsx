@@ -31,7 +31,7 @@ export default function OperationsCommandCenter() {
 <section className="rounded-xl border border-border bg-card p-5 shadow-sm dark:border-border dark:bg-muted sm:p-6">
 <div className="flex flex-col gap-4 lg:flex-row lg:items-end lg:justify-between">
 <div>
-<p className="text-xs font-bold uppercase tracking-[.16em] text-destructive">Marketplace operations</p>
+<p className="text-xs font-bold uppercase tracking-[.16em] text-destructive">Store operations</p>
 <h2 className="mt-2 text-2xl font-bold sm:text-3xl">Exception command center</h2>
 <p className="mt-2 max-w-3xl text-sm leading-6 text-muted-foreground">Prioritize support SLA breaches, notification failures, security events, payment exceptions, refunds and failed deliveries from one live queue.</p>
 </div>

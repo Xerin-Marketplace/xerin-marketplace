@@ -109,7 +109,7 @@ export const Wishlist = () => {
 
  {!wishlistItems.length && (
  <div className="px-10 py-14 text-center text-muted-foreground">
- Your wishlist is empty. Browse approved marketplace products
+ Your wishlist is empty. Browse approved products
  and save items you want to compare later.
  </div>
  )}

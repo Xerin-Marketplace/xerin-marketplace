@@ -58,8 +58,8 @@ const MarketRails = () => {
     <>
       <ProductRail
         eyebrow="New Arrivals"
-        title="Fresh on the marketplace"
-        subtitle="The latest products sellers have published on Xerin Market."
+        title="Fresh on Xerin Mart"
+        subtitle="The latest products sellers have published on Xerin Mart."
         icon={SparklesIcon}
         products={newArrivals}
         isLoading={isLoading}
@@ -70,7 +70,7 @@ const MarketRails = () => {
           key={rail.id}
           eyebrow="Shop by Category"
           title={`Popular in ${rail.name}`}
-          subtitle="Real listings from this category across the marketplace."
+          subtitle="Real listings from this category across Xerin Mart."
           icon={GridIcon}
           products={rail.products}
           isLoading={false}

@@ -4,7 +4,7 @@ import SellerStoreSettings from "@/components/Seller/Store/StoreSettings";
 
 export const metadata: Metadata = {
  title: "My Stores | Seller Center",
- description: "Manage your Xerin Market selling locations.",
+ description: "Manage your Xerin Mart selling locations.",
 };
 
 export default function SellerStorePage() {

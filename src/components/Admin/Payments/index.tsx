@@ -41,7 +41,7 @@ const titles: Record<PaymentView, [string,string,string]> = {
  reconciliation:["Financial control","Reconciliation","Compare Xerin records against provider amounts and references."],
  currencies:["Currency management","Currencies & FX","Manage listing currencies and administrator-controlled exchange rates while all settlement remains in TZS."],
  countries:["Market configuration","Countries","Control countries, currencies, collections and payouts enabled by the platform."],
- fees:["Marketplace economics","Fees & Commissions","Review gateway fees, marketplace commissions and seller deductions."],
+ fees:["Platform economics","Fees & Commissions","Review gateway fees, platform commissions and seller deductions."],
  reports:["Financial intelligence","Payment Reports","Reporting workspace for collections, refunds, payouts and provider performance."],
  audit:["Financial governance","Payment Audit Logs","Trace administrative payment actions and lifecycle events."],
 };

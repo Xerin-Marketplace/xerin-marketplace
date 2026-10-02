@@ -716,7 +716,7 @@ export default function BuyerOrderDetails({ orderId }: { orderId: string }) {
  )}
  />
  <Summary
- label="Marketplace commission"
+ label="Platform commission"
  value={formatCurrency(
  escrow.commission_amount,
  escrow.currency,
@@ -935,7 +935,7 @@ export default function BuyerOrderDetails({ orderId }: { orderId: string }) {
  <div className="flex min-w-0 items-center gap-3">
  <Image
  src="/images/logo/xerin-logo-mark.png"
- alt="Xerin Marketplace"
+ alt="Xerin Mart"
  width={26}
  height={26}
  className="h-7 w-7 shrink-0 object-contain"
@@ -1042,7 +1042,7 @@ function ShipmentCard({
  Shipment {index + 1}
  </p>
  <p className="mt-1 font-bold">
- {shipment.carrier_name || "Marketplace logistics"}
+ {shipment.carrier_name || "Xerin Delivery"}
  </p>
  {shipment.tracking_number && (
  <p className="mt-1 break-all text-sm text-muted-foreground">

@@ -58,7 +58,7 @@ export default function DashboardShell({
  title = "Dashboard Overview",
  breadcrumb,
  centerLabel = "Xerin Center",
- brandSubtitle = "Marketplace Center",
+ brandSubtitle = "Store Center",
  dashboardHref,
  dashboardLabel = "Dashboard",
  notificationsHref,
@@ -66,7 +66,7 @@ export default function DashboardShell({
  settingsHref,
  addressesHref = "/account/addresses",
  supportHref = "/support",
- footerLabel = "Xerin Marketplace",
+ footerLabel = "Xerin Mart",
  searchPlaceholder = "Search",
  onSignOut,
 }: {
@@ -188,7 +188,7 @@ export default function DashboardShell({
  <div className="min-w-0">
  <Image
  src="/images/logo/logooriginal.png"
- alt="Xerin Marketplace logo"
+ alt="Xerin Mart logo"
  width={150}
  height={48}
  className="h-10 w-auto object-contain"

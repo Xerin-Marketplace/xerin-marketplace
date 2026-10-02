@@ -260,7 +260,7 @@ export default function CurrencyFxManagement() {
  <div>
  <h3 className="font-bold text-emerald-950">TZS settlement policy</h3>
  <p className="mt-1 text-sm leading-6 text-emerald-900/80">
- TZS is the protected marketplace base and payment-settlement currency. Sellers may list products in other
+ TZS is the protected base and payment-settlement currency. Sellers may list products in other
  active currencies, but checkout and payment gateway settlement will remain in TZS.
  </p>
  </div>
@@ -278,7 +278,7 @@ export default function CurrencyFxManagement() {
  <h3 className="font-bold text-foreground">Supported currencies</h3>
  </div>
  <p className="mt-1 text-sm text-muted-foreground">
- Initial marketplace currencies: {INITIAL_CURRENCIES.join(", ")}.
+ Initial currencies: {INITIAL_CURRENCIES.join(", ")}.
  </p>
  </div>
  <div className="flex gap-2">

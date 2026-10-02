@@ -164,12 +164,12 @@ export const checkoutApi = {
           logistics_company_name:
             option.logistics_company_name ||
             option.carrier_name ||
-            "Marketplace delivery",
+            "Xerin Delivery",
           service_name: option.method_name,
           carrier:
             option.carrier_name ||
             option.logistics_company_name ||
-            "Marketplace delivery",
+            "Xerin Delivery",
           scope: option.scope,
           supports_cod: option.supports_cod,
           tracking_supported: option.supports_tracking,

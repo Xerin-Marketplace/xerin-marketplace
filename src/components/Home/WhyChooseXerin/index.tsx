@@ -19,7 +19,7 @@ const FEATURES = [
  {
  title: "Verified sellers",
  description:
- "Sellers complete KYC review before listing, so you buy from vetted marketplace partners.",
+ "Sellers complete KYC review before listing, so you buy from vetted sellers.",
  icon: Store01Icon,
  },
  {
@@ -37,10 +37,10 @@ const WhyChooseXerin = () => {
  {/* Section header */}
  <div className="mb-10 text-center">
  <span className="mb-2 inline-flex items-center gap-2 text-sm font-semibold text-primary">
- Why Xerin Market
+ Why Xerin Mart
  </span>
  <h2 className="text-2xl font-bold tracking-tight text-foreground sm:text-3xl lg:text-4xl">
- A marketplace built on trust
+ A store built on trust
  </h2>
  <p className="mx-auto mt-2 max-w-2xl text-sm text-muted-foreground dark:text-muted-foreground sm:text-base">
  We connect buyers and sellers with secure payments, tracked

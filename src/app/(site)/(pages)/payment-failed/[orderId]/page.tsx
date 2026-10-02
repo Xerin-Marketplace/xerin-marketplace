@@ -190,7 +190,7 @@ export default function PaymentFailedPage() {
  <div className="mx-auto max-w-2xl space-y-5">
  <div className="flex items-center justify-between gap-3 px-1">
  <Link href="/">
- <img src="/images/logo/logooriginal.png" alt="Xerin Marketplace" className="h-10 w-auto" />
+ <img src="/images/logo/logooriginal.png" alt="Xerin Mart" className="h-10 w-auto" />
  </Link>
  <span className="inline-flex items-center gap-1.5 rounded-full bg-card px-3 py-1.5 text-[10px] font-bold uppercase tracking-wide text-muted-foreground shadow-sm">
  <HugeiconsIcon icon={ShieldAlertIcon} size={13} /> Payment result
@@ -303,7 +303,7 @@ export default function PaymentFailedPage() {
  </div>
  ) : (
  <div className="mt-6 rounded-2xl border border-border bg-muted p-4 text-sm leading-6 text-muted-foreground dark:border-border dark:bg-muted /60">
- This payment cannot currently be retried. You can review the order or return to the marketplace.
+ This payment cannot currently be retried. You can review the order or return to the store.
  </div>
  )}
 

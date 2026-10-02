@@ -113,7 +113,7 @@ export default function BrokerOwnProducts() {
  setMessage(
  published.status === "approved"
  ? "Product is live. Its 24-hour clock has started."
- : "Product submitted for marketplace review. The 24-hour clock starts only after approval.",
+ : "Product submitted for review. The 24-hour clock starts only after approval.",
  );
 
  await load();

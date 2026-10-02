@@ -1,18 +1,18 @@
-# Xerin Market Frontend
+# Xerin Mart Frontend
 
-Xerin Market is a pan-African multi-vendor marketplace frontend built with Next.js, React, TypeScript, Tailwind CSS, and Redux Toolkit.
+Xerin Mart is a pan-African multi-vendor e-commerce frontend built with Next.js, React, TypeScript, Tailwind CSS, and Redux Toolkit.
 
 The platform connects buyers, sellers, and logistics providers through a modern e-commerce experience with product discovery, cart, wishlist, checkout, account dashboard, and future integration points for payments, logistics tracking, seller tools, and admin workflows.
 
 ## Current Status
 
-This repository contains the Xerin Market frontend application for the marketplace web platform.
+This repository contains the Xerin Mart frontend application for the web store.
 
 Completed so far:
 
-- Xerin Market branding and metadata
+- Xerin Mart branding and metadata
 - Header and footer customization
-- Homepage marketplace sections
+- Homepage store sections
 - Shop, product details, cart, wishlist, checkout, and account cleanup
 - Blog content cleanup
 - Centralized route and external link management

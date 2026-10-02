@@ -94,10 +94,10 @@ export default function MobileStorefrontHeader({
               />
             </button>
 
-            <Link href="/" className="flex min-w-0 flex-1 items-center justify-center px-1" aria-label="Xerin Marketplace home">
+            <Link href="/" className="flex min-w-0 flex-1 items-center justify-center px-1" aria-label="Xerin Mart home">
               <Image
                 src="/images/logo/logooriginal.png"
-                alt="Xerin Marketplace"
+                alt="Xerin Mart"
                 width={200}
                 height={64}
                 className="h-12 w-auto object-contain"

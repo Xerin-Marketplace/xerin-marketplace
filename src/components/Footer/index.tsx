@@ -35,7 +35,7 @@ const Footer = () => {
  Ready to grow your business with Xerin?
  </h3>
  <p className="text-sm text-muted-foreground">
- Start selling, become a Winga, join our logistics network, or explore the marketplace — all in one place.
+ Start selling, become a Winga, join our logistics network, or explore the store — all in one place.
  </p>
  </div>
  <div className="flex flex-wrap items-center justify-center gap-3">
@@ -72,14 +72,14 @@ const Footer = () => {
  <Link href="/" className="flex items-center transition-opacity hover:opacity-90">
  <Image
  src="/images/logo/logooriginal.png"
- alt="Xerin Marketplace"
+ alt="Xerin Mart"
  width={150}
  height={48}
  className="h-14 w-auto object-contain"
  />
  </Link>
  <p className="max-w-xs text-sm text-muted-foreground text-pretty">
- Tanzania&apos;s trusted marketplace for buyers and sellers. Shop with confidence,
+ Tanzania&apos;s trusted online store for buyers and sellers. Shop with confidence,
  sell with ease, and deliver with Xerin Express.
  </p>
 
@@ -152,7 +152,7 @@ const Footer = () => {
  href="https://play.google.com/store/apps/details?id=com.xerinmarket.com&pcampaignid=web_share"
  target="_blank"
  rel="noopener noreferrer"
- aria-label="Download Xerin Marketplace on Google Play"
+ aria-label="Download Xerin Mart on Google Play"
  className="flex items-center gap-2.5 rounded-lg bg-foreground px-4 py-2.5 text-background transition hover:opacity-90"
  >
  <HugeiconsIcon icon={PlayStoreIcon} size={28} />
@@ -166,10 +166,10 @@ const Footer = () => {
 
  {/* Links grid */}
  <div className="grid grid-cols-2 gap-8 sm:grid-cols-4">
- {/* Marketplace */}
+ {/* Shop */}
  <div className="flex flex-col gap-3">
  <h4 className="text-sm font-semibold text-foreground">
- Marketplace
+                    Shop
  <span className="mt-1 block h-0.5 w-6 rounded-full bg-primary" />
  </h4>
  <ul className="flex flex-col gap-2.5">
@@ -292,10 +292,10 @@ const Footer = () => {
  {/* Policies bar */}
  <div className="relative mt-10 border-t border-border pt-6">
  <p className="mb-3 text-center text-sm font-medium text-foreground">
- Marketplace Policies & Legal
+ Policies & Legal
  </p>
  <ul
- aria-label="Marketplace policies and legal guides"
+ aria-label="policies and legal guides"
  className="flex flex-wrap items-center justify-center gap-x-2 gap-y-2 text-center text-sm text-muted-foreground"
  >
  {marketplacePolicyLinks.map((policy, index) => (

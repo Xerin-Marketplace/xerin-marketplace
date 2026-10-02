@@ -259,13 +259,13 @@ export default function AdminSellers({
  </h2>
  <p className="mt-1 max-w-3xl text-sm leading-6 text-muted-foreground">
  {mode === "applications"
- ? "Review onboarding details, KYC documents and business information before activating marketplace access."
+ ? "Review onboarding details, KYC documents and business information before activating selling access."
  : "Monitor every seller account, verification state and operational readiness from one workspace."}
  </p>
  </div>
  <div className="rounded-xl border border-border bg-muted px-4 py-3 text-right">
  <p className="text-[10px] font-bold uppercase tracking-wider text-muted-foreground">
- Marketplace sellers
+ Sellers
  </p>
  <p className="mt-1 text-2xl font-bold text-foreground">{counts.total}</p>
  </div>
@@ -277,7 +277,7 @@ export default function AdminSellers({
  ["All sellers", counts.total, "All registered seller accounts"],
  ["Pending", counts.pending, "Waiting for review"],
  ["Under review", counts.review, "Currently being assessed"],
- ["Approved", counts.approved, "Marketplace access active"],
+ ["Approved", counts.approved, "Selling access active"],
  ["Rejected", counts.rejected, "Correction required"],
  ].map(([label, value, hint]) => (
  <article

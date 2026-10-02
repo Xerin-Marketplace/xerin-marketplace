@@ -47,7 +47,7 @@ export default function MobileBottomNav() {
  className="h-[calc(var(--xerin-mobile-nav-height)+var(--xerin-safe-bottom))] lg:hidden"
  />
  <nav
- aria-label="Mobile marketplace navigation"
+ aria-label="Mobile store navigation"
  className="fixed inset-x-0 bottom-0 z-[9998] border-t border-[var(--border)] bg-card/95 pb-[var(--xerin-safe-bottom)] shadow-sm backdrop-blur lg:hidden dark:border-border dark:bg-[var(--card)]/95"
  >
  <div className="mx-auto flex h-[var(--xerin-mobile-nav-height)] max-w-[560px] items-stretch">

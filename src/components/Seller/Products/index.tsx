@@ -268,7 +268,7 @@ const SellerProducts = () => {
 
 
  // Phase 1 pricing preview is always calculated by the backend.
- // The browser never decides marketplace commission by itself.
+ // The browser never decides platform commission by itself.
  useEffect(() => {
  const basePrice = Number(form.price);
  const salePrice =
@@ -307,7 +307,7 @@ const SellerProducts = () => {
  setPricingPreviewError(
  cause instanceof ApiError
  ? cause.message
- : "Unable to calculate marketplace pricing.",
+ : "Unable to calculate pricing.",
  );
  } finally {
  setPricingPreviewLoading(false);
@@ -856,7 +856,7 @@ const SellerProducts = () => {
  <p className="font-semibold">Product listing is currently locked</p>
  <p className="mt-1 text-sm leading-6">
  Your seller account must be approved before you can create or
- manage marketplace products.
+ manage products.
  </p>
  </div>
  </div>
@@ -873,7 +873,7 @@ const SellerProducts = () => {
  </h1>
  <p className="mt-2 max-w-2xl text-sm leading-6 text-muted-foreground">
  Create product listings, upload real product images, save drafts
- and submit completed products for marketplace review.
+ and submit completed products for review.
  </p>
  </div>
 
@@ -1082,7 +1082,7 @@ const SellerProducts = () => {
 
  {product.commission_rate_snapshot !== undefined && (
  <p className="mt-2 text-xs text-muted-foreground">
- Marketplace commission:{" "}
+ Platform commission:{" "}
  <b className="text-foreground">
  {Number(product.commission_rate_snapshot).toLocaleString()}%
  </b>
@@ -1239,7 +1239,7 @@ const SellerProducts = () => {
  <FormSection
  icon={Tag01Icon}
  title="Product identity"
- description="Choose the marketplace category and provide the basic product information."
+ description="Choose a product category and provide the basic product information."
  >
  <div className="grid gap-4 md:grid-cols-2">
  <div className="md:col-span-2">
@@ -1762,7 +1762,7 @@ const SellerProducts = () => {
  <div className="flex flex-col gap-1 sm:flex-row sm:items-center sm:justify-between">
  <div>
  <p className="text-sm font-bold text-foreground">
- Marketplace pricing preview
+ Pricing preview
  </p>
  <p className="mt-0.5 text-xs leading-5 text-muted-foreground">
  The customer pays your listed price. Xerin commission is shown separately and deducted from your seller settlement.
@@ -1827,7 +1827,7 @@ const SellerProducts = () => {
  </div>
  ) : (
  <p className="mt-4 text-sm text-muted-foreground">
- Select a category and enter your listing price to see the marketplace calculation.
+ Select a category and enter your listing price to see the platform calculation.
  </p>
  )}
 

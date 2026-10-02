@@ -340,11 +340,11 @@ const sidebarGroups: SidebarGroup[] = [
  ],
  },
  {
- title: "Marketplace Settings",
+ title: "Store Settings",
  key: "overview",
  icon: Settings01Icon,
  items: [
- { label: "Marketplace Rules", href: "?tab=overview&menu=marketplace-settings&item=marketplace-rules" },
+ { label: "Platform Rules", href: "?tab=overview&menu=marketplace-settings&item=marketplace-rules" },
  { label: "Commission Rules", href: "?tab=overview&menu=marketplace-settings&item=commission-rules" },
  ],
  },
@@ -537,7 +537,7 @@ export default function AdminDashboard() {
  const hiddenOverviewMenuGroups = [
  "Communications",
  "System Management",
- "Marketplace Settings",
+ "Store Settings",
  "Logistics",
  "Finance Configuration",
  "Account",
@@ -600,7 +600,7 @@ export default function AdminDashboard() {
  },
  Sellers: {
  icon: Store01Icon,
- eyebrow: "Marketplace partners",
+ eyebrow: "Seller partners",
  gradient: "from-[var(--foreground)]",
  },
  };
@@ -722,14 +722,14 @@ export default function AdminDashboard() {
  ? "logout"
  : "profile";
  const isConfigurationWorkspace =
- activeSidebarItem.startsWith("Marketplace Settings:") ||
+ activeSidebarItem.startsWith("Store Settings:") ||
  activeSidebarItem.startsWith("Logistics:") ||
  activeSidebarItem.startsWith("Finance Configuration:");
 
  const configurationView: AdminConfigurationView =
- activeSidebarItem === "Marketplace Settings:Commission Rules"
+ activeSidebarItem === "Store Settings:Commission Rules"
  ? "commissions"
- : activeSidebarItem === "Marketplace Settings:Marketplace Rules"
+ : activeSidebarItem === "Store Settings:Platform Rules"
  ? "marketplace"
  : activeSidebarItem === "Logistics:Delivery Services"
  ? "logistics-services"
@@ -1045,7 +1045,7 @@ export default function AdminDashboard() {
  profileHref="/admin/dashboard?tab=overview&menu=account&item=profile"
  settingsHref="/admin/dashboard?tab=overview&menu=account&item=profile"
  supportHref="/admin/customers/support"
- footerLabel="Xerin Market Admin Center"
+ footerLabel="Xerin Mart Admin Center"
  searchPlaceholder="Search admin records"
  >
  <div className="min-w-0 space-y-5">
@@ -1161,7 +1161,7 @@ export default function AdminDashboard() {
  Ecommerce Dashboard
  </h2>
  <p className="mt-1 text-sm text-muted-foreground dark:text-gray-300">
- Here&apos;s what is happening across your marketplace right now.
+ Here&apos;s what is happening across Xerin Mart right now.
  </p>
  </div>
  <button

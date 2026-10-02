@@ -3,9 +3,9 @@ import ShopWithoutSidebar from "@/components/ShopWithoutSidebar";
 
 import { Metadata } from "next";
 export const metadata: Metadata = {
- title: "Shop Products | Xerin Marketplace",
+ title: "Shop Products | Xerin Mart",
  description:
- "Browse seller-listed products on Xerin Marketplace — protected checkout, delivery quotes and order tracking.",
+ "Browse seller-listed products on Xerin Mart — protected checkout, delivery quotes and order tracking.",
  alternates: { canonical: "/shop-without-sidebar" },
 };
 

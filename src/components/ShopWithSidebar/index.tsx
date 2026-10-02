@@ -243,13 +243,13 @@ const ShopWithSidebar = () => {
 
  {(productsLoading || categoriesLoading) && (
  <p className="text-custom-sm text-muted-foreground">
- Loading marketplace data...
+ Loading products...
  </p>
  )}
 
  {(productsError || categoriesError) && (
  <p className="text-custom-sm font-medium text-destructive">
- Marketplace data could not be loaded. Please try again.
+ Products could not be loaded. Please try again.
  </p>
  )}
  </div>
@@ -294,7 +294,7 @@ const ShopWithSidebar = () => {
  {!productsLoading && !productsError && products.length === 0 && (
  <div className="col-span-full rounded-lg border border-border bg-card px-6 py-12 text-center">
  <h2 className="text-lg font-semibold text-foreground">No products found</h2>
- <p className="mt-2 text-sm text-muted-foreground">There are no marketplace products matching this view.</p>
+ <p className="mt-2 text-sm text-muted-foreground">There are no products matching this view.</p>
  </div>
  )}
  {products.map((item) =>

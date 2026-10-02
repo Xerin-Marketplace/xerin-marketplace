@@ -175,7 +175,7 @@ const Categories = () => {
  <div>
  <span className="mb-1 hidden items-center gap-2 text-sm font-medium text-primary sm:flex sm:text-base">
  <HugeiconsIcon icon={PackageIcon} size={20} />
- Marketplace Products
+ Products
  </span>
  <h2 className="text-lg font-bold text-foreground sm:text-2xl xl:text-heading-5">
  Explore products from our sellers
@@ -411,7 +411,7 @@ const Categories = () => {
  <div className="rounded-2xl border border-red-light-4 bg-red-light-6 px-6 py-12 text-center">
  <h3 className="font-semibold text-red-dark">Products could not be loaded</h3>
  <p className="mt-2 text-sm text-destructive">
- The marketplace API did not return the product catalog. Please try again.
+ The product catalog could not be loaded. Please try again.
  </p>
  <button
  type="button"
@@ -475,7 +475,7 @@ const Categories = () => {
  <div className="flex flex-1 flex-col p-2.5 sm:p-5">
  <div className="mb-1 flex items-center justify-between gap-2 sm:mb-2 sm:gap-3">
  <span className="truncate text-[10px] font-bold uppercase tracking-wide text-primary sm:text-xs sm:font-medium">
- {categoryNameById.get(String(product.category_id)) ?? "Marketplace"}
+ {categoryNameById.get(String(product.category_id)) ?? "Shop"}
  </span>
  {product.is_active && product.status === "approved" ? (
  <span className="hidden rounded-full bg-green-light-6 px-2.5 py-1 text-[11px] font-semibold text-green-dark sm:inline-flex">

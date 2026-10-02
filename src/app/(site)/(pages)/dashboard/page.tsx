@@ -4,7 +4,7 @@ import DashboardClient from "./DashboardClient";
 export const metadata: Metadata = {
  robots: { index: false, follow: false },
  title: "Dashboard",
- description: "Access your Xerin Market buyer, seller, admin, logistics, and support modules.",
+ description: "Access your Xerin Mart buyer, seller, admin, logistics, and support modules.",
 };
 
 const DashboardPage = () => {

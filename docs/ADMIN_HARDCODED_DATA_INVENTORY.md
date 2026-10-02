@@ -22,7 +22,7 @@ Audit scope: `src/components/Admin/**`, admin routes, admin API services, backen
 | `Admin/Promotions` | Coupons, discounts, campaigns | API | `/coupons`, `/promotions/*` | Available | Integrated |
 | `Admin/UserManagement` | Users, roles, permissions, sessions and metrics | API arrays and response counts | `/admin/access-*`, `/admin/active-sessions` | Available | Integrated |
 | `Admin/SystemManagement` | Logs, events, jobs and settings | API arrays | `/system/*` | Available | Integrated |
-| `Admin/SystemManagement` | Marketplace name, support email, maintenance mode, seller registration, currency and auto-cancel hours | Frontend fallback settings | Persisted application settings | `GET /system/settings` | Frontend defaults removed; backend-only |
+| `Admin/SystemManagement` | Store name, support email, maintenance mode, seller registration, currency and auto-cancel hours | Frontend fallback settings | Persisted application settings | `GET /system/settings` | Frontend defaults removed; backend-only |
 | `Admin/Reports` | Metrics, breakdown and report rows | API report payload | `/admin/reports/{type}` | Available | Integrated |
 
 UI-only constants such as navigation tabs, valid status options, form defaults, colors and labels are not business data and remain in the frontend.

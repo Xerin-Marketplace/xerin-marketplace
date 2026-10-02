@@ -100,7 +100,7 @@ export const printOrderInvoice = (
   const body = `
     <div class="topbar" style="display:flex;justify-content:space-between;align-items:flex-end;">
       <div>
-        <p class="brand">Xerin Marketplace</p>
+        <p class="brand">Xerin Mart</p>
         <h1>Invoice</h1>
         <p class="muted" style="margin:4px 0 0;font-size:13px;">Order #${order.id.slice(0, 12).toUpperCase()}</p>
       </div>
@@ -143,7 +143,7 @@ export const printOrderInvoice = (
 
     ${totalsHtml(order)}
 
-    <p style="margin-top:44px;font-size:12px;border-top:1px solid ${line};padding-top:16px;" class="muted">Thank you for shopping with Xerin Marketplace · support@xerinmarketplace.com</p>
+    <p style="margin-top:44px;font-size:12px;border-top:1px solid ${line};padding-top:16px;" class="muted">Thank you for shopping with Xerin Mart · support@xerinmarketplace.com</p>
   `;
 
   const w = window.open("", "_blank");
@@ -163,7 +163,7 @@ export const printPaymentReceipt = (payment: Payment) => {
 
   const body = `
     <div class="topbar" style="text-align:center;">
-      <p class="brand">Xerin Marketplace</p>
+      <p class="brand">Xerin Mart</p>
       <h1>Payment Receipt</h1>
       <p class="muted" style="margin:6px 0 0;font-size:13px;">Ref: ${escapeHtml(payment.provider_transaction_id || payment.id.slice(0, 12).toUpperCase())}</p>
     </div>
@@ -178,7 +178,7 @@ export const printPaymentReceipt = (payment: Payment) => {
       </table>
     </div>
 
-    <p style="margin-top:44px;font-size:12px;border-top:1px solid ${line};padding-top:16px;" class="muted">This is an official receipt for your records · Xerin Marketplace</p>
+    <p style="margin-top:44px;font-size:12px;border-top:1px solid ${line};padding-top:16px;" class="muted">This is an official receipt for your records · Xerin Mart</p>
   `;
 
   const w = window.open("", "_blank");

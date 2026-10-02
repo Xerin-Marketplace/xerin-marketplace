@@ -44,7 +44,7 @@ export default function AdminDisputes() {
       <section className="admin-catalog-header flex items-start justify-between gap-4">
         <div>
           <h2 className="text-2xl font-bold">Payment Disputes</h2>
-          <p className="mt-1 text-sm text-muted-foreground">Disputes raised against marketplace payments.</p>
+          <p className="mt-1 text-sm text-muted-foreground">Disputes raised against payments.</p>
         </div>
         <button onClick={() => void load()} className="rounded-xl border px-3 py-2" aria-label="Refresh">
           <HugeiconsIcon icon={RefreshCwIcon} size={16} />

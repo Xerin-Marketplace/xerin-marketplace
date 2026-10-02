@@ -56,7 +56,7 @@ export default function SimilarProducts({ productId }: { productId: string }) {
  <HugeiconsIcon icon={Store01Icon} size={22} />
  </span>
  <div>
- <span className="text-[11px] font-bold uppercase tracking-[0.14em] text-primary">Compare marketplace offers</span>
+ <span className="text-[11px] font-bold uppercase tracking-[0.14em] text-primary">Compare offers</span>
  <h2 className="mt-1 text-xl font-extrabold text-foreground sm:text-2xl">Similar products from other sellers</h2>
  <p className="mt-1.5 max-w-3xl text-sm leading-6 text-muted-foreground">
  Strong alternatives with a 75%+ weighted specification match, so you can compare price, stock and product details confidently.

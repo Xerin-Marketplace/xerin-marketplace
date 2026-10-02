@@ -68,7 +68,7 @@ export const ADMIN_SECTION_PERMISSIONS: Record<string, string[]> = {
     "admin_reviews:moderate",
   ],
   Orders: ["orders:read"],
-  "Marketplace Operations": ["orders:read", "admin_dashboard_operations:read", "payments:read", "escrow:read", "support_tickets:read", "admin_dashboard_security:read", "admin_activity_logs:read"],
+  "Store Operations": ["orders:read", "admin_dashboard_operations:read", "payments:read", "escrow:read", "support_tickets:read", "admin_dashboard_security:read", "admin_activity_logs:read"],
   Inventory: ["inventory:manage"],
   Customers: [
     "view_all_users",
@@ -139,7 +139,7 @@ export const ADMIN_SECTION_PERMISSIONS: Record<string, string[]> = {
     "admin_activity_logs:read",
     "admin_system_alerts:manage",
   ],
-  "Marketplace Settings": [
+  "Store Settings": [
     "marketplace_settings:read",
     "marketplace_settings:manage",
     "commissions:read",

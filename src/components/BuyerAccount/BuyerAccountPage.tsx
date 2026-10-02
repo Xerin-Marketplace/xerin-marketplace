@@ -17,7 +17,7 @@ import OnboardingTour, { useTour } from "@/components/Common/Info/OnboardingTour
 
 const BUYER_TOUR_STEPS = [
  { title: "Welcome to your dashboard", body: "This is your home base · recent orders, saved items and anything that needs your attention appear here." },
- { title: "Shop products", body: "Browse the marketplace, compare sellers and add items to your cart. Checkout is protected by Xerin buyer protection." },
+ { title: "Shop products", body: "Browse the store, compare sellers and add items to your cart. Checkout is protected by Xerin buyer protection." },
  { title: "Track your orders", body: "Open Orders to follow each order from confirmation to delivery · tap a status badge to see what it means." },
  { title: "Manage your account", body: "Addresses, payment methods and security settings live under the Account menu. Set a default address to check out faster." },
 ];
@@ -141,7 +141,7 @@ export default function BuyerDashboard() {
  <section className="overflow-hidden rounded-xl bg-carbon text-white">
  <div className="grid gap-6 p-6 sm:p-7 lg:grid-cols-[1fr_auto] lg:items-center">
  <div>
- <p className="text-xs font-bold uppercase tracking-[0.18em] text-primary">My Xerin Market</p>
+ <p className="text-xs font-bold uppercase tracking-[0.18em] text-primary">My Xerin Mart</p>
  <h1 className="mt-2 text-2xl font-extrabold text-white sm:text-3xl">
  {profile.state === "ready" && first ? `Welcome back, ${first}` : profile.state === "error" ? "Customer Dashboard" : "Loading your account..."}
  </h1>

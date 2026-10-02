@@ -87,7 +87,7 @@ const approvedGroups: DashboardNavGroup[] = [
  items: [
  { label: "Account Settings", href: "/seller/account", icon: Settings01Icon },
  { label: "Security", href: "/seller/account/security", icon: UserCircleIcon },
- { label: "Marketplace Home", href: "/", icon: LifebuoyIcon },
+ { label: "Store Home", href: "/", icon: LifebuoyIcon },
  ],
  },
 ];
@@ -109,7 +109,7 @@ const activationGroups: DashboardNavGroup[] = [
  items: [
  { label: "Account Settings", href: "/seller/account", icon: Settings01Icon },
  { label: "Security", href: "/seller/account/security", icon: UserCircleIcon },
- { label: "Marketplace Home", href: "/", icon: LifebuoyIcon },
+ { label: "Store Home", href: "/", icon: LifebuoyIcon },
  ],
  },
 ];
@@ -141,7 +141,7 @@ const suspendedComplianceGroups: DashboardNavGroup[] = [
  items: [
  { label: "Account Settings", href: "/seller/account", icon: Settings01Icon },
  { label: "Security", href: "/seller/account/security", icon: UserCircleIcon },
- { label: "Marketplace Home", href: "/", icon: LifebuoyIcon },
+ { label: "Store Home", href: "/", icon: LifebuoyIcon },
  ],
  },
 ];
@@ -276,7 +276,7 @@ export default function SellerLayout({ children }: { children: React.ReactNode }
  settingsHref="/seller/account"
  addressesHref="/account/addresses"
  supportHref="/"
- footerLabel="Xerin Marketplace Seller Center"
+ footerLabel="Xerin Mart Seller Center"
  searchPlaceholder={isApprovedSeller ? "Search seller records" : "Search Seller Center"}
  onSignOut={signOut}
  >
@@ -288,7 +288,7 @@ export default function SellerLayout({ children }: { children: React.ReactNode }
  Selling temporarily suspended · Business Licence expired
  </p>
  <p className="mt-0.5 text-xs leading-5 opacity-80">
- New listings, inventory changes and new customer sales are blocked. You can still complete existing orders. Renew your Business Licence in Business Documents to restore selling access after Marketplace approval.
+ New listings, inventory changes and new customer sales are blocked. You can still complete existing orders. Renew your Business Licence in Business Documents to restore selling access after admin approval.
  </p>
  <Link
  href="/seller/kyc?tab=documents"

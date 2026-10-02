@@ -93,7 +93,7 @@ export default function PaymentSuccessPage() {
  <div className="mx-auto max-w-2xl space-y-5">
  <div className="flex items-center justify-between gap-3 px-1">
  <Link href="/">
- <img src="/images/logo/logooriginal.png" alt="Xerin Marketplace" className="h-10 w-auto" />
+ <img src="/images/logo/logooriginal.png" alt="Xerin Mart" className="h-10 w-auto" />
  </Link>
  <span className="inline-flex items-center gap-1.5 rounded-full bg-card px-3 py-1.5 text-[10px] font-bold uppercase tracking-wide text-green-dark shadow-sm">
  <HugeiconsIcon icon={ShieldCheckIcon} size={13} /> Verified payment

@@ -30,11 +30,11 @@ const Hero = () => {
  <div className="flex w-full items-center justify-between gap-3">
  <div className="min-w-0 flex-1">
  <span className="mb-2 inline-flex rounded-full bg-primary/10 px-2.5 py-1 text-[10px] font-bold uppercase tracking-wide text-primary">Shop confidently</span>
- <h2 className="text-lg font-bold leading-tight text-foreground xl:text-2xl">Trusted marketplace</h2>
+ <h2 className="text-lg font-bold leading-tight text-foreground xl:text-2xl">Trusted online store</h2>
  <p className="mt-1.5 max-w-[230px] text-xs leading-5 text-muted-foreground sm:text-sm">Seller listings, protected checkout and order tracking in one place.</p>
  <Link href={ROUTES.shop} className="mt-3 inline-flex rounded-lg bg-primary px-4 py-2 text-xs font-bold text-primary-foreground transition hover:bg-primary/90 sm:text-sm">Shop Now</Link>
  </div>
- <Image src="/images/hero/phoneremove.png" alt="Xerin Market promotion" width={145} height={190} className="h-[120px] w-auto shrink-0 object-contain sm:h-[135px] xl:h-[170px]" />
+ <Image src="/images/hero/phoneremove.png" alt="Xerin Mart promotion" width={145} height={190} className="h-[120px] w-auto shrink-0 object-contain sm:h-[135px] xl:h-[170px]" />
  </div>
  </div>
  )}

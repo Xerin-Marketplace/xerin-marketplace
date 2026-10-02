@@ -116,7 +116,7 @@ const AUTH_TABS: { key: AuthTab; label: string }[] = [
 ];
 
 const FEATURES = [
- { icon: <HugeiconsIcon icon={ShieldCheckIcon} size={18} />, title: "Marketplace Checkout", description: "Use payment methods made available for your order" },
+ { icon: <HugeiconsIcon icon={ShieldCheckIcon} size={18} />, title: "Secure Checkout", description: "Use payment methods made available for your order" },
  { icon: <HugeiconsIcon icon={TruckIcon} size={18} />, title: "Delivery Options", description: "See available shipping options during checkout" },
  { icon: <HugeiconsIcon icon={Wallet01Icon} size={18} />, title: "Seller Wallet", description: "Track balances and payout requests from Seller Center" },
  { icon: <HugeiconsIcon icon={ChartIncreaseIcon} size={18} />, title: "Manage Your Store", description: "List products and manage customer orders" },
@@ -1447,7 +1447,7 @@ const SellerPanel = ({ onSwitchTab }: { onSwitchTab: (tab: AuthTab) => void }) =
  <br />
  <span className="text-muted-foreground">
  By creating a seller account, I confirm that the information I have
- provided is correct and I agree to comply with XerinMarket seller
+ provided is correct and I agree to comply with Xerin Mart seller
  policies and terms.
  </span>
  </span>
@@ -1711,16 +1711,16 @@ const AuthPage = ({ initialTab = "signup" }: { initialTab?: AuthTab }) => {
 
  const panelCopy: Record<AuthTab, { title: string; body: string }> = {
  signin: { title: 'Welcome back.', body: 'Sign in to keep shopping, track your orders and pick up right where you left off.' },
- signup: { title: 'Join XerinMarket.', body: 'Create your free account in minutes. Shop, track deliveries and manage everything from one place.' },
+ signup: { title: 'Join Xerin Mart.', body: 'Create your free account in minutes. Shop, track deliveries and manage everything from one place.' },
  seller: { title: 'Sell on Xerin.', body: 'Open your store, list your products and reach buyers across the region. Getting started takes minutes, not days.' },
  broker: { title: 'Earn with Xerin.', body: 'Share products you believe in and earn when people buy through your link. No inventory needed.' },
  };
 
  const headings: Record<AuthTab, { title: string; subtitle: string }> = {
- signin: { title: "Welcome back", subtitle: "Sign in to continue to XerinMarket" },
- signup: { title: "Create an account", subtitle: "Create your Xerin Market account" },
+ signin: { title: "Welcome back", subtitle: "Sign in to continue to Xerin Mart" },
+ signup: { title: "Create an account", subtitle: "Create your Xerin Mart account" },
  seller: { title: "Become a seller", subtitle: "Tell us about your business to get started" },
- broker: { title: "Become a broker", subtitle: "Register, verify your identity, and start earning through XerinMarket" },
+ broker: { title: "Become a broker", subtitle: "Register, verify your identity, and start earning through Xerin Mart" },
  };
 
  return (
@@ -1729,8 +1729,8 @@ const AuthPage = ({ initialTab = "signup" }: { initialTab?: AuthTab }) => {
  <div className="flex min-h-[100dvh] flex-col px-4 pb-[max(20px,env(safe-area-inset-bottom))] pt-[max(18px,env(safe-area-inset-top))] sm:px-10 sm:py-8 xl:px-20">
  <div className="flex items-center justify-between">
  <Link href="/" className="inline-flex w-fit items-center gap-2">
- <Image src="/images/logo/xerin-logo-mark.png" alt="Xerin Marketplace" width={44} height={44} priority className="h-11 w-11 object-contain" />
- <span className="text-xl font-bold text-foreground sm:text-2xl">Xerin Marketplace</span>
+ <Image src="/images/logo/xerin-logo-mark.png" alt="Xerin Mart" width={44} height={44} priority className="h-11 w-11 object-contain" />
+ <span className="text-xl font-bold text-foreground sm:text-2xl">Xerin Mart</span>
  </Link>
  <Link href="/" className="rounded-full border border-border px-3 py-1.5 text-xs font-semibold text-muted-foreground transition hover:text-primary lg:hidden">
  Shop
@@ -1758,13 +1758,13 @@ const AuthPage = ({ initialTab = "signup" }: { initialTab?: AuthTab }) => {
  <span>•</span>
  <Link href="/privacy" className="hover:text-foreground dark:hover:text-white">Privacy</Link>
  <span>•</span>
- <span>© {new Date().getFullYear()} XerinMarket</span>
+ <span>© {new Date().getFullYear()} Xerin Mart</span>
  </div>
  </div>
 
  {/* Right panel: marketing / imagery (deliveryoption style) */}
  <div className="relative hidden min-h-[100dvh] overflow-hidden bg-carbon lg:flex lg:flex-col">
- <Image src="/35124 (1).jpg" alt="XerinMarket" fill priority sizes="50vw" className="object-cover object-center" />
+ <Image src="/35124 (1).jpg" alt="Xerin Mart" fill priority sizes="50vw" className="object-cover object-center" />
  <div className="absolute inset-0 bg-black/55" />
  <div className="absolute inset-0 bg-gradient-to-t from-black/70 via-black/40 to-transparent" />
  <div className="absolute inset-0 bg-gradient-to-br from-black/30 via-transparent to-transparent" />
@@ -1791,7 +1791,7 @@ const AuthPage = ({ initialTab = "signup" }: { initialTab?: AuthTab }) => {
 
  {/* Footer note */}
  <div className="flex items-center justify-between text-xs text-white/60">
- <span>&copy; {new Date().getFullYear()} Xerin Marketplace. All rights reserved.</span>
+ <span>&copy; {new Date().getFullYear()} Xerin Mart. All rights reserved.</span>
  </div>
  </div>
  </div>

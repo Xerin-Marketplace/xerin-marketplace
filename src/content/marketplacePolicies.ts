@@ -16,7 +16,7 @@ export const marketplacePolicies = {
     slug: "product-listing",
     title: "Product Listing Policy",
     summary:
-      "Standards sellers must follow when listing and offering products on Xerin Marketplace.",
+      "Standards sellers must follow when listing and offering products on Xerin Mart.",
     sections: [
       {
         heading: "Accurate product information",
@@ -50,7 +50,7 @@ export const marketplacePolicies = {
     slug: "intellectual-property",
     title: "Intellectual Property Protection",
     summary:
-      "How Xerin protects the marketplace from infringing products and content.",
+      "How Xerin protects the platform from infringing products and content.",
     sections: [
       {
         heading: "Respect for intellectual property",
@@ -61,13 +61,13 @@ export const marketplacePolicies = {
       {
         heading: "Reporting a concern",
         paragraphs: [
-          "A rights holder or user who believes that marketplace content is unlawful or infringing should report the concern through Xerin customer support at support@xerinmarketplace.com. The report should identify the relevant listing and clearly explain the concern so it can be reviewed.",
+          "A rights holder or user who believes that platform content is unlawful or infringing should report the concern through Xerin customer support at support@xerinmarketplace.com. The report should identify the relevant listing and clearly explain the concern so it can be reviewed.",
         ],
       },
       {
         heading: "Review and action",
         paragraphs: [
-          "Xerin may review reported content, remove content that violates marketplace rules and suspend accounts involved in prohibited activity. Reports and account actions will be handled fairly through Xerin’s designated support channels.",
+          "Xerin may review reported content, remove content that violates platform rules and suspend accounts involved in prohibited activity. Reports and account actions will be handled fairly through Xerin’s designated support channels.",
         ],
       },
     ],
@@ -94,7 +94,7 @@ export const marketplacePolicies = {
       {
         heading: "Why we use personal information",
         paragraphs: [
-          "We process personal information to provide marketplace services, verify accounts, process payments, fulfil transactions, improve security and meet legal obligations.",
+          "We process personal information to provide our services, verify accounts, process payments, fulfil transactions, improve security and meet legal obligations.",
         ],
       },
       {
@@ -123,19 +123,19 @@ export const marketplacePolicies = {
     slug: "terms-of-use",
     title: "Terms of Use",
     summary:
-      "The core rules that apply when buyers and sellers use Xerin Marketplace.",
+      "The core rules that apply when buyers and sellers use Xerin Mart.",
     sections: [
       {
         heading: "Your agreement with Xerin",
         paragraphs: [
-          "By creating an account or using Xerin Marketplace, you agree to these terms. You must provide accurate and current registration information and are responsible for protecting your password and account.",
-          "Xerin operates as an online marketplace that facilitates transactions between buyers and sellers unless expressly stated otherwise.",
+          "By creating an account or using Xerin Mart, you agree to these terms. You must provide accurate and current registration information and are responsible for protecting your password and account.",
+          "Xerin operates as an online platform that facilitates transactions between buyers and sellers unless expressly stated otherwise.",
         ],
       },
       {
         heading: "Permitted use",
         paragraphs: [
-          "Illegal, fraudulent, misleading, abusive or otherwise prohibited activity is not allowed. Xerin may remove content that violates marketplace rules and may suspend accounts involved in violations.",
+          "Illegal, fraudulent, misleading, abusive or otherwise prohibited activity is not allowed. Xerin may remove content that violates platform rules and may suspend accounts involved in violations.",
         ],
       },
       {
@@ -200,7 +200,7 @@ export const marketplacePolicies = {
     slug: "integrity-compliance",
     title: "Integrity Compliance",
     summary:
-      "Marketplace conduct standards that promote lawful, fair and trustworthy trade.",
+      "Platform conduct standards that promote lawful, fair and trustworthy trade.",
     sections: [
       {
         heading: "Expected conduct",
@@ -216,13 +216,13 @@ export const marketplacePolicies = {
           "Unlawful or infringing content",
           "Malware distribution",
           "Abusive behaviour",
-          "Any other illegal or prohibited marketplace activity",
+          "Any other illegal or prohibited platform activity",
         ],
       },
       {
         heading: "Compliance action",
         paragraphs: [
-          "Xerin may remove content that breaches marketplace rules and may suspend or terminate accounts involved in violations. These measures protect buyers, sellers and the integrity of the marketplace.",
+          "Xerin may remove content that breaches platform rules and may suspend or terminate accounts involved in violations. These measures protect buyers, sellers and the integrity of the platform.",
         ],
       },
       {
@@ -237,12 +237,12 @@ export const marketplacePolicies = {
     slug: "returns-refunds",
     title: "Returns & Refunds Policy",
     summary:
-      "How returns, refunds and disputes work on Xerin Marketplace — including buyer protection and timelines.",
+      "How returns, refunds and disputes work on Xerin Mart — including buyer protection and timelines.",
     sections: [
       {
         heading: "Buyer protection",
         paragraphs: [
-          "Every order placed through Xerin Marketplace is covered by buyer protection. Your payment is held securely and is only released to the seller after the order is delivered and confirmed. If your order does not arrive, is damaged, or is materially different from the listing, you can open a dispute from your order page.",
+          "Every order placed through Xerin Mart is covered by buyer protection. Your payment is held securely and is only released to the seller after the order is delivered and confirmed. If your order does not arrive, is damaged, or is materially different from the listing, you can open a dispute from your order page.",
         ],
         bullets: [
           "Secure payment through Xerin — sellers are paid only after delivery is confirmed",
@@ -278,7 +278,7 @@ export const marketplacePolicies = {
       {
         heading: "Seller obligations",
         paragraphs: [
-          "Sellers must keep listings accurate, pack items safely and ship within the stated handling time. Sellers who repeatedly fail to deliver or misdescribe products may have payouts withheld and may be suspended from the marketplace.",
+          "Sellers must keep listings accurate, pack items safely and ship within the stated handling time. Sellers who repeatedly fail to deliver or misdescribe products may have payouts withheld and may be suspended from the platform.",
         ],
       },
       {

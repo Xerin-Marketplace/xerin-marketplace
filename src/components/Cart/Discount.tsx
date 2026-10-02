@@ -50,7 +50,7 @@ export default function Discount() {
  </h3>
  <p className="mt-1 text-sm leading-6 text-muted-foreground">
  Seller-funded discounts apply only to eligible products. Xerin
- marketplace commission remains separate from the seller discount.
+ platform commission remains separate from the seller discount.
  </p>
 
  {cart.promotion ? (

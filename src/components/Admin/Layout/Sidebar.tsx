@@ -40,7 +40,7 @@ export type SidebarGroup = {
 
 const sidebarGroups: SidebarGroup[] = [
  {
- title: "Marketplace Operations",
+ title: "Store Operations",
  key: "orders",
  icon: TruckIcon,
  items: [
@@ -208,11 +208,11 @@ const sidebarGroups: SidebarGroup[] = [
  ],
  },
  {
- title: "Marketplace Settings",
+ title: "Store Settings",
  key: "overview",
  icon: PreferenceHorizontalIcon,
  items: [
- { label: "Marketplace Rules", href: "/admin/dashboard?tab=overview&menu=marketplace-settings&item=marketplace-rules", icon: PreferenceHorizontalIcon },
+ { label: "Platform Rules", href: "/admin/dashboard?tab=overview&menu=marketplace-settings&item=marketplace-rules", icon: PreferenceHorizontalIcon },
  { label: "Commission Rules", href: "/admin/dashboard?tab=overview&menu=marketplace-settings&item=commission-rules", icon: JusticeScale01Icon },
  ],
  },
@@ -295,7 +295,7 @@ export default function AdminSidebar({
  profileHref="/admin/dashboard?tab=overview&menu=account&item=profile"
  settingsHref="/admin/dashboard?tab=overview&menu=account&item=profile"
  supportHref="/admin/customers/support"
- footerLabel="Xerin Market Admin Center"
+ footerLabel="Xerin Mart Admin Center"
  searchPlaceholder="Search admin records"
  >
  {children}

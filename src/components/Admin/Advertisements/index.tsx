@@ -192,7 +192,7 @@ function AdvertisementManager({
  <div className="flex flex-col gap-4 border-b border-border px-5 py-5 sm:flex-row sm:items-center sm:justify-between dark:border-border">
  <div>
  <p className="text-xs font-bold uppercase tracking-[0.16em] text-primary">
- Marketplace monetization
+ Ad monetization
  </p>
  <h2 className="mt-1 text-2xl font-bold text-foreground">
  Advertisements

@@ -10,7 +10,7 @@ export const END_TO_END_PROBES: QaProbe[] = [
   { id: "logistics-dashboard", role: "logistics", label: "Logistics dashboard", method: "GET", endpoint: "/logistics/me/dashboard", frontendRoute: "/logistics/dashboard", expected: "Company membership is required" },
   { id: "logistics-shipments", role: "logistics", label: "Logistics shipments", method: "GET", endpoint: "/logistics/me/shipments?page=1&page_size=1", frontendRoute: "/logistics/shipments", expected: "Shipments are company-scoped" },
   { id: "logistics-wallet", role: "logistics", label: "Logistics wallet", method: "GET", endpoint: "/logistics/wallet/me", frontendRoute: "/logistics/wallet", expected: "Wallet is company-scoped" },
-  { id: "admin-orders", role: "admin", label: "Admin marketplace orders", method: "GET", endpoint: "/orders/admin/all?page=1&page_size=1", frontendRoute: "/admin/operations/workflow", expected: "Orders require orders:read" },
+  { id: "admin-orders", role: "admin", label: "Admin orders", method: "GET", endpoint: "/orders/admin/all?page=1&page_size=1", frontendRoute: "/admin/operations/workflow", expected: "Orders require orders:read" },
   { id: "admin-finance", role: "admin", label: "Admin finance dashboard", method: "GET", endpoint: "/admin/payments/dashboard", frontendRoute: "/admin/operations/finance-flow", expected: "Finance requires dashboard permission" },
   { id: "admin-exceptions", role: "admin", label: "Admin exception queue", method: "GET", endpoint: "/admin/dashboard/operations-overview?limit=1", frontendRoute: "/admin/operations/command-center", expected: "Operations permission is required" },
 ];

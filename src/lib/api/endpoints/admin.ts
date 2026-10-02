@@ -1161,7 +1161,7 @@ const FINANCE_SETTINGS_DESCRIPTIONS:Record<string,string>={
   escrow_enabled:"Hold buyer funds in escrow until delivery",
   auto_release_enabled:"Release escrow automatically after the hold period",
   allow_partial_release:"Allow partial escrow releases",
-  hold_commission_until_release:"Hold marketplace commission until escrow release",
+  hold_commission_until_release:"Hold platform commission until escrow release",
 };
 
 export const listApplicationSettings=async()=>{
@@ -1418,7 +1418,7 @@ export const adminService = {
 
 //  ===
 // ADMIN PHASE 1-3 CONFIGURATION
-// Marketplace Settings, Logistics and Finance
+// Store Settings, Logistics and Finance
 //  ===
 
 export type AdminMarketplaceSettings = {

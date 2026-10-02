@@ -115,7 +115,7 @@ function BrowseCategories({
  <div>
  <span className="text-[11px] font-bold uppercase tracking-[0.14em] text-primary">Explore Xerin</span>
  <h2 className="mt-1 text-xl font-bold text-foreground sm:text-2xl">Browse by Category</h2>
- <p className="mt-1.5 text-sm text-muted-foreground">Jump directly into the marketplace department you want to explore.</p>
+ <p className="mt-1.5 text-sm text-muted-foreground">Jump directly into the department you want to explore.</p>
  </div>
  <Link
  href="/shop-with-sidebar"

@@ -85,7 +85,7 @@ export default function SellerEarnings() {
  Earnings & Wallet
  </h1>
  <p className="mt-2 text-sm leading-6 text-muted-foreground /60">
- Track your marketplace earnings, Xerin commission, held funds and
+ Track your earnings, Xerin commission, held funds and
  available balance. Financial values shown here come directly from
  the seller commission and wallet APIs.
  </p>
@@ -127,7 +127,7 @@ export default function SellerEarnings() {
  summary?.commission_deducted,
  summary?.currency || currency,
  )}
- hint="Marketplace commission deducted"
+ hint="Platform commission deducted"
  icon={DollarCircleIcon}
  />
  <Metric

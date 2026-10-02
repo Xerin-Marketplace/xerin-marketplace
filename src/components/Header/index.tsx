@@ -109,7 +109,7 @@ const Header = () => {
  <Link className="flex-shrink-0 flex items-center" href="/">
  <Image
  src="/images/logo/logooriginal.png"
- alt="Xerin Marketplace logo"
+ alt="Xerin Mart logo"
  width={340}
  height={108}
  className="object-contain"

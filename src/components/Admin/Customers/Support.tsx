@@ -140,7 +140,7 @@ export default function AdminCustomerSupport() {
  Customer Support Tickets
  </h2>
  <p className="mt-1 max-w-4xl text-sm leading-6 text-muted-foreground">
- Central support workspace for customer issues involving marketplace
+ Central support workspace for customer issues involving store
  sellers, orders and logistics. Administrators can see what is new,
  ongoing, being processed and completed, while maintaining visibility
  across every party in the case.

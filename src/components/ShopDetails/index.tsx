@@ -186,7 +186,7 @@ const ShopDetails = ({ product }: { product: Product }) => {
  {product.rating != null && product.reviewCount != null ? (
  <StarRating rating={product.rating} reviewCount={product.reviewCount} size={16} />
  ) : (
- <span className="text-muted-foreground">New marketplace listing</span>
+ <span className="text-muted-foreground">New listing</span>
  )}
  <span className="hidden h-4 w-px bg-border sm:block" />
  <span className={`inline-flex items-center gap-1.5 font-medium ${available ? "text-green-dark" : "text-muted-foreground"}`}>
@@ -218,7 +218,7 @@ const ShopDetails = ({ product }: { product: Product }) => {
  <div className="min-w-0 lg:col-start-1">
  <div className="space-y-2.5">
  {product.sku && <div className="flex items-center gap-2 text-sm text-foreground"><SpecCheckIcon /> <span><strong>SKU:</strong> {product.sku}</span></div>}
- <div className="flex items-center gap-2 text-sm text-foreground"><SpecCheckIcon /> <span className="inline-flex items-center gap-1.5">Buyer protection and order tracking through Xerin Marketplace<InfoPopover title="Buyer protection"><p>Your payment is held safely and only released to the seller after you confirm delivery.</p><p>If the item never arrives or is not as described, open a dispute from your order and our team will review it.</p></InfoPopover></span></div>
+ <div className="flex items-center gap-2 text-sm text-foreground"><SpecCheckIcon /> <span className="inline-flex items-center gap-1.5">Buyer protection and order tracking through Xerin Mart<InfoPopover title="Buyer protection"><p>Your payment is held safely and only released to the seller after you confirm delivery.</p><p>If the item never arrives or is not as described, open a dispute from your order and our team will review it.</p></InfoPopover></span></div>
  {variantHighlights.map((item) => (
  <div key={item} className="flex items-start gap-2 text-sm text-foreground"><span className="mt-0.5"><SpecCheckIcon /></span><span>{item}</span></div>
  ))}
@@ -299,7 +299,7 @@ const ShopDetails = ({ product }: { product: Product }) => {
  { type: "return" as const, title: "Returns", text: "Buyer protection applies" },
  { type: "delivery" as const, title: "Delivery", text: "Shown at checkout" },
  { type: "secure" as const, title: "Protection", text: "Secure checkout" },
- { type: "market" as const, title: "Marketplace", text: "Xerin order tracking" },
+ { type: "market" as const, title: "Tracking", text: "Order tracking included" },
  ].map((item, index) => (
  <div key={item.title} className={`flex min-h-[92px] items-start gap-2.5 p-3.5 text-foreground sm:p-4 ${index % 2 === 0 ? "border-r" : ""} ${index < 2 ? "border-b sm:border-b-0" : ""} sm:border-r sm:last:border-r-0 border-border`}>
  <span className="mt-0.5 text-primary"><TrustIcon type={item.type} /></span>

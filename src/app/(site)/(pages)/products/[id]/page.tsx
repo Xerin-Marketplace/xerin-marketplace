@@ -52,7 +52,7 @@ export async function generateMetadata({ params }: RouteParams): Promise<Metadat
   const title = `${product.name} | Buy Online | ${siteConfig.name}`;
   const description = truncate(
     product.description ||
-      `Buy ${product.name} online on ${siteConfig.name}. Marketplace checkout with delivery and order tracking.`,
+      `Buy ${product.name} online on ${siteConfig.name}. Secure checkout with delivery and order tracking.`,
   );
   const url = `${siteConfig.url}/products/${product.slug || product.id}`;
   const images = productImages(product);

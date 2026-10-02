@@ -368,7 +368,7 @@ export default function SellerPromotions() {
  </div>
 
  <p className="mt-4 max-w-3xl text-sm leading-6 text-muted-foreground /60">
- Create seller-funded promotions for your products. Xerin marketplace
+ Create seller-funded promotions for your products. Xerin Mart
  commission remains separate from the seller-funded discount, so
  promotions do not silently reduce Xerin&apos;s commission.
  </p>
@@ -963,7 +963,7 @@ function PromotionEditor({
  <div className="rounded-xl border border-primary/25 bg-primary/10 p-4 text-xs leading-5 text-primary">
  <strong>Seller-funded discount:</strong> this promotion reduces the
  seller-controlled amount. Xerin commission remains governed by the
- marketplace commission engine.
+ platform commission engine.
  </div>
  </section>
  </div>

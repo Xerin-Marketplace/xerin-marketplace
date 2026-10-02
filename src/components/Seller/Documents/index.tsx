@@ -274,7 +274,7 @@ export default function SellerBusinessDocuments() {
  setRenewalFile(null);
  setRenewalLicenseNumber("");
  setRenewalExpiryDate("");
- toast.success("Business Licence renewal submitted for Marketplace review.");
+ toast.success("Business Licence renewal submitted for review.");
  await load(false);
  } catch (cause) {
  toast.error(
@@ -502,7 +502,7 @@ export default function SellerBusinessDocuments() {
  </div>
  <h3 className="mt-2 text-xl font-bold text-foreground">Renew your Business Licence</h3>
  <p className="mt-2 text-sm leading-6 text-muted-foreground">
- Your previous Business Licence has expired. Your Xerin account and existing-order access remain available, but new selling stays paused until Marketplace Admin approves a renewed licence.
+ Your previous Business Licence has expired. Your Xerin account and existing-order access remain available, but new selling stays paused until Admin approves a renewed licence.
  </p>
  {currentLicense && (
  <div className="mt-4 flex flex-wrap gap-2 text-xs">
@@ -524,7 +524,7 @@ export default function SellerBusinessDocuments() {
  {renewalUnderReview && (
  <div className="min-w-[250px] rounded-xl border border-primary-200 bg-primary-50 p-4 text-primary-800">
  <div className="flex items-center gap-2 font-semibold"><HugeiconsIcon icon={Clock01Icon} size={16} /> Renewal under review</div>
- <p className="mt-1 text-xs leading-5">Marketplace Admin is reviewing your new licence. Selling will reactivate automatically after approval.</p>
+ <p className="mt-1 text-xs leading-5">Admin is reviewing your new licence. Selling will reactivate automatically after approval.</p>
  </div>
  )}
  </div>
@@ -534,7 +534,7 @@ export default function SellerBusinessDocuments() {
  {renewalRejected && (
  <div className="mb-4 rounded-xl border border-red-light-4 bg-red-light-6 p-3 text-sm text-red-dark">
  <p className="font-semibold">Renewal correction required</p>
- <p className="mt-1 text-xs leading-5">{currentLicense?.rejection_reason || "Marketplace Admin rejected the previous renewal. Upload a corrected licence."}</p>
+ <p className="mt-1 text-xs leading-5">{currentLicense?.rejection_reason || "Admin rejected the previous renewal. Upload a corrected licence."}</p>
  </div>
  )}
  <div className="grid gap-4 lg:grid-cols-[1fr_1fr_1.4fr]">

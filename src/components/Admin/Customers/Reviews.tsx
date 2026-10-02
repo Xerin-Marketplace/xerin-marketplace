@@ -130,7 +130,7 @@ export default function AdminCustomerReviews() {
  ? "Review approved and published."
  : nextStatus === "rejected"
  ? "Review rejected."
- : "Review hidden from the marketplace.",
+ : "Review hidden from the store.",
  );
  await fetchData();
  } catch (cause) {
@@ -190,7 +190,7 @@ export default function AdminCustomerReviews() {
  Customer Reviews
  </h2>
  <p className="mt-1 max-w-3xl text-sm leading-6 text-muted-foreground">
- Review customer feedback across marketplace products, identify
+ Review customer feedback across products, identify
  reported content and inspect the customer, seller and product context
  before moderation.
  </p>

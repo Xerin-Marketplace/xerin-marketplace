@@ -2,9 +2,9 @@ import type { MetadataRoute } from "next";
 
 export default function manifest(): MetadataRoute.Manifest {
   return {
-    name: "Xerin Marketplace",
+    name: "Xerin Mart",
     short_name: "Xerin",
-    description: "Shop online at Xerin Marketplace — verified sellers, secure checkout and delivery tracking.",
+    description: "Shop online at Xerin Mart — verified sellers, secure checkout and delivery tracking.",
     start_url: "/",
     display: "standalone",
     background_color: "#ffffff",
