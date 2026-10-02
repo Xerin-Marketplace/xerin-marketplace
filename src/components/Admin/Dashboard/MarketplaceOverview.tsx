@@ -230,7 +230,7 @@ function KpiCard({
  label: string; value: string; hint: string; icon: IconSvgElement; accent?: boolean;
 }) {
  return (
- <article className="group relative rounded-2xl border border-border bg-card p-5 transition-all duration-200 hover:border-primary/30">
+ <article className="group relative rounded-xl border border-border bg-card p-5 shadow-sm transition-all duration-200 hover:border-primary/30">
  <div className="flex items-center justify-between gap-3">
  <p className="text-xs font-semibold text-muted-foreground">{label}</p>
  <span className={`flex h-8 w-8 items-center justify-center rounded-lg ${accent ? "bg-primary text-primary-foreground" : "bg-muted text-muted-foreground"}`}>
@@ -249,7 +249,7 @@ function SectionCard({
  eyebrow?: string; title: string; subtitle?: string; action?: React.ReactNode; children: React.ReactNode; className?: string;
 }) {
  return (
- <section className={`overflow-hidden rounded-2xl border border-border bg-card shadow-[0_1px_2px_rgba(16,24,40,0.04)] ${className}`}>
+ <section className={`overflow-hidden rounded-xl border border-border bg-card shadow-sm ${className}`}>
  <div className="flex flex-wrap items-start justify-between gap-3 border-b border-border px-5 py-4 sm:px-6">
  <div>
  {eyebrow && <p className="text-[10px] font-bold uppercase tracking-[.16em] text-primary">{eyebrow}</p>}
@@ -339,8 +339,10 @@ export default function MarketplaceOverview() {
 
  return (
  <div className="space-y-5">
- {/* Controls */}
- <div className="flex items-center justify-end gap-2">
+ {/* Title + controls */}
+ <div className="flex items-center justify-between gap-2">
+ <h2 className="text-lg font-bold tracking-tight text-foreground">Overview</h2>
+ <div className="flex items-center gap-2">
  <div className="inline-flex rounded-xl border border-border bg-card p-1">
  {[7, 30, 90].map((value) => (
  <button
@@ -365,6 +367,7 @@ export default function MarketplaceOverview() {
  {loading ? <Spinner size={14} /> : <HugeiconsIcon icon={RefreshCwIcon} size={14} />}
  Refresh
  </button>
+ </div>
  </div>
 
  {error ? (
@@ -417,7 +420,7 @@ export default function MarketplaceOverview() {
 
  {/* Recent orders + top sellers */}
  <div className="grid gap-5 xl:grid-cols-[minmax(0,1.45fr)_minmax(330px,.65fr)]">
- <section className="overflow-hidden rounded-2xl border border-border bg-card shadow-[0_1px_2px_rgba(16,24,40,0.04)]">
+ <section className="overflow-hidden rounded-xl border border-border bg-card shadow-sm">
  <div className="flex items-center justify-between border-b border-border px-5 py-4 sm:px-6">
  <div>
  <p className="text-[10px] font-bold uppercase tracking-[.16em] text-primary">Activity</p>
@@ -510,7 +513,7 @@ export default function MarketplaceOverview() {
  { label: "Pending seller payouts", value: money(overview?.pending_payout_amount, currency), note: "Awaiting / processing", icon: DollarCircleIcon },
  { label: "Completed refunds", value: money(overview?.money.refunds_completed, currency), note: `${Number(overview?.refund_rate_percent || 0).toFixed(2)}% refund rate`, icon: RefreshCwIcon },
  ].map((item) => (
- <article key={item.label} className="rounded-2xl border border-border bg-foreground p-5 text-background shadow-[0_1px_2px_rgba(16,24,40,0.08)]">
+ <article key={item.label} className="rounded-xl border border-border bg-foreground p-5 text-background shadow-sm">
  <div className="flex h-10 w-10 items-center justify-center rounded-xl bg-primary text-primary-foreground">
  <HugeiconsIcon icon={item.icon} size={18} />
  </div>
