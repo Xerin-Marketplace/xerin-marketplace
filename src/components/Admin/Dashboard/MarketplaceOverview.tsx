@@ -339,16 +339,9 @@ export default function MarketplaceOverview() {
 
  return (
  <div className="space-y-5">
- {/* Page header */}
- <section className="rounded-2xl border border-border bg-card px-5 py-5 shadow-[0_1px_2px_rgba(16,24,40,0.04)] sm:px-6">
- <div className="flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
- <div>
- <p className="text-[10px] font-bold uppercase tracking-[.18em] text-primary">Xerin Mart intelligence</p>
- <h2 className="mt-1 text-2xl font-black tracking-tight text-foreground">Marketplace overview</h2>
- <p className="mt-1 text-sm text-muted-foreground">Live sales, orders, sellers and finance performance.</p>
- </div>
- <div className="flex flex-wrap items-center gap-2">
- <div className="inline-flex rounded-xl border border-border bg-muted p-1">
+ {/* Controls */}
+ <div className="flex items-center justify-end gap-2">
+ <div className="inline-flex rounded-xl border border-border bg-card p-1">
  {[7, 30, 90].map((value) => (
  <button
  key={value}
@@ -367,14 +360,12 @@ export default function MarketplaceOverview() {
  <button
  type="button"
  onClick={() => void load()}
- className="inline-flex items-center gap-2 rounded-xl bg-primary px-4 py-2.5 text-xs font-bold text-primary-foreground shadow-sm transition hover:bg-primary/90 active:scale-[.98]"
+ className="inline-flex items-center gap-2 rounded-xl bg-primary px-4 py-2 text-xs font-bold text-primary-foreground transition hover:bg-primary/90 active:scale-[.98]"
  >
  {loading ? <Spinner size={14} /> : <HugeiconsIcon icon={RefreshCwIcon} size={14} />}
  Refresh
  </button>
  </div>
- </div>
- </section>
 
  {error ? (
  <div className="rounded-xl border border-red-200 bg-red-50 px-4 py-3 text-sm text-red-700">{error}</div>
