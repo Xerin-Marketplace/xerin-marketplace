@@ -39,7 +39,22 @@
 
 .admin-dashboard-shell table tbody tr:hover {
   background: #fbfcfe;
-  box-shadow: inset 3px 0 0 #464646;
+  box-shadow: inset 3px 0 0 #f47524;
+}
+
+.admin-dashboard-shell table tbody td:first-child,
+.admin-dashboard-shell table thead th:first-child {
+  padding-left: 1.25rem;
+}
+
+.admin-dashboard-shell table tbody td:last-child,
+.admin-dashboard-shell table thead th:last-child {
+  padding-right: 1.25rem;
+}
+
+/* status pills rendered as bare spans get a consistent look */
+.admin-dashboard-shell table td span[class*="rounded-full"] {
+  text-transform: capitalize;
 }
 
 .admin-dashboard-shell table button,

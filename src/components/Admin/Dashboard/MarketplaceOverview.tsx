@@ -11,6 +11,13 @@ import { adminService } from "@/lib/api/endpoints/admin";
 import { ordersApi } from "@/lib/api/endpoints/commerce";
 import { brokersApi } from "@/lib/api/endpoints/brokers";
 import { formatCurrency } from "@/lib/formatCurrency";
+import {
+ Area, AreaChart, CartesianGrid, Pie, PieChart, ResponsiveContainer,
+ Tooltip as RechartsTooltip, XAxis, YAxis,
+} from "recharts";
+
+const formatCompactNumber = (v: number) =>
+ Intl.NumberFormat("en", { notation: "compact", maximumFractionDigits: 1 }).format(v);
 
 type Overview = {
  start_at: string;
@@ -71,76 +78,84 @@ const fullDate = (value: string) =>
  new Intl.DateTimeFormat("en", { month: "short", day: "numeric", year: "numeric" }).format(new Date(value));
 
 function SalesChart({ data, currency }: { data: SeriesPoint[]; currency: string }) {
- const width = 820;
- const height = 260;
- const padX = 22;
- const padTop = 24;
- const padBottom = 38;
- const max = Math.max(...data.map((point) => Number(point.amount)), 1);
- const innerW = width - padX * 2;
- const innerH = height - padTop - padBottom;
- const points = data.map((point, index) => {
- const x = data.length <= 1 ? width / 2 : padX + (index * innerW) / (data.length - 1);
- const y = padTop + innerH - (Number(point.amount) / max) * innerH;
- return { ...point, x, y };
- });
- const line = points.map((point) => `${point.x},${point.y}`).join(" ");
- const area = points.length
- ? `${points[0].x},${padTop + innerH} ${line} ${points[points.length - 1].x},${padTop + innerH}`
- : "";
- const labelStep = Math.max(1, Math.ceil(data.length / 7));
-
  if (!data.length) {
  return <div className="flex h-[260px] items-center justify-center text-sm text-muted-foreground">No sales activity in this period.</div>;
  }
 
  return (
- <div className="overflow-x-auto">
- <svg viewBox={`0 0 ${width} ${height}`} className="min-w-[650px] w-full" role="img" aria-label="Sales trend">
+ <div className="h-[260px] w-full">
+ <ResponsiveContainer width="100%" height="100%">
+ <AreaChart data={data} margin={{ top: 12, right: 12, bottom: 0, left: 0 }}>
  <defs>
  <linearGradient id="xerinSalesFill" x1="0" y1="0" x2="0" y2="1">
- <stop offset="0%" stopColor="#f47524" stopOpacity="0.24" />
- <stop offset="100%" stopColor="#f47524" stopOpacity="0.015" />
+ <stop offset="0%" stopColor="#f47524" stopOpacity={0.24} />
+ <stop offset="100%" stopColor="#f47524" stopOpacity={0.02} />
  </linearGradient>
  </defs>
- {[0, 0.25, 0.5, 0.75, 1].map((ratio) => {
- const y = padTop + innerH * ratio;
- return <line key={ratio} x1={padX} x2={width - padX} y1={y} y2={y} stroke="#edf0f4" strokeWidth="1" />;
- })}
- <polygon points={area} fill="url(#xerinSalesFill)" />
- <polyline points={line} fill="none" stroke="#f47524" strokeWidth="4" strokeLinecap="round" strokeLinejoin="round" />
- {points.map((point, index) => (
- <g key={point.period}>
- <circle cx={point.x} cy={point.y} r="4" fill="#fff" stroke="#111827" strokeWidth="2" />
- {(index % labelStep === 0 || index === points.length - 1) && (
- <text x={point.x} y={height - 12} textAnchor="middle" fontSize="11" fill="#667085">
- {shortDate(point.period)}
- </text>
- )}
- <title>{`${fullDate(point.period)} · ${money(point.amount, currency)} · ${point.order_count} orders`}</title>
- </g>
- ))}
- </svg>
+ <CartesianGrid vertical={false} stroke="#edf0f4" />
+ <XAxis
+ dataKey="period"
+ tickFormatter={shortDate}
+ tick={{ fontSize: 11, fill: "#667085" }}
+ axisLine={false}
+ tickLine={false}
+ minTickGap={24}
+ />
+ <YAxis
+ width={52}
+ tick={{ fontSize: 11, fill: "#667085" }}
+ axisLine={false}
+ tickLine={false}
+ tickFormatter={(v: number) => formatCompactNumber(v)}
+ />
+ <RechartsTooltip
+ formatter={(value: number | string) => [money(Number(value), currency), "Sales"]}
+ labelFormatter={(label: string) => fullDate(label)}
+ contentStyle={{ borderRadius: 12, border: "1px solid #e2e8f0", fontSize: 12 }}
+ />
+ <Area
+ type="monotone"
+ dataKey="amount"
+ stroke="#f47524"
+ strokeWidth={3}
+ fill="url(#xerinSalesFill)"
+ dot={false}
+ activeDot={{ r: 5, strokeWidth: 2, stroke: "#111827", fill: "#fff" }}
+ />
+ </AreaChart>
+ </ResponsiveContainer>
  </div>
  );
 }
 
 function OrderStatusDonut({ counts }: { counts: OrderCounts }) {
  const total = Object.values(counts).reduce((sum, value) => sum + value, 0);
- let cursor = 0;
- const stops: string[] = [];
- orderStatusItems.forEach((item) => {
- const percent = total ? (counts[item.key] / total) * 100 : 0;
- if (!percent) return;
- stops.push(`${item.tone} ${cursor}% ${cursor + percent}%`);
- cursor += percent;
- });
- const background = stops.length ? `conic-gradient(${stops.join(",")})` : "#f2f4f7";
+ const slices = orderStatusItems
+ .filter((item) => counts[item.key] > 0)
+ .map((item) => ({ name: item.label, value: counts[item.key], fill: item.tone }));
 
  return (
  <div className="grid gap-5 md:grid-cols-[150px_1fr] md:items-center">
- <div className="relative mx-auto h-36 w-36 rounded-full" style={{ background }}>
- <div className="absolute inset-[24px] flex flex-col items-center justify-center rounded-full bg-card dark:bg-card">
+ <div className="relative mx-auto h-36 w-36">
+ <ResponsiveContainer width="100%" height="100%">
+ <PieChart>
+ <Pie
+ data={slices}
+ dataKey="value"
+ innerRadius="62%"
+ outerRadius="100%"
+ paddingAngle={slices.length > 1 ? 3 : 0}
+ strokeWidth={0}
+ startAngle={90}
+ endAngle={-270}
+ />
+ <RechartsTooltip
+ formatter={(value: number | string, name: string) => [Number(value).toLocaleString(), name]}
+ contentStyle={{ borderRadius: 12, border: "1px solid #e2e8f0", fontSize: 12 }}
+ />
+ </PieChart>
+ </ResponsiveContainer>
+ <div className="pointer-events-none absolute inset-0 flex flex-col items-center justify-center">
  <strong className="text-2xl font-black text-foreground">{total.toLocaleString()}</strong>
  <span className="text-[10px] font-semibold uppercase tracking-[.12em] text-muted-foreground">Orders</span>
  </div>

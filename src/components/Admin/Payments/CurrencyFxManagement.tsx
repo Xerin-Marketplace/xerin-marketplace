@@ -3,6 +3,7 @@
 
 import { Spinner } from "@/components/ui/Spinner";
 import { FormEvent, type ReactNode, useCallback, useEffect, useMemo, useState } from "react";
+import { useConfirmDialog } from "@/components/Admin/shared/useConfirm";
 import { HugeiconsIcon } from "@hugeicons/react";
 import { DollarCircleIcon, Globe02Icon, Edit02Icon, PlusIcon, RefreshCwIcon, ShieldCheckIcon, Delete02Icon } from "@hugeicons/core-free-icons";
 import {
@@ -24,6 +25,7 @@ const errorMessage = (error: unknown) =>
  error instanceof Error ? error.message : "Unable to complete the currency operation";
 
 export default function CurrencyFxManagement() {
+ const { confirm, confirmDialog } = useConfirmDialog();
  const [currencies, setCurrencies] = useState<AdminCurrency[]>([]);
  const [rates, setRates] = useState<AdminFxRate[]>([]);
  const [loading, setLoading] = useState(true);
@@ -128,7 +130,7 @@ export default function CurrencyFxManagement() {
 
  async function removeCurrency(currency: AdminCurrency) {
  if (currency.code === "TZS") return;
- if (!window.confirm(`Delete ${currency.code}? This is only allowed when the currency is inactive and has never been used by products, orders, payments, countries or FX rates.`)) return;
+ if (!(await confirm({ title: `Delete ${currency.code}?`, description: "This is only allowed when the currency is inactive and has never been used by products, orders, payments, countries or FX rates.", confirmLabel: "Delete" }))) return;
  setSaving(true);
  setError("");
  setMessage("");
@@ -233,7 +235,7 @@ export default function CurrencyFxManagement() {
  setError("Deactivate the FX rate before deleting it.");
  return;
  }
- if (!window.confirm(`Delete historical ${rate.base_currency}/${rate.quote_currency} rate?`)) return;
+ if (!(await confirm({ title: `Delete ${rate.base_currency}/${rate.quote_currency} rate?`, description: "This deletes the historical FX rate record.", confirmLabel: "Delete" }))) return;
  setSaving(true);
  setError("");
  setMessage("");
@@ -409,6 +411,7 @@ export default function CurrencyFxManagement() {
  .field { height: 44px; width: 100%; border-radius: 12px; border: 1px solid #e2e8f0; background: white; padding: 0 12px; font-size: 14px; outline: none; }
  .field:focus { border-color: #fdba74; box-shadow: 0 0 0 3px rgba(251, 146, 60, .12); }
  `}</style>
+ {confirmDialog}
  </div>
  );
 }
