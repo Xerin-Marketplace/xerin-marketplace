@@ -28,6 +28,7 @@ import {
  UserAdd01Icon,
  Key01Icon,
  LifebuoyIcon,
+ Location01Icon,
  Search01Icon,
  Cancel01Icon,
 } from "@hugeicons/core-free-icons";
@@ -132,9 +133,10 @@ export const ADMIN_SECTIONS: AdminNavSection[] = [
  label: "Customers",
  section: "Commerce",
  icon: UserMultiple02Icon,
- landing: D("?tab=users&menu=user-management&item=users"),
+ landing: D("?tab=users&menu=customers&item=all-customers"),
  children: [
- { label: "All Customers", href: D("?tab=users&menu=user-management&item=users"), icon: UserMultiple02Icon },
+ { label: "All Customers", href: D("?tab=users&menu=customers&item=all-customers"), icon: UserMultiple02Icon },
+ { label: "Customer Addresses", href: D("?tab=users&menu=customers&item=customer-addresses"), icon: Location01Icon },
  { label: "Customer Reviews", href: "/admin/customers/reviews", icon: FileCheckIcon },
  { label: "Customer Support", href: "/admin/customers/support", icon: LifebuoyIcon },
  ],
