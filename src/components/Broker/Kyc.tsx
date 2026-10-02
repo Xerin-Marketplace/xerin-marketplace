@@ -126,7 +126,7 @@ export default function BrokerKyc() {
  currency: "TZS",
  is_default: true,
  });
- toast.success("Payout account saved for verification");
+ toast.success("Payout account saved");
  e.currentTarget.reset();
  await load();
  } catch (err) {
@@ -302,7 +302,7 @@ export default function BrokerKyc() {
  <div>
  <h2 className="text-sm font-bold text-foreground">3. Payout account</h2>
  <p className="text-xs text-muted-foreground">
- Where your commission is paid — verified by Admin.
+ Where your commission is paid.
  </p>
  </div>
  </div>

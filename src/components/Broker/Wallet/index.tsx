@@ -94,7 +94,7 @@ export default function BrokerWalletPage() {
  currency: String(f.get("currency") || "TZS"),
  is_default: true,
  });
- toast.success("Payout account submitted for verification");
+ toast.success("Payout account added and ready to use");
  setDrawerOpen(false);
  await load();
  } catch (x) {
@@ -178,7 +178,7 @@ export default function BrokerWalletPage() {
  <div>
  <h2 className="font-bold text-foreground">Payout accounts</h2>
  <p className="mt-0.5 text-xs text-muted-foreground">
- Mobile money or bank — verified by Admin before use.
+ Mobile money or bank — ready to use as soon as you add it.
  </p>
  </div>
  <button
@@ -243,7 +243,7 @@ export default function BrokerWalletPage() {
  Payout account
  </label>
  <select name="payout_account_id" required className={input}>
- <option value="">Select a verified account</option>
+ <option value="">Select a payout account</option>
  {verified.map((a) => (
  <option key={a.id} value={a.id}>
  {a.provider} · {a.account_number}
@@ -283,7 +283,7 @@ export default function BrokerWalletPage() {
  </button>
  {verified.length === 0 && (
  <p className="text-xs text-muted-foreground">
- Add a payout account and wait for Admin verification first.
+ Add a payout account to request a payout.
  </p>
  )}
  </form>
