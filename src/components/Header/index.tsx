@@ -16,6 +16,8 @@ import CurrencySelector from "./CurrencySelector";
 import { useAuthStore } from "@/store/useAuthStore";
 import { useRouter } from "next/navigation";
 import { useCategories, useProducts } from "@/hooks/useProducts";
+import { useQuery } from "@tanstack/react-query";
+import { usersApi } from "@/lib/api/endpoints/users";
 import MobileStorefrontHeader from "./MobileStorefrontHeader";
 import SearchSuggestions, { saveRecentSearch } from "./SearchSuggestions";
 import { HugeiconsIcon } from "@hugeicons/react";
@@ -32,8 +34,18 @@ const Header = () => {
  const router = useRouter();
  const { openCartModal } = useCartModalContext();
  const { theme, toggleTheme } = useTheme();
- const { user, isAuthenticated, logout } = useAuth();
+ const { user: sessionUser, isAuthenticated, logout } = useAuth();
  const hasHydrated = useAuthStore((state) => state.hasHydrated);
+
+ // Fresh profile (avatar_url etc.) — the stored session only updates on login.
+ const { data: freshUser } = useQuery({
+ queryKey: ["me"],
+ queryFn: usersApi.getMe,
+ enabled: hasHydrated && isAuthenticated,
+ staleTime: 60_000,
+ retry: false,
+ });
+ const user = { ...sessionUser, ...freshUser } as typeof sessionUser;
 
  const { items: cartItems } = useCartView();
 

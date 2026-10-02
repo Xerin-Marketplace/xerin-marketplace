@@ -15,6 +15,7 @@ import {
  ShieldCheckIcon,
  Loading03Icon,
 } from "@hugeicons/core-free-icons";
+import { useQueryClient } from "@tanstack/react-query";
 import { brokersApi } from "@/lib/api/endpoints/brokers";
 import { usersApi } from "@/lib/api/endpoints/users";
 import type { Broker } from "@/types/api/broker";
@@ -46,6 +47,7 @@ export default function BrokerProfile() {
   const [saving, setSaving] = useState(false);
   const [uploading, setUploading] = useState(false);
   const fileRef = useRef<HTMLInputElement | null>(null);
+  const queryClient = useQueryClient();
 
   const [form, setForm] = useState({
     first_name: "",
@@ -96,6 +98,7 @@ export default function BrokerProfile() {
     try {
       const res = await usersApi.uploadAvatar(file);
       setAvatarUrl(res.avatar_url + "?v=" + Date.now());
+      await queryClient.invalidateQueries({ queryKey: ["me"] });
       toast.success("Profile photo updated");
     } catch (err) {
       toast.error(err instanceof Error ? err.message : "Upload failed");
@@ -109,6 +112,7 @@ export default function BrokerProfile() {
     try {
       await usersApi.deleteAvatar();
       setAvatarUrl(null);
+      await queryClient.invalidateQueries({ queryKey: ["me"] });
       toast.success("Profile photo removed");
     } catch (err) {
       toast.error(err instanceof Error ? err.message : "Unable to remove photo");
