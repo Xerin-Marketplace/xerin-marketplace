@@ -513,13 +513,15 @@ export default function MarketplaceOverview() {
  { label: "Pending seller payouts", value: money(overview?.pending_payout_amount, currency), note: "Awaiting / processing", icon: DollarCircleIcon },
  { label: "Completed refunds", value: money(overview?.money.refunds_completed, currency), note: `${Number(overview?.refund_rate_percent || 0).toFixed(2)}% refund rate`, icon: RefreshCwIcon },
  ].map((item) => (
- <article key={item.label} className="rounded-xl border border-border bg-foreground p-5 text-background shadow-sm">
- <div className="flex h-10 w-10 items-center justify-center rounded-xl bg-primary text-primary-foreground">
- <HugeiconsIcon icon={item.icon} size={18} />
+ <article key={item.label} className="rounded-xl border border-border bg-card p-5 shadow-sm">
+ <div className="flex items-center justify-between gap-3">
+ <p className="text-xs font-semibold text-muted-foreground">{item.label}</p>
+ <span className="flex h-8 w-8 items-center justify-center rounded-lg bg-primary/10 text-primary">
+ <HugeiconsIcon icon={item.icon} size={15} />
+ </span>
  </div>
- <p className="mt-4 text-xs font-semibold text-background/60">{item.label}</p>
- <strong className="mt-1 block text-xl font-black tabular-nums">{item.value}</strong>
- <p className="mt-1 text-[11px] text-background/45">{item.note}</p>
+ <strong className="mt-2 block text-xl font-black tabular-nums tracking-tight text-foreground">{item.value}</strong>
+ <p className="mt-1 text-[11px] text-muted-foreground/80">{item.note}</p>
  </article>
  ))}
  </div>

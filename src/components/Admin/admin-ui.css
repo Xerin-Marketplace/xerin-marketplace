@@ -381,10 +381,10 @@
 }
 
 /* ---- Flat white cards everywhere ------------------------------- */
-.admin-dashboard-shell section[class*="rounded"],
-.admin-dashboard-shell article[class*="rounded"],
-.admin-dashboard-shell div.rounded-xl.border,
-.admin-dashboard-shell div.rounded-2xl.border {
+.admin-dashboard-shell section[class*="rounded"]:not([class*="bg-foreground"]):not([class*="bg-primary"]):not([class*="bg-carbon"]),
+.admin-dashboard-shell article[class*="rounded"]:not([class*="bg-foreground"]):not([class*="bg-primary"]),
+.admin-dashboard-shell div.rounded-xl.border:not([class*="bg-foreground"]):not([class*="bg-primary"]),
+.admin-dashboard-shell div.rounded-2xl.border:not([class*="bg-foreground"]):not([class*="bg-primary"]) {
   background: #fff;
   border: 1px solid #ececef;
   box-shadow: none;
@@ -511,10 +511,10 @@
   background: #0c0f14;
 }
 
-.dark .admin-dashboard-shell section[class*="rounded"],
-.dark .admin-dashboard-shell article[class*="rounded"],
-.dark .admin-dashboard-shell div.rounded-xl.border,
-.dark .admin-dashboard-shell div.rounded-2xl.border,
+.dark .admin-dashboard-shell section[class*="rounded"]:not([class*="bg-foreground"]):not([class*="bg-primary"]),
+.dark .admin-dashboard-shell article[class*="rounded"]:not([class*="bg-foreground"]):not([class*="bg-primary"]),
+.dark .admin-dashboard-shell div.rounded-xl.border:not([class*="bg-foreground"]):not([class*="bg-primary"]),
+.dark .admin-dashboard-shell div.rounded-2xl.border:not([class*="bg-foreground"]):not([class*="bg-primary"]),
 .dark .admin-dashboard-shell .bg-carbon,
 .dark .admin-dashboard-shell [class*="bg-carbon"],
 .dark .admin-dashboard-shell aside {
