@@ -11,6 +11,7 @@ import { listPublicStores } from "@/lib/api/endpoints/store";
 import type { Store } from "@/types/api/store";
 import { HugeiconsIcon } from "@hugeicons/react";
 import { PackageIcon, ArrowDown01Icon, Search01Icon, Location01Icon } from "@hugeicons/core-free-icons";
+import { useLanguage } from "@/app/context/LanguageContext";
 
 const PAGE_SIZE = 12;
 
@@ -66,6 +67,7 @@ function storeMatchesLocation(store: Store | undefined, filter: LocationFilter) 
 
 
 const Categories = () => {
+ const { t } = useLanguage();
  const [searchInput, setSearchInput] = useState("");
  const [searchQuery, setSearchQuery] = useState("");
  const [categoryId, setCategoryId] = useState("");
@@ -194,13 +196,13 @@ const Categories = () => {
 
  <div className="absolute right-0 z-40 mt-2 w-[290px] overflow-hidden rounded-2xl border border-border bg-card p-2 shadow-lg">
  <p className="px-3 pb-2 pt-1 text-[11px] font-bold uppercase tracking-wide text-muted-foreground">
- Shop products by location
+ {t("footer_shop_products")}
  </p>
 
  {[
- { value: "all" as LocationFilter, label: "🌐 All products", note: "Local and global stores" },
- { value: "local" as LocationFilter, label: "🇹🇿 Local · Tanzania", note: "Products registered in Tanzania" },
- { value: "global" as LocationFilter, label: "🌍 Global", note: "All countries outside Tanzania" },
+ { value: "all" as LocationFilter, label: `🌐 ${t("filter_all_products")}`, note: "" },
+ { value: "local" as LocationFilter, label: `🇹🇿 ${t("filter_local")}`, note: "" },
+ { value: "global" as LocationFilter, label: `🌍 ${t("filter_global")}`, note: "" },
  ].map((item) => (
  <button
  key={item.value}
@@ -329,7 +331,7 @@ const Categories = () => {
  className="h-12 rounded-lg border border-input bg-background px-4 text-sm text-foreground outline-none transition focus:border-ring focus:ring-2 focus:ring-ring/30"
  aria-label="Filter products by category"
  >
- <option value="">All categories</option>
+ <option value="">{t("categories_all")}</option>
  {categories.map((category) => (
  <option key={String(category.id)} value={String(category.id)}>
  {category.name}
@@ -342,7 +344,7 @@ const Categories = () => {
  className="h-12 rounded-lg bg-primary px-6 text-sm font-semibold text-primary-foreground transition hover:bg-primary/90-dark disabled:cursor-not-allowed disabled:opacity-60"
  disabled={isFetching}
  >
- {isFetching && !isLoading ? "Searching..." : "Search"}
+ {isFetching && !isLoading ? t("filter_searching") : t("common_search")}
  </button>
  </form>
 

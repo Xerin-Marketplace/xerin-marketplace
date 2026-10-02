@@ -1,50 +1,32 @@
 import React from "react";
+"use client";
+import { useLanguage } from "@/app/context/LanguageContext";
 import Link from "next/link";
 import { HugeiconsIcon } from "@hugeicons/react";
 import { ArrowRight01Icon, CreditCardIcon, PackageCheckIcon, ShieldCheckIcon, Store01Icon } from "@hugeicons/core-free-icons";
 
-const FEATURES = [
- {
- title: "Secure payments",
- description:
- "Pay by mobile money or card. Your payment is held in escrow and only released to the seller after delivery is confirmed.",
- icon: CreditCardIcon,
- },
- {
- title: "Tracked delivery",
- description:
- "Xerin Logistics delivers across Tanzania. Follow your order from seller preparation to your doorstep.",
- icon: PackageCheckIcon,
- },
- {
- title: "Verified sellers",
- description:
- "Sellers complete KYC review before listing, so you buy from vetted sellers.",
- icon: Store01Icon,
- },
- {
- title: "Buyer protection",
- description:
- "If something goes wrong, raise a protection claim from your order and our team reviews it.",
- icon: ShieldCheckIcon,
- },
-];
-
 const WhyChooseXerin = () => {
+ const { t } = useLanguage();
+ const FEATURES = [
+ { title: t("feat_secure_title"), description: t("feat_secure_desc"), icon: CreditCardIcon },
+ { title: t("feat_delivery_title"), description: t("feat_delivery_desc"), icon: PackageCheckIcon },
+ { title: t("feat_sellers_title"), description: t("feat_sellers_desc"), icon: Store01Icon },
+ { title: t("feat_protection_title"), description: t("feat_protection_desc"), icon: ShieldCheckIcon },
+ ];
+
  return (
  <section className="overflow-hidden bg-card dark:bg-muted">
  <div className="mx-auto max-w-screen-xl px-4 py-12 lg:py-20 lg:px-6">
  {/* Section header */}
  <div className="mb-10 text-center">
  <span className="mb-2 inline-flex items-center gap-2 text-sm font-semibold text-primary">
- Why Xerin Mart
+ {t("home_why_xerin")}
  </span>
  <h2 className="text-2xl font-bold tracking-tight text-foreground sm:text-3xl lg:text-4xl">
- A store built on trust
+ {t("home_trust_title")}
  </h2>
  <p className="mx-auto mt-2 max-w-2xl text-sm text-muted-foreground dark:text-muted-foreground sm:text-base">
- We connect buyers and sellers with secure payments, tracked
- delivery and buyer protection · all in one platform.
+ {t("home_trust_body")}
  </p>
  </div>
 
@@ -74,14 +56,14 @@ const WhyChooseXerin = () => {
  href="/shop-with-sidebar"
  className="inline-flex items-center gap-2 rounded-lg bg-primary px-6 py-3 text-sm font-semibold text-primary-foreground transition hover:bg-primary/90"
  >
- Start shopping
+ {t("home_start_shopping")}
  <HugeiconsIcon icon={ArrowRight01Icon} size={16} />
  </Link>
  <Link
  href="/seller/register"
  className="inline-flex items-center gap-2 rounded-lg border border-border px-6 py-3 text-sm font-semibold text-foreground transition hover:border-primary hover:text-primary dark:border-border"
  >
- Sell on Xerin
+ {t("footer_sell_on_xerin")}
  </Link>
  </div>
  </div>

@@ -1,4 +1,5 @@
 "use client";
+import { useLanguage } from "@/app/context/LanguageContext";
 
 import React from "react";
 import { useProducts, useCategories } from "@/hooks/useProducts";
@@ -14,6 +15,7 @@ const activeApproved = (p: ApiProduct) => p.is_active && p.status === "approved"
  * itself entirely when the API returns nothing for it.
  */
 const MarketRails = () => {
+  const { t } = useLanguage();
   const { data: products = [], isLoading, isError } = useProducts({ limit: 60 });
   const { data: categories = [] } = useCategories();
 
@@ -58,8 +60,8 @@ const MarketRails = () => {
     <>
       <ProductRail
         eyebrow="New Arrivals"
-        title="Fresh on Xerin Mart"
-        subtitle="The latest products sellers have published on Xerin Mart."
+        title={t("rail_fresh")}
+        subtitle={t("rail_fresh_sub")}
         icon={SparklesIcon}
         products={newArrivals}
         isLoading={isLoading}
@@ -69,8 +71,8 @@ const MarketRails = () => {
         <ProductRail
           key={rail.id}
           eyebrow="Shop by Category"
-          title={`Popular in ${rail.name}`}
-          subtitle="Real listings from this category across Xerin Mart."
+          title={t("rail_popular_in", { name: rail.name })}
+          subtitle={t("rail_popular_sub")}
           icon={GridIcon}
           products={rail.products}
           isLoading={false}

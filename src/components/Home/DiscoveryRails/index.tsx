@@ -1,4 +1,5 @@
 "use client";
+import { useLanguage } from "@/app/context/LanguageContext";
 
 import React, { useEffect, useState } from "react";
 import Image from "next/image";
@@ -94,6 +95,7 @@ function Rail({
  * Sections render nothing when the API returns no data.
  */
 const DiscoveryRails = () => {
+  const { t } = useLanguage();
   const isAuthenticated = useAuthStore((s) => Boolean(s.accessToken));
   const [recentlyViewed, setRecentlyViewed] = useState<SearchProductItem[]>([]);
   const [recommended, setRecommended] = useState<SearchProductItem[]>([]);
@@ -119,14 +121,14 @@ const DiscoveryRails = () => {
   return (
     <>
       <Rail
-        title="Continue shopping"
-        subtitle="Products you viewed recently"
+        title={t("rail_continue")}
+        subtitle={t("rail_continue_sub")}
         icon="history"
         items={recentlyViewed}
       />
       <Rail
-        title="Recommended for you"
-        subtitle="Picked for you from your activity"
+        title={t("rail_recommended")}
+        subtitle={t("rail_recommended_sub")}
         icon="spark"
         items={recommended}
       />
