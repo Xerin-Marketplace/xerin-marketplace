@@ -28,6 +28,7 @@ import { Suspense } from "react";
 import GoogleOneTap from "@/components/Auth/GoogleOneTap";
 import AuthPrompt from "@/components/Auth/AuthPrompt";
 import AppBanner from "@/components/Engagement/AppBanner";
+import IntentChatWidget from "@/components/Engagement/IntentChatWidget";
 
 function CheckoutHeader() {
  const clearCart = useClearCart();
@@ -138,6 +139,7 @@ export default function RootLayout({
  <GoogleOneTap />
  <AuthPrompt />
  <AppBanner />
+ {!hideStorefrontChrome ? <IntentChatWidget /> : null}
  </Suspense>
  </>
  )}

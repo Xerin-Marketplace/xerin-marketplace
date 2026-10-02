@@ -111,7 +111,8 @@ const nextConfig = {
       "default-src 'self'",
 
       // accounts.google.com: GIS script for "Continue with Google".
-      "script-src 'self' 'unsafe-eval' 'unsafe-inline' https://accounts.google.com",
+      // intentchat.com: AI sales-agent widget embed script.
+      "script-src 'self' 'unsafe-eval' 'unsafe-inline' https://accounts.google.com https://*.intentchat.com https://intentchat.com",
 
       "style-src 'self' 'unsafe-inline'",
 
@@ -129,8 +130,8 @@ const nextConfig = {
       // Frontend API calls + Google sign-in endpoints.
       `connect-src 'self' ${apiCspSource} https:`,
 
-      // Google One Tap / sign-in prompt iframe.
-      "frame-src 'self' blob: https://accounts.google.com",
+      // Google One Tap / sign-in prompt iframe + IntentChat chat window.
+      "frame-src 'self' blob: https://accounts.google.com https://*.intentchat.com https://intentchat.com",
 
       "object-src 'none'",
 
