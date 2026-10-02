@@ -25,6 +25,8 @@ export type DashboardNavItem = {
  icon?: IconSvgElement;
  /** Renders a lock marker for gated sections (e.g. pending KYC). */
  locked?: boolean;
+ /** Additional hrefs that should mark this item active (module children). */
+ matches?: string[];
 };
 
 export type DashboardNavGroup = {
@@ -33,6 +35,10 @@ export type DashboardNavGroup = {
  items: DashboardNavItem[];
  icon: IconSvgElement;
 };
+
+function hrefScore(href: string) {
+ return Array.from(new URL(href, "http://localhost").searchParams.keys()).length;
+}
 
 function isItemActive(
  href: string,
@@ -153,12 +159,36 @@ export default function DashboardShell({
  await defaultLogout();
  };
 
+ // Highest query-specificity among all matching hrefs — used so only the
+ // most specific module lights up (e.g. `?tab=overview` must not mark the
+ // Dashboard active while inside Communications).
+ const bestMatchScore = useMemo(() => {
+ let best = -1;
+ groups.forEach((group) =>
+ group.items.forEach((item) =>
+ [item.href, ...(item.matches ?? [])].forEach((href) => {
+ if (isItemActive(href, pathname, searchParams)) {
+ best = Math.max(best, hrefScore(href));
+ }
+ }),
+ ),
+ );
+ return best;
+ }, [groups, pathname, searchParams]);
+
+ const isNavItemActive = (item: DashboardNavItem) =>
+ [item.href, ...(item.matches ?? [])].some(
+ (href) =>
+ isItemActive(href, pathname, searchParams) &&
+ hrefScore(href) === bestMatchScore,
+ );
+
  const activeGroup = useMemo(
  () =>
- groups.find((group) =>
- group.items.some((item) => isItemActive(item.href, pathname, searchParams)),
- )?.title,
- [groups, pathname, searchParams],
+ groups.find((group) => group.items.some((item) => isNavItemActive(item)))
+ ?.title,
+ // eslint-disable-next-line react-hooks/exhaustive-deps
+ [groups, pathname, searchParams, bestMatchScore],
  );
 
  const dashboardActive =
@@ -231,9 +261,10 @@ export default function DashboardShell({
 
  {groups.map((group) => {
  const GroupIcon = group.icon;
+ const hideGroupLabel = group.items.length === 1 && group.items[0]?.label === group.title;
  return (
  <div key={group.title} data-active-group={activeGroup === group.title || undefined}>
- {!collapsed && (
+ {!collapsed && !hideGroupLabel && (
  <p className="mb-2 px-3 text-[10px] font-semibold uppercase tracking-[.18em] text-muted-foreground /35">
  {group.title}
  </p>
@@ -241,7 +272,7 @@ export default function DashboardShell({
  <div className="space-y-1">
  {group.items.map((item) => {
  const Icon = item.icon || GroupIcon;
- const active = isItemActive(item.href, pathname, searchParams);
+ const active = isNavItemActive(item);
  return (
  <Link
  key={`${group.title}-${item.label}`}

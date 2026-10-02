@@ -49,6 +49,8 @@ import AdminFinance from "@/components/Admin/Finance";
 import AdminAnalytics from "@/components/Admin/Analytics";
 import MarketplaceOverview from "@/components/Admin/Dashboard/MarketplaceOverview";
 import DashboardShell, { type DashboardNavGroup } from "@/components/Dashboard/DashboardShell";
+import { ADMIN_SECTIONS, ADMIN_MODULES } from "@/components/Admin/navigation";
+import ModuleSubNav from "@/components/Admin/shared/ModuleSubNav";
 import AdminConfiguration, { AdminConfigurationView } from "@/components/Admin/Configuration";
 import { formatCurrency } from "@/lib/formatCurrency";
 import { ChartColumnIcon, BellIcon, BookOpen01Icon, Package02Icon, ArrowDown01Icon, UserCircleIcon, CreditCardIcon, DashboardSpeed01Icon, Logout01Icon, Menu01Icon, Megaphone01Icon, Moon02Icon, PackageIcon, RefreshCwIcon, Search01Icon, Settings01Icon, ShieldCheckIcon, ShoppingBag01Icon, Store01Icon, TruckIcon, Globe02Icon, JusticeScale01Icon, LockKeyIcon, Wallet03Icon, Sun03Icon, Tag01Icon, UserMultiple02Icon, UserAdd01Icon, Cancel01Icon, GridIcon, Wallet01Icon, File01Icon, StarIcon, ClipboardIcon, DollarCircleIcon, BarChartIcon } from "@hugeicons/core-free-icons";
@@ -90,337 +92,7 @@ const tabs: Array<{ key: AdminTab; label: string; short: string }> = [
  { key: "analytics", label: "Analytics Dashboard", short: "Analytics" },
 ];
 
-type SidebarGroup = {
- title: string;
- key: AdminTab | string;
- items: { label: string; href: string }[];
- icon: IconSvgElement;
-};
 
-const sidebarGroups: SidebarGroup[] = [
- {
- title: "Catalog",
- key: "products",
- icon: PackageIcon,
- items: [
- { label: "Products", href: "?tab=products&menu=catalog&item=products" },
- {
- label: "Categories",
- href: "?tab=categories&menu=catalog&item=categories",
- },
- { label: "Brands", href: "?tab=brands&menu=catalog&item=brands" },
- // {
- // label: "Product Reviews",
- // href: "?tab=reviews&menu=catalog&item=product-reviews",
- // },
- ],
- },
- {
- title: "Orders",
- key: "orders",
- icon: ShoppingBag01Icon,
- items: [
- {
- label: "All Orders",
- href: "?tab=orders&menu=orders&item=all-orders&orders_tab=all",
- },
- {
- label: "Pending Orders",
- href: "?tab=orders&menu=orders&item=pending-orders&orders_tab=pending",
- },
- {
- label: "Processing Orders",
- href: "?tab=orders&menu=orders&item=processing-orders&orders_tab=processing",
- },
- {
- label: "Completed Orders",
- href: "?tab=orders&menu=orders&item=completed-orders&orders_tab=completed",
- },
- {
- label: "Cancelled Orders",
- href: "?tab=orders&menu=orders&item=cancelled-orders&orders_tab=cancelled",
- },
- {
- label: "Order Tracking",
- href: "?tab=orders&menu=orders&item=order-tracking&orders_tab=tracking",
- },
- ],
- },
- {
- title: "Inventory",
- key: "inventory",
- icon: Package02Icon,
- items: [
- {
- label: "Stock Overview",
- href: "?tab=inventory&menu=inventory&item=stock-overview&inventory_tab=stock-overview",
- },
- {
- label: "Warehouses",
- href: "?tab=inventory&menu=inventory&item=warehouses&inventory_tab=warehouses",
- },
- {
- label: "Stock Adjustments",
- href: "?tab=inventory&menu=inventory&item=stock-adjustments&inventory_tab=stock-adjustments",
- },
- {
- label: "Low Stock Products",
- href: "?tab=inventory&menu=inventory&item=low-stock-products&inventory_tab=low-stock-products",
- },
- ],
- },
- {
- title: "Customers",
- key: "users",
- icon: UserMultiple02Icon,
- items: [
- {
- label: "Customer Reviews",
- href: "?tab=users&menu=customers&item=customer-reviews",
- },
- {
- label: "Customer Support",
- href: "?tab=users&menu=customers&item=customer-support",
- },
- ],
- },
- {
- title: "Sellers",
- key: "sellers",
- icon: Store01Icon,
- items: [
- {
- label: "All Sellers",
- href: "?tab=sellers&menu=sellers&item=all-sellers",
- },
- {
- label: "Seller Applications",
- href: "?tab=sellers&menu=sellers&item=seller-applications",
- },
- {
- label: "Seller Orders",
- href: "?tab=sellers&menu=sellers&item=seller-orders",
- },
- {
- label: "Seller Performance",
- href: "?tab=sellers&menu=sellers&item=seller-performance",
- },
- ],
- },
- {
- title: "Brokers",
- key: "brokers",
- icon: UserMultiple02Icon,
- items: [
- { label: "Brokers & KYC Review", href: "/admin/brokers" },
- { label: "Broker Security & Risk", href: "/admin/brokers/security" },
- { label: "Broker Wallet Payouts", href: "/admin/brokers/payouts" },
- ],
- },
- {
- title: "Payments",
- key: "finance",
- icon: CreditCardIcon,
- items: [
- { label: "Payments Dashboard", href: "?tab=finance&menu=payments&item=payments-dashboard" },
- { label: "Transactions", href: "?tab=finance&menu=payments&item=transactions" },
- { label: "Payment Methods", href: "?tab=finance&menu=payments&item=payment-methods" },
- { label: "Payment Providers", href: "?tab=finance&menu=payments&item=payment-providers" },
- { label: "Refunds", href: "?tab=finance&menu=payments&item=refunds" },
- { label: "Disputes & Chargebacks", href: "?tab=finance&menu=payments&item=disputes-chargebacks" },
- { label: "Seller Payout Accounts", href: "?tab=finance&menu=payments&item=seller-payout-accounts" },
- { label: "Seller Payouts", href: "?tab=finance&menu=payments&item=seller-payouts" },
- { label: "Pending Payouts", href: "?tab=finance&menu=payments&item=pending-payouts" },
- { label: "Failed Payments", href: "?tab=finance&menu=payments&item=failed-payments" },
- { label: "Fraud & Risk", href: "?tab=finance&menu=payments&item=fraud-risk" },
- { label: "Reconciliation", href: "?tab=finance&menu=payments&item=reconciliation" },
- { label: "Currencies & FX", href: "?tab=finance&menu=payments&item=currencies-fx" },
- { label: "Countries", href: "?tab=finance&menu=payments&item=countries" },
- { label: "Fees & Commissions", href: "?tab=finance&menu=payments&item=fees-commissions" },
- { label: "Payment Reports", href: "?tab=finance&menu=payments&item=payment-reports" },
- { label: "Payment Audit Logs", href: "?tab=finance&menu=payments&item=payment-audit-logs" },
- ],
- },
- {
- title: "Advertising",
- key: "products",
- icon: Megaphone01Icon,
- items: [
- { label: "All Advertisements", href: "?tab=products&menu=advertising&item=all-advertisements" },
- { label: "Create Advertisement", href: "?tab=products&menu=advertising&item=create-advertisement" },
- { label: "Active Ads", href: "?tab=products&menu=advertising&item=active-ads" },
- { label: "Scheduled Ads", href: "?tab=products&menu=advertising&item=scheduled-ads" },
- { label: "Paused Ads", href: "?tab=products&menu=advertising&item=paused-ads" },
- { label: "Expired Ads", href: "?tab=products&menu=advertising&item=expired-ads" },
- { label: "Advertisement Analytics", href: "?tab=products&menu=advertising&item=advertisement-analytics" },
- ],
- },
- {
- title: "Promotions",
- key: "products",
- icon: Tag01Icon,
- items: [
- { label: "Coupons", href: "?tab=products&menu=promotions&item=coupons" },
- {
- label: "Discounts",
- href: "?tab=products&menu=promotions&item=discounts",
- },
- {
- label: "Campaigns",
- href: "?tab=products&menu=promotions&item=campaigns",
- },
- ],
- },
- {
- title: "Communications",
- key: "overview",
- icon: Megaphone01Icon,
- items: [
- {
- label: "Notifications",
- href: "?tab=overview&menu=communications&item=notifications",
- },
- {
- label: "Email Messages",
- href: "?tab=overview&menu=communications&item=email-messages",
- },
- {
- label: "SMS Messages",
- href: "?tab=overview&menu=communications&item=sms-messages",
- },
- ],
- },
- {
- title: "User Management",
- key: "users",
- icon: ShieldCheckIcon,
- items: [
- { label: "Users", href: "?tab=users&menu=user-management&item=users" },
- { label: "Add New User", href: "?tab=users&menu=user-management&item=add-new-user" },
- { label: "Roles", href: "?tab=users&menu=user-management&item=roles" },
- {
- label: "Permissions",
- href: "?tab=users&menu=user-management&item=permissions",
- },
- {
- label: "Active Sessions",
- href: "?tab=users&menu=user-management&item=active-sessions",
- },
- ],
- },
- {
- title: "Reports & Analytics",
- key: "analytics",
- icon: ChartColumnIcon,
- items: [
- {
- label: "Sales Reports",
- href: "?tab=analytics&menu=reports-analytics&item=sales-reports",
- },
- {
- label: "Order Reports",
- href: "?tab=analytics&menu=reports-analytics&item=order-reports",
- },
- {
- label: "Product Reports",
- href: "?tab=analytics&menu=reports-analytics&item=product-reports",
- },
- {
- label: "Inventory Reports",
- href: "?tab=analytics&menu=reports-analytics&item=inventory-reports",
- },
- {
- label: "Customer Reports",
- href: "?tab=analytics&menu=reports-analytics&item=customer-reports",
- },
- {
- label: "Payment Reports",
- href: "?tab=analytics&menu=reports-analytics&item=payment-reports",
- },
- ],
- },
- {
- title: "Store Settings",
- key: "overview",
- icon: Settings01Icon,
- items: [
- { label: "Platform Rules", href: "?tab=overview&menu=marketplace-settings&item=marketplace-rules" },
- { label: "Commission Rules", href: "?tab=overview&menu=marketplace-settings&item=commission-rules" },
- ],
- },
- {
- title: "Logistics",
- key: "overview",
- icon: TruckIcon,
- items: [
- { label: "Company Approvals", href: "/admin/logistics/approvals" },
- { label: "Logistics Companies", href: "?tab=overview&menu=logistics&item=logistics-companies" },
- { label: "Delivery Services", href: "?tab=overview&menu=logistics&item=delivery-services" },
- { label: "Shipping Zones", href: "?tab=overview&menu=logistics&item=shipping-zones" },
- { label: "Shipping Rates", href: "?tab=overview&menu=logistics&item=shipping-rates" },
- { label: "API & Webhooks", href: "?tab=overview&menu=logistics&item=api-webhooks" },
- ],
- },
- {
- title: "Finance Configuration",
- key: "finance",
- icon: Wallet03Icon,
- items: [
- { label: "Finance Settings", href: "?tab=finance&menu=finance-configuration&item=finance-settings" },
- { label: "Escrow Holds", href: "?tab=finance&menu=finance-configuration&item=escrow-holds" },
- ],
- },
- {
- title: "System Management",
- key: "overview",
- icon: Settings01Icon,
- items: [
- {
- label: "Monitoring Overview",
- href: "?tab=overview&menu=system-management&item=monitoring-overview",
- },
- {
- label: "Audit Logs",
- href: "?tab=overview&menu=system-management&item=audit-logs",
- },
- {
- label: "Email Alerts",
- href: "?tab=overview&menu=system-management&item=email-alerts",
- },
- {
- label: "Migrations",
- href: "?tab=overview&menu=system-management&item=migrations",
- },
- {
- label: "Weekly Reports",
- href: "?tab=overview&menu=system-management&item=weekly-reports",
- },
- {
- label: "System Events",
- href: "?tab=overview&menu=system-management&item=system-events",
- },
- {
- label: "Background Jobs",
- href: "?tab=overview&menu=system-management&item=background-jobs",
- },
- {
- label: "Application Settings",
- href: "?tab=overview&menu=system-management&item=application-settings",
- },
- ],
- },
- {
- title: "Account",
- key: "overview",
- icon: UserCircleIcon,
- items: [
- { label: "Profile", href: "?tab=overview&menu=account&item=profile" },
- { label: "Security", href: "?tab=overview&menu=account&item=security" },
- { label: "Logout", href: "?tab=overview&menu=account&item=logout" },
- 
- ],
- },
-];
 
 const tabIcon = (tab: AdminTab): ReactNode => {
  switch (tab) {
@@ -491,35 +163,34 @@ export default function AdminDashboard() {
  const pathname = usePathname();
  const searchParams = useSearchParams();
  const adminUser = authStorage.getUser<StoredUser>();
- const visibleSidebarGroups = useMemo(
+ const visibleSidebarGroups = useMemo<DashboardNavGroup[]>(
  () =>
- sidebarGroups
- .map((group) => ({
- ...group,
- items: group.items.filter((item) =>
- canAccessAdminItem(adminUser, item.label),
+ ADMIN_SECTIONS.map((section) => ({
+ title: section.label,
+ key: section.label,
+ icon: section.modules[0]?.icon ?? DashboardSpeed01Icon,
+ items: section.modules
+ .map((module) => ({
+ module,
+ children: module.children.filter((child) =>
+ canAccessAdminItem(adminUser, child.label),
  ),
  }))
  .filter(
- (group) =>
- canAccessAdminSection(adminUser, group.title) &&
- group.items.length > 0,
- ),
+ ({ module, children }) =>
+ canAccessAdminSection(adminUser, module.permissionKey ?? module.label) &&
+ children.length > 0,
+ )
+ .map(({ module, children }) => ({
+ label: module.label,
+ href: children[0].href,
+ icon: module.icon,
+ matches: children.map((child) => child.href),
+ })),
+ })).filter((group) => group.items.length > 0),
  [adminUser],
  );
- const shellGroups = useMemo<DashboardNavGroup[]>(
- () =>
- visibleSidebarGroups.map((group) => ({
- ...group,
- items: group.items.map((item) => ({
- ...item,
- href: item.href.startsWith("?")
- ? `/admin/dashboard${item.href}`
- : item.href,
- })),
- })),
- [visibleSidebarGroups],
- );
+ const shellGroups = visibleSidebarGroups;
  const [activeTab, setActiveTab] = useState<AdminTab>("overview");
  const [isCheckingAccess, setIsCheckingAccess] = useState(true);
  const [isAuthorized, setIsAuthorized] = useState(false);
@@ -536,10 +207,10 @@ export default function AdminDashboard() {
 
  const hiddenOverviewMenuGroups = [
  "Communications",
- "System Management",
- "Store Settings",
+ "System",
+ "Settings",
  "Logistics",
- "Finance Configuration",
+ "Finance",
  "Account",
  ];
  const isOverviewHiddenByMenuSelection = hiddenOverviewMenuGroups.some(
@@ -924,32 +595,51 @@ export default function AdminDashboard() {
  return;
  }
 
- const matchedGroup = visibleSidebarGroups.find(
- (group) => normalizeSlug(group.title) === menuParam,
+ // Resolve the destination through the canonical nav config: each child
+ // href carries its own tab/menu/item params.
+ const matched = ADMIN_MODULES.flatMap((module) =>
+ module.children.map((child) => ({
+ module,
+ child,
+ url: new URL(child.href, "http://localhost"),
+ })),
+ ).find(
+ ({ url }) =>
+ url.pathname === pathname &&
+ url.searchParams.get("menu") === menuParam &&
+ (!itemParam || url.searchParams.get("item") === itemParam),
  );
 
- if (!matchedGroup) return;
-
- if (itemParam) {
- const matchedItem = matchedGroup.items.find(
- (item) => normalizeSlug(item.label) === itemParam,
+ if (matched) {
+ const nextTab = resolveTab(
+ (matched.url.searchParams.get("tab") as AdminTab) ?? "overview",
  );
-
- if (matchedItem) {
- const subItemKey = `${matchedGroup.title}:${matchedItem.label}`;
- const mappedTab = resolveTab(subItemKey);
- const nextTab = tabs.some((tab) => tab.key === mappedTab)
- ? mappedTab
- : resolveTab(matchedGroup.key);
- applySidebarSelection(nextTab, subItemKey, matchedGroup.title, false);
+ applySidebarSelection(
+ nextTab,
+ `${matched.module.label}:${matched.child.label}`,
+ matched.module.label,
+ false,
+ );
  return;
  }
- }
+
+ const menuModule = ADMIN_MODULES.find((module) =>
+ module.children.some(
+ (child) =>
+ new URL(child.href, "http://localhost").searchParams.get("menu") ===
+ menuParam,
+ ),
+ );
+ if (!menuModule) return;
 
  applySidebarSelection(
- matchedGroup.key,
- matchedGroup.title,
- matchedGroup.title,
+ resolveTab(
+ (new URL(menuModule.children[0].href, "http://localhost").searchParams.get(
+ "tab",
+ ) as AdminTab) ?? "overview",
+ ),
+ menuModule.label,
+ menuModule.label,
  false,
  );
  }, [isAuthorized, isCheckingAccess, searchParams]);
@@ -1049,6 +739,7 @@ export default function AdminDashboard() {
  searchPlaceholder="Search admin records"
  >
  <div className="min-w-0 space-y-5">
+ <ModuleSubNav />
  {(activeTab === "overview" ||
  activeTab === "users" ||
  activeTab === "sellers" ||
