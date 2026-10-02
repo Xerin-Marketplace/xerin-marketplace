@@ -109,7 +109,7 @@ export const PhoneInput = ({
  const next = event.target.value;
  onDialCodeChange(next === "custom" ? "" : next);
  }}
- className="h-11 w-full sm:w-[108px] shrink-0 cursor-pointer bg-muted pl-3 pr-2 text-sm text-foreground border-b sm:border-b-0 sm:border-r border-border outline-none"
+ className="h-12 w-full sm:w-[108px] shrink-0 cursor-pointer bg-muted pl-3 pr-2 text-sm text-foreground border-b sm:border-b-0 sm:border-r border-border outline-none"
  >
  {PHONE_COUNTRIES.map((country) => (
  <option key={`${country.name}-${country.code}`} value={country.code}>
@@ -120,7 +120,7 @@ export const PhoneInput = ({
  </select>
 
  {selection === "custom" && (
- <div className="flex h-11 items-center border-b sm:border-b-0 sm:border-r border-border bg-muted">
+ <div className="flex h-12 items-center border-b sm:border-b-0 sm:border-r border-border bg-muted">
  <span className="pl-3 text-muted-foreground">+</span>
  <input
  type="text"
@@ -130,7 +130,7 @@ export const PhoneInput = ({
  value={dialCode}
  onChange={(event) => onDialCodeChange(cleanDialCode(event.target.value))}
  disabled={disabled}
- className="h-11 w-20 bg-transparent px-2 outline-none"
+ className="h-12 w-20 bg-transparent px-2 outline-none"
  />
  </div>
  )}
@@ -145,7 +145,7 @@ export const PhoneInput = ({
  onChange={(event) => onChange(cleanLocalPhone(event.target.value))}
  autoComplete="tel-national"
  disabled={disabled}
- className="h-11 flex-1 min-w-0 px-3.5 bg-transparent outline-none placeholder:text-muted-foreground disabled:cursor-not-allowed disabled:opacity-70"
+ className="h-12 flex-1 min-w-0 px-3.5 bg-transparent outline-none placeholder:text-muted-foreground disabled:cursor-not-allowed disabled:opacity-70"
  />
  </div>
  <p className="mt-1.5 text-[11px] leading-4 text-muted-foreground">
