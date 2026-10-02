@@ -366,22 +366,24 @@ export default function AdminDashboard() {
  ? "payments"
  : "sales";
  const isSystemWorkspace =
- activeSidebarItem === "System Management" ||
- activeSidebarItem.startsWith("System Management:");
+ activeSidebarItem === "System" ||
+ activeSidebarItem.startsWith("System:") ||
+ // Application Settings lives under the Settings module but renders the system settings view
+ activeSidebarItem === "Settings:Application Settings";
  const systemView: SystemView =
- activeSidebarItem === "System Management:System Events"
+ activeSidebarItem === "System:System Events"
  ? "events"
- : activeSidebarItem === "System Management:Background Jobs"
+ : activeSidebarItem === "System:Background Jobs"
  ? "jobs"
- : activeSidebarItem === "System Management:Application Settings"
+ : activeSidebarItem === "Settings:Application Settings"
  ? "settings"
- : activeSidebarItem === "System Management:Monitoring Overview"
+ : activeSidebarItem === "System:Monitoring Overview"
  ? "monitoring"
- : activeSidebarItem === "System Management:Email Alerts"
+ : activeSidebarItem === "System:Email Alerts"
  ? "alerts"
- : activeSidebarItem === "System Management:Migrations"
+ : activeSidebarItem === "System:Migrations"
  ? "migrations"
- : activeSidebarItem === "System Management:Weekly Reports"
+ : activeSidebarItem === "System:Weekly Reports"
  ? "reports"
  : "audit";
  const isAccountWorkspace =
@@ -393,14 +395,14 @@ export default function AdminDashboard() {
  ? "logout"
  : "profile";
  const isConfigurationWorkspace =
- activeSidebarItem.startsWith("Store Settings:") ||
+ activeSidebarItem.startsWith("Settings:") ||
  activeSidebarItem.startsWith("Logistics:") ||
- activeSidebarItem.startsWith("Finance Configuration:");
+ activeSidebarItem.startsWith("Finance:");
 
  const configurationView: AdminConfigurationView =
- activeSidebarItem === "Store Settings:Commission Rules"
+ activeSidebarItem === "Settings:Commission Rules"
  ? "commissions"
- : activeSidebarItem === "Store Settings:Platform Rules"
+ : activeSidebarItem === "Settings:Platform Rules"
  ? "marketplace"
  : activeSidebarItem === "Logistics:Delivery Services"
  ? "logistics-services"
@@ -412,7 +414,7 @@ export default function AdminDashboard() {
  ? "logistics-integration"
  : activeSidebarItem === "Logistics:Logistics Companies"
  ? "logistics-companies"
- : activeSidebarItem === "Finance Configuration:Escrow Holds"
+ : activeSidebarItem === "Finance:Escrow Holds"
  ? "escrow"
  : "finance-settings";
 
