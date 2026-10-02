@@ -230,16 +230,15 @@ function KpiCard({
  label: string; value: string; hint: string; icon: IconSvgElement; accent?: boolean;
 }) {
  return (
- <article className="group relative overflow-hidden rounded-2xl border border-border bg-card p-5 transition-all duration-200 hover:-translate-y-0.5 hover:border-primary/40 hover:shadow-[0_12px_32px_-12px_rgba(244,117,36,0.25)]">
- <div className="flex items-start justify-between gap-3">
- <span className={`flex h-10 w-10 items-center justify-center rounded-xl ${accent ? "bg-primary text-primary-foreground" : "bg-primary/10 text-primary"}`}>
- <HugeiconsIcon icon={Icon} size={18} />
+ <article className="group relative rounded-2xl border border-border bg-card p-5 transition-all duration-200 hover:border-primary/30">
+ <div className="flex items-center justify-between gap-3">
+ <p className="text-xs font-semibold text-muted-foreground">{label}</p>
+ <span className={`flex h-8 w-8 items-center justify-center rounded-lg ${accent ? "bg-primary text-primary-foreground" : "bg-muted text-muted-foreground"}`}>
+ <HugeiconsIcon icon={Icon} size={15} />
  </span>
- <HugeiconsIcon icon={ArrowUpRight01Icon} size={15} className="text-muted-foreground/50 transition group-hover:text-primary" />
  </div>
- <p className="mt-4 text-xs font-semibold text-muted-foreground">{label}</p>
- <strong className="mt-1 block break-words text-[22px] font-black leading-tight tracking-tight text-foreground">{value}</strong>
- <p className="mt-1.5 text-[11px] text-muted-foreground/80">{hint}</p>
+ <strong className="mt-2 block break-words text-[24px] font-black leading-tight tracking-tight text-foreground">{value}</strong>
+ <p className="mt-1 text-[11px] text-muted-foreground/80">{hint}</p>
  </article>
  );
 }

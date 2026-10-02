@@ -371,3 +371,182 @@
     flex: 1 1 auto;
   }
 }
+
+/* ============================================================
+   Clean flat admin theme — soft gray canvas, white flat cards
+   ============================================================ */
+
+.admin-dashboard-shell {
+  background: #f7f7f9;
+}
+
+/* ---- Flat white cards everywhere ------------------------------- */
+.admin-dashboard-shell section[class*="rounded"],
+.admin-dashboard-shell article[class*="rounded"],
+.admin-dashboard-shell div.rounded-xl.border,
+.admin-dashboard-shell div.rounded-2xl.border {
+  background: #fff;
+  border: 1px solid #ececef;
+  box-shadow: none;
+  border-radius: 14px;
+}
+
+/* ---- Dark hero banners -> light minimal headers ------------------ */
+.admin-dashboard-shell .bg-carbon,
+.admin-dashboard-shell [class*="bg-carbon"] {
+  background: #fff !important;
+  border: 1px solid #ececef;
+  border-radius: 14px;
+}
+
+.admin-dashboard-shell .bg-carbon h1,
+.admin-dashboard-shell .bg-carbon h2,
+.admin-dashboard-shell .bg-carbon h3 {
+  color: #101828 !important;
+  font-weight: 700;
+  letter-spacing: -0.01em;
+}
+
+.admin-dashboard-shell .bg-carbon p,
+.admin-dashboard-shell .bg-carbon span,
+.admin-dashboard-shell .bg-carbon td,
+.admin-dashboard-shell .bg-carbon div {
+  color: #475467;
+}
+
+.admin-dashboard-shell .bg-carbon p[class*="text-white"],
+.admin-dashboard-shell .bg-carbon > p:first-child,
+.admin-dashboard-shell .bg-carbon div > p:first-child {
+  color: #f47524 !important;
+}
+
+.admin-dashboard-shell .bg-carbon a {
+  color: #344054 !important;
+}
+
+.admin-dashboard-shell .bg-carbon a[class*="bg-primary"],
+.admin-dashboard-shell .bg-carbon button[class*="bg-primary"] {
+  background: #f47524 !important;
+  color: #fff !important;
+  border: none !important;
+}
+
+/* ---- Tables: Snippe-style ---------------------------------------- */
+.admin-dashboard-shell table thead {
+  background: #fff;
+}
+
+.admin-dashboard-shell table thead th {
+  color: #98a2b3;
+  font-size: 0.66rem;
+  font-weight: 700;
+  letter-spacing: 0.09em;
+  text-transform: uppercase;
+  padding-top: 0.9rem;
+  padding-bottom: 0.9rem;
+  border-bottom: 1px solid #ececef;
+}
+
+.admin-dashboard-shell table tbody td {
+  border-bottom-color: #f2f4f6;
+  color: #344054;
+  font-size: 0.8125rem;
+}
+
+.admin-dashboard-shell table tbody tr:hover {
+  background: #fafbfc;
+  box-shadow: none;
+}
+
+/* ---- Status pills: tinted backgrounds ---------------------------- */
+.admin-dashboard-shell [class*="rounded-full"][class*="bg-red-light-6"],
+.admin-dashboard-shell [class*="rounded-full"][class*="bg-destructive/10"] {
+  background: #fef1f2 !important;
+  color: #d92d20 !important;
+  border: none !important;
+}
+
+.admin-dashboard-shell [class*="rounded-full"][class*="bg-green-light-6"],
+.admin-dashboard-shell [class*="rounded-full"][class*="bg-green-50"] {
+  background: #ecfdf3 !important;
+  color: #039855 !important;
+  border: none !important;
+}
+
+.admin-dashboard-shell [class*="rounded-full"][class*="bg-muted"],
+.admin-dashboard-shell [class*="rounded-full"][class*="bg-yellow-light-4"] {
+  background: #f2f4f7 !important;
+  color: #475467 !important;
+  border: none !important;
+}
+
+/* ---- Inputs ------------------------------------------------------ */
+.admin-dashboard-shell input:not([type="checkbox"]):not([type="radio"]):not([type="range"]),
+.admin-dashboard-shell select,
+.admin-dashboard-shell textarea {
+  border-radius: 10px;
+  border-color: #e6e9ef;
+  background: #fff;
+}
+
+.admin-dashboard-shell input:focus,
+.admin-dashboard-shell select:focus,
+.admin-dashboard-shell textarea:focus {
+  border-color: #f47524;
+  box-shadow: 0 0 0 3px rgba(244, 117, 36, 0.1);
+  outline: none;
+}
+
+/* ---- Sidebar polish ----------------------------------------------- */
+.admin-dashboard-shell aside {
+  background: #fff;
+}
+
+.admin-dashboard-shell aside a {
+  border-radius: 10px;
+}
+
+/* ---- Dark mode ---------------------------------------------------- */
+.dark .admin-dashboard-shell {
+  background: #0c0f14;
+}
+
+.dark .admin-dashboard-shell section[class*="rounded"],
+.dark .admin-dashboard-shell article[class*="rounded"],
+.dark .admin-dashboard-shell div.rounded-xl.border,
+.dark .admin-dashboard-shell div.rounded-2xl.border,
+.dark .admin-dashboard-shell .bg-carbon,
+.dark .admin-dashboard-shell [class*="bg-carbon"],
+.dark .admin-dashboard-shell aside {
+  background: #161b22 !important;
+  border-color: rgba(255, 255, 255, 0.08);
+}
+
+.dark .admin-dashboard-shell .bg-carbon h1,
+.dark .admin-dashboard-shell .bg-carbon h2,
+.dark .admin-dashboard-shell .bg-carbon h3 {
+  color: #f2f4f7 !important;
+}
+
+.dark .admin-dashboard-shell .bg-carbon p,
+.dark .admin-dashboard-shell .bg-carbon span,
+.dark .admin-dashboard-shell .bg-carbon td,
+.dark .admin-dashboard-shell .bg-carbon div {
+  color: #98a2b3;
+}
+
+.dark .admin-dashboard-shell table thead {
+  background: transparent;
+}
+
+.dark .admin-dashboard-shell table tbody td {
+  color: #d0d5dd;
+  border-bottom-color: rgba(255, 255, 255, 0.06);
+}
+
+.dark .admin-dashboard-shell input:not([type="checkbox"]):not([type="radio"]),
+.dark .admin-dashboard-shell select,
+.dark .admin-dashboard-shell textarea {
+  background: rgba(255, 255, 255, 0.04);
+  border-color: rgba(255, 255, 255, 0.1);
+}
