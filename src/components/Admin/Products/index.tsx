@@ -27,23 +27,19 @@ export default function AdminProducts(){
  const approve=async()=>{if(!selected)return;setBusy(true);try{await adminService.approveProduct(selected.id);toast.success("Product approved.");setSelected(null);await load();}catch(e){toast.error(errorMessage(e));}finally{setBusy(false);}};
  const reject=async()=>{if(!selected||reason.trim().length<5)return;setBusy(true);try{await adminService.rejectProduct(selected.id,reason.trim());toast.success("Product rejected with correction reason.");setReason("");setRejectOpen(false);setSelected(null);await load();}catch(e){toast.error(errorMessage(e));}finally{setBusy(false);}};
 
- return <div className="admin-catalog-page space-y-5">
- <section className="admin-catalog-header">
- <div className="flex flex-col gap-4 lg:flex-row lg:items-center lg:justify-between">
-<div>
-<p className="text-xs font-bold uppercase tracking-[.14em] text-primary">Product moderation</p>
-<h2 className="mt-1 text-2xl font-bold">Products awaiting review</h2>
-<p className="mt-1 text-sm text-muted-foreground">Search is performed by the backend and only the current page is returned.</p>
-</div>
-<button onClick={()=>void load()} className="inline-flex h-11 items-center gap-2 rounded-xl border px-4 text-sm font-semibold">
-<HugeiconsIcon icon={RefreshCwIcon} size={16}/>Refresh</button>
-</div>
- <div className="relative mt-5 max-w-xl">
-<HugeiconsIcon icon={Search01Icon} size={16} className="absolute left-3 top-1/2 -translate-y-1/2 text-muted-foreground"/>
-<input value={query} onChange={e=>setQuery(e.target.value)} placeholder="Search product, SKU, seller, category or brand..." className="h-11 w-full rounded-xl border-2 pl-9 pr-4 text-sm outline-none focus:border-[var(--primary)]"/>
-</div>
- </section>
- <section className="admin-catalog-card overflow-hidden">
+ return <div className="space-y-4">
+ <div className="flex flex-wrap items-center justify-between gap-3">
+ <h2 className="text-lg font-bold tracking-tight text-foreground">Products awaiting review</h2>
+ <div className="flex items-center gap-2">
+ <label className="relative">
+ <HugeiconsIcon icon={Search01Icon} size={15} className="absolute left-3 top-1/2 -translate-y-1/2 text-muted-foreground"/>
+ <input value={query} onChange={e=>setQuery(e.target.value)} placeholder="Search products..." className="h-10 w-[220px] rounded-lg border border-border bg-card pl-9 pr-3 text-sm outline-none focus:border-primary sm:w-[280px]"/>
+ </label>
+ <button onClick={()=>void load()} className="inline-flex h-10 items-center gap-2 rounded-lg border border-border bg-card px-3.5 text-xs font-semibold text-foreground transition hover:border-primary hover:text-primary">
+ <HugeiconsIcon icon={RefreshCwIcon} size={14}/>Refresh</button>
+ </div>
+ </div>
+ <section className="overflow-hidden rounded-xl border border-border bg-card shadow-sm">
  {loading?<p className="p-12 text-center text-muted-foreground">Loading pending products...</p>:error?<p className="p-12 text-center text-destructive">{error}</p>:!products.length?<div className="p-12 text-center">
 <HugeiconsIcon icon={CheckmarkCircle02Icon} className="mx-auto text-success"/>
 <p className="mt-3 font-semibold">No products awaiting review.</p>
