@@ -52,6 +52,11 @@ const Header = () => {
  const accountHref = getAccountHref(isAuthenticated, user);
  const accountLabel = getAccountLabel(isAuthenticated, user);
  const buyerName = [user?.first_name, user?.last_name].filter(Boolean).join(" ");
+ const avatarSrc = (url?: string | null) => {
+ if (!url) return null;
+ if (url.startsWith("/uploads/")) return url.replace(/^\/uploads\//, "/backend-uploads/");
+ return url;
+ };
 
  const handleOpenCartModal = () => {
  openCartModal();
@@ -96,6 +101,7 @@ const Header = () => {
  accountLabel={accountLabel}
  cartCount={cartItems.length}
  onOpenCart={handleOpenCartModal}
+ user={user}
  />
  <div className="hidden lg:block max-w-[1440px] mx-auto px-4 sm:px-6 lg:px-8 xl:px-10 2xl:px-6">
  {/* <!-- header top start --> */}
@@ -216,11 +222,24 @@ const Header = () => {
  </button>
  <div className="group relative">
  <Link href={accountHref} className="flex items-center gap-2.5">
+ {hasHydrated && isAuthenticated && avatarSrc(user?.avatar_url) ? (
+ // eslint-disable-next-line @next/next/no-img-element
+ <img
+ src={avatarSrc(user?.avatar_url)!}
+ alt=""
+ className="h-9 w-9 rounded-full object-cover ring-2 ring-primary/30"
+ />
+ ) : hasHydrated && isAuthenticated && buyerName ? (
+ <span className="flex h-9 w-9 items-center justify-center rounded-full bg-primary text-sm font-black text-primary-foreground">
+ {buyerName[0].toUpperCase()}
+ </span>
+ ) : (
  <HugeiconsIcon icon={UserIcon} size={24} className="text-primary" />
+ )}
 
  <div>
  <span className="block text-2xs text-muted-foreground uppercase">
- account
+ {hasHydrated && isAuthenticated ? "my xerin" : "account"}
  </span>
  <p className="font-medium text-custom-sm text-foreground">
  {!hasHydrated ? "Loading..." : buyerName || accountLabel}

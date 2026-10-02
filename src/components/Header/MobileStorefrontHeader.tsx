@@ -16,6 +16,13 @@ import {
   ArrowRight01Icon,
 } from "@hugeicons/core-free-icons";
 import { useAddresses } from "@/hooks/useAddresses";
+import type { User } from "@/types/api/user";
+
+const avatarSrc = (url?: string | null) => {
+  if (!url) return null;
+  if (url.startsWith("/uploads/")) return url.replace(/^\/uploads\//, "/backend-uploads/");
+  return url;
+};
 
 interface MobileStorefrontHeaderProps {
   onToggleCategories: () => void;
@@ -27,6 +34,7 @@ interface MobileStorefrontHeaderProps {
   accountLabel: string;
   cartCount: number;
   onOpenCart: () => void;
+  user?: User | null;
 }
 
 export default function MobileStorefrontHeader({
@@ -39,6 +47,7 @@ export default function MobileStorefrontHeader({
   accountLabel,
   cartCount,
   onOpenCart,
+  user,
 }: MobileStorefrontHeaderProps) {
   const router = useRouter();
   const [query, setQuery] = useState("");
@@ -105,13 +114,40 @@ export default function MobileStorefrontHeader({
               />
             </Link>
 
-            <Link
-              href={accountHref}
-              aria-label={accountLabel}
-              className="flex h-10 w-10 shrink-0 items-center justify-center rounded-xl border border-border bg-muted/60 text-foreground transition-colors hover:border-primary hover:text-primary"
-            >
-              <HugeiconsIcon icon={UserIcon} size={18} />
-            </Link>
+            {isAuthenticated ? (
+              <Link
+                href={accountHref}
+                aria-label={accountLabel}
+                className="flex shrink-0 items-center gap-2 rounded-2xl border border-border bg-muted/60 py-1 pl-1 pr-2.5 transition-colors hover:border-primary"
+              >
+                {avatarSrc(user?.avatar_url) ? (
+                  // eslint-disable-next-line @next/next/no-img-element
+                  <img
+                    src={avatarSrc(user?.avatar_url)!}
+                    alt=""
+                    className="h-8 w-8 rounded-xl object-cover ring-1 ring-primary/30"
+                  />
+                ) : (
+                  <span className="flex h-8 w-8 items-center justify-center rounded-xl bg-primary text-xs font-black text-primary-foreground">
+                    {(user?.first_name?.[0] || user?.email?.[0] || "X").toUpperCase()}
+                  </span>
+                )}
+                <span className="flex flex-col leading-none">
+                  <span className="text-[9px] font-semibold uppercase tracking-wide text-muted-foreground">My Xerin</span>
+                  <span className="mt-0.5 max-w-[70px] truncate text-xs font-bold text-foreground">
+                    {user?.first_name || "Account"}
+                  </span>
+                </span>
+              </Link>
+            ) : (
+              <Link
+                href={accountHref}
+                aria-label={accountLabel}
+                className="flex h-10 w-10 shrink-0 items-center justify-center rounded-xl border border-border bg-muted/60 text-foreground transition-colors hover:border-primary hover:text-primary"
+              >
+                <HugeiconsIcon icon={UserIcon} size={18} />
+              </Link>
+            )}
 
             <button
               type="button"

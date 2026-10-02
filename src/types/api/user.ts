@@ -10,6 +10,7 @@ export type User = TimestampFields & {
   last_name?: string | null;
   full_name?: string | null;
   profile_photo?: string | null;
+  avatar_url?: string | null;
   role?: UserRole;
   status?: string;
   account_type?: string;
