@@ -386,3 +386,177 @@
     flex: 1 1 auto;
   }
 }
+
+/* ============================================================
+   Admin reskin — unified "clean ops" theme across every page
+   ============================================================ */
+
+.admin-dashboard-shell {
+  background: #f5f6f8;
+}
+
+/* ---- Cards -------------------------------------------------- */
+.admin-dashboard-shell section.rounded-xl.border,
+.admin-dashboard-shell article.rounded-xl.border,
+.admin-dashboard-shell div.rounded-xl.border.bg-card,
+.admin-dashboard-shell div.rounded-2xl.border {
+  border-color: #e6e9ef;
+  background: #fff;
+  box-shadow: 0 1px 2px rgba(16, 24, 40, 0.04);
+}
+
+.admin-dashboard-shell .rounded-xl.shadow-sm,
+.admin-dashboard-shell .rounded-2xl.shadow-sm {
+  border-color: #e6e9ef;
+  box-shadow: 0 1px 2px rgba(16, 24, 40, 0.05);
+}
+
+/* ---- Dark hero banners -> clean light page headers ---------- */
+.admin-dashboard-shell .bg-carbon {
+  background: #fff !important;
+  border: 1px solid #e6e9ef;
+  border-radius: 14px;
+  color: #101828 !important;
+}
+
+.admin-dashboard-shell .bg-carbon h1,
+.admin-dashboard-shell .bg-carbon h2,
+.admin-dashboard-shell .bg-carbon h3,
+.admin-dashboard-shell .bg-carbon strong {
+  color: #101828 !important;
+}
+
+.admin-dashboard-shell .bg-carbon p,
+.admin-dashboard-shell .bg-carbon span,
+.admin-dashboard-shell .bg-carbon div {
+  color: #475467;
+}
+
+.admin-dashboard-shell .bg-carbon p[class*="text-white"],
+.admin-dashboard-shell .bg-carbon p:first-child {
+  color: #f47524 !important;
+}
+
+.admin-dashboard-shell .bg-carbon [class*="text-white"] {
+  color: #475467;
+}
+
+.admin-dashboard-shell .bg-carbon a[class*="border"] {
+  border-color: #e6e9ef;
+  background: #f8fafc;
+  color: #344054 !important;
+}
+
+.admin-dashboard-shell .bg-carbon a[class*="bg-primary"],
+.admin-dashboard-shell .bg-carbon button[class*="bg-primary"] {
+  background: #f47524;
+  color: #fff !important;
+  border: none;
+}
+
+/* ---- Page header typography --------------------------------- */
+.admin-dashboard-shell h1,
+.admin-dashboard-shell h2 {
+  letter-spacing: -0.02em;
+}
+
+/* ---- Tables ------------------------------------------------- */
+.admin-dashboard-shell table thead {
+  background: #f8fafc;
+}
+
+.admin-dashboard-shell table thead th {
+  color: #667085;
+  font-size: 0.68rem;
+  font-weight: 700;
+  letter-spacing: 0.08em;
+  padding-top: 0.85rem;
+  padding-bottom: 0.85rem;
+}
+
+.admin-dashboard-shell table tbody td {
+  border-bottom-color: #f0f2f5;
+  padding-top: 0.9rem;
+  padding-bottom: 0.9rem;
+  color: #344054;
+  font-size: 0.8125rem;
+}
+
+.admin-dashboard-shell table tbody tr:hover {
+  background: #fafbfc;
+  box-shadow: inset 3px 0 0 #f47524;
+}
+
+/* ---- Inputs ------------------------------------------------- */
+.admin-dashboard-shell input:not([type="checkbox"]):not([type="radio"]):not([type="range"]),
+.admin-dashboard-shell select,
+.admin-dashboard-shell textarea {
+  border-radius: 10px;
+  border-color: #e2e8f0;
+  transition: border-color 140ms ease, box-shadow 140ms ease;
+}
+
+.admin-dashboard-shell input:focus,
+.admin-dashboard-shell select:focus,
+.admin-dashboard-shell textarea:focus {
+  border-color: #f47524;
+  box-shadow: 0 0 0 3px rgba(244, 117, 36, 0.12);
+  outline: none;
+}
+
+/* ---- Buttons: normalize table action links ------------------ */
+.admin-dashboard-shell table td button:not([class*="rounded"]),
+.admin-dashboard-shell table td a:not([class*="rounded"]) {
+  font-weight: 600;
+}
+
+/* ---- Pills / status ----------------------------------------- */
+.admin-dashboard-shell span[class*="rounded-full"][class*="text-"] {
+  font-weight: 600;
+  letter-spacing: 0.01em;
+}
+
+/* ---- Filter toolbars ---------------------------------------- */
+.admin-dashboard-shell section[class*="p-4"] > div.flex input,
+.admin-dashboard-shell section[class*="p-4"] > div.flex select {
+  background: #fff;
+}
+
+/* ---- Dark mode ----------------------------------------------- */
+.dark .admin-dashboard-shell {
+  background: #0f141b;
+}
+
+.dark .admin-dashboard-shell section.rounded-xl.border,
+.dark .admin-dashboard-shell article.rounded-xl.border,
+.dark .admin-dashboard-shell div.rounded-xl.border.bg-card,
+.dark .admin-dashboard-shell div.rounded-2xl.border,
+.dark .admin-dashboard-shell .bg-carbon {
+  background: #1a222d !important;
+  border-color: rgba(255, 255, 255, 0.08);
+  box-shadow: none;
+}
+
+.dark .admin-dashboard-shell .bg-carbon h1,
+.dark .admin-dashboard-shell .bg-carbon h2,
+.dark .admin-dashboard-shell .bg-carbon h3,
+.dark .admin-dashboard-shell .bg-carbon strong {
+  color: #f2f4f7 !important;
+}
+
+.dark .admin-dashboard-shell .bg-carbon p,
+.dark .admin-dashboard-shell .bg-carbon span,
+.dark .admin-dashboard-shell .bg-carbon div {
+  color: #98a2b3;
+}
+
+.dark .admin-dashboard-shell table tbody td {
+  color: #d0d5dd;
+  border-bottom-color: rgba(255, 255, 255, 0.06);
+}
+
+.dark .admin-dashboard-shell input:focus,
+.dark .admin-dashboard-shell select:focus,
+.dark .admin-dashboard-shell textarea:focus {
+  border-color: #f47524;
+}
