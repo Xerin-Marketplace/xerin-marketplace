@@ -1049,69 +1049,6 @@ export default function AdminDashboard() {
  searchPlaceholder="Search admin records"
  >
  <div className="min-w-0 space-y-5">
- <div className="border-b border-border bg-transparent px-0 pb-4 pt-1 dark:border-border">
- <div className="flex flex-col gap-4 lg:flex-row lg:items-center lg:justify-between">
- <div className="flex min-w-0 items-center gap-4">
- {legacyVisualGroup ? (
- <span
- className="flex h-11 w-11 shrink-0 items-center justify-center rounded-xl bg-primary/10 text-primary"
- aria-hidden="true"
- >
- <HugeiconsIcon icon={LegacyIcon} size={20} />
- </span>
- ) : null}
- <div className="min-w-0">
- {legacyVisualGroup ? (
- <p className="text-[11px] font-semibold uppercase tracking-[.16em] text-muted-foreground">
- {legacyTheme[legacyVisualGroup].eyebrow}
- </p>
- ) : null}
- <h1 className="mt-0.5 truncate text-xl font-bold tracking-[-0.02em] text-foreground sm:text-2xl">
- {isPaymentsWorkspace
- ? activeMenuLabel
- : activeTab === "orders"
- ? "Order Management"
- : activeTab === "inventory"
- ? "Inventory Overview"
- : activeTab === "users" &&
- activeSidebarItem !== "Dashboard"
- ? "Customer Management"
- : "Dashboard Overview"}
- </h1>
- <p className="mt-1 truncate text-sm text-muted-foreground">
- {isPaymentsWorkspace
- ? `Admin / Payments / ${activeMenuLabel}`
- : activeTab === "orders"
- ? `Admin / Orders / ${activeMenuLabel}`
- : activeTab === "inventory"
- ? `Admin / Inventory / ${activeMenuLabel}`
- : activeTab === "users" &&
- activeSidebarItem !== "Dashboard"
- ? `Manage customer accounts, addresses, orders and engagement`
- : `Tab: ${activeMenuLabel}`}
- </p>
- </div>
- </div>
-
- <div className="flex flex-col gap-2 sm:flex-row sm:items-center">
- <input
- value={surfaceSearch}
- onChange={(event) => setSurfaceSearch(event.target.value)}
- placeholder={dynamicSearchPlaceholder}
- className="w-full rounded-xl border border-border bg-card/80 px-4 py-2.5 text-sm text-foreground shadow-sm outline-none transition placeholder:text-muted-foreground focus:border-[var(--primary)] focus:ring-2 focus:ring-[var(--primary)]/10 dark:border-border dark:bg-card/[0.05] dark:placeholder:text-white/40 sm:w-[250px]"
- />
- <button
- type="button"
- onClick={loadOverviewData}
- className="inline-flex items-center justify-center gap-2 whitespace-nowrap rounded-xl bg-primary px-4 py-2.5 text-sm font-semibold text-primary-foreground shadow-sm transition hover:bg-primary/90"
- >
- <HugeiconsIcon icon={RefreshCwIcon} size={16} />
- Refresh Data
- </button>
- </div>
- </div>
- </div>
-
  {(activeTab === "overview" ||
  activeTab === "users" ||
  activeTab === "sellers" ||
