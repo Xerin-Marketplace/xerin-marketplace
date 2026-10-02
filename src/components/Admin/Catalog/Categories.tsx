@@ -12,7 +12,6 @@ import {
  type CategoryAttributeInputType,
 } from "@/lib/api/endpoints/admin";
 import Pagination from "@/components/ui/Pagination";
-import { useConfirmDialog } from "@/components/Admin/shared/useConfirm";
 
 type Mode = "product" | "business";
 
@@ -28,7 +27,6 @@ type Editing =
  | null;
 
 export default function AdminCategories() {
- const { confirm, confirmDialog } = useConfirmDialog();
  const [mode, setMode] = useState<Mode>("product");
 
  const [productRows, setProductRows] = useState<ProductCategory[]>([]);
@@ -193,7 +191,7 @@ export default function AdminCategories() {
 
  const removeAttribute = async (attribute: CategoryAttribute) => {
  if (!attributeCategory || attribute.inherited) return;
- if (!(await confirm({ title: `Delete "${attribute.name}"?`, description: "This permanently removes the attribute from the category.", confirmLabel: "Delete" }))) return;
+ if (!window.confirm(`Delete attribute “${attribute.name}”?`)) return;
  setBusy(true);
  try { await adminService.deleteProductCategoryAttribute(attributeCategory.id, attribute.id); toast.success("Attribute deleted."); setAttributes(await adminService.listProductCategoryAttributes(attributeCategory.id, true)); }
  catch (cause) { toast.error(cause instanceof Error ? cause.message : "Unable to delete attribute."); }
@@ -843,7 +841,7 @@ export default function AdminCategories() {
 
  Active
  </label>
-</>
+ </>
  )}
 
  <button
@@ -949,7 +947,6 @@ export default function AdminCategories() {
  color: #9ca3af;
  }
  `}</style>
- {confirmDialog}
  </div>
  </>
  );

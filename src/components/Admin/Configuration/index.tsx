@@ -4,7 +4,6 @@
 import { Spinner } from "@/components/ui/Spinner";
 import { useEffect, useMemo, useState } from "react";
 import toast from "react-hot-toast";
-import { useConfirmDialog, usePromptDialog } from "@/components/Admin/shared/useConfirm";
 import Pagination from "@/components/ui/Pagination";
 import { HugeiconsIcon } from "@hugeicons/react";
 import { Money03Icon, Building03Icon, ArrowLeft01Icon, ArrowRight01Icon, DollarCircleIcon, Globe02Icon, BankIcon, PackageCheckIcon, RefreshCwIcon, Search01Icon, Settings02Icon, ShieldCheckIcon, TruckIcon, UserAdd01Icon } from "@hugeicons/core-free-icons";
@@ -346,7 +345,6 @@ function MarketplaceSettings() {
 }
 
 function CommissionRules() {
- const { confirm, confirmDialog } = useConfirmDialog();
  const [rows, setRows] = useState<AdminCommissionRule[]>([]);
  const [search, setSearch] = useState("");
  const [scope, setScope] = useState("all");
@@ -486,7 +484,7 @@ function CommissionRules() {
  await load();
  }}>{row.is_active ? "Disable" : "Enable"}</button>
  <button className="text-xs font-semibold text-destructive" onClick={async () => {
- if (!(await confirm({ title: "Delete this commission rule?", description: "The rule stops applying to new commissions immediately.", confirmLabel: "Delete" }))) return;
+ if (!confirm("Delete this commission rule?")) return;
  await deleteCommissionRule(row.id);
  await load();
  }}>Delete</button>
@@ -502,13 +500,11 @@ function CommissionRules() {
  </>
  )}
  </TableCard>
- {confirmDialog}
  </section>
  );
 }
 
 function LogisticsCompanies() {
- const { confirm, confirmDialog } = useConfirmDialog();
  const [rows, setRows] = useState<AdminLogisticsCompany[]>([]);
  const [search, setSearch] = useState("");
  const [page, setPage] = useState(1);
@@ -622,11 +618,11 @@ function LogisticsCompanies() {
  <td className="px-5 py-4"><Status value={row.status} /></td>
  <td className="px-5 py-4">
  <div className="flex items-center gap-3"><button className="text-xs font-semibold text-primary" onClick={async () => {
- if (!(await confirm({ title: "Rotate admin password?", description: `A new temporary password will be emailed to ${row.contact_email || "the primary administrator"}. The previous password will stop working.`, confirmLabel: "Rotate password", tone: "warning" }))) return;
+ if (!confirm(`Generate a new temporary password and email it to ${row.contact_email || "the primary administrator"}? The previous password will stop working.`)) return;
  try { const result = await resendLogisticsAdministratorCredentials(row.id); toast.success(`New login credentials sent to ${result.email}.`); }
  catch (error) { toast.error(errorMessage(error)); }
  }}>Resend credentials</button><button className="text-xs font-semibold text-destructive" onClick={async () => {
- if (!(await confirm({ title: "Deactivate this logistics company?", description: "The company will stop receiving delivery jobs and settlements.", confirmLabel: "Deactivate" }))) return;
+ if (!confirm("Deactivate this logistics company?")) return;
  await deactivateLogisticsCompany(row.id); await load();
  }}>Deactivate</button></div>
  </td>
@@ -638,8 +634,7 @@ function LogisticsCompanies() {
  <Pagination page={page} pageSize={pageSize} total={meta.total} totalPages={meta.total_pages} onPageChange={setPage} onPageSizeChange={setPageSize}/>
  </>}
  </TableCard>
- {confirmDialog}
-</section>
+ </section>
  );
 }
 
@@ -778,7 +773,6 @@ function FinanceSettings() {
 }
 
 function EscrowHolds() {
- const { prompt, promptDialog } = usePromptDialog();
  const [rows,setRows]=useState<AdminEscrowHold[]>([]);
  const [claims,setClaims]=useState<AdminSettlementProtectionClaim[]>([]);
  const [search,setSearch]=useState(""); const [status,setStatus]=useState("all");
@@ -786,18 +780,17 @@ function EscrowHolds() {
  const [meta,setMeta]=useState({total:0,total_pages:0}); const [loading,setLoading]=useState(true);
  const load=async()=>{setLoading(true);try{const [r,c]=await Promise.all([listEscrowHolds({page,page_size:pageSize,search:search||undefined,status:status==="all"?undefined:status}),listProtectionClaims({page:1,page_size:20})]);setRows(r.results);setMeta({total:r.total,total_pages:r.total_pages});setClaims(c.results);}catch(e){toast.error(errorMessage(e));}finally{setLoading(false)}};
  useEffect(()=>{const t=setTimeout(()=>void load(),250);return()=>clearTimeout(t)},[page,pageSize,search,status]);
- const resolve=async(claim:AdminSettlementProtectionClaim,action:"release_seller"|"keep_held"|"reject_claim")=>{const responsibility=((await prompt({title:"Resolve protection claim",label:"Responsibility",placeholder:"seller, logistics, customer, platform, or shared",defaultValue:claim.likely_responsibility||"seller"}))||"").trim() as "seller"|"logistics"|"customer"|"platform"|"shared";if(!["seller","logistics","customer","platform","shared"].includes(responsibility))return toast.error("Enter a valid responsibility.");const note=(await prompt({title:"Resolution note",label:"Note",placeholder:"Resolution note..."}))?.trim();if(!note)return;try{await resolveProtectionClaim(claim.id,{responsibility,action,note});toast.success("Protection claim updated.");await load();}catch(e){toast.error(errorMessage(e));}};
+ const resolve=async(claim:AdminSettlementProtectionClaim,action:"release_seller"|"keep_held"|"reject_claim")=>{const responsibility=(prompt("Responsibility: seller, logistics, customer, platform, or shared",claim.likely_responsibility||"seller")||"").trim() as "seller"|"logistics"|"customer"|"platform"|"shared";if(!["seller","logistics","customer","platform","shared"].includes(responsibility))return toast.error("Enter a valid responsibility.");const note=prompt("Resolution note:")?.trim();if(!note)return;try{await resolveProtectionClaim(claim.id,{responsibility,action,note});toast.success("Protection claim updated.");await load();}catch(e){toast.error(errorMessage(e));}};
  return <div className="space-y-5">
  <TableCard title="Escrow ledger" search={search} setSearch={v=>{setSearch(v);setPage(1);}} filter={<select className={inputClass} value={status} onChange={e=>{setStatus(e.target.value);setPage(1);}}><option value="all">All statuses</option><option value="held">Held</option><option value="release_pending">Release pending</option><option value="disputed">Disputed</option><option value="released">Released</option><option value="refunded">Refunded</option></select>}>
- {loading?<Loading label="Loading escrow holds..."/>:<><div className="overflow-x-auto"><table className="w-full min-w-[1000px] text-left text-sm"><TableHead headers={["Reference","Order","Seller","Gross","Seller","Commission","Released","Status","Actions"]}/><tbody className="divide-y">{rows.map(r=><tr key={r.id}><td className="px-5 py-4 font-mono text-xs">{r.reference}</td><td className="px-5 py-4 font-mono text-xs">{r.order_id.slice(0,8)}…</td><td className="px-5 py-4 font-mono text-xs">{r.seller_id?r.seller_id.slice(0,8)+"…":"—"}</td><td className="px-5 py-4 font-semibold">{r.gross_amount.toLocaleString()} {r.currency}</td><td className="px-5 py-4">{r.seller_amount.toLocaleString()}</td><td className="px-5 py-4">{r.commission_amount.toLocaleString()}</td><td className="px-5 py-4">{r.released_amount.toLocaleString()}</td><td className="px-5 py-4"><Status value={r.status}/>{r.release_after&&<p className="mt-1 text-[10px] text-muted-foreground">Auto {new Date(r.release_after).toLocaleString()}</p>}</td><td className="px-5 py-4"><div className="flex gap-2">{["held","release_pending"].includes(r.status)&&<><button className="text-xs font-semibold text-green-dark" onClick={async()=>{const amountText=await prompt({title:"Release escrow",label:"Amount",placeholder:"Release amount (leave empty for full remaining amount)",required:false});const note=(await prompt({title:"Release note",label:"Note",placeholder:"Release note (optional)...",required:false}))||undefined;try{await releaseEscrowHold(r.id,amountText?Number(amountText):undefined,note);toast.success("Escrow release recorded.");await load();}catch(e){toast.error(errorMessage(e));}}}>Release</button><button className="text-xs font-semibold text-destructive" onClick={async()=>{const note=await prompt({title:"Dispute escrow hold",label:"Dispute reason",placeholder:"Why is this hold disputed?",confirmLabel:"Dispute"});if(!note)return;try{await disputeEscrowHold(r.id,note);toast.success("Escrow marked disputed.");await load();}catch(e){toast.error(errorMessage(e));}}}>Dispute</button></>}</div></td></tr>)}{!rows.length&&<EmptyRow colSpan={9} text="No escrow holds found yet."/>}</tbody></table></div><Pagination page={page} pageSize={pageSize} total={meta.total} totalPages={meta.total_pages} onPageChange={setPage} onPageSizeChange={setPageSize}/></>}
+ {loading?<Loading label="Loading escrow holds..."/>:<><div className="overflow-x-auto"><table className="w-full min-w-[1000px] text-left text-sm"><TableHead headers={["Reference","Order","Seller","Gross","Seller","Commission","Released","Status","Actions"]}/><tbody className="divide-y">{rows.map(r=><tr key={r.id}><td className="px-5 py-4 font-mono text-xs">{r.reference}</td><td className="px-5 py-4 font-mono text-xs">{r.order_id.slice(0,8)}…</td><td className="px-5 py-4 font-mono text-xs">{r.seller_id?r.seller_id.slice(0,8)+"…":"—"}</td><td className="px-5 py-4 font-semibold">{r.gross_amount.toLocaleString()} {r.currency}</td><td className="px-5 py-4">{r.seller_amount.toLocaleString()}</td><td className="px-5 py-4">{r.commission_amount.toLocaleString()}</td><td className="px-5 py-4">{r.released_amount.toLocaleString()}</td><td className="px-5 py-4"><Status value={r.status}/>{r.release_after&&<p className="mt-1 text-[10px] text-muted-foreground">Auto {new Date(r.release_after).toLocaleString()}</p>}</td><td className="px-5 py-4"><div className="flex gap-2">{["held","release_pending"].includes(r.status)&&<><button className="text-xs font-semibold text-green-dark" onClick={async()=>{const amountText=prompt("Release amount (leave empty for full remaining amount):");const note=prompt("Release note (optional):")||undefined;try{await releaseEscrowHold(r.id,amountText?Number(amountText):undefined,note);toast.success("Escrow release recorded.");await load();}catch(e){toast.error(errorMessage(e));}}}>Release</button><button className="text-xs font-semibold text-destructive" onClick={async()=>{const note=prompt("Dispute reason:");if(!note)return;try{await disputeEscrowHold(r.id,note);toast.success("Escrow marked disputed.");await load();}catch(e){toast.error(errorMessage(e));}}}>Dispute</button></>}</div></td></tr>)}{!rows.length&&<EmptyRow colSpan={9} text="No escrow holds found yet."/>}</tbody></table></div><Pagination page={page} pageSize={pageSize} total={meta.total} totalPages={meta.total_pages} onPageChange={setPage} onPageSizeChange={setPageSize}/></>}
  </TableCard>
 
  <section className="overflow-hidden rounded-xl border border-border bg-card shadow-sm">
  <div className="border-b border-border p-5"><h3 className="font-bold text-foreground">Customer protection claims</h3><p className="mt-1 text-xs text-muted-foreground">Item-level and order-level F6 claims. A seller hold is automatic only for eligible seller/undetermined reasons.</p></div>
  <div className="overflow-x-auto"><table className="w-full min-w-[1100px] text-left text-sm"><TableHead headers={["Created","Order / Item","Reason","Responsibility","Seller hold","Status","Notes","Actions"]}/><tbody className="divide-y">{claims.map(c=><tr key={c.id}><td className="px-5 py-4 text-xs">{new Date(c.created_at).toLocaleString()}</td><td className="px-5 py-4 font-mono text-xs">{c.order_id.slice(0,8)}…<br/>{c.order_item_id?`Item ${c.order_item_id.slice(0,8)}…`:"Overall order"}</td><td className="px-5 py-4 font-semibold">{pretty(c.reason)}</td><td className="px-5 py-4"><Status value={c.likely_responsibility}/></td><td className="px-5 py-4">{c.hold_applied?<span className="font-semibold text-destructive">Affected escrow held</span>:<span className="text-muted-foreground">No automatic seller hold</span>}</td><td className="px-5 py-4"><Status value={c.status}/></td><td className="max-w-xs px-5 py-4 text-xs text-muted-foreground">{c.notes||"—"}</td><td className="px-5 py-4"><div className="flex flex-wrap gap-2">{!["resolved","rejected","seller_liable","logistics_liable","customer_liable"].includes(c.status)&&<><button onClick={()=>void resolve(c,"release_seller")} className="text-xs font-semibold text-green-dark">Release seller</button><button onClick={()=>void resolve(c,"keep_held")} className="text-xs font-semibold text-yellow-dark-2">Keep held</button><button onClick={()=>void resolve(c,"reject_claim")} className="text-xs font-semibold text-muted-foreground">Reject claim</button></>}</div></td></tr>)}{!claims.length&&<EmptyRow colSpan={8} text="No customer protection claims have been submitted."/>}</tbody></table></div>
  </section>
- {promptDialog}
-</div>;
+ </div>;
 }
 
 
