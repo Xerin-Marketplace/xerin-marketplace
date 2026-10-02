@@ -79,7 +79,7 @@ export default function AdminSidebar({
  dashboardHref="/admin/dashboard"
  notificationsHref="/admin/dashboard?tab=overview&menu=communications&item=notifications"
  profileHref="/admin/dashboard?tab=overview&menu=account&item=profile"
- settingsHref="/admin/dashboard?tab=overview&menu=account&item=profile"
+ settingsHref="/admin/dashboard?tab=overview&menu=marketplace-settings&item=marketplace-rules"
  supportHref="/admin/customers/support"
  footerLabel="Xerin Mart Admin Center"
  searchPlaceholder="Search admin records"

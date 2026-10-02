@@ -3,7 +3,7 @@
 import Image from "next/image";
 import Link from "next/link";
 import { ReactNode, useEffect, useMemo, useRef, useState } from "react";
-import { usePathname, useSearchParams } from "next/navigation";
+import { usePathname, useRouter, useSearchParams } from "next/navigation";
 import { BellIcon, ArrowDown01Icon, ArrowRight01Icon, UserCircleIcon, Home01Icon, DashboardSquare01Icon, Location01Icon, Menu01Icon, Moon02Icon, SidebarLeft01Icon, SidebarRight01Icon, Search01Icon, Settings01Icon, Logout01Icon, Sun03Icon, Cancel01Icon, LockKeyIcon } from "@hugeicons/core-free-icons";
 
 import { useTheme } from "@/app/context/ThemeContext";
@@ -101,7 +101,10 @@ export default function DashboardShell({
  const [mobileOpen, setMobileOpen] = useState(false);
  const [collapsed, setCollapsed] = useState(false);
  const [profileOpen, setProfileOpen] = useState(false);
+ const [navQuery, setNavQuery] = useState("");
  const profileMenuRef = useRef<HTMLDivElement | null>(null);
+ const searchRef = useRef<HTMLDivElement | null>(null);
+ const router = useRouter();
 
  const displayName =
  [user?.first_name, user?.last_name].filter(Boolean).join(" ") ||
@@ -194,6 +197,32 @@ export default function DashboardShell({
  const dashboardActive =
  pathname === new URL(dashboardHref, "http://localhost").pathname &&
  !searchParams.get("tab");
+
+ // Header search = page finder across the visible navigation.
+ const navResults = useMemo(() => {
+ const q = navQuery.trim().toLowerCase();
+ if (!q) return [];
+ const flat = groups.flatMap((group) =>
+ group.items.map((item) => ({ ...item, section: group.title })),
+ );
+ return flat
+ .filter((item) => item.label.toLowerCase().includes(q))
+ .slice(0, 8);
+ }, [groups, navQuery]);
+
+ // Close menus on outside click.
+ useEffect(() => {
+ const onDown = (event: MouseEvent) => {
+ if (profileMenuRef.current && !profileMenuRef.current.contains(event.target as Node)) {
+ setProfileOpen(false);
+ }
+ if (searchRef.current && !searchRef.current.contains(event.target as Node)) {
+ setNavQuery("");
+ }
+ };
+ document.addEventListener("mousedown", onDown);
+ return () => document.removeEventListener("mousedown", onDown);
+ }, []);
 
  return (
  <div
@@ -371,7 +400,73 @@ export default function DashboardShell({
  <h1 className="truncate text-lg font-bold tracking-[-0.02em]">{title}</h1>
  </div>
 
+ <div ref={searchRef} className="relative mx-auto hidden w-full max-w-sm md:block">
+ <HugeiconsIcon
+ icon={Search01Icon}
+ size={16}
+ className="pointer-events-none absolute left-3.5 top-1/2 -translate-y-1/2 text-muted-foreground"
+ />
+ <input
+ value={navQuery}
+ onChange={(event) => setNavQuery(event.target.value)}
+ onKeyDown={(event) => {
+ if (event.key === "Enter" && navResults[0]) {
+ event.preventDefault();
+ router.push(navResults[0].href);
+ setNavQuery("");
+ }
+ }}
+ placeholder={searchPlaceholder}
+ aria-label={searchPlaceholder}
+ role="combobox"
+ aria-expanded={navQuery.trim().length > 0}
+ className="h-10 w-full rounded-full border border-border bg-muted pl-10 pr-4 text-sm outline-none transition placeholder:text-muted-foreground/70 focus:border-[var(--primary)] focus:bg-card dark:border-border dark:bg-card/[.03]"
+ />
+ {navQuery.trim().length > 0 && (
+ <div className="absolute inset-x-0 top-[calc(100%+0.5rem)] z-50 max-h-80 overflow-auto rounded-xl border border-border bg-card p-1.5 shadow-lg dark:border-border">
+ {navResults.length === 0 ? (
+ <p className="px-3 py-2.5 text-sm text-muted-foreground">No matching pages.</p>
+ ) : (
+ navResults.map((item) => (
+ <button
+ key={item.href}
+ type="button"
+ onClick={() => {
+ router.push(item.href);
+ setNavQuery("");
+ }}
+ className="flex w-full items-center justify-between rounded-lg px-3 py-2 text-left text-sm text-muted-foreground transition hover:bg-muted hover:text-foreground dark:hover:bg-card/[.08] dark:hover:text-white"
+ >
+ <span>{item.label}</span>
+ <span className="text-xs text-muted-foreground/60">{item.section}</span>
+ </button>
+ ))
+ )}
+ </div>
+ )}
+ </div>
+
  <div className="ml-auto flex items-center gap-1 sm:gap-2">
+ <button
+ type="button"
+ onClick={toggleTheme}
+ aria-label={theme === "dark" ? "Switch to light mode" : "Switch to dark mode"}
+ className="rounded-xl p-2.5 hover:bg-muted dark:hover:bg-card/10"
+ >
+ <HugeiconsIcon icon={theme === "dark" ? Sun03Icon : Moon02Icon} size={18} />
+ </button>
+
+ {settingsHref && (
+ <Link
+ href={settingsHref}
+ aria-label="Settings"
+ title="Settings"
+ className="rounded-xl p-2.5 hover:bg-muted dark:hover:bg-card/10"
+ >
+ <HugeiconsIcon icon={Settings01Icon} size={18} />
+ </Link>
+ )}
+
  {notificationsHref && (
  <Link
  href={notificationsHref}
@@ -444,6 +539,18 @@ export default function DashboardShell({
  >
  <HugeiconsIcon icon={UserCircleIcon} size={18} />
  <span>Profile</span>
+ </Link>
+ )}
+
+ {settingsHref && (
+ <Link
+ role="menuitem"
+ href={settingsHref}
+ onClick={() => setProfileOpen(false)}
+ className="flex items-center gap-3 rounded-xl px-3 py-2.5 text-sm text-muted-foreground transition hover:bg-muted hover:text-foreground /70 dark:hover:bg-card/[0.08] dark:hover:text-white"
+ >
+ <HugeiconsIcon icon={Settings01Icon} size={18} />
+ <span>Settings</span>
  </Link>
  )}
 
