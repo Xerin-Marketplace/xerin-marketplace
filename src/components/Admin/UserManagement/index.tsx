@@ -399,14 +399,10 @@ export default function AdminUserManagement({
 
  return (
  <div className="space-y-5">
- <section className="rounded-xl border border-border bg-transparent p-5 sm:p-6">
- <div className="flex flex-col gap-5 lg:flex-row lg:items-end lg:justify-between">
+ <div className="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
  <div>
- <p className="text-xs font-semibold uppercase tracking-[.2em] text-muted-foreground">
- Access governance
- </p>
- <h2 className="mt-2 text-3xl font-semibold text-foreground">{titles[view]}</h2>
- <p className="mt-2 max-w-3xl text-sm leading-6 text-muted-foreground">
+ <h2 className="text-lg font-bold tracking-tight text-foreground">{titles[view]}</h2>
+ <p className="mt-0.5 max-w-2xl text-sm text-muted-foreground">
  {descriptions[view]}
  </p>
  </div>
@@ -416,9 +412,9 @@ export default function AdminUserManagement({
  <button
  type="button"
  onClick={() => setShowCreateRole(true)}
- className="inline-flex h-11 items-center gap-2 rounded-xl border border-border bg-card px-4 text-sm font-semibold text-foreground"
+ className="inline-flex h-10 items-center gap-2 rounded-lg bg-primary px-4 text-sm font-semibold text-primary-foreground transition hover:bg-primary/90"
  >
- <HugeiconsIcon icon={PlusIcon} size={16} />
+ <HugeiconsIcon icon={PlusIcon} size={15} />
  Create Role
  </button>
  )}
@@ -430,15 +426,14 @@ export default function AdminUserManagement({
  await ensureRoles();
  setShowCreateStaff(true);
  }}
- className="inline-flex h-11 items-center gap-2 rounded-xl border border-border bg-card px-4 text-sm font-semibold text-foreground"
+ className="inline-flex h-10 items-center gap-2 rounded-lg bg-primary px-4 text-sm font-semibold text-primary-foreground transition hover:bg-primary/90"
  >
- <HugeiconsIcon icon={UserAdd01Icon} size={16} />
+ <HugeiconsIcon icon={UserAdd01Icon} size={15} />
  Add New User
  </button>
  )}
  </div>
  </div>
- </section>
 
  <section className="grid gap-4 sm:grid-cols-2 xl:grid-cols-4">
  {metrics.map(([label, value]) => (
@@ -479,7 +474,7 @@ export default function AdminUserManagement({
  value={query}
  onChange={(event) => setQuery(event.target.value)}
  placeholder={`Search ${titles[view].toLowerCase()}`}
- className="h-11 w-full rounded-xl border border-border bg-muted pl-10 pr-4 text-sm outline-none focus:border-[var(--primary)]"
+ className="h-10 w-full rounded-lg border border-border bg-card pl-10 pr-4 text-sm outline-none focus:border-[var(--primary)]"
  />
  </div>
 
@@ -491,7 +486,7 @@ export default function AdminUserManagement({
  setStatusFilter(event.target.value);
  setPage(1);
  }}
- className="h-11 rounded-xl border border-border bg-card px-3 text-sm outline-none"
+ className="h-10 rounded-lg border border-border bg-card px-3 text-sm outline-none"
  >
  <option value="">All statuses</option>
  <option value="active">Active</option>
@@ -506,7 +501,7 @@ export default function AdminUserManagement({
  setPageSize(Number(event.target.value));
  setPage(1);
  }}
- className="h-11 rounded-xl border border-border bg-card px-3 text-sm outline-none"
+ className="h-10 rounded-lg border border-border bg-card px-3 text-sm outline-none"
  >
  <option value={10}>10 / page</option>
  <option value={25}>25 / page</option>
@@ -518,7 +513,7 @@ export default function AdminUserManagement({
  <button
  type="button"
  onClick={() => void load()}
- className="inline-flex h-11 items-center justify-center gap-2 rounded-xl border border-border px-4 text-sm font-semibold text-muted-foreground"
+ className="inline-flex h-10 items-center justify-center gap-2 rounded-xl border border-border px-4 text-sm font-semibold text-muted-foreground"
  >
  <HugeiconsIcon icon={RefreshCwIcon} size={16} />
  Refresh
@@ -1099,11 +1094,11 @@ function CreateRoleModal({
  }, []);
 
  const roleInputClass =
- "mt-3 h-12 w-full rounded-xl border-2 border-border bg-card px-4 text-sm font-medium text-foreground shadow-sm outline-none transition placeholder:text-muted-foreground hover:border-border focus:border-[var(--primary)] focus:ring-4 focus:ring-ring/30/70";
+ "mt-3 h-10 w-full rounded-lg border border-border bg-card px-4 text-sm font-medium text-foreground shadow-sm outline-none transition placeholder:text-muted-foreground hover:border-border focus:border-[var(--primary)] focus:ring-4 focus:ring-ring/30/70";
 
  return (
  <Modal title="Create New Role" onClose={onClose}>
- <div className="rounded-xl border-2 border-border bg-muted p-5 shadow-sm">
+ <div className="rounded-lg border border-border bg-muted p-5 shadow-sm">
  <div className="flex items-start gap-3">
  <span className="flex h-8 w-8 shrink-0 items-center justify-center rounded-full border border-border bg-card text-sm font-bold text-foreground">
  1
@@ -1116,7 +1111,7 @@ function CreateRoleModal({
  </div>
  </div>
 
- <div className="mt-5 overflow-hidden rounded-xl border-2 border-border bg-card">
+ <div className="mt-5 overflow-hidden rounded-lg border border-border bg-card">
  <div className="border-b border-border p-4">
  <label className="block">
  <span className="text-sm font-semibold text-foreground">
@@ -1147,14 +1142,14 @@ function CreateRoleModal({
  onChange={(event) => setDescription(event.target.value)}
  rows={4}
  placeholder="e.g. Manages payments, refunds, commissions and finance reports."
- className="mt-3 w-full resize-none rounded-xl border-2 border-border bg-card px-4 py-3 text-sm font-medium text-foreground shadow-sm outline-none transition placeholder:text-muted-foreground hover:border-border focus:border-[var(--primary)] focus:ring-4 focus:ring-ring/30/70"
+ className="mt-3 w-full resize-none rounded-lg border border-border bg-card px-4 py-3 text-sm font-medium text-foreground shadow-sm outline-none transition placeholder:text-muted-foreground hover:border-border focus:border-[var(--primary)] focus:ring-4 focus:ring-ring/30/70"
  />
  </label>
  </div>
  </div>
  </div>
 
- <div className="mt-5 rounded-xl border-2 border-border bg-muted p-5 shadow-sm">
+ <div className="mt-5 rounded-lg border border-border bg-muted p-5 shadow-sm">
  <div className="flex items-start justify-between gap-4">
  <div className="flex items-start gap-3">
  <span className="flex h-8 w-8 shrink-0 items-center justify-center rounded-full border border-border bg-card text-sm font-bold text-foreground">
@@ -1184,7 +1179,7 @@ function CreateRoleModal({
  </div>
  </div>
 
- <div className="mt-5 rounded-xl border-2 border-border bg-card p-4">
+ <div className="mt-5 rounded-lg border border-border bg-card p-4">
  <div className="mb-4 flex items-start gap-3">
  <span className="flex h-8 w-8 shrink-0 items-center justify-center rounded-full border border-border bg-muted text-sm font-bold text-foreground">
  3
@@ -1289,7 +1284,7 @@ function CreateStaffWorkspace({
  </div>
 
  <div className="mt-6 grid gap-6 xl:grid-cols-[minmax(0,1.15fr)_minmax(360px,.85fr)]">
- <div className="rounded-xl border-2 border-border bg-muted p-5 shadow-sm sm:p-6">
+ <div className="rounded-lg border border-border bg-muted p-5 shadow-sm sm:p-6">
  <div className="mb-5 flex items-start gap-3 border-b border-border pb-4">
  <span className="flex h-8 w-8 shrink-0 items-center justify-center rounded-lg border border-border bg-card text-sm font-bold text-foreground">1</span>
  <div>
@@ -1298,7 +1293,7 @@ function CreateStaffWorkspace({
  </div>
  </div>
 
- <div className="overflow-hidden rounded-xl border-2 border-border bg-card">
+ <div className="overflow-hidden rounded-lg border border-border bg-card">
  <div className="grid sm:grid-cols-2">
  <div className="border-b border-border p-4 sm:border-r">
  <label className="block">
@@ -1309,7 +1304,7 @@ function CreateStaffWorkspace({
  Staff member&apos;s given name
  </span>
  <input
- className="mt-3 h-12 w-full rounded-xl border-2 border-border bg-card px-4 text-sm font-medium text-foreground shadow-sm outline-none transition placeholder:text-muted-foreground hover:border-border focus:border-[var(--primary)] focus:ring-4 focus:ring-ring/30/70"
+ className="mt-3 h-10 w-full rounded-lg border border-border bg-card px-4 text-sm font-medium text-foreground shadow-sm outline-none transition placeholder:text-muted-foreground hover:border-border focus:border-[var(--primary)] focus:ring-4 focus:ring-ring/30/70"
  placeholder="e.g. Juma"
  value={form.first_name}
  onChange={(e) => setForm({ ...form, first_name: e.target.value })}
@@ -1326,7 +1321,7 @@ function CreateStaffWorkspace({
  Staff member&apos;s family name
  </span>
  <input
- className="mt-3 h-12 w-full rounded-xl border-2 border-border bg-card px-4 text-sm font-medium text-foreground shadow-sm outline-none transition placeholder:text-muted-foreground hover:border-border focus:border-[var(--primary)] focus:ring-4 focus:ring-ring/30/70"
+ className="mt-3 h-10 w-full rounded-lg border border-border bg-card px-4 text-sm font-medium text-foreground shadow-sm outline-none transition placeholder:text-muted-foreground hover:border-border focus:border-[var(--primary)] focus:ring-4 focus:ring-ring/30/70"
  placeholder="e.g. Mushi"
  value={form.last_name}
  onChange={(e) => setForm({ ...form, last_name: e.target.value })}
@@ -1344,7 +1339,7 @@ function CreateStaffWorkspace({
  </span>
  <input
  type="email"
- className="mt-3 h-12 w-full rounded-xl border-2 border-border bg-card px-4 text-sm font-medium text-foreground shadow-sm outline-none transition placeholder:text-muted-foreground hover:border-border focus:border-[var(--primary)] focus:ring-4 focus:ring-ring/30/70"
+ className="mt-3 h-10 w-full rounded-lg border border-border bg-card px-4 text-sm font-medium text-foreground shadow-sm outline-none transition placeholder:text-muted-foreground hover:border-border focus:border-[var(--primary)] focus:ring-4 focus:ring-ring/30/70"
  placeholder="juma@xerinmarketplace.com"
  value={form.email}
  onChange={(e) => setForm({ ...form, email: e.target.value })}
@@ -1361,7 +1356,7 @@ function CreateStaffWorkspace({
  Use international format where possible
  </span>
  <input
- className="mt-3 h-12 w-full rounded-xl border-2 border-border bg-card px-4 text-sm font-medium text-foreground shadow-sm outline-none transition placeholder:text-muted-foreground hover:border-border focus:border-[var(--primary)] focus:ring-4 focus:ring-ring/30/70"
+ className="mt-3 h-10 w-full rounded-lg border border-border bg-card px-4 text-sm font-medium text-foreground shadow-sm outline-none transition placeholder:text-muted-foreground hover:border-border focus:border-[var(--primary)] focus:ring-4 focus:ring-ring/30/70"
  placeholder="+255..."
  value={form.phone}
  onChange={(e) => setForm({ ...form, phone: e.target.value })}
@@ -1379,7 +1374,7 @@ function CreateStaffWorkspace({
  </span>
  <input
  type="password"
- className="mt-3 h-12 w-full rounded-xl border-2 border-border bg-card px-4 text-sm font-medium text-foreground shadow-sm outline-none transition placeholder:text-muted-foreground hover:border-border focus:border-[var(--primary)] focus:ring-4 focus:ring-ring/30/70"
+ className="mt-3 h-10 w-full rounded-lg border border-border bg-card px-4 text-sm font-medium text-foreground shadow-sm outline-none transition placeholder:text-muted-foreground hover:border-border focus:border-[var(--primary)] focus:ring-4 focus:ring-ring/30/70"
  placeholder="Create a temporary password"
  value={form.password}
  onChange={(e) => setForm({ ...form, password: e.target.value })}
@@ -1390,7 +1385,7 @@ function CreateStaffWorkspace({
  </div>
  </div>
 
- <div className="rounded-xl border-2 border-border bg-muted p-5 shadow-sm sm:p-6">
+ <div className="rounded-lg border border-border bg-muted p-5 shadow-sm sm:p-6">
  <div className="mb-5 flex items-start gap-3 border-b border-border pb-4">
  <span className="flex h-8 w-8 shrink-0 items-center justify-center rounded-lg border border-border bg-card text-sm font-bold text-foreground">2</span>
  <div>
@@ -1476,7 +1471,7 @@ function CreateStaffModal({
  roleIds.length > 0;
 
  const inputClass =
- "mt-3 h-12 w-full rounded-xl border-2 border-border bg-card px-4 text-sm font-medium text-foreground shadow-sm outline-none transition placeholder:text-muted-foreground hover:border-border focus:border-[var(--primary)] focus:ring-4 focus:ring-ring/30/70";
+ "mt-3 h-10 w-full rounded-lg border border-border bg-card px-4 text-sm font-medium text-foreground shadow-sm outline-none transition placeholder:text-muted-foreground hover:border-border focus:border-[var(--primary)] focus:ring-4 focus:ring-ring/30/70";
 
  const availableRoles = roles.filter(
  (role) => !["customer", "seller"].includes(role.name),
@@ -1484,7 +1479,7 @@ function CreateStaffModal({
 
  return (
  <Modal title="Create Staff Account" onClose={onClose}>
- <div className="rounded-xl border-2 border-border bg-muted p-5 shadow-sm">
+ <div className="rounded-lg border border-border bg-muted p-5 shadow-sm">
  <div className="flex items-start gap-3">
  <span className="flex h-8 w-8 shrink-0 items-center justify-center rounded-full border border-border bg-card text-sm font-bold text-foreground">
  1
@@ -1497,7 +1492,7 @@ function CreateStaffModal({
  </div>
  </div>
 
- <div className="mt-5 overflow-hidden rounded-xl border-2 border-border bg-card">
+ <div className="mt-5 overflow-hidden rounded-lg border border-border bg-card">
  <div className="grid sm:grid-cols-2">
  <div className="border-b border-border p-4 sm:border-r">
  <label className="block">
@@ -1613,7 +1608,7 @@ function CreateStaffModal({
  </div>
  </div>
 
- <div className="mt-5 rounded-xl border-2 border-border bg-muted p-5 shadow-sm">
+ <div className="mt-5 rounded-lg border border-border bg-muted p-5 shadow-sm">
  <div className="flex items-start justify-between gap-4">
  <div className="flex items-start gap-3">
  <span className="flex h-8 w-8 shrink-0 items-center justify-center rounded-full border border-border bg-card text-sm font-bold text-foreground">
@@ -1634,7 +1629,7 @@ function CreateStaffModal({
  </span>
  </div>
 
- <div className="mt-4 overflow-hidden rounded-xl border-2 border-border bg-card">
+ <div className="mt-4 overflow-hidden rounded-lg border border-border bg-card">
  <div className="grid gap-0 sm:grid-cols-2">
  {availableRoles.map((role, index) => {
  const selected = roleIds.includes(role.id);
@@ -1705,7 +1700,7 @@ function CreateStaffModal({
  )}
  </div>
 
- <div className="mt-5 rounded-xl border-2 border-border bg-card p-4">
+ <div className="mt-5 rounded-lg border border-border bg-card p-4">
  <div className="mb-4 flex items-start gap-3">
  <span className="flex h-8 w-8 shrink-0 items-center justify-center rounded-full border border-border bg-muted text-sm font-bold text-foreground">
  3
