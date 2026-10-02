@@ -1140,11 +1140,12 @@ export const listSystemEvents=async()=>
   (await axiosInstance.get<SecurityEventWire[]>("/audit-logs/security/events")).data.map(mapSecurityEvent);
 export const acknowledgeSystemEvent=async(id:string)=>
   mapSecurityEvent((await axiosInstance.patch<SecurityEventWire>(`/audit-logs/security/events/${id}/resolve`,{note:null})).data);
-export const listBackgroundJobs=async()=>{
-  throw new Error("Background job monitoring is not exposed by the API yet.");
-};
-export const retryBackgroundJob=async(_id:string)=>{throw new Error("Background job monitoring is not exposed by the API yet.");};
-export const cancelBackgroundJob=async(_id:string)=>{throw new Error("Background job monitoring is not exposed by the API yet.");};
+export const listBackgroundJobs=async()=>
+  (await axiosInstance.get<BackgroundJob[]>("/monitoring/jobs")).data;
+export const retryBackgroundJob=async(id:string)=>
+  (await axiosInstance.post<BackgroundJob>(`/monitoring/jobs/${id}/retry`)).data;
+export const cancelBackgroundJob=async(id:string)=>
+  (await axiosInstance.post<BackgroundJob>(`/monitoring/jobs/${id}/cancel`)).data;
 
 // "Application settings" in this UI are backed by the real finance settings
 // singleton (GET/PATCH /admin/finance/settings). Flatten its fields into
