@@ -5,6 +5,7 @@ import { usePathname } from "next/navigation";
 import { useCartModalContext } from "@/app/context/CartSidebarModalContext";
 import { useCartView } from "@/hooks/useCartActions";
 import { useAuth } from "@/hooks/useAuth";
+import { useLanguage } from "@/app/context/LanguageContext";
 import { getAccountHref } from "@/guards/auth-routing";
 import { HugeiconsIcon } from "@hugeicons/react";
 import { Home01Icon, GridIcon, ShoppingCart01Icon, UserIcon } from "@hugeicons/core-free-icons";
@@ -28,6 +29,7 @@ export default function MobileBottomNav() {
  const { openCartModal } = useCartModalContext();
  const { items } = useCartView();
  const { user, isAuthenticated } = useAuth();
+ const { t } = useLanguage();
  const accountHref = getAccountHref(isAuthenticated, user);
 
  const active = (href: string) =>
@@ -53,7 +55,7 @@ export default function MobileBottomNav() {
  <div className="mx-auto flex h-[var(--xerin-mobile-nav-height)] max-w-[560px] items-stretch">
  <Link href="/" className={itemClass(active("/"))}>
  <NavIcon type="home" />
- <span>Home</span>
+ <span>{t("nav_home")}</span>
  </Link>
 
  <Link
@@ -65,7 +67,7 @@ export default function MobileBottomNav() {
  )}
  >
  <NavIcon type="categories" />
- <span>Categories</span>
+ <span>{t("nav_categories")}</span>
  </Link>
 
  <button
@@ -82,7 +84,7 @@ export default function MobileBottomNav() {
  </span>
  )}
  </span>
- <span>Cart</span>
+ <span>{t("header_cart")}</span>
  </button>
 
  <Link
@@ -95,7 +97,7 @@ export default function MobileBottomNav() {
  )}
  >
  <NavIcon type="account" />
- <span>{isAuthenticated ? "Account" : "Sign in"}</span>
+ <span>{isAuthenticated ? t("header_account") : t("header_signin")}</span>
  </Link>
  </div>
  </nav>

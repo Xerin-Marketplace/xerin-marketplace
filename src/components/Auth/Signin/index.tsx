@@ -14,6 +14,9 @@ import { useAuth } from "@/hooks/useAuth";
 import { getPostLoginPath } from "@/guards/auth-routing";
 import { PhoneInput, isValidInternationalPhone, buildInternationalPhone, DEFAULT_DIAL_CODE } from "../phone-input";
 import { useCartModalContext } from "@/app/context/CartSidebarModalContext";
+import { useLanguage } from "@/app/context/LanguageContext";
+
+const useTL = () => useLanguage().t;
 import type { AuthTokenResponse, StaffSecurityNotice } from "@/types/api/auth";
 import { HugeiconsIcon } from "@hugeicons/react";
 import { Mail01Icon, LockIcon, UserIcon, SmartPhone01Icon, ViewIcon, ViewOffIcon, CheckIcon, CheckmarkCircle02Icon, ShieldCheckIcon, SecurityCheckIcon, TruckIcon, Wallet01Icon, ChartIncreaseIcon, Upload04Icon } from "@hugeicons/core-free-icons";
@@ -257,6 +260,7 @@ const PasswordChecklist = ({ password }: { password: string }) => {
  
 
 const SignInPanel = ({ onSwitchTab }: { onSwitchTab: (tab: AuthTab) => void }) => {
+ const t = useTL();
  const router = useRouter();
  const searchParams = useSearchParams();
  const { setSession, mergeGuestCart } = useAuth();
@@ -518,7 +522,7 @@ const SignInPanel = ({ onSwitchTab }: { onSwitchTab: (tab: AuthTab) => void }) =
  Password
  </label>
  <Link href="/forgot-password" className="text-sm text-primary hover:underline">
- Forgot Password
+ {t("auth_forgot")}
  </Link>
  </div>
  <PasswordInput
@@ -539,7 +543,7 @@ const SignInPanel = ({ onSwitchTab }: { onSwitchTab: (tab: AuthTab) => void }) =
  disabled={isSubmitting || googleBusy}
  className="flex h-11 w-full items-center justify-center rounded-lg bg-orange px-6 text-sm font-semibold text-white shadow-sm ease-out duration-200 hover:bg-primary/90-dark disabled:cursor-not-allowed disabled:opacity-70"
  >
- {isSubmitting ? "Signing in..." : "Sign in"}
+ {isSubmitting ? t("common_loading") : t("auth_signin_btn")}
  </button>
 
  <div className="my-5 flex items-center gap-3" aria-hidden="true">
@@ -553,8 +557,8 @@ const SignInPanel = ({ onSwitchTab }: { onSwitchTab: (tab: AuthTab) => void }) =
  </div>
 
  <p className="mt-5 text-center text-sm sm:mt-6">
- <span className="text-muted-foreground">Don&apos;t have an account? </span>
-<Link href="/signup" className="font-medium text-primary hover:underline">Sign Up</Link>
+ <span className="text-muted-foreground">{t("auth_no_account")} </span>
+<Link href="/signup" className="font-medium text-primary hover:underline">{t("auth_signup_link")}</Link>
  </p>
  </form>
  </>
@@ -566,6 +570,7 @@ const SignInPanel = ({ onSwitchTab }: { onSwitchTab: (tab: AuthTab) => void }) =
  
 
 const SignUpPanel = ({ onSwitchTab }: { onSwitchTab: (tab: AuthTab) => void }) => {
+ const t = useTL();
  const router = useRouter();
  const searchParams = useSearchParams();
  const { setSession, mergeGuestCart } = useAuth();
@@ -681,7 +686,7 @@ const SignUpPanel = ({ onSwitchTab }: { onSwitchTab: (tab: AuthTab) => void }) =
  </div>
 
  <div className="mb-4 sm:mb-5">
- <FieldLabel htmlFor="signup-email" required>Email Address</FieldLabel>
+ <FieldLabel htmlFor="signup-email" required>{t("auth_email")}</FieldLabel>
  <TextInput
  type="email"
  id="signup-email"
@@ -696,7 +701,7 @@ const SignUpPanel = ({ onSwitchTab }: { onSwitchTab: (tab: AuthTab) => void }) =
  </div>
 
  <div className="mb-4 sm:mb-5">
- <FieldLabel htmlFor="signup-phone" required>Phone Number</FieldLabel>
+ <FieldLabel htmlFor="signup-phone" required>{t("auth_phone")}</FieldLabel>
  <PhoneInput id="signup-phone" value={phone} onChange={setPhone} dialCode={phoneDialCode} onDialCodeChange={setPhoneDialCode} disabled={isSubmitting} invalid={Boolean(phone) && !isPhoneValid} />
  {phone && !isPhoneValid && (
  <p className="mt-2 text-sm text-red">Enter a valid international phone number.</p>
@@ -704,7 +709,7 @@ const SignUpPanel = ({ onSwitchTab }: { onSwitchTab: (tab: AuthTab) => void }) =
  </div>
 
  <div className="mb-4 sm:mb-5">
- <FieldLabel htmlFor="signup-password" required>Password</FieldLabel>
+ <FieldLabel htmlFor="signup-password" required>{t("auth_password")}</FieldLabel>
  <PasswordInput
  withIcon
  id="signup-password"
@@ -720,7 +725,7 @@ const SignUpPanel = ({ onSwitchTab }: { onSwitchTab: (tab: AuthTab) => void }) =
  </div>
 
  <div className="mb-4 sm:mb-5">
- <FieldLabel htmlFor="signup-confirm-password" required>Re-type Password</FieldLabel>
+ <FieldLabel htmlFor="signup-confirm-password" required>{t("auth_confirm_password")}</FieldLabel>
  <PasswordInput
  withIcon
  id="signup-confirm-password"
@@ -740,7 +745,7 @@ const SignUpPanel = ({ onSwitchTab }: { onSwitchTab: (tab: AuthTab) => void }) =
  disabled={isSubmitting || googleBusy}
  className="flex h-11 w-full items-center justify-center rounded-lg bg-orange px-6 text-sm font-semibold text-white ease-out duration-200 hover:bg-primary/90-dark disabled:cursor-not-allowed disabled:opacity-70"
  >
- {isSubmitting ? "Creating account..." : "Create Account"}
+ {isSubmitting ? t("common_loading") : t("auth_signup_btn")}
  </button>
 
  <div className="my-5 flex items-center gap-3" aria-hidden="true">
@@ -754,8 +759,8 @@ const SignUpPanel = ({ onSwitchTab }: { onSwitchTab: (tab: AuthTab) => void }) =
  </div>
 
  <p className="text-center mt-6 text-sm">
- <span className="text-muted-foreground">Already have an account? </span>
-<Link href="/signin" className="font-medium text-primary hover:underline">Sign In</Link>
+ <span className="text-muted-foreground">{t("auth_have_account")} </span>
+<Link href="/signin" className="font-medium text-primary hover:underline">{t("auth_signin_link")}</Link>
  </p>
 
  </form>
@@ -811,6 +816,7 @@ const SELLER_INITIAL_STATE: SellerFormState = {
 };
 
 const SellerPanel = ({ onSwitchTab }: { onSwitchTab: (tab: AuthTab) => void }) => {
+ const t = useTL();
  const router = useRouter();
 
  const [form, setForm] = useState<SellerFormState>(SELLER_INITIAL_STATE);
@@ -1076,7 +1082,7 @@ const SellerPanel = ({ onSwitchTab }: { onSwitchTab: (tab: AuthTab) => void }) =
  <>
  <div className="grid gap-4 sm:grid-cols-2 sm:gap-5 mb-4 sm:mb-6">
  <div>
- <FieldLabel htmlFor="seller-first-name" required>First Name</FieldLabel>
+ <FieldLabel htmlFor="seller-first-name" required>{t("auth_first_name")}</FieldLabel>
  <TextInput
  type="text"
  id="seller-first-name"
@@ -1088,7 +1094,7 @@ const SellerPanel = ({ onSwitchTab }: { onSwitchTab: (tab: AuthTab) => void }) =
  />
  </div>
  <div>
- <FieldLabel htmlFor="seller-last-name" required>Last Name</FieldLabel>
+ <FieldLabel htmlFor="seller-last-name" required>{t("auth_last_name")}</FieldLabel>
  <TextInput
  type="text"
  id="seller-last-name"
@@ -1103,7 +1109,7 @@ const SellerPanel = ({ onSwitchTab }: { onSwitchTab: (tab: AuthTab) => void }) =
 
  <div className="grid gap-4 sm:grid-cols-2 sm:gap-5 mb-4 sm:mb-6">
  <div>
- <FieldLabel htmlFor="seller-email" required>Email Address</FieldLabel>
+ <FieldLabel htmlFor="seller-email" required>{t("auth_email")}</FieldLabel>
  <TextInput
  type="email"
  id="seller-email"
@@ -1115,7 +1121,7 @@ const SellerPanel = ({ onSwitchTab }: { onSwitchTab: (tab: AuthTab) => void }) =
  />
  </div>
  <div>
- <FieldLabel htmlFor="seller-phone" required>Phone Number</FieldLabel>
+ <FieldLabel htmlFor="seller-phone" required>{t("auth_phone")}</FieldLabel>
  <PhoneInput
  id="seller-phone"
  value={form.phone}
@@ -1130,7 +1136,7 @@ const SellerPanel = ({ onSwitchTab }: { onSwitchTab: (tab: AuthTab) => void }) =
 
  <div className="grid gap-4 sm:grid-cols-2 sm:gap-5 mb-4 sm:mb-6">
  <div>
- <FieldLabel htmlFor="seller-password" required>Password</FieldLabel>
+ <FieldLabel htmlFor="seller-password" required>{t("auth_password")}</FieldLabel>
  <PasswordInput
  withIcon
  id="seller-password"
@@ -1144,7 +1150,7 @@ const SellerPanel = ({ onSwitchTab }: { onSwitchTab: (tab: AuthTab) => void }) =
  />
  </div>
  <div>
- <FieldLabel htmlFor="seller-confirm-password" required>Re-type Password</FieldLabel>
+ <FieldLabel htmlFor="seller-confirm-password" required>{t("auth_confirm_password")}</FieldLabel>
  <PasswordInput
  withIcon
  id="seller-confirm-password"
@@ -1465,7 +1471,7 @@ const SellerPanel = ({ onSwitchTab }: { onSwitchTab: (tab: AuthTab) => void }) =
  disabled={isSubmitting}
  className="h-12 rounded-lg border border-border px-5 text-sm font-semibold text-foreground transition hover:bg-muted disabled:opacity-50"
  >
- Back
+ {t("auth_back")}
  </button>
  )}
  {step < SELLER_STEPS.length - 1 ? (
@@ -1476,7 +1482,7 @@ const SellerPanel = ({ onSwitchTab }: { onSwitchTab: (tab: AuthTab) => void }) =
  }}
  className="flex h-12 flex-1 items-center justify-center rounded-lg bg-orange px-6 text-sm font-semibold text-white transition hover:bg-primary/90-dark"
  >
- Continue
+ {t("auth_continue")}
  </button>
  ) : (
  <button
@@ -1484,14 +1490,14 @@ const SellerPanel = ({ onSwitchTab }: { onSwitchTab: (tab: AuthTab) => void }) =
  disabled={isSubmitting || !form.agreementAccepted}
  className="flex h-12 flex-1 items-center justify-center rounded-lg bg-orange px-6 text-sm font-semibold text-white transition hover:bg-primary/90-dark disabled:cursor-not-allowed disabled:opacity-50"
  >
- {isSubmitting ? "Creating seller account..." : "Create Seller Account"}
+ {isSubmitting ? t("common_loading") : t("auth_signup_btn")}
  </button>
  )}
  </div>
  <p className="text-center mt-6 text-sm">
- <span className="text-muted-foreground">Already have an account? </span>
+ <span className="text-muted-foreground">{t("auth_have_account")} </span>
  <button type="button" onClick={() => onSwitchTab("signin")} className="font-medium text-primary hover:underline">
- Sign in
+ {t("auth_signin_link")}
  </button>
  </p>
  </form>
@@ -1526,6 +1532,7 @@ const BROKER_INITIAL_STATE: BrokerFormState = {
 };
 
 const BrokerPanel = ({ onSwitchTab }: { onSwitchTab: (tab: AuthTab) => void }) => {
+ const t = useTL();
  const router = useRouter();
  const [form, setForm] = useState<BrokerFormState>(BROKER_INITIAL_STATE);
  const [phoneDialCode, setPhoneDialCode] = useState(DEFAULT_DIAL_CODE);
@@ -1626,18 +1633,18 @@ const BrokerPanel = ({ onSwitchTab }: { onSwitchTab: (tab: AuthTab) => void }) =
 
  <div className="grid gap-4 sm:grid-cols-2 sm:gap-5 mb-4 sm:mb-6">
  <div>
- <FieldLabel htmlFor="broker-first-name" required>First Name</FieldLabel>
+ <FieldLabel htmlFor="broker-first-name" required>{t("auth_first_name")}</FieldLabel>
  <TextInput id="broker-first-name" type="text" value={form.firstName} onChange={(e) => updateField("firstName", e.target.value)} placeholder="e.g. Adam" autoComplete="given-name" disabled={isSubmitting} />
  </div>
  <div>
- <FieldLabel htmlFor="broker-last-name" required>Last Name</FieldLabel>
+ <FieldLabel htmlFor="broker-last-name" required>{t("auth_last_name")}</FieldLabel>
  <TextInput id="broker-last-name" type="text" value={form.lastName} onChange={(e) => updateField("lastName", e.target.value)} placeholder="e.g. Mussa" autoComplete="family-name" disabled={isSubmitting} />
  </div>
  </div>
 
  <div className="grid gap-4 sm:grid-cols-2 sm:gap-5 mb-4 sm:mb-6">
  <div>
- <FieldLabel htmlFor="broker-email" required>Email Address</FieldLabel>
+ <FieldLabel htmlFor="broker-email" required>{t("auth_email")}</FieldLabel>
  <TextInput id="broker-email" type="email" value={form.email} onChange={(e) => updateField("email", e.target.value)} placeholder="you@example.com" autoComplete="email" disabled={isSubmitting} />
  </div>
  <div>
@@ -1664,11 +1671,11 @@ const BrokerPanel = ({ onSwitchTab }: { onSwitchTab: (tab: AuthTab) => void }) =
 
  <div className="grid gap-4 sm:grid-cols-2 sm:gap-5 mb-4 sm:mb-6">
  <div>
- <FieldLabel htmlFor="broker-password" required>Password</FieldLabel>
+ <FieldLabel htmlFor="broker-password" required>{t("auth_password")}</FieldLabel>
  <PasswordInput withIcon id="broker-password" value={form.password} onChange={(value) => updateField("password", value)} show={showPassword} onToggleShow={() => setShowPassword((prev) => !prev)} placeholder="Create a password" autoComplete="new-password" disabled={isSubmitting} />
  </div>
  <div>
- <FieldLabel htmlFor="broker-confirm-password" required>Re-type Password</FieldLabel>
+ <FieldLabel htmlFor="broker-confirm-password" required>{t("auth_confirm_password")}</FieldLabel>
  <PasswordInput withIcon id="broker-confirm-password" value={form.confirmPassword} onChange={(value) => updateField("confirmPassword", value)} show={showConfirmPassword} onToggleShow={() => setShowConfirmPassword((prev) => !prev)} placeholder="Re-type your password" autoComplete="new-password" disabled={isSubmitting} />
  </div>
  </div>
@@ -1679,11 +1686,11 @@ const BrokerPanel = ({ onSwitchTab }: { onSwitchTab: (tab: AuthTab) => void }) =
  </div>
 
  <button type="submit" disabled={isSubmitting} className="flex h-11 w-full items-center justify-center rounded-lg bg-orange px-6 text-sm font-semibold text-white ease-out duration-200 hover:bg-primary/90-dark disabled:cursor-not-allowed disabled:opacity-70">
- {isSubmitting ? "Creating broker account..." : "Create Broker Account"}
+ {isSubmitting ? t("common_loading") : t("auth_signup_btn")}
  </button>
 
  <p className="text-center mt-6 text-sm">
- <span className="text-muted-foreground">Already have an account? </span>
+ <span className="text-muted-foreground">{t("auth_have_account")} </span>
  <button type="button" onClick={() => onSwitchTab("signin")} className="font-medium text-primary hover:underline">Sign in</button>
  </p>
  </form>
@@ -1709,18 +1716,20 @@ const AuthPage = ({ initialTab = "signup" }: { initialTab?: AuthTab }) => {
  }
  }, [requestedTab]);
 
+ const { t } = useLanguage();
+
  const panelCopy: Record<AuthTab, { title: string; body: string }> = {
- signin: { title: 'Welcome back.', body: 'Sign in to keep shopping, track your orders and pick up right where you left off.' },
+ signin: { title: t("auth_welcome_back") + ".", body: 'Sign in to keep shopping, track your orders and pick up right where you left off.' },
  signup: { title: 'Join Xerin Mart.', body: 'Create your free account in minutes. Shop, track deliveries and manage everything from one place.' },
  seller: { title: 'Sell on Xerin.', body: 'Open your store, list your products and reach buyers across the region. Getting started takes minutes, not days.' },
  broker: { title: 'Earn with Xerin.', body: 'Share products you believe in and earn when people buy through your link. No inventory needed.' },
  };
 
  const headings: Record<AuthTab, { title: string; subtitle: string }> = {
- signin: { title: "Welcome back", subtitle: "Sign in to continue to Xerin Mart" },
- signup: { title: "Create an account", subtitle: "Create your Xerin Mart account" },
- seller: { title: "Become a seller", subtitle: "Tell us about your business to get started" },
- broker: { title: "Become a broker", subtitle: "Register, verify your identity, and start earning through Xerin Mart" },
+ signin: { title: t("auth_welcome_back"), subtitle: t("auth_signin_subtitle") },
+ signup: { title: t("auth_create_account"), subtitle: t("auth_signup_subtitle") },
+ seller: { title: t("auth_become_seller"), subtitle: t("auth_seller_subtitle") },
+ broker: { title: t("auth_become_broker"), subtitle: t("auth_broker_subtitle") },
  };
 
  return (

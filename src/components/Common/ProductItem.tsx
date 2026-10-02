@@ -7,6 +7,7 @@ import { useQuickViewStore } from "@/store/useQuickViewStore";
 import { useWishlistStore } from "@/store/useWishlistStore";
 import { useAddCartItem, addProductToCartPayload } from "@/hooks/useCartActions";
 import { useAddToWishlist } from "@/hooks/useWishlist";
+import { useLanguage } from "@/app/context/LanguageContext";
 import StarRating from "@/components/Common/StarRating";
 import Link from "next/link";
 import PriceDisplay from "@/components/shared/PriceDisplay";
@@ -18,6 +19,7 @@ const ProductItem = ({ item }: { item: Product }) => {
 
  const updateQuickView = useQuickViewStore((state) => state.updateQuickView);
  const addCartItem = useAddCartItem();
+ const { t } = useLanguage();
  const addToWishlist = useAddToWishlist();
  const addItemToWishlistLocal = useWishlistStore((state) => state.addItemToWishlist);
 
@@ -88,7 +90,7 @@ const ProductItem = ({ item }: { item: Product }) => {
  disabled={addCartItem.isPending}
  className="inline-flex flex-1 items-center justify-center rounded-md bg-primary px-4 py-[10px] text-sm font-medium text-primary-foreground transition-colors duration-200 hover:bg-primary/90 disabled:opacity-50"
  >
- {addCartItem.isPending ? "Adding..." : "Add to cart"}
+ {addCartItem.isPending ? "Adding..." : t("product_add_to_cart")}
  </button>
  </div>
  </div>
@@ -142,7 +144,7 @@ const ProductItem = ({ item }: { item: Product }) => {
  disabled={addCartItem.isPending}
  className="mt-2 flex h-10 w-full items-center justify-center rounded-lg bg-primary px-3 text-xs font-bold text-primary-foreground transition hover:bg-primary/90 disabled:cursor-not-allowed disabled:opacity-50 sm:hidden"
  >
- {addCartItem.isPending ? "Adding..." : "Add to cart"}
+ {addCartItem.isPending ? "Adding..." : t("product_add_to_cart")}
  </button>
  </div>
  </div>

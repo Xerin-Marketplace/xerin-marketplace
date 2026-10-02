@@ -1,3 +1,4 @@
+import { useLanguage } from "@/app/context/LanguageContext";
 import React from "react";
 import Link from "next/link";
 import { useCartModalContext } from "@/app/context/CartSidebarModalContext";
@@ -5,6 +6,7 @@ import { HugeiconsIcon } from "@hugeicons/react";
 import { ShoppingCart01Icon } from "@hugeicons/core-free-icons";
 
 const EmptyCart = () => {
+ const { t } = useLanguage();
  const { closeCartModal } = useCartModalContext();
 
  return (
@@ -13,8 +15,8 @@ const EmptyCart = () => {
  <div className="mx-auto grid size-24 place-items-center rounded-full bg-muted"><HugeiconsIcon icon={ShoppingCart01Icon} size={40} className="text-muted-foreground" /></div>
  </div>
 
- <h3 className="font-semibold text-lg text-foreground">Your cart is empty</h3>
- <p className="pb-6 pt-2 text-muted-foreground">Browse products and add items to your cart.</p>
+ <h3 className="font-semibold text-lg text-foreground">{t("cart_empty")}</h3>
+ <p className="pb-6 pt-2 text-muted-foreground">{t("cart_empty_hint")}</p>
 
  <Link
  onClick={() => closeCartModal()}

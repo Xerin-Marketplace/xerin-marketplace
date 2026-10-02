@@ -23,15 +23,18 @@ import PreLoader from "@/components/Common/PreLoader";
 import MobileBottomNav from "@/components/Header/MobileBottomNav";
 import RuntimeStatus from "@/components/Common/RuntimeStatus";
 import { CurrencyProvider } from "@/app/context/CurrencyContext";
+import { LanguageProvider } from "@/app/context/LanguageContext";
 import { useClearCart } from "@/hooks/useCartActions";
 import { Suspense } from "react";
 import GoogleOneTap from "@/components/Auth/GoogleOneTap";
 import AuthPrompt from "@/components/Auth/AuthPrompt";
 import AppBanner from "@/components/Engagement/AppBanner";
 import IntentChatWidget from "@/components/Engagement/IntentChatWidget";
+import { useLanguage } from "@/app/context/LanguageContext";
 
 function CheckoutHeader() {
  const clearCart = useClearCart();
+ const { t } = useLanguage();
 
  return (
  <header className="sticky top-0 z-50 border-b border-border bg-card/95 backdrop-blur-sm">
@@ -47,7 +50,7 @@ function CheckoutHeader() {
  </Link>
  <div className="flex items-center gap-4">
  <span className="hidden items-center gap-1.5 rounded-full bg-green-light-6 px-3 py-1.5 text-xs font-semibold text-green-dark sm:inline-flex">
- <HugeiconsIcon icon={LockIcon} size={13} /> Secure checkout
+ <HugeiconsIcon icon={LockIcon} size={13} /> {t("checkout_secure")}
  </span>
  <button
  type="button"
@@ -55,13 +58,13 @@ function CheckoutHeader() {
  disabled={clearCart.isPending}
  className="hidden items-center rounded-lg px-3 py-2 text-sm font-semibold text-destructive transition-colors hover:bg-red-light-6 disabled:opacity-50 sm:inline-flex"
  >
- {clearCart.isPending ? "Clearing…" : "Clear cart"}
+ {clearCart.isPending ? t("common_loading") : t("cart_clear")}
  </button>
  <Link
  href="/cart"
  className="inline-flex items-center rounded-lg border border-border bg-card px-4 py-2 text-sm font-semibold text-foreground transition-colors hover:bg-muted"
  >
- Back to cart
+ {t("checkout_back_to_cart")}
  </Link>
  </div>
  </div>
@@ -117,6 +120,7 @@ export default function RootLayout({
  <QueryProvider>
  <AuthProvider>
  <CurrencyProvider>
+ <LanguageProvider>
  <CartModalProvider>
  <ModalProvider>
  <PreviewSliderProvider>
@@ -146,6 +150,7 @@ export default function RootLayout({
  </PreviewSliderProvider>
  </ModalProvider>
  </CartModalProvider>
+ </LanguageProvider>
  </CurrencyProvider>
  </AuthProvider>
  </QueryProvider>

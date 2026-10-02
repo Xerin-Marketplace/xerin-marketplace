@@ -8,6 +8,7 @@ import { ArrowRight01Icon, ShoppingCartAdd01Icon } from "@hugeicons/core-free-ic
 import PriceDisplay from "@/components/shared/PriceDisplay";
 import StarRating from "@/components/Common/StarRating";
 import { mapApiProductToUiProduct } from "@/lib/products/adapters";
+import { useLanguage } from "@/app/context/LanguageContext";
 import {
   addProductToCartPayload,
   useAddCartItem,
@@ -17,6 +18,7 @@ import type { Product as ApiProduct } from "@/types/api/product";
 function RailCard({ product }: { product: ApiProduct }) {
   const uiProduct = mapApiProductToUiProduct(product);
   const addToCart = useAddCartItem();
+  const { t } = useLanguage();
   const imageUrl =
     uiProduct.imgs?.previews?.[0] ?? "/images/products/placeholder.svg";
   const regularPrice = Number(product.price || 0);
@@ -85,7 +87,7 @@ function RailCard({ product }: { product: ApiProduct }) {
           className="mt-3 inline-flex h-10 w-full items-center justify-center gap-2 rounded-xl bg-foreground text-xs font-bold text-background transition hover:bg-primary disabled:opacity-50 dark:bg-card dark:text-foreground dark:hover:bg-primary dark:hover:text-primary-foreground sm:text-sm"
         >
           <HugeiconsIcon icon={ShoppingCartAdd01Icon} size={16} />
-          {addToCart.isPending ? "Adding…" : "Add to Cart"}
+          {addToCart.isPending ? "Adding…" : t("product_add_to_cart")}
         </button>
       </div>
     </article>

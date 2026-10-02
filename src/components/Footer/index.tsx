@@ -9,6 +9,7 @@ import {
 import { useAuth } from "@/hooks/useAuth";
 import { HugeiconsIcon } from "@hugeicons/react";
 import { Location01Icon, Mail01Icon, FacebookIcon, NewTwitterIcon, InstagramIcon, Linkedin01Icon, AppStoreIcon, PlayStoreIcon, ArrowUpRight01Icon } from "@hugeicons/core-free-icons";
+import { useLanguage } from "@/app/context/LanguageContext";
 
 const marketplacePolicyLinks = [
  { label: "Product Listing Policy", href: "/policies/product-listing" },
@@ -21,6 +22,7 @@ const marketplacePolicyLinks = [
 ];
 
 const Footer = () => {
+ const { t } = useLanguage();
  const year = new Date().getFullYear();
  const { isAuthenticated, logout } = useAuth();
 
@@ -319,7 +321,7 @@ const Footer = () => {
  {/* Bottom bar */}
  <div className="relative mt-6 flex flex-col items-center justify-between gap-4 border-t border-border pt-6 sm:flex-row">
  <p className="text-sm text-muted-foreground">
- &copy; {year}. All rights reserved by Xerin Group.
+ &copy; {year} Xerin Mart. {t("footer_rights")}
  </p>
 
  <div className="flex flex-wrap items-center gap-4">

@@ -18,6 +18,8 @@ import { useRouter } from "next/navigation";
 import { useCategories, useProducts } from "@/hooks/useProducts";
 import { useQuery } from "@tanstack/react-query";
 import { usersApi } from "@/lib/api/endpoints/users";
+import { useLanguage } from "@/app/context/LanguageContext";
+import LanguageSwitcher from "@/components/Common/LanguageSwitcher";
 import MobileStorefrontHeader from "./MobileStorefrontHeader";
 import SearchSuggestions, { saveRecentSearch } from "./SearchSuggestions";
 import { HugeiconsIcon } from "@hugeicons/react";
@@ -46,6 +48,13 @@ const Header = () => {
  retry: false,
  });
  const user = { ...sessionUser, ...freshUser } as typeof sessionUser;
+ const { t } = useLanguage();
+ const navTitle = (title: string) => {
+ if (title === "Home") return t("nav_home");
+ if (title === "Shop") return t("nav_shop");
+ if (title === "Categories") return t("nav_categories");
+ return title;
+ };
 
  const { items: cartItems } = useCartView();
 
@@ -175,7 +184,7 @@ const Header = () => {
  id="search"
  aria-label="Search products"
  role="combobox"
- placeholder="Search for products, brands & more..."
+ placeholder={t("search_placeholder")}
  autoComplete="off"
  aria-expanded={suggestionsOpen}
  aria-haspopup="listbox"
@@ -251,14 +260,14 @@ const Header = () => {
 
  <div>
  <span className="block text-2xs text-muted-foreground uppercase">
- {hasHydrated && isAuthenticated ? "my xerin" : "account"}
+ {hasHydrated && isAuthenticated ? t("header_my_xerin") : t("header_account")}
  </span>
  <p className="font-medium text-custom-sm text-foreground">
  {!hasHydrated ? "Loading..." : buyerName || accountLabel}
  </p>
  </div>
  </Link>
- {hasHydrated && isAuthenticated && user?.account_type === "customer" && <div className="invisible absolute right-0 top-full z-50 mt-2 w-52 rounded-lg border border-border bg-card p-2 opacity-0 shadow-lg transition group-hover:visible group-hover:opacity-100 group-focus-within:visible group-focus-within:opacity-100">{[["Orders","/account/orders"],["Addresses","/account/addresses"],["Payments","/account/payments"],["Wishlist","/wishlist"],["Security","/account/security"]].map(([label,href])=><Link key={href} href={href} className="block rounded-lg px-3 py-2 text-sm hover:bg-muted dark:hover:bg-card/5">{label}</Link>)}<button onClick={()=>void logout()} className="block w-full rounded-lg px-3 py-2 text-left text-sm text-destructive hover:bg-red-light-6">Logout</button></div>}
+ {hasHydrated && isAuthenticated && user?.account_type === "customer" && <div className="invisible absolute right-0 top-full z-50 mt-2 w-52 rounded-lg border border-border bg-card p-2 opacity-0 shadow-lg transition group-hover:visible group-hover:opacity-100 group-focus-within:visible group-focus-within:opacity-100">{[[t("header_orders"),"/account/orders"],[t("header_addresses"),"/account/addresses"],[t("header_payments"),"/account/payments"],[t("header_wishlist"),"/wishlist"],[t("header_security"),"/account/security"]].map(([label,href])=><Link key={href} href={href} className="block rounded-lg px-3 py-2 text-sm hover:bg-muted dark:hover:bg-card/5">{label}</Link>)}<button onClick={()=>void logout()} className="block w-full rounded-lg px-3 py-2 text-left text-sm text-destructive hover:bg-red-light-6">{t("header_signout")}</button></div>}
  </div>
 
  <button
@@ -346,7 +355,7 @@ const Header = () => {
  }`}
  >
  <HugeiconsIcon icon={Menu01Icon} size={18} />
- <span>All categories</span>
+ <span>{t("nav_all_categories")}</span>
  </button>
  </li>
 
@@ -365,7 +374,7 @@ const Header = () => {
  stickyMenu ? "xl:py-3" : "xl:py-3.5"
  }`}
  >
- {menuItem.title}
+ {navTitle(menuItem.title)}
  </Link>
  </li>
  )
@@ -386,7 +395,7 @@ const Header = () => {
  className="flex items-center gap-1.5 font-medium text-custom-sm text-foreground hover:text-primary"
  >
  <HugeiconsIcon icon={HistoryIcon} size={16} />
- Shop
+ {t("nav_shop")}
  </a>
  </li>
 
@@ -396,8 +405,12 @@ const Header = () => {
  className="flex items-center gap-1.5 font-medium text-custom-sm text-foreground hover:text-primary"
  >
  <HugeiconsIcon icon={FavouriteIcon} size={16} />
- Wishlist
+ {t("header_wishlist")}
  </Link>
+ </li>
+
+ <li className="py-3">
+ <LanguageSwitcher compact />
  </li>
  </ul>
  </div>
@@ -420,7 +433,7 @@ const Header = () => {
  </div>
  <div className="min-w-0 flex-1">
  <p className="truncate font-semibold text-sm text-foreground">
- {buyerName || user?.email || "Account"}
+ {buyerName || user?.email || t("header_account")}
  </p>
  <p className="truncate text-xs text-muted-foreground">
  {user?.email || accountLabel}
@@ -433,7 +446,7 @@ const Header = () => {
  onClick={() => setNavigationOpen(false)}
  className="rounded-md bg-muted px-3 py-2 text-center text-xs font-semibold text-foreground transition hover:bg-muted dark:bg-muted"
  >
- Dashboard
+ {t("common_dashboard")}
  </Link>
  <button
  type="button"
@@ -443,7 +456,7 @@ const Header = () => {
  }}
  className="rounded-md bg-red-light-6 px-3 py-2 text-center text-xs font-semibold text-destructive transition hover:bg-red-light-5 dark:bg-red-950/30 dark:text-red-400"
  >
- Sign Out
+ {t("header_signout")}
  </button>
  </div>
  </div>
@@ -454,7 +467,7 @@ const Header = () => {
  className="flex items-center justify-center gap-2 rounded-lg bg-orange py-2.5 text-center text-xs font-bold text-white shadow-sm transition hover:bg-primary/90"
  >
  <HugeiconsIcon icon={UserIcon} size={16} />
- <span>Sign In / Register</span>
+ <span>{t("header_signin")} / {t("auth_register")}</span>
  </Link>
  )}
  </div>
@@ -485,7 +498,7 @@ const Header = () => {
  onClick={() => setNavigationOpen(false)}
  className="block px-3 py-2.5 text-custom-sm font-medium text-foreground hover:text-primary hover:bg-muted dark:hover:bg-card/5 rounded-lg"
  >
- {menuItem.title}
+ {navTitle(menuItem.title)}
  </Link>
  )}
  </li>
@@ -498,8 +511,11 @@ const Header = () => {
  className="flex items-center gap-2 px-3 py-2.5 text-custom-sm font-medium text-foreground hover:text-primary hover:bg-muted dark:hover:bg-card/5 rounded-lg"
  >
  <HugeiconsIcon icon={FavouriteIcon} size={16} />
- Wishlist
+ {t("header_wishlist")}
  </Link>
+ </li>
+ <li className="px-3 py-2">
+ <LanguageSwitcher compact={false} />
  </li>
  </ul>
  </nav>

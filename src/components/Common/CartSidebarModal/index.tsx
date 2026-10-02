@@ -9,10 +9,12 @@ import EmptyCart from "./EmptyCart";
 import PriceDisplay from "@/components/shared/PriceDisplay";
 import { HugeiconsIcon } from "@hugeicons/react";
 import { ArrowRight01Icon, Cancel01Icon } from "@hugeicons/core-free-icons";
+import { useLanguage } from "@/app/context/LanguageContext";
 
 const CartSidebarModal = () => {
  const { isCartModalOpen, closeCartModal } = useCartModalContext();
  const { items: cartItems, total: totalPrice, isAuthenticated } = useCartView();
+ const { t } = useLanguage();
 
  useEffect(() => {
  // closing modal while clicking outside
@@ -42,7 +44,7 @@ const CartSidebarModal = () => {
  <div className="modal-content relative flex h-[100dvh] w-full max-w-[500px] flex-col bg-card px-4 shadow-1 sm:px-7.5 lg:px-11">
  <div className="z-10 flex shrink-0 items-center justify-between border-b border-border bg-card pb-4 pt-[max(14px,env(safe-area-inset-top))] sm:pb-7 sm:pt-7.5 lg:pt-11">
  <h2 className="font-medium text-foreground text-lg sm:text-2xl">
- Cart View
+ {t("cart_title")}
  </h2>
  <button
  onClick={() => closeCartModal()}
@@ -71,7 +73,7 @@ const CartSidebarModal = () => {
 
  {cartItems.length > 0 && <div className="shrink-0 border-t border-border bg-card pb-[calc(var(--xerin-mobile-nav-height)+var(--xerin-safe-bottom)+10px)] pt-4 sm:pb-7.5 sm:pt-5 lg:pb-11">
  <div className="flex items-center justify-between gap-5 mb-6">
- <p className="font-medium text-xl text-foreground">Subtotal:</p>
+ <p className="font-medium text-xl text-foreground">{t("cart_subtotal")}:</p>
 
  <p className="font-medium text-xl text-foreground"><PriceDisplay amount={totalPrice} sourceCurrency="TZS" /></p>
  </div>
@@ -82,14 +84,14 @@ const CartSidebarModal = () => {
  href="/cart"
  className="flex h-12 w-full items-center justify-center rounded-lg bg-primary px-3 text-sm font-semibold text-primary-foreground transition hover:bg-primary-dark sm:px-6 sm:font-medium"
  >
- View Cart
+ {t("cart_view")}
  </Link>
 
  <Link
  href={isAuthenticated ? "/checkout" : "/signin?redirect=/checkout"}
  className="flex h-12 w-full items-center justify-center rounded-lg bg-foreground px-3 text-sm font-semibold text-background transition hover:bg-opacity-95 sm:px-6 sm:font-medium"
  >
- Checkout
+ {t("cart_checkout")}
  </Link>
  </div>
  </div>}

@@ -16,6 +16,7 @@ import {
   ArrowRight01Icon,
 } from "@hugeicons/core-free-icons";
 import { useAddresses } from "@/hooks/useAddresses";
+import { useLanguage } from "@/app/context/LanguageContext";
 import type { User } from "@/types/api/user";
 
 const avatarSrc = (url?: string | null) => {
@@ -50,6 +51,7 @@ export default function MobileStorefrontHeader({
   user,
 }: MobileStorefrontHeaderProps) {
   const router = useRouter();
+  const { t } = useLanguage();
   const [query, setQuery] = useState("");
   const [isSearchOpen, setIsSearchOpen] = useState(false);
   const inputRef = useRef<HTMLInputElement>(null);
@@ -173,10 +175,10 @@ export default function MobileStorefrontHeader({
             <span className="truncate">
               {locationLabel ? (
                 <>
-                  Deliver to <b className="font-semibold text-foreground">{locationLabel}</b>
+                  {t("header_deliver_to")} <b className="font-semibold text-foreground">{locationLabel}</b>
                 </>
               ) : (
-                "Set your delivery location"
+                t("header_set_location")
               )}
             </span>
             <HugeiconsIcon icon={ArrowRight01Icon} size={12} className="ml-auto shrink-0" />
@@ -195,7 +197,7 @@ export default function MobileStorefrontHeader({
               }`}
             >
               <HugeiconsIcon icon={GridIcon} size={16} className="shrink-0" />
-              <span>Categories</span>
+              <span>{t("nav_categories")}</span>
             </button>
 
             <button
@@ -204,7 +206,7 @@ export default function MobileStorefrontHeader({
               aria-label="Search products"
               className="flex h-10 flex-1 items-center justify-between rounded-xl border border-border bg-muted/60 px-3 text-xs text-muted-foreground transition-colors hover:border-primary"
             >
-              <span className="truncate">Search products, brands...</span>
+              <span className="truncate">{t("search_placeholder")}</span>
               <div className="flex size-7 items-center justify-center rounded-lg bg-orange text-white">
                 <HugeiconsIcon icon={Search01Icon} size={14} />
               </div>
@@ -228,7 +230,7 @@ export default function MobileStorefrontHeader({
                   <HugeiconsIcon icon={Search01Icon} size={14} />
                 </div>
                 <h3 className="font-bold text-base text-foreground">
-                  Search Products
+                  {t("common_search")}
                 </h3>
               </div>
               <button
