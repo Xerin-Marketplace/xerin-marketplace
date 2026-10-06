@@ -863,7 +863,7 @@ function Support() {
  <b>{a}</b>
  <p className="mt-1 text-sm text-muted-foreground">{b}</p>
  <a
- href="mailto:support@xerinmarketplace.com"
+ href="mailto:support@xerinmart.com"
  className="mt-3 inline-block text-sm font-semibold text-primary"
  >
  Email support

@@ -38,7 +38,7 @@ const FAQS: FAQ[] = [
  {
  question: "How do I report a problem with an order?",
  answer:
- "Go to your order history, select the affected order, and use the report or contact option. You can also reach our support team at support@xerinmarketplace.com.",
+ "Go to your order history, select the affected order, and use the report or contact option. You can also reach our support team at support@xerinmart.com.",
  },
  {
  question: "Can I cancel an order?",

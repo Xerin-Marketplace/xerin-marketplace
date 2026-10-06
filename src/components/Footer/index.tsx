@@ -91,9 +91,9 @@ const Footer = () => {
  <HugeiconsIcon icon={Location01Icon} size={16} />
  Dar es Salaam, Tanzania
  </span>
- <a href="mailto:support@xerinmarketplace.com" className="flex items-center gap-2 transition-colors hover:text-foreground">
+ <a href="mailto:support@xerinmart.com" className="flex items-center gap-2 transition-colors hover:text-foreground">
  <HugeiconsIcon icon={Mail01Icon} size={16} className="shrink-0 text-primary" />
- support@xerinmarketplace.com
+ support@xerinmart.com
  </a>
  <a href={ROUTES.contact} className="flex items-center gap-2 transition-colors hover:text-foreground">
  <HugeiconsIcon icon={Mail01Icon} size={16} />

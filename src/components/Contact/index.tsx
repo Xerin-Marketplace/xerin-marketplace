@@ -7,7 +7,7 @@ import { Call02Icon, Mail01Icon, Location01Icon } from "@hugeicons/core-free-ico
 
 type InquiryType = "logistics_partnership" | "general_query" | "newsletter";
 
-const SUPPORT_EMAIL = "support@xerinmarketplace.com";
+const SUPPORT_EMAIL = "support@xerinmart.com";
 
 const INQUIRY_LABELS: Record<InquiryType, string> = {
  logistics_partnership: "Logistics Partnership",
@@ -122,7 +122,7 @@ const Contact = () => {
 
  <p className="flex items-center gap-4">
  <HugeiconsIcon icon={Mail01Icon} size={22} />
- Email: support@xerinmarketplace.com
+ Email: support@xerinmart.com
  </p>
 
  <p className="flex gap-4">

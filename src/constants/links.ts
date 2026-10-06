@@ -52,6 +52,6 @@ export const PAYMENT_LINKS = {
 } as const;
 
 export const CONTACT_LINKS = {
-  supportEmail: "mailto:support@xerinmarketplace.com",
+  supportEmail: "mailto:support@xerinmart.com",
   supportPage: "/contact",
 } as const;

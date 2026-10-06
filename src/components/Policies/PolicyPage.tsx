@@ -95,10 +95,10 @@ export default function PolicyPage({ policy }: PolicyPageProps) {
  <p className="text-xs text-muted-foreground">
  Reach out to us at{" "}
  <a
- href="mailto:support@xerinmarketplace.com"
+ href="mailto:support@xerinmart.com"
  className="font-medium text-primary hover:underline"
  >
- support@xerinmarketplace.com
+ support@xerinmart.com
  </a>
  </p>
  </div>

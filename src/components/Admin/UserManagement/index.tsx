@@ -1340,7 +1340,7 @@ function CreateStaffWorkspace({
  <input
  type="email"
  className="mt-3 h-10 w-full rounded-lg border border-border bg-card px-4 text-sm font-medium text-foreground shadow-sm outline-none transition placeholder:text-muted-foreground hover:border-border focus:border-[var(--primary)] focus:ring-4 focus:ring-ring/30/70"
- placeholder="juma@xerinmarketplace.com"
+ placeholder="juma@xerinmart.com"
  value={form.email}
  onChange={(e) => setForm({ ...form, email: e.target.value })}
  />
@@ -1555,7 +1555,7 @@ function CreateStaffModal({
  email: event.target.value,
  }))
  }
- placeholder="juma@xerinmarketplace.com"
+ placeholder="juma@xerinmart.com"
  className={inputClass}
  />
  </label>

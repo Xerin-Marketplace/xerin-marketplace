@@ -6,7 +6,7 @@ export const siteConfig = {
   tagline: "Your Trusted Online Store",
   description:
     "Xerin Mart is a modern online marketplace connecting buyers and sellers across Africa. Shop quality products, manage your store, and grow your business.",
-  url: process.env.NEXT_PUBLIC_SITE_URL || "https://xerinmarketplace.com",
+  url: process.env.NEXT_PUBLIC_SITE_URL || "https://xerinmart.com",
   locale: "en_US",
   themeColor: "#c2410c",
   keywords: [
@@ -21,12 +21,12 @@ export const siteConfig = {
   ],
   authors: {
     name: "Xerin Mart",
-    url: process.env.NEXT_PUBLIC_SITE_URL || "https://xerinmarketplace.com",
+    url: process.env.NEXT_PUBLIC_SITE_URL || "https://xerinmart.com",
   },
   creator: "Xerin Mart",
   publisher: "Xerin Mart",
   contact: {
-    email: "support@xerinmarketplace.com",
+    email: "support@xerinmart.com",
     phone: "",
   },
   social: {

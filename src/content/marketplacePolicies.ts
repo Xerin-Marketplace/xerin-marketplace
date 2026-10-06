@@ -61,7 +61,7 @@ export const marketplacePolicies = {
       {
         heading: "Reporting a concern",
         paragraphs: [
-          "A rights holder or user who believes that platform content is unlawful or infringing should report the concern through Xerin customer support at support@xerinmarketplace.com. The report should identify the relevant listing and clearly explain the concern so it can be reviewed.",
+          "A rights holder or user who believes that platform content is unlawful or infringing should report the concern through Xerin customer support at support@xerinmart.com. The report should identify the relevant listing and clearly explain the concern so it can be reviewed.",
         ],
       },
       {
@@ -170,7 +170,7 @@ export const marketplacePolicies = {
       {
         heading: "Submitting an enquiry",
         paragraphs: [
-          "Send legal enquiries, complaints or requests concerning your information to support@xerinmarketplace.com through Xerin’s designated customer-support channel. Xerin’s registered office is in Dar es Salaam, Tanzania.",
+          "Send legal enquiries, complaints or requests concerning your information to support@xerinmart.com through Xerin’s designated customer-support channel. Xerin’s registered office is in Dar es Salaam, Tanzania.",
         ],
       },
       {
@@ -228,7 +228,7 @@ export const marketplacePolicies = {
       {
         heading: "Raising a complaint",
         paragraphs: [
-          "Users can report integrity concerns to support@xerinmarketplace.com. Complaints will be handled through designated support channels with the aim of reaching a fair and prompt resolution.",
+          "Users can report integrity concerns to support@xerinmart.com. Complaints will be handled through designated support channels with the aim of reaching a fair and prompt resolution.",
         ],
       },
     ],
@@ -284,7 +284,7 @@ export const marketplacePolicies = {
       {
         heading: "Questions",
         paragraphs: [
-          "For return or refund questions contact support@xerinmarketplace.com or use the contact page.",
+          "For return or refund questions contact support@xerinmart.com or use the contact page.",
         ],
       },
     ],

@@ -143,7 +143,7 @@ export const printOrderInvoice = (
 
     ${totalsHtml(order)}
 
-    <p style="margin-top:44px;font-size:12px;border-top:1px solid ${line};padding-top:16px;" class="muted">Thank you for shopping with Xerin Mart · support@xerinmarketplace.com</p>
+    <p style="margin-top:44px;font-size:12px;border-top:1px solid ${line};padding-top:16px;" class="muted">Thank you for shopping with Xerin Mart · support@xerinmart.com</p>
   `;
 
   const w = window.open("", "_blank");
