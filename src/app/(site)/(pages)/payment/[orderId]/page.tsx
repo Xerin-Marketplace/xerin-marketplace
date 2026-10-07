@@ -14,7 +14,7 @@ import {
 import { Spinner } from "@/components/ui/Spinner";
 import { useOrder } from "@/hooks/useCommerce";
 import { useUserProfile } from "@/hooks/useUserProfile";
-import { cartApi, checkoutApi, paymentsApi } from "@/lib/api/endpoints/commerce";
+import { cartApi, checkoutApi, ordersApi, paymentsApi } from "@/lib/api/endpoints/commerce";
 import type { OrderPaymentState, PaymentOption, PaymentProviderErrorDetail } from "@/types/api/commerce";
 import { formatCurrency } from "@/lib/formatCurrency";
 
@@ -158,6 +158,23 @@ export default function PaymentPage() {
  }
  };
 
+ const [cancelling, setCancelling] = useState(false);
+ const [confirmCancel, setConfirmCancel] = useState(false);
+ const cancelOrder = async () => {
+ if (!order.data) return;
+ setCancelling(true);
+ try {
+ await ordersApi.updateStatus(String(order.data.id), { status: "cancelled", notes: "Cancelled by customer before payment" });
+ setConfirmCancel(false);
+ setListening(await paymentsApi.orderState(orderId));
+ await order.refetch();
+ } catch {
+ toast.error("This order could not be cancelled right now.");
+ } finally {
+ setCancelling(false);
+ }
+ };
+
  const pay = async () => {
  if (!order.data || !canPay) return;
  setPaying(true);
@@ -261,9 +278,30 @@ export default function PaymentPage() {
 
  {stateError && <p className="mt-4 text-center text-xs text-muted-foreground">{stateError}</p>}
 
- <Link href={`/account/orders/${data.id}`} className="mt-6 inline-flex min-h-12 w-full items-center justify-center rounded-xl bg-card px-4 text-sm font-semibold">
+ <Link href={`/account/orders/${data.id}`} className="mt-4 inline-flex min-h-12 w-full items-center justify-center rounded-xl bg-card px-4 text-sm font-semibold">
  Leave this page — the order keeps processing
  </Link>
+ <button
+ type="button"
+ onClick={() => setConfirmCancel(true)}
+ className="mx-auto mt-3 block text-sm font-semibold text-muted-foreground underline-offset-4 hover:text-red-dark hover:underline"
+ >
+ Cancel this payment
+ </button>
+ {confirmCancel && (
+ <div className="mt-3 rounded-2xl bg-card p-5">
+ <p className="text-sm font-bold text-foreground">Cancel this order?</p>
+ <p className="mt-1 text-xs leading-5 text-muted-foreground">
+ The order and its payment prompt will be cancelled. Nothing is charged.
+ </p>
+ <div className="mt-4 grid grid-cols-2 gap-2">
+ <button type="button" onClick={() => setConfirmCancel(false)} className="h-11 rounded-xl bg-muted text-sm font-semibold">Keep it</button>
+ <button type="button" disabled={cancelling} onClick={() => void cancelOrder()} className="inline-flex h-11 items-center justify-center gap-2 rounded-xl bg-red-dark text-sm font-bold text-white disabled:opacity-50">
+ {cancelling && <Spinner size={14} />} Cancel order
+ </button>
+ </div>
+ </div>
+ )}
  </div>
  </main>
  );
@@ -271,7 +309,6 @@ export default function PaymentPage() {
 
  /* Dead order — offer a one-tap rebuild instead of a dead end */
  if (dead) {
- const expired = orderCancelled;
  return (
  <main className="min-h-screen bg-muted px-4 py-12">
  <div className="mx-auto w-full max-w-md">
@@ -281,11 +318,11 @@ export default function PaymentPage() {
 
  <div className="mt-12 rounded-2xl bg-card p-6 sm:p-7">
  <h1 className="text-xl font-bold text-foreground">
- {expired ? "This order expired" : "Payment did not go through"}
+ {orderCancelled ? "Order cancelled" : "Payment did not go through"}
  </h1>
  <p className="mt-2 text-sm leading-6 text-muted-foreground">
- {expired
- ? "The payment window ran out before the order was paid. No money was taken — rebuild it with one tap."
+ {orderCancelled
+ ? "This order is no longer payable — nothing was charged. Rebuild it with one tap."
  : listening?.message?.trim() || "No money was taken. You can start a fresh payment or rebuild the order."}
  </p>
 
@@ -300,7 +337,7 @@ export default function PaymentPage() {
  </div>
  </dl>
 
- {!expired && !orderCancelled ? (
+ {!orderCancelled ? (
  <button
  type="button"
  onClick={() => setListening(null)}
