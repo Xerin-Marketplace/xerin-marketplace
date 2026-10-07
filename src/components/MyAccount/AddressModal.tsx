@@ -348,6 +348,47 @@ export default function AddressModal({
 
  <form onSubmit={submit} className={isDrawer ? "flex min-h-0 flex-1 flex-col" : "mt-6"}>
  <div className={isDrawer ? "min-h-0 flex-1 overflow-y-auto px-5 py-5 sm:px-7" : undefined}>
+ <div className="mb-5 grid gap-4 rounded-2xl bg-[var(--muted)] p-4 dark:bg-muted sm:grid-cols-2 sm:p-5">
+ <Field label="Country" required>
+ <input
+ required
+ value={form.country}
+ onChange={(e) => {
+ const country = e.target.value;
+ setForm((current) => ({
+ ...current,
+ country,
+ region: isTanzania(country) ? canonicalTanzaniaRegion(current.region) : current.region,
+ }));
+ }}
+ className={input}
+ />
+ </Field>
+ <Field label={isTanzania(form.country) ? "Region (mkoa)" : "Region / State"} required>
+ {isTanzania(form.country) ? (
+ <select
+ required
+ value={canonicalTanzaniaRegion(form.region)}
+ onChange={(e) => set("region", e.target.value)}
+ className={input}
+ >
+ <option value="">Select region first</option>
+ {TANZANIA_REGIONS.map((region) => (
+ <option key={region} value={region}>{region}</option>
+ ))}
+ </select>
+ ) : (
+ <input
+ required
+ value={form.region}
+ onChange={(e) => set("region", e.target.value)}
+ className={input}
+ placeholder="State / province / region"
+ />
+ )}
+ </Field>
+ </div>
+
  <div className="grid gap-4 sm:grid-cols-2">
  <Field label="Address label">
  <input value={form.label || ""} onChange={(e)=>set("label",e.target.value)} className={input} placeholder="Home, Office..." />
@@ -368,8 +409,13 @@ export default function AddressModal({
  </Field>
  </div>
 
- <section className="mt-6 overflow-hidden rounded-2xl bg-[var(--muted)] dark:bg-muted">
- <div className=" p-4 sm:p-5">
+ <section className={`mt-6 overflow-hidden rounded-2xl bg-[var(--muted)] dark:bg-muted ${!form.region?.trim() ? "opacity-60" : ""}`}>
+ {!form.region?.trim() && (
+ <p className="px-4 pt-4 text-xs font-bold text-primary sm:px-5">
+ Select your country and region above first — then find your exact point here.
+ </p>
+ )}
+ <div className={`p-4 sm:p-5 ${!form.region?.trim() ? "pointer-events-none" : ""}`}>
  <div className="flex items-start gap-3">
  <span className="grid h-10 w-10 shrink-0 place-items-center rounded-xl bg-primary/10 text-primary">
  <HugeiconsIcon icon={Location01Icon} size={19} />
@@ -546,46 +592,6 @@ export default function AddressModal({
  </div>
 
  <div className="grid gap-4 sm:grid-cols-2">
- <Field label="Country" required>
- <input
- required
- value={form.country}
- onChange={(e) => {
- const country = e.target.value;
- setForm((current) => ({
- ...current,
- country,
- region: isTanzania(country) ? canonicalTanzaniaRegion(current.region) : current.region,
- }));
- }}
- className={input}
- />
- </Field>
-
- <Field label={isTanzania(form.country) ? "Region (official)" : "Region / State / Province"} required>
- {isTanzania(form.country) ? (
- <select
- required
- value={canonicalTanzaniaRegion(form.region)}
- onChange={(e) => set("region", e.target.value)}
- className={input}
- >
- <option value="">Select official region</option>
- {TANZANIA_REGIONS.map((region) => (
- <option key={region} value={region}>{region}</option>
- ))}
- </select>
- ) : (
- <input
- required
- value={form.region}
- onChange={(e) => set("region", e.target.value)}
- className={input}
- placeholder="State / province / region"
- />
- )}
- </Field>
-
  <Field label="District">
  <input value={form.district || ""} onChange={(e)=>set("district",e.target.value)} className={input} placeholder="District" />
  </Field>
