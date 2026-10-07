@@ -29,7 +29,7 @@ import toast from "react-hot-toast";
 import { useAuthStore } from "@/store/useAuthStore";
 import { requestAuthPrompt } from "@/components/Auth/AuthPrompt";
 import { HugeiconsIcon } from "@hugeicons/react";
-import { CheckIcon, ArrowLeft01Icon, ArrowRight01Icon, Globe02Icon, Location01Icon } from "@hugeicons/core-free-icons";
+import { CheckIcon, ArrowLeft01Icon, ArrowRight01Icon, Globe02Icon, Location01Icon, DeliveryTruck01Icon, ClipboardCheckIcon, CreditCardIcon, ClipboardListIcon, LockPasswordIcon } from "@hugeicons/core-free-icons";
 import InfoPopover from "@/components/Common/Info/InfoPopover";
 import AddressModal from "@/components/MyAccount/AddressModal";
 
@@ -116,11 +116,11 @@ const countryFlag = (country?: string | null) => {
 
 type CheckoutStep = 1 | 2 | 3 | 4;
 
-const CHECKOUT_STEPS: Array<{ id: CheckoutStep; label: string; shortLabel: string }> = [
- { id: 1, label: "Delivery", shortLabel: "Delivery" },
- { id: 2, label: "Logistics", shortLabel: "Logistics" },
- { id: 3, label: "Review", shortLabel: "Review" },
- { id: 4, label: "Payment", shortLabel: "Payment" },
+const CHECKOUT_STEPS: Array<{ id: CheckoutStep; label: string; shortLabel: string; icon: typeof Location01Icon }> = [
+ { id: 1, label: "Delivery", shortLabel: "Delivery", icon: Location01Icon },
+ { id: 2, label: "Logistics", shortLabel: "Logistics", icon: DeliveryTruck01Icon },
+ { id: 3, label: "Review", shortLabel: "Review", icon: ClipboardCheckIcon },
+ { id: 4, label: "Payment", shortLabel: "Payment", icon: CreditCardIcon },
 ];
 
 const Checkout = () => {
@@ -882,16 +882,21 @@ const Checkout = () => {
 
  if (hasHydrated && !isAuthenticated) {
  return (
- <section className="py-20 text-center">
- <h2 className="text-xl font-bold">Sign in to check out</h2>
- <p className="mt-2 text-sm text-muted-foreground">Your cart is saved — sign in to finish your order.</p>
- <div className="mt-6 flex items-center justify-center gap-3">
- <Link href="/signin?redirect=/checkout" className="rounded-lg bg-orange px-5 py-2.5 text-sm font-semibold text-white">
+ <section className="grid place-items-center px-4 py-20 sm:py-28">
+ <div className="w-full max-w-md rounded-3xl border border-border/60 bg-card p-8 text-center shadow-lg shadow-black/[0.03] sm:p-10">
+ <span className="mx-auto grid h-14 w-14 place-items-center rounded-2xl bg-primary/10 text-primary">
+ <HugeiconsIcon icon={LockPasswordIcon} size={26} />
+ </span>
+ <h2 className="mt-5 text-xl font-bold text-foreground">Sign in to check out</h2>
+ <p className="mt-2 text-sm leading-6 text-muted-foreground">Your cart is saved — sign in to finish your order securely.</p>
+ <div className="mt-7 flex flex-col items-center justify-center gap-3 sm:flex-row">
+ <Link href="/signin?redirect=/checkout" className="inline-flex h-11 w-full items-center justify-center rounded-xl bg-primary px-6 text-sm font-bold text-white shadow-md shadow-primary/25 transition hover:opacity-90 sm:w-auto">
  Sign in
  </Link>
- <Link href="/signup?redirect=/checkout" className="rounded-lg border border-border px-5 py-2.5 text-sm font-semibold">
+ <Link href="/signup?redirect=/checkout" className="inline-flex h-11 w-full items-center justify-center rounded-xl border border-border px-6 text-sm font-bold transition hover:border-primary hover:text-primary sm:w-auto">
  Create account
  </Link>
+ </div>
  </div>
  </section>
  );
@@ -899,16 +904,25 @@ const Checkout = () => {
 
  if (isLoadingCart || isLoadingAddresses || deliveryConfig.isLoading) {
  return (
- <section className="py-20 text-center">
- Loading secure checkout…
+ <section className="grid place-items-center px-4 py-24 sm:py-32">
+ <div className="flex flex-col items-center gap-4 text-center">
+ <span className="h-10 w-10 animate-spin rounded-full border-[3px] border-border border-t-primary" />
+ <p className="text-sm font-semibold text-muted-foreground">Preparing secure checkout…</p>
+ </div>
  </section>
  );
  }
 
  if (cartError) {
  return (
- <section className="py-20 text-center text-red">
- Checkout could not load your cart. Please retry.
+ <section className="grid place-items-center px-4 py-20 sm:py-28">
+ <div className="w-full max-w-md rounded-3xl border border-red-light-4 bg-red-light-6 p-8 text-center sm:p-10">
+ <h2 className="text-lg font-bold text-red-dark">Checkout could not load</h2>
+ <p className="mt-2 text-sm leading-6 text-red-dark/80">Something went wrong while loading your cart. Please retry.</p>
+ <button type="button" onClick={() => window.location.reload()} className="mt-6 inline-flex h-11 items-center justify-center rounded-xl bg-destructive px-6 text-sm font-bold text-white">
+ Retry
+ </button>
+ </div>
  </section>
  );
  }
@@ -917,13 +931,17 @@ const Checkout = () => {
  return (
  <>
  <Breadcrumb title="Checkout" pages={["checkout"]} />
- <section className="bg-muted py-20 text-center">
- <p className="mb-4 text-foreground">
- Your cart is empty.
- </p>
- <a href="/search" className="font-medium text-primary">
- Continue Shopping
+ <section className="grid place-items-center px-4 py-20 sm:py-28">
+ <div className="w-full max-w-md rounded-3xl border border-border/60 bg-card p-8 text-center shadow-lg shadow-black/[0.03] sm:p-10">
+ <span className="mx-auto grid h-14 w-14 place-items-center rounded-2xl bg-primary/10 text-primary">
+ <HugeiconsIcon icon={ClipboardListIcon} size={26} />
+ </span>
+ <h2 className="mt-5 text-xl font-bold text-foreground">Your cart is empty</h2>
+ <p className="mt-2 text-sm leading-6 text-muted-foreground">Add products to your cart, then come back to check out.</p>
+ <a href="/search" className="mt-7 inline-flex h-11 items-center justify-center rounded-xl bg-primary px-6 text-sm font-bold text-white shadow-md shadow-primary/25 transition hover:opacity-90">
+ Continue shopping
  </a>
+ </div>
  </section>
  </>
  );
@@ -933,7 +951,7 @@ const Checkout = () => {
  <>
  <Breadcrumb title="Checkout" pages={["checkout"]} />
 
- <section className="overflow-hidden bg-muted pb-8 pt-5 sm:py-12 lg:py-16">
+ <section className="overflow-hidden bg-gradient-to-b from-muted via-muted/70 to-background pb-10 pt-6 sm:py-12 lg:py-16">
  <div className="mx-auto w-full max-w-[1220px] px-3 sm:px-6 lg:px-8">
  <form onSubmit={handleSubmit}>
  <CheckoutStepper
@@ -950,6 +968,7 @@ const Checkout = () => {
  <div className="space-y-4 sm:space-y-6">
  <StepHeading
  step="1"
+ icon={Location01Icon}
  title="Delivery"
  description="Confirm where the order should go. Xerin automatically detects whether the route is domestic or cross-border."
  />
@@ -1001,7 +1020,7 @@ const Checkout = () => {
  </div>
  )}
 
- <section className="rounded-xl border border-[var(--border)] bg-card p-4 shadow-sm sm:p-6">
+ <section className="rounded-2xl border border-border/60 bg-card p-4 shadow-sm sm:p-6">
  <div className="flex items-start gap-3">
  <span className="flex h-10 w-10 items-center justify-center rounded-xl bg-muted text-muted-foreground">
  <HugeiconsIcon icon={Location01Icon} size={18} />
@@ -1098,7 +1117,7 @@ const Checkout = () => {
  isLoading={isLoadingProfile}
  />
 
- <section className="rounded-xl border border-[var(--border)] bg-card p-4 shadow-sm sm:p-6">
+ <section className="rounded-2xl border border-border/60 bg-card p-4 shadow-sm sm:p-6">
  <label htmlFor="notes" className="mb-2.5 block font-semibold">
  Delivery / Order Notes <span className="font-normal text-muted-foreground">(optional)</span>
  </label>
@@ -1131,6 +1150,7 @@ const Checkout = () => {
  <div className="space-y-4 sm:space-y-6">
  <StepHeading
  step="2"
+ icon={DeliveryTruck01Icon}
  title={deliveryMode === "local" ? "Choose Xerin Express" : "Choose Logistics"}
  description={deliveryMode === "local" ? "Choose Standard or Express. Xerin automatically assigns the best qualified domestic delivery partner." : "Choose a company and service that covers every store-to-customer route in this order."}
  />
@@ -1171,7 +1191,7 @@ const Checkout = () => {
  />
  )}
 
- <section className="rounded-xl border border-[var(--border)] bg-card p-4 shadow-sm sm:p-5">
+ <section className="rounded-2xl border border-border/60 bg-card p-4 shadow-sm sm:p-5">
  <h3 className="font-bold text-foreground">Delivery quote</h3>
  {!frozenQuote.data || !selectedShipping ? (
  <p className="mt-3 text-sm leading-6 text-muted-foreground">
@@ -1219,6 +1239,7 @@ const Checkout = () => {
  <div className="space-y-4 sm:space-y-6">
  <StepHeading
  step="3"
+ icon={ClipboardCheckIcon}
  title="Review Order"
  description="Review products, delivery charge and any coupon before choosing payment."
  />
@@ -1243,7 +1264,7 @@ const Checkout = () => {
  )}
  </div>
 
- <section className="rounded-xl border border-[var(--border)] bg-card shadow-sm">
+ <section className="rounded-2xl border border-border/60 bg-card shadow-sm">
  <div className="border-b border-border px-4 py-4 sm:px-6">
  <div className="flex items-center justify-between gap-3">
  <h3 className="font-bold text-foreground">Order review</h3>
@@ -1253,17 +1274,27 @@ const Checkout = () => {
  </div>
  </div>
  <div className="p-4 sm:p-6">
- {cartItems.map((item) => (
- <div key={item.cartItemId} className="flex items-start justify-between gap-3 border-b border-border py-3">
- <div className="min-w-0">
+ {cartItems.map((item) => {
+ const thumb = item.imgs?.thumbnails?.[0];
+ return (
+ <div key={item.cartItemId} className="flex items-center gap-3 border-b border-border py-3 last:border-0">
+ <span className="grid h-14 w-14 shrink-0 place-items-center overflow-hidden rounded-xl border border-border/60 bg-muted">
+ {thumb ? (
+ <img src={thumb} alt="" className="h-full w-full object-cover" />
+ ) : (
+ <HugeiconsIcon icon={ClipboardListIcon} size={18} className="text-muted-foreground" />
+ )}
+ </span>
+ <div className="min-w-0 flex-1">
  <p className="truncate text-sm font-semibold text-foreground">{item.title}</p>
- <p className="mt-1 text-xs text-muted-foreground">Qty {item.quantity}</p>
+ <p className="mt-0.5 text-xs text-muted-foreground">Qty {item.quantity}</p>
  </div>
- <p className="shrink-0 text-sm font-bold">
+ <p className="shrink-0 text-sm font-bold text-foreground">
  {formatCurrency(item.discountedPrice * item.quantity, cart?.currency)}
  </p>
  </div>
- ))}
+ );
+ })}
  <SummaryRow label="Product subtotal" value={<PriceDisplay amount={Number(cart?.subtotal || 0)} sourceCurrency="TZS" showSettlementTzs />} />
  {Number(cart?.promotion_discount_amount || 0) > 0 && (
  <SummaryRow label="Seller promotion" value={<><span>-</span><PriceDisplay amount={Number(cart?.promotion_discount_amount || 0)} sourceCurrency="TZS" /></>} saving />
@@ -1292,6 +1323,7 @@ const Checkout = () => {
  <div className="space-y-4 sm:space-y-6">
  <StepHeading
  step="4"
+ icon={CreditCardIcon}
  title="Payment"
  description="Choose Mobile Payment or Card Payment for the backend-confirmed TZS total."
  />
@@ -1308,7 +1340,7 @@ const Checkout = () => {
  onPhoneNumberChange={setPaymentPhone}
  />
 
- <section className="rounded-xl border border-[var(--border)] bg-card p-4 shadow-sm sm:p-6">
+ <section className="rounded-2xl border border-border/60 bg-card p-4 shadow-sm sm:p-6">
  <h3 className="font-bold text-foreground">Final total</h3>
  <div className="mt-3">
  <SummaryRow label="Product subtotal" value={<PriceDisplay amount={Number(cart?.subtotal || 0)} sourceCurrency="TZS" showSettlementTzs />} />
@@ -1425,49 +1457,54 @@ function CheckoutStepper({
  };
 
  return (
- <nav aria-label="Checkout progress" className="rounded-xl border border-[var(--border)] bg-card p-3 shadow-sm sm:p-4">
- <ol className="grid grid-cols-4 gap-1 sm:gap-3">
+ <nav aria-label="Checkout progress" className="rounded-2xl border border-border/60 bg-card px-4 py-5 shadow-sm sm:px-8">
+ <ol className="flex items-start">
  {CHECKOUT_STEPS.map((step, index) => {
  const active = currentStep === step.id;
  const done = completed(step.id);
  const enabled = unlocked(step.id);
+ const reached = done || active;
  return (
- <li key={step.id} className="relative min-w-0">
+ <li key={step.id} className="relative flex min-w-0 flex-1 flex-col items-center">
+ {index > 0 && (
+ <span
+ aria-hidden="true"
+ className={`absolute left-0 right-1/2 top-5 h-0.5 sm:top-6 ${reached ? "bg-primary" : "bg-border"}`}
+ />
+ )}
+ {index < CHECKOUT_STEPS.length - 1 && (
+ <span
+ aria-hidden="true"
+ className={`absolute left-1/2 right-0 top-5 h-0.5 sm:top-6 ${done ? "bg-primary" : "bg-border"}`}
+ />
+ )}
  <button
  type="button"
  disabled={!enabled}
  onClick={() => onStepClick(step.id)}
- className={`group flex w-full flex-col items-center gap-2 rounded-xl px-1 py-2 text-center transition sm:flex-row sm:px-3 sm:text-left ${
- active
- ? "bg-primary/10 text-primary"
- : done
- ? "text-green-dark"
- : enabled
- ? "text-muted-foreground hover:bg-muted"
- : "cursor-not-allowed text-muted-foreground"
+ className={`relative z-10 flex flex-col items-center gap-1.5 rounded-xl px-1 py-1 transition ${
+ enabled ? "" : "cursor-not-allowed opacity-60"
  }`}
  >
- <span className={`flex h-8 w-8 shrink-0 items-center justify-center rounded-full text-xs font-bold ${
+ <span
+ className={`flex h-10 w-10 items-center justify-center rounded-full transition sm:h-12 sm:w-12 ${
  active
- ? "bg-primary text-primary-foreground"
+ ? "bg-primary text-white shadow-lg shadow-primary/30 ring-4 ring-primary/15"
  : done
- ? "bg-success text-white"
- : "bg-muted text-muted-foreground"
- }`}>
- {done ? <HugeiconsIcon icon={CheckIcon} size={15} /> : step.id}
+ ? "bg-primary text-white"
+ : "border border-border bg-muted text-muted-foreground"
+ }`}
+ >
+ {done ? <HugeiconsIcon icon={CheckIcon} size={18} /> : <HugeiconsIcon icon={step.icon} size={19} />}
  </span>
- <span className="min-w-0">
- <span className="hidden text-[10px] font-bold uppercase tracking-wide text-muted-foreground sm:block">
- Step {step.id}
- </span>
- <span className="block truncate text-[11px] font-bold sm:text-sm">
+ <span
+ className={`block max-w-full truncate text-[11px] font-bold sm:text-xs ${
+ active ? "text-primary" : done ? "text-foreground" : "text-muted-foreground"
+ }`}
+ >
  {step.shortLabel}
  </span>
- </span>
  </button>
- {index < CHECKOUT_STEPS.length - 1 && (
- <span className="absolute -right-1 top-6 hidden h-px w-2 bg-muted sm:block" aria-hidden="true" />
- )}
  </li>
  );
  })}
@@ -1480,22 +1517,29 @@ function StepHeading({
  step,
  title,
  description,
+ icon,
 }: {
  step: string;
  title: string;
  description: string;
+ icon: typeof Location01Icon;
 }) {
  return (
- <div className="mb-4 sm:mb-6">
- <p className="text-xs font-bold uppercase tracking-[0.16em] text-primary">
+ <div className="mb-5 flex items-start gap-3.5 sm:mb-7 sm:gap-4">
+ <span className="grid h-11 w-11 shrink-0 place-items-center rounded-2xl bg-gradient-to-br from-primary to-orange-600 text-white shadow-md shadow-primary/25 sm:h-13 sm:w-13">
+ <HugeiconsIcon icon={icon} size={22} />
+ </span>
+ <div className="min-w-0">
+ <p className="text-[11px] font-bold uppercase tracking-[0.18em] text-primary">
  Step {step} of 4
  </p>
- <h1 className="mt-1 text-xl font-bold text-foreground sm:text-2xl">
+ <h1 className="mt-0.5 text-xl font-bold text-foreground sm:text-2xl">
  {title}
  </h1>
- <p className="mt-1 max-w-2xl text-sm leading-6 text-muted-foreground">
+ <p className="mt-0.5 max-w-2xl text-[13px] leading-5 text-muted-foreground sm:text-sm">
  {description}
  </p>
+ </div>
  </div>
  );
 }
@@ -1528,7 +1572,7 @@ function StepActions({
  type="button"
  onClick={onNext}
  disabled={nextDisabled}
- className="inline-flex h-12 items-center justify-center gap-2 rounded-xl bg-primary px-6 font-semibold text-primary-foreground hover:bg-primary/90 disabled:cursor-not-allowed disabled:opacity-50"
+ className="inline-flex h-12 items-center justify-center gap-2 rounded-xl bg-gradient-to-r from-primary to-orange-600 px-7 font-bold text-white shadow-md shadow-primary/25 transition hover:opacity-90 disabled:cursor-not-allowed disabled:opacity-50 disabled:shadow-none"
  >
  {nextLabel} <HugeiconsIcon icon={ArrowRight01Icon} size={17} />
  </button>
