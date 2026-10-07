@@ -6,7 +6,6 @@ import { useRouter } from "next/navigation";
 import { useQuery, useQueryClient } from "@tanstack/react-query";
 import ShippingMethod from "./ShippingMethod";
 import XerinExpress from "./XerinExpress";
-import MapPinConfirmation from "./MapPinConfirmation";
 import DeliveryModeSelector from "./DeliveryMode";
 import PaymentMethod from "./PaymentMethod";
 import Coupon from "./Coupon";
@@ -27,7 +26,7 @@ import toast from "react-hot-toast";
 import { useAuthStore } from "@/store/useAuthStore";
 import { requestAuthPrompt } from "@/components/Auth/AuthPrompt";
 import { HugeiconsIcon } from "@hugeicons/react";
-import { ArrowLeft01Icon, ArrowRight01Icon, Location01Icon, ClipboardListIcon, LockPasswordIcon, CheckmarkBadge02Icon } from "@hugeicons/core-free-icons";
+import { ClipboardListIcon, LockPasswordIcon } from "@hugeicons/core-free-icons";
 import AddressModal from "@/components/MyAccount/AddressModal";
 
 export type CheckoutForm = {
@@ -294,7 +293,7 @@ const Checkout = () => {
  const xerinExpress = useQuery({
  queryKey: ["checkout", "xerin-express", selectedAddressId, cart?.total],
  queryFn: ({ signal }) => checkoutApi.xerinExpressOptions(selectedAddressId, signal),
- enabled: Boolean(deliveryMode === "local" && selectedAddressId && selectedAddress?.delivery_ready && cartItems.length),
+ enabled: Boolean(deliveryMode === "local" && selectedAddressId && cartItems.length),
  retry: false,
  });
 
@@ -315,7 +314,6 @@ const Checkout = () => {
  ),
  enabled: Boolean(
  selectedAddressId &&
- selectedAddress?.delivery_ready &&
  detectedDelivery.data &&
  detectedDelivery.data.delivery_mode === deliveryMode &&
  isAuthenticated &&
@@ -332,7 +330,6 @@ const Checkout = () => {
  delivery_mode: deliveryMode,
  }, signal),
  enabled: Boolean(
- selectedAddress?.delivery_ready &&
  detectedDelivery.data?.delivery_mode === deliveryMode &&
  selectedCompanyId &&
  cartItems.length && deliveryMode === "international"
@@ -353,7 +350,6 @@ const Checkout = () => {
  delivery_mode: deliveryMode,
  }),
  enabled: Boolean(
- selectedAddress?.delivery_ready &&
  detectedDelivery.data?.delivery_mode === deliveryMode &&
  selectedCompanyId &&
  form.shippingMethod
@@ -501,11 +497,6 @@ const Checkout = () => {
 
  if (!selectedShipping) {
  toast.error("Select a logistics company and delivery service");
- return;
- }
-
- if (!selectedAddress?.delivery_ready) {
- toast.error("Confirm the exact delivery map pin before continuing");
  return;
  }
 
@@ -940,17 +931,11 @@ const Checkout = () => {
  </select>
 
  {selectedAddress && (
- <>
  <div className="mt-3 break-words rounded-lg bg-muted/70 p-3 text-xs leading-5 text-muted-foreground">
  {selectedAddress.recipient_name && <b>{selectedAddress.recipient_name} · </b>}
  {selectedAddress.street}, {selectedAddress.city}, {selectedAddress.region}, {selectedAddress.country}
  {selectedAddress.recipient_phone ? ` · ${selectedAddress.recipient_phone}` : ""}
  </div>
- <MapPinConfirmation
- address={selectedAddress}
- onConfirmed={() => { void refetchAddresses(); }}
- />
- </>
  )}
  </>
  ) : (
@@ -983,7 +968,7 @@ const Checkout = () => {
  config={deliveryConfig.data}
  detected={detectedDelivery.data}
  loading={detectedDelivery.isLoading || detectedDelivery.isFetching}
- awaitingAddress={!selectedAddressId || !selectedAddress?.delivery_ready}
+ awaitingAddress={!selectedAddressId}
  />
  </div>
  {detectedDelivery.error && (
@@ -1058,7 +1043,6 @@ const Checkout = () => {
  destinationRegion={selectedAddress?.region || ""}
  destinationCity={selectedAddress?.city || selectedAddress?.district || ""}
  hasSelectedAddress={Boolean(selectedAddressId)}
- addressReady={Boolean(selectedAddress?.delivery_ready)}
  isLoadingCompanies={eligibleLogistics.isLoading || eligibleLogistics.isFetching}
  isLoadingPricing={deliveryPricing.isLoading || deliveryPricing.isFetching}
  />
@@ -1113,7 +1097,6 @@ const Checkout = () => {
  deliveryPricing.isFetching ||
  frozenQuote.isFetching ||
  !selectedAddressId ||
- !selectedAddress?.delivery_ready ||
  !form.paymentMethod ||
  !form.shippingMethod ||
  !frozenQuote.data
@@ -1250,7 +1233,7 @@ function OrderTotalsCard({
 }
 
 function errorText(error: unknown) {
- return error instanceof Error ? error.message : "Delivery quotation could not be completed. Check the address pin and try again.";
+ return error instanceof Error ? error.message : "Delivery quotation could not be completed. Check the delivery address and try again.";
 }
 
 export default Checkout;

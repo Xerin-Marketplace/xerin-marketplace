@@ -41,32 +41,44 @@ const PaymentMethod = ({
  <div className="space-y-3">
  {options.map((method) => {
  const Icon = iconFor(method.id);
+ const disabled = method.id === "card";
  return (
  <label
  key={method.id}
- className={`flex min-h-[76px] cursor-pointer items-start gap-3 rounded-xl p-3 transition sm:p-4 ${
- selected === method.id
- ? "bg-primary/10"
- : "bg-muted"
+ className={`flex min-h-[76px] items-start gap-3 rounded-xl p-3 transition sm:p-4 ${
+ disabled
+ ? "cursor-not-allowed bg-muted opacity-60"
+ : selected === method.id
+ ? "cursor-pointer bg-primary/10"
+ : "cursor-pointer bg-muted"
  }`}
  >
  <input
  type="radio"
  name="payment"
  checked={selected === method.id}
+ disabled={disabled}
  onChange={() => onChange(method.id)}
- className="mt-1 accent-orange"
+ className="mt-1 accent-orange disabled:cursor-not-allowed"
  />
- <span>
- <span className="font-semibold text-foreground">
+ <span className="mt-0.5 grid size-8 shrink-0 place-items-center rounded-lg bg-muted-foreground/10 text-muted-foreground">
+ <HugeiconsIcon icon={Icon} size={17} />
+ </span>
+ <span className="min-w-0">
+ <span className="flex items-center gap-2 font-semibold text-foreground">
  {method.label}
+ {disabled && (
+ <span className="rounded-md bg-muted-foreground/15 px-1.5 py-0.5 text-[10px] font-bold uppercase tracking-wide text-muted-foreground">
+ Coming soon
+ </span>
+ )}
  </span>
  <span className="mt-1 block text-xs leading-5 text-muted-foreground">
  {method.id === "cash_on_delivery"
  ? "Pay when the logistics company delivers your local order."
  : method.id === "mobile_money"
  ? "Pay securely using your preferred mobile network through Selcom."
- : "Pay securely using Visa or Mastercard through the protected card checkout."}
+ : "Visa and Mastercard payments are not available yet."}
  </span>
  </span>
  </label>

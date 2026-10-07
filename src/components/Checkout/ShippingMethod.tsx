@@ -3,7 +3,7 @@ import { CheckmarkBadge01Icon, Clock01Icon, RouteIcon } from "@hugeicons/core-fr
 import type { DeliveryMode, EligibleLogisticsCompany, MultiSellerDeliveryOption } from "@/types/api/commerce";
 import PriceDisplay from "@/components/shared/PriceDisplay";
 
-export default function ShippingMethod({ companies, excludedCompanies = [], options, selected, onChange, selectedCompanyId, onCompanyChange, deliveryMode, destinationCountry, destinationRegion, destinationCity, hasSelectedAddress, addressReady, isLoadingCompanies, isLoadingPricing }: {
+export default function ShippingMethod({ companies, excludedCompanies = [], options, selected, onChange, selectedCompanyId, onCompanyChange, deliveryMode, destinationCountry, destinationRegion, destinationCity, hasSelectedAddress, isLoadingCompanies, isLoadingPricing }: {
  companies: EligibleLogisticsCompany[]; options: MultiSellerDeliveryOption[]; selected: string;
  excludedCompanies?: Array<{ logistics_company_id: string; name: string; code: string; reasons: string[]; uncovered_sellers: string[] }>;
  onChange: (rateId: string) => void; selectedCompanyId: string; onCompanyChange: (companyId: string) => void;
@@ -12,14 +12,13 @@ export default function ShippingMethod({ companies, excludedCompanies = [], opti
  destinationRegion?: string;
  destinationCity?: string;
  hasSelectedAddress: boolean;
- addressReady: boolean;
  isLoadingCompanies?: boolean;
  isLoadingPricing?: boolean;
 }) {
  return <section>
  <div><div className="flex items-center gap-3"><div><h3 className="font-bold text-foreground">Choose Logistics Company</h3><p className="mt-0.5 text-xs text-muted-foreground">Providers covering every store for this {deliveryMode === "international" ? "cross-border" : "local"} delivery</p>{destinationCountry && <p className="mt-1 text-xs font-semibold text-muted-foreground">Delivering to: {destinationCountry}{destinationRegion ? ` · ${destinationRegion}` : ""}{destinationCity ? ` · ${destinationCity}` : ""}</p>}</div></div></div>
  <div className="p-4 sm:p-6">
- {!hasSelectedAddress ? <Empty text="Choose a delivery address before selecting a logistics company." /> : !addressReady ? <Empty text="Confirm the exact delivery point above first. We will check available logistics companies immediately after the address is verified." /> : isLoadingCompanies ? <Loading text="Checking seller pickup coverage…" /> : companies.length ? <div className="grid gap-3 sm:grid-cols-2 lg:grid-cols-1 xl:grid-cols-2">{companies.map((company) => {
+ {!hasSelectedAddress ? <Empty text="Choose a delivery address before selecting a logistics company." /> : isLoadingCompanies ? <Loading text="Checking seller pickup coverage…" /> : companies.length ? <div className="grid gap-3 sm:grid-cols-2 lg:grid-cols-1 xl:grid-cols-2">{companies.map((company) => {
  const active = company.logistics_company_id === selectedCompanyId;
  return <button type="button" key={company.logistics_company_id} onClick={() => onCompanyChange(company.logistics_company_id)} className={`min-h-[92px] rounded-xl p-3 text-left transition sm:p-4 ${active ? "bg-primary/10" : "bg-muted hover:bg-muted/60"}`}><span className="flex items-start justify-between gap-3"><span className="min-w-0"><b className="block break-words text-sm text-foreground">{company.name}</b><span className="mt-1 block text-xs text-muted-foreground">Covers {company.covered_seller_count} of {company.seller_count} sellers · {company.services.length} service{company.services.length === 1 ? "" : "s"}</span></span>{active && <HugeiconsIcon icon={CheckmarkBadge01Icon} className="shrink-0 text-primary" size={19} />}</span><span className="mt-2 flex flex-wrap gap-1.5">{company.supports_tracking && <Tag text="Tracking" />}{company.supports_cod && <Tag text="COD" />}</span></button>;
  })}</div> : <Empty text="No logistics company currently covers this store-to-customer delivery route for the confirmed address." />}

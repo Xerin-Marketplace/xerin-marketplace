@@ -1,13 +1,14 @@
 import PriceDisplay from "@/components/shared/PriceDisplay";
 import type { XerinExpressOption } from "@/types/api/commerce";
+import { HugeiconsIcon } from "@hugeicons/react";
+import { Clock01Icon, TruckDeliveryIcon, ZapIcon } from "@hugeicons/core-free-icons";
 
 function etaLabel(minutes: number) {
-  if (minutes < 60) return `Within ${minutes} min`;
-  const hours = minutes / 60;
-  if (hours < 24)
-    return `Within ${Number.isInteger(hours) ? hours : Math.ceil(hours)} hr`;
-  const days = Math.round(hours / 24);
-  return `${days}–${days + 1} day${days === 1 ? "" : "s"}`;
+  if (minutes < 60) return `${minutes} min`;
+  const hours = Math.floor(minutes / 60);
+  const mins = minutes % 60;
+  if (mins === 0) return `${hours} hr`;
+  return `${hours} hr ${mins} min`;
 }
 
 export default function XerinExpress({
@@ -33,41 +34,31 @@ export default function XerinExpress({
   return (
     <section>
       <div className="flex items-center gap-2">
-        <svg
-          viewBox="0 0 24 24"
-          className="size-5 text-primary"
-          fill="none"
-          stroke="currentColor"
-          strokeWidth="2"
-          strokeLinecap="round"
-          strokeLinejoin="round"
-          aria-hidden
-        >
-          <path d="M13 2 3 14h7l-1 8 10-12h-7l1-8z" />
-        </svg>
-        <h3 className="font-semibold text-foreground">Xerin Express</h3>
+        <HugeiconsIcon icon={ZapIcon} size={20} className="text-primary" />
+        <h3 className="font-semibold text-foreground">Xerin Express Delivery</h3>
       </div>
       <p className="mt-1 text-xs text-muted-foreground">
         Choose your delivery speed. A partner is assigned automatically.
       </p>
 
       {options.length > 0 ? (
-        <div className="mt-3 grid gap-2 sm:grid-cols-2">
+        <div className="mt-3 space-y-2">
           {options.map((o) => {
             const active = selected === o.rate_id;
+            const isExpress = o.tier === "express";
             return (
               <button
                 type="button"
                 key={o.rate_id}
                 onClick={() => onSelect(o)}
-                className={`flex items-center gap-3 rounded-xl p-3.5 text-left transition ${
+                className={`flex w-full items-start gap-3 rounded-xl p-3.5 text-left transition sm:p-4 ${
                   active
                     ? "bg-primary/10 ring-2 ring-primary"
                     : "bg-muted hover:bg-muted/60"
                 }`}
               >
                 <span
-                  className={`size-4 shrink-0 rounded-full border-2 ${
+                  className={`mt-0.5 size-4 shrink-0 rounded-full border-2 ${
                     active
                       ? "border-primary bg-primary"
                       : "border-muted-foreground/40"
@@ -75,18 +66,27 @@ export default function XerinExpress({
                 />
                 <span className="min-w-0 flex-1">
                   <span className="flex items-center gap-2">
-                    <b className="text-sm text-foreground">{o.label}</b>
-                    {o.tier === "express" && (
-                      <span className="rounded bg-primary px-1.5 py-0.5 text-[10px] font-bold uppercase tracking-wide text-primary-foreground">
-                        Fastest
-                      </span>
-                    )}
+                    <span
+                      className={`rounded-md px-1.5 py-0.5 text-[10px] font-bold uppercase tracking-wide ${
+                        isExpress
+                          ? "bg-primary text-primary-foreground"
+                          : "bg-muted-foreground/15 text-muted-foreground"
+                      }`}
+                    >
+                      {isExpress ? "Express" : "Standard"}
+                    </span>
+                    <b className="truncate text-sm text-foreground">{o.label}</b>
                   </span>
-                  <span className="mt-0.5 block text-xs text-muted-foreground">
+                  <span className="mt-1.5 flex items-center gap-1 text-xs text-muted-foreground">
+                    <HugeiconsIcon icon={Clock01Icon} size={13} className="shrink-0" />
                     {etaLabel(o.promised_delivery_minutes)}
                   </span>
+                  <span className="mt-1 flex items-center gap-1 text-xs text-muted-foreground">
+                    <HugeiconsIcon icon={TruckDeliveryIcon} size={13} className="shrink-0" />
+                    <span className="truncate">{o.logistics_company_name}</span>
+                  </span>
                 </span>
-                <span className="shrink-0 text-sm font-semibold text-foreground">
+                <span className="shrink-0 text-sm font-bold text-foreground">
                   {Number(o.delivery_amount) === 0 ? (
                     "Free"
                   ) : (
