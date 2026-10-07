@@ -25,7 +25,7 @@ import toast from "react-hot-toast";
 import { useAuthStore } from "@/store/useAuthStore";
 import { requestAuthPrompt } from "@/components/Auth/AuthPrompt";
 import { HugeiconsIcon } from "@hugeicons/react";
-import { ClipboardListIcon, LockPasswordIcon } from "@hugeicons/core-free-icons";
+import { ArrowDown01Icon, ClipboardListIcon, Delete02Icon, LockPasswordIcon, MinusSignIcon, PlusSignIcon } from "@hugeicons/core-free-icons";
 import AddressModal from "@/components/MyAccount/AddressModal";
 
 export type CheckoutForm = {
@@ -117,6 +117,8 @@ const Checkout = () => {
  const [destinationCountry, setDestinationCountry] = useState("");
  const [selectedAddressId, setSelectedAddressId] = useState("");
  const [addressDrawerOpen, setAddressDrawerOpen] = useState(false);
+ const [openSections, setOpenSections] = useState<string[]>(["items", "address"]);
+ const [updatingItemId, setUpdatingItemId] = useState<string | null>(null);
  const [selectedCompanyId, setSelectedCompanyId] = useState("");
 
 
@@ -407,6 +409,45 @@ const Checkout = () => {
  if (eligibleLogistics.error) void eligibleLogistics.refetch();
  if (deliveryPricing.error) void deliveryPricing.refetch();
  if (frozenQuote.error) void frozenQuote.refetch();
+ };
+
+ const toggleSection = (id: string) =>
+ setOpenSections((current) =>
+ current.includes(id) ? current.filter((s) => s !== id) : [...current, id],
+ );
+
+ const refreshCart = async () => {
+ await Promise.all([
+ queryClient.invalidateQueries({ queryKey: ["cart"] }),
+ frozenQuote.refetch(),
+ ]);
+ };
+
+ const changeItemQuantity = async (cartItemId: string, quantity: number) => {
+ if (quantity < 1 || updatingItemId) return;
+ setUpdatingItemId(cartItemId);
+ try {
+ await cartApi.updateItem(cartItemId, quantity);
+ await refreshCart();
+ } catch (error) {
+ toast.error(error instanceof Error ? error.message : "Could not update the item.");
+ } finally {
+ setUpdatingItemId(null);
+ }
+ };
+
+ const removeCartItem = async (cartItemId: string) => {
+ if (updatingItemId) return;
+ setUpdatingItemId(cartItemId);
+ try {
+ await cartApi.removeItem(cartItemId);
+ await refreshCart();
+ toast.success("Item removed.");
+ } catch (error) {
+ toast.error(error instanceof Error ? error.message : "Could not remove the item.");
+ } finally {
+ setUpdatingItemId(null);
+ }
  };
 
  const updateField = (
@@ -733,13 +774,18 @@ const Checkout = () => {
  <div className="min-w-0">
 
  {/* Items */}
- <section>
- <h2 className="text-sm font-bold text-foreground/60">Items</h2>
- <div className="mt-3 space-y-1">
+ <CheckoutSection
+ title="Items"
+ summary={`${cartItems.length} item${cartItems.length === 1 ? "" : "s"}`}
+ open={openSections.includes("items")}
+ onToggle={() => toggleSection("items")}
+ >
+ <div className="mt-3 divide-y divide-border/50">
  {cartItems.map((item) => {
  const thumb = item.imgs?.thumbnails?.[0];
+ const busy = updatingItemId === item.cartItemId;
  return (
- <div key={item.cartItemId} className="flex items-center gap-3 py-2.5">
+ <div key={item.cartItemId} className="flex items-center gap-3 py-3">
  <span className="grid h-14 w-14 shrink-0 place-items-center overflow-hidden rounded-xl bg-muted">
  {thumb ? (
  <img src={thumb} alt="" className="h-full w-full object-cover" />
@@ -749,21 +795,59 @@ const Checkout = () => {
  </span>
  <div className="min-w-0 flex-1">
  <p className="truncate text-sm font-semibold text-foreground">{item.title}</p>
- <p className="mt-0.5 text-xs text-muted-foreground">Qty {item.quantity}</p>
+ <p className="mt-0.5 text-xs text-muted-foreground">
+ {formatCurrency(item.discountedPrice, cart?.currency)} each
+ </p>
+ <div className="mt-2 inline-flex items-center rounded-lg bg-muted">
+ <button
+ type="button"
+ aria-label="Decrease quantity"
+ disabled={busy || item.quantity <= 1}
+ onClick={() => void changeItemQuantity(item.cartItemId, item.quantity - 1)}
+ className="grid h-7 w-7 place-items-center rounded-lg text-foreground transition hover:bg-background disabled:opacity-30"
+ >
+ <HugeiconsIcon icon={MinusSignIcon} size={13} />
+ </button>
+ <span className="min-w-8 text-center text-xs font-bold tabular-nums">{item.quantity}</span>
+ <button
+ type="button"
+ aria-label="Increase quantity"
+ disabled={busy}
+ onClick={() => void changeItemQuantity(item.cartItemId, item.quantity + 1)}
+ className="grid h-7 w-7 place-items-center rounded-lg text-foreground transition hover:bg-background disabled:opacity-30"
+ >
+ <HugeiconsIcon icon={PlusSignIcon} size={13} />
+ </button>
  </div>
- <p className="shrink-0 text-sm font-bold text-foreground">
+ </div>
+ <div className="flex shrink-0 flex-col items-end gap-2">
+ <p className="text-sm font-bold text-foreground">
  {formatCurrency(item.discountedPrice * item.quantity, cart?.currency)}
  </p>
+ <button
+ type="button"
+ aria-label="Remove item"
+ disabled={busy}
+ onClick={() => void removeCartItem(item.cartItemId)}
+ className="grid h-7 w-7 place-items-center rounded-lg text-muted-foreground transition hover:bg-red-light-6 hover:text-red-dark disabled:opacity-30"
+ >
+ <HugeiconsIcon icon={Delete02Icon} size={14} />
+ </button>
+ </div>
  </div>
  );
  })}
  </div>
- </section>
+ </CheckoutSection>
  <hr className="my-6 border-border/60" />
 
  {/* Delivery Address */}
- <section>
- <h2 className="text-sm font-bold text-foreground/60">Delivery Address</h2>
+ <CheckoutSection
+ title="Delivery Address"
+ summary={selectedAddress ? `${selectedAddress.recipient_name || selectedAddress.label || "Address selected"} · ${selectedAddress.city || selectedAddress.district || ""}` : undefined}
+ open={openSections.includes("address")}
+ onToggle={() => toggleSection("address")}
+ >
  <p className="mt-1 text-xs leading-5 text-muted-foreground">
  {destinationCountry
  ? `Delivery destination: ${destinationCountry}.`
@@ -832,12 +916,11 @@ const Checkout = () => {
  Manage addresses
  </a>
  </div>
- </section>
+ </CheckoutSection>
  <hr className="my-6 border-border/60" />
 
  {/* Delivery Route */}
- <section>
- <h2 className="text-sm font-bold text-foreground/60">Delivery Route</h2>
+ <CheckoutSection title="Delivery Route" summary={deliveryMode === "local" ? "Domestic" : deliveryMode === "international" ? "International" : undefined} open={openSections.includes("route")} onToggle={() => toggleSection("route")}>
  <div className="mt-3">
  <DeliveryModeSelector
  value={deliveryMode}
@@ -883,12 +966,10 @@ const Checkout = () => {
  )}
  </div>
  )}
- </section>
+ </CheckoutSection>
  <hr className="my-6 border-border/60" />
 
- {/* Delivery Service */}
- <section>
- <h2 className="text-sm font-bold text-foreground/60">Delivery Service</h2>
+ <CheckoutSection title="Delivery Service" summary={selectedShipping ? selectedShipping.service_name || "Xerin Express" : undefined} open={openSections.includes("service")} onToggle={() => toggleSection("service")}>
  <div className="mt-3 space-y-4">
  {(xerinExpress.error || eligibleLogistics.error || deliveryPricing.error || frozenQuote.error) && (
  <div className="flex flex-wrap items-center justify-between gap-3 rounded-xl bg-red-light-6 p-3 text-xs leading-5 text-red-dark">
@@ -930,13 +1011,12 @@ const Checkout = () => {
  </p>
  )}
  </div>
- </section>
+ </CheckoutSection>
  <hr className="my-6 border-border/60" />
 
- {/* Coupon */}
- <section>
+ <CheckoutSection title="Coupon" summary={cart?.coupon_code ? `Applied: ${cart.coupon_code}` : undefined} open={openSections.includes("coupon")} onToggle={() => toggleSection("coupon")}>
  <Coupon />
- </section>
+ </CheckoutSection>
  </div>
 
  <OrderTotalsCard
@@ -998,6 +1078,44 @@ const Checkout = () => {
  </>
  );
 };
+
+function CheckoutSection({
+ title,
+ summary,
+ open,
+ onToggle,
+ children,
+}: {
+ title: string;
+ summary?: string;
+ open: boolean;
+ onToggle: () => void;
+ children: React.ReactNode;
+}) {
+ return (
+ <section>
+ <button
+ type="button"
+ onClick={onToggle}
+ aria-expanded={open}
+ className="flex w-full items-center justify-between gap-3 text-left"
+ >
+ <span className="min-w-0">
+ <span className="block text-sm font-bold text-foreground/60">{title}</span>
+ {!open && summary && (
+ <span className="mt-0.5 block truncate text-xs font-normal text-muted-foreground">{summary}</span>
+ )}
+ </span>
+ <HugeiconsIcon
+ icon={ArrowDown01Icon}
+ size={16}
+ className={`shrink-0 text-muted-foreground transition-transform ${open ? "rotate-180" : ""}`}
+ />
+ </button>
+ {open && <div>{children}</div>}
+ </section>
+ );
+}
 
 function OrderTotalsCard({
  cart,
