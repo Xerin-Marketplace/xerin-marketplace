@@ -644,7 +644,7 @@ const Checkout = () => {
  ) {
  const destination =
  detail.redirect_to ||
- `/order-success/${detail.order_id}`;
+ `/payment/${detail.order_id}`;
 
  const seconds =
  typeof detail.remaining_seconds === "number"

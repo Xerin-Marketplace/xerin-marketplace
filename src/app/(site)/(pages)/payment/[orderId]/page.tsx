@@ -13,7 +13,7 @@ import {
 } from "@hugeicons/core-free-icons";
 import { Spinner } from "@/components/ui/Spinner";
 import { useOrder } from "@/hooks/useCommerce";
-import { checkoutApi, paymentsApi } from "@/lib/api/endpoints/commerce";
+import { cartApi, checkoutApi, paymentsApi } from "@/lib/api/endpoints/commerce";
 import type { OrderPaymentState, PaymentOption, PaymentProviderErrorDetail } from "@/types/api/commerce";
 import { formatCurrency } from "@/lib/formatCurrency";
 
@@ -60,9 +60,7 @@ export default function PaymentPage() {
  }, [orderId]);
 
  useEffect(() => {
- if (!listening) return;
- if (listening.payment_status === "completed") router.replace(`/payment-success/${orderId}`);
- else if (["failed", "cancelled"].includes(listening.payment_status)) router.replace(`/payment-failed/${orderId}`);
+ if (listening?.payment_status === "completed") router.replace(`/payment-success/${orderId}`);
  }, [listening?.payment_status, orderId, router]);
 
  useEffect(() => {
@@ -97,24 +95,52 @@ export default function PaymentPage() {
 
  const mobileOption = options.find((o) => o.id === "mobile_money");
  const isListening = Boolean(listening && ["pending", "processing"].includes(listening.payment_status));
+ const orderCancelled = Boolean(order.data && ["cancelled", "refunded"].includes(order.data.status));
+ const paymentFailed = Boolean(listening && ["failed", "cancelled"].includes(listening.payment_status));
+ const dead = orderCancelled || paymentFailed;
  const amount = listening?.latest_payment ? Number(listening.latest_payment.amount) : Number(order.data?.total || 0);
  const currency = order.data?.currency || "TZS";
 
  const canPay =
  method === "mobile_money" ? provider && phone.trim().length >= 9 : method === "card";
 
+ const [reordering, setReordering] = useState(false);
+ const reorder = async () => {
+ if (!order.data) return;
+ setReordering(true);
+ try {
+ await cartApi.merge(
+ order.data.items.map((item) => ({
+ product_id: item.product_id,
+ variant_id: item.variant_id || undefined,
+ quantity: item.quantity,
+ })),
+ );
+ router.push("/checkout");
+ } catch {
+ toast.error("Could not rebuild your order — please add the items again.");
+ setReordering(false);
+ }
+ };
+
  const pay = async () => {
  if (!order.data || !canPay) return;
  setPaying(true);
  try {
- const payment = await paymentsApi.initiate({
- order_id: String(order.data.id),
- method,
+ const payload = {
  provider: method === "mobile_money" ? provider : undefined,
  phone_number: method === "mobile_money" ? phone.trim() : undefined,
  success_url: method === "card" ? `${window.location.origin}/order-success/${orderId}?payment=success` : undefined,
  failure_url: method === "card" ? `${window.location.origin}/payment-failed/${orderId}` : undefined,
- });
+ };
+
+ const retryable = listening?.latest_payment;
+ let payment;
+ if (retryable && ["failed", "cancelled"].includes(retryable.status)) {
+ payment = await paymentsApi.retry(retryable.id, payload);
+ } else {
+ payment = await paymentsApi.initiate({ order_id: String(order.data.id), method, ...payload });
+ }
 
  sessionStorage.setItem(
  retryStorageKey(orderId),
@@ -203,6 +229,66 @@ export default function PaymentPage() {
  <Link href={`/account/orders/${data.id}`} className="mt-6 inline-flex min-h-12 w-full items-center justify-center rounded-xl bg-card px-4 text-sm font-semibold">
  Leave this page — the order keeps processing
  </Link>
+ </div>
+ </main>
+ );
+ }
+
+ /* Dead order — offer a one-tap rebuild instead of a dead end */
+ if (dead) {
+ const expired = orderCancelled;
+ return (
+ <main className="min-h-screen bg-muted px-4 py-12">
+ <div className="mx-auto w-full max-w-md">
+ <Link href="/">
+ <img src="/images/logo/logooriginal.png" alt="Xerin Mart" className="h-10 w-auto" />
+ </Link>
+
+ <div className="mt-12 rounded-2xl bg-card p-6 sm:p-7">
+ <h1 className="text-xl font-bold text-foreground">
+ {expired ? "This order expired" : "Payment did not go through"}
+ </h1>
+ <p className="mt-2 text-sm leading-6 text-muted-foreground">
+ {expired
+ ? "The payment window ran out before the order was paid. No money was taken — rebuild it with one tap."
+ : listening?.message?.trim() || "No money was taken. You can start a fresh payment or rebuild the order."}
+ </p>
+
+ <dl className="mt-5 divide-y divide-border/60">
+ <div className="flex items-center justify-between py-3">
+ <dt className="text-sm text-muted-foreground">Order</dt>
+ <dd className="text-sm font-semibold">#{data.order_number || data.id.slice(0, 8).toUpperCase()}</dd>
+ </div>
+ <div className="flex items-center justify-between py-3">
+ <dt className="text-sm text-muted-foreground">Total</dt>
+ <dd className="text-sm font-bold">{formatCurrency(Number(data.total || 0), data.currency)}</dd>
+ </div>
+ </dl>
+
+ {!expired && !orderCancelled ? (
+ <button
+ type="button"
+ onClick={() => setListening(null)}
+ className="mt-6 inline-flex h-14 w-full items-center justify-center rounded-xl bg-primary py-4 font-bold text-white"
+ >
+ Try another payment
+ </button>
+ ) : (
+ <button
+ type="button"
+ disabled={reordering}
+ onClick={() => void reorder()}
+ className="mt-6 inline-flex h-14 w-full items-center justify-center gap-2 rounded-xl bg-primary py-4 font-bold text-white disabled:opacity-50"
+ >
+ {reordering && <Spinner size={18} />}
+ {reordering ? "Rebuilding your order…" : "Order these items again"}
+ </button>
+ )}
+
+ <Link href="/" className="mt-3 inline-flex min-h-12 w-full items-center justify-center rounded-xl bg-muted px-4 text-sm font-semibold">
+ Back to shop
+ </Link>
+ </div>
  </div>
  </main>
  );
