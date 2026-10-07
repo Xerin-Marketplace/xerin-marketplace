@@ -111,7 +111,7 @@ export default function PaymentPage() {
  const local9 = normalizePhone(phone);
  const detected = local9.length >= 3 ? detectProvider(local9) : null;
 
- /* Auto network detect + name lookup once the number is complete */
+ /* Auto network detect from the TZ prefix — Selcom has no name-enquiry API */
  useEffect(() => {
  if (method !== "mobile_money" || local9.length !== 9) {
  setLookup({ status: local9.length >= 3 && !detected ? "unknown" : "idle" });
@@ -121,22 +121,9 @@ export default function PaymentPage() {
  setLookup({ status: "unknown" });
  return;
  }
- const [, code, name] = detected;
+ const [, , name] = detected;
  setProvider(name);
- setLookup({ status: "loading" });
- const timer = window.setTimeout(async () => {
- try {
- const result = await paymentsApi.nameLookup({ account_number: `255${local9}`, provider: code });
- setLookup(
- result.success && result.account_name
- ? { status: "found", name: result.account_name }
- : { status: "failed", name: result.message || undefined },
- );
- } catch {
- setLookup({ status: "failed" });
- }
- }, 600);
- return () => window.clearTimeout(timer);
+ setLookup({ status: "found" });
  }, [local9, method]);
 
  const mobileOption = options.find((o) => o.id === "mobile_money");
@@ -405,31 +392,26 @@ export default function PaymentPage() {
  </span>
  </label>
 
- {/* detected network + Selcom name lookup */}
- {lookup.status === "loading" && (
- <div className="mt-3 flex items-center gap-2.5 rounded-xl bg-muted px-4 py-3 text-xs text-muted-foreground">
- <Spinner size={14} /> Checking this number…
- </div>
- )}
+ {/* detected network — resolved from the TZ prefix */}
  {lookup.status === "found" && (
  <div className="mt-3 flex items-center gap-3 rounded-xl bg-green-light-6 px-4 py-3">
  <span className="grid h-8 w-8 shrink-0 place-items-center rounded-full bg-green-dark text-white">
  <HugeiconsIcon icon={ShieldCheckIcon} size={15} />
  </span>
  <span className="min-w-0">
- <span className="block truncate text-sm font-bold text-green-dark">{lookup.name}</span>
- <span className="block text-xs text-green-dark/70">{provider || "Mobile money"} · number confirmed</span>
+ <span className="block truncate text-sm font-bold text-green-dark">{provider}</span>
+ <span className="block text-xs text-green-dark/70">+255 {local9.replace(/(\d{3})(\d{3})(\d{3})/, "$1 $2 $3")}</span>
  </span>
  </div>
  )}
- {lookup.status === "failed" && (
+ {lookup.status === "unknown" && local9.length >= 3 && (
  <div className="mt-3 rounded-xl bg-yellow-light-4 px-4 py-3 text-xs leading-5 text-yellow-dark-2">
- We could not confirm this number on {provider || "the network"} — double-check it or choose the network below.
+ We could not detect the network from this number — choose it below.
  </div>
  )}
 
- {/* manual network picker — only when detection/lookup did not resolve it */}
- {(lookup.status === "unknown" || lookup.status === "failed") && (
+ {/* manual network picker — only when the number does not identify it */}
+ {lookup.status === "unknown" && local9.length === 9 && (
  <label className="mt-4 block text-sm font-semibold text-foreground">
  Mobile network*
  <select
