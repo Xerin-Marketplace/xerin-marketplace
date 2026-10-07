@@ -19,6 +19,20 @@ import { formatCurrency } from "@/lib/formatCurrency";
 
 const retryStorageKey = (orderId: string) => `xerin:payment-retry:${orderId}`;
 
+/* Tanzania MNO prefix detection → AzamPay provider code + display name */
+const PREFIX_PROVIDERS: [RegExp, string, string][] = [
+ [/^7(4|5|6)/, "MPESA", "M-Pesa"],
+ [/^7?68|^69|^78/, "AIRTEL", "Airtel Money"],
+ [/^65|^67|^71|^73/, "TIGOPESA", "Mixx by Yas"],
+ [/^62/, "HALOPESA", "HaloPesa"],
+];
+
+const normalizePhone = (raw: string) =>
+ raw.replace(/\D/g, "").replace(/^255/, "").replace(/^0/, "").slice(0, 9);
+
+const detectProvider = (local9: string) =>
+ PREFIX_PROVIDERS.find(([re]) => re.test(local9)) || null;
+
 const MNO_LOGOS = ["Vodacom M-Pesa", "Airtel Money", "Mixx by Yas", "HaloPesa"];
 const CARD_LOGOS = ["VISA", "Mastercard"];
 
@@ -34,6 +48,7 @@ export default function PaymentPage() {
  const [provider, setProvider] = useState("");
  const [phone, setPhone] = useState("");
  const [paying, setPaying] = useState(false);
+ const [lookup, setLookup] = useState<{ status: "idle" | "loading" | "found" | "failed" | "unknown"; name?: string }>({ status: "idle" });
  const [listening, setListening] = useState<OrderPaymentState | null>(null);
  const [stateError, setStateError] = useState("");
 
@@ -93,6 +108,37 @@ export default function PaymentPage() {
  return () => window.clearInterval(interval);
  }, [listening?.payment_status, listening?.poll_after_seconds, orderId]);
 
+ const local9 = normalizePhone(phone);
+ const detected = local9.length >= 3 ? detectProvider(local9) : null;
+
+ /* Auto network detect + name lookup once the number is complete */
+ useEffect(() => {
+ if (method !== "mobile_money" || local9.length !== 9) {
+ setLookup({ status: local9.length >= 3 && !detected ? "unknown" : "idle" });
+ return;
+ }
+ if (!detected) {
+ setLookup({ status: "unknown" });
+ return;
+ }
+ const [, code, name] = detected;
+ setProvider(name);
+ setLookup({ status: "loading" });
+ const timer = window.setTimeout(async () => {
+ try {
+ const result = await paymentsApi.nameLookup({ account_number: `255${local9}`, provider: code });
+ setLookup(
+ result.success && result.account_name
+ ? { status: "found", name: result.account_name }
+ : { status: "failed", name: result.message || undefined },
+ );
+ } catch {
+ setLookup({ status: "failed" });
+ }
+ }, 600);
+ return () => window.clearTimeout(timer);
+ }, [local9, method]);
+
  const mobileOption = options.find((o) => o.id === "mobile_money");
  const isListening = Boolean(listening && ["pending", "processing"].includes(listening.payment_status));
  const orderCancelled = Boolean(order.data && ["cancelled", "refunded"].includes(order.data.status));
@@ -102,7 +148,7 @@ export default function PaymentPage() {
  const currency = order.data?.currency || "TZS";
 
  const canPay =
- method === "mobile_money" ? provider && phone.trim().length >= 9 : method === "card";
+ method === "mobile_money" ? local9.length === 9 && Boolean(provider) : method === "card";
 
  const [reordering, setReordering] = useState(false);
  const reorder = async () => {
@@ -129,7 +175,7 @@ export default function PaymentPage() {
  try {
  const payload = {
  provider: method === "mobile_money" ? provider : undefined,
- phone_number: method === "mobile_money" ? phone.trim() : undefined,
+ phone_number: method === "mobile_money" ? `255${local9}` : undefined,
  success_url: method === "card" ? `${window.location.origin}/order-success/${orderId}?payment=success` : undefined,
  failure_url: method === "card" ? `${window.location.origin}/payment-failed/${orderId}` : undefined,
  };
@@ -341,8 +387,50 @@ export default function PaymentPage() {
  <div className="rounded-2xl bg-card p-5 sm:p-6">
  {method === "mobile_money" ? (
  <div>
- <div className="grid gap-4 sm:grid-cols-2">
- <label className="text-sm font-semibold text-foreground">
+ <label className="block text-sm font-semibold text-foreground">
+ Mobile number*
+ <span className="mt-2 flex items-stretch overflow-hidden rounded-xl bg-muted ring-primary/25 focus-within:ring-2">
+ <span className="flex items-center gap-2 border-r border-border/60 px-4 text-sm font-bold text-foreground">
+ <span className="text-base leading-none">🇹🇿</span>+255
+ </span>
+ <input
+ type="tel"
+ inputMode="numeric"
+ autoComplete="tel-national"
+ value={local9}
+ onChange={(event) => setPhone(event.target.value)}
+ placeholder="7XX XXX XXX"
+ className="h-12 w-full bg-transparent px-3 text-base tracking-wide outline-none sm:text-sm"
+ />
+ </span>
+ </label>
+
+ {/* detected network + Selcom name lookup */}
+ {lookup.status === "loading" && (
+ <div className="mt-3 flex items-center gap-2.5 rounded-xl bg-muted px-4 py-3 text-xs text-muted-foreground">
+ <Spinner size={14} /> Checking this number…
+ </div>
+ )}
+ {lookup.status === "found" && (
+ <div className="mt-3 flex items-center gap-3 rounded-xl bg-green-light-6 px-4 py-3">
+ <span className="grid h-8 w-8 shrink-0 place-items-center rounded-full bg-green-dark text-white">
+ <HugeiconsIcon icon={ShieldCheckIcon} size={15} />
+ </span>
+ <span className="min-w-0">
+ <span className="block truncate text-sm font-bold text-green-dark">{lookup.name}</span>
+ <span className="block text-xs text-green-dark/70">{provider || "Mobile money"} · number confirmed</span>
+ </span>
+ </div>
+ )}
+ {lookup.status === "failed" && (
+ <div className="mt-3 rounded-xl bg-yellow-light-4 px-4 py-3 text-xs leading-5 text-yellow-dark-2">
+ We could not confirm this number on {provider || "the network"} — double-check it or choose the network below.
+ </div>
+ )}
+
+ {/* manual network picker — only when detection/lookup did not resolve it */}
+ {(lookup.status === "unknown" || lookup.status === "failed") && (
+ <label className="mt-4 block text-sm font-semibold text-foreground">
  Mobile network*
  <select
  value={provider}
@@ -353,17 +441,8 @@ export default function PaymentPage() {
  {(mobileOption?.providers ?? []).map((name) => <option key={name} value={name}>{name}</option>)}
  </select>
  </label>
- <label className="text-sm font-semibold text-foreground">
- Mobile number*
- <input
- type="tel"
- value={phone}
- onChange={(event) => setPhone(event.target.value)}
- placeholder="2557XXXXXXXX"
- className="mt-2 h-12 w-full rounded-xl bg-muted px-3 text-base outline-none focus:ring-2 focus:ring-primary/25 sm:text-sm"
- />
- </label>
- </div>
+ )}
+
  <p className="mt-4 flex items-start gap-2 text-xs leading-5 text-muted-foreground">
  <HugeiconsIcon icon={ShieldCheckIcon} size={15} className="mt-0.5 shrink-0 text-primary" />
  You will get a secure prompt on this number — approve it to complete the payment.

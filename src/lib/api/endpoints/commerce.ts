@@ -372,6 +372,15 @@ export const paymentsApi = {
         { signal },
       )
     ).data,
+  nameLookup: async (payload: { account_number: string; provider: string }) =>
+    (
+      await axiosInstance.post<{
+        success: boolean;
+        account_name: string | null;
+        provider: string | null;
+        message: string | null;
+      }>("/payments/name-lookup", payload)
+    ).data,
   verifyStatus: async (paymentId: string) =>
     (
       await axiosInstance.post<Payment>(
