@@ -42,7 +42,7 @@ const CustomerDetails = ({
  </a>
  </div>
 
- <div className="rounded-xl border border-border bg-card p-4 shadow-sm dark:border-border sm:p-6">
+ <div className="rounded-xl bg-card p-4 sm:p-6">
  {isLoading ? (
  <div className="grid gap-3 sm:grid-cols-2">
  <div className="h-14 animate-pulse rounded-xl bg-muted dark:bg-muted" />
@@ -94,7 +94,7 @@ function Detail({
  value: string;
 }) {
  return (
- <div className="min-w-0 rounded-xl border border-border p-3 dark:border-border">
+ <div className="min-w-0 rounded-xl p-3">
  <div className="flex items-start gap-2.5">
  <span className="mt-0.5 text-primary">{icon}</span>
  <div className="min-w-0">

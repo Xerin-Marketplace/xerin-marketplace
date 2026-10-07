@@ -883,17 +883,17 @@ const Checkout = () => {
  if (hasHydrated && !isAuthenticated) {
  return (
  <section className="grid place-items-center px-4 py-20 sm:py-28">
- <div className="w-full max-w-md rounded-3xl border border-border/60 bg-card p-8 text-center shadow-lg shadow-black/[0.03] sm:p-10">
+ <div className="w-full max-w-md rounded-3xl/60 bg-card p-8 text-center  sm:p-10">
  <span className="mx-auto grid h-14 w-14 place-items-center rounded-2xl bg-primary/10 text-primary">
  <HugeiconsIcon icon={LockPasswordIcon} size={26} />
  </span>
  <h2 className="mt-5 text-xl font-bold text-foreground">Sign in to check out</h2>
  <p className="mt-2 text-sm leading-6 text-muted-foreground">Your cart is saved — sign in to finish your order securely.</p>
  <div className="mt-7 flex flex-col items-center justify-center gap-3 sm:flex-row">
- <Link href="/signin?redirect=/checkout" className="inline-flex h-11 w-full items-center justify-center rounded-xl bg-primary px-6 text-sm font-bold text-white shadow-md shadow-primary/25 transition hover:opacity-90 sm:w-auto">
+ <Link href="/signin?redirect=/checkout" className="inline-flex h-11 w-full items-center justify-center rounded-xl bg-primary px-6 text-sm font-bold text-white transition hover:opacity-90 sm:w-auto">
  Sign in
  </Link>
- <Link href="/signup?redirect=/checkout" className="inline-flex h-11 w-full items-center justify-center rounded-xl border border-border px-6 text-sm font-bold transition hover:border-primary hover:text-primary sm:w-auto">
+ <Link href="/signup?redirect=/checkout" className="inline-flex h-11 w-full items-center justify-center rounded-xl bg-muted px-6 text-sm font-bold transition hover:bg-muted/70 hover:text-primary sm:w-auto">
  Create account
  </Link>
  </div>
@@ -916,7 +916,7 @@ const Checkout = () => {
  if (cartError) {
  return (
  <section className="grid place-items-center px-4 py-20 sm:py-28">
- <div className="w-full max-w-md rounded-3xl border border-red-light-4 bg-red-light-6 p-8 text-center sm:p-10">
+ <div className="w-full max-w-md rounded-3xl bg-red-light-6 p-8 text-center sm:p-10">
  <h2 className="text-lg font-bold text-red-dark">Checkout could not load</h2>
  <p className="mt-2 text-sm leading-6 text-red-dark/80">Something went wrong while loading your cart. Please retry.</p>
  <button type="button" onClick={() => window.location.reload()} className="mt-6 inline-flex h-11 items-center justify-center rounded-xl bg-destructive px-6 text-sm font-bold text-white">
@@ -932,13 +932,13 @@ const Checkout = () => {
  <>
  <Breadcrumb title="Checkout" pages={["checkout"]} />
  <section className="grid place-items-center px-4 py-20 sm:py-28">
- <div className="w-full max-w-md rounded-3xl border border-border/60 bg-card p-8 text-center shadow-lg shadow-black/[0.03] sm:p-10">
+ <div className="w-full max-w-md rounded-3xl/60 bg-card p-8 text-center  sm:p-10">
  <span className="mx-auto grid h-14 w-14 place-items-center rounded-2xl bg-primary/10 text-primary">
  <HugeiconsIcon icon={ClipboardListIcon} size={26} />
  </span>
  <h2 className="mt-5 text-xl font-bold text-foreground">Your cart is empty</h2>
  <p className="mt-2 text-sm leading-6 text-muted-foreground">Add products to your cart, then come back to check out.</p>
- <a href="/search" className="mt-7 inline-flex h-11 items-center justify-center rounded-xl bg-primary px-6 text-sm font-bold text-white shadow-md shadow-primary/25 transition hover:opacity-90">
+ <a href="/search" className="mt-7 inline-flex h-11 items-center justify-center rounded-xl bg-primary px-6 text-sm font-bold text-white transition hover:opacity-90">
  Continue shopping
  </a>
  </div>
@@ -951,7 +951,7 @@ const Checkout = () => {
  <>
  <Breadcrumb title="Checkout" pages={["checkout"]} />
 
- <section className="overflow-hidden bg-gradient-to-b from-muted via-muted/70 to-background pb-10 pt-6 sm:py-12 lg:py-16">
+ <section className="overflow-hidden bg-muted pb-10 pt-6 sm:py-12 lg:py-16">
  <div className="mx-auto w-full max-w-[1220px] px-3 sm:px-6 lg:px-8">
  <form onSubmit={handleSubmit}>
  <CheckoutStepper
@@ -984,7 +984,7 @@ const Checkout = () => {
  />
 
  {detectedDelivery.error && (
- <div className="rounded-xl border border-red-light-4 bg-red-light-6 p-4">
+ <div className="rounded-xl bg-red-light-6 p-4">
  <div className="flex flex-wrap items-center justify-between gap-3 text-xs leading-5 text-red-dark">
  <span className="min-w-0 flex-1">{errorText(detectedDelivery.error)}</span>
  <button
@@ -996,7 +996,7 @@ const Checkout = () => {
  </button>
  </div>
  {storeConfigMissing && (
- <div className="mt-3 border-t border-red-light-4 pt-3 text-xs leading-5 text-red-dark">
+ <div className="mt-3 pt-3 text-xs leading-5 text-red-dark">
  <p>
  One or more stores in your cart have not configured their store
  country, so a delivery route cannot be calculated for them.
@@ -1020,7 +1020,7 @@ const Checkout = () => {
  </div>
  )}
 
- <section className="rounded-2xl border border-border/60 bg-card p-4 shadow-sm sm:p-6">
+ <section className="rounded-2xl/60 bg-card p-4 sm:p-6">
  <div className="flex items-start gap-3">
  <span className="flex h-10 w-10 items-center justify-center rounded-xl bg-muted text-muted-foreground">
  <HugeiconsIcon icon={Location01Icon} size={18} />
@@ -1048,7 +1048,7 @@ const Checkout = () => {
  setSelectedCompanyId("");
  setForm((current) => ({ ...current, shippingMethod: "" }));
  }}
- className="h-12 w-full rounded-xl border border-border bg-card px-3 text-base outline-none focus:border-primary sm:px-4 sm:text-sm"
+ className="h-12 w-full rounded-xl bg-muted px-3 text-base outline-none focus:ring-2 focus:ring-primary/25 sm:px-4 sm:text-sm"
  >
  <option value="">Choose destination country</option>
  {internationalCountryOptions.map((country) => (
@@ -1064,7 +1064,7 @@ const Checkout = () => {
  <select
  value={selectedAddressId}
  onChange={(event) => setSelectedAddressId(event.target.value)}
- className="mt-4 h-12 w-full rounded-xl border border-border bg-card px-3 text-base outline-none focus:border-primary sm:mt-5 sm:px-4 sm:text-sm"
+ className="mt-4 h-12 w-full rounded-xl bg-muted px-3 text-base outline-none focus:ring-2 focus:ring-primary/25 sm:mt-5 sm:px-4 sm:text-sm"
  >
  {matchingAddresses.map((address) => (
  <option key={String(address.id)} value={String(address.id)}>
@@ -1089,7 +1089,7 @@ const Checkout = () => {
  )}
  </>
  ) : (
- <div className="mt-5 rounded-xl border border-yellow-light-2 bg-yellow-light-4 p-4 text-sm leading-6 text-yellow-dark-2">
+ <div className="mt-5 rounded-xl bg-yellow-light-4 p-4 text-sm leading-6 text-yellow-dark-2">
  You do not have a {destinationCountry || "selected country"} delivery address yet.
  </div>
  )}
@@ -1098,7 +1098,7 @@ const Checkout = () => {
  <button
  type="button"
  onClick={() => setAddressDrawerOpen(true)}
- className="inline-flex min-h-11 items-center gap-2 rounded-xl bg-primary px-4 text-sm font-bold text-white shadow-sm transition hover:opacity-90"
+ className="inline-flex min-h-11 items-center gap-2 rounded-xl bg-primary px-4 text-sm font-bold text-white transition hover:opacity-90"
  >
  <HugeiconsIcon icon={Location01Icon} size={17} />
  Add new address
@@ -1117,7 +1117,7 @@ const Checkout = () => {
  isLoading={isLoadingProfile}
  />
 
- <section className="rounded-2xl border border-border/60 bg-card p-4 shadow-sm sm:p-6">
+ <section className="rounded-2xl/60 bg-card p-4 sm:p-6">
  <label htmlFor="notes" className="mb-2.5 block font-semibold">
  Delivery / Order Notes <span className="font-normal text-muted-foreground">(optional)</span>
  </label>
@@ -1127,11 +1127,11 @@ const Checkout = () => {
  value={form.notes}
  onChange={(event) => updateField("notes", event.target.value)}
  placeholder="Building access, delivery instructions, package notes..."
- className="w-full rounded-xl border border-border bg-muted p-3 text-base outline-none focus:border-primary sm:p-4 sm:text-sm"
+ className="w-full rounded-xl bg-muted p-3 text-base outline-none focus:ring-2 focus:ring-primary/25 sm:p-4 sm:text-sm"
  />
  </section>
 
- <section className="rounded-xl border border-primary/20 bg-primary/5 p-4 text-xs leading-5 text-muted-foreground sm:p-5">
+ <section className="rounded-xl bg-primary/5 p-4 text-xs leading-5 text-muted-foreground sm:p-5">
  <b className="text-foreground">Ready for logistics?</b>
  <p className="mt-1">Verify the detected delivery type, address and customer details, then continue.</p>
  </section>
@@ -1156,7 +1156,7 @@ const Checkout = () => {
  />
 
  {(xerinExpress.error || eligibleLogistics.error || deliveryPricing.error || frozenQuote.error) && (
- <div className="flex flex-wrap items-center justify-between gap-3 rounded-xl border border-red-light-4 bg-red-light-6 p-3 text-xs leading-5 text-red-dark">
+ <div className="flex flex-wrap items-center justify-between gap-3 rounded-xl bg-red-light-6 p-3 text-xs leading-5 text-red-dark">
  <span>{errorText(xerinExpress.error || eligibleLogistics.error || deliveryPricing.error || frozenQuote.error)}</span>
  <button
  type="button"
@@ -1191,7 +1191,7 @@ const Checkout = () => {
  />
  )}
 
- <section className="rounded-2xl border border-border/60 bg-card p-4 shadow-sm sm:p-5">
+ <section className="rounded-2xl/60 bg-card p-4 sm:p-5">
  <h3 className="font-bold text-foreground">Delivery quote</h3>
  {!frozenQuote.data || !selectedShipping ? (
  <p className="mt-3 text-sm leading-6 text-muted-foreground">
@@ -1214,7 +1214,7 @@ const Checkout = () => {
  </div>
  ))}
  </div>
- <div className="mt-4 border-t border-border pt-3">
+ <div className="mt-4  pt-3">
  <SummaryRow label="Billable distance" value={`${Number(frozenQuote.data.billable_distance_km).toFixed(1)} km`} />
  <SummaryRow label="Delivery" value={<PriceDisplay amount={Number(frozenQuote.data.delivery_amount)} sourceCurrency="TZS" />} strong />
  <p className="mt-1 text-right text-[10px] text-green-dark">
@@ -1245,8 +1245,8 @@ const Checkout = () => {
  />
 
  <div className="space-y-5">
- <section className="rounded-2xl border border-border/60 bg-card shadow-sm">
- <div className="border-b border-border px-4 py-4 sm:px-6">
+ <section className="rounded-2xl bg-card">
+ <div className=" px-4 py-4 sm:px-6">
  <div className="flex items-center justify-between gap-3">
  <h3 className="font-bold text-foreground">Order review</h3>
  <span className="rounded-full bg-muted px-2.5 py-1 text-[10px] font-bold text-muted-foreground">
@@ -1258,8 +1258,8 @@ const Checkout = () => {
  {cartItems.map((item) => {
  const thumb = item.imgs?.thumbnails?.[0];
  return (
- <div key={item.cartItemId} className="flex items-center gap-3 border-b border-border py-3 last:border-0">
- <span className="grid h-14 w-14 shrink-0 place-items-center overflow-hidden rounded-xl border border-border/60 bg-muted">
+ <div key={item.cartItemId} className="flex items-center gap-3  py-3 ">
+ <span className="grid h-14 w-14 shrink-0 place-items-center overflow-hidden rounded-xl/60 bg-muted">
  {thumb ? (
  <img src={thumb} alt="" className="h-full w-full object-cover" />
  ) : (
@@ -1284,7 +1284,7 @@ const Checkout = () => {
  <SummaryRow label="Platform coupon" value={<><span>-</span><PriceDisplay amount={Number(cart?.coupon_discount_amount || 0)} sourceCurrency="TZS" /></>} saving />
  )}
  <SummaryRow label="Delivery" info={<InfoPopover title="How delivery is priced" align="end"><p>The delivery fee is calculated from the real distance between the seller&apos;s location and your delivery address, using the selected logistics option.</p><p>The quote is locked for a short window so the price cannot change while you pay.</p></InfoPopover>} value={shippingAmount === null ? "Pending quote" : <PriceDisplay amount={shippingAmount} sourceCurrency="TZS" />} />
- <div className="mt-2 border-t border-border pt-2">
+ <div className="mt-2  pt-2">
  <SummaryRow label="Grand Total" info={<InfoPopover title="How the total is calculated" align="end"><p>Grand Total = product subtotal − discounts + delivery fee.</p><p>Payment is settled in TZS. If you view prices in another currency, the final charge uses the backend-confirmed TZS amount.</p></InfoPopover>} value={checkoutTotal === null ? "Pending delivery quote" : <PriceDisplay amount={checkoutTotal} sourceCurrency="TZS" showSettlementTzs />} strong />
  </div>
  </div>
@@ -1293,7 +1293,7 @@ const Checkout = () => {
  <Coupon />
 
  {selectedAddress && (
- <section className="rounded-2xl border border-border/60 bg-card p-4 text-sm shadow-sm sm:p-6">
+ <section className="rounded-2xl/60 bg-card p-4 text-sm sm:p-6">
  <h3 className="font-bold text-foreground">Delivery summary</h3>
  <p className="mt-3 text-muted-foreground">
  <b className="text-foreground">{selectedAddress.recipient_name || profile?.full_name || "Customer"}</b><br />
@@ -1338,7 +1338,7 @@ const Checkout = () => {
  onPhoneNumberChange={setPaymentPhone}
  />
 
- <section className="rounded-2xl border border-border/60 bg-card p-4 shadow-sm sm:p-6">
+ <section className="rounded-2xl/60 bg-card p-4 sm:p-6">
  <h3 className="font-bold text-foreground">Final checks</h3>
  {selectedAddress && (
  <div className="mt-4 flex items-start gap-3 rounded-xl bg-muted/70 p-3.5 text-xs leading-5 text-muted-foreground">
@@ -1349,7 +1349,7 @@ const Checkout = () => {
  </span>
  </div>
  )}
- <div className="mt-4 rounded-xl border border-primary/20 bg-primary/5 p-3 text-[11px] leading-5 text-foreground sm:text-xs">
+ <div className="mt-4 rounded-xl bg-primary/5 p-3 text-[11px] leading-5 text-foreground sm:text-xs">
  <b>Final checkout protection:</b> Xerin rechecks prices, stock, address, logistics and the protected shipping rate before creating the order.
  </div>
  </section>
@@ -1359,7 +1359,7 @@ const Checkout = () => {
  <button
  type="button"
  onClick={() => goToStep(3)}
- className="inline-flex h-12 items-center justify-center gap-2 rounded-xl border border-border bg-card px-5 font-semibold text-foreground hover:border-primary"
+ className="inline-flex h-12 items-center justify-center gap-2 rounded-xl bg-muted px-5 font-semibold text-foreground hover:bg-muted/70"
  >
  <HugeiconsIcon icon={ArrowLeft01Icon} size={17} /> Back to Review
  </button>
@@ -1377,7 +1377,7 @@ const Checkout = () => {
  !form.shippingMethod ||
  !frozenQuote.data
  }
- className="inline-flex h-12 items-center justify-center rounded-xl bg-gradient-to-r from-primary to-orange-600 px-7 text-base font-bold text-white shadow-md shadow-primary/25 transition hover:opacity-90 disabled:cursor-not-allowed disabled:opacity-50 disabled:shadow-none sm:text-sm"
+ className="inline-flex h-12 items-center justify-center rounded-xl bg-primary px-7 text-base font-bold text-white transition hover:opacity-90 disabled:cursor-not-allowed disabled:opacity-50 sm:text-sm"
  >
  {createOrder.isPending || isCreatingAddress ? "Processing..." : "Pay Securely"}
  </button>
@@ -1453,7 +1453,7 @@ function CheckoutStepper({
  };
 
  return (
- <nav aria-label="Checkout progress" className="rounded-2xl border border-border/60 bg-card px-4 py-5 shadow-sm sm:px-8">
+ <nav aria-label="Checkout progress" className="rounded-2xl/60 bg-card px-4 py-5 sm:px-8">
  <ol className="flex items-start">
  {CHECKOUT_STEPS.map((step, index) => {
  const active = currentStep === step.id;
@@ -1485,10 +1485,10 @@ function CheckoutStepper({
  <span
  className={`flex h-10 w-10 items-center justify-center rounded-full transition sm:h-12 sm:w-12 ${
  active
- ? "bg-primary text-white shadow-lg shadow-primary/30 ring-4 ring-primary/15"
+ ? "bg-primary text-white ring-4 ring-primary/15"
  : done
  ? "bg-primary text-white"
- : "border border-border bg-muted text-muted-foreground"
+ : "bg-muted text-muted-foreground"
  }`}
  >
  {done ? <HugeiconsIcon icon={CheckIcon} size={18} /> : <HugeiconsIcon icon={step.icon} size={19} />}
@@ -1522,7 +1522,7 @@ function StepHeading({
 }) {
  return (
  <div className="mb-5 flex items-start gap-3.5 sm:mb-7 sm:gap-4">
- <span className="grid h-11 w-11 shrink-0 place-items-center rounded-2xl bg-gradient-to-br from-primary to-orange-600 text-white shadow-md shadow-primary/25 sm:h-13 sm:w-13">
+ <span className="grid h-11 w-11 shrink-0 place-items-center rounded-2xl bg-primary/10 text-primary text-white sm:h-13 sm:w-13">
  <HugeiconsIcon icon={icon} size={22} />
  </span>
  <div className="min-w-0">
@@ -1555,20 +1555,20 @@ function OrderTotalsCard({
  const couponDiscount = Number(cart?.coupon_discount_amount || 0);
  return (
  <aside className="order-first lg:order-none lg:sticky lg:top-24">
- <section className="overflow-hidden rounded-2xl border border-border/60 bg-card shadow-sm">
- <header className="flex items-center justify-between gap-3 border-b border-border px-5 py-4">
+ <section className="overflow-hidden rounded-2xl bg-card">
+ <header className="flex items-center justify-between gap-3  px-5 py-4">
  <h3 className="font-bold text-foreground">Order summary</h3>
  <span className="rounded-full bg-primary/10 px-2.5 py-1 text-[10px] font-bold text-primary">
  {cartItems.length} item{cartItems.length === 1 ? "" : "s"}
  </span>
  </header>
 
- <div className="hidden max-h-60 space-y-3 overflow-y-auto border-b border-border px-5 py-4 lg:block">
+ <div className="hidden max-h-60 space-y-3 overflow-y-auto  px-5 py-4 lg:block">
  {cartItems.slice(0, 4).map((item) => {
  const thumb = item.imgs?.thumbnails?.[0];
  return (
  <div key={item.cartItemId} className="flex items-center gap-3">
- <span className="grid h-11 w-11 shrink-0 place-items-center overflow-hidden rounded-lg border border-border/60 bg-muted">
+ <span className="grid h-11 w-11 shrink-0 place-items-center overflow-hidden rounded-lg/60 bg-muted">
  {thumb ? (
  <img src={thumb} alt="" className="h-full w-full object-cover" />
  ) : (
@@ -1612,7 +1612,7 @@ function OrderTotalsCard({
  label="Delivery"
  value={shippingAmount === null ? "Pending quote" : <PriceDisplay amount={shippingAmount} sourceCurrency="TZS" />}
  />
- <div className="mt-2 border-t border-border pt-2">
+ <div className="mt-2  pt-2">
  <SummaryRow
  label="Total"
  value={checkoutTotal === null ? "Pending" : <PriceDisplay amount={checkoutTotal} sourceCurrency="TZS" showSettlementTzs />}
@@ -1646,7 +1646,7 @@ function StepActions({
  <button
  type="button"
  onClick={onBack}
- className="inline-flex h-12 items-center justify-center gap-2 rounded-xl border border-border bg-card px-5 font-semibold text-foreground hover:border-primary"
+ className="inline-flex h-12 items-center justify-center gap-2 rounded-xl bg-muted px-5 font-semibold text-foreground hover:bg-muted/70"
  >
  <HugeiconsIcon icon={ArrowLeft01Icon} size={17} /> Back
  </button>
@@ -1657,7 +1657,7 @@ function StepActions({
  type="button"
  onClick={onNext}
  disabled={nextDisabled}
- className="inline-flex h-12 items-center justify-center gap-2 rounded-xl bg-gradient-to-r from-primary to-orange-600 px-7 font-bold text-white shadow-md shadow-primary/25 transition hover:opacity-90 disabled:cursor-not-allowed disabled:opacity-50 disabled:shadow-none"
+ className="inline-flex h-12 items-center justify-center gap-2 rounded-xl bg-primary px-7 font-bold text-white transition hover:opacity-90 disabled:cursor-not-allowed disabled:opacity-50"
  >
  {nextLabel} <HugeiconsIcon icon={ArrowRight01Icon} size={17} />
  </button>

@@ -14,8 +14,8 @@ const Coupon = () => {
  };
 
  return (
- <div className="mt-4 rounded-xl border border-border bg-card shadow-sm dark:border-border sm:mt-7.5">
- <div className="border-b border-border px-4 py-4 sm:px-6 sm:py-5">
+ <div className="mt-4 rounded-xl bg-card sm:mt-7.5">
+ <div className=" px-4 py-4 sm:px-6 sm:py-5">
  <h3 className="text-base font-bold text-foreground sm:text-xl sm:font-medium">Have any Coupon Code?</h3>
  </div>
 
@@ -28,7 +28,7 @@ const Coupon = () => {
  value={code}
  onChange={(e) => setCode(e.target.value)}
  placeholder="Enter coupon code"
- className="h-12 w-full rounded-xl border border-border bg-muted px-4 text-base outline-none duration-200 placeholder:text-muted-foreground focus:ring-2 focus:ring-ring/30 sm:text-sm"
+ className="h-12 w-full rounded-xl bg-muted px-4 text-base outline-none duration-200 placeholder:text-muted-foreground focus:ring-2 focus:ring-ring/30 sm:text-sm"
  />
 
  <button

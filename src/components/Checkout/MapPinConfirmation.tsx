@@ -98,18 +98,18 @@ export default function MapPinConfirmation({
  };
 
  if (address.delivery_ready) {
- return <div className="mt-3 flex items-start gap-2 rounded-xl border border-green-light-4 bg-green-light-6 p-3 text-xs leading-5 text-emerald-800"><HugeiconsIcon icon={CheckmarkCircle02Icon} className="mt-0.5 shrink-0" size={16} /><span><b>Delivery location confirmed.</b> Logistics companies can calculate a road-distance quote for this address.</span></div>;
+ return <div className="mt-3 flex items-start gap-2 rounded-xl bg-green-light-6 p-3 text-xs leading-5 text-emerald-800"><HugeiconsIcon icon={CheckmarkCircle02Icon} className="mt-0.5 shrink-0" size={16} /><span><b>Delivery location confirmed.</b> Logistics companies can calculate a road-distance quote for this address.</span></div>;
  }
 
- return <div className="mt-4 rounded-xl border border-yellow-light-2 bg-yellow-light-4 p-3 sm:p-4">
+ return <div className="mt-4 rounded-xl bg-yellow-light-4 p-3 sm:p-4">
  <div className="flex items-start gap-2"><HugeiconsIcon icon={Location01Icon} className="mt-0.5 shrink-0 text-yellow-dark-2" size={18} /><div><p className="text-sm font-bold text-amber-900">Confirm the exact delivery point</p><p className="mt-1 text-xs leading-5 text-yellow-dark-2">Search for the location or use your phone’s GPS. A confirmed pin is required before logistics pricing.</p></div></div>
  <div className="relative mt-3">
  <HugeiconsIcon icon={Search01Icon} className="absolute left-3 top-3.5 text-muted-foreground" size={17} />
- <input value={search} onChange={(event) => { setSearch(event.target.value); setLocation(null); }} placeholder="Search street, building or landmark" className="h-12 w-full rounded-xl border border-yellow-light-2 bg-card pl-10 pr-3 text-base outline-none focus:border-primary sm:text-sm" />
- {suggestions.data && search.trim().length >= 3 && !location && <div className="absolute z-20 mt-1 max-h-56 w-full overflow-y-auto rounded-xl border bg-card p-1 shadow-lg">{suggestions.data.map((item) => <button type="button" key={item.place_id} onClick={() => void choosePlace(item.place_id)} className="block min-h-11 w-full rounded-lg px-3 py-2 text-left text-sm hover:bg-muted"><b className="block text-foreground">{item.main_text || item.description}</b>{item.secondary_text && <span className="text-xs text-muted-foreground">{item.secondary_text}</span>}</button>)}</div>}
+ <input value={search} onChange={(event) => { setSearch(event.target.value); setLocation(null); }} placeholder="Search street, building or landmark" className="h-12 w-full rounded-xl bg-card pl-10 pr-3 text-base outline-none focus:ring-2 focus:ring-primary/25 sm:text-sm" />
+ {suggestions.data && search.trim().length >= 3 && !location && <div className="absolute z-20 mt-1 max-h-56 w-full overflow-y-auto rounded-xl bg-card p-1 shadow-xl ring-1 ring-black/5">{suggestions.data.map((item) => <button type="button" key={item.place_id} onClick={() => void choosePlace(item.place_id)} className="block min-h-11 w-full rounded-lg px-3 py-2 text-left text-sm hover:bg-muted"><b className="block text-foreground">{item.main_text || item.description}</b>{item.secondary_text && <span className="text-xs text-muted-foreground">{item.secondary_text}</span>}</button>)}</div>}
  </div>
- <button type="button" onClick={useMyLocation} disabled={locating} className="mt-3 inline-flex min-h-11 w-full items-center justify-center gap-2 rounded-xl border border-yellow-light bg-card px-4 text-sm font-semibold text-amber-900 sm:w-auto"><HugeiconsIcon icon={Target02Icon} size={17} />{locating ?"Finding location…" : "Use my current location"}</button>
- {locationError && <p role="alert" className="mt-3 rounded-lg border border-red-light-4 bg-red-light-6 p-3 text-xs leading-5 text-red-dark">{locationError}</p>}
+ <button type="button" onClick={useMyLocation} disabled={locating} className="mt-3 inline-flex min-h-11 w-full items-center justify-center gap-2 rounded-xl bg-muted px-4 text-sm font-semibold text-amber-900 sm:w-auto"><HugeiconsIcon icon={Target02Icon} size={17} />{locating ?"Finding location…" : "Use my current location"}</button>
+ {locationError && <p role="alert" className="mt-3 rounded-lg bg-red-light-6 p-3 text-xs leading-5 text-red-dark">{locationError}</p>}
  {location && <div className="mt-3 rounded-xl bg-card p-3"><p className="break-words text-sm font-medium text-foreground">{location.formatted_address}</p><p className="mt-1 text-xs text-muted-foreground">Pin: {Number(location.latitude).toFixed(6)}, {Number(location.longitude).toFixed(6)}</p><button type="button" onClick={() => void confirm()} disabled={confirming} className="mt-3 inline-flex min-h-11 w-full items-center justify-center gap-2 rounded-xl bg-primary px-4 text-sm font-bold text-primary-foreground sm:w-auto">{confirming ? <Spinner size={17} /> : <HugeiconsIcon icon={CheckmarkCircle02Icon} size={17} />}{confirming ?"Confirming…" : "Confirm this delivery pin"}</button></div>}
  </div>;
 }

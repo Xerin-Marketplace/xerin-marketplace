@@ -41,7 +41,7 @@ const emptyForm: AddressRequest = {
 };
 
 const input =
- "mt-1.5 w-full rounded-xl border border-[var(--border)] bg-[var(--muted)] px-4 py-3 text-sm outline-none transition focus:border-[var(--primary)] focus:ring-4 focus:ring-ring/30 disabled:opacity-60 dark:border-border dark:bg-muted";
+ "mt-1.5 w-full rounded-xl bg-[var(--muted)] px-4 py-3 text-sm outline-none transition focus:ring-2 focus:ring-primary/25 disabled:opacity-60 dark:bg-muted";
 
 const TANZANIA_REGIONS = [
  "Arusha", "Dar es Salaam", "Dodoma", "Geita", "Iringa", "Kagera",
@@ -312,19 +312,19 @@ export default function AddressModal({
  <div
  className={
  isDrawer
- ? `absolute inset-x-0 bottom-0 flex max-h-[92dvh] flex-col rounded-t-3xl bg-card shadow-2xl transition-transform duration-300 ease-out sm:inset-y-0 sm:left-auto sm:right-0 sm:h-full sm:w-full sm:max-w-xl sm:rounded-none ${
+ ? `absolute inset-x-0 bottom-0 flex max-h-[92dvh] flex-col rounded-t-3xl bg-card transition-transform duration-300 ease-out sm:inset-y-0 sm:left-auto sm:right-0 sm:h-full sm:w-full sm:max-w-xl sm:rounded-none ${
  entered && !closing
  ? "translate-x-0 translate-y-0"
  : "translate-y-full sm:translate-x-full sm:translate-y-0"
  }`
- : "mx-auto my-8 w-full max-w-3xl rounded-2xl bg-card p-5 shadow-lg sm:p-7"
+ : "mx-auto my-8 w-full max-w-3xl rounded-2xl bg-card p-5 sm:p-7"
  }
  onClick={isDrawer ? (event) => event.stopPropagation() : undefined}
  >
  {isDrawer && (
  <div className="mx-auto mt-2.5 h-1.5 w-12 shrink-0 rounded-full bg-border sm:hidden" />
  )}
- <div className={isDrawer ? "flex items-start justify-between gap-4 border-b border-[var(--border)] px-5 py-4 sm:px-7" : "flex items-start justify-between gap-4"}>
+ <div className={isDrawer ? "flex items-start justify-between gap-4  px-5 py-4 sm:px-7" : "flex items-start justify-between gap-4"}>
  <div>
  <h3 className="text-xl font-bold">{initialAddress ?"Edit Delivery Address" : "Add Delivery Address"}</h3>
  <p className="mt-1 text-sm text-[var(--muted-foreground)]">
@@ -338,8 +338,8 @@ export default function AddressModal({
  aria-label="Close"
  className={
  isDrawer
- ? "grid h-10 w-10 shrink-0 place-items-center rounded-full border border-[var(--border)] text-foreground transition hover:border-primary hover:text-primary"
- : "rounded-xl border border-[var(--border)] px-3 py-2 text-sm font-semibold"
+ ? "grid h-10 w-10 shrink-0 place-items-center rounded-full text-foreground transition hover:bg-primary hover:text-white hover:text-primary"
+ : "rounded-xl bg-[var(--muted)] px-3 py-2 text-sm font-semibold"
  }
  >
  {isDrawer ? <HugeiconsIcon icon={Cancel01Icon} size={18} /> : "Close"}
@@ -368,8 +368,8 @@ export default function AddressModal({
  </Field>
  </div>
 
- <section className="mt-6 overflow-hidden rounded-2xl border border-[var(--border)] bg-[var(--muted)] dark:border-border dark:bg-muted">
- <div className="border-b border-[var(--border)] p-4 dark:border-border sm:p-5">
+ <section className="mt-6 overflow-hidden rounded-2xl bg-[var(--muted)] dark:bg-muted">
+ <div className=" p-4 sm:p-5">
  <div className="flex items-start gap-3">
  <span className="grid h-10 w-10 shrink-0 place-items-center rounded-xl bg-primary/10 text-primary">
  <HugeiconsIcon icon={Location01Icon} size={19} />
@@ -398,7 +398,7 @@ export default function AddressModal({
  placeholder="Search street, building, landmark or place"
  />
  {mapSuggestions.length > 0 && !mapLocation && (
- <div className="absolute z-30 mt-1 max-h-56 w-full overflow-y-auto rounded-xl border border-[var(--border)] bg-card p-1 shadow-lg dark:border-border">
+ <div className="absolute z-30 mt-1 max-h-56 w-full overflow-y-auto rounded-xl bg-card p-1 shadow-xl ring-1 ring-black/5">
  {mapSuggestions.map((item) => (
  <button
  key={item.place_id}
@@ -418,7 +418,7 @@ export default function AddressModal({
  type="button"
  onClick={useCurrentLocation}
  disabled={mapBusy}
- className="mt-3 inline-flex min-h-11 w-full items-center justify-center gap-2 rounded-xl border border-primary/30 bg-card px-4 text-sm font-bold text-primary transition hover:border-primary hover:bg-primary/90 hover:text-white disabled:opacity-60 dark:bg-muted sm:w-auto"
+ className="mt-3 inline-flex min-h-11 w-full items-center justify-center gap-2 rounded-xl bg-card px-4 text-sm font-bold text-primary transition hover:bg-primary hover:text-white hover:bg-primary/90 hover:text-white disabled:opacity-60 dark:bg-muted sm:w-auto"
  >
  {mapBusy ? <Spinner size={17} /> : <HugeiconsIcon icon={Target02Icon} size={17} />}
  {mapBusy ? "Finding and filling address..." : "Use my current location & fill address"}
@@ -435,7 +435,7 @@ export default function AddressModal({
  )}
 
  {locationError && (
- <p role="alert" className="mt-3 rounded-xl border border-red-light-4 bg-red-light-6 p-3 text-xs leading-5 text-red-dark">
+ <p role="alert" className="mt-3 rounded-xl bg-red-light-6 p-3 text-xs leading-5 text-red-dark">
  {locationError}
  </p>
  )}
@@ -450,7 +450,7 @@ export default function AddressModal({
  referrerPolicy="no-referrer-when-downgrade"
  src={`https://www.google.com/maps?q=${Number(form.latitude)},${Number(form.longitude)}&z=17&output=embed`}
  />
- <div className="flex flex-col gap-3 border-t border-[var(--border)] bg-card p-4 dark:border-border sm:flex-row sm:items-center sm:justify-between">
+ <div className="flex flex-col gap-3  bg-card p-4 sm:flex-row sm:items-center sm:justify-between">
  <div className="min-w-0">
  <p className="flex items-center gap-2 text-sm font-bold text-green">
  <HugeiconsIcon icon={CheckmarkCircle02Icon} size={16} /> Exact GPS pin selected
@@ -466,7 +466,7 @@ export default function AddressModal({
  href={`https://www.google.com/maps/search/?api=1&query=${Number(form.latitude)},${Number(form.longitude)}`}
  target="_blank"
  rel="noreferrer"
- className="inline-flex min-h-10 shrink-0 items-center justify-center rounded-xl border border-[var(--border)] px-3 text-xs font-bold text-foreground hover:border-primary hover:text-primary dark:border-border"
+ className="inline-flex min-h-10 shrink-0 items-center justify-center rounded-xl px-3 text-xs font-bold text-foreground hover:bg-primary hover:text-white hover:text-primary"
  >
  Open in Google Maps
  </a>
@@ -476,7 +476,7 @@ export default function AddressModal({
  </section>
 
  {hasGpsLocation && !editLocationDetails ? (
- <section className="mt-5 rounded-2xl border border-green/20 bg-green/[0.04] p-4 sm:p-5">
+ <section className="mt-5 rounded-2xl bg-green/[0.04] p-4 sm:p-5">
  <div className="flex flex-col gap-4 sm:flex-row sm:items-start sm:justify-between">
  <div>
  <p className="flex items-center gap-2 text-sm font-bold text-green">
@@ -490,7 +490,7 @@ export default function AddressModal({
  <button
  type="button"
  onClick={() => setEditLocationDetails(true)}
- className="inline-flex min-h-10 shrink-0 items-center justify-center rounded-xl border border-[var(--border)] bg-card px-3 text-xs font-bold text-foreground hover:border-primary hover:text-primary dark:border-border dark:bg-muted"
+ className="inline-flex min-h-10 shrink-0 items-center justify-center rounded-xl bg-card px-3 text-xs font-bold text-foreground hover:bg-primary hover:text-white dark:bg-muted"
  >
  Edit extracted details
  </button>
@@ -506,7 +506,7 @@ export default function AddressModal({
  ["Street", form.street],
  ["Postal code", form.postal_code],
  ].map(([label, value]) => (
- <div key={label} className="rounded-xl border border-[var(--border)] bg-card px-3 py-2.5 dark:border-border dark:bg-muted">
+ <div key={label} className="rounded-xl bg-card px-3 py-2.5 dark:bg-muted">
  <p className="text-[11px] font-bold uppercase tracking-wide text-[var(--muted-foreground)]">{label}</p>
  <p className="mt-0.5 break-words text-sm font-semibold text-foreground">
  {value || "Not returned by Google"}
@@ -516,13 +516,13 @@ export default function AddressModal({
  </div>
 
  {!hasRequiredResolvedAddress && (
- <div className="mt-4 rounded-xl border border-yellow-light-2 bg-yellow-light-4 p-3 text-xs leading-5 text-yellow-dark-2">
+ <div className="mt-4 rounded-xl bg-yellow-light-4 p-3 text-xs leading-5 text-yellow-dark-2">
  Google could not return every required address field for this point. Please use <b>Edit extracted details</b> and complete only the missing information.
  </div>
  )}
  </section>
  ) : (hasGpsLocation || showManualFallback) ? (
- <section className="mt-5 rounded-2xl border border-[var(--border)] p-4 dark:border-border sm:p-5">
+ <section className="mt-5 rounded-2xl p-4 sm:p-5">
  <div className="mb-4 flex items-center justify-between gap-3">
  <div>
  <h4 className="font-bold text-foreground">
@@ -608,14 +608,14 @@ export default function AddressModal({
  </section>
  ) : null}
 
- <label className="mt-5 flex cursor-pointer items-center gap-3 rounded-xl border border-[var(--border)] p-4 text-sm dark:border-border">
+ <label className="mt-5 flex cursor-pointer items-center gap-3 rounded-xl bg-[var(--muted)] p-4 text-sm">
  <input type="checkbox" checked={Boolean(form.is_default)} onChange={(e)=>set("is_default",e.target.checked)} />
  <span><b>Use as default delivery address</b><span className="mt-0.5 block text-xs font-normal text-[var(--muted-foreground)]">Checkout will prefer this address.</span></span>
  </label>
  </div>
 
- <div className={isDrawer ? "flex items-center gap-3 border-t border-[var(--border)] bg-card p-4 sm:px-7" : "mt-6 flex flex-col gap-3 sm:flex-row sm:justify-end"}>
- <button type="button" disabled={isSubmitting} onClick={requestClose} className={isDrawer ? "rounded-xl border border-[var(--border)] px-5 py-3 text-sm font-semibold" : "rounded-xl border border-[var(--border)] px-5 py-3 text-sm font-semibold"}>Cancel</button>
+ <div className={isDrawer ? "flex items-center gap-3  bg-card p-4 sm:px-7" : "mt-6 flex flex-col gap-3 sm:flex-row sm:justify-end"}>
+ <button type="button" disabled={isSubmitting} onClick={requestClose} className={isDrawer ? "rounded-xl px-5 py-3 text-sm font-semibold" : "rounded-xl px-5 py-3 text-sm font-semibold"}>Cancel</button>
  <button type="submit" disabled={isSubmitting || !form.country?.trim() || !form.region?.trim() || !form.city?.trim() || !form.street?.trim()} className={`rounded-xl bg-[var(--primary)] px-5 py-3 text-sm font-semibold text-white disabled:cursor-not-allowed disabled:opacity-50 ${isDrawer ? "flex-1" : ""}`}>
  {isSubmitting ? "Saving..." : initialAddress ? "Save Changes" : "Add Address"}
  </button>

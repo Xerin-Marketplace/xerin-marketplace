@@ -32,8 +32,8 @@ const PaymentMethod = ({
  const selectedOption = options.find((item) => item.id === selected);
 
  return (
- <section className="mt-4 rounded-xl border border-border bg-card shadow-sm dark:border-border sm:mt-7.5">
- <div className="border-b border-border px-4 py-4 dark:border-border sm:px-6 sm:py-5">
+ <section className="mt-4 rounded-xl bg-card sm:mt-7.5">
+ <div className=" px-4 py-4 sm:px-6 sm:py-5">
  <h3 className="font-bold text-foreground">
  Payment Method
  </h3>
@@ -53,10 +53,10 @@ const PaymentMethod = ({
  return (
  <label
  key={method.id}
- className={`flex min-h-[76px] cursor-pointer items-start gap-3 rounded-xl border p-3 transition sm:p-4 ${
+ className={`flex min-h-[76px] cursor-pointer items-start gap-3 rounded-xl p-3 transition sm:p-4 ${
  selected === method.id
- ? "border-primary bg-primary/5"
- : "border-border dark:border-border"
+ ? "bg-primary/10"
+ : "bg-muted"
  }`}
  >
  <input
@@ -94,7 +94,7 @@ const PaymentMethod = ({
  onChange={(event) =>
  onProviderChange(event.target.value)
  }
- className="mt-2 h-12 w-full rounded-xl border border-border bg-card px-3 text-base dark:border-border dark:bg-muted sm:text-sm"
+ className="mt-2 h-12 w-full rounded-xl bg-card px-3 text-base dark:bg-muted sm:text-sm"
  >
  <option value="">Select network</option>
  {selectedOption.providers.map((name) => (
@@ -114,21 +114,21 @@ const PaymentMethod = ({
  onPhoneNumberChange(event.target.value)
  }
  placeholder="+255 7XX XXX XXX"
- className="mt-2 h-12 w-full rounded-xl border border-border bg-card px-3 text-base dark:border-border dark:bg-muted sm:text-sm"
+ className="mt-2 h-12 w-full rounded-xl bg-card px-3 text-base dark:bg-muted sm:text-sm"
  />
  </label>
  </div>
  )}
 
  {selected === "card" && (
- <div className="mt-4 rounded-xl border border-primary/20 bg-primary/5 p-4 text-sm text-foreground">
+ <div className="mt-4 rounded-xl bg-primary/5 p-4 text-sm text-foreground">
  <div className="flex items-center gap-2 font-semibold">
  <HugeiconsIcon icon={ShieldCheckIcon} size={16} />
  Secure Card Payment
  </div>
  <div className="mt-3 flex flex-wrap gap-2">
- <span className="rounded-lg border border-primary-200 bg-card px-3 py-2 font-bold tracking-wide text-primary-900 dark:border-border dark:bg-muted">VISA</span>
- <span className="rounded-lg border border-primary-200 bg-card px-3 py-2 font-bold tracking-wide text-primary-900 dark:border-border dark:bg-muted">Mastercard</span>
+ <span className="rounded-lg bg-card px-3 py-2 font-bold tracking-wide text-primary-900 dark:bg-muted">VISA</span>
+ <span className="rounded-lg bg-card px-3 py-2 font-bold tracking-wide text-primary-900 dark:bg-muted">Mastercard</span>
  </div>
  <p className="mt-3 text-xs leading-5">
  After you place the order, Xerin redirects you to Selcom Secure Checkout to enter your Visa or Mastercard details. Card number and CVV never pass through or get stored by Xerin.
@@ -137,7 +137,7 @@ const PaymentMethod = ({
  )}
 
  {selected === "cash_on_delivery" && (
- <div className="flex items-start gap-2 rounded-xl border border-green-light-4 bg-green-light-6 p-4 text-xs leading-5 text-emerald-800">
+ <div className="flex items-start gap-2 rounded-xl bg-green-light-6 p-4 text-xs leading-5 text-emerald-800">
  <HugeiconsIcon icon={ShieldCheckIcon} size={15} className="mt-0.5 shrink-0" />
  No digital escrow is created until money is actually collected.
  Xerin still records the COD payment and fulfilment state.
