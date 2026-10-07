@@ -962,7 +962,7 @@ const Checkout = () => {
  maxReachedStep={maxReachedStep}
  />
 
- <div className="mt-5 sm:mt-7">
+ <div className="mt-5 grid items-start gap-6 sm:mt-7 lg:grid-cols-[minmax(0,1fr)_370px]">
  <div className="min-w-0">
  {currentStep === 1 && (
  <div className="space-y-4 sm:space-y-6">
@@ -973,7 +973,7 @@ const Checkout = () => {
  description="Confirm where the order should go. Xerin automatically detects whether the route is domestic or cross-border."
  />
 
- <div className="grid items-start gap-5 lg:grid-cols-2 lg:gap-6">
+ <div className="space-y-5">
  <div className="space-y-5">
  <DeliveryModeSelector
  value={deliveryMode}
@@ -1244,26 +1244,7 @@ const Checkout = () => {
  description="Review products, delivery charge and any coupon before choosing payment."
  />
 
- <div className="grid items-start gap-5 lg:grid-cols-2 lg:gap-6">
  <div className="space-y-5">
- <Coupon />
-
- {selectedAddress && (
- <section className="rounded-xl border border-[var(--border)] bg-card p-4 text-sm shadow-sm sm:p-6">
- <h3 className="font-bold text-foreground">Delivery summary</h3>
- <p className="mt-3 text-muted-foreground">
- <b className="text-foreground">{selectedAddress.recipient_name || profile?.full_name || "Customer"}</b><br />
- {selectedAddress.street}, {selectedAddress.city}, {selectedAddress.region}, {selectedAddress.country}
- </p>
- {selectedShipping && (
- <p className="mt-3 text-muted-foreground">
- {deliveryMode === "local" ? <>Delivery: <b className="text-foreground">Xerin Express · {("tier" in selectedShipping ? selectedShipping.label : "Domestic")}</b><br />Partner assigned automatically</> : <>Logistics: <b className="text-foreground">{eligibleLogistics.data?.results.find((company) => company.logistics_company_id === selectedCompanyId)?.name || "Selected provider"}</b><br />Service: {"method_name" in selectedShipping ? selectedShipping.method_name : "International"} · Cross-border</>}
- </p>
- )}
- </section>
- )}
- </div>
-
  <section className="rounded-2xl border border-border/60 bg-card shadow-sm">
  <div className="border-b border-border px-4 py-4 sm:px-6">
  <div className="flex items-center justify-between gap-3">
@@ -1308,6 +1289,23 @@ const Checkout = () => {
  </div>
  </div>
  </section>
+
+ <Coupon />
+
+ {selectedAddress && (
+ <section className="rounded-2xl border border-border/60 bg-card p-4 text-sm shadow-sm sm:p-6">
+ <h3 className="font-bold text-foreground">Delivery summary</h3>
+ <p className="mt-3 text-muted-foreground">
+ <b className="text-foreground">{selectedAddress.recipient_name || profile?.full_name || "Customer"}</b><br />
+ {selectedAddress.street}, {selectedAddress.city}, {selectedAddress.region}, {selectedAddress.country}
+ </p>
+ {selectedShipping && (
+ <p className="mt-3 text-muted-foreground">
+ {deliveryMode === "local" ? <>Delivery: <b className="text-foreground">Xerin Express · {("tier" in selectedShipping ? selectedShipping.label : "Domestic")}</b><br />Partner assigned automatically</> : <>Logistics: <b className="text-foreground">{eligibleLogistics.data?.results.find((company) => company.logistics_company_id === selectedCompanyId)?.name || "Selected provider"}</b><br />Service: {"method_name" in selectedShipping ? selectedShipping.method_name : "International"} · Cross-border</>}
+ </p>
+ )}
+ </section>
+ )}
  </div>
 
  <StepActions
@@ -1328,7 +1326,7 @@ const Checkout = () => {
  description="Choose Mobile Payment or Card Payment for the backend-confirmed TZS total."
  />
 
- <div className="grid items-start gap-5 lg:grid-cols-[minmax(0,1.15fr)_minmax(340px,.85fr)] lg:gap-6">
+ <div className="space-y-5">
  <PaymentMethod
  options={paymentOptions.data ?? []}
  selected={form.paymentMethod}
@@ -1341,21 +1339,14 @@ const Checkout = () => {
  />
 
  <section className="rounded-2xl border border-border/60 bg-card p-4 shadow-sm sm:p-6">
- <h3 className="font-bold text-foreground">Final total</h3>
- <div className="mt-3">
- <SummaryRow label="Product subtotal" value={<PriceDisplay amount={Number(cart?.subtotal || 0)} sourceCurrency="TZS" showSettlementTzs />} />
- {Number(cart?.coupon_discount_amount || 0) > 0 && (
- <SummaryRow label="Coupon" value={<><span>-</span><PriceDisplay amount={Number(cart?.coupon_discount_amount || 0)} sourceCurrency="TZS" /></>} saving />
- )}
- <SummaryRow label="Delivery" info={<InfoPopover title="How delivery is priced" align="end"><p>Calculated from the real distance to your delivery address using the selected logistics option. The quote is locked while you complete payment.</p></InfoPopover>} value={shippingAmount === null ? "Pending" : <PriceDisplay amount={shippingAmount} sourceCurrency="TZS" />} />
- <div className="mt-2 border-t border-border pt-2">
- <SummaryRow label="Grand Total" info={<InfoPopover title="How the total is calculated" align="end"><p>Grand Total = product subtotal − discounts + delivery fee. Payment is settled in TZS.</p></InfoPopover>} value={checkoutTotal === null ? "Pending quote" : <PriceDisplay amount={checkoutTotal} sourceCurrency="TZS" showSettlementTzs />} strong />
- </div>
- </div>
+ <h3 className="font-bold text-foreground">Final checks</h3>
  {selectedAddress && (
- <div className="mt-4 rounded-lg bg-muted/70 p-3 text-xs leading-5 text-muted-foreground">
+ <div className="mt-4 flex items-start gap-3 rounded-xl bg-muted/70 p-3.5 text-xs leading-5 text-muted-foreground">
+ <HugeiconsIcon icon={Location01Icon} size={16} className="mt-0.5 shrink-0 text-primary" />
+ <span>
  <b className="text-foreground">Deliver to</b><br />
  {selectedAddress.street}, {selectedAddress.city}, {selectedAddress.country}
+ </span>
  </div>
  )}
  <div className="mt-4 rounded-xl border border-primary/20 bg-primary/5 p-3 text-[11px] leading-5 text-foreground sm:text-xs">
@@ -1386,7 +1377,7 @@ const Checkout = () => {
  !form.shippingMethod ||
  !frozenQuote.data
  }
- className="inline-flex h-12 items-center justify-center rounded-xl bg-primary px-6 text-base font-semibold text-primary-foreground shadow-sm transition hover:bg-primary/90 disabled:cursor-not-allowed disabled:opacity-50 sm:text-sm"
+ className="inline-flex h-12 items-center justify-center rounded-xl bg-gradient-to-r from-primary to-orange-600 px-7 text-base font-bold text-white shadow-md shadow-primary/25 transition hover:opacity-90 disabled:cursor-not-allowed disabled:opacity-50 disabled:shadow-none sm:text-sm"
  >
  {createOrder.isPending || isCreatingAddress ? "Processing..." : "Pay Securely"}
  </button>
@@ -1400,7 +1391,12 @@ const Checkout = () => {
 
  </div>
 
-
+ <OrderTotalsCard
+ cart={cart}
+ cartItems={cartItems}
+ shippingAmount={shippingAmount}
+ checkoutTotal={checkoutTotal}
+ />
  </div>
  </form>
  </div>
@@ -1541,6 +1537,95 @@ function StepHeading({
  </p>
  </div>
  </div>
+ );
+}
+
+function OrderTotalsCard({
+ cart,
+ cartItems,
+ shippingAmount,
+ checkoutTotal,
+}: {
+ cart: ReturnType<typeof useBackendCart>["data"];
+ cartItems: ReturnType<typeof mapBackendCartToUi>;
+ shippingAmount: number | null;
+ checkoutTotal: number | null;
+}) {
+ const promoDiscount = Number(cart?.promotion_discount_amount || 0);
+ const couponDiscount = Number(cart?.coupon_discount_amount || 0);
+ return (
+ <aside className="order-first lg:order-none lg:sticky lg:top-24">
+ <section className="overflow-hidden rounded-2xl border border-border/60 bg-card shadow-sm">
+ <header className="flex items-center justify-between gap-3 border-b border-border px-5 py-4">
+ <h3 className="font-bold text-foreground">Order summary</h3>
+ <span className="rounded-full bg-primary/10 px-2.5 py-1 text-[10px] font-bold text-primary">
+ {cartItems.length} item{cartItems.length === 1 ? "" : "s"}
+ </span>
+ </header>
+
+ <div className="hidden max-h-60 space-y-3 overflow-y-auto border-b border-border px-5 py-4 lg:block">
+ {cartItems.slice(0, 4).map((item) => {
+ const thumb = item.imgs?.thumbnails?.[0];
+ return (
+ <div key={item.cartItemId} className="flex items-center gap-3">
+ <span className="grid h-11 w-11 shrink-0 place-items-center overflow-hidden rounded-lg border border-border/60 bg-muted">
+ {thumb ? (
+ <img src={thumb} alt="" className="h-full w-full object-cover" />
+ ) : (
+ <HugeiconsIcon icon={ClipboardListIcon} size={15} className="text-muted-foreground" />
+ )}
+ </span>
+ <span className="min-w-0 flex-1 truncate text-xs font-semibold text-foreground">
+ {item.title}
+ </span>
+ <span className="shrink-0 text-xs text-muted-foreground">×{item.quantity}</span>
+ </div>
+ );
+ })}
+ {cartItems.length > 4 && (
+ <p className="text-[11px] font-semibold text-muted-foreground">
+ +{cartItems.length - 4} more item{cartItems.length - 4 === 1 ? "" : "s"}
+ </p>
+ )}
+ </div>
+
+ <div className="p-5">
+ <SummaryRow
+ label="Subtotal"
+ value={<PriceDisplay amount={Number(cart?.subtotal || 0)} sourceCurrency="TZS" />}
+ />
+ {promoDiscount > 0 && (
+ <SummaryRow
+ label="Promotion"
+ value={<><span>-</span><PriceDisplay amount={promoDiscount} sourceCurrency="TZS" /></>}
+ saving
+ />
+ )}
+ {couponDiscount > 0 && (
+ <SummaryRow
+ label="Coupon"
+ value={<><span>-</span><PriceDisplay amount={couponDiscount} sourceCurrency="TZS" /></>}
+ saving
+ />
+ )}
+ <SummaryRow
+ label="Delivery"
+ value={shippingAmount === null ? "Pending quote" : <PriceDisplay amount={shippingAmount} sourceCurrency="TZS" />}
+ />
+ <div className="mt-2 border-t border-border pt-2">
+ <SummaryRow
+ label="Total"
+ value={checkoutTotal === null ? "Pending" : <PriceDisplay amount={checkoutTotal} sourceCurrency="TZS" showSettlementTzs />}
+ strong
+ />
+ </div>
+ <p className="mt-3 flex items-center gap-1.5 text-[11px] leading-5 text-muted-foreground">
+ <HugeiconsIcon icon={LockPasswordIcon} size={13} className="shrink-0 text-primary" />
+ Secure checkout — total confirmed by the server before you pay.
+ </p>
+ </div>
+ </section>
+ </aside>
  );
 }
 
