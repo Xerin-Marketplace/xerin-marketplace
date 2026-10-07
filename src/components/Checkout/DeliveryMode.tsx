@@ -2,8 +2,6 @@
 
 
 import { Spinner } from "@/components/ui/Spinner";
-import { HugeiconsIcon } from "@hugeicons/react";
-import { Globe02Icon, Loading03Icon, Location01Icon, ShieldCheckIcon } from "@hugeicons/core-free-icons";
 import type { DeliveryCheckoutConfig, DetectedDeliveryMode, DeliveryMode } from "@/types/api/commerce";
 
 export default function DeliveryModeSelector({
@@ -27,27 +25,18 @@ export default function DeliveryModeSelector({
  <p className="mt-1 text-sm leading-6 text-muted-foreground">
  Xerin detects this automatically from the product store country and your selected delivery address.
  </p>
- <div className="mt-5 rounded-xl bg-primary/10 p-4">
+ <div className="mt-5 rounded-xl bg-muted p-4">
  {loading ? (
  <div className="flex items-center gap-2 text-sm font-semibold"><Spinner size={17} /> Detecting delivery route…</div>
  ) : awaitingAddress || !detected ? (
- <div className="flex items-start gap-3">
- <span className="flex h-10 w-10 items-center justify-center rounded-xl bg-muted text-muted-foreground">
- <HugeiconsIcon icon={Location01Icon} size={18} />
- </span>
- <div className="min-w-0">
+ <div>
  <p className="font-bold text-foreground">Waiting for delivery address</p>
  <p className="mt-1 text-xs leading-5 text-muted-foreground">
  Select and confirm a delivery address below. Xerin will then detect whether this order is domestic or cross-border.
  </p>
  </div>
- </div>
  ) : (
- <div className="flex items-start gap-3">
- <span className={`flex h-10 w-10 items-center justify-center rounded-xl ${crossBorder ? "bg-primary/5 text-primary-600" : "bg-primary/10 text-primary"}`}>
- {crossBorder ? <HugeiconsIcon icon={Globe02Icon} size={18} /> : <HugeiconsIcon icon={Location01Icon} size={18} />}
- </span>
- <div className="min-w-0">
+ <div>
  <p className="font-bold text-foreground">{crossBorder ?"International / Cross-border" : "Domestic / Local"}</p>
  <p className="mt-1 text-xs leading-5 text-muted-foreground">
  {crossBorder
@@ -57,7 +46,7 @@ export default function DeliveryModeSelector({
  {detected?.origins?.length ? (
  <div className="mt-3 flex flex-wrap gap-2">
  {detected.origins.map((origin) => (
- <span key={origin.store_id} className="rounded-full bg-muted px-2.5 py-1 text-[10px] font-bold text-muted-foreground">
+ <span key={origin.store_id} className="rounded-full bg-background px-2.5 py-1 text-[10px] font-bold text-muted-foreground">
  {origin.store_name}: {origin.origin_country} → {origin.destination_country}
  </span>
  ))}
@@ -65,10 +54,9 @@ export default function DeliveryModeSelector({
  ) : null}
  {!crossBorder && config?.cod_allowed && (
  <span className="mt-3 inline-flex items-center gap-1 rounded-full bg-green-light-6 px-2.5 py-1 text-[10px] font-bold uppercase text-green-dark">
- <HugeiconsIcon icon={ShieldCheckIcon} size={11} /> COD may be available
+ COD may be available
  </span>
  )}
- </div>
  </div>
  )}
  </div>

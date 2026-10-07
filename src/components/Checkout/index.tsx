@@ -4,7 +4,6 @@ import React, { useEffect, useMemo, useState } from "react";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { useQuery, useQueryClient } from "@tanstack/react-query";
-import Breadcrumb from "../Common/Breadcrumb";
 import Billing from "./Billing";
 import ShippingMethod from "./ShippingMethod";
 import XerinExpress from "./XerinExpress";
@@ -29,7 +28,7 @@ import toast from "react-hot-toast";
 import { useAuthStore } from "@/store/useAuthStore";
 import { requestAuthPrompt } from "@/components/Auth/AuthPrompt";
 import { HugeiconsIcon } from "@hugeicons/react";
-import { CheckIcon, ArrowLeft01Icon, ArrowRight01Icon, Globe02Icon, Location01Icon, DeliveryTruck01Icon, ClipboardCheckIcon, CreditCardIcon, ClipboardListIcon, LockPasswordIcon, CheckmarkBadge02Icon } from "@hugeicons/core-free-icons";
+import { ArrowLeft01Icon, ArrowRight01Icon, Location01Icon, ClipboardListIcon, LockPasswordIcon, CheckmarkBadge02Icon } from "@hugeicons/core-free-icons";
 import InfoPopover from "@/components/Common/Info/InfoPopover";
 import AddressModal from "@/components/MyAccount/AddressModal";
 
@@ -116,11 +115,11 @@ const countryFlag = (country?: string | null) => {
 
 type CheckoutStep = 1 | 2 | 3 | 4;
 
-const CHECKOUT_STEPS: Array<{ id: CheckoutStep; label: string; shortLabel: string; icon: typeof Location01Icon }> = [
- { id: 1, label: "Delivery", shortLabel: "Delivery", icon: Location01Icon },
- { id: 2, label: "Logistics", shortLabel: "Logistics", icon: DeliveryTruck01Icon },
- { id: 3, label: "Review", shortLabel: "Review", icon: ClipboardCheckIcon },
- { id: 4, label: "Payment", shortLabel: "Payment", icon: CreditCardIcon },
+const CHECKOUT_STEPS: Array<{ id: CheckoutStep; label: string; shortLabel: string }> = [
+ { id: 1, label: "Delivery", shortLabel: "Delivery" },
+ { id: 2, label: "Logistics", shortLabel: "Logistics" },
+ { id: 3, label: "Review", shortLabel: "Review" },
+ { id: 4, label: "Payment", shortLabel: "Payment" },
 ];
 
 const Checkout = () => {
@@ -930,7 +929,6 @@ const Checkout = () => {
  if (cartItems.length === 0) {
  return (
  <>
- <Breadcrumb title="Checkout" pages={["checkout"]} />
  <section className="grid place-items-center px-4 py-20 sm:py-28">
  <div className="w-full max-w-md rounded-3xl bg-muted p-8 text-center sm:p-10">
  <span className="mx-auto grid h-14 w-14 place-items-center rounded-2xl bg-primary/10 text-primary">
@@ -949,9 +947,8 @@ const Checkout = () => {
 
  return (
  <>
- <Breadcrumb title="Checkout" pages={["checkout"]} />
 
- <section className="overflow-hidden bg-background pb-10 pt-6 sm:py-12 lg:py-16">
+ <section className="overflow-hidden bg-background pb-12 pt-5 sm:pb-16 sm:pt-8">
  <div className="mx-auto w-full max-w-[1220px] px-3 sm:px-6 lg:px-8">
  <form onSubmit={handleSubmit}>
  <CheckoutStepper
@@ -1114,10 +1111,6 @@ const Checkout = () => {
  isLoading={isLoadingProfile}
  />
 
- <section className="rounded-xl bg-primary/5 p-4 text-xs leading-5 text-muted-foreground sm:p-5">
- <b className="text-foreground">Ready for logistics?</b>
- <p className="mt-1">Verify the detected delivery type, address and customer details, then continue.</p>
- </section>
  </div>
  </div>
 
@@ -1453,12 +1446,8 @@ function CheckoutStepper({
  : "cursor-not-allowed text-muted-foreground"
  }`}
  >
- <HugeiconsIcon
- icon={done ? CheckmarkBadge02Icon : step.icon}
- size={19}
- className="shrink-0"
- />
- <span className="hidden sm:inline">{step.shortLabel}</span>
+ {done && <HugeiconsIcon icon={CheckmarkBadge02Icon} size={16} className="shrink-0" />}
+ <span className="text-xs sm:text-sm">{step.shortLabel}</span>
  </button>
  {!last && (
  <span

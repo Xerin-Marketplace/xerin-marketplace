@@ -57,9 +57,6 @@ const PaymentMethod = ({
  onChange={() => onChange(method.id)}
  className="mt-1 accent-orange"
  />
- <span className="flex h-9 w-9 shrink-0 items-center justify-center rounded-xl bg-muted text-muted-foreground">
- <HugeiconsIcon icon={Icon} size={17} />
- </span>
  <span>
  <span className="font-semibold text-foreground">
  {method.label}
@@ -113,8 +110,7 @@ const PaymentMethod = ({
 
  {selected === "card" && (
  <div className="mt-4 rounded-xl bg-primary/5 p-4 text-sm text-foreground">
- <div className="flex items-center gap-2 font-semibold">
- <HugeiconsIcon icon={ShieldCheckIcon} size={16} />
+ <div className="font-semibold">
  Secure Card Payment
  </div>
  <div className="mt-3 flex flex-wrap gap-2">
@@ -129,7 +125,7 @@ const PaymentMethod = ({
 
  {selected === "cash_on_delivery" && (
  <div className="flex items-start gap-2 rounded-xl bg-green-light-6 p-4 text-xs leading-5 text-emerald-800">
- <HugeiconsIcon icon={ShieldCheckIcon} size={15} className="mt-0.5 shrink-0" />
+
  No digital escrow is created until money is actually collected.
  Xerin still records the COD payment and fulfilment state.
  </div>
