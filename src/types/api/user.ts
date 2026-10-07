@@ -88,7 +88,7 @@ export type MapAutocompleteSuggestion = {
 };
 
 export type MapResolvedLocation = {
-  provider: "google";
+  provider: "google" | "nominatim" | string;
   place_id?: string | null;
   display_name?: string | null;
   formatted_address: string;
