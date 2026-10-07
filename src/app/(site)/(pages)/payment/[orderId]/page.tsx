@@ -155,13 +155,13 @@ export default function PaymentPage() {
  if (!order.data) return;
  setReordering(true);
  try {
- await cartApi.merge(
- order.data.items.map((item) => ({
+ for (const item of order.data.items) {
+ await cartApi.addItem({
  product_id: item.product_id,
  variant_id: item.variant_id || undefined,
  quantity: item.quantity,
- })),
- );
+ });
+ }
  router.push("/checkout");
  } catch {
  toast.error("Could not rebuild your order — please add the items again.");
