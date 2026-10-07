@@ -5,7 +5,7 @@ import { Spinner } from "@/components/ui/Spinner";
 import React, { FormEvent, useEffect, useState } from "react";
 import toast from "react-hot-toast";
 import { HugeiconsIcon } from "@hugeicons/react";
-import { CheckmarkCircle02Icon, Target02Icon, Loading03Icon, Location01Icon, Search01Icon } from "@hugeicons/core-free-icons";
+import { CheckmarkCircle02Icon, Target02Icon, Loading03Icon, Location01Icon, Search01Icon, Cancel01Icon } from "@hugeicons/core-free-icons";
 import { usersApi } from "@/lib/api/endpoints/users";
 import type { Address, AddressRequest, MapResolvedLocation } from "@/types/api/user";
 
@@ -15,6 +15,9 @@ type Props = {
  initialAddress?: Address | null;
  isSubmitting?: boolean;
  onSubmit: (payload: AddressRequest) => Promise<void> | void;
+ /** "drawer" renders a right-side slide-over (bottom sheet on mobile),
+  * used by checkout. Default keeps the centred dialog. */
+ presentation?: "modal" | "drawer";
 };
 
 const emptyForm: AddressRequest = {
@@ -68,6 +71,7 @@ export default function AddressModal({
  initialAddress,
  isSubmitting = false,
  onSubmit,
+ presentation = "modal",
 }: Props) {
  const [form, setForm] = useState<AddressRequest>(emptyForm);
  const [mapSearch, setMapSearch] = useState("");
@@ -77,6 +81,33 @@ export default function AddressModal({
  const [locationError, setLocationError] = useState("");
  const [editLocationDetails, setEditLocationDetails] = useState(false);
  const [showManualFallback, setShowManualFallback] = useState(false);
+ const isDrawer = presentation === "drawer";
+ const [entered, setEntered] = useState(false);
+ const [closing, setClosing] = useState(false);
+
+ useEffect(() => {
+ if (!isDrawer) return;
+ if (!isOpen) {
+ setEntered(false);
+ setClosing(false);
+ return;
+ }
+ const timer = window.setTimeout(() => setEntered(true), 24);
+ return () => window.clearTimeout(timer);
+ }, [isDrawer, isOpen]);
+
+ const requestClose = () => {
+ if (isSubmitting) return;
+ if (!isDrawer) {
+ closeModal();
+ return;
+ }
+ setClosing(true);
+ window.setTimeout(() => {
+ setClosing(false);
+ closeModal();
+ }, 280);
+ };
 
  useEffect(() => {
  if (!isOpen) return;
@@ -270,19 +301,53 @@ export default function AddressModal({
  };
 
  return (
- <div className="fixed inset-0 z-[120] overflow-y-auto bg-black/55 p-4 sm:p-8">
- <div className="mx-auto my-8 w-full max-w-3xl rounded-2xl bg-card p-5 shadow-lg sm:p-7">
- <div className="flex items-start justify-between gap-4">
+ <div
+ className={
+ isDrawer
+ ? `fixed inset-0 z-[120] bg-black/55 backdrop-blur-[2px] transition-opacity duration-300 ${entered && !closing ? "opacity-100" : "opacity-0"}`
+ : "fixed inset-0 z-[120] overflow-y-auto bg-black/55 p-4 sm:p-8"
+ }
+ onClick={isDrawer ? requestClose : undefined}
+ >
+ <div
+ className={
+ isDrawer
+ ? `absolute inset-x-0 bottom-0 flex max-h-[92dvh] flex-col rounded-t-3xl bg-card shadow-2xl transition-transform duration-300 ease-out sm:inset-y-0 sm:left-auto sm:right-0 sm:h-full sm:w-full sm:max-w-xl sm:rounded-none ${
+ entered && !closing
+ ? "translate-x-0 translate-y-0"
+ : "translate-y-full sm:translate-x-full sm:translate-y-0"
+ }`
+ : "mx-auto my-8 w-full max-w-3xl rounded-2xl bg-card p-5 shadow-lg sm:p-7"
+ }
+ onClick={isDrawer ? (event) => event.stopPropagation() : undefined}
+ >
+ {isDrawer && (
+ <div className="mx-auto mt-2.5 h-1.5 w-12 shrink-0 rounded-full bg-border sm:hidden" />
+ )}
+ <div className={isDrawer ? "flex items-start justify-between gap-4 border-b border-[var(--border)] px-5 py-4 sm:px-7" : "flex items-start justify-between gap-4"}>
  <div>
  <h3 className="text-xl font-bold">{initialAddress ?"Edit Delivery Address" : "Add Delivery Address"}</h3>
  <p className="mt-1 text-sm text-[var(--muted-foreground)]">
  These details are used for checkout, shipping quotes and logistics handover.
  </p>
  </div>
- <button type="button" disabled={isSubmitting} onClick={closeModal} className="rounded-xl border border-[var(--border)] px-3 py-2 text-sm font-semibold">Close</button>
+ <button
+ type="button"
+ disabled={isSubmitting}
+ onClick={requestClose}
+ aria-label="Close"
+ className={
+ isDrawer
+ ? "grid h-10 w-10 shrink-0 place-items-center rounded-full border border-[var(--border)] text-foreground transition hover:border-primary hover:text-primary"
+ : "rounded-xl border border-[var(--border)] px-3 py-2 text-sm font-semibold"
+ }
+ >
+ {isDrawer ? <HugeiconsIcon icon={Cancel01Icon} size={18} /> : "Close"}
+ </button>
  </div>
 
- <form onSubmit={submit} className="mt-6">
+ <form onSubmit={submit} className={isDrawer ? "flex min-h-0 flex-1 flex-col" : "mt-6"}>
+ <div className={isDrawer ? "min-h-0 flex-1 overflow-y-auto px-5 py-5 sm:px-7" : undefined}>
  <div className="grid gap-4 sm:grid-cols-2">
  <Field label="Address label">
  <input value={form.label || ""} onChange={(e)=>set("label",e.target.value)} className={input} placeholder="Home, Office..." />
@@ -547,10 +612,11 @@ export default function AddressModal({
  <input type="checkbox" checked={Boolean(form.is_default)} onChange={(e)=>set("is_default",e.target.checked)} />
  <span><b>Use as default delivery address</b><span className="mt-0.5 block text-xs font-normal text-[var(--muted-foreground)]">Checkout will prefer this address.</span></span>
  </label>
+ </div>
 
- <div className="mt-6 flex flex-col gap-3 sm:flex-row sm:justify-end">
- <button type="button" disabled={isSubmitting} onClick={closeModal} className="rounded-xl border border-[var(--border)] px-5 py-3 text-sm font-semibold">Cancel</button>
- <button type="submit" disabled={isSubmitting || !form.country?.trim() || !form.region?.trim() || !form.city?.trim() || !form.street?.trim()} className="rounded-xl bg-[var(--primary)] px-5 py-3 text-sm font-semibold text-white disabled:cursor-not-allowed disabled:opacity-50">
+ <div className={isDrawer ? "flex items-center gap-3 border-t border-[var(--border)] bg-card p-4 sm:px-7" : "mt-6 flex flex-col gap-3 sm:flex-row sm:justify-end"}>
+ <button type="button" disabled={isSubmitting} onClick={requestClose} className={isDrawer ? "rounded-xl border border-[var(--border)] px-5 py-3 text-sm font-semibold" : "rounded-xl border border-[var(--border)] px-5 py-3 text-sm font-semibold"}>Cancel</button>
+ <button type="submit" disabled={isSubmitting || !form.country?.trim() || !form.region?.trim() || !form.city?.trim() || !form.street?.trim()} className={`rounded-xl bg-[var(--primary)] px-5 py-3 text-sm font-semibold text-white disabled:cursor-not-allowed disabled:opacity-50 ${isDrawer ? "flex-1" : ""}`}>
  {isSubmitting ? "Saving..." : initialAddress ? "Save Changes" : "Add Address"}
  </button>
  </div>

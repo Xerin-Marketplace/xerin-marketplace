@@ -31,6 +31,7 @@ import { requestAuthPrompt } from "@/components/Auth/AuthPrompt";
 import { HugeiconsIcon } from "@hugeicons/react";
 import { CheckIcon, ArrowLeft01Icon, ArrowRight01Icon, Globe02Icon, Location01Icon } from "@hugeicons/core-free-icons";
 import InfoPopover from "@/components/Common/Info/InfoPopover";
+import AddressModal from "@/components/MyAccount/AddressModal";
 
 export type CheckoutForm = {
  firstName: string;
@@ -129,6 +130,7 @@ const Checkout = () => {
  const [deliveryMode, setDeliveryMode] = useState<DeliveryMode>("local");
  const [destinationCountry, setDestinationCountry] = useState("");
  const [selectedAddressId, setSelectedAddressId] = useState("");
+ const [addressDrawerOpen, setAddressDrawerOpen] = useState(false);
  const [selectedCompanyId, setSelectedCompanyId] = useState("");
  const [paymentProvider, setPaymentProvider] = useState("");
  const [paymentPhone, setPaymentPhone] = useState("");
@@ -155,6 +157,7 @@ const Checkout = () => {
 
  const {
  addresses,
+ createAddress,
  isCreatingAddress,
  isLoadingAddresses,
  refetchAddresses,
@@ -1072,9 +1075,19 @@ const Checkout = () => {
  </div>
  )}
 
- <a href="/account/addresses?returnTo=%2Fcheckout" className="mt-4 inline-block text-sm font-semibold text-primary">
- Manage delivery addresses
+ <div className="mt-4 flex flex-wrap items-center gap-3">
+ <button
+ type="button"
+ onClick={() => setAddressDrawerOpen(true)}
+ className="inline-flex min-h-11 items-center gap-2 rounded-xl bg-primary px-4 text-sm font-bold text-white shadow-sm transition hover:opacity-90"
+ >
+ <HugeiconsIcon icon={Location01Icon} size={17} />
+ Add new address
+ </button>
+ <a href="/account/addresses?returnTo=%2Fcheckout" className="text-sm font-semibold text-primary hover:underline">
+ Manage addresses
  </a>
+ </div>
  </section>
  </div>
 
@@ -1360,6 +1373,28 @@ const Checkout = () => {
  </form>
  </div>
  </section>
+
+ <AddressModal
+ isOpen={addressDrawerOpen}
+ closeModal={() => setAddressDrawerOpen(false)}
+ presentation="drawer"
+ isSubmitting={isCreatingAddress}
+ onSubmit={async (payload) => {
+ try {
+ const created = await createAddress(payload);
+ const createdCountry = normalizeCountry(created.country);
+ if (createdCountry && createdCountry !== destinationCountry) {
+ setDestinationCountry(createdCountry);
+ }
+ await refetchAddresses();
+ setSelectedAddressId(String(created.id));
+ setAddressDrawerOpen(false);
+ toast.success("Delivery address added — it is selected for this order.");
+ } catch (error) {
+ toast.error(error instanceof Error ? error.message : "Could not save the address. Try again.");
+ }
+ }}
+ />
  </>
  );
 };
