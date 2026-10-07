@@ -4,7 +4,6 @@ import React, { useEffect, useMemo, useState } from "react";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { useQuery, useQueryClient } from "@tanstack/react-query";
-import Billing from "./Billing";
 import ShippingMethod from "./ShippingMethod";
 import XerinExpress from "./XerinExpress";
 import MapPinConfirmation from "./MapPinConfirmation";
@@ -1102,15 +1101,6 @@ const Checkout = () => {
  </a>
  </div>
  </section>
- </div>
-
- <div className="space-y-5">
- <Billing
- profile={profile}
- selectedAddress={selectedAddress}
- isLoading={isLoadingProfile}
- />
-
  </div>
  </div>
 
