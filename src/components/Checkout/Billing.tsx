@@ -42,7 +42,7 @@ const CustomerDetails = ({
  </a>
  </div>
 
- <div className="rounded-xl bg-card p-4 sm:p-6">
+ <div>
  {isLoading ? (
  <div className="grid gap-3 sm:grid-cols-2">
  <div className="h-14 animate-pulse rounded-xl bg-muted dark:bg-muted" />
@@ -73,7 +73,7 @@ const CustomerDetails = ({
  </div>
  )}
 
- <p className="mt-4 rounded-xl bg-muted px-3 py-2.5 text-xs leading-5 text-muted-foreground dark:bg-muted /60">
+ <p className="mt-4 rounded-xl bg-muted px-3 py-2.5 text-xs leading-5 text-muted-foreground dark:bg-muted">
  Customer identity is loaded from your Xerin profile. Delivery country,
  city, region, street, postal information and Google coordinates come
  from the confirmed saved address selected above, so you do not need to

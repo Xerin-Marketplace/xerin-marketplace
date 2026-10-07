@@ -29,7 +29,7 @@ import toast from "react-hot-toast";
 import { useAuthStore } from "@/store/useAuthStore";
 import { requestAuthPrompt } from "@/components/Auth/AuthPrompt";
 import { HugeiconsIcon } from "@hugeicons/react";
-import { CheckIcon, ArrowLeft01Icon, ArrowRight01Icon, Globe02Icon, Location01Icon, DeliveryTruck01Icon, ClipboardCheckIcon, CreditCardIcon, ClipboardListIcon, LockPasswordIcon } from "@hugeicons/core-free-icons";
+import { CheckIcon, ArrowLeft01Icon, ArrowRight01Icon, Globe02Icon, Location01Icon, DeliveryTruck01Icon, ClipboardCheckIcon, CreditCardIcon, ClipboardListIcon, LockPasswordIcon, CheckmarkBadge02Icon } from "@hugeicons/core-free-icons";
 import InfoPopover from "@/components/Common/Info/InfoPopover";
 import AddressModal from "@/components/MyAccount/AddressModal";
 
@@ -883,7 +883,7 @@ const Checkout = () => {
  if (hasHydrated && !isAuthenticated) {
  return (
  <section className="grid place-items-center px-4 py-20 sm:py-28">
- <div className="w-full max-w-md rounded-3xl/60 bg-card p-8 text-center  sm:p-10">
+ <div className="w-full max-w-md rounded-3xl bg-muted p-8 text-center sm:p-10">
  <span className="mx-auto grid h-14 w-14 place-items-center rounded-2xl bg-primary/10 text-primary">
  <HugeiconsIcon icon={LockPasswordIcon} size={26} />
  </span>
@@ -932,7 +932,7 @@ const Checkout = () => {
  <>
  <Breadcrumb title="Checkout" pages={["checkout"]} />
  <section className="grid place-items-center px-4 py-20 sm:py-28">
- <div className="w-full max-w-md rounded-3xl/60 bg-card p-8 text-center  sm:p-10">
+ <div className="w-full max-w-md rounded-3xl bg-muted p-8 text-center sm:p-10">
  <span className="mx-auto grid h-14 w-14 place-items-center rounded-2xl bg-primary/10 text-primary">
  <HugeiconsIcon icon={ClipboardListIcon} size={26} />
  </span>
@@ -951,7 +951,7 @@ const Checkout = () => {
  <>
  <Breadcrumb title="Checkout" pages={["checkout"]} />
 
- <section className="overflow-hidden bg-muted pb-10 pt-6 sm:py-12 lg:py-16">
+ <section className="overflow-hidden bg-background pb-10 pt-6 sm:py-12 lg:py-16">
  <div className="mx-auto w-full max-w-[1220px] px-3 sm:px-6 lg:px-8">
  <form onSubmit={handleSubmit}>
  <CheckoutStepper
@@ -968,7 +968,6 @@ const Checkout = () => {
  <div className="space-y-4 sm:space-y-6">
  <StepHeading
  step="1"
- icon={Location01Icon}
  title="Delivery"
  description="Confirm where the order should go. Xerin automatically detects whether the route is domestic or cross-border."
  />
@@ -1020,10 +1019,9 @@ const Checkout = () => {
  </div>
  )}
 
- <section className="rounded-2xl/60 bg-card p-4 sm:p-6">
+ <section >
  <div className="flex items-start gap-3">
  <span className="flex h-10 w-10 items-center justify-center rounded-xl bg-muted text-muted-foreground">
- <HugeiconsIcon icon={Location01Icon} size={18} />
  </span>
  <div>
  <h2 className="font-bold text-foreground">Delivery Address</h2>
@@ -1100,7 +1098,6 @@ const Checkout = () => {
  onClick={() => setAddressDrawerOpen(true)}
  className="inline-flex min-h-11 items-center gap-2 rounded-xl bg-primary px-4 text-sm font-bold text-white transition hover:opacity-90"
  >
- <HugeiconsIcon icon={Location01Icon} size={17} />
  Add new address
  </button>
  <a href="/account/addresses?returnTo=%2Fcheckout" className="text-sm font-semibold text-primary hover:underline">
@@ -1136,7 +1133,6 @@ const Checkout = () => {
  <div className="space-y-4 sm:space-y-6">
  <StepHeading
  step="2"
- icon={DeliveryTruck01Icon}
  title={deliveryMode === "local" ? "Choose Xerin Express" : "Choose Logistics"}
  description={deliveryMode === "local" ? "Choose Standard or Express. Xerin automatically assigns the best qualified domestic delivery partner." : "Choose a company and service that covers every store-to-customer route in this order."}
  />
@@ -1177,7 +1173,7 @@ const Checkout = () => {
  />
  )}
 
- <section className="rounded-2xl/60 bg-card p-4 sm:p-5">
+ <section >
  <h3 className="font-bold text-foreground">Delivery quote</h3>
  {!frozenQuote.data || !selectedShipping ? (
  <p className="mt-3 text-sm leading-6 text-muted-foreground">
@@ -1225,13 +1221,12 @@ const Checkout = () => {
  <div className="space-y-4 sm:space-y-6">
  <StepHeading
  step="3"
- icon={ClipboardCheckIcon}
  title="Review Order"
  description="Review products, delivery charge and any coupon before choosing payment."
  />
 
  <div className="space-y-5">
- <section className="rounded-2xl bg-card">
+ <section >
  <div className=" px-4 py-4 sm:px-6">
  <div className="flex items-center justify-between gap-3">
  <h3 className="font-bold text-foreground">Order review</h3>
@@ -1245,7 +1240,7 @@ const Checkout = () => {
  const thumb = item.imgs?.thumbnails?.[0];
  return (
  <div key={item.cartItemId} className="flex items-center gap-3  py-3 ">
- <span className="grid h-14 w-14 shrink-0 place-items-center overflow-hidden rounded-xl/60 bg-muted">
+ <span className="grid h-14 w-14 shrink-0 place-items-center overflow-hidden rounded-xl bg-muted">
  {thumb ? (
  <img src={thumb} alt="" className="h-full w-full object-cover" />
  ) : (
@@ -1279,7 +1274,7 @@ const Checkout = () => {
  <Coupon />
 
  {selectedAddress && (
- <section className="rounded-2xl/60 bg-card p-4 text-sm sm:p-6">
+ <section className="text-sm">
  <h3 className="font-bold text-foreground">Delivery summary</h3>
  <p className="mt-3 text-muted-foreground">
  <b className="text-foreground">{selectedAddress.recipient_name || profile?.full_name || "Customer"}</b><br />
@@ -1307,7 +1302,6 @@ const Checkout = () => {
  <div className="space-y-4 sm:space-y-6">
  <StepHeading
  step="4"
- icon={CreditCardIcon}
  title="Payment"
  description="Choose Mobile Payment or Card Payment for the backend-confirmed TZS total."
  />
@@ -1324,11 +1318,10 @@ const Checkout = () => {
  onPhoneNumberChange={setPaymentPhone}
  />
 
- <section className="rounded-2xl/60 bg-card p-4 sm:p-6">
+ <section >
  <h3 className="font-bold text-foreground">Final checks</h3>
  {selectedAddress && (
  <div className="mt-4 flex items-start gap-3 rounded-xl bg-muted/70 p-3.5 text-xs leading-5 text-muted-foreground">
- <HugeiconsIcon icon={Location01Icon} size={16} className="mt-0.5 shrink-0 text-primary" />
  <span>
  <b className="text-foreground">Deliver to</b><br />
  {selectedAddress.street}, {selectedAddress.city}, {selectedAddress.country}
@@ -1439,54 +1432,40 @@ function CheckoutStepper({
  };
 
  return (
- <nav aria-label="Checkout progress" className="rounded-2xl/60 bg-card px-4 py-5 sm:px-8">
- <ol className="flex items-start">
+ <nav aria-label="Checkout progress">
+ <ol className="flex w-full items-center text-sm font-semibold">
  {CHECKOUT_STEPS.map((step, index) => {
  const active = currentStep === step.id;
  const done = completed(step.id);
  const enabled = unlocked(step.id);
- const reached = done || active;
+ const last = index === CHECKOUT_STEPS.length - 1;
  return (
- <li key={step.id} className="relative flex min-w-0 flex-1 flex-col items-center">
- {index > 0 && (
- <span
- aria-hidden="true"
- className={`absolute left-0 right-1/2 top-5 h-0.5 sm:top-6 ${reached ? "bg-primary" : "bg-border"}`}
- />
- )}
- {index < CHECKOUT_STEPS.length - 1 && (
- <span
- aria-hidden="true"
- className={`absolute left-1/2 right-0 top-5 h-0.5 sm:top-6 ${done ? "bg-primary" : "bg-border"}`}
- />
- )}
+ <li key={step.id} className={`flex items-center ${last ? "" : "flex-1"}`}>
  <button
  type="button"
  disabled={!enabled}
  onClick={() => onStepClick(step.id)}
- className={`relative z-10 flex flex-col items-center gap-1.5 rounded-xl px-1 py-1 transition ${
- enabled ? "" : "cursor-not-allowed opacity-60"
+ className={`flex items-center gap-2 transition ${
+ active || done
+ ? "text-primary"
+ : enabled
+ ? "text-foreground"
+ : "cursor-not-allowed text-muted-foreground"
  }`}
  >
- <span
- className={`flex h-10 w-10 items-center justify-center rounded-full transition sm:h-12 sm:w-12 ${
- active
- ? "bg-primary text-white ring-4 ring-primary/15"
- : done
- ? "bg-primary text-white"
- : "bg-muted text-muted-foreground"
- }`}
- >
- {done ? <HugeiconsIcon icon={CheckIcon} size={18} /> : <HugeiconsIcon icon={step.icon} size={19} />}
- </span>
- <span
- className={`block max-w-full truncate text-[11px] font-bold sm:text-xs ${
- active ? "text-primary" : done ? "text-foreground" : "text-muted-foreground"
- }`}
- >
- {step.shortLabel}
- </span>
+ <HugeiconsIcon
+ icon={done ? CheckmarkBadge02Icon : step.icon}
+ size={19}
+ className="shrink-0"
+ />
+ <span className="hidden sm:inline">{step.shortLabel}</span>
  </button>
+ {!last && (
+ <span
+ aria-hidden="true"
+ className={`mx-3 h-px flex-1 sm:mx-6 ${done ? "bg-primary" : "bg-border"}`}
+ />
+ )}
  </li>
  );
  })}
@@ -1496,32 +1475,21 @@ function CheckoutStepper({
 }
 
 function StepHeading({
- step,
  title,
  description,
- icon,
 }: {
  step: string;
  title: string;
  description: string;
- icon: typeof Location01Icon;
 }) {
  return (
- <div className="mb-5 flex items-start gap-3.5 sm:mb-7 sm:gap-4">
- <span className="grid h-11 w-11 shrink-0 place-items-center rounded-2xl bg-primary/10 text-primary text-white sm:h-13 sm:w-13">
- <HugeiconsIcon icon={icon} size={22} />
- </span>
- <div className="min-w-0">
- <p className="text-[11px] font-bold uppercase tracking-[0.18em] text-primary">
- Step {step} of 4
- </p>
- <h1 className="mt-0.5 text-xl font-bold text-foreground sm:text-2xl">
+ <div className="mb-5 sm:mb-6">
+ <h1 className="text-xl font-semibold text-foreground sm:text-2xl">
  {title}
  </h1>
- <p className="mt-0.5 max-w-2xl text-[13px] leading-5 text-muted-foreground sm:text-sm">
+ <p className="mt-1 max-w-2xl text-sm leading-6 text-muted-foreground">
  {description}
  </p>
- </div>
  </div>
  );
 }
@@ -1540,21 +1508,20 @@ function OrderTotalsCard({
  const promoDiscount = Number(cart?.promotion_discount_amount || 0);
  const couponDiscount = Number(cart?.coupon_discount_amount || 0);
  return (
- <aside className="order-first lg:order-none lg:sticky lg:top-24">
- <section className="overflow-hidden rounded-2xl bg-card">
- <header className="flex items-center justify-between gap-3  px-5 py-4">
- <h3 className="font-bold text-foreground">Order summary</h3>
- <span className="rounded-full bg-primary/10 px-2.5 py-1 text-[10px] font-bold text-primary">
+ <aside className="order-first w-full lg:order-none lg:sticky lg:top-24">
+ <div className="flex items-center justify-between gap-3">
+ <h3 className="text-lg font-semibold text-foreground">Order summary</h3>
+ <span className="text-xs font-semibold text-muted-foreground">
  {cartItems.length} item{cartItems.length === 1 ? "" : "s"}
  </span>
- </header>
+ </div>
 
- <div className="hidden max-h-60 space-y-3 overflow-y-auto  px-5 py-4 lg:block">
+ <div className="hidden max-h-60 space-y-3 overflow-y-auto py-5 lg:block">
  {cartItems.slice(0, 4).map((item) => {
  const thumb = item.imgs?.thumbnails?.[0];
  return (
  <div key={item.cartItemId} className="flex items-center gap-3">
- <span className="grid h-11 w-11 shrink-0 place-items-center overflow-hidden rounded-lg/60 bg-muted">
+ <span className="grid h-11 w-11 shrink-0 place-items-center overflow-hidden rounded-lg bg-muted">
  {thumb ? (
  <img src={thumb} alt="" className="h-full w-full object-cover" />
  ) : (
@@ -1575,42 +1542,41 @@ function OrderTotalsCard({
  )}
  </div>
 
- <div className="p-5">
- <SummaryRow
- label="Subtotal"
- value={<PriceDisplay amount={Number(cart?.subtotal || 0)} sourceCurrency="TZS" />}
- />
+ <div className="divide-y divide-border">
+ <div className="flex items-center justify-between gap-4 py-3">
+ <span className="text-sm text-muted-foreground">Subtotal</span>
+ <span className="text-sm font-medium text-foreground"><PriceDisplay amount={Number(cart?.subtotal || 0)} sourceCurrency="TZS" /></span>
+ </div>
  {promoDiscount > 0 && (
- <SummaryRow
- label="Promotion"
- value={<><span>-</span><PriceDisplay amount={promoDiscount} sourceCurrency="TZS" /></>}
- saving
- />
+ <div className="flex items-center justify-between gap-4 py-3">
+ <span className="text-sm text-muted-foreground">Promotion</span>
+ <span className="text-sm font-medium text-green"><PriceDisplay amount={promoDiscount} sourceCurrency="TZS" /></span>
+ </div>
  )}
  {couponDiscount > 0 && (
- <SummaryRow
- label="Coupon"
- value={<><span>-</span><PriceDisplay amount={couponDiscount} sourceCurrency="TZS" /></>}
- saving
- />
- )}
- <SummaryRow
- label="Delivery"
- value={shippingAmount === null ? "Pending quote" : <PriceDisplay amount={shippingAmount} sourceCurrency="TZS" />}
- />
- <div className="mt-2  pt-2">
- <SummaryRow
- label="Total"
- value={checkoutTotal === null ? "Pending" : <PriceDisplay amount={checkoutTotal} sourceCurrency="TZS" showSettlementTzs />}
- strong
- />
+ <div className="flex items-center justify-between gap-4 py-3">
+ <span className="text-sm text-muted-foreground">Coupon</span>
+ <span className="text-sm font-medium text-green">-<PriceDisplay amount={couponDiscount} sourceCurrency="TZS" /></span>
  </div>
- <p className="mt-3 flex items-center gap-1.5 text-[11px] leading-5 text-muted-foreground">
+ )}
+ <div className="flex items-center justify-between gap-4 py-3">
+ <span className="text-sm text-muted-foreground">Delivery</span>
+ <span className="text-sm font-medium text-foreground">
+ {shippingAmount === null ? "Pending quote" : <PriceDisplay amount={shippingAmount} sourceCurrency="TZS" />}
+ </span>
+ </div>
+ <div className="flex items-center justify-between gap-4 py-3">
+ <span className="text-base font-bold text-foreground">Total</span>
+ <span className="text-base font-bold text-foreground">
+ {checkoutTotal === null ? "Pending" : <PriceDisplay amount={checkoutTotal} sourceCurrency="TZS" showSettlementTzs />}
+ </span>
+ </div>
+ </div>
+
+ <p className="mt-4 flex items-center gap-1.5 text-[11px] leading-5 text-muted-foreground">
  <HugeiconsIcon icon={LockPasswordIcon} size={13} className="shrink-0 text-primary" />
  Secure checkout — total confirmed by the server before you pay.
  </p>
- </div>
- </section>
  </aside>
  );
 }

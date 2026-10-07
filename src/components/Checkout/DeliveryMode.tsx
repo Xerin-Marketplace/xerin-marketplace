@@ -21,7 +21,7 @@ export default function DeliveryModeSelector({
 }) {
  const crossBorder = value === "international";
  return (
- <section className="rounded-xl bg-card p-5 sm:p-6">
+ <section>
  <p className="text-xs font-bold uppercase tracking-[.14em] text-primary">Automatic delivery route</p>
  <h2 className="mt-1 text-xl font-bold text-foreground">Delivery Type</h2>
  <p className="mt-1 text-sm leading-6 text-muted-foreground">
@@ -57,7 +57,7 @@ export default function DeliveryModeSelector({
  {detected?.origins?.length ? (
  <div className="mt-3 flex flex-wrap gap-2">
  {detected.origins.map((origin) => (
- <span key={origin.store_id} className="rounded-full bg-card px-2.5 py-1 text-[10px] font-bold text-muted-foreground dark:bg-muted /70">
+ <span key={origin.store_id} className="rounded-full bg-muted px-2.5 py-1 text-[10px] font-bold text-muted-foreground">
  {origin.store_name}: {origin.origin_country} → {origin.destination_country}
  </span>
  ))}

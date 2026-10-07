@@ -32,18 +32,9 @@ const PaymentMethod = ({
  const selectedOption = options.find((item) => item.id === selected);
 
  return (
- <section className="mt-4 rounded-xl bg-card sm:mt-7.5">
- <div className=" px-4 py-4 sm:px-6 sm:py-5">
- <h3 className="font-bold text-foreground">
- Payment Method
- </h3>
- <p className="mt-1 text-xs leading-5 text-muted-foreground">
- Choose Mobile Payment or Card Payment. Cash on Delivery only appears
- when the selected logistics service is eligible.
- </p>
- </div>
+ <section>
 
- <div className="p-4 sm:p-6">
+ <div>
  {isLoading ? (
  <p className="text-muted-foreground">Loading payment options…</p>
  ) : options.length ? (
@@ -94,7 +85,7 @@ const PaymentMethod = ({
  onChange={(event) =>
  onProviderChange(event.target.value)
  }
- className="mt-2 h-12 w-full rounded-xl bg-card px-3 text-base dark:bg-muted sm:text-sm"
+ className="mt-2 h-12 w-full rounded-xl bg-muted px-3 text-base dark:bg-muted sm:text-sm"
  >
  <option value="">Select network</option>
  {selectedOption.providers.map((name) => (
@@ -114,7 +105,7 @@ const PaymentMethod = ({
  onPhoneNumberChange(event.target.value)
  }
  placeholder="+255 7XX XXX XXX"
- className="mt-2 h-12 w-full rounded-xl bg-card px-3 text-base dark:bg-muted sm:text-sm"
+ className="mt-2 h-12 w-full rounded-xl bg-muted px-3 text-base dark:bg-muted sm:text-sm"
  />
  </label>
  </div>
@@ -127,8 +118,8 @@ const PaymentMethod = ({
  Secure Card Payment
  </div>
  <div className="mt-3 flex flex-wrap gap-2">
- <span className="rounded-lg bg-card px-3 py-2 font-bold tracking-wide text-primary-900 dark:bg-muted">VISA</span>
- <span className="rounded-lg bg-card px-3 py-2 font-bold tracking-wide text-primary-900 dark:bg-muted">Mastercard</span>
+ <span className="rounded-lg bg-muted px-3 py-2 font-bold tracking-wide text-primary-900 dark:bg-muted">VISA</span>
+ <span className="rounded-lg bg-muted px-3 py-2 font-bold tracking-wide text-primary-900 dark:bg-muted">Mastercard</span>
  </div>
  <p className="mt-3 text-xs leading-5">
  After you place the order, Xerin redirects you to Selcom Secure Checkout to enter your Visa or Mastercard details. Card number and CVV never pass through or get stored by Xerin.

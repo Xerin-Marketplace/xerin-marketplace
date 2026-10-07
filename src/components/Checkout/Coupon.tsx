@@ -14,12 +14,12 @@ const Coupon = () => {
  };
 
  return (
- <div className="mt-4 rounded-xl bg-card sm:mt-7.5">
- <div className=" px-4 py-4 sm:px-6 sm:py-5">
+ <div>
+ <div>
  <h3 className="text-base font-bold text-foreground sm:text-xl sm:font-medium">Have any Coupon Code?</h3>
  </div>
 
- <div className="px-4 py-4 sm:px-6 sm:py-6">
+ <div className="mt-3">
  <div className="flex flex-col gap-2 sm:flex-row sm:gap-4">
  <input
  type="text"
