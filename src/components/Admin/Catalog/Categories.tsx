@@ -1,9 +1,10 @@
 "use client";
 
-import { FormEvent, ReactNode, useEffect, useState } from "react";
+import { FormEvent, ReactNode, useEffect, useRef, useState } from "react";
 import { HugeiconsIcon } from "@hugeicons/react";
-import { Alert02Icon, Edit02Icon, PlusIcon, RefreshCwIcon, Search01Icon, Delete02Icon, Settings02Icon, Cancel01Icon } from "@hugeicons/core-free-icons";
+import { Alert02Icon, Edit02Icon, PlusIcon, RefreshCwIcon, Search01Icon, Delete02Icon, Settings02Icon, Cancel01Icon, Image01Icon, Upload04Icon } from "@hugeicons/core-free-icons";
 import toast from "react-hot-toast";
+import { resolveProductImageUrl } from "@/lib/products/adapters";
 import {
  adminService,
  type BusinessCategory,
@@ -65,6 +66,16 @@ export default function AdminCategories() {
  slug: "",
  parent_id: "",
  });
+ const [createImage, setCreateImage] = useState<File | null>(null);
+ const [createPreview, setCreatePreview] = useState<string | null>(null);
+ const createImageRef = useRef<HTMLInputElement | null>(null);
+
+ useEffect(() => {
+ if (!createImage) { setCreatePreview(null); return; }
+ const url = URL.createObjectURL(createImage);
+ setCreatePreview(url);
+ return () => URL.revokeObjectURL(url);
+ }, [createImage]);
 
  const [businessForm, setBusinessForm] = useState({
  name: "",
@@ -208,19 +219,26 @@ export default function AdminCategories() {
  setBusy(true);
 
  try {
- await adminService.createProductCategory({
+ const payload = {
  name: productForm.name.trim(),
  slug:
  productForm.slug.trim() ||
  slugify(productForm.name),
  parent_id: productForm.parent_id || null,
- });
+ };
+ if (createImage) {
+ await adminService.createProductCategoryWithImage(payload, createImage);
+ } else {
+ await adminService.createProductCategory(payload);
+ }
 
  setProductForm({
  name: "",
  slug: "",
  parent_id: "",
  });
+ setCreateImage(null);
+ if (createImageRef.current) createImageRef.current.value = "";
 
  toast.success("Product category created.");
 
@@ -320,6 +338,41 @@ export default function AdminCategories() {
  );
  } finally {
  setBusy(false);
+ }
+ };
+
+ const imageInputRef = useRef<HTMLInputElement | null>(null);
+ const [imageBusy, setImageBusy] = useState(false);
+
+ const uploadImage = async (file: File) => {
+ if (!editing || editing.type !== "product") return;
+ if (!file.type.startsWith("image/")) { toast.error("Please choose an image file."); return; }
+ setImageBusy(true);
+ try {
+ const updated = await adminService.uploadProductCategoryImage(editing.row.id, file);
+ setEditing({ type: "product", row: { ...editing.row, image_url: updated.image_url, thumbnail_url: updated.thumbnail_url } });
+ setProductRows((rows) => rows.map((r) => (r.id === updated.id ? { ...r, image_url: updated.image_url, thumbnail_url: updated.thumbnail_url } : r)));
+ toast.success("Category image updated.");
+ } catch (cause) {
+ toast.error(cause instanceof Error ? cause.message : "Unable to upload image.");
+ } finally {
+ setImageBusy(false);
+ if (imageInputRef.current) imageInputRef.current.value = "";
+ }
+ };
+
+ const removeImage = async () => {
+ if (!editing || editing.type !== "product") return;
+ setImageBusy(true);
+ try {
+ await adminService.removeProductCategoryImage(editing.row.id);
+ setEditing({ type: "product", row: { ...editing.row, image_url: null, thumbnail_url: null } });
+ setProductRows((rows) => rows.map((r) => (r.id === editing.row.id ? { ...r, image_url: null, thumbnail_url: null } : r)));
+ toast.success("Category image removed.");
+ } catch (cause) {
+ toast.error(cause instanceof Error ? cause.message : "Unable to remove image.");
+ } finally {
+ setImageBusy(false);
  }
  };
 
@@ -436,6 +489,41 @@ export default function AdminCategories() {
  }))
  }
  />
+ </Field>
+
+ <Field label="Image (optional)">
+ <input
+ ref={createImageRef}
+ type="file"
+ accept="image/png,image/jpeg,image/webp"
+ className="hidden"
+ onChange={(event) => setCreateImage(event.target.files?.[0] ?? null)}
+ />
+ <div className="flex items-center gap-3">
+ {createPreview ? (
+ // eslint-disable-next-line @next/next/no-img-element
+ <img src={createPreview} alt="Preview" className="h-14 w-14 rounded-lg border object-cover" />
+ ) : (
+ <span className="flex h-14 w-14 items-center justify-center rounded-lg border border-dashed bg-muted text-muted-foreground">
+ <HugeiconsIcon icon={Image01Icon} size={18} />
+ </span>
+ )}
+ <div className="flex flex-col gap-1">
+ <button
+ type="button"
+ onClick={() => createImageRef.current?.click()}
+ className="inline-flex items-center gap-2 rounded-lg border px-3 py-1.5 text-xs font-semibold transition hover:bg-muted"
+ >
+ <HugeiconsIcon icon={Upload04Icon} size={12} />
+ {createImage ? "Change" : "Choose image"}
+ </button>
+ {createImage && (
+ <button type="button" onClick={() => setCreateImage(null)} className="text-left text-xs font-semibold text-destructive">
+ Remove
+ </button>
+ )}
+ </div>
+ </div>
  </Field>
 
  <button
@@ -604,7 +692,23 @@ export default function AdminCategories() {
  ).map((row: any) => (
  <tr key={row.id}>
  <td className="px-5 py-4 font-semibold">
- {row.name}
+ <div className="flex items-center gap-3">
+ {mode === "product" && (
+ row.thumbnail_url || row.image_url ? (
+ // eslint-disable-next-line @next/next/no-img-element
+ <img
+ src={resolveProductImageUrl(row.thumbnail_url || row.image_url)}
+ alt={row.name}
+ className="h-10 w-10 shrink-0 rounded-lg border object-cover"
+ />
+ ) : (
+ <span className="flex h-10 w-10 shrink-0 items-center justify-center rounded-lg border bg-muted text-muted-foreground">
+ <HugeiconsIcon icon={Image01Icon} size={16} />
+ </span>
+ )
+ )}
+ <span>{row.name}</span>
+ </div>
  </td>
 
  <td className="px-5 py-4 text-muted-foreground">
@@ -748,6 +852,58 @@ export default function AdminCategories() {
  <HugeiconsIcon icon={Cancel01Icon} size={18} />
  </button>
  </div>
+
+ {editing.type === "product" && (
+ <div className="mt-4">
+ <p className="text-xs font-semibold uppercase tracking-wider text-muted-foreground">Category image</p>
+ <p className="mt-1 text-xs text-muted-foreground">Shown on the mobile app home and categories screens. Square images (at least 400×400) look best.</p>
+ <div className="mt-3 flex items-center gap-4">
+ {editing.row.image_url ? (
+ // eslint-disable-next-line @next/next/no-img-element
+ <img
+ src={resolveProductImageUrl(editing.row.thumbnail_url || editing.row.image_url)}
+ alt={editing.row.name}
+ className="h-20 w-20 rounded-xl border object-cover"
+ />
+ ) : (
+ <span className="flex h-20 w-20 items-center justify-center rounded-xl border border-dashed bg-muted text-muted-foreground">
+ <HugeiconsIcon icon={Image01Icon} size={24} />
+ </span>
+ )}
+ <div className="flex flex-col gap-2">
+ <input
+ ref={imageInputRef}
+ type="file"
+ accept="image/png,image/jpeg,image/webp"
+ className="hidden"
+ onChange={(event) => {
+ const file = event.target.files?.[0];
+ if (file) void uploadImage(file);
+ }}
+ />
+ <button
+ type="button"
+ disabled={imageBusy}
+ onClick={() => imageInputRef.current?.click()}
+ className="inline-flex items-center gap-2 rounded-lg border px-3 py-2 text-sm font-semibold transition hover:bg-muted disabled:opacity-50"
+ >
+ <HugeiconsIcon icon={Upload04Icon} size={14} />
+ {imageBusy ? "Uploading..." : editing.row.image_url ? "Replace image" : "Upload image"}
+ </button>
+ {editing.row.image_url && (
+ <button
+ type="button"
+ disabled={imageBusy}
+ onClick={() => void removeImage()}
+ className="text-left text-xs font-semibold text-destructive disabled:opacity-50"
+ >
+ Remove image
+ </button>
+ )}
+ </div>
+ </div>
+ </div>
+ )}
 
  <Field label="Name">
  <input

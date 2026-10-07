@@ -507,6 +507,7 @@ export type ProductCategory = {
   slug: string;
   description?: string | null;
   image_url?: string | null;
+  thumbnail_url?: string | null;
   display_order: number;
   is_active: boolean;
   products_count: number;
@@ -1273,6 +1274,33 @@ export const createProductCategory = async (payload: CreateProductCategoryPayloa
 
 export const updateProductCategory = async (categoryId:string,payload:Partial<CreateProductCategoryPayload>):Promise<ProductCategory> => (await axiosInstance.patch<ProductCategory>(`/admin/product-categories/${categoryId}`,payload)).data;
 
+export const createProductCategoryWithImage = async (
+  payload: CreateProductCategoryPayload,
+  image: File,
+): Promise<ProductCategory> => {
+  const form = new FormData();
+  form.append("name", payload.name);
+  form.append("slug", payload.slug);
+  if (payload.parent_id) form.append("parent_id", payload.parent_id);
+  form.append("image", image);
+  const res = await axiosInstance.post<ProductCategory>("/admin/product-categories/with-image", form, {
+    headers: { "Content-Type": "multipart/form-data" },
+  });
+  return res.data;
+};
+
+export const uploadProductCategoryImage = async (categoryId: string, file: File): Promise<ProductCategory> => {
+  const form = new FormData();
+  form.append("image", file);
+  const res = await axiosInstance.post<ProductCategory>(`/products/categories/${categoryId}/image`, form, {
+    headers: { "Content-Type": "multipart/form-data" },
+  });
+  return res.data;
+};
+
+export const removeProductCategoryImage = async (categoryId: string): Promise<ProductCategory> =>
+  (await axiosInstance.delete<ProductCategory>(`/products/categories/${categoryId}/image`)).data;
+
 export const deleteProductCategory = async (categoryId: string): Promise<{ message: string }> => {
   const res = await axiosInstance.delete<{ message: string }>(`/admin/product-categories/${categoryId}`);
   return res.data;
@@ -1410,7 +1438,10 @@ export const adminService = {
   updateBrand,
   deleteBrand,
   createProductCategory,
+  createProductCategoryWithImage,
   updateProductCategory,
+  uploadProductCategoryImage,
+  removeProductCategoryImage,
   deleteProductCategory,
   listProductReviews,
   moderateProductReview,
