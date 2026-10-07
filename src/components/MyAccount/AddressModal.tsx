@@ -494,7 +494,7 @@ export default function AddressModal({
  className="h-56 w-full border-0 sm:h-72"
  loading="lazy"
  referrerPolicy="no-referrer-when-downgrade"
- src={`https://www.google.com/maps?q=${Number(form.latitude)},${Number(form.longitude)}&z=17&output=embed`}
+ src={`https://www.openstreetmap.org/export/embed.html?bbox=${Number(form.longitude) - 0.006},${Number(form.latitude) - 0.004},${Number(form.longitude) + 0.006},${Number(form.latitude) + 0.004}&layer=mapnik&marker=${Number(form.latitude)},${Number(form.longitude)}`}
  />
  <div className="flex flex-col gap-3  bg-card p-4 sm:flex-row sm:items-center sm:justify-between">
  <div className="min-w-0">
