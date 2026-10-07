@@ -34,8 +34,10 @@ export default function XerinExpress({
   return (
     <section>
       <div className="flex items-center gap-2">
-        <HugeiconsIcon icon={ZapIcon} size={20} className="text-primary" />
-        <h3 className="font-semibold text-foreground">Xerin Express Delivery</h3>
+        <HugeiconsIcon icon={ZapIcon} size={18} className="text-foreground" />
+        <h3 className="text-sm font-semibold text-foreground">
+          Xerin Express Delivery
+        </h3>
       </div>
       <p className="mt-1 text-xs text-muted-foreground">
         Choose your delivery speed. A partner is assigned automatically.
@@ -51,16 +53,16 @@ export default function XerinExpress({
                 type="button"
                 key={o.rate_id}
                 onClick={() => onSelect(o)}
-                className={`flex w-full items-start gap-3 rounded-xl p-3.5 text-left transition sm:p-4 ${
+                className={`flex w-full items-start gap-3 rounded-xl border p-3.5 text-left transition sm:p-4 ${
                   active
-                    ? "bg-primary/10 ring-2 ring-primary"
-                    : "bg-muted hover:bg-muted/60"
+                    ? "border-foreground bg-card"
+                    : "border-transparent bg-muted hover:bg-muted/60"
                 }`}
               >
                 <span
                   className={`mt-0.5 size-4 shrink-0 rounded-full border-2 ${
                     active
-                      ? "border-primary bg-primary"
+                      ? "border-foreground bg-foreground"
                       : "border-muted-foreground/40"
                   }`}
                 />
@@ -69,7 +71,7 @@ export default function XerinExpress({
                     <span
                       className={`rounded-md px-1.5 py-0.5 text-[10px] font-bold uppercase tracking-wide ${
                         isExpress
-                          ? "bg-primary text-primary-foreground"
+                          ? "bg-foreground text-background"
                           : "bg-muted-foreground/15 text-muted-foreground"
                       }`}
                     >
@@ -101,7 +103,7 @@ export default function XerinExpress({
           })}
         </div>
       ) : (
-        <p className="mt-3 rounded-xl bg-yellow-light-4 p-3 text-sm text-yellow-dark-2">
+        <p className="mt-3 rounded-xl bg-muted p-3 text-sm text-muted-foreground">
           Xerin Express is not available for this address yet. Standard
           delivery will be arranged with the seller.
         </p>

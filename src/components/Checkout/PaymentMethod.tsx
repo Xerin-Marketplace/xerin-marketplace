@@ -45,12 +45,12 @@ const PaymentMethod = ({
  return (
  <label
  key={method.id}
- className={`flex min-h-[76px] items-start gap-3 rounded-xl p-3 transition sm:p-4 ${
+ className={`flex min-h-[76px] items-start gap-3 rounded-xl border p-3 transition sm:p-4 ${
  disabled
- ? "cursor-not-allowed bg-muted opacity-60"
+ ? "cursor-not-allowed border-transparent bg-muted opacity-60"
  : selected === method.id
- ? "cursor-pointer bg-primary/10"
- : "cursor-pointer bg-muted"
+ ? "cursor-pointer border-foreground bg-card"
+ : "cursor-pointer border-transparent bg-muted"
  }`}
  >
  <input
@@ -59,9 +59,9 @@ const PaymentMethod = ({
  checked={selected === method.id}
  disabled={disabled}
  onChange={() => onChange(method.id)}
- className="mt-1 accent-orange disabled:cursor-not-allowed"
+ className="mt-1 accent-foreground disabled:cursor-not-allowed"
  />
- <span className="mt-0.5 grid size-8 shrink-0 place-items-center rounded-lg bg-muted-foreground/10 text-muted-foreground">
+ <span className="mt-0.5 grid size-8 shrink-0 place-items-center rounded-lg bg-muted-foreground/10 text-foreground">
  <HugeiconsIcon icon={Icon} size={17} />
  </span>
  <span className="min-w-0">
@@ -120,24 +120,8 @@ const PaymentMethod = ({
  </div>
  )}
 
- {selected === "card" && (
- <div className="mt-4 rounded-xl bg-primary/5 p-4 text-sm text-foreground">
- <div className="font-semibold">
- Secure Card Payment
- </div>
- <div className="mt-3 flex flex-wrap gap-2">
- <span className="rounded-lg bg-muted px-3 py-2 font-bold tracking-wide text-primary-900 dark:bg-muted">VISA</span>
- <span className="rounded-lg bg-muted px-3 py-2 font-bold tracking-wide text-primary-900 dark:bg-muted">Mastercard</span>
- </div>
- <p className="mt-3 text-xs leading-5">
- After you place the order, Xerin redirects you to Selcom Secure Checkout to enter your Visa or Mastercard details. Card number and CVV never pass through or get stored by Xerin.
- </p>
- </div>
- )}
-
  {selected === "cash_on_delivery" && (
- <div className="flex items-start gap-2 rounded-xl bg-green-light-6 p-4 text-xs leading-5 text-emerald-800">
-
+ <div className="flex items-start gap-2 rounded-xl bg-muted p-4 text-xs leading-5 text-muted-foreground">
  No digital escrow is created until money is actually collected.
  Xerin still records the COD payment and fulfilment state.
  </div>

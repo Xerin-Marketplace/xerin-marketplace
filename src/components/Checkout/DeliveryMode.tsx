@@ -48,7 +48,7 @@ export default function DeliveryModeSelector({
  </div>
  ) : null}
  {!crossBorder && config?.cod_allowed && (
- <span className="mt-3 inline-flex items-center gap-1 rounded-full bg-green-light-6 px-2.5 py-1 text-[10px] font-bold uppercase text-green-dark">
+ <span className="mt-3 inline-flex items-center gap-1 rounded-full bg-card px-2.5 py-1 text-[10px] font-bold uppercase text-muted-foreground ring-1 ring-border">
  COD may be available
  </span>
  )}

@@ -785,16 +785,16 @@ const Checkout = () => {
  return (
  <section className="grid place-items-center px-4 py-20 sm:py-28">
  <div className="w-full max-w-md rounded-3xl bg-muted p-8 text-center sm:p-10">
- <span className="mx-auto grid h-14 w-14 place-items-center rounded-2xl bg-primary/10 text-primary">
+ <span className="mx-auto grid h-14 w-14 place-items-center rounded-2xl bg-muted text-foreground">
  <HugeiconsIcon icon={LockPasswordIcon} size={26} />
  </span>
  <h2 className="mt-5 text-xl font-bold text-foreground">Sign in to check out</h2>
  <p className="mt-2 text-sm leading-6 text-muted-foreground">Your cart is saved — sign in to finish your order securely.</p>
  <div className="mt-7 flex flex-col items-center justify-center gap-3 sm:flex-row">
- <Link href="/signin?redirect=/checkout" className="inline-flex h-11 w-full items-center justify-center rounded-xl bg-primary px-6 text-sm font-bold text-white transition hover:opacity-90 sm:w-auto">
+ <Link href="/signin?redirect=/checkout" className="inline-flex h-11 w-full items-center justify-center rounded-xl bg-foreground px-6 text-sm font-bold text-background transition hover:opacity-90 sm:w-auto">
  Sign in
  </Link>
- <Link href="/signup?redirect=/checkout" className="inline-flex h-11 w-full items-center justify-center rounded-xl bg-muted px-6 text-sm font-bold transition hover:bg-muted/70 hover:text-primary sm:w-auto">
+ <Link href="/signup?redirect=/checkout" className="inline-flex h-11 w-full items-center justify-center rounded-xl bg-muted px-6 text-sm font-bold transition hover:bg-muted/70 sm:w-auto">
  Create account
  </Link>
  </div>
@@ -807,7 +807,7 @@ const Checkout = () => {
  return (
  <section className="grid place-items-center px-4 py-24 sm:py-32">
  <div className="flex flex-col items-center gap-4 text-center">
- <span className="h-10 w-10 animate-spin rounded-full border-[3px] border-border border-t-primary" />
+ <span className="h-10 w-10 animate-spin rounded-full border-[3px] border-border border-t-foreground" />
  <p className="text-sm font-semibold text-muted-foreground">Preparing secure checkout…</p>
  </div>
  </section>
@@ -833,12 +833,12 @@ const Checkout = () => {
  <>
  <section className="grid place-items-center px-4 py-20 sm:py-28">
  <div className="w-full max-w-md rounded-3xl bg-muted p-8 text-center sm:p-10">
- <span className="mx-auto grid h-14 w-14 place-items-center rounded-2xl bg-primary/10 text-primary">
+ <span className="mx-auto grid h-14 w-14 place-items-center rounded-2xl bg-muted text-foreground">
  <HugeiconsIcon icon={ClipboardListIcon} size={26} />
  </span>
  <h2 className="mt-5 text-xl font-bold text-foreground">Your cart is empty</h2>
  <p className="mt-2 text-sm leading-6 text-muted-foreground">Add products to your cart, then come back to check out.</p>
- <a href="/search" className="mt-7 inline-flex h-11 items-center justify-center rounded-xl bg-primary px-6 text-sm font-bold text-white transition hover:opacity-90">
+ <a href="/search" className="mt-7 inline-flex h-11 items-center justify-center rounded-xl bg-foreground px-6 text-sm font-bold text-background transition hover:opacity-90">
  Continue shopping
  </a>
  </div>
@@ -904,7 +904,7 @@ const Checkout = () => {
  setSelectedCompanyId("");
  setForm((current) => ({ ...current, shippingMethod: "" }));
  }}
- className="h-12 w-full rounded-xl bg-muted px-3 text-base outline-none focus:ring-2 focus:ring-primary/25 sm:px-4 sm:text-sm"
+ className="h-12 w-full rounded-xl bg-muted px-3 text-base outline-none focus:ring-2 focus:ring-foreground/15 sm:px-4 sm:text-sm"
  >
  <option value="">Choose destination country</option>
  {internationalCountryOptions.map((country) => (
@@ -920,7 +920,7 @@ const Checkout = () => {
  <select
  value={selectedAddressId}
  onChange={(event) => setSelectedAddressId(event.target.value)}
- className="mt-4 h-12 w-full rounded-xl bg-muted px-3 text-base outline-none focus:ring-2 focus:ring-primary/25 sm:px-4 sm:text-sm"
+ className="mt-4 h-12 w-full rounded-xl bg-muted px-3 text-base outline-none focus:ring-2 focus:ring-foreground/15 sm:px-4 sm:text-sm"
  >
  {matchingAddresses.map((address) => (
  <option key={String(address.id)} value={String(address.id)}>
@@ -948,11 +948,11 @@ const Checkout = () => {
  <button
  type="button"
  onClick={() => setAddressDrawerOpen(true)}
- className="inline-flex min-h-11 items-center gap-2 rounded-xl bg-primary px-4 text-sm font-bold text-white transition hover:opacity-90"
+ className="inline-flex min-h-11 items-center gap-2 rounded-xl bg-foreground px-4 text-sm font-bold text-background transition hover:opacity-90"
  >
  Add new address
  </button>
- <a href="/account/addresses?returnTo=%2Fcheckout" className="text-sm font-semibold text-primary hover:underline">
+ <a href="/account/addresses?returnTo=%2Fcheckout" className="text-sm font-semibold text-foreground underline underline-offset-4 hover:opacity-70">
  Manage addresses
  </a>
  </div>
@@ -1101,7 +1101,7 @@ const Checkout = () => {
  !form.shippingMethod ||
  !frozenQuote.data
  }
- className="mt-5 inline-flex h-12 w-full items-center justify-center rounded-xl bg-primary px-7 text-base font-bold text-white transition hover:opacity-90 disabled:cursor-not-allowed disabled:opacity-50 sm:text-sm"
+ className="mt-5 inline-flex h-12 w-full items-center justify-center rounded-xl bg-foreground px-7 text-base font-bold text-background transition hover:opacity-90 disabled:cursor-not-allowed disabled:opacity-50 sm:text-sm"
  >
  {createOrder.isPending || isCreatingAddress ? "Processing..." : "Pay Securely"}
  </button>
@@ -1224,7 +1224,7 @@ function OrderTotalsCard({
  </div>
 
  <p className="mt-4 flex items-center gap-1.5 text-[11px] leading-5 text-muted-foreground">
- <HugeiconsIcon icon={LockPasswordIcon} size={13} className="shrink-0 text-primary" />
+ <HugeiconsIcon icon={LockPasswordIcon} size={13} className="shrink-0 text-foreground" />
  Secure checkout — total confirmed by the server before you pay.
  </p>
  {action}

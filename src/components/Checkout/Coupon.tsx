@@ -34,7 +34,7 @@ const Coupon = () => {
  <button
  type="submit"
  disabled={applyCoupon.isPending || !code.trim()}
- className="inline-flex h-12 items-center justify-center rounded-xl bg-primary px-6 font-semibold text-primary-foreground duration-200 hover:bg-primary-dark disabled:opacity-50 sm:w-auto"
+ className="inline-flex h-12 items-center justify-center rounded-xl bg-foreground px-6 font-semibold text-background duration-200 hover:opacity-90 disabled:opacity-50 sm:w-auto"
  >
  {applyCoupon.isPending ? "Applying..." : "Apply"}
  </button>
