@@ -168,8 +168,15 @@ export default function PaymentPage() {
  setConfirmCancel(false);
  setListening(await paymentsApi.orderState(orderId));
  await order.refetch();
- } catch {
+ } catch (cause: unknown) {
+ const code = (cause as { response?: { status?: number } })?.response?.status;
+ if (code === 403 || code === 409) {
+ // Order already moved past pending — refresh so the UI shows its real state
+ setListening(await paymentsApi.orderState(orderId).catch(() => listening));
+ await order.refetch();
+ } else {
  toast.error("This order could not be cancelled right now.");
+ }
  } finally {
  setCancelling(false);
  }
