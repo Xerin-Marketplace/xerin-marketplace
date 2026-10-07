@@ -62,7 +62,7 @@ function OrderJourney({ order }: { order: CustomerOrderDetail }) {
 
  if (failed) {
  return (
- <section className="rounded-xl border border-red-light-4 bg-red-light-6 p-5 sm:p-6">
+ <section className="rounded-xl bg-red-light-6 p-5 sm:p-6">
  <div className="flex items-center gap-3">
  <span className="grid h-12 w-12 place-items-center rounded-full bg-destructive/10 text-destructive">
  <HugeiconsIcon icon={Alert02Icon} size={22} />
@@ -79,7 +79,7 @@ function OrderJourney({ order }: { order: CustomerOrderDetail }) {
  }
 
  return (
- <section className="rounded-xl border border-border bg-card p-5 sm:p-7">
+ <section className="rounded-xl bg-muted p-5 sm:p-7">
  <div className="flex items-center justify-between gap-3">
  <h2 className="text-base font-bold text-foreground sm:text-lg">Order Journey</h2>
  <span className="rounded-full bg-primary/10 px-3 py-1 text-xs font-bold text-primary">
@@ -101,12 +101,12 @@ function OrderJourney({ order }: { order: CustomerOrderDetail }) {
  return (
  <div key={stage.key} className="flex flex-col items-center gap-2">
  <span
- className={`grid shrink-0 place-items-center rounded-full border-2 transition-all duration-300 ${
+ className={`grid shrink-0 place-items-center rounded-full transition-all duration-300 ${
  active
- ? "h-14 w-14 border-primary bg-primary text-primary-foreground shadow-lg"
+ ? "h-14 w-14 bg-primary text-primary-foreground"
  : done
- ? "h-11 w-11 border-primary bg-primary/10 text-primary"
- : "h-11 w-11 border-border bg-card text-muted-foreground"
+ ? "h-11 w-11 bg-primary/10 text-primary"
+ : "h-11 w-11 bg-muted text-muted-foreground"
  }`}
  >
  <HugeiconsIcon icon={stage.icon} size={active ? 24 : 18} />
@@ -312,14 +312,14 @@ export default function BuyerOrderDetails({ orderId }: { orderId: string }) {
 
  if (loading)
  return (
- <p className="rounded-xl border bg-card p-10 text-center text-muted-foreground">
+ <p className="rounded-xl bg-muted p-10 text-center text-muted-foreground">
  Loading order and delivery tracking...
  </p>
  );
 
  if (error)
  return (
- <div className="rounded-xl border border-red-light-4 bg-red-light-6 p-8 text-center text-red-dark">
+ <div className="rounded-xl bg-red-light-6 p-8 text-center text-red-dark">
  <p>{error}</p>
  <button
  onClick={() => void load()}
@@ -339,7 +339,7 @@ export default function BuyerOrderDetails({ orderId }: { orderId: string }) {
  <div className="flex flex-col gap-4 sm:flex-row sm:items-start sm:justify-between">
  <div>
  <h1 className="mt-1 text-2xl font-bold">
- Order {order.id.slice(0, 8).toUpperCase()}
+ Order #{order.order_number || order.id.slice(0, 8).toUpperCase()}
  </h1>
  <p className="mt-1 text-sm text-muted-foreground">
  Created {new Date(order.created_at).toLocaleString()}
@@ -347,7 +347,7 @@ export default function BuyerOrderDetails({ orderId }: { orderId: string }) {
  </div>
  <button
  onClick={() => void load()}
- className="inline-flex items-center justify-center gap-2 rounded-xl border border-border bg-card px-4 py-2.5 text-sm font-semibold dark:border-border"
+ className="inline-flex items-center justify-center gap-2 rounded-xl bg-muted px-4 py-2.5 text-sm font-semibold"
  >
  <HugeiconsIcon icon={RefreshCwIcon} size={14} />
  Refresh Tracking
@@ -382,7 +382,7 @@ export default function BuyerOrderDetails({ orderId }: { orderId: string }) {
  <section className="grid gap-5 xl:grid-cols-[1fr_380px]">
  <div className="space-y-5">
  <Card title="Order Items">
- <div className="divide-y divide-[var(--border)] dark:divide-white/10">
+ <div className="divide-y divide-border/60">
  {order.items.map((item) => (
  <div
  key={item.id}
@@ -428,12 +428,12 @@ export default function BuyerOrderDetails({ orderId }: { orderId: string }) {
  {order.seller_orders.map((sellerOrder, index) => (
  <div
  key={sellerOrder.id}
- className="overflow-hidden rounded-xl border border-border bg-card shadow-sm dark:border-border"
+ className="overflow-hidden rounded-xl bg-muted"
  >
- <div className="border-b border-border bg-muted/60 p-4 sm:p-5">
+ <div className="p-4 sm:p-5">
  <div className="flex flex-col gap-4 xl:flex-row xl:items-center xl:justify-between">
  <div className="flex min-w-0 items-start gap-3">
- <span className="grid h-12 w-12 shrink-0 place-items-center rounded-xl bg-primary text-primary-foreground shadow-sm">
+ <span className="grid h-12 w-12 shrink-0 place-items-center rounded-xl bg-primary text-white">
  <HugeiconsIcon icon={PackageCheckIcon} size={20} />
  </span>
 
@@ -456,7 +456,7 @@ export default function BuyerOrderDetails({ orderId }: { orderId: string }) {
  </div>
 
  <div className="grid grid-cols-2 gap-2 sm:grid-cols-3 xl:min-w-[330px]">
- <div className="rounded-xl border border-primary/25 bg-card px-3 py-2.5 dark:border-border dark:bg-card/[0.035]">
+ <div className="rounded-xl bg-card px-3 py-2.5">
  <p className="text-[10px] font-bold uppercase tracking-wide text-muted-foreground">
  Items
  </p>
@@ -465,7 +465,7 @@ export default function BuyerOrderDetails({ orderId }: { orderId: string }) {
  </p>
  </div>
 
- <div className="rounded-xl border border-primary/25 bg-card px-3 py-2.5 dark:border-border dark:bg-card/[0.035]">
+ <div className="rounded-xl bg-card px-3 py-2.5">
  <p className="text-[10px] font-bold uppercase tracking-wide text-muted-foreground">
  Seller portion
  </p>
@@ -477,7 +477,7 @@ export default function BuyerOrderDetails({ orderId }: { orderId: string }) {
  </p>
  </div>
 
- <div className="col-span-2 rounded-xl border border-primary/25 bg-card px-3 py-2.5 dark:border-border dark:bg-card/[0.035] sm:col-span-1">
+ <div className="col-span-2 rounded-xl bg-card px-3 py-2.5 sm:col-span-1">
  <p className="text-[10px] font-bold uppercase tracking-wide text-muted-foreground">
  Next step
  </p>
@@ -499,7 +499,7 @@ export default function BuyerOrderDetails({ orderId }: { orderId: string }) {
  ))}
  </div>
  ) : (
- <div className="rounded-xl border border-dashed border-[var(--muted-foreground)] p-5 text-sm text-muted-foreground dark:border-border">
+ <div className="rounded-xl bg-muted p-5 text-sm text-muted-foreground">
  Seller fulfilment records will appear after the order enters processing.
  </div>
  )}
@@ -517,7 +517,7 @@ export default function BuyerOrderDetails({ orderId }: { orderId: string }) {
  ))}
  </div>
  ) : (
- <div className="rounded-xl border border-dashed border-[var(--muted-foreground)] p-5 text-sm text-muted-foreground">
+ <div className="rounded-xl bg-muted p-5 text-sm text-muted-foreground">
  Shipment has not been created yet. This normally appears after
  payment confirmation or COD acceptance.
  </div>
@@ -534,7 +534,7 @@ export default function BuyerOrderDetails({ orderId }: { orderId: string }) {
  {order.payments.map((payment) => (
  <div
  key={payment.id}
- className="rounded-xl border border-border p-4 dark:border-border"
+ className="rounded-xl bg-muted p-4"
  >
  <div className="flex items-start justify-between gap-3">
  <div>
@@ -573,7 +573,7 @@ export default function BuyerOrderDetails({ orderId }: { orderId: string }) {
  ))}
  </div>
  ) : (
- <div className="rounded-xl border border-dashed border-[var(--muted-foreground)] p-4 text-sm text-muted-foreground dark:border-border">
+ <div className="rounded-xl bg-muted p-4 text-sm text-muted-foreground">
  Payment information will appear here after checkout.
  </div>
  )}
@@ -640,17 +640,17 @@ export default function BuyerOrderDetails({ orderId }: { orderId: string }) {
 
  <div className="relative z-[1] shrink-0">
  <span
- className={`grid h-11 w-11 place-items-center rounded-full border-2 shadow-sm ${
+ className={`grid h-11 w-11 place-items-center rounded-full ${
  active
- ? "border-[var(--primary)] bg-primary/10 text-primary dark:bg-primary/10"
- : "border-primary/25 bg-card text-primary "
+ ? "bg-primary/10 text-primary"
+ : "bg-muted text-primary"
  }`}
  >
  <HugeiconsIcon icon={Icon} size={18} />
  </span>
 
  {active && (
- <span className="absolute -right-1 -top-1 grid h-4 w-4 place-items-center rounded-full border-2 border-white bg-success shadow-sm">
+ <span className="absolute -right-1 -top-1 grid h-4 w-4 place-items-center rounded-full bg-success">
  <span className="h-1.5 w-1.5 rounded-full bg-card" />
  </span>
  )}
@@ -683,7 +683,7 @@ export default function BuyerOrderDetails({ orderId }: { orderId: string }) {
  </div>
  ) : (
  <div className="rounded-xl border border-dashed border-[var(--muted-foreground)] p-5 text-center dark:border-border">
- <span className="mx-auto grid h-11 w-11 place-items-center rounded-full border-2 border-primary/25 bg-primary/10 text-primary dark:bg-primary/10">
+ <span className="mx-auto grid h-11 w-11 place-items-center rounded-full bg-primary/10 text-primary dark:bg-primary/10">
  <HugeiconsIcon icon={TruckIcon} size={20} />
  </span>
  <p className="mt-3 text-sm font-semibold">
@@ -739,7 +739,7 @@ export default function BuyerOrderDetails({ orderId }: { orderId: string }) {
  )}
 
  {escrow.delivery_verified_at && (
- <div className="rounded-xl border border-primary/25 bg-primary/10 p-3 text-xs leading-5 text-primary-900">
+ <div className="rounded-xl bg-primary/10 p-3 text-xs leading-5 text-primary-900">
  <b>Delivery verified:</b> {new Date(escrow.delivery_verified_at).toLocaleString()}
  {escrow.release_after && <><br /><b>Automatic seller release:</b> {new Date(escrow.release_after).toLocaleString()}</>}
  {escrow.seller_release_grace_hours && <><br />Protection window: {Math.round(escrow.seller_release_grace_hours / 24 * 10) / 10} days</>}
@@ -752,7 +752,7 @@ export default function BuyerOrderDetails({ orderId }: { orderId: string }) {
  {escrow.items.map((protectedItem) => {
  const item = order.items.find((row) => row.id === protectedItem.order_item_id);
  return (
- <div key={protectedItem.order_item_id} className="rounded-xl border border-border p-3 dark:border-border">
+ <div key={protectedItem.order_item_id} className="rounded-xl bg-muted p-3">
  <div className="flex items-start justify-between gap-3">
  <div>
  <p className="text-sm font-bold text-foreground">{item?.product_name || "Order item"}</p>
@@ -767,7 +767,7 @@ export default function BuyerOrderDetails({ orderId }: { orderId: string }) {
  </button>
  )}
  {protectedItem.can_report_problem && (
- <button type="button" onClick={() => setClaimDialog({ scope: "item", itemId: protectedItem.order_item_id })} className="rounded-lg border border-red-light-4 px-3 py-2 text-xs font-bold text-red-dark">
+ <button type="button" onClick={() => setClaimDialog({ scope: "item", itemId: protectedItem.order_item_id })} className="rounded-lg bg-red-light-6 px-3 py-2 text-xs font-bold text-red-dark">
  Report product problem
  </button>
  )}
@@ -776,7 +776,7 @@ export default function BuyerOrderDetails({ orderId }: { orderId: string }) {
  );
  })}
  {escrow.can_report_problem && (
- <button type="button" onClick={() => setClaimDialog({ scope: "order" })} className="w-full rounded-xl border border-border px-3 py-2.5 text-xs font-bold text-accent-foreground dark:border-border">
+ <button type="button" onClick={() => setClaimDialog({ scope: "order" })} className="w-full rounded-xl bg-muted px-3 py-2.5 text-xs font-bold text-foreground">
  Report an overall delivery/order problem
  </button>
  )}
@@ -911,7 +911,7 @@ export default function BuyerOrderDetails({ orderId }: { orderId: string }) {
  type="button"
  onClick={() => void openDocument("receipt")}
  disabled={downloadingPaymentReceipt}
- className="inline-flex min-h-11 items-center justify-center gap-2 rounded-xl bg-primary px-4 text-sm font-bold text-primary-foreground shadow-sm disabled:opacity-60"
+ className="inline-flex min-h-11 items-center justify-center gap-2 rounded-xl bg-primary px-4 text-sm font-bold text-white disabled:opacity-60"
  >
  <HugeiconsIcon icon={ViewIcon} size={16} />
  {downloadingPaymentReceipt ? "Preparing receipt..." : "View Receipt"}
@@ -921,7 +921,7 @@ export default function BuyerOrderDetails({ orderId }: { orderId: string }) {
  type="button"
  onClick={() => void openDocument("invoice")}
  disabled={downloadingInvoice}
- className="inline-flex min-h-11 items-center justify-center gap-2 rounded-xl border border-border bg-card px-4 text-sm font-bold text-foreground shadow-sm disabled:opacity-60 dark:border-border"
+ className="inline-flex min-h-11 items-center justify-center gap-2 rounded-xl bg-muted px-4 text-sm font-bold text-foreground disabled:opacity-60"
  >
  <HugeiconsIcon icon={ViewIcon} size={16} />
  {downloadingInvoice ? "Preparing invoice..." : "View Invoice"}
@@ -949,7 +949,7 @@ export default function BuyerOrderDetails({ orderId }: { orderId: string }) {
  type="button"
  onClick={closePdfPreview}
  aria-label="Close document preview"
- className="flex h-9 w-9 shrink-0 items-center justify-center rounded-lg border border-border text-muted-foreground transition hover:bg-muted hover:text-foreground"
+ className="flex h-9 w-9 shrink-0 items-center justify-center rounded-lg text-muted-foreground transition hover:bg-muted hover:text-foreground"
  >
  <HugeiconsIcon icon={Cancel01Icon} size={17} />
  </button>
@@ -975,7 +975,7 @@ export default function BuyerOrderDetails({ orderId }: { orderId: string }) {
  </div>
  <div className="mt-5 space-y-4">
  <label className="block text-sm font-semibold">What is wrong?
- <select value={claimReason} onChange={(e) => setClaimReason(e.target.value as SettlementProtectionClaimReason)} className="mt-2 w-full rounded-xl border border-border bg-card px-3 py-3 text-sm dark:border-border">
+ <select value={claimReason} onChange={(e) => setClaimReason(e.target.value as SettlementProtectionClaimReason)} className="mt-2 w-full rounded-xl bg-muted px-3 py-3 text-sm outline-none focus:ring-2 focus:ring-primary/25">
  <option value="wrong_product">Wrong product received</option>
  <option value="not_as_described">Product not as described</option>
  <option value="missing_item">Item missing</option>
@@ -992,7 +992,7 @@ export default function BuyerOrderDetails({ orderId }: { orderId: string }) {
  </select>
  </label>
  <label className="block text-sm font-semibold">When did you first notice it?
- <select value={claimWhen} onChange={(e) => setClaimWhen(e.target.value as typeof claimWhen)} className="mt-2 w-full rounded-xl border border-border bg-card px-3 py-3 text-sm dark:border-border">
+ <select value={claimWhen} onChange={(e) => setClaimWhen(e.target.value as typeof claimWhen)} className="mt-2 w-full rounded-xl bg-muted px-3 py-3 text-sm outline-none focus:ring-2 focus:ring-primary/25">
  <option value="before_acceptance">Before accepting delivery</option>
  <option value="on_opening">Immediately after opening</option>
  <option value="after_initial_use">After initial use</option>
@@ -1000,11 +1000,11 @@ export default function BuyerOrderDetails({ orderId }: { orderId: string }) {
  </select>
  </label>
  <div className="grid gap-3 sm:grid-cols-2">
- <label className="flex items-center gap-2 rounded-xl border border-border p-3 text-sm dark:border-border"><input type="checkbox" checked={packageDamaged} onChange={(e) => setPackageDamaged(e.target.checked)} /> External package was damaged</label>
- <label className="flex items-center gap-2 rounded-xl border border-border p-3 text-sm dark:border-border"><input type="checkbox" checked={productUsed} onChange={(e) => setProductUsed(e.target.checked)} /> Product has been used</label>
+ <label className="flex items-center gap-2 rounded-xl bg-muted p-3 text-sm"><input type="checkbox" checked={packageDamaged} onChange={(e) => setPackageDamaged(e.target.checked)} /> External package was damaged</label>
+ <label className="flex items-center gap-2 rounded-xl bg-muted p-3 text-sm"><input type="checkbox" checked={productUsed} onChange={(e) => setProductUsed(e.target.checked)} /> Product has been used</label>
  </div>
  <label className="block text-sm font-semibold">Explain what happened
- <textarea value={claimNotes} onChange={(e) => setClaimNotes(e.target.value)} rows={4} className="mt-2 w-full rounded-xl border border-border bg-card px-3 py-3 text-sm dark:border-border" placeholder="Be specific about the product condition and what you observed." />
+ <textarea value={claimNotes} onChange={(e) => setClaimNotes(e.target.value)} rows={4} className="mt-2 w-full rounded-xl bg-muted px-3 py-3 text-sm outline-none focus:ring-2 focus:ring-primary/25" placeholder="Be specific about the product condition and what you observed." />
  </label>
  <button type="button" disabled={claimNotes.trim().length < 5 || submittingClaim} onClick={() => void submitProtectionClaim()} className="w-full rounded-xl bg-primary px-4 py-3 text-sm font-bold text-primary-foreground disabled:opacity-50">{submittingClaim ? "Submitting..." : "Submit protection claim"}</button>
  </div>
@@ -1035,7 +1035,7 @@ function ShipmentCard({
  index: number;
 }) {
  return (
- <div className="rounded-xl border border-border p-4 dark:border-border">
+ <div className="rounded-xl bg-muted p-4">
  <div className="flex flex-col gap-3 sm:flex-row sm:items-start sm:justify-between">
  <div>
  <p className="text-xs font-bold uppercase tracking-wide text-muted-foreground">
@@ -1172,7 +1172,7 @@ function CustomerSellerChat({ orderId, sellerOrderId }: { orderId: string; selle
  )} */}
 
  {open && (
- <div className="mt-4 overflow-hidden rounded-xl border border-border bg-card shadow-sm dark:border-border">
+ <div className="mt-4 overflow-hidden rounded-xl bg-muted">
  <div className="flex items-center justify-between border-b border-border bg-card px-4 py-3 dark:border-border">
  {/* <div>
  <p className="text-sm font-bold">Live order conversation</p>
@@ -1250,7 +1250,7 @@ function CustomerSellerChat({ orderId, sellerOrderId }: { orderId: string; selle
  </div>
 
  <div className="border-t border-border bg-card p-3 dark:border-border sm:p-4">
- <div className="flex items-center gap-2 rounded-xl border border-border bg-card p-1.5 focus-within:border-[var(--primary)] dark:border-border">
+ <div className="flex items-center gap-2 rounded-xl bg-card p-1.5 focus-within:border-[var(--primary)] dark:border-border">
  <input
  value={text}
  onChange={(e) => setText(e.target.value)}
@@ -1287,8 +1287,8 @@ function Card({
  children: React.ReactNode;
 }) {
  return (
- <section className="rounded-xl border border-border bg-card p-5 shadow-sm dark:border-border">
- <h2 className="mb-4 font-bold">{title}</h2>
+ <section className="pt-2">
+ <h2 className="mb-4 text-xs font-bold uppercase tracking-[.14em] text-muted-foreground">{title}</h2>
  {children}
  </section>
  );
@@ -1304,12 +1304,11 @@ function Metric({
  icon: IconSvgElement;
 }) {
  return (
- <div className="rounded-xl border border-border bg-card p-4 dark:border-border">
- <HugeiconsIcon icon={Icon} size={16} className="text-primary" />
- <p className="mt-3 text-xs font-semibold uppercase tracking-wide text-muted-foreground">
+ <div>
+ <p className="text-xs font-semibold uppercase tracking-wide text-muted-foreground">
  {label}
  </p>
- <p className="mt-1 font-bold capitalize">{value}</p>
+ <p className="mt-1.5 font-bold capitalize">{value}</p>
  </div>
  );
 }
