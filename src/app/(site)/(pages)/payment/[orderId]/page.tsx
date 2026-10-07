@@ -13,6 +13,7 @@ import {
 } from "@hugeicons/core-free-icons";
 import { Spinner } from "@/components/ui/Spinner";
 import { useOrder } from "@/hooks/useCommerce";
+import { useUserProfile } from "@/hooks/useUserProfile";
 import { cartApi, checkoutApi, paymentsApi } from "@/lib/api/endpoints/commerce";
 import type { OrderPaymentState, PaymentOption, PaymentProviderErrorDetail } from "@/types/api/commerce";
 import { formatCurrency } from "@/lib/formatCurrency";
@@ -41,6 +42,7 @@ export default function PaymentPage() {
  const router = useRouter();
  const orderId = params.orderId;
  const order = useOrder(orderId);
+ const profile = useUserProfile();
 
  const [options, setOptions] = useState<PaymentOption[]>([]);
  const [optionsLoading, setOptionsLoading] = useState(true);
@@ -400,7 +402,10 @@ export default function PaymentPage() {
  </span>
  <span className="min-w-0">
  <span className="block truncate text-sm font-bold text-green-dark">{provider}</span>
- <span className="block text-xs text-green-dark/70">+255 {local9.replace(/(\d{3})(\d{3})(\d{3})/, "$1 $2 $3")}</span>
+ <span className="block truncate text-xs text-green-dark/70">
+ +255 {local9.replace(/(\d{3})(\d{3})(\d{3})/, "$1 $2 $3")}
+ {profile.profile ? ` · Paying as ${[profile.profile.first_name, profile.profile.last_name].filter(Boolean).join(" ")}` : ""}
+ </span>
  </span>
  </div>
  )}
