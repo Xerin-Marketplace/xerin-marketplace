@@ -7,7 +7,7 @@ import { useQuery, useQueryClient } from "@tanstack/react-query";
 import ShippingMethod from "./ShippingMethod";
 import XerinExpress from "./XerinExpress";
 import DeliveryModeSelector from "./DeliveryMode";
-import PaymentMethod from "./PaymentMethod";
+
 import Coupon from "./Coupon";
 import { useBackendCart, mapBackendCartToUi } from "@/hooks/useCartActions";
 import { useCreateOrder } from "@/hooks/useCommerce";
@@ -16,7 +16,6 @@ import { useUserProfile } from "@/hooks/useUserProfile";
 import {
  cartApi,
  checkoutApi,
- paymentsApi,
 } from "@/lib/api/endpoints/commerce";
 import axiosInstance from "@/lib/api/client";
 import type { DeliveryMode } from "@/types/api/commerce";
@@ -119,8 +118,7 @@ const Checkout = () => {
  const [selectedAddressId, setSelectedAddressId] = useState("");
  const [addressDrawerOpen, setAddressDrawerOpen] = useState(false);
  const [selectedCompanyId, setSelectedCompanyId] = useState("");
- const [paymentProvider, setPaymentProvider] = useState("");
- const [paymentPhone, setPaymentPhone] = useState("");
+
 
  const isAuthenticated = useAuthStore((state) => state.isAuthenticated);
  const hasHydrated = useAuthStore((state) => state.hasHydrated);
@@ -368,17 +366,6 @@ const Checkout = () => {
  if (selected.logistics_company_id !== selectedCompanyId) setSelectedCompanyId(selected.logistics_company_id);
  }, [deliveryMode, xerinExpress.data, form.shippingMethod, selectedCompanyId]);
 
- const paymentOptions = useQuery({
- queryKey: [
- "checkout",
- "payment-options",
- Boolean(selectedShipping?.supports_cod),
- ],
- queryFn: () =>
- checkoutApi.paymentOptions(Boolean(selectedShipping?.supports_cod)),
- enabled: isAuthenticated,
- });
-
  useEffect(() => {
  if (deliveryMode === "local") return;
  const companies = eligibleLogistics.data?.results ?? [];
@@ -404,39 +391,6 @@ const Checkout = () => {
  setForm((current) => ({ ...current, shippingMethod: options[0].rate_id }));
  }
  }, [deliveryPricing.data, form.shippingMethod, deliveryMode]);
-
- useEffect(() => {
- const options = paymentOptions.data ?? [];
- if (
- options.length &&
- !options.some((option) => option.id === form.paymentMethod)
- ) {
- setForm((current) => ({
- ...current,
- paymentMethod: options[0].id,
- }));
- }
- }, [paymentOptions.data, form.paymentMethod]);
-
- useEffect(() => {
- const selectedOption = paymentOptions.data?.find(
- (option) => option.id === form.paymentMethod,
- );
- if (!selectedOption) return;
-
- if (
- selectedOption.requires_phone &&
- !selectedOption.providers.includes(paymentProvider)
- ) {
- setPaymentProvider(selectedOption.providers[0] ?? "");
- } else if (!selectedOption.requires_phone) {
- setPaymentProvider(
- selectedOption.id === "cash_on_delivery"
- ? ""
- : selectedOption.providers[0] ?? "azampay",
- );
- }
- }, [form.paymentMethod, paymentOptions.data, paymentProvider]);
 
  const shippingAmount = frozenQuote.data
  ? Number(frozenQuote.data.delivery_amount)
@@ -514,22 +468,6 @@ const Checkout = () => {
  let createdOrderId: string | null = null;
 
  try {
- const selectedPayment = paymentOptions.data?.find(
- (option) => option.id === form.paymentMethod,
- );
-
- const phoneNumber =
- paymentPhone.trim() || profile?.phone?.trim() || form.phone.trim();
-
- if (
- selectedPayment?.requires_phone &&
- (!paymentProvider || !phoneNumber)
- ) {
- throw new Error(
- "Select a mobile network and enter the mobile payment number",
- );
- }
-
  const order = await createOrder.mutateAsync({
  shipping_address_id: selectedAddressId,
  shipping_rate_id: selectedShipping.rate_id,
@@ -539,26 +477,6 @@ const Checkout = () => {
  promotion_code: cart?.promotion_code || undefined,
  notes: form.notes || undefined,
  });
-
- const paymentRetryKey = `xerin:payment-retry:${order.id}`;
- const paymentRetryContext = {
- method: form.paymentMethod,
- provider:
- form.paymentMethod === "cash_on_delivery"
- ? undefined
- : paymentProvider || (form.paymentMethod === "card" ? "selcom" : "selcom"),
- phone_number:
- selectedPayment?.requires_phone
- ? phoneNumber
- : undefined,
- };
-
- if (typeof window !== "undefined") {
- sessionStorage.setItem(
- paymentRetryKey,
- JSON.stringify(paymentRetryContext),
- );
- }
 
  createdOrderId = String(order.id);
 
@@ -575,49 +493,7 @@ const Checkout = () => {
  );
  }
 
- const successUrl = `${window.location.origin}/order-success/${order.id}?payment=success`;
- const failureUrl = `${window.location.origin}/payment-failed/${order.id}`;
-
- const isCod = form.paymentMethod === "cash_on_delivery";
-
- const payment = await paymentsApi.initiate({
- order_id: String(order.id),
- method: form.paymentMethod,
- provider: isCod ? undefined : paymentProvider || (form.paymentMethod === "card" ? "selcom" : "selcom"),
- phone_number: selectedPayment?.requires_phone
- ? phoneNumber
- : undefined,
- success_url:
- form.paymentMethod === "card" ? successUrl : undefined,
- failure_url:
- form.paymentMethod === "card" ? failureUrl : undefined,
- });
-
- if (isCod) {
- if (typeof window !== "undefined") {
- sessionStorage.removeItem(paymentRetryKey);
- }
- toast.success(
- "Order placed with Cash on Delivery. Payment will be collected at delivery.",
- );
- router.push(`/order-success/${order.id}?payment=cod`);
- return;
- }
-
- const checkoutUrl = payment.provider_response?.checkout_url;
- if (form.paymentMethod === "card" && checkoutUrl) {
- window.location.assign(checkoutUrl);
- return;
- }
-
- toast.success(
- payment.status === "processing"
- ? "Payment request sent. Complete the payment on your phone."
- : "Order placed successfully",
- );
- router.push(
- `/order-success/${order.id}?payment_id=${payment.id}&payment=${payment.status}`,
- );
+ router.push(`/payment/${order.id}`);
  } catch (error: unknown) {
  type CheckoutErrorDetail = {
  code?: string;
@@ -1061,24 +937,6 @@ const Checkout = () => {
  <section>
  <Coupon />
  </section>
- <hr className="my-6 border-border/60" />
-
- {/* Payment */}
- <section>
- <h2 className="text-sm font-bold text-foreground/60">Payment</h2>
- <div className="mt-3">
- <PaymentMethod
- options={paymentOptions.data ?? []}
- selected={form.paymentMethod}
- onChange={(value) => updateField("paymentMethod", value)}
- isLoading={paymentOptions.isLoading}
- provider={paymentProvider}
- phoneNumber={paymentPhone}
- onProviderChange={setPaymentProvider}
- onPhoneNumberChange={setPaymentPhone}
- />
- </div>
- </section>
  </div>
 
  <OrderTotalsCard
@@ -1097,13 +955,12 @@ const Checkout = () => {
  deliveryPricing.isFetching ||
  frozenQuote.isFetching ||
  !selectedAddressId ||
- !form.paymentMethod ||
  !form.shippingMethod ||
  !frozenQuote.data
  }
- className="mt-5 inline-flex h-12 w-full items-center justify-center rounded-xl bg-foreground px-7 text-base font-bold text-background transition hover:opacity-90 disabled:cursor-not-allowed disabled:opacity-50 sm:text-sm"
+ className="mt-5 inline-flex h-12 w-full items-center justify-center rounded-xl bg-primary px-7 text-base font-bold text-white transition hover:opacity-90 disabled:cursor-not-allowed disabled:opacity-50 sm:text-sm"
  >
- {createOrder.isPending || isCreatingAddress ? "Processing..." : "Pay Securely"}
+ {createOrder.isPending || isCreatingAddress ? "Processing..." : "Continue to Payment"}
  </button>
  <p className="mt-3 text-center text-[11px] leading-5 text-muted-foreground">
  Display currency is for convenience only. Payment is settled in TZS using the backend-confirmed Grand Total.
