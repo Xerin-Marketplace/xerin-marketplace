@@ -1117,20 +1117,6 @@ const Checkout = () => {
  isLoading={isLoadingProfile}
  />
 
- <section className="rounded-2xl/60 bg-card p-4 sm:p-6">
- <label htmlFor="notes" className="mb-2.5 block font-semibold">
- Delivery / Order Notes <span className="font-normal text-muted-foreground">(optional)</span>
- </label>
- <textarea
- id="notes"
- rows={5}
- value={form.notes}
- onChange={(event) => updateField("notes", event.target.value)}
- placeholder="Building access, delivery instructions, package notes..."
- className="w-full rounded-xl bg-muted p-3 text-base outline-none focus:ring-2 focus:ring-primary/25 sm:p-4 sm:text-sm"
- />
- </section>
-
  <section className="rounded-xl bg-primary/5 p-4 text-xs leading-5 text-muted-foreground sm:p-5">
  <b className="text-foreground">Ready for logistics?</b>
  <p className="mt-1">Verify the detected delivery type, address and customer details, then continue.</p>
