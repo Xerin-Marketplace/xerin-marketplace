@@ -28,7 +28,6 @@ import { useAuthStore } from "@/store/useAuthStore";
 import { requestAuthPrompt } from "@/components/Auth/AuthPrompt";
 import { HugeiconsIcon } from "@hugeicons/react";
 import { ArrowLeft01Icon, ArrowRight01Icon, Location01Icon, ClipboardListIcon, LockPasswordIcon, CheckmarkBadge02Icon } from "@hugeicons/core-free-icons";
-import InfoPopover from "@/components/Common/Info/InfoPopover";
 import AddressModal from "@/components/MyAccount/AddressModal";
 
 export type CheckoutForm = {
@@ -112,15 +111,6 @@ const countryFlag = (country?: string | null) => {
 };
 
 
-type CheckoutStep = 1 | 2 | 3 | 4;
-
-const CHECKOUT_STEPS: Array<{ id: CheckoutStep; label: string; shortLabel: string }> = [
- { id: 1, label: "Delivery", shortLabel: "Delivery" },
- { id: 2, label: "Logistics", shortLabel: "Logistics" },
- { id: 3, label: "Review", shortLabel: "Review" },
- { id: 4, label: "Payment", shortLabel: "Payment" },
-];
-
 const Checkout = () => {
  const router = useRouter();
  const queryClient = useQueryClient();
@@ -132,8 +122,6 @@ const Checkout = () => {
  const [selectedCompanyId, setSelectedCompanyId] = useState("");
  const [paymentProvider, setPaymentProvider] = useState("");
  const [paymentPhone, setPaymentPhone] = useState("");
- const [currentStep, setCurrentStep] = useState<CheckoutStep>(1);
- const [maxReachedStep, setMaxReachedStep] = useState<CheckoutStep>(1);
 
  const isAuthenticated = useAuthStore((state) => state.isAuthenticated);
  const hasHydrated = useAuthStore((state) => state.hasHydrated);
@@ -464,87 +452,11 @@ const Checkout = () => {
  shippingAmount === null ? null : cartProductTotal + shippingAmount;
 
 
- const step1Ready = Boolean(
- destinationCountry &&
- selectedAddressId &&
- selectedAddress?.delivery_ready &&
- detectedDelivery.data?.delivery_mode === deliveryMode,
- );
-
- const step2Ready = Boolean(
- selectedCompanyId &&
- form.shippingMethod &&
- selectedShipping &&
- frozenQuote.data &&
- new Date(frozenQuote.data.expires_at).getTime() > Date.now(),
- );
-
- const goToStep = (step: CheckoutStep) => {
- if (step > maxReachedStep + 1) {
- toast.error("Complete the current checkout step first.");
- return;
- }
- if (step > 1 && !step1Ready) {
- toast.error("Confirm your delivery address before continuing.");
- setCurrentStep(1);
- return;
- }
- if (step > 2 && !step2Ready) {
- toast.error("Select a logistics service and wait for the protected quote.");
- setCurrentStep(2);
- return;
- }
- setCurrentStep(step);
- setMaxReachedStep((current) =>
- Math.max(current, step) as CheckoutStep,
- );
- if (typeof window !== "undefined") {
- window.scrollTo({ top: 0, behavior: "smooth" });
- }
- };
-
- const continueFromDelivery = () => {
- if (!destinationCountry) {
- toast.error("Choose the delivery destination country.");
- return;
- }
- if (!selectedAddressId) {
- toast.error("Select a delivery address.");
- return;
- }
- if (!selectedAddress?.delivery_ready) {
- toast.error("Confirm the exact Google delivery point before continuing.");
- return;
- }
- if (!detectedDelivery.data || detectedDelivery.data.delivery_mode !== deliveryMode) {
- toast.error("Wait for Xerin to detect the delivery route.");
- return;
- }
- goToStep(2);
- };
-
  const retryLogistics = () => {
  if (xerinExpress.error) void xerinExpress.refetch();
  if (eligibleLogistics.error) void eligibleLogistics.refetch();
  if (deliveryPricing.error) void deliveryPricing.refetch();
  if (frozenQuote.error) void frozenQuote.refetch();
- };
-
- const continueFromLogistics = () => {
- if (!selectedCompanyId || !selectedShipping) {
- toast.error("Select a logistics company and delivery price option.");
- return;
- }
- if (!frozenQuote.data) {
- toast.error("Wait for the protected delivery quote.");
- return;
- }
- if (new Date(frozenQuote.data.expires_at).getTime() <= Date.now()) {
- toast.error("The delivery quote expired. Recalculate delivery.");
- void frozenQuote.refetch();
- return;
- }
- goToStep(3);
  };
 
  const updateField = (
@@ -950,91 +862,50 @@ const Checkout = () => {
  <section className="overflow-hidden bg-background pb-12 pt-5 sm:pb-16 sm:pt-8">
  <div className="mx-auto w-full max-w-[1220px] px-3 sm:px-6 lg:px-8">
  <form onSubmit={handleSubmit}>
- <CheckoutStepper
- currentStep={currentStep}
- onStepClick={goToStep}
- step1Ready={step1Ready}
- step2Ready={step2Ready}
- maxReachedStep={maxReachedStep}
- />
-
- <div className="mt-5 grid items-start gap-6 sm:mt-7 lg:grid-cols-[minmax(0,1fr)_370px]">
+<div className="grid items-start gap-8 lg:grid-cols-[minmax(0,1fr)_370px] lg:gap-12">
  <div className="min-w-0">
- {currentStep === 1 && (
- <div className="space-y-4 sm:space-y-6">
- <StepHeading
- step="1"
- title="Delivery"
- description="Confirm where the order should go. Xerin automatically detects whether the route is domestic or cross-border."
- />
 
- <div className="space-y-5">
- <div className="space-y-5">
- <DeliveryModeSelector
- value={deliveryMode}
- config={deliveryConfig.data}
- detected={detectedDelivery.data}
- loading={detectedDelivery.isLoading || detectedDelivery.isFetching}
- awaitingAddress={!selectedAddressId || !selectedAddress?.delivery_ready}
- />
-
- {detectedDelivery.error && (
- <div className="rounded-xl bg-red-light-6 p-4">
- <div className="flex flex-wrap items-center justify-between gap-3 text-xs leading-5 text-red-dark">
- <span className="min-w-0 flex-1">{errorText(detectedDelivery.error)}</span>
- <button
- type="button"
- onClick={() => void detectedDelivery.refetch()}
- className="rounded-lg bg-destructive px-3 py-1.5 font-semibold text-white hover:bg-red-dark"
- >
- Retry
- </button>
- </div>
- {storeConfigMissing && (
- <div className="mt-3 pt-3 text-xs leading-5 text-red-dark">
- <p>
- One or more stores in your cart have not configured their store
- country, so a delivery route cannot be calculated for them.
- </p>
- {missingCountryStores.data?.length ? (
- <p className="mt-2 font-semibold">
- Affected store{missingCountryStores.data.length === 1 ? "" : "s"}:{" "}
- {missingCountryStores.data
- .map((s, i) => s.store_name || `Store ${i + 1}`)
- .join(", ")}
- </p>
- ) : null}
- <Link
- href="/cart"
- className="mt-2 inline-flex items-center gap-1 font-bold underline underline-offset-2 hover:text-foreground"
- >
- Review cart and remove the affected item
- </Link>
- </div>
+ {/* Items */}
+ <section>
+ <h2 className="text-sm font-bold text-foreground/60">Items</h2>
+ <div className="mt-3 space-y-1">
+ {cartItems.map((item) => {
+ const thumb = item.imgs?.thumbnails?.[0];
+ return (
+ <div key={item.cartItemId} className="flex items-center gap-3 py-2.5">
+ <span className="grid h-14 w-14 shrink-0 place-items-center overflow-hidden rounded-xl bg-muted">
+ {thumb ? (
+ <img src={thumb} alt="" className="h-full w-full object-cover" />
+ ) : (
+ <HugeiconsIcon icon={ClipboardListIcon} size={18} className="text-muted-foreground" />
  )}
- </div>
- )}
-
- <section >
- <div className="flex items-start gap-3">
- <span className="flex h-10 w-10 items-center justify-center rounded-xl bg-muted text-muted-foreground">
  </span>
- <div>
- <h2 className="font-bold text-foreground">Delivery Address</h2>
+ <div className="min-w-0 flex-1">
+ <p className="truncate text-sm font-semibold text-foreground">{item.title}</p>
+ <p className="mt-0.5 text-xs text-muted-foreground">Qty {item.quantity}</p>
+ </div>
+ <p className="shrink-0 text-sm font-bold text-foreground">
+ {formatCurrency(item.discountedPrice * item.quantity, cart?.currency)}
+ </p>
+ </div>
+ );
+ })}
+ </div>
+ </section>
+ <hr className="my-6 border-border/60" />
+
+ {/* Delivery Address */}
+ <section>
+ <h2 className="text-sm font-bold text-foreground/60">Delivery Address</h2>
  <p className="mt-1 text-xs leading-5 text-muted-foreground">
  {destinationCountry
  ? `Delivery destination: ${destinationCountry}.`
  : "Choose the delivery destination country first."}
  </p>
- </div>
- </div>
 
- <div className="mt-4 sm:mt-5">
- <label htmlFor="delivery-destination-country" className="mb-2 block text-xs font-bold uppercase tracking-wide text-muted-foreground">
- Delivery destination country
- </label>
+ <div className="mt-4">
  <select
- id="delivery-destination-country"
+ aria-label="Delivery destination country"
  value={destinationCountry}
  onChange={(event) => {
  setDestinationCountry(event.target.value);
@@ -1058,7 +929,7 @@ const Checkout = () => {
  <select
  value={selectedAddressId}
  onChange={(event) => setSelectedAddressId(event.target.value)}
- className="mt-4 h-12 w-full rounded-xl bg-muted px-3 text-base outline-none focus:ring-2 focus:ring-primary/25 sm:mt-5 sm:px-4 sm:text-sm"
+ className="mt-4 h-12 w-full rounded-xl bg-muted px-3 text-base outline-none focus:ring-2 focus:ring-primary/25 sm:px-4 sm:text-sm"
  >
  {matchingAddresses.map((address) => (
  <option key={String(address.id)} value={String(address.id)}>
@@ -1101,25 +972,63 @@ const Checkout = () => {
  </a>
  </div>
  </section>
- </div>
- </div>
+ <hr className="my-6 border-border/60" />
 
- <StepActions
- nextLabel="Continue to Logistics"
- onNext={continueFromDelivery}
- nextDisabled={!step1Ready}
+ {/* Delivery Route */}
+ <section>
+ <h2 className="text-sm font-bold text-foreground/60">Delivery Route</h2>
+ <div className="mt-3">
+ <DeliveryModeSelector
+ value={deliveryMode}
+ config={deliveryConfig.data}
+ detected={detectedDelivery.data}
+ loading={detectedDelivery.isLoading || detectedDelivery.isFetching}
+ awaitingAddress={!selectedAddressId || !selectedAddress?.delivery_ready}
  />
+ </div>
+ {detectedDelivery.error && (
+ <div className="mt-4 rounded-xl bg-red-light-6 p-4">
+ <div className="flex flex-wrap items-center justify-between gap-3 text-xs leading-5 text-red-dark">
+ <span className="min-w-0 flex-1">{errorText(detectedDelivery.error)}</span>
+ <button
+ type="button"
+ onClick={() => void detectedDelivery.refetch()}
+ className="rounded-lg bg-destructive px-3 py-1.5 font-semibold text-white hover:bg-red-dark"
+ >
+ Retry
+ </button>
+ </div>
+ {storeConfigMissing && (
+ <div className="mt-3 pt-3 text-xs leading-5 text-red-dark">
+ <p>
+ One or more stores in your cart have not configured their store
+ country, so a delivery route cannot be calculated for them.
+ </p>
+ {missingCountryStores.data?.length ? (
+ <p className="mt-2 font-semibold">
+ Affected store{missingCountryStores.data.length === 1 ? "" : "s"}:{" "}
+ {missingCountryStores.data
+ .map((s, i) => s.store_name || `Store ${i + 1}`)
+ .join(", ")}
+ </p>
+ ) : null}
+ <Link
+ href="/cart"
+ className="mt-2 inline-flex items-center gap-1 font-bold underline underline-offset-2 hover:text-foreground"
+ >
+ Review cart and remove the affected item
+ </Link>
  </div>
  )}
+ </div>
+ )}
+ </section>
+ <hr className="my-6 border-border/60" />
 
- {currentStep === 2 && (
- <div className="space-y-4 sm:space-y-6">
- <StepHeading
- step="2"
- title={deliveryMode === "local" ? "Choose Xerin Express" : "Choose Logistics"}
- description={deliveryMode === "local" ? "Choose Standard or Express. Xerin automatically assigns the best qualified domestic delivery partner." : "Choose a company and service that covers every store-to-customer route in this order."}
- />
-
+ {/* Delivery Service */}
+ <section>
+ <h2 className="text-sm font-bold text-foreground/60">Delivery Service</h2>
+ <div className="mt-3 space-y-4">
  {(xerinExpress.error || eligibleLogistics.error || deliveryPricing.error || frozenQuote.error) && (
  <div className="flex flex-wrap items-center justify-between gap-3 rounded-xl bg-red-light-6 p-3 text-xs leading-5 text-red-dark">
  <span>{errorText(xerinExpress.error || eligibleLogistics.error || deliveryPricing.error || frozenQuote.error)}</span>
@@ -1133,7 +1042,6 @@ const Checkout = () => {
  </div>
  )}
 
- <div className="grid items-start gap-5 lg:grid-cols-[minmax(0,1.15fr)_minmax(340px,.85fr)] lg:gap-6">
  {deliveryMode === "local" ? (
  <XerinExpress options={xerinExpress.data ?? []} selected={form.shippingMethod} onSelect={selectXerinExpress} loading={xerinExpress.isLoading || xerinExpress.isFetching} />
  ) : (
@@ -1156,140 +1064,25 @@ const Checkout = () => {
  />
  )}
 
- <section >
- <h3 className="font-bold text-foreground">Delivery quote</h3>
- {!frozenQuote.data || !selectedShipping ? (
- <p className="mt-3 text-sm leading-6 text-muted-foreground">
- Select a delivery option to generate the protected quote.
+ {frozenQuote.data && selectedShipping && (
+ <p className="text-xs text-muted-foreground">
+ Delivery fee locked until {new Date(frozenQuote.data.expires_at).toLocaleTimeString([], { hour: "2-digit", minute: "2-digit" })}
  </p>
- ) : (
- <>
- <div className="mt-4 space-y-2">
- {frozenQuote.data.seller_routes_snapshot.map((route, index) => (
- <div key={`${route.store_id || route.pickup_location_id || index}`} className="rounded-lg bg-muted/70 p-3 text-xs">
- <div className="flex flex-wrap items-center justify-between gap-2">
- <b className="text-foreground">{route.store_name || route.pickup_label || `Store ${index + 1}`}</b>
- <span className="font-bold uppercase text-green-dark dark:text-emerald-300">
- {route.route_type === "cross_border" ? "Cross-border" : "Domestic"}
- </span>
- </div>
- <p className="mt-1 text-muted-foreground">
- {route.origin_country || "Store origin"} → {frozenQuote.data.address_snapshot?.country || destinationCountry || "Destination"} · {Number(route.distance_km || 0).toFixed(1)} km
- </p>
- </div>
- ))}
- </div>
- <div className="mt-4  pt-3">
- <SummaryRow label="Billable distance" value={`${Number(frozenQuote.data.billable_distance_km).toFixed(1)} km`} />
- <SummaryRow label="Delivery" value={<PriceDisplay amount={Number(frozenQuote.data.delivery_amount)} sourceCurrency="TZS" />} strong />
- <p className="mt-1 text-right text-[10px] text-green-dark">
- Quote locked until {new Date(frozenQuote.data.expires_at).toLocaleTimeString([], { hour: "2-digit", minute: "2-digit" })}
- </p>
- </div>
- </>
  )}
- </section>
- </div>
-
- <StepActions
- onBack={() => goToStep(1)}
- nextLabel="Continue to Review"
- onNext={continueFromLogistics}
- nextDisabled={!step2Ready}
- />
- </div>
- )}
-
- {currentStep === 3 && (
- <div className="space-y-4 sm:space-y-6">
- <StepHeading
- step="3"
- title="Review Order"
- description="Review products, delivery charge and any coupon before choosing payment."
- />
-
- <div className="space-y-5">
- <section >
- <div className=" px-4 py-4 sm:px-6">
- <div className="flex items-center justify-between gap-3">
- <h3 className="font-bold text-foreground">Order review</h3>
- <span className="rounded-full bg-muted px-2.5 py-1 text-[10px] font-bold text-muted-foreground">
- {cartItems.length} item{cartItems.length === 1 ? "" : "s"}
- </span>
- </div>
- </div>
- <div className="p-4 sm:p-6">
- {cartItems.map((item) => {
- const thumb = item.imgs?.thumbnails?.[0];
- return (
- <div key={item.cartItemId} className="flex items-center gap-3  py-3 ">
- <span className="grid h-14 w-14 shrink-0 place-items-center overflow-hidden rounded-xl bg-muted">
- {thumb ? (
- <img src={thumb} alt="" className="h-full w-full object-cover" />
- ) : (
- <HugeiconsIcon icon={ClipboardListIcon} size={18} className="text-muted-foreground" />
- )}
- </span>
- <div className="min-w-0 flex-1">
- <p className="truncate text-sm font-semibold text-foreground">{item.title}</p>
- <p className="mt-0.5 text-xs text-muted-foreground">Qty {item.quantity}</p>
- </div>
- <p className="shrink-0 text-sm font-bold text-foreground">
- {formatCurrency(item.discountedPrice * item.quantity, cart?.currency)}
- </p>
- </div>
- );
- })}
- <SummaryRow label="Product subtotal" value={<PriceDisplay amount={Number(cart?.subtotal || 0)} sourceCurrency="TZS" showSettlementTzs />} />
- {Number(cart?.promotion_discount_amount || 0) > 0 && (
- <SummaryRow label="Seller promotion" value={<><span>-</span><PriceDisplay amount={Number(cart?.promotion_discount_amount || 0)} sourceCurrency="TZS" /></>} saving />
- )}
- {Number(cart?.coupon_discount_amount || 0) > 0 && (
- <SummaryRow label="Platform coupon" value={<><span>-</span><PriceDisplay amount={Number(cart?.coupon_discount_amount || 0)} sourceCurrency="TZS" /></>} saving />
- )}
- <SummaryRow label="Delivery" info={<InfoPopover title="How delivery is priced" align="end"><p>The delivery fee is calculated from the real distance between the seller&apos;s location and your delivery address, using the selected logistics option.</p><p>The quote is locked for a short window so the price cannot change while you pay.</p></InfoPopover>} value={shippingAmount === null ? "Pending quote" : <PriceDisplay amount={shippingAmount} sourceCurrency="TZS" />} />
- <div className="mt-2  pt-2">
- <SummaryRow label="Grand Total" info={<InfoPopover title="How the total is calculated" align="end"><p>Grand Total = product subtotal − discounts + delivery fee.</p><p>Payment is settled in TZS. If you view prices in another currency, the final charge uses the backend-confirmed TZS amount.</p></InfoPopover>} value={checkoutTotal === null ? "Pending delivery quote" : <PriceDisplay amount={checkoutTotal} sourceCurrency="TZS" showSettlementTzs />} strong />
- </div>
  </div>
  </section>
+ <hr className="my-6 border-border/60" />
 
+ {/* Coupon */}
+ <section>
  <Coupon />
-
- {selectedAddress && (
- <section className="text-sm">
- <h3 className="font-bold text-foreground">Delivery summary</h3>
- <p className="mt-3 text-muted-foreground">
- <b className="text-foreground">{selectedAddress.recipient_name || profile?.full_name || "Customer"}</b><br />
- {selectedAddress.street}, {selectedAddress.city}, {selectedAddress.region}, {selectedAddress.country}
- </p>
- {selectedShipping && (
- <p className="mt-3 text-muted-foreground">
- {deliveryMode === "local" ? <>Delivery: <b className="text-foreground">Xerin Express · {("tier" in selectedShipping ? selectedShipping.label : "Domestic")}</b><br />Partner assigned automatically</> : <>Logistics: <b className="text-foreground">{eligibleLogistics.data?.results.find((company) => company.logistics_company_id === selectedCompanyId)?.name || "Selected provider"}</b><br />Service: {"method_name" in selectedShipping ? selectedShipping.method_name : "International"} · Cross-border</>}
- </p>
- )}
  </section>
- )}
- </div>
+ <hr className="my-6 border-border/60" />
 
- <StepActions
- onBack={() => goToStep(2)}
- nextLabel="Continue to Payment"
- onNext={() => goToStep(4)}
- nextDisabled={!step2Ready}
- />
- </div>
- )}
-
- {currentStep === 4 && (
- <div className="space-y-4 sm:space-y-6">
- <StepHeading
- step="4"
- title="Payment"
- description="Choose Mobile Payment or Card Payment for the backend-confirmed TZS total."
- />
-
- <div className="space-y-5">
+ {/* Payment */}
+ <section>
+ <h2 className="text-sm font-bold text-foreground/60">Payment</h2>
+ <div className="mt-3">
  <PaymentMethod
  options={paymentOptions.data ?? []}
  selected={form.paymentMethod}
@@ -1300,31 +1093,17 @@ const Checkout = () => {
  onProviderChange={setPaymentProvider}
  onPhoneNumberChange={setPaymentPhone}
  />
-
- <section >
- <h3 className="font-bold text-foreground">Final checks</h3>
- {selectedAddress && (
- <div className="mt-4 flex items-start gap-3 rounded-xl bg-muted/70 p-3.5 text-xs leading-5 text-muted-foreground">
- <span>
- <b className="text-foreground">Deliver to</b><br />
- {selectedAddress.street}, {selectedAddress.city}, {selectedAddress.country}
- </span>
- </div>
- )}
- <div className="mt-4 rounded-xl bg-primary/5 p-3 text-[11px] leading-5 text-foreground sm:text-xs">
- <b>Final checkout protection:</b> Xerin rechecks prices, stock, address, logistics and the protected shipping rate before creating the order.
  </div>
  </section>
  </div>
 
- <div className="mt-5 flex flex-col-reverse gap-3 sm:flex-row sm:items-center sm:justify-between">
- <button
- type="button"
- onClick={() => goToStep(3)}
- className="inline-flex h-12 items-center justify-center gap-2 rounded-xl bg-muted px-5 font-semibold text-foreground hover:bg-muted/70"
- >
- <HugeiconsIcon icon={ArrowLeft01Icon} size={17} /> Back to Review
- </button>
+ <OrderTotalsCard
+ cart={cart}
+ cartItems={cartItems}
+ shippingAmount={shippingAmount}
+ checkoutTotal={checkoutTotal}
+ action={
+ <>
  <button
  type="submit"
  disabled={
@@ -1339,28 +1118,19 @@ const Checkout = () => {
  !form.shippingMethod ||
  !frozenQuote.data
  }
- className="inline-flex h-12 items-center justify-center rounded-xl bg-primary px-7 text-base font-bold text-white transition hover:opacity-90 disabled:cursor-not-allowed disabled:opacity-50 sm:text-sm"
+ className="mt-5 inline-flex h-12 w-full items-center justify-center rounded-xl bg-primary px-7 text-base font-bold text-white transition hover:opacity-90 disabled:cursor-not-allowed disabled:opacity-50 sm:text-sm"
  >
  {createOrder.isPending || isCreatingAddress ? "Processing..." : "Pay Securely"}
  </button>
- </div>
-
- <p className="text-center text-[11px] leading-5 text-muted-foreground">
+ <p className="mt-3 text-center text-[11px] leading-5 text-muted-foreground">
  Display currency is for convenience only. Payment is settled in TZS using the backend-confirmed Grand Total.
  </p>
- </div>
- )}
-
- </div>
-
- <OrderTotalsCard
- cart={cart}
- cartItems={cartItems}
- shippingAmount={shippingAmount}
- checkoutTotal={checkoutTotal}
+ </>
+ }
  />
  </div>
  </form>
+
  </div>
  </section>
 
@@ -1389,100 +1159,18 @@ const Checkout = () => {
  );
 };
 
-function CheckoutStepper({
- currentStep,
- onStepClick,
- step1Ready,
- step2Ready,
- maxReachedStep,
-}: {
- currentStep: CheckoutStep;
- onStepClick: (step: CheckoutStep) => void;
- step1Ready: boolean;
- step2Ready: boolean;
- maxReachedStep: CheckoutStep;
-}) {
- const completed = (step: CheckoutStep) =>
- step === 1 ? step1Ready && currentStep > 1 :
- step === 2 ? step2Ready && currentStep > 2 :
- currentStep > step;
-
- const unlocked = (step: CheckoutStep) => {
- if (step === 1) return true;
- if (step > maxReachedStep + 1) return false;
- if (step === 2) return step1Ready;
- return step1Ready && step2Ready;
- };
-
- return (
- <nav aria-label="Checkout progress">
- <ol className="flex w-full items-center text-sm font-semibold">
- {CHECKOUT_STEPS.map((step, index) => {
- const active = currentStep === step.id;
- const done = completed(step.id);
- const enabled = unlocked(step.id);
- const last = index === CHECKOUT_STEPS.length - 1;
- return (
- <li key={step.id} className={`flex items-center ${last ? "" : "flex-1"}`}>
- <button
- type="button"
- disabled={!enabled}
- onClick={() => onStepClick(step.id)}
- className={`flex items-center gap-2 transition ${
- active || done
- ? "text-primary"
- : enabled
- ? "text-foreground"
- : "cursor-not-allowed text-muted-foreground"
- }`}
- >
- {done && <HugeiconsIcon icon={CheckmarkBadge02Icon} size={16} className="shrink-0" />}
- <span className="text-xs sm:text-sm">{step.shortLabel}</span>
- </button>
- {!last && (
- <span
- aria-hidden="true"
- className={`mx-3 h-px flex-1 sm:mx-6 ${done ? "bg-primary" : "bg-border"}`}
- />
- )}
- </li>
- );
- })}
- </ol>
- </nav>
- );
-}
-
-function StepHeading({
- title,
- description,
-}: {
- step: string;
- title: string;
- description: string;
-}) {
- return (
- <div className="mb-5 sm:mb-6">
- <h1 className="text-xl font-semibold text-foreground sm:text-2xl">
- {title}
- </h1>
- <p className="mt-1 max-w-2xl text-sm leading-6 text-muted-foreground">
- {description}
- </p>
- </div>
- );
-}
-
 function OrderTotalsCard({
  cart,
  cartItems,
  shippingAmount,
  checkoutTotal,
+ action,
 }: {
  cart: ReturnType<typeof useBackendCart>["data"];
  cartItems: ReturnType<typeof mapBackendCartToUi>;
  shippingAmount: number | null;
  checkoutTotal: number | null;
+ action?: React.ReactNode;
 }) {
  const promoDiscount = Number(cart?.promotion_discount_amount || 0);
  const couponDiscount = Number(cart?.coupon_discount_amount || 0);
@@ -1556,83 +1244,8 @@ function OrderTotalsCard({
  <HugeiconsIcon icon={LockPasswordIcon} size={13} className="shrink-0 text-primary" />
  Secure checkout — total confirmed by the server before you pay.
  </p>
+ {action}
  </aside>
- );
-}
-
-function StepActions({
- onBack,
- onNext,
- nextLabel,
- nextDisabled = false,
-}: {
- onBack?: () => void;
- onNext: () => void;
- nextLabel: string;
- nextDisabled?: boolean;
-}) {
- return (
- <div className="mt-5 flex flex-col-reverse gap-3 sm:flex-row sm:items-center sm:justify-between">
- {onBack ? (
- <button
- type="button"
- onClick={onBack}
- className="inline-flex h-12 items-center justify-center gap-2 rounded-xl bg-muted px-5 font-semibold text-foreground hover:bg-muted/70"
- >
- <HugeiconsIcon icon={ArrowLeft01Icon} size={17} /> Back
- </button>
- ) : (
- <span />
- )}
- <button
- type="button"
- onClick={onNext}
- disabled={nextDisabled}
- className="inline-flex h-12 items-center justify-center gap-2 rounded-xl bg-primary px-7 font-bold text-white transition hover:opacity-90 disabled:cursor-not-allowed disabled:opacity-50"
- >
- {nextLabel} <HugeiconsIcon icon={ArrowRight01Icon} size={17} />
- </button>
- </div>
- );
-}
-
-function SummaryRow({
- label,
- value,
- saving = false,
- strong = false,
- info,
-}: {
- label: string;
- value: React.ReactNode;
- saving?: boolean;
- strong?: boolean;
- info?: React.ReactNode;
-}) {
- return (
- <div className="flex items-center justify-between gap-3 py-2.5 sm:gap-4 sm:py-3">
- <span
- className={
- strong
- ? "inline-flex items-center gap-1.5 font-bold text-foreground"
- : "inline-flex items-center gap-1.5 text-sm text-muted-foreground"
- }
- >
- {label}
- {info}
- </span>
- <span
- className={`text-right ${
- strong
- ? "text-base font-bold text-foreground sm:text-lg"
- : saving
- ? "text-sm font-bold text-green-dark"
- : "text-sm font-semibold"
- }`}
- >
- {value}
- </span>
- </div>
  );
 }
 

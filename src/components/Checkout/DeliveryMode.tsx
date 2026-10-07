@@ -20,12 +20,7 @@ export default function DeliveryModeSelector({
  const crossBorder = value === "international";
  return (
  <section>
- <p className="text-xs font-bold uppercase tracking-[.14em] text-primary">Automatic delivery route</p>
- <h2 className="mt-1 text-xl font-bold text-foreground">Delivery Type</h2>
- <p className="mt-1 text-sm leading-6 text-muted-foreground">
- Xerin detects this automatically from the product store country and your selected delivery address.
- </p>
- <div className="mt-5 rounded-xl bg-muted p-4">
+ <div className="rounded-xl bg-muted p-4">
  {loading ? (
  <div className="flex items-center gap-2 text-sm font-semibold"><Spinner size={17} /> Detecting delivery route…</div>
  ) : awaitingAddress || !detected ? (
