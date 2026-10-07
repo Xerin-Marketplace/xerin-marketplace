@@ -2,15 +2,12 @@
 
 import Link from "next/link";
 import { useParams, useRouter } from "next/navigation";
-import { useEffect, useMemo, useState } from "react";
+import { useEffect, useState } from "react";
 import toast from "react-hot-toast";
 import { HugeiconsIcon } from "@hugeicons/react";
 import {
- Alert02Icon,
  ArrowLeft01Icon,
  CreditCardIcon,
- Money03Icon,
- RefreshCwIcon,
  ShieldCheckIcon,
  SmartPhone01Icon,
 } from "@hugeicons/core-free-icons";
@@ -21,8 +18,9 @@ import type { OrderPaymentState, PaymentOption, PaymentProviderErrorDetail } fro
 import { formatCurrency } from "@/lib/formatCurrency";
 
 const retryStorageKey = (orderId: string) => `xerin:payment-retry:${orderId}`;
-const iconFor = (method: string) =>
- method === "mobile_money" ? SmartPhone01Icon : method === "cash_on_delivery" ? Money03Icon : CreditCardIcon;
+
+const MNO_LOGOS = ["Vodacom M-Pesa", "Airtel Money", "Mixx by Yas", "HaloPesa"];
+const CARD_LOGOS = ["VISA", "Mastercard"];
 
 export default function PaymentPage() {
  const params = useParams<{ orderId: string }>();
@@ -32,14 +30,13 @@ export default function PaymentPage() {
 
  const [options, setOptions] = useState<PaymentOption[]>([]);
  const [optionsLoading, setOptionsLoading] = useState(true);
- const [method, setMethod] = useState("");
+ const [method, setMethod] = useState<"mobile_money" | "card">("mobile_money");
  const [provider, setProvider] = useState("");
  const [phone, setPhone] = useState("");
  const [paying, setPaying] = useState(false);
  const [listening, setListening] = useState<OrderPaymentState | null>(null);
  const [stateError, setStateError] = useState("");
 
- // Fetch payment options + any in-flight payment state
  useEffect(() => {
  let cancelled = false;
  (async () => {
@@ -49,7 +46,7 @@ export default function PaymentPage() {
  paymentsApi.orderState(orderId).catch(() => null),
  ]);
  if (cancelled) return;
- setOptions(opts);
+ setOptions(opts.filter((o) => o.id === "mobile_money" || o.id === "card"));
  if (state) setListening(state);
  } catch {
  toast.error("Could not load payment methods.");
@@ -62,14 +59,12 @@ export default function PaymentPage() {
  };
  }, [orderId]);
 
- // Redirect once the payment resolves
  useEffect(() => {
  if (!listening) return;
  if (listening.payment_status === "completed") router.replace(`/payment-success/${orderId}`);
  else if (["failed", "cancelled"].includes(listening.payment_status)) router.replace(`/payment-failed/${orderId}`);
  }, [listening?.payment_status, orderId, router]);
 
- // Poll while the provider is processing the payment
  useEffect(() => {
  if (!listening || !["pending", "processing"].includes(listening.payment_status)) return;
  const tick = async () => {
@@ -100,17 +95,13 @@ export default function PaymentPage() {
  return () => window.clearInterval(interval);
  }, [listening?.payment_status, listening?.poll_after_seconds, orderId]);
 
- const selectedOption = options.find((o) => o.id === method);
+ const mobileOption = options.find((o) => o.id === "mobile_money");
  const isListening = Boolean(listening && ["pending", "processing"].includes(listening.payment_status));
  const amount = listening?.latest_payment ? Number(listening.latest_payment.amount) : Number(order.data?.total || 0);
  const currency = order.data?.currency || "TZS";
 
- const canPay = Boolean(
- method &&
- (method === "cash_on_delivery" ||
- method === "card" ||
- (selectedOption?.requires_phone ? provider && phone.trim().length >= 9 : true)),
- );
+ const canPay =
+ method === "mobile_money" ? provider && phone.trim().length >= 9 : method === "card";
 
  const pay = async () => {
  if (!order.data || !canPay) return;
@@ -119,8 +110,8 @@ export default function PaymentPage() {
  const payment = await paymentsApi.initiate({
  order_id: String(order.data.id),
  method,
- provider: method === "cash_on_delivery" ? undefined : provider || undefined,
- phone_number: selectedOption?.requires_phone ? phone.trim() : undefined,
+ provider: method === "mobile_money" ? provider : undefined,
+ phone_number: method === "mobile_money" ? phone.trim() : undefined,
  success_url: method === "card" ? `${window.location.origin}/order-success/${orderId}?payment=success` : undefined,
  failure_url: method === "card" ? `${window.location.origin}/payment-failed/${orderId}` : undefined,
  });
@@ -129,12 +120,6 @@ export default function PaymentPage() {
  retryStorageKey(orderId),
  JSON.stringify({ method, provider: provider || undefined, phone_number: phone.trim() || undefined }),
  );
-
- if (method === "cash_on_delivery") {
- toast.success("Order placed — pay when your delivery arrives.");
- router.push(`/order-success/${orderId}?payment=cod`);
- return;
- }
 
  const checkoutUrl = payment.provider_response?.checkout_url;
  if (method === "card" && checkoutUrl) {
@@ -155,8 +140,8 @@ export default function PaymentPage() {
 
  if (order.isLoading) {
  return (
- <main className="grid min-h-screen place-items-center bg-background px-4">
- <div className="flex w-full max-w-xs items-center gap-4 rounded-2xl bg-muted p-4">
+ <main className="grid min-h-screen place-items-center bg-muted px-4">
+ <div className="flex w-full max-w-xs items-center gap-4 rounded-2xl bg-card p-4">
  <Spinner size={20} />
  <div className="min-w-0 flex-1">
  <p className="truncate text-sm font-semibold">Loading payment…</p>
@@ -169,8 +154,8 @@ export default function PaymentPage() {
 
  if (!order.data) {
  return (
- <main className="grid min-h-screen place-items-center bg-background px-4">
- <div className="max-w-sm text-center">
+ <main className="grid min-h-screen place-items-center bg-muted px-4">
+ <div className="rounded-2xl bg-card p-10 text-center">
  <h1 className="text-xl font-bold">Order not found</h1>
  <Link href="/account/orders" className="mt-6 inline-flex h-12 items-center rounded-xl bg-primary px-6 font-bold text-white">My orders</Link>
  </div>
@@ -180,16 +165,16 @@ export default function PaymentPage() {
 
  const data = order.data;
 
- /* Listening state — "approve on your phone" view */
+ /* Listening — waiting for the phone prompt */
  if (isListening && listening) {
  return (
- <main className="min-h-screen bg-background px-4 py-12">
+ <main className="min-h-screen bg-muted px-4 py-12">
  <div className="mx-auto w-full max-w-md">
  <Link href="/">
  <img src="/images/logo/logooriginal.png" alt="Xerin Mart" className="h-10 w-auto" />
  </Link>
 
- <div className="mt-12 flex items-center gap-4 rounded-2xl bg-muted p-5">
+ <div className="mt-12 flex items-center gap-4 rounded-2xl bg-card p-5">
  <Spinner size={26} />
  <div className="min-w-0 flex-1">
  <p className="truncate text-base font-bold text-foreground">Processing payment…</p>
@@ -200,122 +185,114 @@ export default function PaymentPage() {
  <span className="shrink-0 text-sm font-bold tabular-nums text-foreground">{formatCurrency(amount, currency)}</span>
  </div>
 
- <dl className="mt-8 divide-y divide-border/60">
- <div className="flex items-center justify-between py-3.5">
+ <div className="mt-4 rounded-2xl bg-card p-5">
+ <dl className="divide-y divide-border/60">
+ <div className="flex items-center justify-between py-3">
  <dt className="text-sm text-muted-foreground">Order</dt>
  <dd className="text-sm font-semibold">#{data.order_number || data.id.slice(0, 8).toUpperCase()}</dd>
  </div>
- <div className="flex items-center justify-between py-3.5">
+ <div className="flex items-center justify-between py-3">
  <dt className="text-sm text-muted-foreground">Waiting for</dt>
  <dd className="text-sm font-semibold capitalize">{(listening.latest_payment?.provider || provider || "your network").replaceAll("_", " ")}</dd>
  </div>
  </dl>
+ </div>
 
- {stateError && <p className="mt-4 text-xs text-muted-foreground">{stateError}</p>}
+ {stateError && <p className="mt-4 text-center text-xs text-muted-foreground">{stateError}</p>}
 
- <div className="mt-8 grid gap-3">
- <Link href={`/account/orders/${data.id}`} className="inline-flex min-h-12 items-center justify-center rounded-xl bg-muted px-4 text-sm font-semibold">
+ <Link href={`/account/orders/${data.id}`} className="mt-6 inline-flex min-h-12 w-full items-center justify-center rounded-xl bg-card px-4 text-sm font-semibold">
  Leave this page — the order keeps processing
  </Link>
- </div>
  </div>
  </main>
  );
  }
 
- /* Method picker */
+ /* Method picker + summary */
  return (
- <main className="min-h-screen bg-background px-4 pb-16 pt-8 sm:pt-10">
- <div className="mx-auto w-full max-w-md">
+ <main className="min-h-screen bg-muted px-4 pb-16 pt-8 sm:pt-10">
+ <div className="mx-auto w-full max-w-4xl">
+ <div className="flex items-center justify-between">
  <Link href="/">
- <img src="/images/logo/logooriginal.png" alt="Xerin Mart" className="h-10 w-auto" />
+ <img src="/images/logo/logooriginal.png" alt="Xerin Mart" className="h-9 w-auto" />
  </Link>
-
- <Link href={`/account/orders/${data.id}`} className="mt-8 inline-flex items-center gap-1.5 text-sm font-semibold text-muted-foreground">
- <HugeiconsIcon icon={ArrowLeft01Icon} size={15} /> Back to order
+ <Link href={`/account/orders/${data.id}`} className="inline-flex items-center gap-1.5 text-sm font-semibold text-muted-foreground hover:text-foreground">
+ <HugeiconsIcon icon={ArrowLeft01Icon} size={15} /> Order #{data.order_number || data.id.slice(0, 8).toUpperCase()}
  </Link>
-
- <div className="mt-5 flex items-end justify-between gap-4">
- <div>
- <h1 className="text-2xl font-bold text-foreground">Pay for your order</h1>
- <p className="mt-1 text-sm text-muted-foreground">#{data.order_number || data.id.slice(0, 8).toUpperCase()}</p>
- </div>
- <p className="text-2xl font-bold text-primary">{formatCurrency(Number(data.total || 0), data.currency)}</p>
  </div>
 
- <div className="mt-8">
- <p className="text-xs font-bold uppercase tracking-[.14em] text-muted-foreground">Payment method</p>
+ <h1 className="mt-6 text-2xl font-bold text-foreground">Payment</h1>
+
+ {/* Method tabs */}
  {optionsLoading ? (
- <div className="mt-4 flex items-center gap-3 rounded-2xl bg-muted p-5 text-sm text-muted-foreground">
+ <div className="mt-4 flex items-center gap-3 rounded-2xl bg-card p-5 text-sm text-muted-foreground">
  <Spinner size={18} /> Loading payment methods…
  </div>
  ) : (
- <div className="mt-3 space-y-2">
- {options.map((opt) => {
- const Icon = iconFor(opt.id);
- const active = method === opt.id;
- const disabled = opt.id === "card" && !(opt as PaymentOption & { enabled?: boolean }).enabled && false;
+ <>
+ <div className="mt-4 grid grid-cols-2 gap-2 rounded-2xl bg-card p-1.5">
+ {(["mobile_money", "card"] as const).map((id) => {
+ const active = method === id;
+ const Icon = id === "mobile_money" ? SmartPhone01Icon : CreditCardIcon;
  return (
  <button
- key={opt.id}
+ key={id}
  type="button"
- disabled={disabled}
- onClick={() => setMethod(opt.id)}
- className={`flex w-full items-center gap-4 rounded-2xl p-4 text-left transition ${
- active ? "bg-primary/10 ring-2 ring-primary/40" : "bg-muted hover:bg-muted/70"
+ onClick={() => setMethod(id)}
+ className={`flex items-center justify-center gap-2.5 rounded-xl px-4 py-3 text-sm font-bold transition ${
+ active ? "bg-primary text-white" : "text-muted-foreground hover:text-foreground"
  }`}
  >
- <span className={`grid h-11 w-11 shrink-0 place-items-center rounded-xl ${active ? "bg-primary text-white" : "bg-background text-foreground"}`}>
- <HugeiconsIcon icon={Icon} size={20} />
- </span>
- <span className="min-w-0 flex-1">
- <span className="block text-sm font-bold text-foreground">{opt.label}</span>
- <span className="mt-0.5 block text-xs text-muted-foreground">
- {opt.id === "mobile_money"
- ? "M-Pesa, Airtel Money, Mixx, HaloPesa"
- : opt.id === "cash_on_delivery"
- ? "Pay cash when your order arrives"
- : "Visa or Mastercard"}
- </span>
- </span>
- <span className={`h-5 w-5 shrink-0 rounded-full ring-2 ${active ? "bg-primary ring-primary" : "bg-transparent ring-border"}`} />
+ <HugeiconsIcon icon={Icon} size={18} />
+ {id === "mobile_money" ? "Mobile Money" : "Card"}
  </button>
  );
  })}
  </div>
- )}
 
- {selectedOption?.requires_phone && (
- <div className="mt-4 grid gap-3 sm:grid-cols-2">
- <label className="text-xs font-semibold text-foreground">
- Mobile network
+ <div className="mt-5 grid items-start gap-5 lg:grid-cols-[1fr_340px]">
+ {/* Method form */}
+ <div className="rounded-2xl bg-card p-5 sm:p-6">
+ {method === "mobile_money" ? (
+ <div>
+ <div className="grid gap-4 sm:grid-cols-2">
+ <label className="text-sm font-semibold text-foreground">
+ Mobile network*
  <select
  value={provider}
  onChange={(event) => setProvider(event.target.value)}
- className="mt-1.5 h-12 w-full rounded-xl bg-muted px-3 text-base outline-none focus:ring-2 focus:ring-primary/25 sm:text-sm"
+ className="mt-2 h-12 w-full rounded-xl bg-muted px-3 text-base outline-none focus:ring-2 focus:ring-primary/25 sm:text-sm"
  >
  <option value="">Select network</option>
- {selectedOption.providers.map((name) => <option key={name} value={name}>{name}</option>)}
+ {(mobileOption?.providers ?? []).map((name) => <option key={name} value={name}>{name}</option>)}
  </select>
  </label>
- <label className="text-xs font-semibold text-foreground">
- Mobile number
+ <label className="text-sm font-semibold text-foreground">
+ Mobile number*
  <input
  type="tel"
  value={phone}
  onChange={(event) => setPhone(event.target.value)}
  placeholder="2557XXXXXXXX"
- className="mt-1.5 h-12 w-full rounded-xl bg-muted px-3 text-base outline-none focus:ring-2 focus:ring-primary/25 sm:text-sm"
+ className="mt-2 h-12 w-full rounded-xl bg-muted px-3 text-base outline-none focus:ring-2 focus:ring-primary/25 sm:text-sm"
  />
  </label>
  </div>
- )}
-
- {method === "cash_on_delivery" && (
- <p className="mt-4 flex items-start gap-2 rounded-xl bg-muted p-4 text-xs leading-5 text-muted-foreground">
- <HugeiconsIcon icon={ShieldCheckIcon} size={16} className="mt-0.5 shrink-0 text-primary" />
- Pay in cash or mobile money when your delivery arrives. Nothing is charged now.
+ <p className="mt-4 flex items-start gap-2 text-xs leading-5 text-muted-foreground">
+ <HugeiconsIcon icon={ShieldCheckIcon} size={15} className="mt-0.5 shrink-0 text-primary" />
+ You will get a secure prompt on this number — approve it to complete the payment.
  </p>
+ </div>
+ ) : (
+ <div>
+ <p className="text-sm leading-6 text-muted-foreground">
+ You will be taken to our secure card checkout to enter your Visa or Mastercard details — we never handle your card number.
+ </p>
+ <div className="mt-4 flex items-center gap-2 text-xs text-muted-foreground">
+ <HugeiconsIcon icon={ShieldCheckIcon} size={15} className="text-primary" />
+ Encrypted card processing by Selcom Pay
+ </div>
+ </div>
  )}
 
  <button
@@ -324,18 +301,36 @@ export default function PaymentPage() {
  onClick={() => void pay()}
  className="mt-6 inline-flex h-14 w-full items-center justify-center gap-2 rounded-xl bg-primary py-4 font-bold text-white disabled:cursor-not-allowed disabled:opacity-50"
  >
- {paying ? <Spinner size={18} /> : <HugeiconsIcon icon={method === "mobile_money" ? SmartPhone01Icon : CreditCardIcon} size={18} />}
- {paying
- ? "Starting payment…"
- : method === "cash_on_delivery"
- ? "Place order — pay on delivery"
- : `Pay ${formatCurrency(Number(data.total || 0), data.currency)}`}
+ {paying && <Spinner size={18} />}
+ {paying ? "Starting payment…" : `Pay ${formatCurrency(amount, currency)}`}
  </button>
-
- <p className="mt-3 flex items-center justify-center gap-1.5 text-[11px] text-muted-foreground">
- <HugeiconsIcon icon={ShieldCheckIcon} size={13} /> Payments are encrypted and processed securely by Xerin
- </p>
  </div>
+
+ {/* Summary */}
+ <div className="rounded-2xl bg-card p-5 sm:p-6">
+ <dl className="space-y-3 text-sm">
+ <div className="flex justify-between"><dt className="text-muted-foreground">Subtotal</dt><dd className="font-semibold">{formatCurrency(Number(data.subtotal || 0), currency)}</dd></div>
+ {Number(data.discount_amount || 0) > 0 && (
+ <div className="flex justify-between"><dt className="text-muted-foreground">Savings</dt><dd className="font-semibold text-green-dark">-{formatCurrency(Number(data.discount_amount), currency)}</dd></div>
+ )}
+ <div className="flex justify-between"><dt className="text-muted-foreground">Delivery</dt><dd className="font-semibold">{formatCurrency(Number(data.shipping_amount || 0), currency)}</dd></div>
+ {Number(data.tax_amount || 0) > 0 && (
+ <div className="flex justify-between"><dt className="text-muted-foreground">Tax</dt><dd className="font-semibold">{formatCurrency(Number(data.tax_amount), currency)}</dd></div>
+ )}
+ <div className="flex justify-between border-t border-border/60 pt-3 text-base"><dt className="font-bold">Total</dt><dd className="font-bold">{formatCurrency(Number(data.total || 0), currency)}</dd></div>
+ </dl>
+
+ <div className="mt-6 flex flex-wrap items-center gap-2">
+ {(method === "mobile_money" ? MNO_LOGOS : CARD_LOGOS).map((name) => (
+ <span key={name} className="rounded-md bg-muted px-2.5 py-1.5 text-[10px] font-bold uppercase tracking-wide text-muted-foreground">
+ {name}
+ </span>
+ ))}
+ </div>
+ </div>
+ </div>
+ </>
+ )}
  </div>
  </main>
  );
