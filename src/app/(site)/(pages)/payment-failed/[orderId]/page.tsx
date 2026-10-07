@@ -5,7 +5,7 @@ import { useParams, useRouter } from "next/navigation";
 import { useEffect, useMemo, useState } from "react";
 import toast from "react-hot-toast";
 import { HugeiconsIcon } from "@hugeicons/react";
-import { Alert02Icon, Clock01Icon, CreditCardIcon, RefreshCwIcon, ShieldAlertIcon, SmartPhone01Icon } from "@hugeicons/core-free-icons";
+import { Alert02Icon, Clock01Icon, CreditCardIcon, RefreshCwIcon, SmartPhone01Icon } from "@hugeicons/core-free-icons";
 import { useOrder } from "@/hooks/useCommerce";
 import { paymentsApi } from "@/lib/api/endpoints/commerce";
 import type {
@@ -13,7 +13,6 @@ import type {
  PaymentProviderErrorDetail,
 } from "@/types/api/commerce";
 import { formatCurrency } from "@/lib/formatCurrency";
-import InfoPopover from "@/components/Common/Info/InfoPopover";
 
 
 type RetryContext = {
@@ -161,10 +160,10 @@ export default function PaymentFailedPage() {
 
  if (order.isLoading || loadingState) {
  return (
- <main className="min-h-screen bg-muted px-4 py-16">
- <div className="mx-auto flex max-w-xl items-center justify-center gap-3 rounded-2xl bg-card p-8 shadow-sm">
+ <main className="grid min-h-screen place-items-center bg-background px-4">
+ <div className="flex items-center gap-3 text-sm text-muted-foreground">
  <HugeiconsIcon icon={RefreshCwIcon} className="animate-spin" size={18} />
- Checking payment result…
+ Checking your payment…
  </div>
  </main>
  );
@@ -172,11 +171,11 @@ export default function PaymentFailedPage() {
 
  if (!order.data || !state) {
  return (
- <main className="min-h-screen bg-muted px-4 py-16">
- <div className="mx-auto max-w-xl rounded-2xl bg-card p-8 text-center shadow-sm">
- <h1 className="text-xl font-bold">Payment result unavailable</h1>
- <Link href="/account/orders" className="mt-5 inline-flex rounded-xl bg-[var(--primary)] px-5 py-3 font-bold text-white">
- View Orders
+ <main className="grid min-h-screen place-items-center bg-background px-4">
+ <div className="max-w-sm text-center">
+ <h1 className="text-xl font-bold">We could not load this payment</h1>
+ <Link href="/account/orders" className="mt-6 inline-flex h-12 items-center rounded-xl bg-primary px-6 font-bold text-white">
+ View my orders
  </Link>
  </div>
  </main>
@@ -184,110 +183,86 @@ export default function PaymentFailedPage() {
  }
 
  const data = order.data;
+ const reference = data.order_number || data.id.slice(0, 8).toUpperCase();
+
+ const headline = timedOut
+ ? "Payment time ran out"
+ : providerCancelled
+ ? "Payment cancelled"
+ : "Payment did not go through";
+
+ const friendlyMessage = timedOut
+ ? "The payment was not completed in time, so this order was cancelled and the items were released. No money was taken."
+ : providerCancelled
+ ? "You cancelled the payment prompt on your phone. No money was taken."
+ : failureReason + " No money was taken for this attempt.";
 
  return (
- <main className="min-h-screen bg-muted px-3 py-6 sm:px-4 sm:py-12">
- <div className="mx-auto max-w-2xl space-y-5">
- <div className="flex items-center justify-between gap-3 px-1">
+ <main className="min-h-screen bg-background px-4 pb-16 pt-10 sm:pt-14">
+ <div className="mx-auto w-full max-w-md">
  <Link href="/">
  <img src="/images/logo/logooriginal.png" alt="Xerin Mart" className="h-10 w-auto" />
  </Link>
- <span className="inline-flex items-center gap-1.5 rounded-full bg-card px-3 py-1.5 text-[10px] font-bold uppercase tracking-wide text-muted-foreground shadow-sm">
- <HugeiconsIcon icon={ShieldAlertIcon} size={13} /> Payment result
- </span>
- </div>
 
- <section className="overflow-hidden rounded-3xl border border-amber-100 bg-card shadow-sm dark:border-amber-500/20">
- <div className="bg-yellow-light-4 px-5 py-7 text-center dark:bg-warning/10 sm:px-8 sm:py-9">
- <span className="mx-auto grid h-16 w-16 place-items-center rounded-full bg-amber-600 text-white">
- {timedOut ? <HugeiconsIcon icon={Clock01Icon} size={32} /> : <HugeiconsIcon icon={Alert02Icon} size={32} />}
+ <span className={`mt-10 grid h-14 w-14 place-items-center rounded-full ${timedOut ? "bg-yellow-light-4 text-yellow-dark-2" : "bg-red-light-6 text-red-dark"}`}>
+ <HugeiconsIcon icon={timedOut ? Clock01Icon : Alert02Icon} size={28} />
  </span>
- <p className="mt-4 text-xs font-bold uppercase tracking-[.16em] text-yellow-dark-2">
- {timedOut
- ? "Payment window expired"
- : providerCancelled
- ? "Payment cancelled"
- : "Payment not completed"}
- </p>
- <h1 className="mt-1 text-2xl font-bold text-foreground sm:text-3xl">
- {timedOut
- ? "This order has been cancelled"
- : providerCancelled
- ? "The payment attempt was cancelled"
- : "The payment attempt failed"}
+
+ <h1 className="mt-5 text-2xl font-bold text-foreground sm:text-3xl">
+ {headline}
  </h1>
- <p className="mx-auto mt-2 max-w-lg text-sm leading-6 text-muted-foreground /60">
- {failureReason}
+ <p className="mt-2 text-sm leading-6 text-muted-foreground">
+ {friendlyMessage}
  </p>
- <div className="mt-3">
- <InfoPopover title="Why did this happen?" trigger="link" triggerLabel="Why did this happen?" align="end">
- <p>Common reasons: insufficient balance on the mobile-money or bank account, a cancelled USSD prompt, or the payment window expiring before confirmation.</p>
- <p>No money is taken for a failed attempt · you can safely retry from this page or from your order.</p>
- </InfoPopover>
- </div>
- </div>
 
- <div className="p-5 sm:p-8">
- <dl className="grid gap-4 sm:grid-cols-2">
- <Info label="Order number" value={data.id} />
- <Info label="Order total" value={formatCurrency(data.total, data.currency)} />
- <Info label="Order status" value={state.order_status.replaceAll("_", " ")} capitalize />
- <Info label="Payment status" value={state.payment_status.replaceAll("_", " ")} capitalize />
+ <dl className="mt-8 divide-y divide-border/60">
+ <div className="flex items-center justify-between gap-4 py-3.5">
+ <dt className="text-sm text-muted-foreground">Order</dt>
+ <dd className="text-sm font-semibold text-foreground">#{reference}</dd>
+ </div>
+ <div className="flex items-center justify-between gap-4 py-3.5">
+ <dt className="text-sm text-muted-foreground">Total</dt>
+ <dd className="text-sm font-bold text-foreground">{formatCurrency(data.total, data.currency)}</dd>
+ </div>
+ <div className="flex items-center justify-between gap-4 py-3.5">
+ <dt className="text-sm text-muted-foreground">Status</dt>
+ <dd className="text-sm font-medium capitalize text-foreground">{state.payment_status.replaceAll("_", " ")}</dd>
+ </div>
  </dl>
 
- {!timedOut && (failed || providerCancelled) && (
- <div className="mt-6 rounded-2xl border border-red-light-4 bg-red-light-6 p-4 dark:border-border dark:bg-destructive/10">
- <p className="text-xs font-bold uppercase tracking-wide text-red-dark dark:text-red-300">
- Provider result
- </p>
- <p className="mt-1 text-sm font-semibold leading-6 text-red-900 dark:text-red-100">
- {failureReason}
- </p>
- <p className="mt-1 text-xs leading-5 text-red-dark/80 dark:text-red-200/70">
- Your order remains active only while the backend says it is retryable. Retry creates a new payment attempt for this same order.
- </p>
- </div>
- )}
-
  {timedOut ? (
- <div className="mt-6 rounded-2xl border border-yellow-light-2 bg-yellow-light-4 p-4 text-sm leading-6 text-amber-900">
- Reserved inventory has been released. Because this order is terminal, payment cannot be retried against it. Place a new order if you still want the products.
- </div>
+ <p className="mt-6 rounded-xl bg-muted p-4 text-sm leading-6 text-muted-foreground">
+ This order cannot be paid anymore — place a new order if you still want the items.
+ </p>
  ) : state.retryable && payment ? (
- <div className="mt-6 rounded-2xl border border-border p-4 dark:border-border sm:p-5">
- <h2 className="font-bold text-foreground">Retry payment</h2>
+ <div className="mt-8">
+ <h2 className="text-base font-bold text-foreground">Try paying again</h2>
  <p className="mt-1 text-xs leading-5 text-muted-foreground">
- The same pending order is reused; Xerin does not create a duplicate order.
+ Same order — no duplicate will be created.
  </p>
 
  {payment.method === "mobile_money" && (
  <div className="mt-4 grid gap-3 sm:grid-cols-2">
- <label className="text-xs font-semibold">
+ <label className="text-xs font-semibold text-foreground">
  Mobile network
  <select
  value={provider}
  onChange={(event) => setProvider(event.target.value)}
- className="mt-1 h-12 w-full rounded-xl border border-border bg-card px-3 text-base dark:border-border dark:bg-muted sm:text-sm"
+ className="mt-1.5 h-12 w-full rounded-xl bg-muted px-3 text-base outline-none focus:ring-2 focus:ring-primary/25 sm:text-sm"
  >
  <option value="">Select network</option>
  {MNO_PROVIDERS.map((row) => <option key={row} value={row}>{row}</option>)}
  </select>
  </label>
- <label className="text-xs font-semibold">
+ <label className="text-xs font-semibold text-foreground">
  Mobile number
  <input
  value={phone}
  onChange={(event) => setPhone(event.target.value)}
  placeholder="2557XXXXXXXX"
- className="mt-1 h-12 w-full rounded-xl border border-border bg-card px-3 text-base dark:border-border dark:bg-muted sm:text-sm"
+ className="mt-1.5 h-12 w-full rounded-xl bg-muted px-3 text-base outline-none focus:ring-2 focus:ring-primary/25 sm:text-sm"
  />
  </label>
- </div>
- )}
-
- {payment.method === "card" && (
- <div className="mt-4 inline-flex items-center gap-2 rounded-xl bg-muted px-3 py-2 text-sm font-semibold dark:bg-muted">
- <HugeiconsIcon icon={CreditCardIcon} size={16} /> Secure card payment
  </div>
  )}
 
@@ -295,54 +270,33 @@ export default function PaymentFailedPage() {
  type="button"
  disabled={!canRetry || retrying}
  onClick={() => void retryPayment()}
- className="mt-4 inline-flex min-h-12 w-full items-center justify-center gap-2 rounded-xl bg-[var(--primary)] px-5 font-bold text-white disabled:cursor-not-allowed disabled:opacity-50 sm:w-auto"
+ className="mt-5 inline-flex min-h-12 w-full items-center justify-center gap-2 rounded-xl bg-primary px-5 font-bold text-white disabled:cursor-not-allowed disabled:opacity-50"
  >
  {payment.method === "mobile_money" ? <HugeiconsIcon icon={SmartPhone01Icon} size={17} /> : <HugeiconsIcon icon={CreditCardIcon} size={17} />}
- {retrying ? "Starting retry..." : "Retry Payment"}
+ {retrying ? "Starting…" : "Retry payment"}
  </button>
  </div>
  ) : (
- <div className="mt-6 rounded-2xl border border-border bg-muted p-4 text-sm leading-6 text-muted-foreground dark:border-border dark:bg-muted /60">
- This payment cannot currently be retried. You can review the order or return to the store.
- </div>
+ <p className="mt-6 rounded-xl bg-muted p-4 text-sm leading-6 text-muted-foreground">
+ This order can no longer be paid. Place a new order if you still want the items.
+ </p>
  )}
 
- <div className="mt-6 grid gap-3 sm:grid-cols-2">
+ <div className="mt-8 grid gap-3 sm:grid-cols-2">
  <Link
  href={`/account/orders/${data.id}`}
- className="inline-flex min-h-12 items-center justify-center rounded-xl border border-border px-4 font-semibold text-accent-foreground dark:border-border"
+ className="inline-flex min-h-12 items-center justify-center rounded-xl bg-muted px-4 font-semibold text-foreground"
  >
- View Order
+ View order
  </Link>
  <Link
  href="/"
- className="inline-flex min-h-12 items-center justify-center rounded-xl border border-border px-4 font-semibold text-accent-foreground dark:border-border"
+ className="inline-flex min-h-12 items-center justify-center rounded-xl bg-muted px-4 font-semibold text-foreground"
  >
- {timedOut ? "Shop Again" : "Continue Shopping"}
+ {timedOut ? "Shop again" : "Continue shopping"}
  </Link>
  </div>
  </div>
- </section>
- </div>
  </main>
- );
-}
-
-function Info({
- label,
- value,
- capitalize = false,
-}: {
- label: string;
- value: string;
- capitalize?: boolean;
-}) {
- return (
- <div className="min-w-0 rounded-xl border border-border p-3 dark:border-border">
- <dt className="text-[10px] font-bold uppercase tracking-wide text-muted-foreground">{label}</dt>
- <dd className={`mt-1 break-words text-sm font-semibold text-foreground ${capitalize ? "capitalize" : ""}`}>
- {value}
- </dd>
- </div>
  );
 }
