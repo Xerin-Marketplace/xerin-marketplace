@@ -216,7 +216,7 @@ export default function BuyerDashboard() {
  )}
 
  {/* Needs attention */}
- <section>
+ <section className="rounded-2xl bg-card p-5 sm:p-6">
  <div className="flex items-center justify-between">
  <h2 className="text-sm font-bold text-foreground">Needs your attention</h2>
  <span className="rounded-full bg-primary/10 px-3 py-1 text-xs font-bold text-primary">
@@ -231,8 +231,8 @@ export default function BuyerDashboard() {
  </section>
 
  {/* Charts */}
- <section className="grid gap-8 lg:grid-cols-[1.5fr_1fr]">
- <div>
+ <section className="grid gap-6 lg:grid-cols-[1.5fr_1fr]">
+ <div className="rounded-2xl bg-card p-5 sm:p-6">
  <div className="flex items-end justify-between">
  <div>
  <h2 className="text-sm font-bold text-foreground">Your spending</h2>
@@ -264,7 +264,7 @@ export default function BuyerDashboard() {
  </div>
  </div>
 
- <div>
+ <div className="rounded-2xl bg-card p-5 sm:p-6">
  <h2 className="text-sm font-bold text-foreground">Orders by status</h2>
  <p className="mt-0.5 text-xs text-muted-foreground">{allOrders.length} order{allOrders.length === 1 ? "" : "s"} total</p>
  <div className="mt-4 flex items-center gap-5">
@@ -296,7 +296,7 @@ export default function BuyerDashboard() {
  </section>
 
  {/* Order journey */}
- <section>
+ <section className="rounded-2xl bg-card p-5 sm:p-6">
  <div className="flex items-end justify-between">
  <h2 className="text-sm font-bold text-foreground">Your order journey</h2>
  <Link href="/account/orders" className="text-xs font-bold text-primary">View all orders</Link>
@@ -311,7 +311,7 @@ export default function BuyerDashboard() {
 
  {/* Recent orders + side column */}
  <div className="grid gap-10 xl:grid-cols-[1.15fr_.85fr]">
- <section>
+ <section className="rounded-2xl bg-card p-5 sm:p-6">
  <div className="flex items-center justify-between">
  <h2 className="text-sm font-bold text-foreground">Recent orders</h2>
  <Link href="/account/orders" className="text-xs font-bold text-primary">View all</Link>
@@ -336,8 +336,8 @@ export default function BuyerDashboard() {
  )}
  </section>
 
- <div className="space-y-10">
- <section>
+ <div className="space-y-6">
+ <section className="rounded-2xl bg-card p-5 sm:p-6">
  <h2 className="text-sm font-bold text-foreground">Quick actions</h2>
  <div className="mt-4 space-y-1">
  <Action href={cartCount ? "/cart" : "/shop-with-sidebar"} icon={ShoppingBag01Icon} label={cartCount ? "Continue checkout" : "Browse products"} />
@@ -347,7 +347,7 @@ export default function BuyerDashboard() {
  </div>
  </section>
 
- <section>
+ <section className="rounded-2xl bg-card p-5 sm:p-6">
  <h2 className="text-sm font-bold text-foreground">Account readiness</h2>
  {profile.state === "loading" ? <Loading /> : profile.state === "error" ? <ErrorText /> : (
  <div className="mt-4 space-y-2 text-sm">
@@ -359,7 +359,7 @@ export default function BuyerDashboard() {
  )}
  </section>
 
- <section>
+ <section className="rounded-2xl bg-card p-5 sm:p-6">
  <h2 className="text-sm font-bold text-foreground">At a glance</h2>
  <div className="mt-4 space-y-2">
  <GlanceRow icon={PackageIcon} label="All orders" value={orders.state === "loading" ? "…" : String(orders.data?.total ?? 0)} />
