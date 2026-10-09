@@ -44,7 +44,7 @@ function ProductCard({ product }: { product: ApiProduct }) {
  />
  </Link>
 
- <div className="flex flex-1 flex-col p-3 sm:p-4">
+ <div className="flex flex-1 flex-col p-2.5 sm:p-3">
  <h3 className="line-clamp-2 min-h-[36px] text-[13px] font-medium leading-[18px] text-foreground transition group-hover:text-primary sm:min-h-[40px] sm:text-sm sm:leading-5">
  <Link href={`/products/${product.id}`}>{product.name}</Link>
  </h3>
@@ -150,7 +150,7 @@ const FeaturedProducts = () => {
  </div>
 
  {/* Desktop: grid */}
- <div className="hidden gap-5 sm:grid sm:grid-cols-3 lg:grid-cols-4">
+ <div className="hidden gap-3 sm:grid sm:grid-cols-3 lg:grid-cols-5 xl:grid-cols-6">
  {isLoading
  ? Array.from({ length: 8 }).map((_, i) => <SkeletonCard key={i} />)
  : featured.map((product) => (

@@ -100,7 +100,7 @@ const SingleGridItem = ({ item }: { item: Product }) => {
  </div>
  </Link>
 
- <div className="flex flex-1 flex-col p-3 sm:p-4">
+ <div className="flex flex-1 flex-col p-2.5 sm:p-3">
  <h3 className="line-clamp-2 min-h-[36px] text-[13px] font-medium leading-[18px] text-foreground transition group-hover:text-primary sm:min-h-[40px] sm:text-sm sm:leading-5">
  <Link href={`/products/${item.id}`}>{item.title}</Link>
  </h3>

@@ -212,7 +212,7 @@ const FlashDeals = () => {
  )}
 
  {/* Desktop: grid */}
- <div className="hidden gap-5 sm:grid sm:grid-cols-3 lg:grid-cols-5">
+ <div className="hidden gap-3 sm:grid sm:grid-cols-3 lg:grid-cols-5 xl:grid-cols-6">
  {isLoading
  ? Array.from({ length: 5 }).map((_, i) => <SkeletonCard key={i} />)
  : deals.slice(0, 5).map((product) => (
