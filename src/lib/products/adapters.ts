@@ -118,6 +118,7 @@ export const mapApiProductToUiProduct = (product: ApiProduct): UiProduct => {
     categoryId: product.category_id ?? product.category?.id ?? null,
     categoryName: product.category?.name ?? null,
     categorySlug: product.category?.slug ?? null,
+    brandName: product.brand?.name ?? null,
     title: product.name || product.slug || "Untitled product",
     reviews: reviewCount,
     reviewCount,
