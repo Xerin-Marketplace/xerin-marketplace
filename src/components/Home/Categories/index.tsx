@@ -1,6 +1,6 @@
 "use client";
 
-import React, { FormEvent, useMemo, useState } from "react";
+import React, { useMemo, useState } from "react";
 import Image from "next/image";
 import Link from "next/link";
 import { useCategories, useProducts } from "@/hooks/useProducts";
@@ -10,7 +10,7 @@ import { useQuery } from "@tanstack/react-query";
 import { listPublicStores } from "@/lib/api/endpoints/store";
 import type { Store } from "@/types/api/store";
 import { HugeiconsIcon } from "@hugeicons/react";
-import { PackageIcon, ArrowDown01Icon, Search01Icon, Location01Icon } from "@hugeicons/core-free-icons";
+import { PackageIcon, ArrowDown01Icon, Location01Icon } from "@hugeicons/core-free-icons";
 import { useLanguage } from "@/app/context/LanguageContext";
 
 const PAGE_SIZE = 12;
@@ -68,8 +68,6 @@ function storeMatchesLocation(store: Store | undefined, filter: LocationFilter) 
 
 const Categories = () => {
  const { t } = useLanguage();
- const [searchInput, setSearchInput] = useState("");
- const [searchQuery, setSearchQuery] = useState("");
  const [categoryId, setCategoryId] = useState("");
  const [locationFilter, setLocationFilter] = useState<LocationFilter>("all");
  const [page, setPage] = useState(1);
@@ -83,7 +81,6 @@ const Categories = () => {
 
  const productQuery = useMemo(
  () => ({
- search: searchQuery || undefined,
  category_id: categoryId || undefined,
  // Location filtering depends on the product's store. When a location
  // filter is active we fetch a wider catalog window and paginate the
@@ -91,7 +88,7 @@ const Categories = () => {
  skip: locationFilter === "all" ? (page - 1) * PAGE_SIZE : 0,
  limit: locationFilter === "all" ? PAGE_SIZE + 1 : 100,
  }),
- [searchQuery, categoryId, locationFilter, page],
+ [categoryId, locationFilter, page],
  );
 
  const {
@@ -152,15 +149,7 @@ const Categories = () => {
  [categories],
  );
 
- const handleSearch = (event: FormEvent<HTMLFormElement>) => {
- event.preventDefault();
- setPage(1);
- setSearchQuery(searchInput.trim());
- };
-
  const clearFilters = () => {
- setSearchInput("");
- setSearchQuery("");
  setCategoryId("");
  setLocationFilter("all");
  setPage(1);
@@ -305,64 +294,17 @@ const Categories = () => {
  ))}
  </div>
 
- {/* Search and filters */}
- <div className="mb-8 hidden rounded-2xl border border-border bg-card p-4 shadow-sm sm:block sm:p-5">
- <form
- onSubmit={handleSearch}
- className="grid gap-3 md:grid-cols-[minmax(0,1fr)_260px_auto]"
- >
- <div className="relative">
- <HugeiconsIcon icon={Search01Icon} size={18} className="pointer-events-none absolute left-4 top-1/2 -translate-y-1/2 text-muted-foreground" />
- <input
- type="search"
- value={searchInput}
- onChange={(event) => setSearchInput(event.target.value)}
- placeholder="Search products by name, description or SKU..."
- className="h-12 w-full rounded-lg border border-input bg-background pl-11 pr-4 text-sm text-foreground outline-none transition placeholder:text-muted-foreground focus:border-ring focus:ring-2 focus:ring-ring/30"
- />
- </div>
-
- <select
- value={categoryId}
- onChange={(event) => {
- setCategoryId(event.target.value);
- setPage(1);
- }}
- className="h-12 rounded-lg border border-input bg-background px-4 text-sm text-foreground outline-none transition focus:border-ring focus:ring-2 focus:ring-ring/30"
- aria-label="Filter products by category"
- >
- <option value="">{t("categories_all")}</option>
- {categories.map((category) => (
- <option key={String(category.id)} value={String(category.id)}>
- {category.name}
- </option>
- ))}
- </select>
-
- <button
- type="submit"
- className="h-12 rounded-lg bg-primary px-6 text-sm font-semibold text-primary-foreground transition hover:bg-primary/90-dark disabled:cursor-not-allowed disabled:opacity-60"
- disabled={isFetching}
- >
- {isFetching && !isLoading ? t("filter_searching") : t("common_search")}
- </button>
- </form>
-
- {(searchQuery || categoryId || locationFilter !== "all") && (
- <div className="mt-4 flex flex-wrap items-center gap-2 text-sm">
+ {/* Active filters */}
+ {(categoryId || locationFilter !== "all") && (
+ <div className="mb-4 flex flex-wrap items-center gap-2 text-sm">
  <span className="text-muted-foreground">Active filters:</span>
- {searchQuery && (
- <span className="rounded-full bg-primary/10 px-3 py-1 font-medium text-primary">
- Search: {searchQuery}
- </span>
- )}
  {categoryId && (
- <span className="rounded-full bg-primary/10 px-3 py-1 font-medium text-primary">
+ <span className="rounded-full bg-card px-3 py-1 font-medium text-primary shadow-sm">
  Category: {categoryNameById.get(categoryId) ?? "Selected category"}
  </span>
  )}
  {locationFilter !== "all" && (
- <span className="rounded-full bg-primary/10 px-3 py-1 font-medium text-primary">
+ <span className="rounded-full bg-card px-3 py-1 font-medium text-primary shadow-sm">
  Location: {selectedLocationLabel}
  </span>
  )}
@@ -375,7 +317,6 @@ const Categories = () => {
  </button>
  </div>
  )}
- </div>
 
  {/* Results information */}
  <div className="mb-3 hidden flex-wrap items-center justify-between gap-3 sm:flex sm:mb-5">
@@ -393,7 +334,7 @@ const Categories = () => {
 
  {/* Product states */}
  {isLoading ? (
- <div className="grid grid-cols-2 gap-2.5 sm:gap-5 lg:grid-cols-3 xl:grid-cols-4">
+ <div className="grid grid-cols-2 gap-3 sm:grid-cols-3 lg:grid-cols-5 xl:grid-cols-6">
  {Array.from({ length: 8 }).map((_, index) => (
  <div
  key={index}
@@ -429,7 +370,7 @@ const Categories = () => {
  <p className="mt-1.5 text-sm text-muted-foreground">
  Try another search term, category, or location filter.
  </p>
- {(searchQuery || categoryId || locationFilter !== "all") && (
+ {(categoryId || locationFilter !== "all") && (
  <button
  type="button"
  onClick={clearFilters}
@@ -440,7 +381,7 @@ const Categories = () => {
  )}
  </div>
  ) : (
- <div className="grid grid-cols-2 gap-2.5 sm:gap-5 lg:grid-cols-3 xl:grid-cols-4">
+ <div className="grid grid-cols-2 gap-3 sm:grid-cols-3 lg:grid-cols-5 xl:grid-cols-6">
  {products.map((product) => {
  const uiProduct = mapApiProductToUiProduct(product);
  const imageUrl = uiProduct.imgs?.previews?.[0] ?? "/images/products/placeholder.svg";
@@ -454,41 +395,41 @@ const Categories = () => {
  return (
  <article
  key={String(product.id)}
- className="group flex h-full min-w-0 flex-col overflow-hidden rounded-xl border border-border bg-card shadow-sm transition duration-200 hover:shadow-md"
+ className="group flex h-full min-w-0 flex-col overflow-hidden rounded-2xl bg-card shadow-sm transition duration-200 hover:-translate-y-0.5 hover:shadow-md"
  >
  <Link
  href={`/products/${product.id}`}
- className="relative flex aspect-square items-center justify-center overflow-hidden bg-muted p-2.5 sm:h-64 sm:aspect-auto sm:p-6"
+ className="relative block aspect-square overflow-hidden bg-muted"
  >
  {hasDiscount && (
- <span className="absolute left-2 top-2 z-10 rounded bg-destructive px-1.5 py-0.5 text-[10px] font-bold text-destructive-foreground sm:left-4 sm:top-4 sm:rounded-full sm:px-3 sm:py-1 sm:text-xs">
+ <span className="absolute left-2 top-2 z-10 rounded-md bg-primary px-2 py-0.5 text-[10px] font-bold text-primary-foreground shadow-sm">
  -{discountPercentage}%
  </span>
  )}
  <Image
  src={imageUrl}
  alt={product.name}
- width={260}
- height={260}
- className="h-full w-full object-contain transition-transform duration-300 group-hover:scale-[1.03]"
+ width={400}
+ height={400}
+ className="h-full w-full object-cover transition-transform duration-300 group-hover:scale-105"
  />
  </Link>
 
- <div className="flex flex-1 flex-col p-2.5 sm:p-5">
- <div className="mb-1 flex items-center justify-between gap-2 sm:mb-2 sm:gap-3">
- <span className="truncate text-[10px] font-bold uppercase tracking-wide text-primary sm:text-xs sm:font-medium">
- {categoryNameById.get(String(product.category_id)) ?? "Shop"}
- </span>
- {product.is_active && product.status === "approved" ? (
- <span className="hidden rounded-full bg-green-light-6 px-2.5 py-1 text-[11px] font-semibold text-green-dark sm:inline-flex">
- Available
- </span>
- ) : null}
- </div>
-
- <h3 className="line-clamp-2 min-h-[38px] text-[13px] font-semibold leading-[19px] text-foreground transition group-hover:text-primary sm:min-h-[48px] sm:text-base sm:leading-6">
+ <div className="flex flex-1 flex-col p-2.5 sm:p-3">
+ <h3 className="line-clamp-2 min-h-[34px] text-[12px] font-medium leading-[17px] text-foreground transition group-hover:text-primary sm:min-h-[36px] sm:text-[13px] sm:leading-[18px]">
  <Link href={`/products/${product.id}`}>{product.name}</Link>
  </h3>
+
+ <div className="mt-1.5 flex flex-wrap items-baseline gap-x-1.5 gap-y-0.5">
+ <span className="text-[14px] font-extrabold text-foreground sm:text-[15px]">
+ <PriceDisplay amount={hasDiscount ? salePrice! : regularPrice} sourceCurrency={product.currency} />
+ </span>
+ {hasDiscount && (
+ <span className="text-[10px] text-muted-foreground line-through sm:text-[11px]">
+ <PriceDisplay amount={regularPrice} sourceCurrency={product.currency} />
+ </span>
+ )}
+ </div>
 
  {(() => {
  const store = storeById.get(String(product.store_id));
@@ -497,48 +438,15 @@ const Categories = () => {
  ? countryDisplayName(country)
  : store?.store_scope === "local"
  ? "Tanzania"
- : "Location not configured";
+ : "Marketplace";
 
  return (
- <div className="mt-1.5 flex min-w-0 items-center gap-1.5 text-[11px] text-muted-foreground sm:text-xs">
- <HugeiconsIcon icon={Location01Icon} size={13} className="shrink-0" />
- <span className="truncate font-medium">{countryLabel}</span>
+ <div className="mt-1.5 flex min-w-0 items-center gap-1 text-[11px] text-muted-foreground">
+ <HugeiconsIcon icon={Location01Icon} size={11} className="shrink-0" />
+ <span className="truncate">{countryLabel}</span>
  </div>
  );
  })()}
-
- {(() => {
- const store = storeById.get(String(product.store_id));
- const region = String(store?.region || "").trim();
-
- return (
- <div className="mt-1.5 hidden min-w-0 items-center gap-1.5 text-xs text-muted-foreground sm:flex">
- <span className="shrink-0 font-medium text-foreground">Region:</span>
- <span className="truncate">{region || "Not configured"}</span>
- </div>
- );
- })()}
- <div className="mt-2 flex items-end justify-between gap-2 border-t border-border pt-2 sm:mt-4 sm:gap-3 sm:pt-4">
- <div>
- <p className="hidden text-xs text-muted-foreground sm:block">Price</p>
- <div className="mt-0.5 flex flex-wrap items-center gap-2">
- <span className="text-[15px] font-extrabold text-foreground sm:text-lg">
- <PriceDisplay amount={hasDiscount ? salePrice! : regularPrice} sourceCurrency={product.currency} />
- </span>
- {hasDiscount && (
- <span className="text-[10px] text-muted-foreground line-through sm:text-xs">
- <PriceDisplay amount={regularPrice} sourceCurrency={product.currency} />
- </span>
- )}
- </div>
- </div>
- <Link
- href={`/products/${product.id}`}
- className="hidden items-center justify-center rounded-lg bg-foreground px-4 py-2.5 text-xs font-semibold text-background transition hover:bg-primary sm:inline-flex"
- >
- View product
- </Link>
- </div>
  </div>
  </article>
  );
