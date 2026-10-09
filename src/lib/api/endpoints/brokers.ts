@@ -48,4 +48,7 @@ export const brokersApi = {
   adminRiskEvents: async (params?:Record<string,string|number>) => (await axiosInstance.get<PaginatedBrokerRiskEvents>("/brokers/admin/security/risk-events",{params})).data,
   adminResolveRisk: async (id:string,note?:string) => (await axiosInstance.patch<BrokerRiskEvent>(`/brokers/admin/security/risk-events/${id}/resolve`,{note:note||null})).data,
   adminFreezeWallet: async (brokerId:string,frozen:boolean,reason:string) => (await axiosInstance.patch<BrokerWallet|undefined>(`/brokers/admin/${brokerId}/security/wallet-freeze`,{frozen,reason})).data,
+  adminProducts: async (params?:Record<string,string|number>) => (await axiosInstance.get<{items:BrokerProduct[];total:number;page:number;page_size:number}>("/brokers/admin/products",{params})).data,
+  adminApproveProduct: async (id:string) => (await axiosInstance.post<BrokerProduct>(`/brokers/admin/products/${id}/approve`)).data,
+  adminRejectProduct: async (id:string,reason:string) => (await axiosInstance.post<BrokerProduct>(`/brokers/admin/products/${id}/reject`,{reason})).data,
 };
