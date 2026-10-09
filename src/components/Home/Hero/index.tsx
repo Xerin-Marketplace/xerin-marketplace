@@ -2,6 +2,7 @@
 
 import React from "react";
 import HeroCarousel from "./HeroCarousel";
+import HeroCategories from "./HeroCategories";
 import Image from "next/image";
 import { ROUTES } from "@/constants/links";
 import Link from "next/link";
@@ -14,7 +15,10 @@ const Hero = () => {
  return (
  <section className="overflow-hidden bg-[var(--muted)] pb-4 pt-[90px] sm:pb-6 sm:pt-[118px] lg:pb-9 lg:pt-[142px] xl:pt-[150px]">
  <div className="mx-auto w-full max-w-[1440px] px-3 sm:px-5 lg:px-8 xl:px-10 2xl:px-6">
- <div className="grid items-stretch gap-3 lg:grid-cols-[minmax(0,2fr)_minmax(300px,0.82fr)] xl:gap-5">
+ <div className="grid items-stretch gap-3 lg:grid-cols-[240px_minmax(0,1fr)_minmax(280px,0.7fr)] xl:gap-5">
+ <div className="hidden h-full min-h-[470px] lg:block xl:min-h-[500px]">
+ <HeroCategories />
+ </div>
  <div className="min-w-0">
  <div className="relative z-1 h-full min-h-[410px] overflow-hidden rounded-2xl bg-card shadow-sm sm:min-h-[410px] lg:min-h-[470px] xl:min-h-[500px]">
  <Image src="/images/hero/hero-bg.png" alt="hero background" className="absolute bottom-0 right-0 -z-1 h-full w-auto object-cover" width={534} height={520} priority />
