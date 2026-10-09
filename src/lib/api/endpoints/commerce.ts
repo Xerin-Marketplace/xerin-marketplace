@@ -262,6 +262,7 @@ export const ordersApi = {
     delivery_mode: DeliveryMode;
     coupon_code?: string;
     promotion_code?: string;
+    referral_code?: string;
     notes?: string;
   }) =>
     (await axiosInstance.post<Order>("/orders", payload)).data,

@@ -509,6 +509,17 @@ const Checkout = () => {
  let createdOrderId: string | null = null;
 
  try {
+ // Referral attribution — first stored broker referral wins.
+ let referralCode: string | undefined;
+ try {
+ referralCode = Object.keys(window.localStorage)
+ .filter((key) => key.startsWith("xerin_broker_ref_"))
+ .map((key) => window.localStorage.getItem(key))
+ .find((value) => Boolean(value && value.trim())) || undefined;
+ } catch {
+ referralCode = undefined;
+ }
+
  const order = await createOrder.mutateAsync({
  shipping_address_id: selectedAddressId,
  shipping_rate_id: selectedShipping.rate_id,
@@ -516,6 +527,7 @@ const Checkout = () => {
  delivery_mode: deliveryMode,
  coupon_code: cart?.coupon_code || undefined,
  promotion_code: cart?.promotion_code || undefined,
+ referral_code: referralCode,
  notes: form.notes || undefined,
  });
 
