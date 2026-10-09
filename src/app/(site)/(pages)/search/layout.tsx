@@ -4,7 +4,7 @@ import { noindexMetadata } from "@/lib/seo";
 
 export const metadata: Metadata = {
   title: "Search",
-  description: "Search products, brands and categories on Xerin Mart.",
+  description: "Search products, brands and categories on Xerin Marketplace.",
   robots: noindexMetadata.robots,
 };
 

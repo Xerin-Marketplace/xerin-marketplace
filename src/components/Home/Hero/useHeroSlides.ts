@@ -70,7 +70,7 @@ export const useHeroSlides = () => {
       {
         kind: "platform",
         id: "brand",
-        eyebrow: "Xerin Mart",
+        eyebrow: "Xerin Marketplace",
         headline: "We're connecting you to everything you need",
         sub: "Thousands of products from sellers across Africa — electronics, fashion, home goods and more, all in one place.",
         ctaLabel: "Start Shopping",
@@ -78,7 +78,7 @@ export const useHeroSlides = () => {
         secondaryLabel: "Browse Categories",
         secondaryHref: ROUTES.shop,
         image: "/images/hero/headphon.png",
-        imageAlt: "Shop thousands of products on Xerin Mart",
+        imageAlt: "Shop thousands of products on Xerin Marketplace",
       },
       {
         kind: "platform",
@@ -102,7 +102,7 @@ export const useHeroSlides = () => {
         secondaryLabel: "Continue shopping",
         secondaryHref: ROUTES.shop,
         image: "/images/hero/phoneremove.png",
-        imageAlt: "Xerin Mart mobile app",
+        imageAlt: "Xerin Marketplace mobile app",
       },
     ];
 
@@ -118,7 +118,7 @@ export const useHeroSlides = () => {
         secondaryLabel: "Sign In",
         secondaryHref: ROUTES.signin,
         image: "/images/hero/Tshirtremove.png",
-        imageAlt: "Create a Xerin Mart account",
+        imageAlt: "Create a Xerin Marketplace account",
       });
     }
 

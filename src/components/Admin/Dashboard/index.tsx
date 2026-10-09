@@ -737,7 +737,7 @@ export default function AdminDashboard() {
  profileHref="/admin/dashboard?tab=overview&menu=account&item=profile"
  settingsHref="/admin/dashboard?tab=overview&menu=marketplace-settings&item=marketplace-rules"
  supportHref="/admin/customers/support"
- footerLabel="Xerin Mart Admin Center"
+ footerLabel="Xerin Marketplace Admin Center"
  searchPlaceholder="Search admin records"
  >
  <div className="min-w-0 space-y-5">
@@ -791,7 +791,7 @@ export default function AdminDashboard() {
  Ecommerce Dashboard
  </h2>
  <p className="mt-1 text-sm text-muted-foreground dark:text-gray-300">
- Here&apos;s what is happening across Xerin Mart right now.
+ Here&apos;s what is happening across Xerin Marketplace right now.
  </p>
  </div>
  <button

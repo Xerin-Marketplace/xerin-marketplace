@@ -7,7 +7,7 @@ const config: Record<string, { title: string; status?: string; subtitle: string 
  all: {
  title: "All System Orders",
  subtitle:
- "A complete operational view of customer orders generated across the Xerin Mart.",
+ "A complete operational view of customer orders generated across the Xerin Marketplace.",
  },
  pending: {
  title: "Pending Orders",

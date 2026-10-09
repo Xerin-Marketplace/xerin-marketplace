@@ -112,7 +112,7 @@ export default function BrokerLayout({ children }: { children: React.ReactNode }
  settingsHref="/account/security"
  addressesHref="/account/addresses"
  supportHref="/"
- footerLabel="Xerin Mart Broker Center"
+ footerLabel="Xerin Marketplace Broker Center"
  searchPlaceholder="Search Broker Center"
  onSignOut={() => logout()}
  >

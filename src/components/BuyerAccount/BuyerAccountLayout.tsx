@@ -199,7 +199,7 @@ export default function BuyerAccountLayout({ children }: { children: React.React
  settingsHref={foreignWorkspace?.settings || "/account/security"}
  addressesHref="/account/addresses"
  supportHref="/contact"
- footerLabel="Xerin Mart"
+ footerLabel="Xerin Marketplace"
  searchPlaceholder="Search your account"
  onSignOut={logout}
  >

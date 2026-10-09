@@ -111,13 +111,13 @@ export default function VerifyPhone() {
  <Link href="/" className="inline-flex w-fit items-center gap-2">
  <Image
  src="/images/logo/xerin-logo-mark.png"
- alt="Xerin Mart"
+ alt="Xerin Marketplace"
  width={30}
  height={30}
  priority
  className="h-11 w-11 object-contain"
  />
- <span className="text-xl font-bold text-foreground sm:text-2xl">Xerin Mart</span>
+ <span className="text-xl font-bold text-foreground sm:text-2xl">Xerin Marketplace</span>
  </Link>
  <Link
  href="/"
@@ -235,13 +235,13 @@ export default function VerifyPhone() {
  <span>•</span>
  <Link href="/privacy" className="hover:text-foreground dark:hover:text-white">Privacy</Link>
  <span>•</span>
- <span>© {new Date().getFullYear()} Xerin Mart</span>
+ <span>© {new Date().getFullYear()} Xerin Marketplace</span>
  </div>
  </div>
 
  {/* Right panel: marketing / imagery — same as signin/signup */}
  <div className="relative hidden min-h-[100dvh] overflow-hidden bg-carbon lg:flex lg:flex-col">
- <Image src="/35124 (1).jpg" alt="Xerin Mart" fill priority sizes="50vw" className="object-cover object-center" />
+ <Image src="/35124 (1).jpg" alt="Xerin Marketplace" fill priority sizes="50vw" className="object-cover object-center" />
  <div className="absolute inset-0 bg-black/55" />
  <div className="absolute inset-0 bg-gradient-to-t from-black/70 via-black/40 to-transparent" />
  <div className="absolute inset-0 bg-gradient-to-br from-black/30 via-transparent to-transparent" />
@@ -265,7 +265,7 @@ export default function VerifyPhone() {
  </div>
 
  <div className="flex items-center justify-between text-xs text-white/60">
- <span>&copy; {new Date().getFullYear()} Xerin Mart. All rights reserved.</span>
+ <span>&copy; {new Date().getFullYear()} Xerin Marketplace. All rights reserved.</span>
  </div>
  </div>
  </div>

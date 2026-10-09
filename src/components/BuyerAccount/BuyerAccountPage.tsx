@@ -190,7 +190,7 @@ export default function BuyerDashboard() {
  {/* Header */}
  <section className="flex flex-col gap-4 sm:flex-row sm:items-end sm:justify-between">
  <div>
- <p className="text-xs font-bold uppercase tracking-[0.18em] text-primary">My Xerin Mart</p>
+ <p className="text-xs font-bold uppercase tracking-[0.18em] text-primary">My Xerin Marketplace</p>
  <h1 className="mt-1.5 text-2xl font-bold tracking-tight text-foreground sm:text-3xl">
  {profile.state === "ready" && first ? `Welcome back, ${first}` : profile.state === "error" ? "Your dashboard" : "Loading your account…"}
  </h1>

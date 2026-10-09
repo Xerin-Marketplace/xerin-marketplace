@@ -276,7 +276,7 @@ export default function SellerLayout({ children }: { children: React.ReactNode }
  settingsHref="/seller/account"
  addressesHref="/account/addresses"
  supportHref="/"
- footerLabel="Xerin Mart Seller Center"
+ footerLabel="Xerin Marketplace Seller Center"
  searchPlaceholder={isApprovedSeller ? "Search seller records" : "Search Seller Center"}
  onSignOut={signOut}
  >

@@ -72,7 +72,7 @@ export default function DashboardShell({
  settingsHref,
  addressesHref = "/account/addresses",
  supportHref = "/support",
- footerLabel = "Xerin Mart",
+ footerLabel = "Xerin Marketplace",
  searchPlaceholder = "Search",
  onSignOut,
 }: {
@@ -247,7 +247,7 @@ export default function DashboardShell({
  <div className="min-w-0">
  <Image
  src="/images/logo/logooriginal.png"
- alt="Xerin Mart logo"
+ alt="Xerin Marketplace logo"
  width={150}
  height={48}
  className="h-10 w-auto object-contain"

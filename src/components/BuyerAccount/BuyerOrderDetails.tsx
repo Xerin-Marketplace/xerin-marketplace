@@ -935,7 +935,7 @@ export default function BuyerOrderDetails({ orderId }: { orderId: string }) {
  <div className="flex min-w-0 items-center gap-3">
  <Image
  src="/images/logo/xerin-logo-mark.png"
- alt="Xerin Mart"
+ alt="Xerin Marketplace"
  width={26}
  height={26}
  className="h-7 w-7 shrink-0 object-contain"

@@ -31,7 +31,7 @@ import InfoPopover from "@/components/Common/Info/InfoPopover";
 
 const SELLER_TOUR_STEPS = [
  { title: "Your seller dashboard", body: "Store readiness, sales performance and items that need your attention · all in one place." },
- { title: "Add your first product", body: "Create listings from Products. They go live on Xerin Mart after a quick review." },
+ { title: "Add your first product", body: "Create listings from Products. They go live on Xerin Marketplace after a quick review." },
  { title: "Complete verification", body: "Finish KYC so your store stays active and payouts are never interrupted. We only ask for what regulators require." },
  { title: "Orders and payouts", body: "Fulfil orders on time and your earnings settle to your payout account automatically." },
 ];
@@ -398,7 +398,7 @@ export default function SellerDashboard() {
  tone="amber"
  progress={dashboardProductsTotal ? Math.min(100, Math.round((dashboardProductsPending / dashboardProductsTotal) * 100)) : 0}
  graphLabel="pending"
- info={<InfoPopover title="Pending review" align="end"><p>New and edited listings go through a catalog review before they appear on Xerin Mart.</p><p>Reviewed products move here automatically · no action needed unless one is rejected.</p></InfoPopover>}
+ info={<InfoPopover title="Pending review" align="end"><p>New and edited listings go through a catalog review before they appear on Xerin Marketplace.</p><p>Reviewed products move here automatically · no action needed unless one is rejected.</p></InfoPopover>}
  />
  <MetricCard
  label="Total Orders"
@@ -1172,7 +1172,7 @@ function SellerActivationDashboard({
  </h2>
 
  <p className="mt-3 max-w-2xl text-sm leading-6 text-muted-foreground sm:text-base">
- Before selling on Xerin Mart, complete your business verification.
+ Before selling on Xerin Marketplace, complete your business verification.
  Product, inventory, order, store and finance features will unlock
  after your seller account is approved.
  </p>

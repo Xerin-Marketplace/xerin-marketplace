@@ -218,7 +218,7 @@ const ShopDetails = ({ product }: { product: Product }) => {
  <div className="min-w-0 lg:col-start-1">
  <div className="space-y-2.5">
  {product.sku && <div className="flex items-center gap-2 text-sm text-foreground"><SpecCheckIcon /> <span><strong>SKU:</strong> {product.sku}</span></div>}
- <div className="flex items-center gap-2 text-sm text-foreground"><SpecCheckIcon /> <span className="inline-flex items-center gap-1.5">Buyer protection and order tracking through Xerin Mart<InfoPopover title="Buyer protection"><p>Your payment is held safely and only released to the seller after you confirm delivery.</p><p>If the item never arrives or is not as described, open a dispute from your order and our team will review it.</p></InfoPopover></span></div>
+ <div className="flex items-center gap-2 text-sm text-foreground"><SpecCheckIcon /> <span className="inline-flex items-center gap-1.5">Buyer protection and order tracking through Xerin Marketplace<InfoPopover title="Buyer protection"><p>Your payment is held safely and only released to the seller after you confirm delivery.</p><p>If the item never arrives or is not as described, open a dispute from your order and our team will review it.</p></InfoPopover></span></div>
  {variantHighlights.map((item) => (
  <div key={item} className="flex items-start gap-2 text-sm text-foreground"><span className="mt-0.5"><SpecCheckIcon /></span><span>{item}</span></div>
  ))}

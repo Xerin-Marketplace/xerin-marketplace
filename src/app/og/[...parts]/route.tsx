@@ -112,7 +112,7 @@ export async function GET(
     const p = await fetchJson<Product>(`/products/${slug}`);
     if (p) {
       title = p.name || title;
-      subtitle = truncate(p.description?.replace(/<[^>]*>/g, "") || "Shop this product on Xerin Mart.");
+      subtitle = truncate(p.description?.replace(/<[^>]*>/g, "") || "Shop this product on Xerin Marketplace.");
       price = money(p.sale_price ?? p.price, p.currency);
       image = p.primary_image_url || p.images?.[0]?.image_url || p.images?.[0]?.url || null;
       badge = p.brand_name || null;
@@ -121,21 +121,21 @@ export async function GET(
     const c = await fetchJson<Named>(`/categories/${slug}`);
     if (c) {
       title = c.name || title;
-      subtitle = truncate(c.description || `Shop ${c.name} online on Xerin Mart.`);
+      subtitle = truncate(c.description || `Shop ${c.name} online on Xerin Marketplace.`);
       image = c.image_url || null;
     }
   } else if (kind === "brand" && slug) {
     const b = await fetchJson<Named>(`/brands/${slug}`);
     if (b) {
       title = b.name || title;
-      subtitle = `Shop ${b.name} products on Xerin Mart.`;
+      subtitle = `Shop ${b.name} products on Xerin Marketplace.`;
       image = b.logo_url || null;
     }
   } else if (kind === "store" && slug) {
     const s = await fetchJson<Named>(`/stores/${slug}`);
     if (s) {
       title = s.name || title;
-      subtitle = `Shop from ${s.name} on Xerin Mart.`;
+      subtitle = `Shop from ${s.name} on Xerin Marketplace.`;
       image = s.logo_url || null;
     }
   }

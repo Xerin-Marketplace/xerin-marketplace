@@ -74,7 +74,7 @@ export default function HelpCenter() {
 
  <div className="mb-10 flex flex-wrap items-center justify-between gap-4 rounded-xl border border-border bg-muted p-5">
  <div>
- <p className="text-sm font-bold text-foreground">New to Xerin Mart?</p>
+ <p className="text-sm font-bold text-foreground">New to Xerin Marketplace?</p>
  <p className="mt-1 text-xs leading-5 text-muted-foreground">
  Take a short guided tour of your dashboard · it takes less than a minute.
  </p>
@@ -127,7 +127,7 @@ export default function HelpCenter() {
  <span>•</span>
  <Link href="/contact" className="hover:text-foreground dark:hover:text-white">Contact Support</Link>
  <span>•</span>
- <span>© {new Date().getFullYear()} Xerin Mart</span>
+ <span>© {new Date().getFullYear()} Xerin Marketplace</span>
  </div>
  </section>
  </div>

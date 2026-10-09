@@ -5,7 +5,7 @@ import ForgotPassword from "@/components/Auth/ForgotPassword";
 export const metadata: Metadata = {
  robots: { index: false, follow: false },
  title: "Forgot Password",
- description: "Request password reset instructions for your Xerin Mart account.",
+ description: "Request password reset instructions for your Xerin Marketplace account.",
 };
 
 const ForgotPasswordPage = () => {

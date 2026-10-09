@@ -6,7 +6,7 @@ import { Metadata } from "next";
 export const metadata: Metadata = {
  robots: { index: false, follow: false },
  title: "Shopping Cart",
- description: "Review your selected products before checkout on Xerin Mart.",
+ description: "Review your selected products before checkout on Xerin Marketplace.",
  // other metadata
 };
 

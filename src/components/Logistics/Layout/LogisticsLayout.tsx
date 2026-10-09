@@ -88,7 +88,7 @@ function Workspace({ children }: { children: React.ReactNode }) {
  settingsHref="/logistics/settings"
  addressesHref="/account/addresses"
  supportHref="/"
- footerLabel="Xerin Mart Logistics Center"
+ footerLabel="Xerin Marketplace Logistics Center"
  searchPlaceholder="Search logistics records"
  onSignOut={signOut}
  >

@@ -334,7 +334,7 @@ const SellerKyc = () => {
  <div className="mb-6 flex items-center justify-between gap-3">
  <h2 className="text-xl font-semibold text-foreground">Required Documents</h2>
  <InfoPopover title="Why we need this" trigger="link" triggerLabel="Why do we ask for this?" align="end">
- <p>Xerin Mart regulations require us to verify every seller&apos;s business identity before they can sell or receive payouts.</p>
+ <p>Xerin Marketplace regulations require us to verify every seller&apos;s business identity before they can sell or receive payouts.</p>
  <p>Your documents are reviewed once and stored securely · they are never shown to buyers.</p>
  </InfoPopover>
  </div>

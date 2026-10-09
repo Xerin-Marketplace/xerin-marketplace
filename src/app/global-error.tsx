@@ -17,7 +17,7 @@ export default function GlobalError({ reset }: { error: Error; reset: () => void
           <div style={{ maxWidth: 400 }}>
             <h1 style={{ fontSize: 22, fontWeight: 800 }}>Something went wrong</h1>
             <p style={{ marginTop: 8, fontSize: 14, lineHeight: 1.6, color: "#666" }}>
-              An unexpected error occurred. Please try again · if the problem continues, contact Xerin Mart support.
+              An unexpected error occurred. Please try again · if the problem continues, contact Xerin Marketplace support.
             </p>
             <button
               type="button"

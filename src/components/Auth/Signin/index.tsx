@@ -1453,7 +1453,7 @@ const SellerPanel = ({ onSwitchTab }: { onSwitchTab: (tab: AuthTab) => void }) =
  <br />
  <span className="text-muted-foreground">
  By creating a seller account, I confirm that the information I have
- provided is correct and I agree to comply with Xerin Mart seller
+ provided is correct and I agree to comply with Xerin Marketplace seller
  policies and terms.
  </span>
  </span>
@@ -1720,7 +1720,7 @@ const AuthPage = ({ initialTab = "signup" }: { initialTab?: AuthTab }) => {
 
  const panelCopy: Record<AuthTab, { title: string; body: string }> = {
  signin: { title: t("auth_welcome_back") + ".", body: 'Sign in to keep shopping, track your orders and pick up right where you left off.' },
- signup: { title: 'Join Xerin Mart.', body: 'Create your free account in minutes. Shop, track deliveries and manage everything from one place.' },
+ signup: { title: 'Join Xerin Marketplace.', body: 'Create your free account in minutes. Shop, track deliveries and manage everything from one place.' },
  seller: { title: 'Sell on Xerin.', body: 'Open your store, list your products and reach buyers across the region. Getting started takes minutes, not days.' },
  broker: { title: 'Earn with Xerin.', body: 'Share products you believe in and earn when people buy through your link. No inventory needed.' },
  };
@@ -1738,8 +1738,8 @@ const AuthPage = ({ initialTab = "signup" }: { initialTab?: AuthTab }) => {
  <div className="flex min-h-[100dvh] flex-col px-4 pb-[max(20px,env(safe-area-inset-bottom))] pt-[max(18px,env(safe-area-inset-top))] sm:px-10 sm:py-8 xl:px-20">
  <div className="flex items-center justify-between">
  <Link href="/" className="inline-flex w-fit items-center gap-2">
- <Image src="/images/logo/xerin-logo-mark.png" alt="Xerin Mart" width={44} height={44} priority className="h-11 w-11 object-contain" />
- <span className="text-xl font-bold text-foreground sm:text-2xl">Xerin Mart</span>
+ <Image src="/images/logo/xerin-logo-mark.png" alt="Xerin Marketplace" width={44} height={44} priority className="h-11 w-11 object-contain" />
+ <span className="text-xl font-bold text-foreground sm:text-2xl">Xerin Marketplace</span>
  </Link>
  <Link href="/" className="rounded-full border border-border px-3 py-1.5 text-xs font-semibold text-muted-foreground transition hover:text-primary lg:hidden">
  Shop
@@ -1767,13 +1767,13 @@ const AuthPage = ({ initialTab = "signup" }: { initialTab?: AuthTab }) => {
  <span>•</span>
  <Link href="/privacy" className="hover:text-foreground dark:hover:text-white">Privacy</Link>
  <span>•</span>
- <span>© {new Date().getFullYear()} Xerin Mart</span>
+ <span>© {new Date().getFullYear()} Xerin Marketplace</span>
  </div>
  </div>
 
  {/* Right panel: marketing / imagery (deliveryoption style) */}
  <div className="relative hidden min-h-[100dvh] overflow-hidden bg-carbon lg:flex lg:flex-col">
- <Image src="/35124 (1).jpg" alt="Xerin Mart" fill priority sizes="50vw" className="object-cover object-center" />
+ <Image src="/35124 (1).jpg" alt="Xerin Marketplace" fill priority sizes="50vw" className="object-cover object-center" />
  <div className="absolute inset-0 bg-black/55" />
  <div className="absolute inset-0 bg-gradient-to-t from-black/70 via-black/40 to-transparent" />
  <div className="absolute inset-0 bg-gradient-to-br from-black/30 via-transparent to-transparent" />
@@ -1800,7 +1800,7 @@ const AuthPage = ({ initialTab = "signup" }: { initialTab?: AuthTab }) => {
 
  {/* Footer note */}
  <div className="flex items-center justify-between text-xs text-white/60">
- <span>&copy; {new Date().getFullYear()} Xerin Mart. All rights reserved.</span>
+ <span>&copy; {new Date().getFullYear()} Xerin Marketplace. All rights reserved.</span>
  </div>
  </div>
  </div>

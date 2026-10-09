@@ -3,9 +3,9 @@ import { siteConfig } from "@/lib/site-config";
 import { Metadata } from "next";
 
 export const metadata: Metadata = {
- title: "Xerin Mart | Shop Products Online in Africa",
+ title: "Xerin Marketplace | Shop Products Online in Africa",
  description:
- "Shop quality products from verified sellers on Xerin Mart. Protected checkout, delivery quotes, order tracking and seller stores across Africa.",
+ "Shop quality products from verified sellers on Xerin Marketplace. Protected checkout, delivery quotes, order tracking and seller stores across Africa.",
  alternates: { canonical: "/" },
  openGraph: { images: [`${siteConfig.url}/og/home`] },
  twitter: { card: "summary_large_image", images: [`${siteConfig.url}/og/home`] },

@@ -75,7 +75,7 @@ const Footer = () => {
  <Link href="/" className="flex items-center transition-opacity hover:opacity-90">
  <Image
  src="/images/logo/logooriginal.png"
- alt="Xerin Mart"
+ alt="Xerin Marketplace"
  width={150}
  height={48}
  className="h-14 w-auto object-contain"
@@ -154,7 +154,7 @@ const Footer = () => {
  href="https://play.google.com/store/apps/details?id=com.xerinmarket.com&pcampaignid=web_share"
  target="_blank"
  rel="noopener noreferrer"
- aria-label="Download Xerin Mart on Google Play"
+ aria-label="Download Xerin Marketplace on Google Play"
  className="flex items-center gap-2.5 rounded-lg bg-foreground px-4 py-2.5 text-background transition hover:opacity-90"
  >
  <HugeiconsIcon icon={PlayStoreIcon} size={28} />
@@ -322,7 +322,7 @@ const Footer = () => {
  <div className="relative mt-6 flex flex-col items-center justify-between gap-4 border-t border-border pt-6 sm:flex-row">
  <div className="flex flex-wrap items-center gap-4">
  <p className="text-sm text-muted-foreground">
- &copy; {year} Xerin Mart. {t("footer_rights")}
+ &copy; {year} Xerin Marketplace. {t("footer_rights")}
  </p>
  <LanguageSwitcher compact />
  </div>

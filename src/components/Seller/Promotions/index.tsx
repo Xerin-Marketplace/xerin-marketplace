@@ -368,7 +368,7 @@ export default function SellerPromotions() {
  </div>
 
  <p className="mt-4 max-w-3xl text-sm leading-6 text-muted-foreground /60">
- Create seller-funded promotions for your products. Xerin Mart
+ Create seller-funded promotions for your products. Xerin Marketplace
  commission remains separate from the seller-funded discount, so
  promotions do not silently reduce Xerin&apos;s commission.
  </p>

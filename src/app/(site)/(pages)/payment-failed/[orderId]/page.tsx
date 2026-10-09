@@ -201,7 +201,7 @@ export default function PaymentFailedPage() {
  <main className="min-h-screen bg-background px-4 pb-16 pt-10 sm:pt-14">
  <div className="mx-auto w-full max-w-md">
  <Link href="/">
- <img src="/images/logo/logooriginal.png" alt="Xerin Mart" className="h-10 w-auto" />
+ <img src="/images/logo/logooriginal.png" alt="Xerin Marketplace" className="h-10 w-auto" />
  </Link>
 
  <span className={`mt-10 grid h-14 w-14 place-items-center rounded-full ${timedOut ? "bg-yellow-light-4 text-yellow-dark-2" : "bg-red-light-6 text-red-dark"}`}>

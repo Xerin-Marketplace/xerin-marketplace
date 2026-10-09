@@ -192,7 +192,7 @@ const VerifyOtp = () => {
  "access_token" in verification
  ) {
  setSession(verification as import("@/types/api/auth").AuthTokenResponse);
- setSuccessMessage("Account verified. Choose how you would like to use Xerin Mart...");
+ setSuccessMessage("Account verified. Choose how you would like to use Xerin Marketplace...");
  window.setTimeout(() => router.push("/choose-role"), 500);
  return;
  }
@@ -227,14 +227,14 @@ const VerifyOtp = () => {
  <Link href="/" className="inline-flex w-fit items-center gap-2">
  <Image
  src="/images/logo/xerin-logo-mark.png"
- alt="Xerin Mart"
+ alt="Xerin Marketplace"
  width={30}
  height={30}
  priority
  className="h-11 w-11 object-contain"
  />
  <span className="text-xl font-bold text-foreground sm:text-2xl">
- Xerin Mart
+ Xerin Marketplace
  </span>
  </Link>
 
@@ -390,7 +390,7 @@ const VerifyOtp = () => {
  <span>•</span>
  <Link href="/privacy" className="hover:text-foreground dark:hover:text-white">Privacy</Link>
  <span>•</span>
- <span>© {new Date().getFullYear()} Xerin Mart</span>
+ <span>© {new Date().getFullYear()} Xerin Marketplace</span>
  </div>
  </div>
 
@@ -398,7 +398,7 @@ const VerifyOtp = () => {
  <div className="relative hidden min-h-[100dvh] overflow-hidden bg-carbon lg:flex lg:flex-col">
  <Image
  src="/35124 (1).jpg"
- alt="Xerin Mart"
+ alt="Xerin Marketplace"
  fill
  priority
  sizes="50vw"
@@ -430,7 +430,7 @@ const VerifyOtp = () => {
  </div>
 
  <div className="flex items-center justify-between text-xs text-white/60">
- <span>&copy; {new Date().getFullYear()} Xerin Mart. All rights reserved.</span>
+ <span>&copy; {new Date().getFullYear()} Xerin Marketplace. All rights reserved.</span>
  </div>
  </div>
  </div>

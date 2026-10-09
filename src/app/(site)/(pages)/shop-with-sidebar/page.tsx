@@ -3,9 +3,9 @@ import ShopWithSidebar from "@/components/ShopWithSidebar";
 
 import { Metadata } from "next";
 export const metadata: Metadata = {
- title: "Shop All Products | Xerin Mart",
+ title: "Shop All Products | Xerin Marketplace",
  description:
- "Browse all products listed by sellers on Xerin Mart — filter by category, brand and price with protected checkout on every order.",
+ "Browse all products listed by sellers on Xerin Marketplace — filter by category, brand and price with protected checkout on every order.",
  alternates: { canonical: "/shop-with-sidebar" },
 };
 

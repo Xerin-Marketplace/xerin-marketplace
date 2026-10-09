@@ -69,7 +69,7 @@ const statusClass = (status: string) => {
 export default function OrderList({
  status,
  title = "All Orders",
- subtitle = "View every order generated on Xerin Mart and manage its fulfilment lifecycle.",
+ subtitle = "View every order generated on Xerin Marketplace and manage its fulfilment lifecycle.",
 }: {
  view?: string;
  status?: string;

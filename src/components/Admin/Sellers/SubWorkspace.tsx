@@ -328,7 +328,7 @@ export default function SellerSubWorkspace({ view }: { view: View }) {
  <div>
  <h3 className="font-bold text-foreground">Operational flow</h3>
  <p className="mt-1 text-xs text-muted-foreground">
- How this seller activity moves through Xerin Mart.
+ How this seller activity moves through Xerin Marketplace.
  </p>
  </div>
  </div>

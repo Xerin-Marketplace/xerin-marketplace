@@ -34,7 +34,7 @@ const Hero = () => {
  <p className="mt-1.5 max-w-[230px] text-xs leading-5 text-muted-foreground sm:text-sm">Seller listings, protected checkout and order tracking in one place.</p>
  <Link href={ROUTES.shop} className="mt-3 inline-flex rounded-lg bg-primary px-4 py-2 text-xs font-bold text-primary-foreground transition hover:bg-primary/90 sm:text-sm">Shop Now</Link>
  </div>
- <Image src="/images/hero/phoneremove.png" alt="Xerin Mart promotion" width={145} height={190} className="h-[120px] w-auto shrink-0 object-contain sm:h-[135px] xl:h-[170px]" />
+ <Image src="/images/hero/phoneremove.png" alt="Xerin Marketplace promotion" width={145} height={190} className="h-[120px] w-auto shrink-0 object-contain sm:h-[135px] xl:h-[170px]" />
  </div>
  </div>
  )}

@@ -138,7 +138,7 @@ const BestSellers = () => {
  Most loved by buyers
  </h2>
  <p className="mt-1.5 hidden max-w-lg text-sm text-muted-foreground dark:text-muted-foreground sm:block">
- Top-rated products based on reviews, ratings, and buyer popularity across Xerin Mart.
+ Top-rated products based on reviews, ratings, and buyer popularity across Xerin Marketplace.
  </p>
  </div>
 

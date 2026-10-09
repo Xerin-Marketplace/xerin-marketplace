@@ -4,7 +4,7 @@ import { Metadata } from "next";
 
 export const metadata: Metadata = {
  title: "Product Details",
- description: "View product details, seller information, pricing, and delivery options on Xerin Mart.",
+ description: "View product details, seller information, pricing, and delivery options on Xerin Marketplace.",
  // other metadata
 };
 

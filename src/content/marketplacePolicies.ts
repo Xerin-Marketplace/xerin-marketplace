@@ -16,7 +16,7 @@ export const marketplacePolicies = {
     slug: "product-listing",
     title: "Product Listing Policy",
     summary:
-      "Standards sellers must follow when listing and offering products on Xerin Mart.",
+      "Standards sellers must follow when listing and offering products on Xerin Marketplace.",
     sections: [
       {
         heading: "Accurate product information",
@@ -123,12 +123,12 @@ export const marketplacePolicies = {
     slug: "terms-of-use",
     title: "Terms of Use",
     summary:
-      "The core rules that apply when buyers and sellers use Xerin Mart.",
+      "The core rules that apply when buyers and sellers use Xerin Marketplace.",
     sections: [
       {
         heading: "Your agreement with Xerin",
         paragraphs: [
-          "By creating an account or using Xerin Mart, you agree to these terms. You must provide accurate and current registration information and are responsible for protecting your password and account.",
+          "By creating an account or using Xerin Marketplace, you agree to these terms. You must provide accurate and current registration information and are responsible for protecting your password and account.",
           "Xerin operates as an online platform that facilitates transactions between buyers and sellers unless expressly stated otherwise.",
         ],
       },
@@ -237,12 +237,12 @@ export const marketplacePolicies = {
     slug: "returns-refunds",
     title: "Returns & Refunds Policy",
     summary:
-      "How returns, refunds and disputes work on Xerin Mart — including buyer protection and timelines.",
+      "How returns, refunds and disputes work on Xerin Marketplace — including buyer protection and timelines.",
     sections: [
       {
         heading: "Buyer protection",
         paragraphs: [
-          "Every order placed through Xerin Mart is covered by buyer protection. Your payment is held securely and is only released to the seller after the order is delivered and confirmed. If your order does not arrive, is damaged, or is materially different from the listing, you can open a dispute from your order page.",
+          "Every order placed through Xerin Marketplace is covered by buyer protection. Your payment is held securely and is only released to the seller after the order is delivered and confirmed. If your order does not arrive, is damaged, or is materially different from the listing, you can open a dispute from your order page.",
         ],
         bullets: [
           "Secure payment through Xerin — sellers are paid only after delivery is confirmed",

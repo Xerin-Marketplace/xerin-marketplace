@@ -256,7 +256,7 @@ export default function PaymentPage() {
  <main className="min-h-screen bg-muted px-4 py-12">
  <div className="mx-auto w-full max-w-md">
  <Link href="/">
- <img src="/images/logo/logooriginal.png" alt="Xerin Mart" className="h-10 w-auto" />
+ <img src="/images/logo/logooriginal.png" alt="Xerin Marketplace" className="h-10 w-auto" />
  </Link>
 
  <div className="mt-12 flex items-center gap-4 rounded-2xl bg-card p-5">
@@ -320,7 +320,7 @@ export default function PaymentPage() {
  <main className="min-h-screen bg-muted px-4 py-12">
  <div className="mx-auto w-full max-w-md">
  <Link href="/">
- <img src="/images/logo/logooriginal.png" alt="Xerin Mart" className="h-10 w-auto" />
+ <img src="/images/logo/logooriginal.png" alt="Xerin Marketplace" className="h-10 w-auto" />
  </Link>
 
  <div className="mt-12 rounded-2xl bg-card p-6 sm:p-7">
@@ -379,7 +379,7 @@ export default function PaymentPage() {
  <div className="mx-auto w-full max-w-4xl">
  <div className="flex items-center justify-between">
  <Link href="/">
- <img src="/images/logo/logooriginal.png" alt="Xerin Mart" className="h-9 w-auto" />
+ <img src="/images/logo/logooriginal.png" alt="Xerin Marketplace" className="h-9 w-auto" />
  </Link>
  <Link href={`/account/orders/${data.id}`} className="inline-flex items-center gap-1.5 text-sm font-semibold text-muted-foreground hover:text-foreground">
  <HugeiconsIcon icon={ArrowLeft01Icon} size={15} /> Order #{data.order_number || data.id.slice(0, 8).toUpperCase()}

@@ -165,7 +165,7 @@ const QuickViewModal = () => {
  </div>
 
  <p>
- This product is available from a Xerin Mart seller. Review price,
+ This product is available from a Xerin Marketplace seller. Review price,
  availability, and delivery options before adding it to cart.
  </p>
 
