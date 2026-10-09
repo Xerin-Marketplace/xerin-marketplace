@@ -93,7 +93,7 @@ const ShopDetails = ({ product }: { product: Product }) => {
   return (
     <>
       <section className="bg-muted pb-24 pt-[92px] sm:pb-28 sm:pt-6">
-        <div className="mx-auto w-full max-w-[960px] space-y-2.5 px-2.5 sm:space-y-3 sm:px-4 lg:px-6">
+        <div className="mx-auto w-full max-w-[1200px] space-y-2.5 px-2.5 sm:space-y-3 sm:px-4 lg:px-6">
           {/* Breadcrumb */}
           <nav aria-label="Breadcrumb" className="flex flex-wrap items-center gap-1.5 px-1 pb-1 text-[11px] text-muted-foreground sm:text-xs">
             <Link href="/" className="transition hover:text-primary">Home</Link>
@@ -109,8 +109,9 @@ const ShopDetails = ({ product }: { product: Product }) => {
             <span className="truncate max-w-[220px] text-foreground/80">{product.title}</span>
           </nav>
 
-          {/* Gallery card */}
-          <Card>
+          <div className="grid gap-2.5 sm:gap-3 lg:grid-cols-2 lg:items-start">
+          {/* Gallery card — left column */}
+          <Card className="lg:sticky lg:top-24">
             <div className="relative aspect-square overflow-hidden bg-muted sm:aspect-[4/3] lg:aspect-[16/10]">
               <button
                 type="button"
@@ -208,6 +209,8 @@ const ShopDetails = ({ product }: { product: Product }) => {
             )}
           </Card>
 
+          {/* Right column — price, variants, protection, delivery */}
+          <div className="space-y-2.5 sm:space-y-3">
           {/* Price & title card */}
           <Card>
             <CardBody>
@@ -319,8 +322,10 @@ const ShopDetails = ({ product }: { product: Product }) => {
               </div>
             </CardBody>
           </Card>
+          </div>
+          </div>
 
-          {/* Key attributes card */}
+          {/* Key attributes card — full width */}
           <Card>
             <CardBody>
               <CardTitle>Key attributes</CardTitle>
