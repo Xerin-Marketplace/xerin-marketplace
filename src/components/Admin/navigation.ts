@@ -394,11 +394,11 @@ export function getActiveAdminModule(
  searchParams: { get(key: string): string | null },
 ) {
  let best: { module: AdminNavModule; score: number } | null = null;
- for (const module of ADMIN_MODULES) {
- for (const child of module.children) {
+ for (const mod of ADMIN_MODULES) {
+ for (const child of mod.children) {
  if (!isAdminNavHrefActive(child.href, pathname, searchParams)) continue;
  const score = hrefSpecificity(child.href);
- if (!best || score > best.score) best = { module, score };
+ if (!best || score > best.score) best = { module: mod, score };
  }
  }
  return best?.module ?? null;
