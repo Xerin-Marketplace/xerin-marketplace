@@ -23,6 +23,9 @@ export type Product = {
   id: number | string;
   storeId?: number | string | null;
   sellerId?: number | string | null;
+  categoryId?: number | string | null;
+  categoryName?: string | null;
+  categorySlug?: string | null;
   imgs?: {
     thumbnails: string[];
     previews: string[];

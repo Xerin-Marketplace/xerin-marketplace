@@ -3,7 +3,7 @@
 import React, { useMemo, useState } from "react";
 import Image from "next/image";
 import { useRouter } from "next/navigation";
-import Breadcrumb from "../Common/Breadcrumb";
+import Link from "next/link";
 import StarRating from "@/components/Common/StarRating";
 import PriceDisplay from "@/components/shared/PriceDisplay";
 import { ROUTES } from "@/constants/links";
@@ -84,14 +84,41 @@ const ShopDetails = ({ product }: { product: Product }) => {
 
  return (
  <>
- <div className="hidden sm:block"><Breadcrumb title="Product Details" pages={["product details"]} /></div>
-
  <section className="bg-background pb-8 pt-[92px] sm:pb-12 sm:pt-6 lg:pb-16 lg:pt-10">
- <div className="mx-auto w-full max-w-[1280px] px-3 sm:px-6 lg:px-8 xl:px-4">
- <div className="grid gap-5 lg:grid-cols-[minmax(0,0.90fr)_minmax(0,1.10fr)] lg:gap-9 xl:gap-12">
- {/* Gallery */}
+ <div className="mx-auto w-full max-w-[1360px] px-3 sm:px-6 lg:px-8">
+ <nav aria-label="Breadcrumb" className="mb-4 flex flex-wrap items-center gap-1.5 text-xs text-muted-foreground sm:mb-5 sm:text-sm">
+ <Link href="/" className="transition hover:text-primary">Home</Link>
+ <span>/</span>
+ {product.categorySlug ? (
+ <Link href={`/category/${product.categorySlug}`} className="transition hover:text-primary">
+ {product.categoryName || "Category"}
+ </Link>
+ ) : (
+ <Link href="/shop-with-sidebar" className="transition hover:text-primary">Shop</Link>
+ )}
+ <span>/</span>
+ <span className="truncate max-w-[240px] text-foreground/80 sm:max-w-none sm:whitespace-normal">{product.title}</span>
+ </nav>
+ <div className="grid gap-5 lg:grid-cols-[minmax(0,420px)_minmax(0,1fr)_290px] lg:gap-6 xl:gap-8">
+ {/* Gallery — vertical thumbs + main image + seller card (Alibaba layout) */}
  <div className="min-w-0">
- <div className="relative aspect-[1.03/1] min-h-[310px] overflow-hidden rounded-xl border border-border bg-muted shadow-sm sm:min-h-[430px] lg:min-h-[510px]">
+ <div className="flex gap-3">
+ {thumbnails.length > 1 && (
+ <div className="no-scrollbar hidden max-h-[420px] w-[68px] shrink-0 flex-col gap-2 overflow-y-auto sm:flex">
+ {thumbnails.map((item, key) => (
+ <button
+ type="button"
+ onClick={() => setPreviewImg(key)}
+ key={`${item}-${key}`}
+ className={`flex h-[64px] w-[64px] shrink-0 items-center justify-center overflow-hidden rounded-lg border-2 bg-muted transition ${key === previewImg ? "border-primary shadow-sm" : "border-transparent hover:border-border"}`}
+ >
+ <Image width={56} height={56} src={item} alt={`${product.title} thumbnail ${key + 1}`} className="h-full w-full object-cover object-center" />
+ </button>
+ ))}
+ </div>
+ )}
+
+ <div className="relative aspect-square min-w-0 flex-1 overflow-hidden rounded-xl border border-border bg-muted shadow-sm">
  <button
  type="button"
  onClick={handlePreviewSlider}
@@ -158,21 +185,29 @@ const ShopDetails = ({ product }: { product: Product }) => {
  <div className="absolute inset-0 flex items-center justify-center text-sm text-muted-foreground">No product image available</div>
  )}
  </div>
+ </div>
 
- {thumbnails.length > 0 && (
- <div className="no-scrollbar mt-3 flex gap-2.5 overflow-x-auto pb-2 sm:mt-4 sm:gap-3">
+ {thumbnails.length > 1 && (
+ <div className="no-scrollbar mt-3 flex gap-2 overflow-x-auto pb-1 sm:hidden">
  {thumbnails.map((item, key) => (
  <button
  type="button"
  onClick={() => setPreviewImg(key)}
  key={`${item}-${key}`}
- className={`flex h-[70px] w-[70px] shrink-0 items-center justify-center overflow-hidden rounded-lg border-2 bg-muted p-2 transition sm:h-[86px] sm:w-[86px] ${key === previewImg ? "border-primary shadow-sm" : "border-transparent hover:border-border"}`}
+ className={`flex h-[62px] w-[62px] shrink-0 items-center justify-center overflow-hidden rounded-lg border-2 bg-muted transition ${key === previewImg ? "border-primary shadow-sm" : "border-transparent hover:border-border"}`}
  >
- <Image width={76} height={76} src={item} alt={`${product.title} thumbnail ${key + 1}`} className="h-full w-full object-cover object-center" />
+ <Image width={56} height={56} src={item} alt={`${product.title} thumbnail ${key + 1}`} className="h-full w-full object-cover object-center" />
  </button>
  ))}
  </div>
  )}
+
+ {/* Supplier card under gallery — Alibaba style */}
+ {product.sellerId ? (
+ <div className="mt-4">
+ <SellerCard sellerId={product.sellerId} />
+ </div>
+ ) : null}
  </div>
 
  {/* Product content */}
@@ -214,8 +249,8 @@ const ShopDetails = ({ product }: { product: Product }) => {
  <p className="mt-1.5 text-xs text-muted-foreground sm:text-sm">Delivery price is calculated at checkout based on the selected destination.</p>
  </div>
 
- <div className="mt-5 grid gap-x-8 gap-y-0 sm:mt-6 lg:grid-cols-[minmax(0,1fr)_285px] xl:grid-cols-[minmax(0,1fr)_300px] xl:gap-x-10">
- <div className="min-w-0 lg:col-start-1">
+ <div className="mt-5 sm:mt-6">
+ <div className="min-w-0">
  <div className="space-y-2.5">
  {product.sku && <div className="flex items-center gap-2 text-sm text-foreground"><SpecCheckIcon /> <span><strong>SKU:</strong> {product.sku}</span></div>}
  <div className="flex items-center gap-2 text-sm text-foreground"><SpecCheckIcon /> <span className="inline-flex items-center gap-1.5">Buyer protection and order tracking through Xerin Marketplace<InfoPopover title="Buyer protection"><p>Your payment is held safely and only released to the seller after you confirm delivery.</p><p>If the item never arrives or is not as described, open a dispute from your order and our team will review it.</p></InfoPopover></span></div>
@@ -281,15 +316,58 @@ const ShopDetails = ({ product }: { product: Product }) => {
  </div>
  </div>
 
- <div className="mt-5 min-w-0 w-full lg:col-start-2 lg:row-start-1 lg:mt-0 lg:justify-self-end lg:w-[285px] xl:w-[300px]">
+ </div>
+ </div>
+
+ {/* Right column — shipping + order protection (Alibaba style) */}
+ <aside className="min-w-0 space-y-4 lg:pt-1">
+ <div className="rounded-2xl border border-border bg-card p-5 shadow-sm">
+ <h3 className="text-sm font-bold text-foreground">Shipping</h3>
+ <p className="mt-1.5 text-xs leading-5 text-muted-foreground">
+ Shipping fee and delivery date are calculated at checkout based on your delivery address and chosen courier.
+ </p>
+ </div>
+
+ <div className="rounded-2xl border border-border bg-card p-5 shadow-sm">
+ <h3 className="flex items-center gap-1.5 text-sm font-bold text-foreground">
+ Xerin order protection
+ <InfoPopover title="Order protection">
+ <p>Your payment is held safely and only released to the seller after you confirm delivery.</p>
+ <p>If the item never arrives or is not as described, open a dispute from your order and our team will review it.</p>
+ </InfoPopover>
+ </h3>
+ <div className="mt-3 space-y-3.5">
+ <div className="flex items-start gap-3">
+ <span className="mt-0.5 shrink-0 text-green-dark"><HugeiconsIcon icon={ShieldCheckIcon} size={18} /></span>
+ <div>
+ <p className="text-[13px] font-semibold text-foreground">Secure payments</p>
+ <p className="mt-0.5 text-xs leading-5 text-muted-foreground">Every payment on Xerin Marketplace is processed over encrypted, PCI-compliant channels.</p>
+ </div>
+ </div>
+ <div className="flex items-start gap-3">
+ <span className="mt-0.5 shrink-0 text-green-dark"><HugeiconsIcon icon={RotateLeft01Icon} size={18} /></span>
+ <div>
+ <p className="text-[13px] font-semibold text-foreground">Money-back protection</p>
+ <p className="mt-0.5 text-xs leading-5 text-muted-foreground">Claim a refund if your order doesn&apos;t ship or arrives with product issues.</p>
+ </div>
+ </div>
+ <div className="flex items-start gap-3">
+ <span className="mt-0.5 shrink-0 text-green-dark"><HugeiconsIcon icon={TruckIcon} size={18} /></span>
+ <div>
+ <p className="text-[13px] font-semibold text-foreground">Delivery tracking</p>
+ <p className="mt-0.5 text-xs leading-5 text-muted-foreground">Follow your order from seller preparation to your doorstep.</p>
+ </div>
+ </div>
+ </div>
+ </div>
+
  <OtherSellerOffersButton
  productId={String(product.id)}
  onOpen={() => setSellerOffersOpen(true)}
  />
- {product.sellerId ? <SellerCard sellerId={product.sellerId} /> : null}
- </div>
+ </aside>
 
- <div className="min-w-0 lg:col-span-2">
+ <div className="min-w-0 lg:col-span-3">
  <ProductSpecifications productId={product.id} variant="overview" overviewLimit={6} />
  </div>
  </div>
@@ -306,8 +384,6 @@ const ShopDetails = ({ product }: { product: Product }) => {
  <span><span className="block text-xs font-bold sm:text-sm">{item.title}</span><span className="mt-1 block text-[11px] leading-4 text-muted-foreground sm:text-xs">{item.text}</span></span>
  </div>
  ))}
- </div>
- </div>
  </div>
  </div>
  </section>
