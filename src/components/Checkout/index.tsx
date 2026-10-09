@@ -981,7 +981,7 @@ const Checkout = () => {
  </CheckoutSection>
  <hr className="my-6 border-border/60" />
 
- <CheckoutSection title="Delivery Service" summary={selectedShipping ? selectedShipping.service_name || "Xerin Express" : undefined} open={openSections.includes("service")} onToggle={() => toggleSection("service")}>
+ <CheckoutSection title="Delivery Service" summary={(() => { const s = selectedShipping as { service_name?: string; method_name?: string; label?: string } | undefined; return s ? s.service_name || s.method_name || s.label || "Xerin Express" : undefined; })()} open={openSections.includes("service")} onToggle={() => toggleSection("service")}>
  <div className="mt-3 space-y-4">
  {(xerinExpress.error || eligibleLogistics.error || deliveryPricing.error || frozenQuote.error) && (
  <div className="flex flex-wrap items-center justify-between gap-3 rounded-xl bg-red-light-6 p-3 text-xs leading-5 text-red-dark">
