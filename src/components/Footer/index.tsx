@@ -329,14 +329,15 @@ const Footer = () => {
 
  <div className="flex flex-wrap items-center gap-4">
  <p className="text-sm font-medium text-muted-foreground">{t("footer_we_accept")}</p>
- <div className="flex flex-wrap items-center gap-4">
- <span aria-label="We accept Visa card payments">
- <Image src="/images/payment/payment-01.svg" alt="visa card" width={66} height={22} />
+ <span aria-label="We accept Visa, Mastercard, mobile money, PayPal, Apple Pay and Google Pay">
+ <Image
+ src="/images/we-accept.jpg"
+ alt="Visa, Mastercard, M-Pesa, Airtel Money, PayPal, Apple Pay, Google Pay"
+ width={560}
+ height={62}
+ className="h-7 w-auto rounded-md bg-white px-1 py-0.5"
+ />
  </span>
- <span aria-label="We accept Mastercard payments">
- <Image src="/images/payment/payment-03.svg" alt="master card" width={33} height={24} />
- </span>
- </div>
  </div>
 
  <p className="text-sm text-muted-foreground">Dar es Salaam, Tanzania</p>
