@@ -22,51 +22,55 @@ function ProductCard({ product }: { product: ApiProduct }) {
  ? Math.round(((regularPrice - salePrice) / regularPrice) * 100)
  : 0;
 
+ const reviews = product.review_count ?? 0;
+
  return (
- <article className="group flex h-full min-w-0 flex-col overflow-hidden rounded-2xl border border-border bg-card shadow-sm transition duration-300 hover:shadow-lg sm:hover:-translate-y-1">
+ <article className="group flex h-full min-w-0 flex-col overflow-hidden rounded-2xl bg-card shadow-sm transition duration-200 hover:-translate-y-0.5 hover:shadow-md">
  <Link
  href={`/products/${product.id}`}
- className="relative flex aspect-square items-center justify-center overflow-hidden bg-muted p-2.5 sm:h-56 sm:aspect-auto sm:p-5"
+ className="relative block aspect-square overflow-hidden bg-muted"
  >
  {hasDiscount && (
- <span className="absolute left-2 top-2 z-10 rounded-full bg-destructive px-2 py-0.5 text-[10px] font-bold text-white shadow-sm sm:left-3 sm:top-3 sm:px-2.5 sm:py-1 sm:text-xs">
+ <span className="absolute left-2 top-2 z-10 rounded-md bg-primary px-2 py-0.5 text-[10px] font-bold text-primary-foreground shadow-sm sm:left-3 sm:top-3">
  -{discountPercentage}%
  </span>
  )}
  <Image
  src={imageUrl}
  alt={product.name}
- width={240}
- height={240}
- className="h-full w-full object-contain transition-transform duration-300 group-hover:scale-105"
+ width={400}
+ height={400}
+ className="h-full w-full object-cover transition-transform duration-300 group-hover:scale-105"
  />
  </Link>
 
- <div className="flex flex-1 flex-col p-2.5 sm:p-4">
- <h3 className="line-clamp-2 min-h-[36px] text-[13px] font-semibold leading-[18px] text-foreground transition group-hover:text-primary sm:min-h-[44px] sm:text-sm sm:leading-5">
+ <div className="flex flex-1 flex-col p-3 sm:p-4">
+ <h3 className="line-clamp-2 min-h-[36px] text-[13px] font-medium leading-[18px] text-foreground transition group-hover:text-primary sm:min-h-[40px] sm:text-sm sm:leading-5">
  <Link href={`/products/${product.id}`}>{product.name}</Link>
  </h3>
 
- <div className="mt-2 flex items-end justify-between gap-2 border-t border-border pt-2 sm:pt-3">
- <div>
- <div className="flex flex-wrap items-center gap-1.5">
- <span className="text-[15px] font-extrabold text-destructive sm:text-base sm:text-foreground">
+ <div className="mt-2 flex flex-wrap items-baseline gap-x-1.5 gap-y-0.5">
+ <span className="text-[15px] font-extrabold text-foreground sm:text-base">
  <PriceDisplay amount={hasDiscount ? salePrice! : regularPrice} sourceCurrency={product.currency} />
  </span>
  {hasDiscount && (
- <span className="text-[10px] text-muted-foreground line-through sm:text-xs">
+ <span className="text-[11px] text-muted-foreground line-through sm:text-xs">
  <PriceDisplay amount={regularPrice} sourceCurrency={product.currency} />
  </span>
  )}
  </div>
- </div>
- <Link
- href={`/products/${product.id}`}
- className="flex h-8 w-8 shrink-0 items-center justify-center rounded-full bg-foreground text-background transition hover:bg-primary/90 dark:bg-card dark:text-foreground sm:h-9 sm:w-9"
- aria-label="View product"
- >
- <HugeiconsIcon icon={ArrowRight01Icon} size={14} />
- </Link>
+
+ <div className="mt-1.5 flex items-center gap-1.5 text-[11px] text-muted-foreground sm:text-xs">
+ {reviews > 0 ? (
+ <>
+ <HugeiconsIcon icon={StarIcon} size={12} className="fill-amber-400 text-amber-400" />
+ <span className="font-semibold text-foreground/80">{Number(product.rating || 0).toFixed(1)}</span>
+ <span>·</span>
+ <span>{reviews} review{reviews === 1 ? "" : "s"}</span>
+ </>
+ ) : (
+ <span>New on Xerin Marketplace</span>
+ )}
  </div>
  </div>
  </article>
