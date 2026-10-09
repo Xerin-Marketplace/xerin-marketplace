@@ -11,10 +11,18 @@ export default function RuntimeStatus() {
  const [dismissed, setDismissed] = useState(false);
 
  useEffect(() => {
+ let timer: number | undefined;
  const sync = () => {
  const nextOffline = !navigator.onLine;
- setOffline(nextOffline);
- if (!nextOffline) setDismissed(false);
+ window.clearTimeout(timer);
+ if (!nextOffline) {
+ setOffline(false);
+ setDismissed(false);
+ return;
+ }
+ // navigator.onLine flaps on flaky connections — only surface the
+ // banner when the browser stays offline for a few seconds.
+ timer = window.setTimeout(() => setOffline(true), 4000);
  };
  const sessionExpired = () => toast.error("Your session expired. Please sign in again.", { id: "session-expired" });
 
@@ -23,6 +31,7 @@ export default function RuntimeStatus() {
  window.addEventListener("offline", sync);
  window.addEventListener(SESSION_EXPIRED_EVENT, sessionExpired);
  return () => {
+ window.clearTimeout(timer);
  window.removeEventListener("online", sync);
  window.removeEventListener("offline", sync);
  window.removeEventListener(SESSION_EXPIRED_EVENT, sessionExpired);
