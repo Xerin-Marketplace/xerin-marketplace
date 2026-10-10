@@ -8,6 +8,7 @@ import type {
  BrokerCommissionSummary,
 } from "@/types/api/broker";
 import { formatCurrency } from "@/utils/currency";
+import InfoPopover from "@/components/Common/Info/InfoPopover";
 
 const FILTERS: { label: string; value: "" | BrokerCommissionStatus }[] = [
  { label: "All", value: "" },
@@ -82,7 +83,12 @@ export default function BrokerEarnings() {
  Commission &amp; escrow
  </h1>
  <p className="mt-1 text-sm text-muted-foreground">
- Commission becomes available after Xerin&apos;s escrow release milestone.
+ Commission becomes available after Xerin&apos;s escrow release milestone.{" "}
+ <InfoPopover title="How earnings work" trigger="link" triggerLabel="How it works" align="end">
+ <p>When a buyer purchases through your referral link, the order generates a commission at the offer&apos;s fixed or percentage rate.</p>
+ <p><strong>Pending</strong> — the order exists but hasn&apos;t been delivered yet. <strong>Available</strong> — delivered orders release commission to your wallet balance.</p>
+ <p>If an order is cancelled or refunded, the commission is reversed and removed from your balance.</p>
+ </InfoPopover>
  </p>
  </div>
 

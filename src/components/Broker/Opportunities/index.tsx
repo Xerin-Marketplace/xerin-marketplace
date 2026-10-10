@@ -2,6 +2,7 @@
 
 import { useEffect, useMemo, useState } from "react";
 import { Spinner } from "@/components/ui/Spinner";
+import InfoPopover from "@/components/Common/Info/InfoPopover";
 import { HugeiconsIcon } from "@hugeicons/react";
 import {
  Search01Icon,
@@ -98,7 +99,12 @@ export default function BrokerOpportunities() {
  Promotion opportunities
  </h1>
  <p className="mt-1 text-sm text-muted-foreground">
- Accept seller campaigns and earn per attributed sale.
+ Accept seller campaigns and earn per attributed sale.{" "}
+ <InfoPopover title="How opportunities work" trigger="link" triggerLabel="How it works" align="end">
+ <p>Each opportunity is a product a seller pays you to promote. Accept it, share your referral link, and earn the listed reward for every attributed sale.</p>
+ <p>Commission is credited when the order is delivered — cancelled or refunded orders reverse it.</p>
+ <p>Some offers have a sales cap or an end date — promote early.</p>
+ </InfoPopover>
  </p>
  </div>
  <button

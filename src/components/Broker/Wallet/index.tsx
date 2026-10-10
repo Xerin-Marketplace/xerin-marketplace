@@ -9,6 +9,7 @@ import type {
  BrokerWalletTransaction,
 } from "@/types/api/broker";
 import { formatCurrency } from "@/utils/currency";
+import InfoPopover from "@/components/Common/Info/InfoPopover";
 import toast from "react-hot-toast";
 import { HugeiconsIcon } from "@hugeicons/react";
 import {
@@ -142,7 +143,13 @@ export default function BrokerWalletPage() {
  </h1>
  <p className="mt-1 text-sm text-muted-foreground">
  Only escrow-released commission is withdrawable. Payouts stay on hold
- until Admin completes or rejects them.
+ until Admin completes or rejects them.{" "}
+ <InfoPopover title="Your wallet balances" trigger="link" triggerLabel="Learn more" align="end">
+ <p><strong>Available</strong> — commission released after delivery; ready to withdraw.</p>
+ <p><strong>Pending</strong> — commission earned on orders still in progress.</p>
+ <p><strong>Reserved</strong> — payouts you&apos;ve requested that are awaiting admin processing.</p>
+ <p>Cancelled or refunded orders reverse their commission automatically.</p>
+ </InfoPopover>
  </p>
  </div>
 

@@ -6,6 +6,7 @@ import { brokersApi } from "@/lib/api/endpoints/brokers";
 import { productsApi } from "@/lib/api/endpoints/products";
 import type { BrokerProduct } from "@/types/api/broker";
 import type { Brand, Category, ListingCurrency } from "@/types/api/product";
+import InfoPopover from "@/components/Common/Info/InfoPopover";
 import { HugeiconsIcon } from "@hugeicons/react";
 import { PlusSignIcon, Cancel01Icon } from "@hugeicons/core-free-icons";
 
@@ -147,7 +148,12 @@ export default function BrokerOwnProducts() {
  Broker products
  </h1>
  <p className="mt-1 text-sm text-muted-foreground">
- Each approved listing stays live for 24 hours, then archives automatically.
+ Each approved listing stays live for 24 hours, then archives automatically.{" "}
+ <InfoPopover title="How listings work" trigger="link" triggerLabel="How it works" align="end">
+ <p>Submit a product with at least one image — it goes to review. Once approved it becomes visible to buyers for 24 hours.</p>
+ <p>When a listing expires you can relist it from this page — no second review needed.</p>
+ <p>If a listing is rejected, the reason appears on the product. Fix it and resubmit.</p>
+ </InfoPopover>
  </p>
  </div>
  <button
