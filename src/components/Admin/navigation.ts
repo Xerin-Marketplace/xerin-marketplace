@@ -21,6 +21,8 @@ import {
  Wallet03Icon,
  BellIcon,
  Mail01Icon,
+ MailSend01Icon,
+ Settings02Icon,
  DatabaseIcon,
  PreferenceHorizontalIcon,
  DashboardSquare01Icon,
@@ -235,6 +237,19 @@ export const ADMIN_SECTIONS: AdminNavSection[] = [
  { label: "Coupons", href: D("?tab=products&menu=promotions&item=coupons"), icon: Tag01Icon },
  { label: "Discounts", href: D("?tab=products&menu=promotions&item=discounts"), icon: Tag01Icon },
  { label: "Campaigns", href: D("?tab=products&menu=promotions&item=campaigns"), icon: Megaphone01Icon },
+ ],
+ },
+ {
+ label: "Engagement",
+ section: "Marketing",
+ icon: MailSend01Icon,
+ landing: D("?tab=overview&menu=engagement&item=overview"),
+ children: [
+ { label: "Overview", href: D("?tab=overview&menu=engagement&item=overview"), icon: ChartColumnIcon },
+ { label: "Campaigns", href: D("?tab=overview&menu=engagement&item=campaigns"), icon: Megaphone01Icon },
+ { label: "Templates", href: D("?tab=overview&menu=engagement&item=templates"), icon: Tag01Icon },
+ { label: "Holiday Calendar", href: D("?tab=overview&menu=engagement&item=calendar"), icon: Megaphone01Icon },
+ { label: "Monthly Automation", href: D("?tab=overview&menu=engagement&item=automation"), icon: Settings02Icon },
  ],
  },
  {

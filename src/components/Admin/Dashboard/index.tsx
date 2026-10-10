@@ -37,6 +37,9 @@ import AdminPromotions, { PromotionView } from "@/components/Admin/Promotions";
 import AdminCommunications, {
  CommunicationView,
 } from "@/components/Admin/Communications";
+import AdminEngagement, {
+ EngagementView,
+} from "@/components/Admin/Engagement";
 import AdminUserManagement, {
  UserManagementView,
 } from "@/components/Admin/UserManagement";
@@ -328,6 +331,19 @@ export default function AdminDashboard() {
  : activeSidebarItem === "Promotions:Campaigns"
  ? "campaigns"
  : "coupons";
+ const isEngagementWorkspace =
+ activeSidebarItem === "Engagement" ||
+ activeSidebarItem.startsWith("Engagement:");
+ const engagementView: EngagementView =
+ activeSidebarItem === "Engagement:Campaigns"
+ ? "campaigns"
+ : activeSidebarItem === "Engagement:Templates"
+ ? "templates"
+ : activeSidebarItem === "Engagement:Holiday Calendar"
+ ? "calendar"
+ : activeSidebarItem === "Engagement:Monthly Automation"
+ ? "automation"
+ : "overview";
  const isCommunicationsWorkspace =
  activeSidebarItem === "Communications" ||
  activeSidebarItem.startsWith("Communications:");
@@ -1059,6 +1075,9 @@ export default function AdminDashboard() {
  ) : null}
  {isCommunicationsWorkspace && !isLoading ? (
  <AdminCommunications view={communicationView} />
+ ) : null}
+ {isEngagementWorkspace && !isLoading ? (
+ <AdminEngagement view={engagementView} />
  ) : null}
  {isUserManagementWorkspace && !isLoading ? (
  <AdminUserManagement view={userManagementView} />
