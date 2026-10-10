@@ -126,7 +126,7 @@ export default function BrokerOwnProducts() {
  }
 
  async function archive(id: string) {
- if (!confirm("Archive this Broker listing?")) return;
+ if (!confirm("Archive this listing? It will be permanently hidden from buyers and cannot be republished.")) return;
 
  setBusy(true);
  try {

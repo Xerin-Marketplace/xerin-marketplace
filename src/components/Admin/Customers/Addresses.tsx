@@ -9,7 +9,7 @@ import Link from "next/link";
 const getErrorMessage = (error: unknown) => {
  if (error instanceof ApiError) return error.message;
  if (error instanceof Error) return error.message;
- return "Something went wrong.";
+ return "We couldn't load this information. Please refresh the page or try again later.";
 };
 
 const AdminCustomerAddresses = () => {

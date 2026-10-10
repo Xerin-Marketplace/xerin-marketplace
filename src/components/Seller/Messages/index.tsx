@@ -8,7 +8,7 @@ import { FormEvent, useCallback, useEffect, useMemo, useState } from "react";
 import toast from "react-hot-toast";
 
 const date = (value?: string | null) => value ? new Intl.DateTimeFormat(undefined, { dateStyle: "medium", timeStyle: "short" }).format(new Date(value)) : "—";
-const err = (error: unknown) => { const e=error as {response?:{data?:{detail?:string}};message?:string}; return e.response?.data?.detail || e.message || "Request failed."; };
+const err = (error: unknown) => { const e=error as {response?:{data?:{detail?:string}};message?:string}; return e.response?.data?.detail || e.message || "We couldn't complete your request. Please try again."; };
 
 export default function SellerMessages() {
  const [orders,setOrders]=useState<SellerOrder[]>([]); const [selected,setSelected]=useState<SellerOrder|null>(null);

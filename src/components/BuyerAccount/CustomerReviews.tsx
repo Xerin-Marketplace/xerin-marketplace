@@ -109,7 +109,7 @@ function ReviewDialog({ item, close, done, busy, setBusy }: { item: ReviewableIt
 
 function ReviewCard({ review, reload }: { review: CustomerReview; reload:()=>Promise<void> }) {
  async function remove() {
- if (!confirm("Delete this review?")) return;
+ if (!confirm("Delete this review? It will be permanently removed from the product page and cannot be restored.")) return;
  try { await reviewsApi.remove(review.id); toast.success("Review deleted."); await reload(); }
  catch { toast.error("Unable to delete review."); }
  }

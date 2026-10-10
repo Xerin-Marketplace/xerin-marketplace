@@ -95,7 +95,7 @@ const errorMessage = (error: unknown) => {
  message?: string;
  };
  const detail = candidate.response?.data?.detail;
- return (typeof detail === "string" ? detail : detail?.message) || candidate.message || "Request failed";
+ return (typeof detail === "string" ? detail : detail?.message) || candidate.message || "We couldn't complete your request. Please try again";
 };
 
 export default function SellerOrderDetail({ orderId }: { orderId: string }) {

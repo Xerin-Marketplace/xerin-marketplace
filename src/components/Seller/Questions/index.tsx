@@ -12,7 +12,7 @@ import { getMyProducts } from "@/lib/api/endpoints/products";
 import type { Product } from "@/types/api/product";
 import type { SellerProductQuestion } from "@/types/api/seller-feedback";
 
-const err=(e:unknown)=>{const x=e as {response?:{data?:{detail?:string}};message?:string};return x.response?.data?.detail||x.message||"Request failed.";};
+const err=(e:unknown)=>{const x=e as {response?:{data?:{detail?:string}};message?:string};return x.response?.data?.detail||x.message||"We couldn't complete your request. Please try again.";};
 
 export default function SellerQuestions() {
  const [rows,setRows]=useState<SellerProductQuestion[]>([]);

@@ -123,7 +123,7 @@ const errorMessage = (error: unknown) => {
  const detail = candidate.response?.data?.detail;
  if (typeof detail === "string") return detail;
  if (Array.isArray(detail) && detail[0]?.msg) return detail[0].msg;
- return candidate.message || "Request failed.";
+ return candidate.message || "We couldn't complete your request. Please try again.";
 };
 
 const inputClass =
@@ -484,7 +484,7 @@ function CommissionRules() {
  await load();
  }}>{row.is_active ? "Disable" : "Enable"}</button>
  <button className="text-xs font-semibold text-destructive" onClick={async () => {
- if (!confirm("Delete this commission rule?")) return;
+ if (!confirm("Delete this commission rule? New orders will no longer use it, though commission already calculated keeps its recorded rate.")) return;
  await deleteCommissionRule(row.id);
  await load();
  }}>Delete</button>
@@ -622,7 +622,7 @@ function LogisticsCompanies() {
  try { const result = await resendLogisticsAdministratorCredentials(row.id); toast.success(`New login credentials sent to ${result.email}.`); }
  catch (error) { toast.error(errorMessage(error)); }
  }}>Resend credentials</button><button className="text-xs font-semibold text-destructive" onClick={async () => {
- if (!confirm("Deactivate this logistics company?")) return;
+ if (!confirm("Deactivate this logistics company? They will no longer be selectable for new deliveries; existing shipments are unaffected.")) return;
  await deactivateLogisticsCompany(row.id); await load();
  }}>Deactivate</button></div>
  </td>

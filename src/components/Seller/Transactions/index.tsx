@@ -21,8 +21,8 @@ const errorMessage = (error: unknown) => {
  };
  const detail = candidate.response?.data?.detail;
  if (typeof detail === "string") return detail;
- if (Array.isArray(detail) && detail[0]?.msg) return detail[0].msg || "Request failed.";
- return candidate.message || "Request failed.";
+ if (Array.isArray(detail) && detail[0]?.msg) return detail[0].msg || "We couldn't complete your request. Please try again.";
+ return candidate.message || "We couldn't complete your request. Please try again.";
 };
 
 const money = (value: number | string, currency = "TZS") =>

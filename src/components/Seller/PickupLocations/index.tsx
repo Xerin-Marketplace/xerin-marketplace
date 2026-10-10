@@ -74,7 +74,7 @@ export default function SellerPickupLocations() {
 
 const input = "h-12 w-full rounded-xl border border-border bg-card px-3 text-base outline-none focus:border-primary dark:border-border sm:text-sm";
 function Field({ label, children }: { label: string; children: React.ReactNode }) { return <label className="block text-sm font-semibold text-accent-foreground /80">{label}<div className="mt-1.5">{children}</div></label>; }
-function message(error: unknown) { const e = error as { response?: { data?: { detail?: string | { message?: string } } }; message?: string }; const d=e.response?.data?.detail; return (typeof d === "string" ? d : d?.message) || e.message || "Request failed"; }
+function message(error: unknown) { const e = error as { response?: { data?: { detail?: string | { message?: string } } }; message?: string }; const d=e.response?.data?.detail; return (typeof d === "string" ? d : d?.message) || e.message || "We couldn't complete your request. Please try again"; }
 
 function normalizeRegion(value: string) { return value.toLowerCase().replace(/[^a-z]/g, ""); }
 function canonicalTanzaniaRegion(value: string, options: string[]) {

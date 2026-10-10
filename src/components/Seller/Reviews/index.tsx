@@ -15,7 +15,7 @@ import type {
 
 const err = (e: unknown) => {
  const x = e as { response?: { data?: { detail?: string } }; message?: string };
- return x.response?.data?.detail || x.message || "Request failed.";
+ return x.response?.data?.detail || x.message || "We couldn't complete your request. Please try again.";
 };
 const pretty = (s: string) =>
  s.replaceAll("_", " ").replace(/\b\w/g, (x) => x.toUpperCase());
