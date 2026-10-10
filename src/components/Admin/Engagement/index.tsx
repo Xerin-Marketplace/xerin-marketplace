@@ -125,6 +125,10 @@ export default function AdminEngagement({ view }: { view: EngagementView }) {
     ["Emails sent", overview?.delivery.email?.sent ?? "—"],
     ["SMS sent", overview?.delivery.sms?.sent ?? "—"],
     ["Failed", (overview?.delivery.email?.failed ?? 0) + (overview?.delivery.sms?.failed ?? 0)],
+    ["Promo orders", overview?.attribution?.promotion_orders ?? "—"],
+    ["Promo revenue", overview?.attribution ? `TZS ${Number(overview.attribution.promotion_revenue).toLocaleString()}` : "—"],
+    ["Broker sales", overview?.attribution?.broker_attributed_sales ?? "—"],
+    ["Broker commission", overview?.attribution ? `TZS ${Number(overview.attribution.broker_commission_value).toLocaleString()}` : "—"],
   ];
 
   return (

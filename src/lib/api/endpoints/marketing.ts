@@ -29,6 +29,10 @@ export type MarketingOverview = {
   contacts: { total_customers: number; email_eligible: number; sms_eligible: number; opted_out: number };
   campaigns: Record<string, number>;
   delivery: Record<string, Record<string, number>>;
+  attribution?: {
+    promotion_orders: number; promotion_revenue: string; promotion_redemptions: number;
+    broker_attributed_sales: number; broker_commission_value: string; definition: string;
+  };
   upcoming_events: { name: string; date: string | null; estimated: boolean }[];
 };
 
