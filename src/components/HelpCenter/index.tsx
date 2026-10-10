@@ -50,6 +50,26 @@ const FAQS: FAQ[] = [
  answer:
  "Xerin protects personal information in accordance with the Personal Data Protection Act, 2022. See our Privacy Policy for details on how we collect, use and protect your data.",
  },
+ {
+ question: "How do I earn as a broker?",
+ answer:
+ "Open Opportunities, accept a product campaign, and share your personal referral link. You earn the listed reward for every sale made through your link.",
+ },
+ {
+ question: "When is my broker commission paid?",
+ answer:
+ "Commission is pending while the order is in progress and becomes available once the order is delivered. Cancelled or refunded orders reverse the commission automatically.",
+ },
+ {
+ question: "How do broker product listings work?",
+ answer:
+ "Submit a product with at least one image. After admin approval it stays live for 24 hours. When it expires you can relist it instantly from your products page — no second review needed.",
+ },
+ {
+ question: "How do I withdraw my broker earnings?",
+ answer:
+ "Add a payout account in your broker wallet, then request a payout. Your available balance can be withdrawn; payouts stay on hold until admin completes them.",
+ },
 ];
 
 const QuestionIcon = () => (
